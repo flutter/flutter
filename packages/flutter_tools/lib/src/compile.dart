@@ -23,7 +23,7 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-KernelCompilerFactory get kernelCompilerFactory => context[KernelCompilerFactory];
+KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
 
 class KernelCompilerFactory {
   const KernelCompilerFactory();

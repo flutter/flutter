@@ -426,6 +426,82 @@ void main() {
   }, skip: !Platform.isLinux);
   */
 
+  testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          key: textFieldKey,
+          controller: controller,
+          maxLines: null,
+        ),
+      )
+    );
+    expect(controller.selection.baseOffset, -1);
+    expect(controller.selection.extentOffset, -1);
+
+    const String testValueOneLine = 'enough text to be exactly at the end of the line.';
+    await tester.enterText(find.byType(TextField), testValueOneLine);
+    await skipPastScrollingAnimation(tester);
+
+    RenderBox findInputBox() => tester.renderObject(find.byKey(textFieldKey));
+
+    RenderBox inputBox = findInputBox();
+    final Size oneLineInputSize = inputBox.size;
+
+    await tester.tapAt(textOffsetToPosition(tester, testValueOneLine.length));
+    await tester.pump();
+
+    const String testValueTwoLines = 'enough text to overflow the first line and go to the second';
+    await tester.enterText(find.byType(TextField), testValueTwoLines);
+    await skipPastScrollingAnimation(tester);
+
+    expect(inputBox, findInputBox());
+    inputBox = findInputBox();
+    expect(inputBox.size.height, greaterThan(oneLineInputSize.height));
+    final Size twoLineInputSize = inputBox.size;
+
+    // Enter a string with the same number of characters as testValueTwoLines,
+    // but where the overflowing part is all spaces. Assert that it only renders
+    // on one line.
+    const String testValueSpaces = testValueOneLine + '          ';
+    expect(testValueSpaces.length, testValueTwoLines.length);
+    await tester.enterText(find.byType(TextField), testValueSpaces);
+    await skipPastScrollingAnimation(tester);
+
+    expect(inputBox, findInputBox());
+    inputBox = findInputBox();
+    expect(inputBox.size.height, oneLineInputSize.height);
+
+    // Swapping the final space for a letter causes it to wrap to 2 lines.
+    const String testValueSpacesOverflow = testValueOneLine + '         a';
+    expect(testValueSpacesOverflow.length, testValueTwoLines.length);
+    await tester.enterText(find.byType(TextField), testValueSpacesOverflow);
+    await skipPastScrollingAnimation(tester);
+
+    expect(inputBox, findInputBox());
+    inputBox = findInputBox();
+    expect(inputBox.size.height, twoLineInputSize.height);
+
+    // Positioning the cursor at the end of a line overflowing with spaces puts
+    // it inside the input still.
+    await tester.enterText(find.byType(TextField), testValueSpaces);
+    await skipPastScrollingAnimation(tester);
+    await tester.tapAt(textOffsetToPosition(tester, testValueSpaces.length));
+    await tester.pump();
+
+    final double inputWidth = findRenderEditable(tester).size.width;
+    final Offset cursorOffsetSpaces = findRenderEditable(tester).getLocalRectForCaret(
+      const TextPosition(offset: testValueSpaces.length),
+    ).bottomRight;
+
+    // Gap between caret and edge of input, defined in editable.dart.
+    const int _kCaretGap = 1;
+
+    expect(cursorOffsetSpaces.dx, inputWidth - _kCaretGap);
+  });
+
   testWidgets('obscureText control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       overlay(
@@ -2678,29 +2754,30 @@ void main() {
       controller = TextEditingController();
     });
 
-    MaterialApp setupWidget() {
-
+    Future<void> setupWidget(WidgetTester tester) async {
       final FocusNode focusNode = FocusNode();
       controller = TextEditingController();
 
-      return MaterialApp(
-        home:  Material(
-          child: RawKeyboardListener(
-            focusNode: focusNode,
-            onKey: null,
-            child: TextField(
-              controller: controller,
-              maxLines: 3,
-              strutStyle: StrutStyle.disabled,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: RawKeyboardListener(
+              focusNode: focusNode,
+              onKey: null,
+              child: TextField(
+                controller: controller,
+                maxLines: 3,
+                strutStyle: StrutStyle.disabled,
+              ),
             ),
-          ) ,
+          ),
         ),
       );
+      await tester.pump();
     }
 
     testWidgets('Shift test 1', (WidgetTester tester) async {
-
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2713,7 +2790,7 @@ void main() {
     });
 
     testWidgets('Control Shift test', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'their big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2729,7 +2806,7 @@ void main() {
     });
 
     testWidgets('Down and up test', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house';
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2751,7 +2828,7 @@ void main() {
     });
 
     testWidgets('Down and up test 2', (WidgetTester tester) async {
-      await tester.pumpWidget(setupWidget());
+      await setupWidget(tester);
       const String testValue = 'a big house\njumped over a mouse\nOne more line yay'; // 11 \n 19
       await tester.enterText(find.byType(TextField), testValue);
 
@@ -2838,6 +2915,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -2908,6 +2987,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -3017,6 +3098,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -5272,6 +5355,7 @@ void main() {
       cursorColor: Color(0xff00ff00),
       keyboardAppearance: Brightness.dark,
       scrollPadding: EdgeInsets.zero,
+      scrollPhysics: ClampingScrollPhysics(),
       enableInteractiveSelection: false,
     ).debugFillProperties(builder);
 
@@ -5298,6 +5382,7 @@ void main() {
       'keyboardAppearance: Brightness.dark',
       'scrollPadding: EdgeInsets.zero',
       'selection disabled',
+      'scrollPhysics: ClampingScrollPhysics',
     ]);
   });
 
@@ -5597,5 +5682,72 @@ void main() {
       editable.getLocalRectForCaret(const TextPosition(offset: 1)).topLeft,
     );
     expect(topLeft.dx, equals(383)); // Should be same as equivalent in 'Caret center position'
+  });
+
+  testWidgets('selection handles are rendered and not faded away', (WidgetTester tester) async {
+    const String testText = 'lorem ipsum';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable =
+      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pumpAndSettle();
+
+    final List<Widget> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    // On Android, an empty app contains a single FadeTransition. The following
+    // two are the left and right text selection handles, respectively.
+    expect(transitions.length, 3);
+    final FadeTransition left = transitions[1];
+    final FadeTransition right = transitions[2];
+
+    expect(left.opacity.value, equals(1.0));
+    expect(right.opacity.value, equals(1.0));
+  });
+
+  testWidgets('iOS selection handles are rendered and not faded away', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String testText = 'lorem ipsum';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable =
+      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+
+    await tester.tapAt(const Offset(20, 10));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pumpAndSettle();
+
+    final List<Widget> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
+
+    expect(left.opacity.value, equals(1.0));
+    expect(right.opacity.value, equals(1.0));
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }

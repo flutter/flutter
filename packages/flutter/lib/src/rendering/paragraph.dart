@@ -475,8 +475,9 @@ class RenderParagraph extends RenderBox {
     int offset = 0;
     text.visitTextSpan((TextSpan span) {
       if (span.recognizer != null && (span.recognizer is TapGestureRecognizer || span.recognizer is LongPressGestureRecognizer)) {
+        final int length = span.semanticsLabel?.length ?? span.text.length;
         _recognizerOffsets.add(offset);
-        _recognizerOffsets.add(offset + span.text.length);
+        _recognizerOffsets.add(offset + length);
         _recognizers.add(span.recognizer);
       }
       offset += span.text.length;

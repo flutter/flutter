@@ -72,6 +72,17 @@ class UpgradeCommandRunner {
         );
       }
     }
+    // If there are uncomitted changes we might be on the right commit but
+    // we should still warn.
+    if (!force && await hasUncomittedChanges()) {
+      throwToolExit(
+        'Your flutter checkout has local changes that would be erased by '
+        'upgrading. If you want to keep these changes, it is recommended that '
+        'you stash them via "git stash" or else commit the changes to a local '
+        'branch. If it is okay to remove local changes, then re-run this '
+        'command with --force.'
+      );
+    }
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
     await attemptFastForward();
@@ -79,6 +90,18 @@ class UpgradeCommandRunner {
     await updatePackages(flutterVersion);
     await runDoctor();
     return null;
+  }
+
+  Future<bool> hasUncomittedChanges() async {
+    try {
+      final RunResult result = await runCheckedAsync(<String>[
+        'git', 'status', '-s'
+      ], workingDirectory: Cache.flutterRoot);
+      return result.stdout.trim().isNotEmpty;
+    } catch (e) {
+      throwToolExit('git status failed: $e');
+    }
+    return false;
   }
 
   /// Check if there is an upstream repository configured.

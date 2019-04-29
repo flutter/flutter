@@ -4,12 +4,9 @@
 
 import 'dart:async';
 
-import 'package:archive/archive.dart';
-import 'package:bsdiff/bsdiff.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
-import '../application_package.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -20,7 +17,6 @@ import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -425,8 +421,6 @@ Future<void> _buildGradleProjectV2(
   command.add('-Ptrack-widget-creation=${buildInfo.trackWidgetCreation}');
   if (buildInfo.compilationTraceFilePath != null)
     command.add('-Pcompilation-trace-file=${buildInfo.compilationTraceFilePath}');
-  if (buildInfo.createPatch)
-    command.add('-Ppatch=true');
   if (buildInfo.extraFrontEndOptions != null)
     command.add('-Pextra-front-end-options=${buildInfo.extraFrontEndOptions}');
   if (buildInfo.extraGenSnapshotOptions != null)
@@ -497,105 +491,6 @@ Future<void> _buildGradleProjectV2(
     }
     printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
 
-    if (buildInfo.createBaseline) {
-      // Save baseline apk for generating dynamic patches in later builds.
-      final AndroidApk package = AndroidApk.fromApk(apkFile);
-      final Directory baselineDir = fs.directory(buildInfo.baselineDir);
-      final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
-      baselineApkFile.parent.createSync(recursive: true);
-      apkFile.copySync(baselineApkFile.path);
-      printStatus('Saved baseline package ${baselineApkFile.path}.');
-    }
-
-    if (buildInfo.createPatch) {
-      final AndroidApk package = AndroidApk.fromApk(apkFile);
-      final Directory baselineDir = fs.directory(buildInfo.baselineDir);
-      final File baselineApkFile = baselineDir.childFile('${package.versionCode}.apk');
-      if (!baselineApkFile.existsSync())
-        throwToolExit('Error: Could not find baseline package ${baselineApkFile.path}.');
-
-      printStatus('Found baseline package ${baselineApkFile.path}.');
-      printStatus('Creating dynamic patch...');
-      final Archive newApk = ZipDecoder().decodeBytes(apkFile.readAsBytesSync());
-      final Archive oldApk = ZipDecoder().decodeBytes(baselineApkFile.readAsBytesSync());
-
-      final Archive update = Archive();
-      for (ArchiveFile newFile in newApk) {
-        if (!newFile.isFile)
-          continue;
-
-        // Ignore changes to signature manifests.
-        if (newFile.name.startsWith('META-INF/'))
-          continue;
-
-        final ArchiveFile oldFile = oldApk.findFile(newFile.name);
-        if (oldFile != null && oldFile.crc32 == newFile.crc32)
-          continue;
-
-        // Only allow certain changes.
-        if (!newFile.name.startsWith('assets/') &&
-            !(buildInfo.usesAot && newFile.name.endsWith('.so')))
-          throwToolExit("Error: Dynamic patching doesn't support changes to ${newFile.name}.");
-
-        final String name = newFile.name;
-        if (name.contains('_snapshot_') || name.endsWith('.so')) {
-          final List<int> diff = bsdiff(oldFile.content, newFile.content);
-          final int ratio = 100 * diff.length ~/ newFile.content.length;
-          printStatus('Deflated $name by ${ratio == 0 ? 99 : 100 - ratio}%');
-          update.addFile(ArchiveFile(name + '.bzdiff40', diff.length, diff));
-        } else {
-          update.addFile(ArchiveFile(name, newFile.content.length, newFile.content));
-        }
-      }
-
-      File updateFile;
-      if (buildInfo.patchNumber != null) {
-        updateFile = fs.directory(buildInfo.patchDir)
-            .childFile('${package.versionCode}-${buildInfo.patchNumber}.zip');
-      } else {
-        updateFile = fs.directory(buildInfo.patchDir)
-            .childFile('${package.versionCode}.zip');
-      }
-
-      if (update.files.isEmpty) {
-        printStatus('No changes detected, creating rollback patch.');
-      }
-
-      final List<String> checksumFiles = <String>[
-        'assets/isolate_snapshot_data',
-        'assets/isolate_snapshot_instr',
-        'assets/flutter_assets/isolate_snapshot_data',
-      ];
-
-      int baselineChecksum = 0;
-      for (String fn in checksumFiles) {
-        final ArchiveFile oldFile = oldApk.findFile(fn);
-        if (oldFile != null)
-          baselineChecksum = getCrc32(oldFile.content, baselineChecksum);
-      }
-      if (baselineChecksum == 0)
-        throwToolExit('Error: Could not find baseline VM snapshot.');
-
-      final Map<String, dynamic> manifest = <String, dynamic>{
-        'baselineChecksum': baselineChecksum,
-        'buildNumber': package.versionCode,
-      };
-
-      if (buildInfo.patchNumber != null) {
-        manifest.addAll(<String, dynamic>{
-          'patchNumber': buildInfo.patchNumber,
-        });
-      }
-
-      const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-      final String manifestJson = encoder.convert(manifest);
-      update.addFile(ArchiveFile('manifest.json', manifestJson.length, manifestJson.codeUnits));
-
-      updateFile.parent.createSync(recursive: true);
-      updateFile.writeAsBytesSync(ZipEncoder().encode(update), flush: true);
-      final String patchSize = getSizeAsMB(updateFile.lengthSync());
-      printStatus('Created dynamic patch ${updateFile.path} ($patchSize).');
-    }
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)

@@ -14,7 +14,7 @@ void main() {
   group(WindowsWorkflow, () {
     final MockPlatform windows = MockPlatform();
     final MockPlatform windowsWithFde = MockPlatform()
-      ..environment['FLUTTER_DESKTOP_EMBEDDING'] = 'true';
+      ..environment['ENABLE_FLUTTER_DESKTOP'] = 'true';
     final MockPlatform notWindows = MockPlatform();
     when(windows.isWindows).thenReturn(true);
     when(windowsWithFde.isWindows).thenReturn(true);
