@@ -422,8 +422,6 @@ void main() {
     ];
 
     final List<Map<String, dynamic>> callbackHistory = <Map<String, dynamic>>[];
-    Map<String, dynamic> latestCall;
-
     final ExpansionPanelList _expansionListRadio = ExpansionPanelList.radio(
       expansionCallback: (int _index, bool _isExpanded) {
         callbackHistory.add(<String, dynamic>{
