@@ -181,7 +181,7 @@ class DrawerController extends StatefulWidget {
     @required this.alignment,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.scrimColor,
+    this.scrimColor = Colors.black54,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
