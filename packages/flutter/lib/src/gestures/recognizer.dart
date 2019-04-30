@@ -513,7 +513,7 @@ class CombinedOffset {
     @required this.global,
   });
 
-  /// Creates a [CombinedOffset] from [PointerEvent.localPosition] and 
+  /// Creates a [CombinedOffset] from [PointerEvent.localPosition] and
   /// [PointerEvent.position].
   factory CombinedOffset.fromEventPosition(PointerEvent event) {
     return CombinedOffset(local: event.localPosition, global: event.position);
