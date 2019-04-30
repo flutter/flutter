@@ -428,9 +428,7 @@ void main() {
       simControl = MockSimControl();
     });
 
-    testUsingContext(
-      "startApp uses compiled app's Info.plist to find CFBundleIdentifier",
-          () async {
+    testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
         final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
         when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
 
@@ -439,9 +437,7 @@ void main() {
 
         const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
         final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package,
-            prebuiltApplication: true,
-            debuggingOptions: mockOptions);
+        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
         verify(simControl.launch(any, 'correct', any));
       },
