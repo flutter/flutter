@@ -303,6 +303,7 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
     return CupertinoPageScaffold(
       navigationBar: const CupertinoNavigationBar(
         trailing: ExitButton(),
+        iconTheme: IconThemeData(color: Colors.black, size: 50),
       ),
       child: SafeArea(
         top: false,

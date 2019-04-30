@@ -954,7 +954,7 @@ class _NavigationBarStaticComponents {
     @required Widget userLargeTitle,
     @required EdgeInsetsDirectional padding,
     @required bool large,
-    @required IconThemeData iconTheme
+    IconThemeData iconTheme
   }) : leading = createLeading(
          leadingKey: keys.leadingKey,
          userLeading: userLeading,
@@ -1062,7 +1062,7 @@ class _NavigationBarStaticComponents {
     @required Widget userLeading,
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
-    @required IconThemeData iconTheme,
+    IconThemeData iconTheme,
   }) {
     if (
       userLeading != null ||
