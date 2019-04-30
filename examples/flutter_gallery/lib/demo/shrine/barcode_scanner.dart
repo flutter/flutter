@@ -138,6 +138,7 @@ class _CameraAppState extends State<CameraApp> {
 
   @override
   void dispose() {
+    _controller?.stopImageStream();
     _controller?.dispose();
     super.dispose();
   }
@@ -201,34 +202,75 @@ class _CameraAppState extends State<CameraApp> {
                 child: Column(
                   children: <Widget>[
                     Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Image.asset(
                           '18-0.jpg',
                           package: 'shrine_images',
                           fit: BoxFit.cover,
-                          width: 75.0,
-                          height: 75.0,
+                          width: 96,
+                          height: 96,
                         ),
-                        Column(
-                          children: const <Widget>[
-                            Text('Medium Red Notebook'),
-                            Text('(2 pack)'),
-                            Text('A5, ruled'),
-                            Text('100 pages'),
-                          ],
+                        Container(
+                          height: 96,
+                          margin: EdgeInsets.only(left: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              Container(
+                                child: Text(
+                                  'Medium Red Notepad',
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .body1
+                                      .copyWith(fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                              Text(
+                                '(2 pack)',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .body1
+                                    .copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: const <Widget>[
+                                    Text('A5, ruled'),
+                                    Text('100 pages'),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         )
                       ],
                     ),
-                    Text('Lightweight yet durable notepad with red leather'
-                        'cover for everyday notes. Available in packs of 2'),
+                    Container(
+                      margin: EdgeInsets.only(top: 22, bottom: 25),
+                      child: Text(
+                        'Lightweight yet durable notepad with red leather'
+                        'cover for everyday notes. Available in packs of 2.',
+                      ),
+                    ),
                     RaisedButton(
                       onPressed: () {},
-                      color: kShrinePink400,
+                      color: kShrinePink100,
                       child: Container(
                         width: 312,
                         height: 48,
-                        child: Center(
-                          child: Text('Add To Cart - \$39.99'),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Container(
+                              margin: EdgeInsets.only(right: 16),
+                              child: Icon(Icons.add_shopping_cart),
+                            ),
+                            Text('ADD TO CART - \$39.99',
+                                style:
+                                    Theme.of(context).primaryTextTheme.button),
+                          ],
                         ),
                       ),
                     ),
@@ -297,7 +339,13 @@ class _CameraAppState extends State<CameraApp> {
             child: Container(
               color: kShrinePink50,
               child: Center(
-                child: Text(_scannerHint ?? 'Point your camera at a barcode'),
+                child: Text(
+                  _scannerHint ?? 'Point your camera at a barcode',
+                  style: Theme.of(context)
+                      .textTheme
+                      .body1
+                      .copyWith(fontWeight: FontWeight.bold),
+                ),
               ),
             ),
           ),
