@@ -1464,7 +1464,7 @@ class _RenderListTile extends RenderBox {
     assert(position != null);
     for (RenderBox child in _children) {
       final BoxParentData parentData = child.parentData;
-      final bool isHit = result.withPaintOffset(
+      final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,
         hitTest: (HitTestResult result, Offset transformed) {

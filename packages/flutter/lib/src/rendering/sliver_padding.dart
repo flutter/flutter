@@ -265,7 +265,7 @@ class RenderSliverPadding extends RenderSliver with RenderObjectWithChildMixin<R
     if (child != null && child.geometry.hitTestExtent > 0.0) {
       final Matrix4 transform = Matrix4.identity();
       applyPaintTransform(child, transform);
-      return result.withPaintTransform(
+      return result.addWithPaintTransform(
         transform: transform,
         position: null, // Sliver speak a different hit test protocol.
         hitTest: (HitTestResult result, Offset _) {

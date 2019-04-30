@@ -578,7 +578,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       }
       final Matrix4 transform = Matrix4.identity();
       applyPaintTransform(child, transform);
-      final bool isHit = result.withPaintTransform(
+      final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: null, // Don't transform position, slivers speak a different hit test protocol.
         hitTest: (HitTestResult result, Offset _) {

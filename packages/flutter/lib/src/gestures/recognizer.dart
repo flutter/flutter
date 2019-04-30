@@ -503,9 +503,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
 /// A container for a [local] and [global] [Offset].
 ///
-/// Usually, the [global] [Offset] is in the coordinate space of the screen and
-/// the [local] offset is the same [Offset], but transformed to a local
-/// coordinate space.
+/// Usually, the [global] [Offset] is in the coordinate space of the screen
+/// after conversion to logical pixels and the [local] offset is the same
+/// [Offset], but transformed to a local coordinate space.
 class CombinedOffset {
   /// Creates a [CombinedOffset] combining a [local] and [global] [Offset].
   const CombinedOffset({
@@ -531,7 +531,8 @@ class CombinedOffset {
   /// The [Offset] in the local coordinate space.
   final Offset local;
 
-  /// The [Offset] in the global coordinate space.
+  /// The [Offset] in the global coordinate space after conversion to logical
+  /// pixels.
   final Offset global;
 
   /// Adds the `other.global` to [global] and `other.local` to [local].

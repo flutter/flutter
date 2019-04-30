@@ -1523,7 +1523,7 @@ abstract class RenderSliverHelpers implements RenderSliver {
     }
     assert(paintOffset != null);
     assert(transformedPosition != null);
-    return result.withPaintOffset(
+    return result.addWithPaintOffset(
       offset: paintOffset,
       position: null, // Slivers speak a different hit test protocol.
       hitTest: (HitTestResult result, Offset position) {

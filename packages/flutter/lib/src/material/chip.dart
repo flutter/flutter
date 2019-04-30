@@ -1747,7 +1747,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
     final Offset offset = Offset(position.dx, size.height / 2);
-    return result.withRawTransform(
+    return result.addWithRawTransform(
       transform: MatrixUtils.forceToPoint(offset),
       position: position,
       hitTest: (HitTestResult result, Offset position) {
@@ -2286,7 +2286,7 @@ class _RenderChip extends RenderBox {
     }
     if (hitTestChild != null) {
       final Offset center = hitTestChild.size.center(Offset.zero);
-      return result.withRawTransform(
+      return result.addWithRawTransform(
         transform: MatrixUtils.forceToPoint(center),
         position: position,
         hitTest: (HitTestResult result, Offset position) {

@@ -1281,7 +1281,7 @@ class _RenderDecoration extends RenderBox {
     for (RenderBox child in _children) {
       // TODO(hansmuller): label must be handled specially since we've transformed it
       final Offset offset = _boxParentData(child).offset;
-      final bool isHit = result.withPaintOffset(
+      final bool isHit = result.addWithPaintOffset(
         offset: offset,
         position: position,
         hitTest: (HitTestResult result, Offset transformed) {

@@ -380,7 +380,7 @@ class RenderFlow extends RenderBox
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
-      final bool absorbed = result.withPaintTransform(
+      final bool absorbed = result.addWithPaintTransform(
         transform: transform,
         position: position,
         hitTest: (HitTestResult result, Offset position) {

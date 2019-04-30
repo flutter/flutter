@@ -119,7 +119,7 @@ class HitTestResult {
   ///
   ///   @override
   ///   bool hitTestChildren(HitTestResult result, { Offset position }) {
-  ///     return result.withTransform(
+  ///     return result.addWithPaintTransform(
   ///       transform: _effectiveTransform,
   ///       position: position,
   ///       hitTest: (HitTestResult result, Offset position) {
@@ -133,11 +133,11 @@ class HitTestResult {
   ///
   /// See also:
   ///
-  ///  * [withPaintOffset], which can be used for `transform`s that are just
+  ///  * [addWithPaintOffset], which can be used for `transform`s that are just
   ///    simple matrix translations by an [Offset].
-  ///  * [withRawTransform], which takes a transform matrix that is directly
+  ///  * [addWithRawTransform], which takes a transform matrix that is directly
   ///    used to transform the position without any pre-processing.
-  bool withPaintTransform({
+  bool addWithPaintTransform({
     @required Matrix4 transform,
     @required Offset position,
     @required HitTest hitTest,
@@ -162,22 +162,22 @@ class HitTestResult {
   /// Convenience method for hit testing children, that are translated by
   /// an [Offset].
   ///
-  /// This method can be used as a convenience over [withPaintTransform] if
+  /// This method can be used as a convenience over [addWithPaintTransform] if
   /// a parent paints a child at an `offset`.
   ///
   /// A null value for `position` is treated as if [Offset.zero] was provided.
   ///
   /// Se also:
   ///
-  ///  * [withPaintTransform], which takes a generic paint transform matrix and
+  ///  * [addWithPaintTransform], which takes a generic paint transform matrix and
   ///    documents the intended usage of this API in more detail.
-  bool withPaintOffset({
+  bool addWithPaintOffset({
     @required Offset offset,
     @required Offset position,
     @required HitTest hitTest,
   }) {
     assert(hitTest != null);
-    return withRawTransform(
+    return addWithRawTransform(
       transform: offset != null ? Matrix4.translationValues(-offset.dx, -offset.dy, 0.0) : null,
       position: position,
       hitTest: hitTest,
@@ -187,14 +187,14 @@ class HitTestResult {
   /// Transforms `position` to the local coordinate system of a child before
   /// hit-testing the child.
   ///
-  /// Unlike [withPaintTransform], the provided `transform` matrix is used
+  /// Unlike [addWithPaintTransform], the provided `transform` matrix is used
   /// directly to transform `position` without any pre-processing.
   ///
   /// Se also:
   ///
-  ///  * [withPaintTransform], which accomplishes the same thing, but takes a
+  ///  * [addWithPaintTransform], which accomplishes the same thing, but takes a
   ///    _paint_ transform matrix.
-  bool withRawTransform({
+  bool addWithRawTransform({
     @required Matrix4 transform,
     @required Offset position,
     @required HitTest hitTest,
@@ -217,7 +217,7 @@ class HitTestResult {
   ///
   /// See also:
   ///
-  ///  * [withPaintTransform], which is used during hit testing
+  ///  * [addWithPaintTransform], which is used during hit testing
   ///    to build up the transform returned by this method.
   Matrix4 getTransform(HitTestEntry entry) {
     assert(_path.containsKey(entry));

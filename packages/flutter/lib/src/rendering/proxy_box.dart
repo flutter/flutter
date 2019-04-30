@@ -2123,7 +2123,7 @@ class RenderTransform extends RenderProxyBox {
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(!transformHitTests || _effectiveTransform != null);
-    return result.withPaintTransform(
+    return result.addWithPaintTransform(
       transform: transformHitTests ? _effectiveTransform : null,
       position: position,
       hitTest: (HitTestResult result, Offset position) {
@@ -2304,7 +2304,7 @@ class RenderFittedBox extends RenderProxyBox {
     if (size.isEmpty)
       return false;
     _updatePaintData();
-    return result.withPaintTransform(
+    return result.addWithPaintTransform(
       transform: _transform,
       position: position,
       hitTest: (HitTestResult result, Offset position) {
@@ -2387,7 +2387,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
-    return result.withPaintTransform(
+    return result.addWithPaintTransform(
       transform: transformHitTests
           ? Matrix4.translationValues(translation.dx * size.width, translation.dy * size.height, 0.0)
           : null,
@@ -4698,7 +4698,7 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
-    return result.withPaintTransform(
+    return result.addWithPaintTransform(
       transform: getCurrentTransform(),
       position: position,
       hitTest: (HitTestResult result, Offset position) {

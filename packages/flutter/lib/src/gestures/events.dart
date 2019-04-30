@@ -363,6 +363,8 @@ abstract class PointerEvent extends Diagnosticable {
   final Matrix4 transform;
 
   /// The original [PointerEvent] before it was transformed by [transform].
+  ///
+  /// If [transform] is null or the identity transformation this may be null.
   final PointerEvent original;
 
   /// Transforms the event from the global coordinate space into the coordinate
@@ -373,6 +375,10 @@ abstract class PointerEvent extends Diagnosticable {
   ///
   /// The method may return the same object instance if for example the
   /// transformation has no effect on the event.
+  ///
+  /// Transforms are not commutative. If this method is called on a
+  /// [PointerEvent] that has a non-null [transform] value, that value will be
+  /// overridden by the provided `transform`.
   PointerEvent transformed(Matrix4 transform);
 
   @override

@@ -777,26 +777,23 @@ class _RenderCupertinoDialog extends RenderBox {
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     final BoxParentData contentSectionParentData = contentSection.parentData;
-    final bool isHit = result.withPaintOffset(
-      offset: contentSectionParentData.offset,
-      position: position,
-      hitTest: (HitTestResult result, Offset transformed) {
-        assert(transformed == position - contentSectionParentData.offset);
-        return contentSection.hitTest(result, position: transformed);
-      },
-    );
-    if (isHit) {
-      return true;
-    }
     final BoxParentData actionsSectionParentData = actionsSection.parentData;
-    return result.withPaintOffset(
-      offset: actionsSectionParentData.offset,
-      position: position,
-      hitTest: (HitTestResult result, Offset transformed) {
-        assert(transformed == position - actionsSectionParentData.offset);
-        return actionsSection.hitTest(result, position: transformed);
-      },
-    );
+    return result.addWithPaintOffset(
+             offset: contentSectionParentData.offset,
+             position: position,
+             hitTest: (HitTestResult result, Offset transformed) {
+               assert(transformed == position - contentSectionParentData.offset);
+               return contentSection.hitTest(result, position: transformed);
+             },
+           )
+        || result.addWithPaintOffset(
+             offset: actionsSectionParentData.offset,
+             position: position,
+             hitTest: (HitTestResult result, Offset transformed) {
+               assert(transformed == position - actionsSectionParentData.offset);
+               return actionsSection.hitTest(result, position: transformed);
+             },
+           );
   }
 }
 

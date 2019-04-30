@@ -1110,7 +1110,7 @@ class RenderTable extends RenderBox {
       final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
-        final bool isHit = result.withPaintOffset(
+        final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
           position: position,
           hitTest: (HitTestResult result, Offset transformed) {

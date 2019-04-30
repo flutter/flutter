@@ -1876,8 +1876,8 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
-  /// If transforming is necessary, [HitTestResult.withPaintTransform],
-  /// [HitTestResult.withPaintOffset], or [HitTestResult.withRawTransform] need
+  /// If transforming is necessary, [HitTestResult.addWithPaintTransform],
+  /// [HitTestResult.addWithPaintOffset], or [HitTestResult.addWithRawTransform] need
   /// to be invoked by the caller to record the required transform operations
   /// in the [HitTestResult]. These methods will also help with applying the
   /// transform to `position`.
@@ -1950,8 +1950,8 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
-  /// If transforming is necessary, [HitTestResult.withPaintTransform],
-  /// [HitTestResult.withPaintOffset], or [HitTestResult.withRawTransform] need
+  /// If transforming is necessary, [HitTestResult.addWithPaintTransform],
+  /// [HitTestResult.addWithPaintOffset], or [HitTestResult.addWithRawTransform] need
   /// to be invoked by the caller to record the required transform operations
   /// in the [HitTestResult]. These methods will also help with applying the
   /// transform to `position`.
@@ -2265,7 +2265,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      final bool isHit = result.withPaintOffset(
+      final bool isHit = result.addWithPaintOffset(
         offset: childParentData.offset,
         position: position,
         hitTest: (HitTestResult result, Offset transformed) {
