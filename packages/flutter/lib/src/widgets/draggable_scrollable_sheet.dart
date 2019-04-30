@@ -271,7 +271,7 @@ class _DraggableSheetExtent {
     if (availablePixels == 0) {
       return;
     }
-    currentExtent += delta / availablePixels;
+    currentExtent += delta / availablePixels * maxExtent;
     DraggableScrollableNotification(
       minExtent: minExtent,
       maxExtent: maxExtent,
@@ -280,9 +280,6 @@ class _DraggableSheetExtent {
       context: context,
     ).dispatch(context);
   }
-
-  @override
-  String toString() => '$runtimeType{$minExtent $currentExtent $maxExtent $availablePixels}';
 }
 
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
