@@ -57,10 +57,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(crossAxisMargin != null),
        assert(minLength != null),
        assert(padding != null),
-       assert(padding.top >= 0),
-       assert(padding.right >= 0),
-       assert(padding.bottom >= 0),
-       assert(padding.left >= 0) {
+       assert(padding.isNonNegative) {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -178,26 +175,26 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   void _paintThumb(
-    double beforeInset,
+    double beforePadding,
     double before,
     double inside,
-    double afterInset,
+    double afterPadding,
     double after,
     double viewport,
     Canvas canvas,
     Size size,
     AxisDirection direction,
   ) {
-    final double totalInset = beforeInset + afterInset;
+    final double totalPadding = beforePadding + afterPadding;
 
     // Skip painting if there's not enough space.
-    if (viewport <= totalInset || viewport <= totalInset + 2 * mainAxisMargin) {
+    if (viewport <= totalPadding || viewport <= totalPadding + 2 * mainAxisMargin) {
       return;
     }
 
-    final double effectiveInside = inside - totalInset;
+    final double effectiveInside = inside - totalPadding;
     // Because viewport <= inside this is guaranteed to be greater than or equal to 0.
-    final double effectiveViewport = viewport - totalInset;
+    final double effectiveViewport = viewport - totalPadding;
 
     // Establish the minimum size possible.
     double thumbExtent = math.min(effectiveViewport, minOverscrollLength);
@@ -239,7 +236,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     thumbExtent = math.min(thumbExtent, effectiveViewport - 2 * mainAxisMargin);
 
     final double fractionPast = (before + after > 0.0) ? (before / (before + after)).clamp(0.0, 1.0) : 0;
-    final double thumbOffset = fractionPast * (effectiveViewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin + beforeInset;
+    final double thumbOffset = fractionPast * (effectiveViewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin + beforePadding;
 
     _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, direction);
   }

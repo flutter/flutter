@@ -10,10 +10,10 @@ import '../rendering/mock_canvas.dart';
 const Color _kScrollbarColor = Color(0x99777777);
 
 Widget _buildSingleChildScrollViewWithCupertinoScrollbar({
-    TextDirection textDirection = TextDirection.ltr,
-    EdgeInsets padding = EdgeInsets.zero,
-    Widget child}
-) {
+  TextDirection textDirection = TextDirection.ltr,
+  EdgeInsets padding = EdgeInsets.zero,
+  Widget child
+}) {
   return Directionality(
     textDirection: textDirection,
     child: MediaQuery(
