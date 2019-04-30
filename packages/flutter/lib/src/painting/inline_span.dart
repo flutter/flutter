@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
@@ -17,7 +16,7 @@ import 'text_style.dart';
 /// [InlineSpan]s.
 typedef InlineSpanVisitor = bool Function(InlineSpan span);
 
-/// An immutable span of inline content which forms a paragraph.
+/// An immutable span of inline content which forms part of a paragraph.
 ///
 ///  * The subclass [TextSpan] specifies text and may contain child [InlineSpan]s.
 ///  * The subclass [PlaceholderSpan] represents a placeholder that may be
@@ -104,7 +103,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Flattens the [InlineSpan] tree into a single string.
   ///
   /// Styles are not honored in this process. If `includeSemanticsLabels` is
-  /// true, then the text returned will include the [TextStyle.semanticsLabel]s
+  /// true, then the text returned will include the [TextSpan.semanticsLabel]s
   /// instead of the text contents for [TextSpan]s.
   ///
   /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
