@@ -10,8 +10,8 @@ import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'inline_span.dart';
-import 'text_style.dart';
 import 'text_painter.dart';
+import 'text_style.dart';
 
 /// An immutable span of text.
 ///
@@ -171,6 +171,7 @@ class TextSpan extends InlineSpan {
   /// Rather than using this directly, it's simpler to use the
   /// [TextPainter] class to paint [TextSpan] objects onto [Canvas]
   /// objects.
+  @override
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
     final bool hasStyle = style != null;
@@ -206,6 +207,7 @@ class TextSpan extends InlineSpan {
   }
 
   /// Returns the text span that contains the given position in the text.
+  @override
   InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     final TextAffinity affinity = position.affinity;
@@ -215,7 +217,7 @@ class TextSpan extends InlineSpan {
     visitChildren((InlineSpan span) {
       assert(result == null);
       if (span is TextSpan) {
-        TextSpan textSpan = span as TextSpan;
+        final TextSpan textSpan = span;
         final int endOffset = offset + textSpan.text.length;
         if (targetOffset == offset && affinity == TextAffinity.downstream ||
             targetOffset > offset && targetOffset < endOffset ||
@@ -238,6 +240,7 @@ class TextSpan extends InlineSpan {
   ///
   /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.
+  @override
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     assert(debugAssertIsValid());
     final StringBuffer buffer = StringBuffer();
@@ -262,6 +265,7 @@ class TextSpan extends InlineSpan {
   /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
   ///
   /// Returns null if the index is out of bounds.
+  @override
   int codeUnitAt(int index) {
     if (index < 0)
       return null;
@@ -269,7 +273,7 @@ class TextSpan extends InlineSpan {
     int result;
     visitChildren((InlineSpan span) {
       if (span is TextSpan) {
-        TextSpan textSpan = span as TextSpan;
+        final TextSpan textSpan = span;
         if (index - offset < textSpan.text.length) {
           result = textSpan.text.codeUnitAt(index - offset);
           return false;
@@ -289,6 +293,7 @@ class TextSpan extends InlineSpan {
   /// ```dart
   /// assert(myTextSpan.debugAssertIsValid());
   /// ```
+  @override
   bool debugAssertIsValid() {
     assert(() {
       if (!visitChildren((InlineSpan span) {
@@ -320,12 +325,13 @@ class TextSpan extends InlineSpan {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
+  @override
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
     if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
-    TextSpan textSpan = other;
+    final TextSpan textSpan = other;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
         (style == null) != (textSpan.style == null))

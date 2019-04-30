@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Gradient, Shader, TextBox, Offsetff, PlaceholderAlignment;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -85,8 +85,8 @@ class RenderParagraph extends RenderBox
          locale: locale,
          strutStyle: strutStyle,
        ) {
-    addAll(children);
-    _extractPlaceholderSpans(text);
+   addAll(children);
+   _extractPlaceholderSpans(text);
   }
 
   @override
@@ -124,10 +124,10 @@ class RenderParagraph extends RenderBox
   // Traverses the InlineSpan tree and depth-first collects the list of
   // child WidgetsSpans. Populates _placeholderSpans.
   void _extractPlaceholderSpans(InlineSpan span) {
-    _placeholderSpans = [];
+    _placeholderSpans = <PlaceholderSpan>[];
     span.visitChildren((InlineSpan span) {
       if (span is PlaceholderSpan) {
-        PlaceholderSpan placeholderSpan = span;
+        final PlaceholderSpan placeholderSpan = span;
         _placeholderSpans.add(placeholderSpan);
       }
       return true;
@@ -264,7 +264,7 @@ class RenderParagraph extends RenderBox
       // not effect the final layout of parents.
       _needsLayout = true;
     }
-    double minWidth = _textPainter.minIntrinsicWidth;
+    final double minWidth = _textPainter.minIntrinsicWidth;
     return minWidth;
   }
 
@@ -281,7 +281,7 @@ class RenderParagraph extends RenderBox
       // not effect the final layout of parents.
       _needsLayout = true;
     }
-    double maxWidth = _textPainter.maxIntrinsicWidth;
+    final double maxWidth = _textPainter.maxIntrinsicWidth;
     return maxWidth;
   }
 
@@ -295,7 +295,7 @@ class RenderParagraph extends RenderBox
     // layout run is temporary and not a real layout run. It does
     // not effect the final layout of parents.
     _needsLayout = true;
-    double height = _textPainter.height;
+    final double height = _textPainter.height;
     return height;
   }
 
@@ -320,7 +320,7 @@ class RenderParagraph extends RenderBox
 
   /// Intrinsics cannot be calculated without a full layout for
   /// alignments that require the baseline (baseline, aboveBaseline,
-  /// belowBaseline).
+  /// belowBaseline)
   bool _canComputeIntrinsics() {
     for (PlaceholderSpan span in _placeholderSpans) {
       switch (span.alignment) {
@@ -344,7 +344,7 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMaxIntrinsics(double height) {
     RenderBox child = firstChild;
-    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
       // Height and baseline is irrelevant as all text will be laid
@@ -362,11 +362,11 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenWidthWithMinIntrinsics(double height) {
     RenderBox child = firstChild;
-    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
-      double intrinsicWidth = child.getMinIntrinsicWidth(height);
-      double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
+      final double intrinsicWidth = child.getMinIntrinsicWidth(height);
+      final double intrinsicHeight = child.getMinIntrinsicHeight(intrinsicWidth);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
         size: Size(intrinsicWidth, intrinsicHeight),
         alignment: _placeholderSpans[childIndex].alignment,
@@ -380,11 +380,11 @@ class RenderParagraph extends RenderBox
 
   void _computeChildrenHeightWithMinIntrinsics(double width) {
     RenderBox child = firstChild;
-    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
-      double intrinsicHeight = child.getMinIntrinsicHeight(width);
-      double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
+      final double intrinsicHeight = child.getMinIntrinsicHeight(width);
+      final double intrinsicWidth = child.getMinIntrinsicWidth(intrinsicHeight);
       placeholderDimensions[childIndex] = PlaceholderDimensions(
         size: Size(intrinsicWidth, intrinsicHeight),
         alignment: _placeholderSpans[childIndex].alignment,
@@ -402,7 +402,6 @@ class RenderParagraph extends RenderBox
   @override
   bool hitTestChildren(HitTestResult result, { Offset position }) {
     RenderBox child = firstChild;
-    int childIndex = 0;
     while (child != null) {
       final TextParentData textParentData = child.parentData;
       final Offset adjustedPosition = position - textParentData.offset;
@@ -411,7 +410,6 @@ class RenderParagraph extends RenderBox
         return true;
       }
       child = childAfter(child);
-      childIndex += 1;
     }
     return false;
   }
@@ -453,7 +451,7 @@ class RenderParagraph extends RenderBox
   // specified.
   void _layoutChildren(BoxConstraints constraints) {
     RenderBox child = firstChild;
-    List<PlaceholderDimensions> placeholderDimensions = List(childCount);
+    final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
       // Set min constraints to 0, since the text min constraints don't apply
@@ -631,7 +629,7 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     while (child != null) {
       assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
-      TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
       context.paintChild(
         child,
         offset + textParentData.offset
@@ -725,7 +723,7 @@ class RenderParagraph extends RenderBox
     int offset = 0;
     text.visitChildren((InlineSpan span) {
       if (span is TextSpan) {
-        TextSpan textSpan = span as TextSpan;
+        final TextSpan textSpan = span;
         if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || textSpan.recognizer is LongPressGestureRecognizer)) {
           final int length = textSpan.semanticsLabel?.length ?? textSpan.text.length;
           _inlineSemanticsOffsets.add(offset);
@@ -783,7 +781,7 @@ class RenderParagraph extends RenderBox
         rect.bottom.ceilToDouble() + 4.0,
       );
       order += 1;
-      SemanticsConfiguration configuration = SemanticsConfiguration()
+      final SemanticsConfiguration configuration = SemanticsConfiguration()
         ..sortKey = OrdinalSortKey(order)
         ..textDirection = initialDirection;
       if (includeText) {
@@ -810,10 +808,10 @@ class RenderParagraph extends RenderBox
         // Add semantics for this recognizer.
         final SemanticsNode node = SemanticsNode();
         if (inlineElement is TapGestureRecognizer) {
-          final TapGestureRecognizer recognizer = inlineElement as GestureRecognizer;
+          final TapGestureRecognizer recognizer = inlineElement;
           configuration.onTap = recognizer.onTap;
         } else if (inlineElement is LongPressGestureRecognizer) {
-          final LongPressGestureRecognizer recognizer = inlineElement as GestureRecognizer;
+          final LongPressGestureRecognizer recognizer = inlineElement;
           configuration.onLongPress = recognizer.onLongPress;
         } else {
           assert(false);

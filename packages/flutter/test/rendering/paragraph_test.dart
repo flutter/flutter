@@ -338,7 +338,7 @@ void main() {
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
-    List<RenderBox> renderBoxes = [];
+    final List<RenderBox> renderBoxes = <RenderBox>[];
     renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
     renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
     renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
@@ -350,7 +350,7 @@ void main() {
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
 
-    List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
         const TextSelection(baseOffset: 0, extentOffset: 8)
     );
 
@@ -380,7 +380,7 @@ void main() {
     );
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
-    List<RenderBox> renderBoxes = [];
+    final List<RenderBox> renderBoxes = <RenderBox>[];
     renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
     renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
     renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
@@ -396,7 +396,7 @@ void main() {
     );
     layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
 
-    List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
         const TextSelection(baseOffset: 0, extentOffset: 12)
     );
 

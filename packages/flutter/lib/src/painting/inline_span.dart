@@ -5,12 +5,11 @@
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
-import 'text_style.dart';
 import 'text_painter.dart';
+import 'text_style.dart';
 
 /// Called on each span as [InlineSpan.visitChildren] walks the [InlineSpan] tree.
 ///

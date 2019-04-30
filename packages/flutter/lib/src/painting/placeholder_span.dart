@@ -2,17 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
+import 'dart:ui' as ui show PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
-import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'inline_span.dart';
-import 'text_style.dart';
 import 'text_painter.dart';
 import 'text_span.dart';
+import 'text_style.dart';
 
 /// An immutable placeholder that is embedded inline within text.
 ///
@@ -37,13 +35,11 @@ abstract class PlaceholderSpan extends InlineSpan {
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
   const PlaceholderSpan({
-    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
-    TextBaseline baseline,
+    this.alignment = ui.PlaceholderAlignment.bottom,
+    this.baseline,
     TextStyle style,
     List<InlineSpan> children,
-  }) : alignment = alignment,
-       baseline = baseline,
-       super(style: style, children: children,);
+  }) : super(style: style, children: children,);
 
   /// How the placeholder aligns vertically with the text.
   ///
@@ -58,6 +54,7 @@ abstract class PlaceholderSpan extends InlineSpan {
 
   /// [PlaceholderSpan]s are flattened to a `0xFFFC` object replacement character in the
   /// plain text representation when [includePlaceholders] is true.
+  @override
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     return includePlaceholders ? '\uFFFC' : '';
   }

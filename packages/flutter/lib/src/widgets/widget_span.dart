@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show ParagraphBuilder, PlaceholderAlignment;
 
 import 'package:flutter/painting.dart';
-import 'package:flutter/gestures.dart';
 
 import 'framework.dart';
 
@@ -107,7 +106,7 @@ class WidgetSpan extends PlaceholderSpan {
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
-    Widget child,
+    @required this.child,
     InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
@@ -115,7 +114,6 @@ class WidgetSpan extends PlaceholderSpan {
        assert((alignment == InlineWidgetAlignment.aboveBaseline ||
                alignment == InlineWidgetAlignment.belowBaseline ||
                alignment == InlineWidgetAlignment.baseline) ? baseline != null : true),
-       child = child,
        super(alignment:
            // Convert InlineWidgetAlignment to PlaceholderAlignment in a const fashion.
            alignment == InlineWidgetAlignment.baseline ? ui.PlaceholderAlignment.baseline :
@@ -148,7 +146,7 @@ class WidgetSpan extends PlaceholderSpan {
       builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
     if (dimensions != null) {
       assert(builder.placeholderCount < dimensions.length);
-      PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
+      final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
       builder.addPlaceholder(
         currentDimensions.size.width,
         currentDimensions.size.height,
@@ -162,6 +160,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
+  @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (!visitor(this))
       return false;
@@ -169,6 +168,7 @@ class WidgetSpan extends PlaceholderSpan {
     return true;
   }
 
+  @override
   int codeUnitAt(int index) {
     return null;
   }
@@ -182,12 +182,12 @@ class WidgetSpan extends PlaceholderSpan {
   /// See also:
   ///
   ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
+  @override
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
       return RenderComparison.identical;
     if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
-    final WidgetSpan typedOther = other;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
     RenderComparison result = RenderComparison.identical;
@@ -202,6 +202,9 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
+  int get hashCode => hashValues(child, style, alignment, baseline);
+
+  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -209,10 +212,13 @@ class WidgetSpan extends PlaceholderSpan {
       return false;
     final WidgetSpan typedOther = other;
     return typedOther.child == child
+        && typedOther.alignment == alignment
+        && typedOther.baseline == baseline
         && typedOther.style == style;
   }
 
   /// Returns the text span that contains the given position in the text.
+  @override
   InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     return null;
@@ -226,6 +232,7 @@ class WidgetSpan extends PlaceholderSpan {
   /// ```dart
   /// assert(myWidgetSpan.debugAssertIsValid());
   /// ```
+  @override
   bool debugAssertIsValid() {
     // WidgetSpans are always valid as asserts prevent invalid WidgetSpans
     // from being constructed.
