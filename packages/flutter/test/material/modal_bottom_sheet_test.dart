@@ -297,6 +297,7 @@ void main() {
               children: <TestSemantics>[
                 TestSemantics(
                   flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
+                  actions: <SemanticsAction>[SemanticsAction.scrollDown, SemanticsAction.scrollUp],
                   children: <TestSemantics>[
                     TestSemantics(
                       label: 'BottomSheet',
