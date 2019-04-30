@@ -1,0 +1,41 @@
+# Copyright 2019 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/package.gni")
+
+package("environment_delegating_runner") {
+  testonly = true
+
+  binaries = [
+    {
+      name = "environment_delegating_runner"
+    },
+  ]
+  meta = [
+    {
+      path = rebase_path("meta/environment_delegating_runner.cmx")
+      dest = "environment_delegating_runner.cmx"
+    },
+  ]
+
+  deps = [
+    ":bin",
+  ]
+}
+
+executable("bin") {
+  output_name = "environment_delegating_runner"
+  testonly = true
+
+  sources = [
+    "environment_delegating_runner.cc",
+  ]
+
+  deps = [
+    "//sdk/fidl/fuchsia.sys",
+    "//sdk/lib/fidl/cpp",
+    "//sdk/lib/sys/cpp",
+    "//zircon/public/lib/async-loop-cpp",
+  ]
+}

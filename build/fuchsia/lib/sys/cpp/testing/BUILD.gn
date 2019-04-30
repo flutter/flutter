@@ -1,0 +1,78 @@
+# Copyright 2019 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_set("unit") {
+  testonly = true
+
+  sources = [
+    "component_context_provider.cc",
+    "component_context_provider.h",
+    "fake_component.cc",
+    "fake_component.h",
+    "fake_launcher.cc",
+    "fake_launcher.h",
+    "service_directory_provider.cc",
+    "service_directory_provider.h",
+  ]
+
+  public_deps = [
+    "//garnet/public/lib/gtest",
+    "//sdk/lib/sys/cpp",
+    "//sdk/lib/vfs/cpp",
+    "//zircon/public/fidl/fuchsia-io",
+    "//zircon/public/lib/fit",
+    "//zircon/public/lib/zx",
+  ]
+
+  deps = [
+    "//zircon/public/lib/fdio",
+  ]
+
+  public_configs = [ "//sdk/config" ]
+}
+
+source_set("integration") {
+  testonly = true
+
+  sources = [
+    "test_with_environment.cc",
+    "test_with_environment.h",
+  ]
+
+  public_deps = [
+    ":enclosing_environment",
+    "//garnet/public/lib/gtest",
+  ]
+
+  public_configs = [ "//sdk/config" ]
+}
+
+source_set("enclosing_environment") {
+  testonly = true
+
+  sources = [
+    "component_interceptor.cc",
+    "component_interceptor.h",
+    "enclosing_environment.cc",
+    "enclosing_environment.h",
+    "launcher_impl.cc",
+    "launcher_impl.h",
+  ]
+
+  deps = [
+    "//sdk/lib/sys/cpp/testing/environment_delegating_runner:bin",
+    "//third_party/rapidjson",
+  ]
+
+  public_configs = [ "//sdk/config" ]
+
+  public_deps = [
+    "//sdk/fidl/fuchsia.sys",
+    "//sdk/lib/fidl/cpp",
+    "//sdk/lib/sys/cpp",
+    "//sdk/lib/vfs/cpp",
+    "//sdk/lib/vfs/cpp",
+    "//zircon/public/lib/async-default",
+  ]
+}

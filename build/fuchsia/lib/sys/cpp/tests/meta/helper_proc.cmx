@@ -1,0 +1,5 @@
+{
+    "program": {
+        "binary": "bin/helper_proc"
+    }
+}

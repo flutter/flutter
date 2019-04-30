@@ -1,0 +1,11 @@
+{
+    "program": {
+        "binary": "test/component_cpp_testing_tests"
+    },
+    "sandbox": {
+        "services": [
+            "fuchsia.sys.Environment",
+            "fuchsia.sys.Loader"
+        ]
+    }
+}

@@ -1,0 +1,131 @@
+# Copyright 2019 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/package/component.gni")
+import("//build/test.gni")
+import("//build/test/test_package.gni")
+import("//build/testing/environments.gni")
+
+test("component_cpp_unittests") {
+  sources = [
+    "echo_server.h",
+    "file_descriptor_unittest.cc",
+    "outgoing_directory_unittest.cc",
+    "service_directory_unittest.cc",
+  ]
+
+  deps = [
+    "//garnet/examples/fidl/services:echo",
+    "//garnet/public/lib/gtest",
+    "//sdk/lib/sys/cpp",
+    "//third_party/googletest:gtest_main",
+    "//zircon/public/fidl/fuchsia-io",
+    "//zircon/public/lib/fdio",
+    "//zircon/public/lib/fidl",
+  ]
+}
+
+test("component_cpp_testing_unittests") {
+  sources = [
+    "component_context_provider_unittest.cc",
+    "echo_server.h",
+    "service_directory_provider_unittest.cc",
+  ]
+
+  deps = [
+    "//garnet/examples/fidl/services:echo",
+    "//garnet/public/lib/gtest",
+    "//sdk/lib/sys/cpp/testing:unit",
+    "//third_party/googletest:gtest_main",
+    "//zircon/public/fidl/fuchsia-io",
+    "//zircon/public/lib/fidl",
+  ]
+}
+
+test("component_cpp_testing_tests") {
+  sources = [
+    "component_interceptor_unittest.cc",
+    "enclosing_environment_test.cc",
+  ]
+
+  deps = [
+    "//garnet/examples/fidl/services:echo",
+    "//garnet/public/lib/gtest",
+    "//sdk/lib/sys/cpp/testing:integration",
+    "//third_party/googletest:gtest_main",
+    "//zircon/public/fidl/fuchsia-io",
+    "//zircon/public/lib/fidl",
+  ]
+}
+
+executable("helper_proc") {
+  testonly = true
+
+  sources = [
+    "helper.cc",
+  ]
+
+  deps = [
+    "//garnet/examples/fidl/services:echo",
+    "//src/lib/fxl",
+    "//sdk/lib/fidl/cpp",
+    "//sdk/lib/sys/cpp",
+    "//zircon/public/lib/async-cpp",
+    "//zircon/public/lib/async-loop-cpp",
+  ]
+}
+
+# TODO(IN-933): Reenable once fuchsia_test_component is supported.
+# fuchsia_test_component("component_cpp_unittests_component") {
+#   deps = [
+#     ":component_cpp_unittests",
+#   ]
+#   binary = "component_cpp_unittests"
+# }
+
+# TODO(IN-933): Reenable once fuchsia_test_component is supported.
+# fuchsia_test_component("component_cpp_testing_unittests_component") {
+#   deps = [
+#     ":component_cpp_testing_unittests",
+#   ]
+#   binary = "component_cpp_testing_unittests"
+# }
+
+# TODO(IN-933): Convert back to package
+test_package("component_cpp_tests") {
+  deps = [
+    ":component_cpp_testing_tests",
+    ":component_cpp_testing_unittests",
+    ":component_cpp_unittests",
+    ":helper_proc",
+  ]
+
+  binaries = [
+    {
+      name = "helper_proc"
+    },
+  ]
+
+  meta = [
+    {
+      path = rebase_path("meta/helper_proc.cmx")
+      dest = "helper_proc.cmx"
+    },
+  ]
+
+  tests = [
+    {
+      name = "component_cpp_unittests"
+      environments = basic_envs
+    },
+    {
+      name = "component_cpp_testing_unittests"
+      environments = basic_envs
+    },
+    {
+      name = "component_cpp_testing_tests"
+      environments = basic_envs
+    },
+  ]
+}

@@ -1,0 +1,10 @@
+{
+    "program": {
+        "binary": "bin/environment_delegating_runner"
+    },
+    "sandbox": {
+        "services": [
+            "fuchsia.sys.Runner"
+        ]
+    }
+}
