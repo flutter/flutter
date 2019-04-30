@@ -21,7 +21,6 @@ import '../src/mocks.dart';
 void main() {
   Cache.disableLocking();
   final MockProcessManager mockProcessManager = MockProcessManager();
-  final MemoryFileSystem memoryFilesystem = MemoryFileSystem();
   final MockProcess mockProcess = MockProcess();
   final MockPlatform linuxPlatform = MockPlatform();
   final MockPlatform notLinuxPlatform = MockPlatform();
@@ -46,7 +45,7 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
   });
 
   testUsingContext('Linux build fails on non-linux platform', () async {
@@ -61,7 +60,7 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
   });
 
   testUsingContext('Linux build invokes make', () async {
@@ -70,6 +69,10 @@ void main() {
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.directory('/bin/cache/artifacts/engine/linux-x64').createSync(recursive: true);
+    fs.file('/bin/cache/artifacts/engine/linux-x64/icudtl.dat').createSync();
+    fs.file('/bin/cache/artifacts/engine/linux-x64/libflutter_linux.so').createSync();
+
     when(mockProcessManager.start(<String>[
       'make',
       '-C',
@@ -84,8 +87,10 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
+    expect(fs.file('build/linux/release/lib/libflutter_linux.so').existsSync(), true);
+    expect(fs.file('build/linux/cache/flutter_library/icudtl.dat').existsSync(), true);
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => linuxPlatform,
   });
