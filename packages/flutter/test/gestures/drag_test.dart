@@ -641,9 +641,8 @@ void main() {
 
       tester.route(down);
       expect(logs, <String>['down']);
-      pointer.buttons = kSecondaryButton;
       // Move out of slop so make sure button changes takes priority over slops
-      tester.route(pointer.move(const Offset(30.0, 30.0)));
+      tester.route(pointer.move(const Offset(30.0, 30.0), buttons: kSecondaryButton));
       expect(logs, <String>['down', 'cancel']);
 
       tester.route(pointer.up());
@@ -658,8 +657,7 @@ void main() {
         tester.closeArena(down.pointer);
 
         tester.route(down);
-        pointer.buttons = kSecondaryButton;
-        tester.route(pointer.move(const Offset(10.0, 10.0)));
+        tester.route(pointer.move(const Offset(10.0, 10.0), buttons: kSecondaryButton));
         tester.route(pointer.up());
         expect(logs, <String>['down', 'cancel']);
       }
@@ -691,8 +689,7 @@ void main() {
       expect(logs, <String>['down']);
       tester.route(pointer.move(const Offset(30.0, 30.0)));
       expect(logs, <String>['down', 'start']);
-      pointer.buttons = kSecondaryButton;
-      tester.route(pointer.move(const Offset(30.0, 30.0)));
+      tester.route(pointer.move(const Offset(30.0, 30.0), buttons: kSecondaryButton));
       expect(logs, <String>['down', 'start', 'end']);
 
       // Make sure no further updates are sent
@@ -713,9 +710,8 @@ void main() {
         tester.route(down);
 
         tester.route(pointer.move(const Offset(30.0, 30.0)));
-        pointer.buttons = kSecondaryButton;
 
-        tester.route(pointer.move(const Offset(30.0, 31.0)));
+        tester.route(pointer.move(const Offset(30.0, 31.0), buttons: kSecondaryButton));
         tester.route(pointer.up());
         expect(logs, <String>['down', 'start', 'end']);
       }
