@@ -7,7 +7,7 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-/// Defines default property values for [BottomSheet] widgets.
+/// Defines default property values for [BottomSheet]'s [Material].
 ///
 /// Descendant widgets obtain the current [BottomSheetThemeData] object
 /// using `Theme.of(context).bottomSheetTheme`. Instances of
@@ -32,13 +32,22 @@ class BottomSheetThemeData extends Diagnosticable {
     this.shape,
   });
 
-  /// Color to be used for the [BottomSheet]'s background.
+  /// Default value for [BottomSheet.backgroundColor].
+  ///
+  /// If null, [BottomSheet] defaults to [Material]'s default.
   final Color backgroundColor;
 
-  /// The z-coordinate to be used for the [BottomSheet]'s elevation.
+  /// Default value for [BottomSheet.elevation].
+  ///
+  /// {@macro flutter.material.material.elevation}
+  ///
+  /// If null, [BottomSheet] defaults to 0.0.
   final double elevation;
 
-  /// The shape to be used for the bottom sheet's [Material].
+  /// Default value for [BottomSheet.shape].
+  ///
+  /// If null, no overriding shape is specified for [BottomSheet], so the
+  /// [BottomSheet] is rectangular.
   final ShapeBorder shape;
 
   /// Creates a copy of this object with the given fields replaced with the
