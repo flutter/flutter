@@ -39,6 +39,7 @@ class _CameraAppState extends State<CameraApp> {
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -48,7 +49,7 @@ class _CameraAppState extends State<CameraApp> {
   }
 
   Future<void> _startScanningBarcodes() async {
-    final CameraDescription camera = await getCamera(CameraLensDirection.back);
+    final CameraDescription camera = await getCamera(CameraLensDirection.front);
     await _openCamera(camera);
     await _streamImages(camera);
   }
@@ -177,6 +178,70 @@ class _CameraAppState extends State<CameraApp> {
     );
   }
 
+  void _showBottomSheet() {
+    _scaffoldKey.currentState.showBottomSheet<void>(
+      (BuildContext context) {
+        return Container(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Container(
+                alignment: Alignment.topLeft,
+                decoration: BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Colors.grey)),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Text('1 result found'),
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.all(20),
+                child: Column(
+                  children: <Widget>[
+                    Row(
+                      children: <Widget>[
+                        Image.asset(
+                          '18-0.jpg',
+                          package: 'shrine_images',
+                          fit: BoxFit.cover,
+                          width: 75.0,
+                          height: 75.0,
+                        ),
+                        Column(
+                          children: const <Widget>[
+                            Text('Medium Red Notebook'),
+                            Text('(2 pack)'),
+                            Text('A5, ruled'),
+                            Text('100 pages'),
+                          ],
+                        )
+                      ],
+                    ),
+                    Text('Lightweight yet durable notepad with red leather'
+                        'cover for everyday notes. Available in packs of 2'),
+                    RaisedButton(
+                      onPressed: () {},
+                      color: kShrinePink400,
+                      child: Container(
+                        width: 312,
+                        height: 48,
+                        child: Center(
+                          child: Text('Add To Cart - \$39.99'),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     Widget background;
@@ -195,6 +260,7 @@ class _CameraAppState extends State<CameraApp> {
     }
 
     return Scaffold(
+      key: _scaffoldKey,
       body: Stack(
         children: <Widget>[
           background,
@@ -260,7 +326,9 @@ class _CameraAppState extends State<CameraApp> {
                   Icons.flash_off,
                   color: Colors.white,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  _showBottomSheet();
+                },
               ),
               IconButton(
                 icon: Icon(
