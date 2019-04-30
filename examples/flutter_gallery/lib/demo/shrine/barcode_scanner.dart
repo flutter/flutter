@@ -34,8 +34,6 @@ class _CameraAppState extends State<CameraApp> {
   static const double validRectSideLength = 256;
 
   CameraController _controller;
-  BarcodeDetector _detector;
-  bool _isDetecting = false;
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
@@ -52,7 +50,7 @@ class _CameraAppState extends State<CameraApp> {
   Future<void> _startScanningBarcodes() async {
     final CameraDescription camera = await getCamera(CameraLensDirection.back);
     await _openCamera(camera);
-    await _streamImages(camera);
+    await _streamImages(camera.sensorOrientation);
   }
 
   Future<void> _openCamera(CameraDescription camera) async {
@@ -67,23 +65,23 @@ class _CameraAppState extends State<CameraApp> {
     setState(() {});
   }
 
-  Future<void> _streamImages(CameraDescription camera) async {
-    _detector = FirebaseVision.instance.barcodeDetector();
-
+  Future<void> _streamImages(int sensorOrientation) async {
+    final BarcodeDetector detector = FirebaseVision.instance.barcodeDetector();
+    bool isDetecting = false;
     final Size size = MediaQuery.of(context).size;
 
     _controller.startImageStream((CameraImage image) {
-      if (_isDetecting) {
+      if (isDetecting) {
         return;
       }
 
-      _isDetecting = true;
+      isDetecting = true;
 
       final ImageRotation rotation = rotationIntToImageRotation(
-        camera.sensorOrientation,
+        sensorOrientation,
       );
 
-      detect(image, _detector.detectInImage, rotation).then(
+      detect(image, detector.detectInImage, rotation).then(
         (dynamic result) {
           if (!_controller.value.isStreamingImages) {
             return;
@@ -135,7 +133,7 @@ class _CameraAppState extends State<CameraApp> {
             _scannerHint = null;
           });
         },
-      ).whenComplete(() => _isDetecting = false);
+      ).whenComplete(() => isDetecting = false);
     });
   }
 
@@ -182,7 +180,7 @@ class _CameraAppState extends State<CameraApp> {
   }
 
   void _showBottomSheet() {
-    final PersistentBottomSheetController controller =
+    final PersistentBottomSheetController<void> controller =
         _scaffoldKey.currentState.showBottomSheet<void>(
       (BuildContext context) {
         return Container(
