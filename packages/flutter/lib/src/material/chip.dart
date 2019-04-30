@@ -2206,10 +2206,9 @@ class _RenderChip extends RenderBox {
       );
 
       final Size updatedSize = _boxSize(label);
-
       return Size(
         updatedSize.width + theme.labelPadding.horizontal,
-        rawSize.height + theme.labelPadding.vertical,
+        updatedSize.height + theme.labelPadding.vertical,
       );
     }
 
