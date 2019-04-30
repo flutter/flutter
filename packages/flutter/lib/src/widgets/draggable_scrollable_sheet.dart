@@ -262,6 +262,9 @@ class _DraggableSheetExtent {
   }
   double get currentExtent => _currentExtent.value;
 
+  double get additionalMinExtent => isAtMin ? 0.0 : 1.0;
+  double get additionalMaxExtent => isAtMax ? 0.0 : 1.0;
+
   /// The scroll position gets inputs in terms of pixels, but the extent is
   /// expected to be expressed as a number between 0..1.
   void addPixelDelta(double delta, BuildContext context) {
@@ -277,6 +280,9 @@ class _DraggableSheetExtent {
       context: context,
     ).dispatch(context);
   }
+
+  @override
+  String toString() => '$runtimeType{$minExtent $currentExtent $maxExtent $availablePixels}';
 }
 
 class _DraggableScrollableSheetState extends State<DraggableScrollableSheet> {
@@ -425,6 +431,17 @@ class _DraggableScrollableSheetScrollPosition
   VoidCallback _dragCancelCallback;
   final _DraggableSheetExtent extent;
   bool get listShouldScroll => pixels > 0.0;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    // We need to provide some extra extent if we haven't yet reached the max or
+    // min extents. Otherwise, a list with fewer children than the extent of
+    // the available space will get stuck.
+    return super.applyContentDimensions(
+      minScrollExtent - extent.additionalMinExtent,
+      maxScrollExtent + extent.additionalMaxExtent,
+    );
+  }
 
   @override
   void applyUserOffset(double delta) {

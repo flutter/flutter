@@ -8,7 +8,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  Widget _boilerplate(VoidCallback onButtonPressed) {
+  Widget _boilerplate(VoidCallback onButtonPressed, {
+    int itemCount = 100,
+    double initialChildSize = .5,
+  }) {
     return Directionality(
       textDirection: TextDirection.ltr,
       child: Stack(
@@ -20,12 +23,13 @@ void main() {
           DraggableScrollableSheet(
             maxChildSize: 1.0,
             minChildSize: .25,
+            initialChildSize: initialChildSize,
             builder: (BuildContext context, ScrollController scrollController) {
               return Container(
                 color: const Color(0xFFABCDEF),
                 child: ListView.builder(
                   controller: scrollController,
-                  itemCount: 100,
+                  itemCount: itemCount,
                   itemBuilder: (BuildContext context, int index) => Text('Item $index'),
                 ),
               );
@@ -72,6 +76,23 @@ void main() {
         expect(find.text('Item 1'), findsOneWidget);
         expect(find.text('Item 21'), findsNothing);
         expect(find.text('Item 36'), findsNothing);
+      });
+
+      testWidgets('Can be dragged down when list is shorter than full height', (WidgetTester tester) async {
+        await tester.pumpWidget(_boilerplate(null, itemCount: 30, initialChildSize: .25));
+
+        expect(find.text('Item 1').hitTestable(), findsOneWidget);
+        expect(find.text('Item 29').hitTestable(), findsNothing);
+
+        await tester.drag(find.text('Item 1'), const Offset(0, -325));
+        await tester.pumpAndSettle();
+        expect(find.text('Item 1').hitTestable(), findsOneWidget);
+        expect(find.text('Item 29').hitTestable(), findsOneWidget);
+
+        await tester.drag(find.text('Item 1'), const Offset(0, 325));
+        await tester.pumpAndSettle();
+        expect(find.text('Item 1').hitTestable(), findsOneWidget);
+        expect(find.text('Item 29').hitTestable(), findsNothing);
       });
 
       testWidgets('Can be dragged up and cover its container and scroll in single motion, and then dragged back down', (WidgetTester tester) async {
