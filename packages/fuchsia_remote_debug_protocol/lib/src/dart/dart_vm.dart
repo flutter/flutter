@@ -33,6 +33,14 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
 
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (error is json_rpc.RpcException) {
+    final json_rpc.RpcException rpcException = error;
+    if (rpcException.data != null && rpcException.data['id'] == null) {
+      // This can happen, e.g., if a client tries to call us before methods have
+      // been registered, but the client doesn't care for a response.
+      return;
+    }
+  }
   _log.fine('Error in internalimplementation of JSON RPC.\n$error\n$stack');
 }
 
