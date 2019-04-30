@@ -59,6 +59,9 @@ class DesktopLogReader extends DeviceLogReader {
     _inputController.addStream(process.stdout
       .transform(utf8.decoder)
       .transform(const LineSplitter()));
+    _inputController.addStream(process.stderr
+      .transform(utf8.decoder)
+      .transform(const LineSplitter()));
   }
 
   @override
