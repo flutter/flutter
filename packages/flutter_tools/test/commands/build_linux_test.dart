@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
@@ -63,7 +64,7 @@ void main() {
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext('Linux build invokes make', () async {
+  testUsingContext('Linux build invokes make and writes temporary files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file('linux/build.sh').createSync(recursive: true);
@@ -80,6 +81,7 @@ void main() {
       'BUILD=release',
       'FLUTTER_ROOT=/',
       'FLUTTER_BUNDLE_FLAGS=',
+      'FLUTTER_ARTIFACT_CACHE_DIR='
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
