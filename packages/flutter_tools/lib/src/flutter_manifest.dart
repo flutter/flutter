@@ -400,11 +400,9 @@ void _validateFonts(YamlList fonts, List<String> errors) {
     }
     if (fontMap['fonts'] == null) {
       continue;
-    } else {
-      if (fontMap['fonts'] is! YamlList) {
-        errors.add('Expected "fonts" to either be null or a list.');
-        continue;
-      }
+    } else if (fontMap['fonts'] is! YamlList) {
+      errors.add('Expected "fonts" to either be null or a list.');
+      continue;
     }
     for (final YamlMap fontListItem in fontMap['fonts']) {
       for (final MapEntry<dynamic, dynamic> kvp in fontListItem.entries) {

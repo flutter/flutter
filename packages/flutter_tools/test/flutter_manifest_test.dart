@@ -482,7 +482,8 @@ flutter:
       );
     });
 
-    testUsingContext('returns proper error when font detail is malformed', () async {
+    // Regression test for https://github.com/flutter/flutter/issues/31764
+    testUsingContext('Returns proper error when font detail is malformed', () async {
       final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
@@ -495,7 +496,7 @@ flutter:
       fonts:
         -asset: a/bar
 ''';
-      final dynamic flutterManifest = FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest, null);
       expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
