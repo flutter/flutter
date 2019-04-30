@@ -1,0 +1,237 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+declare_args() {
+  fuchsia_sdk_path = "//fuchsia/sdk"
+  fuchsia_sdk = "//build/fuchsia"
+  is_fuchsia_sdk = false
+}
+
+template("fuchsia_sysroot") {
+  assert(defined(invoker.meta), "The meta.json file path must be specified.")
+
+  meta_json = read_file(invoker.meta, "json")
+
+  assert(meta_json.type == "sysroot")
+
+  meta_json_versions = meta_json.versions
+  defs = meta_json_versions.x64
+
+  _libs = []
+  _lib_dirs = []
+  _include_dirs = []
+
+  foreach(link_lib, defs.link_libs) {
+    if (link_lib != "arch/x64/sysroot/lib/Scrt1.o") {
+      _libs += [ "$fuchsia_sdk_path/$link_lib" ]
+    }
+  }
+
+  defs_include_dir = defs.include_dir
+  _include_dirs += [ "$fuchsia_sdk_path/$defs_include_dir" ]
+
+  config_name = "config_$target_name"
+  config(config_name) {
+    lib_dirs = _lib_dirs
+    libs = _libs
+    include_dirs = _include_dirs
+  }
+
+  group(target_name) {
+    public_configs = [ ":$config_name" ]
+  }
+}
+
+template("fuchsia_fidl_library") {
+  assert(defined(invoker.meta), "The meta.json file path must be specified.")
+
+  meta_json = read_file(invoker.meta, "json")
+
+  assert(meta_json.type == "fidl_library")
+
+  _deps = [ ":fidl_cpp" ]
+
+  library_name = string_replace(meta_json.name, "fuchsia.", "")
+  library_name_json = "$library_name.json"
+
+  foreach(dep, meta_json.deps) {
+    _deps += [ ":$dep" ]
+  }
+
+  config_name = "config_$target_name"
+  config(config_name) {
+    include_dirs = [ target_gen_dir ]
+  }
+
+  fidl_gen_target_name = "fidlgen_$target_name"
+  action(fidl_gen_target_name) {
+    script = "//build/fuchsia/fidl_gen_cpp.py"
+
+    library_name_slashes = string_replace(library_name, ".", "/")
+
+    inputs = [
+      invoker.meta,
+    ]
+
+    outputs = [
+      "$target_gen_dir/fuchsia/$library_name_slashes/c/fidl.h",
+      "$target_gen_dir/fuchsia/$library_name_slashes/cpp/fidl.h",
+      "$target_gen_dir/fuchsia/$library_name_slashes/cpp/fidl.cc",
+      "$target_gen_dir/fuchsia/$library_name_slashes/cpp/tables.cc",
+      "$target_gen_dir/fuchsia/$library_name_slashes/cpp/fidl_test_base.h",
+    ]
+
+    args = [
+      "--fidlc-bin",
+      rebase_path("$fuchsia_sdk_path/tools/fidlc"),
+      "--fidlgen-bin",
+      rebase_path("$fuchsia_sdk_path/tools/fidlgen"),
+      "--sdk-base",
+      rebase_path(fuchsia_sdk_path),
+      "--root",
+      rebase_path(invoker.meta),
+      "--json",
+      rebase_path("$target_gen_dir/$library_name_json"),
+      "--include-base",
+      rebase_path("$target_gen_dir"),
+      "--output-base-cc",
+      rebase_path("$target_gen_dir/fuchsia/$library_name_slashes/cpp/fidl"),
+      "--output-c-header",
+      rebase_path("$target_gen_dir/fuchsia/$library_name_slashes/c/fidl.h"),
+      "--output-c-tables",
+      rebase_path(
+          "$target_gen_dir/fuchsia/$library_name_slashes/cpp/tables.cc"),
+    ]
+  }
+
+  source_set(target_name) {
+    public_configs = [ ":$config_name" ]
+
+    sources = get_target_outputs(":$fidl_gen_target_name")
+
+    deps = [
+      ":$fidl_gen_target_name",
+    ]
+
+    public_deps = _deps
+  }
+}
+
+template("fuchsia_cc_source_library") {
+  assert(defined(invoker.meta), "The meta.json file path must be specified.")
+
+  meta_json = read_file(invoker.meta, "json")
+
+  assert(meta_json.type == "cc_source_library")
+
+  _include_dirs = []
+  _sources = []
+  _output_name = meta_json.name
+  _deps = []
+
+  meta_json_include_dir = meta_json.include_dir
+  _include_dirs += [ "$fuchsia_sdk_path/$meta_json_include_dir" ]
+
+  foreach(header, meta_json.headers) {
+    _sources += [ "$fuchsia_sdk_path/$header" ]
+  }
+
+  foreach(source, meta_json.sources) {
+    _sources += [ "$fuchsia_sdk_path/$source" ]
+  }
+
+  config_name = "config_$target_name"
+  config(config_name) {
+    include_dirs = _include_dirs
+  }
+
+  foreach(dep, meta_json.deps) {
+    _deps += [ ":$dep" ]
+  }
+
+  foreach(dep, meta_json.fidl_deps) {
+    _deps += [ ":$dep" ]
+  }
+
+  source_set(target_name) {
+    include_dirs = _include_dirs
+    sources = _sources
+    public_configs = [ ":$config_name" ]
+    output_name = _output_name
+    public_deps = _deps
+  }
+}
+
+template("fuchsia_cc_prebuilt_library") {
+  assert(defined(invoker.meta), "The meta.json file path must be specified.")
+  meta_json = read_file(invoker.meta, "json")
+
+  _include_dirs = []
+  _deps = []
+  _libs = []
+
+  meta_json_include_dir = meta_json.include_dir
+  _include_dirs += [ "$fuchsia_sdk_path/$meta_json_include_dir" ]
+
+  if (target_name == "vulkan") {
+    _include_dirs += [ "$fuchsia_sdk/vulkan/include" ]
+  }
+
+  foreach(dep, meta_json.deps) {
+    _deps += [ ":$dep" ]
+  }
+
+  meta_json_binaries = meta_json.binaries
+  meta_json_binaries_x64 = meta_json_binaries.x64
+  prebuilt_lib = meta_json_binaries_x64.link
+  _libs = [ "$fuchsia_sdk_path/$prebuilt_lib" ]
+
+  config_name = "config_$target_name"
+  config(config_name) {
+    include_dirs = _include_dirs
+    libs = _libs
+  }
+
+  group(target_name) {
+    public_configs = [ ":$config_name" ]
+    public_deps = _deps
+  }
+}
+
+template("fuchsia_sdk") {
+  assert(defined(invoker.meta), "The meta.json file path must be specified.")
+
+  meta_json = read_file(invoker.meta, "json")
+
+  foreach(part, meta_json.parts) {
+    part_meta_json = {
+    }
+
+    part_meta = part.meta
+    part_meta_rebased = "$fuchsia_sdk_path/$part_meta"
+
+    part_meta_json = read_file(part_meta_rebased, "json")
+    subtarget_name = part_meta_json.name
+    if (part.type == "cc_source_library") {
+      fuchsia_cc_source_library(subtarget_name) {
+        meta = part_meta_rebased
+      }
+    } else if (part.type == "sysroot") {
+      fuchsia_sysroot(subtarget_name) {
+        meta = part_meta_rebased
+      }
+    } else if (part.type == "fidl_library") {
+      fuchsia_fidl_library(subtarget_name) {
+        meta = part_meta_rebased
+      }
+    } else if (part.type == "cc_prebuilt_library") {
+      fuchsia_cc_prebuilt_library(subtarget_name) {
+        meta = part_meta_rebased
+      }
+    }
+  }
+
+  group(target_name) {
+  }
+}

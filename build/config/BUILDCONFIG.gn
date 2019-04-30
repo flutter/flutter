@@ -259,21 +259,24 @@ if (current_os == "win") {
   is_mac = false
   is_posix = true
   is_win = false
-} else if (current_os == "fuchsia") {
+} else if (current_os == "fuchsia" || target_os == "fuchsia") {
   is_android = false
   is_chromeos = false
+  is_fnl = false
   is_fuchsia = true
   is_fuchsia_host = false
   is_ios = false
-  is_linux = true
+  is_linux = false
   is_mac = false
   is_posix = true
   is_win = false
 }
 
+import("//build/fuchsia/fuchsia.gni")
+
 # Some library targets may be built as different type depending on the target
 # platform. This variable specifies the default library type for each target.
-if (is_fuchsia) {
+if (is_fuchsia && !is_fuchsia_sdk) {
   default_library_type = "shared_library"
 } else {
   default_library_type = "static_library"
@@ -435,6 +438,7 @@ if (is_posix) {
   _native_compiler_configs += [
     "//build/config/gcc:no_exceptions",
     "//build/config/gcc:symbol_visibility_hidden",
+    "//build/config:symbol_visibility_hidden",
   ]
 }
 
@@ -626,6 +630,15 @@ if (custom_toolchain != "") {
   } else {
     set_default_toolchain("//build/toolchain/mac:ios_clang_arm")
   }
+}
+
+if (is_fuchsia_sdk) {
+  if (host_os == "mac") {
+    host_toolchain = "//build/toolchain/mac:clang_$host_cpu"
+  } else {
+    host_toolchain = "//build/toolchain/linux:clang_$host_cpu"
+  }
+  set_default_toolchain("//build/toolchain/fuchsia")
 }
 
 # Sets default dependencies for executable and shared_library targets.

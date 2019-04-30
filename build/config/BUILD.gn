@@ -221,3 +221,8 @@ config("precompiled_headers") {
     cflags = [ "/FI$precompiled_header" ]
   }
 }
+
+config("symbol_visibility_hidden") {
+  # Empty but present because this is also present in other buildroots.
+  # The same config from gcc/BUILD.gn is used instead.
+}

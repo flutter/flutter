@@ -16,10 +16,10 @@ if (is_win) {
   import("//build/config/win/visual_studio_version.gni")
 }
 
-import("//build/toolchain/ccache.gni")
-import("//build/toolchain/clang.gni")
 import("//build/config/profiler.gni")
 import("//build/config/sanitizers/sanitizers.gni")
+import("//build/toolchain/ccache.gni")
+import("//build/toolchain/clang.gni")
 
 declare_args() {
   # Normally, Android builds are lightly optimized, even for debug builds, to
@@ -398,6 +398,8 @@ config("compiler") {
     cc_std = [ "-std=c++11" ]
   } else if (is_win) {
     cc_std = [ "/std:c++14" ]
+  } else if (is_fuchsia) {
+    cc_std = [ "-std=c++17" ]
   } else {
     cc_std = [ "-std=c++14" ]
   }
@@ -461,6 +463,12 @@ config("compiler") {
         ldflags += [ "--target=x86_64-linux-androideabi" ]
       }
     }
+  }
+
+  # Fuchsia-specific flags setup.
+  # -----------------------------
+  if (is_fuchsia_sdk) {
+    defines += [ "FUCHSIA_SDK" ]
   }
 
   asmflags = cflags

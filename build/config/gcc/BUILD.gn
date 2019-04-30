@@ -18,6 +18,7 @@ config("symbol_visibility_hidden") {
   # Note that -fvisibility-inlines-hidden is set globally in the compiler
   # config since that can almost always be applied.
   if (!enable_profiling) {
+    defines = [ "_LIBCPP_DISABLE_VISIBILITY_ANNOTATIONS" ]
     cflags = [ "-fvisibility=hidden" ]
   }
 }
