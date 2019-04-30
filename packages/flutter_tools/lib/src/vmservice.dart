@@ -237,6 +237,16 @@ class VMService {
   }
 
   static void _unhandledError(dynamic error, dynamic stack) {
+    if (error is rpc.RpcException) {
+      final rpc.RpcException rpcException = error;
+      if (rpcException.data != null && rpcException.data['id'] == null) {
+        // This can happen, e.g., if a client tries to call us before methods have
+        // been registered, but the client doesn't care for a response.
+        logger.printTrace('RPC client sent a notification that resulted in an error:\n$error');
+        return;
+      }
+      assert(false, 'json_rpc_2 failed to send an exception back to the client.');
+    }
     logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
     assert(false);
   }
