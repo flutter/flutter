@@ -39,6 +39,7 @@ class _CameraAppState extends State<CameraApp> {
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
+  Color _frameColor = Colors.white54;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -49,7 +50,7 @@ class _CameraAppState extends State<CameraApp> {
   }
 
   Future<void> _startScanningBarcodes() async {
-    final CameraDescription camera = await getCamera(CameraLensDirection.front);
+    final CameraDescription camera = await getCamera(CameraLensDirection.back);
     await _openCamera(camera);
     await _streamImages(camera);
   }
@@ -117,6 +118,8 @@ class _CameraAppState extends State<CameraApp> {
                 setState(() {
                   _scannerHint = 'Loading information...';
                   _closeWindow = true;
+                  _frameColor = Colors.black87;
+                  _showBottomSheet();
                 });
                 return;
               } else if (validRect.overlaps(barcode.boundingBox)) {
@@ -138,7 +141,6 @@ class _CameraAppState extends State<CameraApp> {
 
   @override
   void dispose() {
-    _controller?.stopImageStream();
     _controller?.dispose();
     super.dispose();
   }
@@ -180,7 +182,8 @@ class _CameraAppState extends State<CameraApp> {
   }
 
   void _showBottomSheet() {
-    _scaffoldKey.currentState.showBottomSheet<void>(
+    final PersistentBottomSheetController controller =
+        _scaffoldKey.currentState.showBottomSheet<void>(
       (BuildContext context) {
         return Container(
           width: double.infinity,
@@ -282,6 +285,8 @@ class _CameraAppState extends State<CameraApp> {
         );
       },
     );
+
+    controller.closed.then((_) => Navigator.of(context).pop());
   }
 
   @override
@@ -311,7 +316,7 @@ class _CameraAppState extends State<CameraApp> {
             child: CustomPaint(
               painter: WindowPainter(
                 windowSize: Size(validRectSideLength, validRectSideLength),
-                windowFrameColor: Colors.white54,
+                windowFrameColor: _frameColor,
                 closeWindow: _closeWindow,
               ),
             ),
@@ -374,9 +379,7 @@ class _CameraAppState extends State<CameraApp> {
                   Icons.flash_off,
                   color: Colors.white,
                 ),
-                onPressed: () {
-                  _showBottomSheet();
-                },
+                onPressed: () {},
               ),
               IconButton(
                 icon: Icon(
