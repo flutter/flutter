@@ -1,4 +1,4 @@
-Signature: 3431245f7ddfe37ccf94674fdf52539a
+Signature: 8dea993a420095483d96a152ad4e84a0
 
 UNUSED LICENSES:
 
@@ -1448,7 +1448,6 @@ FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImageFilterDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
 FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
-FILE: ../../../third_party/skia/gm/3dgm.cpp
 FILE: ../../../third_party/skia/gm/analytic_gradients.cpp
 FILE: ../../../third_party/skia/gm/androidblendmodes.cpp
 FILE: ../../../third_party/skia/gm/b_119394958.cpp
@@ -1513,6 +1512,7 @@ FILE: ../../../third_party/skia/include/utils/Sk3D.h
 FILE: ../../../third_party/skia/include/utils/SkAnimCodecPlayer.h
 FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
 FILE: ../../../third_party/skia/infra/cts/run_testlab.go
+FILE: ../../../third_party/skia/modules/skottie/gm/3dgm.cpp
 FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
@@ -5578,6 +5578,7 @@ FILE: ../../../third_party/skia/gm/crbug_947055.cpp
 FILE: ../../../third_party/skia/gm/mac_aa_explorer.cpp
 FILE: ../../../third_party/skia/gm/mixercolorfilter.cpp
 FILE: ../../../third_party/skia/gm/overdrawcanvas.cpp
+FILE: ../../../third_party/skia/gm/postercircle.cpp
 FILE: ../../../third_party/skia/gm/samplelocations.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/gm/skbug_8955.cpp
