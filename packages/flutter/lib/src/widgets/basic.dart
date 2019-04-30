@@ -594,7 +594,9 @@ class ClipRect extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -661,6 +663,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
       ..borderRadius = borderRadius
+      ..clipBehavior = clipBehavior
       ..clipper = clipper;
   }
 
@@ -710,7 +713,9 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -796,7 +801,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -886,6 +893,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
     renderObject
       ..shape = shape
+      ..clipBehavior = clipBehavior
       ..borderRadius = borderRadius
       ..elevation = elevation
       ..color = color
@@ -974,6 +982,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
     renderObject
       ..clipper = clipper
+      ..clipBehavior = clipBehavior
       ..elevation = elevation
       ..color = color
       ..shadowColor = shadowColor;

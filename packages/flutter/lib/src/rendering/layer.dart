@@ -1463,6 +1463,7 @@ class PhysicalModelLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
+    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
