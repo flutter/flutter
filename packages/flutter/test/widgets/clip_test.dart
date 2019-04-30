@@ -40,7 +40,75 @@ class ValueClipper<T> extends CustomClipper<T> {
   }
 }
 
+class _UpdateCountedClipRect extends ClipRect {
+  _UpdateCountedClipRect({Clip clipBehavior = Clip.antiAlias})
+    : super(clipBehavior: clipBehavior);
+}
+
+class _UpdateCountedClipRRect extends ClipRRect {
+  _UpdateCountedClipRRect({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior, borderRadius: BorderRadius.circular(1.0));
+}
+
+class _UpdateCountedClipOval extends ClipOval {
+  _UpdateCountedClipOval({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior);
+}
+
+class _UpdateCountedClipPath extends ClipPath {
+  _UpdateCountedClipPath({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior);
+}
+
 void main() {
+  testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipRect());
+
+    final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipRect(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipRRect());
+
+    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipRRect(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipOval());
+
+    final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipOval(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipPath());
+
+    final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipPath(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
   testWidgets('ClipPath', (WidgetTester tester) async {
     await tester.pumpWidget(
       ClipPath(
