@@ -4686,7 +4686,7 @@ class RenderFollowerLayer extends RenderProxyBox {
       _layer,
       super.paint,
       Offset.zero,
-      childPaintBounds: Rect.fromLTRB(
+      childPaintBounds: const Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
         double.negativeInfinity,
         double.negativeInfinity,

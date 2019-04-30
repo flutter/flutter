@@ -87,6 +87,10 @@ class AttachCommand extends FlutterCommand {
         'project-root',
         hide: !verboseHelp,
         help: 'Normally used only in run target',
+      )..addFlag('track-widget-creation',
+        hide: !verboseHelp,
+        help: 'Track widget creation locations.',
+        defaultsTo: false,
       )..addFlag('machine',
         hide: !verboseHelp,
         negatable: false,
@@ -156,7 +160,7 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     Cache.releaseLockEarly();
 
@@ -239,7 +243,8 @@ class AttachCommand extends FlutterCommand {
       final bool useHot = getBuildInfo().isDebug;
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
-        trackWidgetCreation: false,
+        flutterProject: flutterProject,
+        trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
         fileSystemScheme: argResults['filesystem-scheme'],

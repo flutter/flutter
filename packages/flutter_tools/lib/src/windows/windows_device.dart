@@ -10,7 +10,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../convert.dart';
+import '../desktop.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -27,7 +27,10 @@ class WindowsDevice extends Device {
   void clearLogs() { }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('windows');
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+    return _logReader;
+  }
+  final DesktopLogReader _logReader = DesktopLogReader();
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -71,7 +74,7 @@ class WindowsDevice extends Device {
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
-      await buildWindows((await FlutterProject.current()).windows, debuggingOptions.buildInfo);
+      await buildWindows(FlutterProject.current().windows, debuggingOptions.buildInfo);
     }
     await stopApp(package);
     final Process process = await processManager.start(<String>[
@@ -80,8 +83,8 @@ class WindowsDevice extends Device {
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    final WindowsLogReader logReader = WindowsLogReader(package, process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
+    _logReader.initializeProcess(process);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -111,6 +114,11 @@ class WindowsDevice extends Device {
   // to uninstall the application.
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.windows.existsSync();
+  }
 }
 
 class WindowsDevices extends PollingDeviceDiscovery {
@@ -161,19 +169,4 @@ List<String> runningProcess(String processName) {
     return data;
   }
   return null;
-}
-
-class WindowsLogReader extends DeviceLogReader {
-  WindowsLogReader(this.windowsApp, this.process);
-
-  final WindowsApp windowsApp;
-  final Process process;
-
-  @override
-  Stream<String> get logLines {
-    return process.stdout.transform(utf8.decoder);
-  }
-
-  @override
-  String get name => windowsApp.displayName;
 }

@@ -46,11 +46,11 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             label: '1',
-            rect: Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
           TestSemantics(
             label: '2',
-            rect: Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
+            rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
           ),
           // node with Text 3 not present.
         ],
@@ -105,11 +105,11 @@ void main() {
         children: <TestSemantics>[
           TestSemantics(
             label: '1',
-            rect: Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 75.0, 14.0),
           ),
           TestSemantics(
             label: '2\n3',
-            rect: Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
+            rect: const Rect.fromLTRB(0.0, 0.0, 25.0, 14.0), // clipped form original 75.0 to 25.0
           ),
         ],
       ),

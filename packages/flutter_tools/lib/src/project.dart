@@ -39,12 +39,12 @@ class FlutterProject {
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> fromDirectory(Directory directory) async {
+  static FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    final FlutterManifest manifest = await _readManifest(
+    final FlutterManifest manifest = _readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
     );
-    final FlutterManifest exampleManifest = await _readManifest(
+    final FlutterManifest exampleManifest = _readManifest(
       _exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
     );
     return FlutterProject(directory, manifest, exampleManifest);
@@ -52,11 +52,11 @@ class FlutterProject {
 
   /// Returns a future that completes with a [FlutterProject] view of the current directory.
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> current() => fromDirectory(fs.currentDirectory);
+  static FlutterProject current() => fromDirectory(fs.currentDirectory);
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory.
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> fromPath(String path) => fromDirectory(fs.directory(path));
+  static FlutterProject fromPath(String path) => fromDirectory(fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
@@ -149,8 +149,8 @@ class FlutterProject {
   ///
   /// Completes with an empty [FlutterManifest], if the file does not exist.
   /// Completes with a ToolExit on validation error.
-  static Future<FlutterManifest> _readManifest(String path) async {
-    final FlutterManifest manifest = await FlutterManifest.createFromPath(path);
+  static FlutterManifest _readManifest(String path) {
+    final FlutterManifest manifest = FlutterManifest.createFromPath(path);
     if (manifest == null)
       throwToolExit('Please correct the pubspec.yaml file at $path');
     return manifest;
@@ -158,16 +158,21 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (!directory.existsSync() || hasExampleApp)
+  Future<void> ensureReadyForPlatformSpecificTooling({bool checkProjects = false}) async {
+    if (!directory.existsSync() || hasExampleApp) {
       return;
+    }
     refreshPluginsList(this);
-    await android.ensureReadyForPlatformSpecificTooling();
-    await ios.ensureReadyForPlatformSpecificTooling();
+    if ((android.existsSync() && checkProjects) || !checkProjects) {
+      await android.ensureReadyForPlatformSpecificTooling();
+    }
+    if ((ios.existsSync() && checkProjects) || !checkProjects) {
+      await ios.ensureReadyForPlatformSpecificTooling();
+    }
     if (flutterWebEnabled) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    await injectPlugins(this);
+    await injectPlugins(this, checkProjects: checkProjects);
   }
 
   /// Return the set of builders used by this package.
@@ -224,6 +229,9 @@ class IosProject {
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
+  /// Whether the flutter application has an iOS project.
+  bool get exists => hostAppRoot.existsSync();
+
   /// The xcode config file for [mode].
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
@@ -253,6 +261,11 @@ class IosProject {
 
   /// Xcode workspace shared workspace settings file for the host app.
   File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
+
+  /// Whether the current flutter project has an iOS subproject.
+  bool existsSync()  {
+    return parent.isModule || _editableDirectory.existsSync();
+  }
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
@@ -408,6 +421,11 @@ class AndroidProject {
     return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'bundle'));
   }
 
+  /// Whether the current flutter project has an Android sub-project.
+  bool existsSync() {
+    return parent.isModule || _editableHostAppDirectory.existsSync();
+  }
+
   bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
@@ -486,6 +504,11 @@ class WebProject {
 
   final FlutterProject parent;
 
+  /// Whether this flutter project has a web sub-project.
+  bool existsSync() {
+    return parent.directory.childDirectory('web').existsSync();
+  }
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support
     /// a custom html under the web sub directory.
@@ -536,8 +559,14 @@ class MacOSProject {
 
   bool existsSync() => project.directory.childDirectory('macos').existsSync();
 
-  // Note: The build script file exists as a temporary shim.
-  File get buildScript => project.directory.childDirectory('macos').childFile('build.sh');
+  Directory get _editableDirectory => project.directory.childDirectory('macos');
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the Xcode build.
+  File get generatedXcodePropertiesFile => _editableDirectory.childDirectory('Flutter').childFile('Generated.xcconfig');
+
+  /// The Xcode project file.
+  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
 
   // Note: The name script file exists as a temporary shim.
   File get nameScript => project.directory.childDirectory('macos').childFile('name_output.sh');
@@ -564,11 +593,10 @@ class LinuxProject {
 
   final FlutterProject project;
 
-  bool existsSync() => project.directory.childDirectory('linux').existsSync();
+  Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
 
-  // Note: The build script file exists as a temporary shim.
-  File get buildScript => project.directory.childDirectory('linux').childFile('build.sh');
+  bool existsSync() => editableHostAppDirectory.existsSync();
 
-  // Note: The name script file exists as a temporary shim.
-  File get nameScript => project.directory.childDirectory('linux').childFile('name_output.sh');
+  /// The Linux project makefile.
+  File get makeFile => editableHostAppDirectory.childFile('Makefile');
 }

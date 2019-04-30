@@ -183,8 +183,7 @@ BuildApp() {
       --${build_mode}                                                       \
       --ios-arch="${archs}"                                                 \
       ${flutter_engine_flag}                                                \
-      ${local_engine_flag}                                                  \
-      ${track_widget_creation_flag}
+      ${local_engine_flag}
 
     if [[ $? -ne 0 ]]; then
       EchoError "Failed to build ${project_path}."

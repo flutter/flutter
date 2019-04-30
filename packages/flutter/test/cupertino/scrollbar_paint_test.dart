@@ -27,7 +27,7 @@ void main() {
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       color: const Color(0x99777777),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(
+        const Rect.fromLTWH(
           800.0 - 2.5 - 2.5, // Screen width - margin - thickness.
           4.0, // Initial position is the top margin.
           2.5, // Thickness.
