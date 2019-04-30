@@ -307,7 +307,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => CameraApp()),
+              MaterialPageRoute<void>(builder: (BuildContext context) => BarcodeScanner()),
             );
           },
         ),

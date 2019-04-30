@@ -25,13 +25,13 @@ import 'package:path_provider/path_provider.dart';
 import 'barcode_scanner_utils.dart';
 import 'colors.dart';
 
-class CameraApp extends StatefulWidget {
+class BarcodeScanner extends StatefulWidget {
   @override
-  _CameraAppState createState() => _CameraAppState();
+  _BarcodeScannerState createState() => _BarcodeScannerState();
 }
 
-class _CameraAppState extends State<CameraApp> {
-  static const double validRectSideLength = 256;
+class _BarcodeScannerState extends State<BarcodeScanner> {
+  static const double _validRectSideLength = 256;
 
   CameraController _controller;
   String _scannerHint;
@@ -91,13 +91,13 @@ class _CameraAppState extends State<CameraApp> {
           final double heightScale = image.width / size.height;
 
           final Offset center = size.center(Offset.zero);
-          const double halfRectSideLength = validRectSideLength / 2;
+          const double halfRectSideLength = _validRectSideLength / 2;
 
           final Rect validRect = Rect.fromLTWH(
             widthScale * (center.dx - halfRectSideLength),
             heightScale * (center.dy - halfRectSideLength),
-            widthScale * validRectSideLength,
-            heightScale * validRectSideLength,
+            widthScale * _validRectSideLength,
+            heightScale * _validRectSideLength,
           );
 
           final List<Barcode> barcodes = result;
@@ -313,7 +313,7 @@ class _CameraAppState extends State<CameraApp> {
             constraints: BoxConstraints.expand(),
             child: CustomPaint(
               painter: WindowPainter(
-                windowSize: Size(validRectSideLength, validRectSideLength),
+                windowSize: Size(_validRectSideLength, _validRectSideLength),
                 windowFrameColor: _frameColor,
                 closeWindow: _closeWindow,
               ),
@@ -356,8 +356,8 @@ class _CameraAppState extends State<CameraApp> {
             constraints: BoxConstraints.expand(),
             child: Center(
               child: Container(
-                width: validRectSideLength,
-                height: validRectSideLength,
+                width: _validRectSideLength,
+                height: _validRectSideLength,
                 decoration: BoxDecoration(
                   border: Border.all(width: 3, color: kShrineBrown600),
                 ),
