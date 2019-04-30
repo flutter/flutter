@@ -102,16 +102,6 @@ Future<T> _warnIfSlow<T>({
   return future..timeout(timeout, onTimeout: () { _log.warning(message); });
 }
 
-Duration _maxDuration(Duration a, Duration b) {
-  if (a == null)
-    return b;
-  if (b == null)
-    return a;
-  if (a > b)
-    return a;
-  return b;
-}
-
 /// A convenient accessor to frequently used finders.
 ///
 /// Examples:
@@ -416,7 +406,7 @@ class FlutterDriver {
       ).then<Map<String, dynamic>>((Object value) => value);
       response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
-        timeout: _maxDuration(command.timeout, _kUnusuallyLongTimeout),
+        timeout: command.timeout ?? _kUnusuallyLongTimeout,
         message: '${command.kind} message is taking a long time to complete...',
       );
       _logCommunication('<<< $response');
@@ -458,11 +448,15 @@ class FlutterDriver {
   }
 
   /// Waits until [finder] locates the target.
+  ///
+  /// If the command times out, show a message saying things seem to be taking a long time.
   Future<void> waitFor(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(WaitFor(finder, timeout: timeout));
   }
 
   /// Waits until [finder] can no longer locate the target.
+  ///
+  /// If the command times out, show a message saying things seem to be taking a long time.
   Future<void> waitForAbsent(SerializableFinder finder, { Duration timeout }) async {
     await _sendCommand(WaitForAbsent(finder, timeout: timeout));
   }
