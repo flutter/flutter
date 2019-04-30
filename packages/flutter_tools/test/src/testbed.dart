@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -17,6 +19,33 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 };
 
 /// Manages interaction with the tool injection and runner system.
+///
+/// The Testbed automatically injects reasonable defaults through the context
+/// DI system such as a [BufferLogger] and a [MemoryFileSytem].
+///
+/// Example:
+///
+/// Testing that a filesystem operation works as expected
+///
+///     void main() {
+///       group('Example', () {
+///         Testbed testbed;
+///
+///         setUp(() {
+///           testbed = Testbed(setUp: () {
+///             fs.file('foo').createSync()
+///           });
+///         })
+///
+///         test('Can delete a file', () => testBed.run(() {
+///           expect(fs.file('foo').existsSync(), true);
+///           fs.file('foo').deleteSync();
+///           expect(fs.file('foo').existsSync(), false);
+///         }));
+///       });
+///     }
+///
+/// For a more detailed example, see the code in test_compiler_test.dart.
 class Testbed {
   /// Creates a new [TestBed]
   ///
@@ -32,21 +61,24 @@ class Testbed {
   final Map<Type, Generator> _overrides;
 
   /// Runs `test` within a tool zone.
-  dynamic run(dynamic Function() test) {
+  FutureOr<T> run<T>(FutureOr<T> Function() test) {
     final Map<Type, Generator> testOverrides = Map<Type, Generator>.from(_testbedDefaults);
     if (_overrides != null) {
       testOverrides.addAll(_overrides);
     }
-    return runInContext<dynamic>(() {
-      return context.run<dynamic>(
+    // Cache the original flutter root to restore after the test case.
+    final String originalFlutterRoot = Cache.flutterRoot;
+    return runInContext<T>(() {
+      return context.run<T>(
         name: 'testbed',
         overrides: testOverrides,
         body: () async {
-          Cache.flutterRoot ??= '';
+          Cache.flutterRoot = '';
           if (_setup != null) {
             await _setup();
           }
-          return test();
+          await test();
+          Cache.flutterRoot = originalFlutterRoot;
         }
       );
     });
