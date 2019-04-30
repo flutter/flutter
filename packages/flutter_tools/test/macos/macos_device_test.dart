@@ -84,6 +84,9 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
           utf8.encode('Observatory listening on http://127.0.0.1/0'),
         ]);
       });
+      when(mockProcess.stderr).thenAnswer((Invocation invocation) {
+        return Stream<List<int>>.empty();
+      });
 
       testUsingContext('Can run from prebuilt application', () async {
         final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: true);
