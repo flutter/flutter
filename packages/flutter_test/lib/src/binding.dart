@@ -740,7 +740,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   int get microtaskCount => _currentFakeAsync.microtaskCount;
 
-  static Set<String> _allowedKeys;
+  /// A whitelist [Set] that is used in mocking the asset message channel.
+  static Set<String> _allowedAssetKeys;
 
   void _mockFlutterAssets() {
     if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
@@ -748,29 +749,39 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
     _ensureInitialized(assetFolderPath);
-    BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
-      final String key = utf8.decode(message.buffer.asUint8List());
-      if (_allowedKeys.contains(key)) {
-        final File asset = File(path.join(assetFolderPath, key));
-        final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
-        return Future<ByteData>.value(encoded.buffer.asByteData());
-      }
-    });
+
+    if (_allowedAssetKeys.isNotEmpty) {
+      BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
+        final String key = utf8.decode(message.buffer.asUint8List());
+        if (_allowedAssetKeys.contains(key)) {
+          final File asset = File(path.join(assetFolderPath, key));
+          final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+          return Future<ByteData>.value(encoded.buffer.asByteData());
+        }
+      });
+    }
   }
 
   void _ensureInitialized(String assetFolderPath) {
-    if (_allowedKeys == null) {
-      final File manifestFile = File(
-          path.join(assetFolderPath, 'AssetManifest.json'));
-      final Map<String, dynamic> manifest = json.decode(
-          manifestFile.readAsStringSync());
-      _allowedKeys = <String>{
-        'AssetManifest.json',
-      };
-      for (List<dynamic> value in manifest.values) {
-        final List<String> strList = List<String>.from(value);
-        _allowedKeys.addAll(strList);
-      }
+    if (_allowedAssetKeys != null) {
+      return;
+    }
+    final File manifestFile = File(
+        path.join(assetFolderPath, 'AssetManifest.json'));
+    // If the file does not exist, it means there is no asset declared in
+    // the project.
+    if (!manifestFile.existsSync()) {
+      _allowedAssetKeys = <String>{};
+      return;
+    }
+    final Map<String, dynamic> manifest = json.decode(
+        manifestFile.readAsStringSync());
+    _allowedAssetKeys = <String>{
+      'AssetManifest.json',
+    };
+    for (List<dynamic> value in manifest.values) {
+      final List<String> strList = List<String>.from(value);
+      _allowedAssetKeys.addAll(strList);
     }
   }
 
