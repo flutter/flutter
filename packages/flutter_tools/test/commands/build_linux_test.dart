@@ -81,7 +81,6 @@ void main() {
       'BUILD=release',
       'FLUTTER_ROOT=/',
       'FLUTTER_BUNDLE_FLAGS=',
-      'FLUTTER_ARTIFACT_CACHE_DIR='
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
