@@ -189,6 +189,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   const CupertinoNavigationBar({
     Key key,
     this.leading,
+    this.iconTheme,
     this.automaticallyImplyLeading = true,
     this.automaticallyImplyMiddle = true,
     this.previousPageTitle,
@@ -223,6 +224,13 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// will be automatically created.
   /// {@endtemplate}
   final Widget leading;
+
+  /// {@template flutter.cupertino.navBar.iconTheme}
+  /// The color, opacity, and size to use for nav bar back icons
+  ///
+  /// If this property is null, The default color is DefaultTextStyle.color, size is 34
+  /// {@endtemplate}
+  final IconThemeData iconTheme;
 
   /// {@template flutter.cupertino.navBar.automaticallyImplyLeading}
   /// Controls whether we should try to imply the leading widget if null.
@@ -404,6 +412,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
       padding: widget.padding,
       userLargeTitle: null,
       large: false,
+      iconTheme: widget.iconTheme
     );
 
     final Widget navBar = _wrapWithBackground(
@@ -945,6 +954,7 @@ class _NavigationBarStaticComponents {
     @required Widget userLargeTitle,
     @required EdgeInsetsDirectional padding,
     @required bool large,
+    @required IconThemeData iconTheme
   }) : leading = createLeading(
          leadingKey: keys.leadingKey,
          userLeading: userLeading,
@@ -957,6 +967,7 @@ class _NavigationBarStaticComponents {
          userLeading: userLeading,
          route: route,
          automaticallyImplyLeading: automaticallyImplyLeading,
+         iconTheme: iconTheme,
        ),
        backLabel = createBackLabel(
          backLabelKey: keys.backLabelKey,
@@ -1051,6 +1062,7 @@ class _NavigationBarStaticComponents {
     @required Widget userLeading,
     @required ModalRoute<dynamic> route,
     @required bool automaticallyImplyLeading,
+    @required IconThemeData iconTheme,
   }) {
     if (
       userLeading != null ||
@@ -1062,7 +1074,7 @@ class _NavigationBarStaticComponents {
       return null;
     }
 
-    return KeyedSubtree(key: backChevronKey, child: const _BackChevron());
+    return KeyedSubtree(key: backChevronKey, child: _BackChevron(iconTheme: iconTheme));
   }
 
   /// This widget is not decorated with a font since the font style could
@@ -1276,7 +1288,9 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
 
 
 class _BackChevron extends StatelessWidget {
-  const _BackChevron({ Key key }) : super(key: key);
+  const _BackChevron({ Key key, this.iconTheme }) : super(key: key);
+
+  final IconThemeData iconTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -1290,8 +1304,8 @@ class _BackChevron extends StatelessWidget {
         text: String.fromCharCode(CupertinoIcons.back.codePoint),
         style: TextStyle(
           inherit: false,
-          color: textStyle.color,
-          fontSize: 34.0,
+          color:iconTheme?.color == null ? textStyle.color : iconTheme?.color,
+          fontSize:iconTheme?.size == null ? 34.0 : iconTheme.size,
           fontFamily: CupertinoIcons.back.fontFamily,
           package: CupertinoIcons.back.fontPackage,
         ),
