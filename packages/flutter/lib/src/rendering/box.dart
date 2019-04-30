@@ -614,7 +614,7 @@ class BoxHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
-  const BoxHitTestEntry(RenderBox target, this.localPosition)
+  BoxHitTestEntry(RenderBox target, this.localPosition)
     : assert(localPosition != null),
       super(target);
 

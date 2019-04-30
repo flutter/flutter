@@ -7,7 +7,6 @@ import 'dart:collection';
 import 'dart:ui' as ui show PointerDataPacket;
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'arena.dart';
 import 'converter.dart';
@@ -197,8 +196,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
     }
     for (HitTestEntry entry in hitTestResult.path) {
       try {
-        final Matrix4 transform = hitTestResult.getTransform(entry);
-        entry.target.handleEvent(event.transformed(transform), entry);
+        entry.target.handleEvent(event.transformed(entry.transform), entry);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,

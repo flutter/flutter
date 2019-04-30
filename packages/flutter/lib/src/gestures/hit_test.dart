@@ -50,13 +50,24 @@ abstract class HitTestTarget {
 /// to the event propagation phase.
 class HitTestEntry {
   /// Creates a hit test entry.
-  const HitTestEntry(this.target);
+  HitTestEntry(this.target);
 
   /// The [HitTestTarget] encountered during the hit test.
   final HitTestTarget target;
 
   @override
   String toString() => '$target';
+
+  /// Returns a matrix describing how [PointerEvent]s delivered to this
+  /// [HitTestEntry] should be transformed from the global coordinate space of
+  /// the screen to the local coordinate space of [target].
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.addWithPaintTransform], which is used during hit testing
+  ///    to build up the transform returned by this method.
+  Matrix4 get transform => _transform;
+  Matrix4 _transform;
 }
 
 /// The result of performing a hit test.
@@ -66,8 +77,8 @@ class HitTestResult {
   /// The first entry in the path is the most specific, typically the one at
   /// the leaf of tree being hit tested. Event propagation starts with the most
   /// specific (i.e., first) entry and proceeds in order through the path.
-  Iterable<HitTestEntry> get path => _path.keys;
-  final Map<HitTestEntry, Matrix4> _path = <HitTestEntry, Matrix4>{};
+  Iterable<HitTestEntry> get path => _path;
+  final List<HitTestEntry> _path = <HitTestEntry>[];
 
   /// Add a [HitTestEntry] to the path.
   ///
@@ -75,7 +86,9 @@ class HitTestResult {
   /// be added in order from most specific to least specific, typically during an
   /// upward walk of the tree being hit tested.
   void add(HitTestEntry entry) {
-    _path[entry] = _transforms.isEmpty ? null : _transforms.last;
+    assert(entry._transform == null);
+    entry._transform = _transforms.isEmpty ? null : _transforms.last;
+    _path.add(entry);
   }
 
   /// Transforms `position` to the local coordinate system of a child before
@@ -211,19 +224,6 @@ class HitTestResult {
     return absorbed;
   }
 
-  /// Returns a matrix describing how [PointerEvent]s delivered to `entry`
-  /// should be transformed from the global coordinate space of the screen to
-  /// the local coordinate space of `entry`.
-  ///
-  /// See also:
-  ///
-  ///  * [addWithPaintTransform], which is used during hit testing
-  ///    to build up the transform returned by this method.
-  Matrix4 getTransform(HitTestEntry entry) {
-    assert(_path.containsKey(entry));
-    return _path[entry];
-  }
-
   final Queue<Matrix4> _transforms = Queue<Matrix4>();
 
   void _pushTransform(Matrix4 transform) {
@@ -244,5 +244,5 @@ class HitTestResult {
   }
 
   @override
-  String toString() => 'HitTestResult(${_path.isEmpty ? "<empty path>" : _path.keys.join(", ")})';
+  String toString() => 'HitTestResult(${_path.isEmpty ? "<empty path>" : _path.join(", ")})';
 }
