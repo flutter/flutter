@@ -235,7 +235,7 @@ class HitTestResult {
 //      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
 //      'The provided matrix is:\n$transform'
 //    );
-    _transforms.add(_transforms.isEmpty ? transform : _transforms.last * transform);
+    _transforms.add(_transforms.isEmpty ? transform :  transform * _transforms.last);
   }
 
   void _popTransform() {
