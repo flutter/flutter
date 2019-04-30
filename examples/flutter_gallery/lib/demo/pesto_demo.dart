@@ -205,13 +205,13 @@ class _PestoLogoState extends State<PestoLogo> {
   static const double kTextHeight = 48.0;
   final TextStyle titleStyle = const PestoStyle(fontSize: kTextHeight, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 3.0);
   final RectTween _textRectTween = RectTween(
-    begin: Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
-    end: Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight),
+    begin: const Rect.fromLTWH(0.0, kLogoHeight, kLogoWidth, kTextHeight),
+    end: const Rect.fromLTWH(0.0, kImageHeight, kLogoWidth, kTextHeight),
   );
   final Curve _textOpacity = const Interval(0.4, 1.0, curve: Curves.easeInOut);
   final RectTween _imageRectTween = RectTween(
-    begin: Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
-    end: Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight),
+    begin: const Rect.fromLTWH(0.0, 0.0, kLogoWidth, kLogoHeight),
+    end: const Rect.fromLTWH(0.0, 0.0, kLogoWidth, kImageHeight),
   );
 
   @override

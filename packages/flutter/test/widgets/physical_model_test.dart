@@ -208,7 +208,7 @@ void main() {
       // These would be overlapping if we only took the rectangular bounds of the circle.
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -219,7 +219,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(20, 20, 140, 150),
+          rect: const Rect.fromLTWH(20, 20, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -246,7 +246,7 @@ void main() {
     testWidgets('not non-rect entirely overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(20, 20, 140, 150),
+          rect: const Rect.fromLTWH(20, 20, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -257,7 +257,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(50, 50, 100, 100),
+          rect: const Rect.fromLTWH(50, 50, 100, 100),
           child: Container(
             width: 300,
             height: 300,
@@ -284,7 +284,7 @@ void main() {
     testWidgets('non-rect partially overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -295,7 +295,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(30, 20, 150, 150),
+          rect: const Rect.fromLTWH(30, 20, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -325,7 +325,7 @@ void main() {
     testWidgets('child partially overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -343,7 +343,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(30, 20, 180, 180),
+          rect: const Rect.fromLTWH(30, 20, 180, 180),
           child: Container(
             width: 300,
             height: 300,
@@ -369,7 +369,7 @@ void main() {
     testWidgets('non-rect partially overlapping, wrong painting order, check disabled', (WidgetTester tester) async {
        final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -380,7 +380,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(30, 20, 150, 150),
+          rect: const Rect.fromLTWH(30, 20, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -413,7 +413,7 @@ void main() {
 
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(140, 100, 140, 150),
+          rect: const Rect.fromLTWH(140, 100, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -427,7 +427,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(50, 50, 100, 100),
+          rect: const Rect.fromLTWH(50, 50, 100, 100),
           child: Container(
             width: 300,
             height: 300,
@@ -454,7 +454,7 @@ void main() {
     testWidgets('with a RenderTransform, overlapping', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(140, 100, 140, 150),
+          rect: const Rect.fromLTWH(140, 100, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -468,7 +468,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(50, 50, 100, 100),
+          rect: const Rect.fromLTWH(50, 50, 100, 100),
           child: Container(
             width: 300,
             height: 300,

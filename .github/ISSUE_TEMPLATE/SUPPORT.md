@@ -2,6 +2,9 @@
 name: I want help writing my application
 about: You have a question for how to achieve a particular effect, or you need help
   with using a particular API.
+title: ''
+labels: ''
+assignees: ''
 
 ---
 
@@ -9,7 +12,7 @@ about: You have a question for how to achieve a particular effect, or you need h
 
      Please check out our documentation first:
       * https://flutter.dev/
-      * https://docs.flutter.io/
+      * https://api.flutter.dev/
 
      If you can't find the answer there, please consider asking a question on
      the Stack Overflow Web site:

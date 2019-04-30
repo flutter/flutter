@@ -21,7 +21,7 @@ void main() {
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final TestCompiler testCompiler = FakeTestCompiler(
         false,
-        await FlutterProject.current(),
+        FlutterProject.current(),
         residentCompiler,
       );
       when(residentCompiler.recompile(
@@ -30,7 +30,7 @@ void main() {
         outputPath: testCompiler.outputDill.path,
       )).thenAnswer((Invocation invocation) async {
         fs.file('abc.dill').createSync();
-        return CompilerOutput('abc.dill', 0, <Uri>[]);
+        return const CompilerOutput('abc.dill', 0, <Uri>[]);
       });
 
       expect(await testCompiler.compile('test/foo.dart'), 'test/foo.dart.dill');
@@ -46,7 +46,7 @@ void main() {
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
       final TestCompiler testCompiler = FakeTestCompiler(
         false,
-        await FlutterProject.current(),
+        FlutterProject.current(),
         residentCompiler,
       );
       when(residentCompiler.recompile(
@@ -55,7 +55,7 @@ void main() {
         outputPath: testCompiler.outputDill.path,
       )).thenAnswer((Invocation invocation) async {
         fs.file('abc.dill').createSync();
-        return CompilerOutput('abc.dill', 1, <Uri>[]);
+        return const CompilerOutput('abc.dill', 1, <Uri>[]);
       });
 
       expect(await testCompiler.compile('test/foo.dart'), null);

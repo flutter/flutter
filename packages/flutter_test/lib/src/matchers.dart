@@ -297,6 +297,9 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// await expectLater(imageFuture, matchesGoldenFile('save.png'));
 /// ```
 ///
+/// Golden image files can be created or updated by running `flutter test
+/// --update-goldens` on the test.
+///
 /// See also:
 ///
 ///  * [goldenFileComparator], which acts as the backend for this matcher.

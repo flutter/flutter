@@ -935,7 +935,8 @@ void restoreVmServiceConnectFunction() {
 
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
   _log.trace('Unhandled RPC error:\n$error\n$stack');
-  assert(false);
+  // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+  // assert(false);
 }
 
 /// Waits for a real Dart VM service to become available, then connects using
