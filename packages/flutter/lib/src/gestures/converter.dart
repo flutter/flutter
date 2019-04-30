@@ -96,7 +96,6 @@ class PointerEventConverter {
   /// [PointerEvent] for more details on the [PointerEvent] coordinate space.
   static Iterable<PointerEvent> expand(Iterable<ui.PointerData> data, double devicePixelRatio) sync* {
     for (ui.PointerData datum in data) {
-      print('converter ${datum.change} ${datum.buttons}');
       final Offset position = Offset(datum.physicalX, datum.physicalY) / devicePixelRatio;
       final double radiusMinor = _toLogicalPixels(datum.radiusMinor, devicePixelRatio);
       final double radiusMajor = _toLogicalPixels(datum.radiusMajor, devicePixelRatio);
