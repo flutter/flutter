@@ -5,6 +5,7 @@
 import 'package:flutter/src/physics/utils.dart' show nearEqual;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
@@ -36,29 +37,15 @@ CustomPainter _buildPainter({
   )..update(scrollMetrics, scrollMetrics.axisDirection);
 }
 
-class _DrawRectOnceCanvas implements Canvas {
-  Rect rect;
-
-  @override
-  void noSuchMethod(Invocation invocation) {
-    assert(invocation.memberName == #drawRect);
-    // Must call reset before redraw. This is for catching redundant
-    // `drawRect` calls.
-    assert(rect == null);
-    assert(invocation.positionalArguments[0] is Rect);
-    rect = invocation.positionalArguments[0];
-  }
-
-  void reset() {
-    rect = null;
-  }
-}
+class _DrawRectOnceCanvas extends Mock implements Canvas { }
 
 void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
+  Rect captureRect() => verify(testCanvas.drawRect(captureAny, any)).captured.single;
 
-  tearDown(testCanvas.reset);
+  tearDown(() => painter = null);
+
 
   final ScrollMetrics defaultMetrics = FixedScrollMetrics(
     minScrollExtent: 0,
@@ -88,23 +75,23 @@ void main() {
 
       painter.paint(testCanvas, size);
 
-      expect(testCanvas.rect.top, 0);
-      expect(testCanvas.rect.left, size.width - _kThickness);
-      expect(testCanvas.rect.width, _kThickness);
-      expect(testCanvas.rect.height >= minLen, true);
+      final Rect rect0 = captureRect();
+      expect(rect0.top, 0);
+      expect(rect0.left, size.width - _kThickness);
+      expect(rect0.width, _kThickness);
+      expect(rect0.height >= minLen, true);
 
       // When scroll normally.
-      testCanvas.reset();
-
       const double newPixels = 1.0;
 
       painter.update(metrics.copyWith(pixels: newPixels), metrics.axisDirection);
 
       painter.paint(testCanvas, size);
 
-      expect(testCanvas.rect.left, size.width - _kThickness);
-      expect(testCanvas.rect.width, _kThickness);
-      expect(testCanvas.rect.height >= minLen, true);
+      final Rect rect1 = captureRect();
+      expect(rect1.left, size.width - _kThickness);
+      expect(rect1.width, _kThickness);
+      expect(rect1.height >= minLen, true);
     }
   );
 
@@ -140,17 +127,16 @@ void main() {
         painter.update(metrics, metrics.axisDirection);
         painter.paint(testCanvas, size);
 
-        final double newCoefficient = metrics.pixels/testCanvas.rect.top;
+        final Rect rect = captureRect();
+        final double newCoefficient = metrics.pixels/rect.top;
         lastCoefficient ??= newCoefficient;
 
-        expect(testCanvas.rect.top >= 0, true);
-        expect(testCanvas.rect.bottom <= maxExtent, true);
-        expect(testCanvas.rect.left, size.width - _kThickness);
-        expect(testCanvas.rect.width, _kThickness);
-        expect(nearEqual(testCanvas.rect.height, viewportDimension * viewportDimension / (viewportDimension + maxExtent), 0.001), true);
+        expect(rect.top >= 0, true);
+        expect(rect.bottom <= maxExtent, true);
+        expect(rect.left, size.width - _kThickness);
+        expect(rect.width, _kThickness);
+        expect(nearEqual(rect.height, viewportDimension * viewportDimension / (viewportDimension + maxExtent), 0.001), true);
         expect(nearEqual(lastCoefficient, newCoefficient, 0.001), true);
-
-        testCanvas.reset();
       }
     }
   );
@@ -183,19 +169,17 @@ void main() {
         );
 
         painter.paint(testCanvas, size);
-        expect(testCanvas.rect.top, margin);
+
+        expect(captureRect().top, margin);
 
         // Overscroll to double.infinity (down).
-        testCanvas.reset();
         painter.update(
           startingMetrics.copyWith(pixels: double.infinity),
           startingMetrics.axisDirection
         );
 
         painter.paint(testCanvas, size);
-        expect(size.height - testCanvas.rect.bottom, margin);
-
-        testCanvas.reset();
+        expect(size.height - captureRect().bottom, margin);
       }
     }
   );
@@ -226,23 +210,23 @@ void main() {
           );
 
           painter.paint(testCanvas, size);
+          final Rect rect = captureRect();
+
           switch (direction) {
             case AxisDirection.up:
             case AxisDirection.down:
               expect(
                 margin,
                 textDirection == TextDirection.ltr
-                ? size.width - testCanvas.rect.right
-                : testCanvas.rect.left
+                ? size.width - rect.right
+                : rect.left
               );
               break;
             case AxisDirection.left:
             case AxisDirection.right:
-              expect(margin, size.height - testCanvas.rect.bottom);
+              expect(margin, size.height - rect.bottom);
               break;
           }
-
-          testCanvas.reset();
         }
       }
     }
@@ -272,10 +256,9 @@ void main() {
 
       // Top overscroll.
       p.paint(testCanvas, size);
-      expect(testCanvas.rect.top, padding.top);
-      expect(size.width - testCanvas.rect.right, padding.right);
-
-      testCanvas.reset();
+      final Rect rect0 = captureRect();
+      expect(rect0.top, padding.top);
+      expect(size.width - rect0.right, padding.right);
 
       // Bottom overscroll.
       p.update(
@@ -286,8 +269,9 @@ void main() {
       );
 
       p.paint(testCanvas, size);
-      expect(size.height - testCanvas.rect.bottom, padding.bottom);
-      expect(size.width - testCanvas.rect.right, padding.right);
+      final Rect rect1 = captureRect();
+      expect(size.height - rect1.bottom, padding.bottom);
+      expect(size.width - rect1.right, padding.right);
     });
 
     testWidgets('up', (WidgetTester tester) async {
@@ -301,10 +285,9 @@ void main() {
 
       // Top overscroll.
       p.paint(testCanvas, size);
-      expect(testCanvas.rect.top, padding.top);
-      expect(size.width - testCanvas.rect.right, padding.right);
-
-      testCanvas.reset();
+      final Rect rect0 = captureRect();
+      expect(rect0.top, padding.top);
+      expect(size.width - rect0.right, padding.right);
 
       // Bottom overscroll.
       p.update(
@@ -316,8 +299,9 @@ void main() {
       );
 
       p.paint(testCanvas, size);
-      expect(size.height - testCanvas.rect.bottom, padding.bottom);
-      expect(size.width - testCanvas.rect.right, padding.right);
+      final Rect rect1 = captureRect();
+      expect(size.height - rect1.bottom, padding.bottom);
+      expect(size.width - rect1.right, padding.right);
     });
 
     testWidgets('left', (WidgetTester tester) async {
@@ -331,10 +315,9 @@ void main() {
 
       // Right overscroll.
       p.paint(testCanvas, size);
-      expect(size.height - testCanvas.rect.bottom, padding.bottom);
-      expect(size.width - testCanvas.rect.right, padding.right);
-
-      testCanvas.reset();
+      final Rect rect0 = captureRect();
+      expect(size.height - rect0.bottom, padding.bottom);
+      expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
       p.update(
@@ -346,8 +329,9 @@ void main() {
       );
 
       p.paint(testCanvas, size);
-      expect(size.height - testCanvas.rect.bottom, padding.bottom);
-      expect(testCanvas.rect.left, padding.left);
+      final Rect rect1 = captureRect();
+      expect(size.height - rect1.bottom, padding.bottom);
+      expect(rect1.left, padding.left);
     });
 
     testWidgets('right', (WidgetTester tester) async {
@@ -361,10 +345,9 @@ void main() {
 
       // Right overscroll.
       p.paint(testCanvas, size);
-      expect(size.height - testCanvas.rect.bottom, padding.bottom);
-      expect(size.width - testCanvas.rect.right, padding.right);
-
-      testCanvas.reset();
+      final Rect rect0 = captureRect();
+      expect(size.height - rect0.bottom, padding.bottom);
+      expect(size.width - rect0.right, padding.right);
 
       // Left overscroll.
       p.update(
@@ -376,8 +359,9 @@ void main() {
       );
 
       p.paint(testCanvas, size);
-      expect(size.height - testCanvas.rect.bottom, padding.bottom);
-      expect(testCanvas.rect.left, padding.left);
+      final Rect rect1 = captureRect();
+      expect(size.height - rect1.bottom, padding.bottom);
+      expect(rect1.left, padding.left);
     });
   });
 
@@ -413,21 +397,21 @@ void main() {
         for(ScrollMetrics metrics in metricsList) {
           painter.update(metrics, metrics.axisDirection);
           painter.paint(testCanvas, size);
+          final Rect rect = captureRect();
 
           if (previousRect != null) {
-            if (testCanvas.rect.height == size.height) {
+            if (rect.height == size.height) {
               // Size of the scrollbar is too large for the view port
-              expect(previousRect.top <= testCanvas.rect.top, true);
-              expect(previousRect.bottom <= testCanvas.rect.bottom, true);
+              expect(previousRect.top <= rect.top, true);
+              expect(previousRect.bottom <= rect.bottom, true);
             } else {
               // The scrollbar can fit in the view port.
-              expect(previousRect.top < testCanvas.rect.top, true);
-              expect(previousRect.bottom < testCanvas.rect.bottom, true);
+              expect(previousRect.top < rect.top, true);
+              expect(previousRect.bottom < rect.bottom, true);
             }
           }
 
-          previousRect = testCanvas.rect;
-          testCanvas.reset();
+          previousRect = rect;
         }
       }
     }

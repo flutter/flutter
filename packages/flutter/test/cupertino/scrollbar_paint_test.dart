@@ -41,11 +41,11 @@ void main() {
       color: _kScrollbarColor,
       rrect: RRect.fromRectAndRadius(
         const Rect.fromLTWH(
-          800.0 - 2.5 - 2.5, // Screen width - margin - thickness.
-          4.0, // Initial position is the top margin.
+          800.0 - 3 - 2.5, // Screen width - margin - thickness.
+          3.0, // Initial position is the top margin.
           2.5, // Thickness.
           // Fraction in viewport * scrollbar height - top, bottom margin.
-          600.0 / 4000.0 * 600.0 - 4.0 - 4.0,
+          600.0 / 4000.0 * 600.0 - 4.0 - 3.0,
         ),
         const Radius.circular(1.25),
       ),

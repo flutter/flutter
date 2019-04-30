@@ -9,8 +9,8 @@ import 'package:flutter/widgets.dart';
 // All values eyeballed.
 const Color _kScrollbarColor = Color(0x99777777);
 const double _kScrollbarThickness = 2.5;
-const double _kScrollbarMainAxisMargin = 4.0;
-const double _kScrollbarCrossAxisMargin = 2.5;
+const double _kScrollbarMainAxisMargin = 3.0;
+const double _kScrollbarCrossAxisMargin = 3.0;
 const double _kScrollbarMinLength = 36.0;
 const double _kScrollbarMinOverscrollLength = 8.0;
 const Radius _kScrollbarRadius = Radius.circular(1.25);
