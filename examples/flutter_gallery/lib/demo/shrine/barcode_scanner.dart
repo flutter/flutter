@@ -13,12 +13,14 @@
 // limitations under the License.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 
 import 'barcode_scanner_utils.dart';
 import 'colors.dart';
@@ -34,7 +36,9 @@ class _CameraAppState extends State<CameraApp> {
   CameraController _controller;
   BarcodeDetector _detector;
   bool _isDetecting = false;
-  String scannerHint;
+  String _scannerHint;
+  bool _closeWindow = false;
+  String _barcodePictureFilePath;
 
   @override
   void initState() {
@@ -79,6 +83,10 @@ class _CameraAppState extends State<CameraApp> {
 
       detect(image, _detector.detectInImage, rotation).then(
         (dynamic result) {
+          if (!_controller.value.isStreamingImages) {
+            return;
+          }
+
           final double widthScale = image.height / size.width;
           final double heightScale = image.width / size.height;
 
@@ -101,13 +109,18 @@ class _CameraAppState extends State<CameraApp> {
               final bool doesContain = intersection == barcode.boundingBox;
 
               if (doesContain) {
+                _controller.stopImageStream().then((_) {
+                  _takePicture();
+                });
+
                 setState(() {
-                  scannerHint = 'Loading information...';
+                  _scannerHint = 'Loading information...';
+                  _closeWindow = true;
                 });
                 return;
               } else if (validRect.overlaps(barcode.boundingBox)) {
                 setState(() {
-                  scannerHint = 'Move closer to the barcode';
+                  _scannerHint = 'Move closer to the barcode';
                 });
                 return;
               }
@@ -115,7 +128,7 @@ class _CameraAppState extends State<CameraApp> {
           }
 
           setState(() {
-            scannerHint = null;
+            _scannerHint = null;
           });
         },
       ).whenComplete(() => _isDetecting = false);
@@ -126,6 +139,27 @@ class _CameraAppState extends State<CameraApp> {
   void dispose() {
     _controller?.dispose();
     super.dispose();
+  }
+
+  String _timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
+
+  Future<void> _takePicture() async {
+    final Directory extDir = await getApplicationDocumentsDirectory();
+
+    final String dirPath = '${extDir.path}/Pictures/barcodePics';
+    await Directory(dirPath).create(recursive: true);
+
+    final String filePath = '$dirPath/${_timestamp()}.jpg';
+
+    try {
+      await _controller.takePicture(filePath);
+    } on CameraException catch (e) {
+      print(e);
+    }
+
+    setState(() {
+      _barcodePictureFilePath = filePath;
+    });
   }
 
   Widget _buildCameraPreview() {
@@ -145,20 +179,32 @@ class _CameraAppState extends State<CameraApp> {
 
   @override
   Widget build(BuildContext context) {
-    if (_controller == null || !_controller.value.isInitialized) {
-      return Container();
+    Widget background;
+    if (_barcodePictureFilePath != null) {
+      background = Container(
+        constraints: BoxConstraints.expand(),
+        child: Image.file(
+          File(_barcodePictureFilePath),
+          fit: BoxFit.fill,
+        ),
+      );
+    } else if (_controller != null && _controller.value.isInitialized) {
+      background = _buildCameraPreview();
+    } else {
+      background = Container();
     }
 
     return Scaffold(
       body: Stack(
         children: <Widget>[
-          _buildCameraPreview(),
+          background,
           Container(
             constraints: BoxConstraints.expand(),
             child: CustomPaint(
               painter: WindowPainter(
                 windowSize: Size(validRectSideLength, validRectSideLength),
                 windowFrameColor: Colors.white54,
+                closeWindow: _closeWindow,
               ),
             ),
           ),
@@ -185,7 +231,7 @@ class _CameraAppState extends State<CameraApp> {
             child: Container(
               color: kShrinePink50,
               child: Center(
-                child: Text(scannerHint ?? 'Point your camera at a barcode'),
+                child: Text(_scannerHint ?? 'Point your camera at a barcode'),
               ),
             ),
           ),
@@ -276,6 +322,10 @@ class WindowPainter extends CustomPainter {
     canvas.drawRect(top, paint);
     canvas.drawRect(right, paint);
     canvas.drawRect(bottom, paint);
+
+    if (closeWindow) {
+      canvas.drawRect(windowRect, paint);
+    }
   }
 
   @override

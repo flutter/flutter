@@ -19,6 +19,7 @@ dependencies:
   shrine_images: 1.1.1
   camera: 0.5.0
   firebase_ml_vision: 0.7.0
+  path_provider: 0.5.0+1
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   flutter_gallery_assets: 0.1.8
