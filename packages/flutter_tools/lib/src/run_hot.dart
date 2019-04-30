@@ -444,7 +444,7 @@ class HotRunner extends ResidentRunner {
               final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
               if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
                 // Resume the isolate so that it can be killed by the embedder.
-                return view.uiIsolate.resume();
+                view.uiIsolate.resume();
               }
             },
           ).whenComplete(

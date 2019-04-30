@@ -366,6 +366,7 @@ abstract class FlutterTestDriver {
       _debugPrint('$task...');
       return callback()..timeout(timeout, onTimeout: () {
         _debugPrint('$task is taking longer than usual...');
+        return null;
       });
     }
 
@@ -388,6 +389,7 @@ abstract class FlutterTestDriver {
       print(messages.toString());
       timeoutExpired = true;
       print('$task is taking longer than usual...');
+      return null;
     });
 
     return future.catchError((dynamic error) {
