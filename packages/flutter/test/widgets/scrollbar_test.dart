@@ -128,12 +128,12 @@ void main() {
       );
 
       final List<ScrollMetrics> metricsList =
-      <ScrollMetrics> [startingMetrics.copyWith(pixels: 0.01)]
-      ..addAll(List<ScrollMetrics>.generate(
-          (maxExtent/viewportDimension).round(),
-          (int index) => startingMetrics.copyWith(pixels: (index + 1) * viewportDimension)
-        ).where((ScrollMetrics metrics) => !metrics.outOfRange))
-      ..add(startingMetrics.copyWith(pixels: maxExtent - 0.01));
+        <ScrollMetrics> [startingMetrics.copyWith(pixels: 0.01)]
+        ..addAll(List<ScrollMetrics>.generate(
+            (maxExtent/viewportDimension).round(),
+            (int index) => startingMetrics.copyWith(pixels: (index + 1) * viewportDimension)
+          ).where((ScrollMetrics metrics) => !metrics.outOfRange))
+        ..add(startingMetrics.copyWith(pixels: maxExtent - 0.01));
 
       double lastCoefficient;
       for(ScrollMetrics metrics in metricsList) {

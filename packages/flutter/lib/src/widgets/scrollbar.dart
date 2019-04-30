@@ -48,7 +48,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     this.crossAxisMargin = 0.0,
     this.radius,
     this.minLength = _kMinThumbExtent,
-    this.minOverscrollLength = _kMinThumbExtent,
+    double minOverscrollLength,
   }) : assert(color != null),
        assert(textDirection != null),
        assert(thickness != null),
@@ -56,8 +56,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(mainAxisMargin != null),
        assert(crossAxisMargin != null),
        assert(minLength != null),
+       assert(minOverscrollLength == null || minOverscrollLength <= minLength),
        assert(padding != null),
-       assert(padding.isNonNegative) {
+       assert(padding.isNonNegative),
+       minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
@@ -77,11 +79,15 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final Animation<double> fadeoutOpacityAnimation;
 
   /// Distance from the scrollbar's start and end to the edge of the viewport in
-  /// pixels. Mustn't be null.
+  /// pixels. It's only decorative, as its value does not affect the size of the scrollbar.
+  ///
+  /// Mustn't be null and defaults to 0.
   final double mainAxisMargin;
 
-  /// Distance from the scrollbar's side to the nearest edge in pixels. Must not
-  /// be null.
+  /// Distance from the scrollbar's side to the nearest edge in pixels. It's only
+  /// decorative as its value does not affect the size of the scrollbar.
+  ///
+  /// Must not be null and defaults to 0.
   final double crossAxisMargin;
 
   /// [Radius] of corners if the scrollbar should have rounded corners.
@@ -104,15 +110,25 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// scrollable extent is large and the current visible viewport is small, and the
   /// viewport is not overscrolled.
   ///
-  /// Mustn't be null and the value is typically greater than or equal to
-  /// [minOverscrollLength].
+  /// When the size of the scrollbar track in the view port is smaller than
+  /// [minLength], the size of the scrollbar may shrink to a smaller size than
+  /// [minLength] to fit in the track. E.g., when [minLength] is set to
+  /// `double.infinite`, it will not be respected if the size of the scrollbar
+  /// track is finite.
+  ///
+  /// Mustn't be null and the value has to be greater than or equal to
+  /// [minOverscrollLength]. Defaults to 18.0.
   final double minLength;
 
   /// The preferred smallest size the scrollbar can shrink to when viewport is
   /// overscrolled.
   ///
-  /// Mustn't be null and the value is typically less than or equal to
-  /// [minLength].
+  /// When overscrolling, if the size of the scrollbar track in the view port
+  /// is smaller than [minOverscrollLength], the size of the scrollbar may become
+  /// smaller than [minOverscrollLength] in order to fit in.
+  ///
+  /// The value is less than or equal to [minLength]. If unspecified or set to null,
+  /// it will defaults to the value of [minLength].
   final double minOverscrollLength;
 
   ScrollMetrics _lastMetrics;
@@ -151,8 +167,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
       case AxisDirection.up:
         thumbSize = Size(thickness, thumbExtent);
         x = textDirection == TextDirection.rtl
-        ? crossAxisMargin + padding.left
-        : size.width - thickness - crossAxisMargin - padding.right;
+          ? crossAxisMargin + padding.left
+          : size.width - thickness - crossAxisMargin - padding.right;
         y = thumbOffset;
         break;
       case AxisDirection.left:
