@@ -184,7 +184,6 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     final Rect thumbRect = Offset(x, y) & thumbSize;
-    print('$thumbRect, ${_lastMetrics.pixels}');
     if (radius == null)
       canvas.drawRect(thumbRect, _paint);
     else
@@ -220,13 +219,13 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
-    final double fractionVisible = (effectiveInside / (before + inside + after)).clamp(0.0, 1.0);
+    final double fractionVisible = (effectiveInside / (before + inside + after - totalPadding)).clamp(0.0, 1.0);
     thumbExtent = math.max(
       thumbExtent,
       trackSize * fractionVisible
     );
     // Thumb extent is no smaller than minLength if scrolling normally.
-    if (before > 0 && after > 0) {
+    if (before > 0 && after > totalPadding) {
       thumbExtent = math.max(
         minLength,
         thumbExtent,
@@ -254,7 +253,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // to prevent the scrollbar from scrolling towards the wrong direction.
     thumbExtent = math.min(thumbExtent, trackSize);
 
-    final double fractionPast = (before + after > 0.0) ? (before / (before + after)).clamp(0.0, 1.0) : 0;
+    final double fractionPast = (before + after > totalPadding) ? (before / (before + after - totalPadding)).clamp(0.0, 1.0) : 0;
     final double thumbOffset = fractionPast * (trackSize - thumbExtent) + mainAxisMargin + beforePadding;
 
     _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, direction);

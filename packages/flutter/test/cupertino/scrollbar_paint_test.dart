@@ -9,6 +9,10 @@ import '../rendering/mock_canvas.dart';
 
 const Color _kScrollbarColor = Color(0x99777777);
 
+// The `y` offset has to be larger than `ScrollDragController._bigThresholdBreakDistance`
+// to prevent [motionStartDistanceThreshold] from affecting the actual drag distance.
+const Offset _kGestureOffset = Offset(0, -25);
+
 void main() {
   testWidgets('Paints iOS spec', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -28,9 +32,9 @@ void main() {
     expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-    await gesture.moveBy(const Offset(0.0, -10.0));
+    await gesture.moveBy(_kGestureOffset);
     // Move back to original position.
-    await gesture.moveBy(const Offset(0.0, 10.0));
+    await gesture.moveBy(Offset.zero.translate(-_kGestureOffset.dx, -_kGestureOffset.dy));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
     expect(find.byType(CupertinoScrollbar), paints..rrect(
@@ -56,13 +60,16 @@ void main() {
             padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
           ),
           child: CupertinoPageScaffold(
-            navigationBar: CupertinoNavigationBar(
-              middle: const Text('Title'),
-              backgroundColor: const Color(0x11111111)
+            navigationBar: const CupertinoNavigationBar(
+              middle: Text('Title'),
+              backgroundColor: Color(0x11111111)
             ),
             child: CupertinoScrollbar(
               child: ListView(
-                children: const <Widget> [SizedBox(width: 4000, height: 4000)]
+                children: <Widget> [DecoratedBox(
+                    decoration: BoxDecoration(color: const Color(0xFFFF0000)),
+                    child: const SizedBox(width: 4000, height: 4000)
+                )]
               )
             )
           )
@@ -71,14 +78,14 @@ void main() {
     );
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await gesture.moveBy(const Offset(0.0, -10));
+    await gesture.moveBy(_kGestureOffset);
     // Move back to original position.
-    await gesture.moveBy(const Offset(0.0, 10));
+    await gesture.moveBy(Offset.zero.translate(-_kGestureOffset.dx, -_kGestureOffset.dy));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(CupertinoScrollbar), paints..rrect(
-        //color: _kScrollbarColor,
+        color: _kScrollbarColor,
         rrect: RRect.fromRectAndRadius(
           const Rect.fromLTWH(
             800.0 - 3 - 2.5, // Screen width - margin - thickness.
