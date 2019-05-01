@@ -248,6 +248,97 @@ void main() {
     );
   });
 
+  testWidgets(
+      'Chip constrains the avatar, label, and delete icons to the bounds of '
+      'the chip when it exceeds the available space', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/11523
+    Widget chipBuilder (String text, {Widget avatar, VoidCallback onDeleted}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Container(
+            width: 150,
+            child: Column(
+              children: <Widget>[
+                Chip(
+                  avatar: avatar,
+                  label: Text(text),
+                  onDeleted: onDeleted,
+                ),
+              ]
+            ),
+          ),
+        ),
+      );
+    }
+
+    Rect chipRect;
+    Rect avatarRect;
+    Rect labelRect;
+    Rect deleteIconRect;
+    const String text = 'very long text that be clipped';
+
+    await tester.pumpWidget(chipBuilder(text));
+
+    chipRect = tester.getRect(find.byType(Chip));
+    labelRect = tester.getRect(
+      find.text(text),
+    );
+    expect(chipRect.contains(labelRect.topLeft), true);
+    expect(chipRect.contains(labelRect.topRight), true);
+    expect(chipRect.contains(labelRect.bottomLeft), true);
+    expect(chipRect.contains(labelRect.bottomRight), true);
+
+    await tester.pumpWidget(chipBuilder(
+      text,
+      avatar: const CircleAvatar(child: Text('A')),
+    ));
+    await tester.pumpAndSettle();
+
+    chipRect = tester.getRect(find.byType(Chip));
+    avatarRect = tester.getRect(find.byType(CircleAvatar));
+
+    expect(chipRect.contains(avatarRect.topLeft), true);
+    expect(chipRect.contains(avatarRect.topRight), true);
+    expect(chipRect.contains(avatarRect.bottomLeft), true);
+    expect(chipRect.contains(avatarRect.bottomRight), true);
+
+    labelRect = tester.getRect(
+      find.text(text),
+    );
+    expect(chipRect.contains(labelRect.topLeft), true);
+    expect(chipRect.contains(labelRect.topRight), true);
+    expect(chipRect.contains(labelRect.bottomLeft), true);
+    expect(chipRect.contains(labelRect.bottomRight), true);
+
+    await tester.pumpWidget(chipBuilder(
+      text,
+      avatar: const CircleAvatar(child: Text('A')),
+      onDeleted: () {},
+    ));
+    await tester.pumpAndSettle();
+
+    chipRect = tester.getRect(find.byType(Chip));
+    avatarRect = tester.getRect(find.byType(CircleAvatar));
+    expect(chipRect.contains(avatarRect.topLeft), true);
+    expect(chipRect.contains(avatarRect.topRight), true);
+    expect(chipRect.contains(avatarRect.bottomLeft), true);
+    expect(chipRect.contains(avatarRect.bottomRight), true);
+
+    labelRect = tester.getRect(
+      find.text(text),
+    );
+    expect(chipRect.contains(labelRect.topLeft), true);
+    expect(chipRect.contains(labelRect.topRight), true);
+    expect(chipRect.contains(labelRect.bottomLeft), true);
+    expect(chipRect.contains(labelRect.bottomRight), true);
+
+    deleteIconRect = tester.getRect(find.byIcon(Icons.cancel));
+    expect(chipRect.contains(deleteIconRect.topLeft), true);
+    expect(chipRect.contains(deleteIconRect.topRight), true);
+    expect(chipRect.contains(deleteIconRect.bottomLeft), true);
+    expect(chipRect.contains(deleteIconRect.bottomRight), true);
+  });
+
   testWidgets('Chip in row works ok', (WidgetTester tester) async {
     const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(
