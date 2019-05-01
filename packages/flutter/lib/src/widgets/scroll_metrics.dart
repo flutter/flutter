@@ -92,36 +92,27 @@ abstract class ScrollMetrics {
   /// [maxScrollExtent].
   bool get atEdge => pixels == minScrollExtent || pixels == maxScrollExtent;
 
-  /// The quantity of content conceptually "above" the currently visible content
-  /// of the viewport in the scrollable. This is the content above the content
-  /// described by [extentInside].
+  /// The quantity of content conceptually "above" the viewport in the scrollable.
+  /// This is the content above the content described by [extentInside].
   double get extentBefore => math.max(pixels - minScrollExtent, 0.0);
 
-  /// The quantity of visible content.
+  /// The quantity of content conceptually "inside" the viewport in the scrollable.
   ///
-  /// If [extentBefore] and [extentAfter] are non-zero, then this is typically
-  /// the height of the viewport. The value will always be greater than or equal
-  /// to the size of the viewport.
+  /// The value is typically the height of the viewport when [outOfRange] is false.
+  /// It could be less if there is less content visible than the size of the
+  /// viewport.
   ///
-  /// The implementation assumes [maxScrollExtent] is greater than or equal to
-  /// [minScrollExtent] and thus the value will always be greater than or equal
-  /// to [viewportDimension].
-  ///
-  /// See also:
-  ///
-  /// * [ViewportOffset.applyContentDimensions]
+  /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
-    assert(maxScrollExtent != null);
-    assert(minScrollExtent != null);
-    assert(minScrollExtent <= maxScrollExtent);
-    return math.min(pixels, maxScrollExtent) -
-           math.max(pixels, minScrollExtent) +
-           viewportDimension;
+    return viewportDimension
+    // "above" overscroll value
+    - (minScrollExtent - pixels).clamp(0, viewportDimension)
+    // "below" overscroll value
+    - (pixels - maxScrollExtent).clamp(0, viewportDimension);
   }
 
-  /// The quantity of content conceptually "below" the currently visible content
-  /// of the viewport in the scrollable. This is the content below the content
-  /// described by [extentInside].
+  /// The quantity of content conceptually "below" the viewport in the scrollable.
+  /// This is the content below the content described by [extentInside].
   double get extentAfter => math.max(maxScrollExtent - pixels, 0.0);
 }
 
