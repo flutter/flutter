@@ -775,7 +775,7 @@ class _RenderCupertinoDialog extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     bool isHit = false;
     final BoxParentData contentSectionParentData = contentSection.parentData;
     final BoxParentData actionsSectionParentData = actionsSection.parentData;
@@ -1693,7 +1693,7 @@ class _RenderCupertinoDialogActions extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }

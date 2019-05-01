@@ -200,7 +200,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 700.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -254,7 +254,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -500.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
@@ -343,7 +343,7 @@ void main() {
     expect(_getPaintOrigin(sliverD), const Offset(300.0, 0.0));
     expect(_getPaintOrigin(sliverE), const Offset(700.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
@@ -397,7 +397,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-300.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -471,7 +471,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 300.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 700.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(130.0, 150.0));
     expect(result.path.first.target, equals(c));
   });
@@ -525,7 +525,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -100.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, -500.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 350.0));
     expect(result.path.first.target, equals(c));
   });
@@ -579,7 +579,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(300.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(700.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(150.0, 450.0));
     expect(result.path.first.target, equals(c));
   });
@@ -633,7 +633,7 @@ void main() {
     expect(d.localToGlobal(const Offset(0.0, 0.0)), const Offset(100.0, 0.0));
     expect(e.localToGlobal(const Offset(0.0, 0.0)), const Offset(-300.0, 0.0));
 
-    final HitTestResult result = HitTestResult();
+    final BoxHitTestResult result = BoxHitTestResult();
     root.hitTest(result, position: const Offset(550.0, 150.0));
     expect(result.path.first.target, equals(c));
   });

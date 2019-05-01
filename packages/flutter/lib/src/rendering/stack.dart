@@ -581,7 +581,7 @@ class RenderStack extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -668,7 +668,7 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);

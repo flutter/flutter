@@ -1104,7 +1104,7 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];

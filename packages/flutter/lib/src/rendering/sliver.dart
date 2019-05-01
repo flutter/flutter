@@ -766,6 +766,32 @@ class SliverGeometry extends Diagnosticable {
   }
 }
 
+/// The result of performing a hit test on [RenderSliver]s.
+class SliverHitTestResult extends HitTestResult {
+  /// Creates an empty hit test result for hit testing on [RenderSliver].
+  SliverHitTestResult() : super();
+
+  /// Wraps `result` to create a [HitTestResult] that implements the
+  /// [SliverHitTestResult] protocol for hit testing on [RenderSliver]s.
+  ///
+  /// This method is used by [RenderObject]s that adapt between the
+  /// [RenderSliver]-world and the non-[RenderSliver]-world to convert a
+  /// (subtype of) [HitTestResult] to a [SliverHitTestResult] for hit testing on
+  /// [RenderSliver]s.
+  ///
+  /// The [HitTestEntry]s added to the returned [SliverHitTestResult] are also
+  /// added to the wrapped `result` (both share the same underlying data
+  /// structure to store [HitTestEntry]s).
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.wrap], which turns a [SliverHitTestResult] back into a
+  ///    generic [HitTestResult].
+  ///  * [BoxHitTestResult.wrap], which turns a [SliverHitTestResult] into a
+  ///    [BoxHitTestResult] for hit testing on [RenderBox] children.
+  SliverHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+}
+
 /// A hit test entry used by [RenderSliver].
 ///
 /// The coordinate system used by this hit test entry is relative to the
@@ -1167,7 +1193,7 @@ abstract class RenderSliver extends RenderObject {
   /// The most straight-forward way to implement hit testing for a new sliver
   /// render object is to override its [hitTestSelf] and [hitTestChildren]
   /// methods.
-  bool hitTest(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
+  bool hitTest(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     if (mainAxisPosition >= 0.0 && mainAxisPosition < geometry.hitTestExtent &&
         crossAxisPosition >= 0.0 && crossAxisPosition < constraints.crossAxisExtent) {
       if (hitTestChildren(result, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition) ||
@@ -1205,7 +1231,7 @@ abstract class RenderSliver extends RenderObject {
   ///
   /// For a discussion of the semantics of the arguments, see [hitTest].
   @protected
-  bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) => false;
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) => false;
 
   /// Computes the portion of the region from `from` to `to` that is visible,
   /// assuming that only the region from the [SliverConstraints.scrollOffset]
@@ -1495,7 +1521,7 @@ abstract class RenderSliverHelpers implements RenderSliver {
   ///
   /// Calling this for a child that is not visible is not valid.
   @protected
-  bool hitTestBoxChild(HitTestResult result, RenderBox child, { @required double mainAxisPosition, @required double crossAxisPosition }) {
+  bool hitTestBoxChild(BoxHitTestResult result, RenderBox child, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     final bool rightWayUp = _getRightWayUp(constraints);
     double absolutePosition = mainAxisPosition - childMainAxisPosition(child);
     final double absoluteCrossAxisPosition = crossAxisPosition - childCrossAxisPosition(child);
@@ -1595,10 +1621,10 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     assert(geometry.hitTestExtent > 0.0);
     if (child != null)
-      return hitTestBoxChild(result, child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
+      return hitTestBoxChild(BoxHitTestResult.wrap(result), child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
     return false;
   }
 

@@ -609,6 +609,31 @@ class BoxConstraints extends Constraints {
   }
 }
 
+/// The result of performing a hit test on [RenderBox]s.
+class BoxHitTestResult extends HitTestResult {
+  /// Creates an empty hit test result for hit testing on [RenderBox].
+  BoxHitTestResult() : super();
+
+  /// Wraps `result` to create a [HitTestResult] that implements the
+  /// [BoxHitTestResult] protocol for hit testing on [RenderBox]s.
+  ///
+  /// This method is used by [RenderObject]s that adapt between the
+  /// [RenderBox]-world and the non-[RenderBox]-world to convert a (subtype of)
+  /// [HitTestResult] to a [BoxHitTestResult] for hit testing on [RenderBox]s.
+  ///
+  /// The [HitTestEntry]s added to the returned [BoxHitTestResult] are also
+  /// added to the wrapped `result` (both share the same underlying data
+  /// structure to store [HitTestEntry]s).
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.wrap], which turns a [BoxHitTestResult] back into a
+  ///    generic [HitTestResult].
+  ///  * [SliverHitTestResult.wrap], which turns a [BoxHitTestResult] into a
+  ///    [SliverHitTestResult] for hit testing on [RenderSliver] children.
+  BoxHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+}
+
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
@@ -1882,7 +1907,7 @@ abstract class RenderBox extends RenderObject {
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
   /// even through it does not [paint] its children.
-  bool hitTest(HitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
@@ -1947,7 +1972,7 @@ abstract class RenderBox extends RenderObject {
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestChildren(HitTestResult result, { Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform.
@@ -2248,7 +2273,7 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///
   ///  * [defaultPaint], which paints the children appropriate for this
   ///    hit-testing strategy.
-  bool defaultHitTestChildren(HitTestResult result, { Offset position }) {
+  bool defaultHitTestChildren(BoxHitTestResult result, { Offset position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {

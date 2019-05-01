@@ -1276,7 +1276,7 @@ class _RenderDecoration extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (RenderBox child in _children) {
       // TODO(hansmuller): label must be handled specially since we've transformed it

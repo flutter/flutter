@@ -713,7 +713,7 @@ class _RenderCupertinoAlert extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     bool isHit = false;
     final MultiChildLayoutParentData contentSectionParentData = contentSection.parentData;
     final MultiChildLayoutParentData actionsSectionParentData = actionsSection.parentData;
@@ -1261,7 +1261,7 @@ class _RenderCupertinoAlertActions extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 }

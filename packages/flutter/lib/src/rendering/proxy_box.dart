@@ -110,7 +110,7 @@ mixin RenderProxyBoxMixin<T extends RenderBox> on RenderBox, RenderObjectWithChi
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
@@ -155,7 +155,7 @@ abstract class RenderProxyBoxWithHitTestBehavior extends RenderProxyBox {
   HitTestBehavior behavior;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     bool hitTarget = false;
     if (size.contains(position)) {
       hitTarget = hitTestChildren(result, position: position) || hitTestSelf(position);
@@ -1270,7 +1270,7 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   Rect get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1346,7 +1346,7 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   RRect get _defaultClip => _borderRadius.toRRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1411,7 +1411,7 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   Rect get _defaultClip => Offset.zero & size;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     _updateClip();
     assert(_clip != null);
     final Offset center = _clip.center;
@@ -1476,7 +1476,7 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1669,7 +1669,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -1764,7 +1764,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (_clipper != null) {
       _updateClip();
       assert(_clip != null);
@@ -2112,7 +2112,7 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     // RenderTransform objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -2121,7 +2121,7 @@ class RenderTransform extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     if (transformHitTests) {
       final Matrix4 inverse = Matrix4.tryInvert(_effectiveTransform);
       if (inverse == null) {
@@ -2302,7 +2302,7 @@ class RenderFittedBox extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     if (size.isEmpty)
       return false;
     _updatePaintData();
@@ -2371,7 +2371,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     // RenderFractionalTranslation objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -2388,7 +2388,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
   bool transformHitTests;
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     assert(!debugNeedsLayout);
     if (transformHitTests) {
       position = Offset(
@@ -2907,7 +2907,7 @@ class RenderIgnorePointer extends RenderProxyBox {
   bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     return ignoring ? false : super.hitTest(result, position: position);
   }
 
@@ -3017,7 +3017,7 @@ class RenderOffstage extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     return !offstage && super.hitTest(result, position: position);
   }
 
@@ -3113,7 +3113,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
   bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     return absorbing
         ? size.contains(position)
         : super.hitTest(result, position: position);
@@ -4653,7 +4653,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     // RenderFollowerLayer objects don't check if they are
     // themselves hit, because it's confusing to think about
     // how the untransformed size and the child's transformed
@@ -4662,7 +4662,7 @@ class RenderFollowerLayer extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     final Matrix4 inverse = Matrix4.tryInvert(getCurrentTransform());
     if (inverse == null) {
       // We cannot invert the effective transform. That means the child

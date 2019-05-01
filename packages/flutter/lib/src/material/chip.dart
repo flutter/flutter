@@ -1740,7 +1740,7 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     // Only redirects hit detection which occurs above and below the render object.
@@ -2258,7 +2258,7 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     RenderBox hitTestChild;

@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -558,7 +557,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     double mainAxisPosition, crossAxisPosition;
     switch (axis) {
       case Axis.vertical:
@@ -572,9 +571,10 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
     assert(mainAxisPosition != null);
     assert(crossAxisPosition != null);
+    final SliverHitTestResult sliverResult = SliverHitTestResult.wrap(result);
     for (RenderSliver child in childrenInHitTestOrder) {
       if (child.geometry.visible && child.hitTest(
-        result,
+        sliverResult,
         mainAxisPosition: computeChildMainAxisPosition(child, mainAxisPosition),
         crossAxisPosition: crossAxisPosition,
       )) {

@@ -555,7 +555,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     if (child != null) {
       final Offset transformed = position + -_paintOffset;
       return child.hitTest(result, position: transformed);

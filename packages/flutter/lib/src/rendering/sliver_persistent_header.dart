@@ -11,7 +11,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'object.dart';
 import 'sliver.dart';
@@ -169,10 +168,10 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   double childMainAxisPosition(covariant RenderObject child) => super.childMainAxisPosition(child);
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
+  bool hitTestChildren(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     assert(geometry.hitTestExtent > 0.0);
     if (child != null)
-      return hitTestBoxChild(result, child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
+      return hitTestBoxChild(BoxHitTestResult.wrap(result), child, mainAxisPosition: mainAxisPosition, crossAxisPosition: crossAxisPosition);
     return false;
   }
 
