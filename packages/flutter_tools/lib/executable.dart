@@ -40,7 +40,6 @@ import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
-import 'src/commands/web_swap.dart';
 import 'src/runner/flutter_command.dart';
 
 /// Main entry point for commands.
@@ -86,7 +85,6 @@ Future<void> main(List<String> args) async {
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),
-    WebSwapCommand(),
   ], verbose: verbose,
      muteCommandLogging: muteCommandLogging,
      verboseHelp: verboseHelp,
