@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -349,6 +350,61 @@ void main() {
 
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('cursor android golden', (WidgetTester tester) async {
+    final Widget widget = CupertinoApp(
+      home: Center(
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(400, 400)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.0.1.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final Widget widget = CupertinoApp(
+      home: Center(
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(400, 400)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    debugDefaultTargetPlatformOverride = null;
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.1.1.png'),
+    );
+  }, skip: !Platform.isLinux);
 
   testWidgets(
     'can control text content via controller',
