@@ -129,7 +129,7 @@ void main() {
       matching: find.byType(Container),
       ).first,
     );
-    
+
     final BoxDecoration decoration = container.decoration;
     expect(decoration.color, const Color(0xFF323232));
     expect(decoration.shape,  BoxShape.rectangle);
