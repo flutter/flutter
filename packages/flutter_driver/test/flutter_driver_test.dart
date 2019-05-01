@@ -15,6 +15,9 @@ import 'package:quiver/testing/async.dart';
 
 import 'common.dart';
 
+/// Default timeout value.
+const Duration _kDefaultTimeout = Duration(seconds: 5);
+
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
@@ -386,7 +389,7 @@ void main() {
     });
 
     group('sendCommand error conditions', () {
-      test('local timeout', () async {
+      test('local default timeout', () async {
         final List<String> log = <String>[];
         final StreamSubscription<LogRecord> logSub = flutterDriverLog.listen((LogRecord s) => log.add(s.toString()));
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
@@ -396,7 +399,23 @@ void main() {
         FakeAsync().run((FakeAsync time) {
           driver.waitFor(find.byTooltip('foo'));
           expect(log, <String>[]);
-          time.elapse(const Duration(hours: 1));
+          time.elapse(_kDefaultTimeout);
+        });
+        expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
+        await logSub.cancel();
+      });
+
+      test('local custom timeout', () async {
+        final List<String> log = <String>[];
+        final StreamSubscription<LogRecord> logSub = flutterDriverLog.listen((LogRecord s) => log.add(s.toString()));
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          // completer never completed to trigger timeout
+          return Completer<Map<String, dynamic>>().future;
+        });
+        FakeAsync().run((FakeAsync time) {
+          driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+          expect(log, <String>[]);
+          time.elapse(_kTestTimeout);
         });
         expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
         await logSub.cancel();
