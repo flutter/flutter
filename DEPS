@@ -167,32 +167,31 @@ deps = {
   'src/third_party/icu':
    Var('chromium_git') + '/chromium/deps/icu.git' + '@' + 'c56c671998902fcc4fc9ace88c83daa99f980793',
 
-  'src/third_party/dart':
-   Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
-
   'src/third_party/boringssl':
    Var('github_git') + '/dart-lang/boringssl_gen.git' + '@' + Var('dart_boringssl_gen_rev'),
 
   'src/third_party/boringssl/src':
    'https://boringssl.googlesource.com/boringssl.git' + '@' + Var('dart_boringssl_rev'),
 
+  'src/third_party/dart':
+   Var('dart_git') + '/sdk.git' + '@' + Var('dart_revision'),
+
+  # WARNING: Unused Dart dependencies in the list below till "WARNING:" marker are removed automatically - see create_updated_flutter_deps.py.
+
   'src/third_party/dart/third_party/observatory_pub_packages':
    Var('dart_git') + '/observatory_pub_packages.git' + '@' + Var('dart_observatory_pub_packages_rev'),
-
-  'src/third_party/dart/third_party/pkg/oauth2':
-   Var('dart_git') + '/oauth2.git' + '@' + Var('dart_oauth2_tag'),
 
   'src/third_party/dart/third_party/pkg/args':
    Var('dart_git') + '/args.git' + '@' + Var('dart_args_tag'),
 
   'src/third_party/dart/third_party/pkg/async':
-   Var('dart_git') + '/async.git' + '@' +   Var('dart_async_tag'),
+   Var('dart_git') + '/async.git' + '@' + Var('dart_async_tag'),
 
   'src/third_party/dart/third_party/pkg/bazel_worker':
-   Var('dart_git') + '/bazel_worker.git' + '@' +   Var('dart_bazel_worker_tag'),
+   Var('dart_git') + '/bazel_worker.git' + '@' + Var('dart_bazel_worker_tag'),
 
   'src/third_party/dart/third_party/pkg/boolean_selector':
-   Var('dart_git') + '/boolean_selector.git' + '@' +   Var('dart_boolean_selector_tag'),
+   Var('dart_git') + '/boolean_selector.git' + '@' + Var('dart_boolean_selector_tag'),
 
   'src/third_party/dart/third_party/pkg/charcode':
    Var('dart_git') + '/charcode.git' + '@' + Var('dart_charcode_tag'),
@@ -218,12 +217,6 @@ deps = {
   'src/third_party/dart/third_party/pkg/dartdoc':
    Var('dart_git') + '/dartdoc.git' + '@' + Var('dart_dartdoc_tag'),
 
-  'src/third_party/dart/third_party/pkg/json_rpc_2':
-   Var('dart_git') + '/json_rpc_2.git' + '@' + Var('dart_json_rpc_2_tag'),
-
-  'src/third_party/dart/third_party/pkg/intl':
-   Var('dart_git') + '/intl.git' + '@' + Var('dart_intl_tag'),
-
   'src/third_party/dart/third_party/pkg/fixnum':
    Var('dart_git') + '/fixnum.git' + '@' + Var('dart_fixnum_tag'),
 
@@ -236,6 +229,9 @@ deps = {
   'src/third_party/dart/third_party/pkg/http':
    Var('dart_git') + '/http.git' + '@' + Var('dart_http_tag'),
 
+  'src/third_party/dart/third_party/pkg/http_multi_server':
+   Var('dart_git') + '/http_multi_server.git' + '@' + Var('dart_http_multi_server_tag'),
+
   'src/third_party/dart/third_party/pkg/http_parser':
    Var('dart_git') + '/http_parser.git' + '@' + Var('dart_http_parser_tag'),
 
@@ -245,14 +241,17 @@ deps = {
   'src/third_party/dart/third_party/pkg/http_throttle':
    Var('dart_git') + '/http_throttle.git' + '@' + Var('dart_http_throttle_tag'),
 
-  'src/third_party/dart/third_party/pkg/http_multi_server':
-   Var('dart_git') + '/http_multi_server.git' + '@' + Var('dart_http_multi_server_tag'),
+  'src/third_party/dart/third_party/pkg/intl':
+   Var('dart_git') + '/intl.git' + '@' + Var('dart_intl_tag'),
 
-  'src/third_party/dart/third_party/pkg/logging':
-   Var('dart_git') + '/logging.git' + '@' + Var('dart_logging_tag'),
+  'src/third_party/dart/third_party/pkg/json_rpc_2':
+   Var('dart_git') + '/json_rpc_2.git' + '@' + Var('dart_json_rpc_2_tag'),
 
   'src/third_party/dart/third_party/pkg/linter':
    Var('dart_git') + '/linter.git' + '@' + Var('dart_linter_tag'),
+
+  'src/third_party/dart/third_party/pkg/logging':
+   Var('dart_git') + '/logging.git' + '@' + Var('dart_logging_tag'),
 
   'src/third_party/dart/third_party/pkg/markdown':
    Var('dart_git') + '/markdown.git' + '@' + Var('dart_markdown_tag'),
@@ -269,11 +268,8 @@ deps = {
   'src/third_party/dart/third_party/pkg/mustache':
    Var('dart_git') + '/external/github.com/xxgreg/mustache' + '@' + Var('dart_mustache_tag'),
 
-  'src/third_party/dart/third_party/pkg_tested/package_config':
-   Var('dart_git') + '/package_config.git' + '@' + Var('dart_package_config_tag'),
-
-  'src/third_party/dart/third_party/pkg_tested/package_resolver':
-   Var('dart_git') + '/package_resolver.git' + '@' + Var('dart_package_resolver_tag'),
+  'src/third_party/dart/third_party/pkg/oauth2':
+   Var('dart_git') + '/oauth2.git' + '@' + Var('dart_oauth2_tag'),
 
   'src/third_party/dart/third_party/pkg/path':
    Var('dart_git') + '/path.git' + '@' + Var('dart_path_tag'),
@@ -287,14 +283,14 @@ deps = {
   'src/third_party/dart/third_party/pkg/protobuf':
    Var('dart_git') + '/protobuf.git' + '@' + Var('dart_protobuf_rev'),
 
-  'src/third_party/dart/third_party/pkg/pub_semver':
-   Var('dart_git') + '/pub_semver.git' + '@' + Var('dart_pub_semver_tag'),
-
   'src/third_party/dart/third_party/pkg/pub':
    Var('dart_git') + '/pub.git' + '@' + Var('dart_pub_rev'),
 
+  'src/third_party/dart/third_party/pkg/pub_semver':
+   Var('dart_git') + '/pub_semver.git' + '@' + Var('dart_pub_semver_tag'),
+
   'src/third_party/dart/third_party/pkg/quiver':
-   Var('chromium_git') + '/external/github.com/google/quiver-dart' + '@' + Var('dart_quiver-dart_tag'),
+   Var('chromium_git') + '/external/github.com/google/quiver-dart.git' + '@' + Var('dart_quiver-dart_tag'),
 
   'src/third_party/dart/third_party/pkg/resource':
    Var('dart_git') + '/resource.git' + '@' + Var('dart_resource_rev'),
@@ -311,38 +307,35 @@ deps = {
   'src/third_party/dart/third_party/pkg/shelf_web_socket':
    Var('dart_git') + '/shelf_web_socket.git' + '@' + Var('dart_shelf_web_socket_tag'),
 
-  'src/third_party/dart/third_party/pkg/source_span':
-   Var('dart_git') + '/source_span.git' + '@' + Var('dart_source_span_tag'),
-
   'src/third_party/dart/third_party/pkg/source_map_stack_trace':
    Var('dart_git') + '/source_map_stack_trace.git' + '@' + Var('dart_source_map_stack_trace_tag'),
 
   'src/third_party/dart/third_party/pkg/source_maps':
    Var('dart_git') + '/source_maps.git' + '@' + Var('dart_source_maps_tag'),
 
-  'src/third_party/dart/third_party/pkg/string_scanner':
-   Var('dart_git') + '/string_scanner.git' + '@' + Var('dart_string_scanner_tag'),
-
-  'src/third_party/dart/third_party/pkg/stream_channel':
-   Var('dart_git') + '/stream_channel.git' + '@' + Var('dart_stream_channel_tag'),
+  'src/third_party/dart/third_party/pkg/source_span':
+   Var('dart_git') + '/source_span.git' + '@' + Var('dart_source_span_tag'),
 
   'src/third_party/dart/third_party/pkg/stack_trace':
    Var('dart_git') + '/stack_trace.git' + '@' + Var('dart_stack_trace_tag'),
 
-  'src/third_party/dart/third_party/pkg_tested/dart_style':
-   Var('dart_git') + '/dart_style.git' + '@' + Var('dart_dart_style_tag'),
+  'src/third_party/dart/third_party/pkg/stream_channel':
+   Var('dart_git') + '/stream_channel.git' + '@' + Var('dart_stream_channel_tag'),
 
-  'src/third_party/dart/third_party/pkg/typed_data':
-   Var('dart_git') + '/typed_data.git' + '@' + Var('dart_typed_data_tag'),
+  'src/third_party/dart/third_party/pkg/string_scanner':
+   Var('dart_git') + '/string_scanner.git' + '@' + Var('dart_string_scanner_tag'),
 
   'src/third_party/dart/third_party/pkg/term_glyph':
    Var('dart_git') + '/term_glyph.git' + '@' + Var('dart_term_glyph_tag'),
 
+  'src/third_party/dart/third_party/pkg/test':
+   Var('dart_git') + '/test.git' + '@' + Var('dart_test_tag'),
+
   'src/third_party/dart/third_party/pkg/test_reflective_loader':
    Var('dart_git') + '/test_reflective_loader.git' + '@' + Var('dart_test_reflective_loader_tag'),
 
-  'src/third_party/dart/third_party/pkg/test':
-   Var('dart_git') + '/test.git' + '@' + Var('dart_test_tag'),
+  'src/third_party/dart/third_party/pkg/typed_data':
+   Var('dart_git') + '/typed_data.git' + '@' + Var('dart_typed_data_tag'),
 
   'src/third_party/dart/third_party/pkg/usage':
    Var('dart_git') + '/usage.git' + '@' + Var('dart_usage_tag'),
@@ -355,6 +348,17 @@ deps = {
 
   'src/third_party/dart/third_party/pkg/yaml':
    Var('dart_git') + '/yaml.git' + '@' + Var('dart_yaml_tag'),
+
+  'src/third_party/dart/third_party/pkg_tested/dart_style':
+   Var('dart_git') + '/dart_style.git' + '@' + Var('dart_dart_style_tag'),
+
+  'src/third_party/dart/third_party/pkg_tested/package_config':
+   Var('dart_git') + '/package_config.git' + '@' + Var('dart_package_config_tag'),
+
+  'src/third_party/dart/third_party/pkg_tested/package_resolver':
+   Var('dart_git') + '/package_resolver.git' + '@' + Var('dart_package_resolver_tag'),
+
+  # WARNING: end of dart dependencies list that is cleaned up automatically - see create_updated_flutter_deps.py.
 
   'src/third_party/colorama/src':
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
