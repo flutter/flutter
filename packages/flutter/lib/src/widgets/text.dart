@@ -246,7 +246,14 @@ class Text extends StatelessWidget {
 
   /// Creates a text widget with a [InlineSpan].
   ///
+  /// The following subclasses of [InlineSpan] may be used to build rich text:
+  ///
+  /// * [TextSpan]s define text and children [InlineSpan]s.
+  /// * [WidgetSpan]s define embedded inline widgets.
+  ///
   /// The [textSpan] parameter must not be null.
+  ///
+  /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
     this.textSpan, {
     Key key,
