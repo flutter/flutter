@@ -249,6 +249,13 @@ class MatrixUtils {
     // Essentially perspective * view * model.
     return result;
   }
+
+  /// Returns a matrix that transforms every point to [offset].
+  static Matrix4 forceToPoint(Offset offset) {
+    return Matrix4.identity()
+      ..setRow(0, Vector4(0, 0, 0, offset.dx))
+      ..setRow(1, Vector4(0, 0, 0, offset.dy));
+  }
 }
 
 /// Returns a list of strings representing the given transform in a format

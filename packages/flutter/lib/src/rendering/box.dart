@@ -612,6 +612,171 @@ class BoxConstraints extends Constraints {
   }
 }
 
+/// Method signature for hit testing a [RenderBox].
+///
+/// Used by [BoxHitTestResult.addWithPaintTransform] to hit test children
+/// of a [RenderBox].
+///
+/// See also:
+///
+///  * [RenderBox.hitTest], which documents more details around hit testing
+///    [RenderBox]s.
+typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset position);
+
+/// The result of performing a hit test on [RenderBox]s.
+class BoxHitTestResult extends HitTestResult {
+  /// Creates an empty hit test result for hit testing on [RenderBox].
+  BoxHitTestResult() : super();
+
+  /// Wraps `result` to create a [HitTestResult] that implements the
+  /// [BoxHitTestResult] protocol for hit testing on [RenderBox]s.
+  ///
+  /// This method is used by [RenderObject]s that adapt between the
+  /// [RenderBox]-world and the non-[RenderBox]-world to convert a (subtype of)
+  /// [HitTestResult] to a [BoxHitTestResult] for hit testing on [RenderBox]s.
+  ///
+  /// The [HitTestEntry]s added to the returned [BoxHitTestResult] are also
+  /// added to the wrapped `result` (both share the same underlying data
+  /// structure to store [HitTestEntry]s).
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.wrap], which turns a [BoxHitTestResult] back into a
+  ///    generic [HitTestResult].
+  ///  * [SliverHitTestResult.wrap], which turns a [BoxHitTestResult] into a
+  ///    [SliverHitTestResult] for hit testing on [RenderSliver] children.
+  BoxHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+
+  /// Transforms `position` to the local coordinate system of a child before
+  /// hit-testing the child.
+  ///
+  /// Since the provided paint `transform` describes the transform from the
+  /// child to the parent, the matrix is inverted before it is used to transform
+  /// `position` from the coordinate system of the parent to the system of the
+  /// child.
+  ///
+  /// If `transform` is null it will be treated as the identity transform and
+  /// `position` is provided to the `hitTest` callback as-is. If `transform`
+  /// cannot be inverted, the `hitTest` callback is not invoked and false is
+  /// returned. Otherwise, the return value of the `hitTest` callback is
+  /// returned.
+  ///
+  /// The `position` argument may be null, which will be forwarded to the
+  /// `hitTest` callback as-is. Using null as the position can be useful if
+  /// the child speaks a different hit test protocol then the parent and the
+  /// position is not required to do the actual hit testing in that protocol.
+  ///
+  /// {@tool sample}
+  /// This method is used in [RenderBox.hitTestChildren]:
+  ///
+  /// ```dart
+  /// abstract class Foo extends RenderBox {
+  ///
+  ///   final Matrix4 _effectiveTransform = Matrix4.rotationZ(50);
+  ///
+  ///   @override
+  ///   void applyPaintTransform(RenderBox child, Matrix4 transform) {
+  ///     transform.multiply(_effectiveTransform);
+  ///   }
+  ///
+  ///   @override
+  ///   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
+  ///     return result.addWithPaintTransform(
+  ///       transform: _effectiveTransform,
+  ///       position: position,
+  ///       hitTest: (BoxHitTestResult result, Offset position) {
+  ///         return super.hitTestChildren(result, position: position);
+  ///       },
+  ///     );
+  ///   }
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [addWithPaintOffset], which can be used for `transform`s that are just
+  ///    simple matrix translations by an [Offset].
+  ///  * [addWithRawTransform], which takes a transform matrix that is directly
+  ///    used to transform the position without any pre-processing.
+  bool addWithPaintTransform({
+    @required Matrix4 transform,
+    @required Offset position,
+    @required BoxHitTest hitTest,
+  }) {
+    assert(hitTest != null);
+    if (transform != null) {
+      transform = Matrix4.tryInvert(transform);
+      if (transform == null) {
+        // Objects are not visible on screen and cannot be hit-tested.
+        return false;
+      }
+    }
+    return addWithRawTransform(
+      transform: transform,
+      position: position,
+      hitTest: hitTest,
+    );
+  }
+
+  /// Convenience method for hit testing children, that are translated by
+  /// an [Offset].
+  ///
+  /// This method can be used as a convenience over [addWithPaintTransform] if
+  /// a parent paints a child at an `offset`.
+  ///
+  /// A null value for `offset` is treated as if [Offset.zero] was provided.
+  ///
+  /// Se also:
+  ///
+  ///  * [addWithPaintTransform], which takes a generic paint transform matrix and
+  ///    documents the intended usage of this API in more detail.
+  bool addWithPaintOffset({
+    @required Offset offset,
+    @required Offset position,
+    @required BoxHitTest hitTest,
+  }) {
+    assert(hitTest != null);
+    return addWithRawTransform(
+      transform: offset != null ? Matrix4.translationValues(-offset.dx, -offset.dy, 0.0) : null,
+      position: position,
+      hitTest: hitTest,
+    );
+  }
+
+  /// Transforms `position` to the local coordinate system of a child before
+  /// hit-testing the child.
+  ///
+  /// Unlike [addWithPaintTransform], the provided `transform` matrix is used
+  /// directly to transform `position` without any pre-processing.
+  ///
+  /// If `transform` is null it will be treated as the identity transform ad
+  /// `position` is provided to the `hitTest` callback as-is.
+  ///
+  /// The function returns the return value of the `hitTest` callback.
+  ///
+  /// The `position` argument may be null, which will be forwarded to the
+  /// `hitTest` callback as-is. Using null as the position can be useful if
+  /// the child speaks a different hit test protocol then the parent and the
+  /// position is not required to do the actual hit testing in that protocol.
+  ///
+  /// Se also:
+  ///
+  ///  * [addWithPaintTransform], which accomplishes the same thing, but takes a
+  ///    _paint_ transform matrix.
+  bool addWithRawTransform({
+    @required Matrix4 transform,
+    @required Offset position,
+    @required BoxHitTest hitTest,
+  }) {
+    assert(hitTest != null);
+    final Offset transformedPosition = position == null || transform == null
+        ? position
+        : MatrixUtils.transformPoint(transform, position);
+    return hitTest(this, transformedPosition);
+  }
+}
+
 /// A hit test entry used by [RenderBox].
 class BoxHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
@@ -1877,13 +2042,18 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
+  /// If transforming is necessary, [BoxHitTestResult.addWithPaintTransform],
+  /// [BoxHitTestResult.addWithPaintOffset], or
+  /// [BoxHitTestResult.addWithRawTransform] should be used to transform
+  /// `position` to the local coordinate system.
+  ///
   /// Hit testing requires layout to be up-to-date but does not require painting
   /// to be up-to-date. That means a render object can rely upon [performLayout]
   /// having been called in [hitTest] but cannot rely upon [paint] having been
   /// called. For example, a render object might be a child of a [RenderOpacity]
   /// object, which calls [hitTest] on its children when its opacity is zero
   /// even through it does not [paint] its children.
-  bool hitTest(HitTestResult result, { @required Offset position }) {
+  bool hitTest(BoxHitTestResult result, { @required Offset position }) {
     assert(() {
       if (!hasSize) {
         if (debugNeedsLayout) {
@@ -1945,10 +2115,15 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
+  /// If transforming is necessary, [BoxHitTestResult.addWithPaintTransform],
+  /// [BoxHitTestResult.addWithPaintOffset], or
+  /// [BoxHitTestResult.addWithRawTransform] should be used to transform
+  /// `position` to the local coordinate system.
+  ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.
   @protected
-  bool hitTestChildren(HitTestResult result, { Offset position }) => false;
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) => false;
 
   /// Multiply the transform from the parent's coordinate system to this box's
   /// coordinate system into the given transform.
@@ -2249,12 +2424,20 @@ mixin RenderBoxContainerDefaultsMixin<ChildType extends RenderBox, ParentDataTyp
   ///
   ///  * [defaultPaint], which paints the children appropriate for this
   ///    hit-testing strategy.
-  bool defaultHitTestChildren(HitTestResult result, { Offset position }) {
+  bool defaultHitTestChildren(BoxHitTestResult result, { Offset position }) {
     // the x, y parameters have the top left of the node's box as the origin
     ChildType child = lastChild;
     while (child != null) {
       final ParentDataType childParentData = child.parentData;
-      if (child.hitTest(result, position: position - childParentData.offset))
+      final bool isHit = result.addWithPaintOffset(
+        offset: childParentData.offset,
+        position: position,
+        hitTest: (HitTestResult result, Offset transformed) {
+          assert(transformed == position - childParentData.offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit)
         return true;
       child = childParentData.previousSibling;
     }
