@@ -470,6 +470,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   // Set during layout if overflow occurred on the main axis.
   double _overflow;
+  bool get _hasOverflow => _overflow > 1e-9;
 
   @override
   void setupParentData(RenderBox child) {
@@ -829,29 +830,23 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Align items along the main axis.
-    // Unfortunately, using full precision floating point here causes false
-    // positives on the overflow detection.
-    // We apply a similar hack here as _applyFloatingPointHack in
-    // text_painter.dart.
-    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max
-      ? maxMainSize.ceilToDouble()
-      : allocatedSize.ceilToDouble();
+    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
     double actualSize;
+    double actualSizeDelta;
     switch (_direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(idealSize, crossSize));
-        actualSize = size.width.ceilToDouble();
-        crossSize = size.height.ceilToDouble();
+        actualSize = size.width;
+        crossSize = size.height;
         break;
       case Axis.vertical:
         size = constraints.constrain(Size(crossSize, idealSize));
-        actualSize = size.height.ceilToDouble();
-        crossSize = size.width.ceilToDouble();
+        actualSize = size.height;
+        crossSize = size.width;
         break;
     }
-    final double actualSizeDelta = (actualSize - allocatedSize).ceilToDouble();
+    actualSizeDelta = actualSize - allocatedSize;
     _overflow = math.max(0.0, -actualSizeDelta);
-
     final double remainingSpace = math.max(0.0, actualSizeDelta);
     double leadingSpace;
     double betweenSpace;
@@ -943,7 +938,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_overflow <= 0.0) {
+    if (!_hasOverflow) {
       defaultPaint(context, offset);
       return;
     }
@@ -990,12 +985,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Offset.zero & size : null;
+  Rect describeApproximatePaintClip(RenderObject child) => _hasOverflow ? Offset.zero & size : null;
 
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (_overflow is double && _overflow > 0.0)
+    if (_overflow is double && _hasOverflow)
       header += ' OVERFLOWING';
     return header;
   }
