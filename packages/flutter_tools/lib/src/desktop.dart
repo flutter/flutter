@@ -58,6 +58,9 @@ class DesktopLogReader extends DeviceLogReader {
   void initializeProcess(Process process) {
     process.stdout.listen(_inputController.add);
     process.stderr.listen(_inputController.add);
+    process.exitCode.then((int result) {
+      _inputController.close();
+    });
   }
 
   @override
