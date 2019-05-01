@@ -43,8 +43,6 @@ void main() {
       child: flex,
     );
     flex.add(box1);
-    expect(exceptions, isEmpty);
-
     layout(parent);
     expect(flex.size, const Size(slightlySmaller, 100.0));
     pumpFrame(phase: EnginePhase.paint);
