@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
@@ -95,7 +96,13 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   /// Returns the text span that contains the given position in the text. 
   InlineSpan getSpanForPosition(TextPosition position);
-  InlineSpan computeSpanForPosition(TextPosition position, TrackingInt offset);
+
+  /// Performs the check at each InlineSpan for if the index falls within the range
+  /// of the span and returns the TextSpan if it does.
+  ///
+  /// This method should not be directly called. Use [toPlainText] instead.
+  @protected
+  InlineSpan getSpanForPositionVisitor(TextPosition position, TrackingInt offset);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
@@ -110,6 +117,11 @@ abstract class InlineSpan extends DiagnosticableTree {
     computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
     return buffer.toString();
   }
+
+  /// Walks the InlineSpan tree and writes the plain text representation to [buffer].
+  ///
+  /// This method should not be directly called. Use [toPlainText] instead.
+  @protected
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
@@ -118,6 +130,12 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index);
+
+  /// Performs the check at each InlineSpan for if the index falls within the range
+  /// of the span and stores the corresponding code unit in [result] if it does.
+  ///
+  /// This method should not be directly called. Use [codeUnitAt] instead.
+  @protected
   bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result);
 
   /// In checked mode, throws an exception if the object is not in a
@@ -129,6 +147,12 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// assert(myInlineSpan.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid();
+  @protected
+
+  /// Performs the check at each InlineSpan for if the contents are valid. Returns
+  /// false when contents are invalid.
+  ///
+  /// This method should not be directly called. Use [toPlainText] instead.
   bool debugAssertIsValidVisitor();
 
   /// Describe the difference between this span and another, in terms of
