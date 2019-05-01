@@ -86,4 +86,39 @@ void main() {
       0.0, moreOrLessEquals(-86.60254037844386), moreOrLessEquals(-50.0), 1.05,
     ]);
   });
+
+  test('forceToPoint', () {
+    const Offset forcedOffset = Offset(20, -30);
+    final Matrix4 forcedTransform = MatrixUtils.forceToPoint(forcedOffset);
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, forcedOffset),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, Offset.zero),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(1, 1)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-1, -1)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-20, 30)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-1.2344, 1422434.23)),
+      forcedOffset,
+    );
+  });
 }
