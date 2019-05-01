@@ -181,6 +181,7 @@ class DrawerController extends StatefulWidget {
     @required this.alignment,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.scrimColor = Colors.black54,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -220,6 +221,11 @@ class DrawerController extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
+  /// The color to use for the scrim that obscures primary content while a drawer is open.
+  ///
+  /// By default, the color is [Colors.black54]
+  final Color scrimColor;
+
   @override
   DrawerControllerState createState() => DrawerControllerState();
 }
@@ -231,6 +237,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
+    _color = ColorTween(begin: Colors.transparent, end: widget.scrimColor);
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
@@ -379,7 +386,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       widget.drawerCallback(false);
   }
 
-  final ColorTween _color = ColorTween(begin: Colors.transparent, end: Colors.black54);
+  ColorTween _color;
   final GlobalKey _gestureDetectorKey = GlobalKey();
 
   AlignmentDirectional get _drawerOuterAlignment {
