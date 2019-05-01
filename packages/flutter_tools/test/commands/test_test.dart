@@ -122,7 +122,7 @@ Future<void> _testFile(String testName, String workingDirectory, String testDire
       reason: 'Failure in $testName to compare to $fullTestExpectation',
     );
     final String expectationLine = expectations[expectationLineNumber];
-    final String outputLine = output[outputLineNumber];
+    String outputLine = output[outputLineNumber];
     if (expectationLine == '<<skip until matching line>>') {
       allowSkip = true;
       expectationLineNumber += 1;
@@ -139,6 +139,18 @@ Future<void> _testFile(String testName, String workingDirectory, String testDire
       expect(haveSeenStdErrMarker, isFalse);
       haveSeenStdErrMarker = true;
     }
+    if (!RegExp(expectationLine).hasMatch(outputLine) && outputLineNumber + 1 < output.length) {
+      // Check if the RegExp can match the next two lines in the output so
+      // that it is possible to write expectations that still hold even if a
+      // line is wrapped slightly differently due to for example a file name
+      // being longer on one platform than another.
+      final String mergedLines = '$outputLine\n${output[outputLineNumber+1]}';
+      if (RegExp(expectationLine).hasMatch(mergedLines)) {
+        outputLineNumber += 1;
+        outputLine = mergedLines;
+      }
+    }
+
     expect(outputLine, matches(expectationLine), reason: 'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
     expectationLineNumber += 1;
     outputLineNumber += 1;
