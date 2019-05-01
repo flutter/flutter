@@ -13,10 +13,10 @@ void main() {
   });
 
   test('BottomSheetThemeData null fields by default', () {
-    const BottomSheetThemeData snackBarTheme = BottomSheetThemeData();
-    expect(snackBarTheme.backgroundColor, null);
-    expect(snackBarTheme.elevation, null);
-    expect(snackBarTheme.shape, null);
+    const BottomSheetThemeData bottomSheetTheme = BottomSheetThemeData();
+    expect(bottomSheetTheme.backgroundColor, null);
+    expect(bottomSheetTheme.elevation, null);
+    expect(bottomSheetTheme.shape, null);
   });
 
   testWidgets('Default BottomSheetThemeData debugFillProperties', (WidgetTester tester) async {
@@ -52,65 +52,55 @@ void main() {
   });
 
   testWidgets('Passing no BottomSheetThemeData returns defaults', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
-        key: scaffoldKey,
-        body: const Center(child: Text('body')),
+        body: BottomSheet(
+          onClosing: () {},
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
       ),
     ));
 
-    showModalBottomSheet<void>(
-      context: scaffoldKey.currentContext,
-      builder: (BuildContext context) {
-        return Container(
-          child: const Text('BottomSheet'),
-        );
-      },
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ).first,
     );
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    final Material material = _getBottomSheetMaterial(tester);
     expect(material.color, null);
     expect(material.elevation, 0.0);
     expect(material.shape, null);
   });
 
   testWidgets('BottomSheet uses values from BottomSheetThemeData', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final BottomSheetThemeData bottomSheetTheme = _bottomSheetTheme();
 
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(bottomSheetTheme: bottomSheetTheme),
       home: Scaffold(
-        key: scaffoldKey,
-        body: const Center(child: Text('body')),
+        body: BottomSheet(
+          onClosing: () {},
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
       ),
     ));
 
-    showModalBottomSheet<void>(
-      context: scaffoldKey.currentContext,
-      builder: (BuildContext context) {
-        return Container(
-          child: const Text('BottomSheet'),
-        );
-      },
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ).first,
     );
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    final Material material = _getBottomSheetMaterial(tester);
     expect(material.color, bottomSheetTheme.backgroundColor);
     expect(material.elevation, bottomSheetTheme.elevation);
     expect(material.shape, bottomSheetTheme.shape);
   });
 
   testWidgets('BottomSheet widget properties take priority over theme', (WidgetTester tester) async {
-    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     const Color backgroundColor = Colors.purple;
     const double elevation = 7.0;
     const ShapeBorder shape = RoundedRectangleBorder(
@@ -120,27 +110,24 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData(bottomSheetTheme: _bottomSheetTheme()),
       home: Scaffold(
-        key: scaffoldKey,
-        body: const Center(child: Text('body')),
+        body: BottomSheet(
+          backgroundColor: backgroundColor,
+          elevation: elevation,
+          shape: shape,
+          onClosing: () {},
+          builder: (BuildContext context) {
+            return Container();
+          },
+        ),
       ),
     ));
 
-    showModalBottomSheet<void>(
-      backgroundColor: backgroundColor,
-      elevation: elevation,
-      shape: shape,
-      context: scaffoldKey.currentContext,
-      builder: (BuildContext context) {
-        return Container(
-          child: const Text('BottomSheet'),
-        );
-      },
+    final Material material = tester.widget<Material>(
+      find.descendant(
+        of: find.byType(BottomSheet),
+        matching: find.byType(Material),
+      ).first,
     );
-
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-
-    final Material material = _getBottomSheetMaterial(tester);
     expect(material.color, backgroundColor);
     expect(material.elevation, elevation);
     expect(material.shape, shape);
@@ -152,23 +139,5 @@ BottomSheetThemeData _bottomSheetTheme() {
     backgroundColor: Colors.orange,
     elevation: 12.0,
     shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(12)),
-  );
-}
-
-Material _getBottomSheetMaterial(WidgetTester tester) {
-  return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(BottomSheet),
-      matching: find.byType(Material),
-    ).first,
-  );
-}
-
-RawMaterialButton _getSnackBarButton(WidgetTester tester) {
-  return tester.widget<RawMaterialButton>(
-    find.descendant(
-      of: find.byType(SnackBar),
-      matching: find.byType(RawMaterialButton),
-    ).first,
   );
 }
