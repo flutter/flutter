@@ -124,18 +124,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    final Container container = _getContainerScaffold(tester);
+    final Container container = tester.widget<Container>(find.descendant(
+      of: find.byType(Scaffold),
+      matching: find.byType(Container),
+      ).first,
+    );
+    
     final BoxDecoration decoration = container.decoration;
     expect(decoration.color, const Color(0xFF323232));
     expect(decoration.shape,  BoxShape.rectangle);
   });
-}
-
-Container _getContainerScaffold(WidgetTester tester) {
-  return tester.widget<Container>(
-    find.descendant(
-      of: find.byType(Scaffold),
-      matching: find.byType(Container),
-    ).first,
-  );
 }
