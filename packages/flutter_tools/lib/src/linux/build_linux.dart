@@ -22,7 +22,8 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo) async {
   final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
   final Directory artifactDirectory = fs.directory(artifacts.getEngineArtifactsPath(TargetPlatform.linux_x64));
 
-  // Copy the source files and headers into linux project's cache directory.
+  // Copy the source files, headers, icu, and shared library into the Linux
+  // project's cache directory.
   copyDirectorySync(artifactDirectory, linuxProject.cacheDirectory);
 
   final String bundleFlags = buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '';
