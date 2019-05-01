@@ -110,9 +110,9 @@ void main() {
   testWidgets('Drawer scrimDrawerColor test', (WidgetTester tester) async {
 
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: Scaffold(
-          drawerScrimColor: const Color(0xFF323232),
+          drawerScrimColor: Color(0xFF323232),
           drawer: Drawer(),
         ),
       ),
