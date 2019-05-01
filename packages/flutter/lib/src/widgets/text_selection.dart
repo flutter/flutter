@@ -682,25 +682,23 @@ class _TextSelectionHandleOverlayState
               left: interactiveRect.left,
               width: interactiveRect.width,
               height: interactiveRect.height,
-              child: Container(
-                color: Colors.pinkAccent.withOpacity(0.3),
-                child: GestureDetector(
-                  dragStartBehavior: widget.dragStartBehavior,
-                  onPanStart: _handleDragStart,
-                  onPanUpdate: _handleDragUpdate,
-                  onTap: _handleTap,
-                  child: Padding(
-                    padding: EdgeInsets.only(
-                      left: interactivePadding.left,
-                      top: interactivePadding.top,
-                      right: interactivePadding.right,
-                      bottom: interactivePadding.bottom,
-                    ),
-                    child: widget.selectionControls.buildHandle(
-                      context,
-                      type,
-                      widget.renderObject.preferredLineHeight,
-                    ),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                dragStartBehavior: widget.dragStartBehavior,
+                onPanStart: _handleDragStart,
+                onPanUpdate: _handleDragUpdate,
+                onTap: _handleTap,
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: interactivePadding.left,
+                    top: interactivePadding.top,
+                    right: interactivePadding.right,
+                    bottom: interactivePadding.bottom,
+                  ),
+                  child: widget.selectionControls.buildHandle(
+                    context,
+                    type,
+                    widget.renderObject.preferredLineHeight,
                   ),
                 ),
               ),
