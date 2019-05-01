@@ -10,6 +10,22 @@ import 'basic_types.dart';
 import 'text_painter.dart';
 import 'text_style.dart';
 
+/// Mutable wrapper of an integer that can be passed by reference to track a
+/// value across a recursive stack.
+class TrackingInt {
+  TrackingInt([this.value = 0]);
+
+  int value;
+
+  @override operator +(TrackingInt other) => value + other.value;
+  @override operator -(TrackingInt other) => value - other.value;
+  @override operator *(TrackingInt other) => value * other.value;
+  @override operator /(TrackingInt other) => value / other.value;
+  @override operator <(TrackingInt other) => value < other.value;
+  @override operator >(TrackingInt other) => value > other.value;
+  @override operator ==(TrackingInt other) => value == other.value;
+}
+
 /// Called on each span as [InlineSpan.visitChildren] walks the [InlineSpan] tree.
 ///
 /// Returns true when the walk should continue, and false to stop visiting further
@@ -65,7 +81,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Creates a [InlineSpan] with the given values.
   const InlineSpan({
     this.style,
-    this.children,
   });
 
   /// The style to apply to this span.
@@ -73,17 +88,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// The [style] is also applied to any child spans when this is an instance
   /// of [TextSpan].
   final TextStyle style;
-
-  /// Additional spans to include as children.
-  ///
-  /// If both [text] and [children] are non-null, the text will precede the
-  /// children.
-  ///
-  /// Modifying the list after the [TextSpan] has been created is not
-  /// supported and may have unexpected results.
-  ///
-  /// The list must not contain any nulls.
-  final List<InlineSpan> children;
 
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained. [Paragraph] objects can be drawn on
@@ -99,6 +103,7 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   /// Returns the text span that contains the given position in the text. 
   InlineSpan getSpanForPosition(TextPosition position);
+  InlineSpan _computeSpanForPosition(TextPosition position, TrackingInt offset);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
@@ -108,7 +113,12 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.
-  String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true});
+  String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
+    final StringBuffer buffer = StringBuffer();
+    computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
+    return buffer.toString();
+  }
+  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
   ///
@@ -116,6 +126,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index);
+  bool _codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result);
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -126,6 +137,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// assert(myInlineSpan.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid();
+  bool _debugAssertIsValidVisitor();
 
   /// Describe the difference between this span and another, in terms of
   /// how much damage it will make to the rendering. The comparison is deep.
@@ -144,12 +156,11 @@ abstract class InlineSpan extends DiagnosticableTree {
     if (other.runtimeType != runtimeType)
       return false;
     final InlineSpan typedOther = other;
-    return typedOther.style == style
-        && listEquals<InlineSpan>(typedOther.children, children);
+    return typedOther.style == style;
   }
 
   @override
-  int get hashCode => hashValues(style, hashList(children));
+  int get hashCode => hashValues(style, 0);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

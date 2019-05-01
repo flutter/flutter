@@ -122,7 +122,7 @@ class WidgetSpan extends PlaceholderSpan {
            alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
            alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
            alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
-         baseline: baseline, style: style, children: null,
+         baseline: baseline, style: style,
        );
 
   /// The widget to embed inline within text.
@@ -164,13 +164,21 @@ class WidgetSpan extends PlaceholderSpan {
   bool visitChildren(InlineSpanVisitor visitor) {
     if (!visitor(this))
       return false;
-    assert(children == null);
     return true;
+  }
+
+  @override
+  InlineSpan _computeSpanForPosition(TextPosition position, TrackingInt offset) {
+    return null;
   }
 
   @override
   int codeUnitAt(int index) {
     return null;
+  }
+  @override
+  bool _codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
+    return true;
   }
 
   /// Describe the difference between this widget span and another [InlineSpan],
@@ -236,6 +244,11 @@ class WidgetSpan extends PlaceholderSpan {
   bool debugAssertIsValid() {
     // WidgetSpans are always valid as asserts prevent invalid WidgetSpans
     // from being constructed.
+    return true;
+  }
+
+  @override
+  bool _debugAssertIsValidVisitor() {
     return true;
   }
 }

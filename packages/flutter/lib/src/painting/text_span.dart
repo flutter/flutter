@@ -63,17 +63,28 @@ class TextSpan extends InlineSpan {
   /// [children] should be set.
   const TextSpan({
     this.text,
-    List<InlineSpan> children,
+    this.children,
     TextStyle style,
     this.recognizer,
     this.semanticsLabel,
-  }) : super(style: style, children: children);
+  }) : super(style: style,);
 
   /// The text contained in the span.
   ///
   /// If both [text] and [children] are non-null, the text will precede the
   /// children.
   final String text;
+
+  /// Additional spans to include as children.
+  ///
+  /// If both [text] and [children] are non-null, the text will precede the
+  /// children.
+  ///
+  /// Modifying the list after the [TextSpan] has been created is not
+  /// supported and may have unexpected results.
+  ///
+  /// The list must not contain any nulls.
+  final List<InlineSpan> children;
 
   /// A gesture recognizer that will receive events that hit this span.
   ///
@@ -210,26 +221,46 @@ class TextSpan extends InlineSpan {
   @override
   InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
-    final TextAffinity affinity = position.affinity;
-    final int targetOffset = position.offset;
-    int offset = 0;
+    // final TextAffinity affinity = position.affinity;
+    // final int targetOffset = position.offset;
+    TrackingInt offset = TrackingInt();
     TextSpan result;
     visitChildren((InlineSpan span) {
-      assert(result == null);
-      if (span is TextSpan) {
-        final TextSpan textSpan = span;
-        final int endOffset = offset + textSpan.text.length;
-        if (targetOffset == offset && affinity == TextAffinity.downstream ||
-            targetOffset > offset && targetOffset < endOffset ||
-            targetOffset == endOffset && affinity == TextAffinity.upstream) {
-          result = span;
-          return false;
-        }
-        offset = endOffset;
+      result = _computeSpanForPosition(position, offset);
+      if (result != null) {
+        return false;
       }
       return true;
+      // assert(result == null);
+      // if (span is TextSpan) {
+      //   final TextSpan textSpan = span;
+      //   final int endOffset = offset + textSpan.text.length;
+      //   if (targetOffset == offset && affinity == TextAffinity.downstream ||
+      //       targetOffset > offset && targetOffset < endOffset ||
+      //       targetOffset == endOffset && affinity == TextAffinity.upstream) {
+      //     result = span;
+      //     return false;
+      //   }
+      //   offset = endOffset;
+      // }
+      // return true;
     });
     return result;
+  }
+  InlineSpan _computeSpanForPosition(TextPosition position, TrackingInt offset) {
+    if (text == null) {
+      return null;
+    }
+    final TextAffinity affinity = position.affinity;
+    final int targetOffset = position.offset;
+    final int endOffset = offset.value + text.length;
+    if (offset.value == targetOffset && affinity == TextAffinity.downstream ||
+        offset.value < targetOffset && targetOffset < endOffset ||
+        endOffset == targetOffset && affinity == TextAffinity.upstream) {
+      return this;
+    }
+    offset.value = endOffset;
+    return null;
   }
 
   /// Flattens the [TextSpan] tree into a single string.
@@ -242,8 +273,29 @@ class TextSpan extends InlineSpan {
   /// represented as a 0xFFFC 'object replacement character'.
   @override
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
-    assert(debugAssertIsValid());
+    // assert(debugAssertIsValid());
+    // final StringBuffer buffer = StringBuffer();
+    // if (semanticsLabel != null && includeSemanticsLabels) {
+    //   buffer.write(semanticsLabel);
+    // } else if (text != null) {
+    //   buffer.write(text);
+    // }
+    // if (children != null) {
+    //   for (InlineSpan child in children) {
+    //     buffer.write(child.toPlainText(
+    //       includeSemanticsLabels: includeSemanticsLabels,
+    //       includePlaceholders: includePlaceholders,
+    //     ));
+    //   }
+    // }
+    // return buffer.toString();
+
     final StringBuffer buffer = StringBuffer();
+    computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
+    return buffer.toString();
+  }
+  void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
+    assert(debugAssertIsValid());
     if (semanticsLabel != null && includeSemanticsLabels) {
       buffer.write(semanticsLabel);
     } else if (text != null) {
@@ -251,13 +303,12 @@ class TextSpan extends InlineSpan {
     }
     if (children != null) {
       for (InlineSpan child in children) {
-        buffer.write(child.toPlainText(
+        child.computeToPlainText(buffer,
           includeSemanticsLabels: includeSemanticsLabels,
           includePlaceholders: includePlaceholders,
-        ));
+        );
       }
     }
-    return buffer.toString();
   }
 
   /// Returns the UTF-16 code unit at the given index in the flattened string.
@@ -269,20 +320,33 @@ class TextSpan extends InlineSpan {
   int codeUnitAt(int index) {
     if (index < 0)
       return null;
-    int offset = 0;
-    int result;
+    TrackingInt offset = TrackingInt();
+    TrackingInt result = TrackingInt(null);
     visitChildren((InlineSpan span) {
-      if (span is TextSpan) {
-        final TextSpan textSpan = span;
-        if (index - offset < textSpan.text.length) {
-          result = textSpan.text.codeUnitAt(index - offset);
-          return false;
-        }
-        offset += textSpan.text.length;
-      }
-      return true;
+      return _codeUnitAtVisitor(TrackingInt(index), offset, result);
+      // if (span is TextSpan) {
+      //   final TextSpan textSpan = span;
+      //   if (index - offset < textSpan.text.length) {
+      //     result = textSpan.text.codeUnitAt(index - offset);
+      //     return false;
+      //   }
+      //   offset += textSpan.text.length;
+      // }
+      // return true;
     });
-    return result;
+    return result.value;
+  }
+
+  bool _codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
+    if (text == null) {
+      return true;
+    }
+    if (index.value - offset.value < text.length) {
+      result.value = text.codeUnitAt(index.value - offset.value);
+      return false;
+    }
+    offset.value += text.length;
+    return true;
   }
 
   /// In checked mode, throws an exception if the object is not in a
@@ -297,13 +361,14 @@ class TextSpan extends InlineSpan {
   bool debugAssertIsValid() {
     assert(() {
       if (!visitChildren((InlineSpan span) {
-        if (span.children != null) {
-          for (InlineSpan child in span.children) {
-            if (child == null)
-              return false;
-          }
-        }
-        return true;
+        return _debugAssertIsValidVisitor();
+        // if (span.children != null) {
+        //   for (InlineSpan child in span.children) {
+        //     if (child == null)
+        //       return false;
+        //   }
+        // }
+        // return true;
       })) {
         throw FlutterError(
           'TextSpan contains a null child.\n'
@@ -314,6 +379,15 @@ class TextSpan extends InlineSpan {
       }
       return true;
     }());
+    return true;
+  }
+  bool _debugAssertIsValidVisitor() {
+    if (children != null) {
+      for (InlineSpan child in children) {
+        if (child == null)
+          return false;
+      }
+    }
     return true;
   }
 
