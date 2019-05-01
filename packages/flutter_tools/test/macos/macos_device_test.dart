@@ -77,7 +77,7 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
         return FakeProcess(
           exitCode: Completer<int>().future,
-          stdout: Stream<List<int>>.fromIterable([
+          stdout: Stream<List<int>>.fromIterable(<List<int>>[
             utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
           ]),
           stderr: const Stream<List<int>>.empty(),
