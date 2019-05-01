@@ -125,8 +125,9 @@ class _TextSelectionHandlePainter extends CustomPainter {
 }
 
 class _MaterialTextSelectionControls extends TextSelectionControls {
+  /// Returns the size of the Material handle.
   @override
-  Size handleSize = const Size(_kHandleSize, _kHandleSize);
+  Size getHandleSize(double textLineHeight) => const Size(_kHandleSize, _kHandleSize);
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
@@ -199,7 +200,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
         return Offset(_kHandleSize, 0);
       case TextSelectionHandleType.right:
         return Offset(0, 0);
-      case TextSelectionHandleType.collapsed:
+      default:
         return Offset(_kHandleSize / 2, 0);
     }
   }

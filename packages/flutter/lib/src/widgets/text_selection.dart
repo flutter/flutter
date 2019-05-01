@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
@@ -11,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/material.dart';
 
 import 'basic.dart';
 import 'container.dart';
@@ -107,7 +105,7 @@ abstract class TextSelectionControls {
   Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate);
 
   /// Returns the size of the selection handle.
-  Size get handleSize;
+  Size getHandleSize(double textLineHeight);
 
   /// Whether the current selection of the text field managed by the given
   /// `delegate` can be removed from the text field and placed into the
@@ -514,6 +512,37 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   }
 }
 
+/// The minimum size that a widget should be in order to be easily interacted
+/// with by the user.
+@visibleForTesting
+const double kMinInteractiveSize = 48.0;
+/// Interactive areas are expected to be at least a certain size in order to be
+/// easily touched by a user's finger. This method takes a Rect and returns a
+/// new Rect that has been expanded, while staying centered, to be at least this
+/// minimum interactive size in each direction.
+@visibleForTesting
+Rect getInteractiveRect(Rect rect) {
+  Rect interactiveRect = rect;
+  if (interactiveRect.width < kMinInteractiveSize) {
+    interactiveRect = Rect.fromLTWH(
+      interactiveRect.left - (kMinInteractiveSize - interactiveRect.width) / 2,
+      interactiveRect.top,
+      kMinInteractiveSize,
+      interactiveRect.height,
+    );
+  }
+  if (interactiveRect.height < kMinInteractiveSize) {
+    interactiveRect = Rect.fromLTWH(
+      interactiveRect.left,
+      interactiveRect.top - (kMinInteractiveSize - interactiveRect.height) / 2,
+      interactiveRect.width,
+      kMinInteractiveSize,
+    );
+  }
+
+  return interactiveRect;
+}
+
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
   Offset _dragPosition;
@@ -555,7 +584,10 @@ class _TextSelectionHandleOverlayState
   }
 
   void _handleDragStart(DragStartDetails details) {
-    _dragPosition = details.globalPosition + Offset(0.0, -widget.selectionControls.handleSize.height);
+    final Size handleSize = widget.selectionControls.getHandleSize(
+      widget.renderObject.preferredLineHeight,
+    );
+    _dragPosition = details.globalPosition + Offset(0.0, -handleSize.height);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -619,15 +651,14 @@ class _TextSelectionHandleOverlayState
       point.dy.clamp(0.0, viewport.height),
     );
 
-    final Widget handle = widget.selectionControls.buildHandle(
-      context,
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
       type,
       widget.renderObject.preferredLineHeight,
     );
-    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(type, widget.renderObject.preferredLineHeight);
-    final Offset superPoint = point - handleAnchor;
-    final Size handleSize = widget.selectionControls.handleSize;
-    Rect handleRect = Rect.fromLTWH(
+    final Size handleSize = widget.selectionControls.getHandleSize(
+      widget.renderObject.preferredLineHeight,
+    );
+    final Rect handleRect = Rect.fromLTWH(
       // Put handleAnchor on top of point
       point.dx - handleAnchor.dx,
       point.dy - handleAnchor.dy,
@@ -635,39 +666,14 @@ class _TextSelectionHandleOverlayState
       handleSize.height,
     );
 
-    // Make sure the GestureDetector includes a minimum of 48px of interactive
-    // space for each handle.
-    const double minInteractiveSize = 48.0;
-    Rect interactiveRect = handleRect;
-    Rect interactivePadding = Rect.fromLTRB(0, 0, 0, 0);
-    if (interactiveRect.width < minInteractiveSize) {
-      interactiveRect = Rect.fromLTWH(
-        interactiveRect.left - (minInteractiveSize - interactiveRect.width) / 2,
-        interactiveRect.top,
-        minInteractiveSize,
-        interactiveRect.height,
-      );
-      interactivePadding = Rect.fromLTRB(
-        (minInteractiveSize - handleRect.width) / 2,
-        interactivePadding.top,
-        (minInteractiveSize - handleRect.width) / 2,
-        interactivePadding.bottom,
-      );
-    }
-    if (interactiveRect.height < minInteractiveSize) {
-      interactiveRect = Rect.fromLTWH(
-        interactiveRect.left,
-        interactiveRect.top - (minInteractiveSize - interactiveRect.height) / 2,
-        interactiveRect.width,
-        minInteractiveSize,
-      );
-      interactivePadding = Rect.fromLTRB(
-        interactivePadding.left,
-        (minInteractiveSize - handleRect.height) / 2,
-        interactivePadding.right,
-        (minInteractiveSize - handleRect.height) / 2,
-      );
-    }
+    // Make sure the GestureDetector is big enough to be easily interactive.
+    final Rect interactiveRect = getInteractiveRect(handleRect);
+    final double paddingHorizontal = handleRect.width < interactiveRect.width
+      ? (interactiveRect.width - handleRect.width) / 2
+      : 0;
+    final double paddingVertical = handleRect.height < interactiveRect.height
+      ? (interactiveRect.height - handleRect.height) / 2
+      : 0;
 
     return CompositedTransformFollower(
       link: widget.layerLink,
@@ -690,10 +696,10 @@ class _TextSelectionHandleOverlayState
                 onTap: _handleTap,
                 child: Padding(
                   padding: EdgeInsets.only(
-                    left: interactivePadding.left,
-                    top: interactivePadding.top,
-                    right: interactivePadding.right,
-                    bottom: interactivePadding.bottom,
+                    left: paddingHorizontal,
+                    top: paddingVertical,
+                    right: paddingHorizontal,
+                    bottom: paddingVertical,
                   ),
                   child: widget.selectionControls.buildHandle(
                     context,
