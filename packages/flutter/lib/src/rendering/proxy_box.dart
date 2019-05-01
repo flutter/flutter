@@ -2258,7 +2258,7 @@ class RenderFittedBox extends RenderProxyBox {
     _transform = null;
   }
 
-  double _div_handle_zero(double a, double b) {
+  double _divHandleZero(double a, double b) {
     return a == 0 ? 0 : a / b;
   }
 
@@ -2273,8 +2273,8 @@ class RenderFittedBox extends RenderProxyBox {
       _resolve();
       final Size childSize = child.size;
       final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
-      final double scaleX = _div_handle_zero(sizes.destination.width, sizes.source.width);
-      final double scaleY = _div_handle_zero(sizes.destination.height, sizes.source.height);
+      final double scaleX = _divHandleZero(sizes.destination.width, sizes.source.width);
+      final double scaleY = _divHandleZero(sizes.destination.height, sizes.source.height);
       final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
       final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
