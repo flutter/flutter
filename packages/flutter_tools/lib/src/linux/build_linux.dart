@@ -13,41 +13,17 @@ import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 
-// The name of the icu data file.
-const String _kIcuDataName = 'icudtl.dat';
-
-/// The name of the engine library.
-const String _kLibraryName = 'libflutter_linux.so';
-
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo) async {
   /// Cache flutter root in linux directory.
-  linuxProject.editableHostAppDirectory.childFile('.generated_flutter_root')
+ linuxProject.cacheDirectory.childFile('generated_flutter_root')
     ..createSync(recursive: true)
     ..writeAsStringSync(Cache.flutterRoot);
   final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
-  final Directory cacheDirectory = fs.directory(artifacts.getEngineArtifactsPath(TargetPlatform.linux_x64));
-  final Directory buildDirectory = fs.directory(fs.path.join(getLinuxBuildDirectory(), 'cache', 'flutter_library'));
-  final File icuData = fs.file(fs.path.join(cacheDirectory.path, _kIcuDataName));
-  final File libraryFile = fs.file(fs.path.join(cacheDirectory.path, _kLibraryName));
+  final Directory artifactDirectory = fs.directory(artifacts.getEngineArtifactsPath(TargetPlatform.linux_x64));
 
-  // Copy the source files and headers.
-  copyDirectorySync(cacheDirectory, buildDirectory);
-
-  // Copy the ICU data.
-  final File icuDestination = fs.file(fs.path.join(getLinuxBuildDirectory(), buildFlag, 'data', _kIcuDataName));
-  if (!icuDestination.existsSync()) {
-    icuDestination.createSync(recursive: true);
-  }
-  icuData.copySync(icuDestination.path);
-
-  // Copy the library file.
-  final File libraryDestination = fs.file(fs.path.join(getLinuxBuildDirectory(), buildFlag, 'lib', _kLibraryName));
-  if (!libraryDestination.existsSync()) {
-    libraryDestination.createSync(recursive: true);
-  }
-  libraryFile.copySync(libraryDestination.path);
-
+  // Copy the source files and headers into linux project's cache directory.
+  copyDirectorySync(artifactDirectory, linuxProject.cacheDirectory);
 
   final String bundleFlags = buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '';
   final Process process = await processManager.start(<String>[
