@@ -224,7 +224,7 @@ class TextSpan extends InlineSpan {
     final TrackingInt offset = TrackingInt();
     TextSpan result;
     visitChildren((InlineSpan span) {
-      result = span.computeSpanForPosition(position, offset);
+      result = span.getSpanForPositionVisitor(position, offset);
       if (result != null) {
         return false;
       }
@@ -233,7 +233,7 @@ class TextSpan extends InlineSpan {
     return result;
   }
   @override
-  InlineSpan computeSpanForPosition(TextPosition position, TrackingInt offset) {
+  InlineSpan getSpanForPositionVisitor(TextPosition position, TrackingInt offset) {
     if (text == null) {
       return null;
     }

@@ -168,7 +168,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  InlineSpan computeSpanForPosition(TextPosition position, TrackingInt offset) {
+  InlineSpan getSpanForPositionVisitor(TextPosition position, TrackingInt offset) {
     return null;
   }
 
