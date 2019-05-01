@@ -203,24 +203,26 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ) {
     final double totalPadding = beforePadding + afterPadding;
 
+    // mainAxisMargin has no implication on the quantity of visible contents,
+    // but it affects the quantity of the available track size (the scrolling
+    // boundaries).
+    final double effectiveInside = inside - totalPadding;
+    final double trackSize = viewport - totalPadding - 2 * mainAxisMargin;
+
     // Skip painting if there's not enough space.
-    if (viewport <= totalPadding || viewport <= totalPadding + 2 * mainAxisMargin) {
+    if (effectiveInside <= 0 || trackSize <= 0) {
       return;
     }
 
-    final double effectiveInside = inside - totalPadding;
-    // Because viewport <= inside this is guaranteed to be greater than or equal to 0.
-    final double effectiveViewport = viewport - totalPadding;
-
     // Establish the minimum size possible.
-    double thumbExtent = math.min(effectiveViewport, minOverscrollLength);
+    double thumbExtent = math.min(trackSize, minOverscrollLength);
 
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
     final double fractionVisible = (effectiveInside / (before + inside + after)).clamp(0.0, 1.0);
     thumbExtent = math.max(
       thumbExtent,
-      effectiveViewport * fractionVisible - 2 * mainAxisMargin,
+      trackSize * fractionVisible
     );
     // Thumb extent is no smaller than minLength if scrolling normally.
     if (before > 0 && after > 0) {
@@ -243,16 +245,16 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     else {
       thumbExtent = math.max(
         thumbExtent,
-        minLength * (((effectiveInside / effectiveViewport) - 0.8).clamp(0.0, 0.2) / 0.2),
+        minLength * (((effectiveInside / trackSize) - 0.8).clamp(0.0, 0.2) / 0.2),
       );
     }
 
     // Disregard `minLength` or `minOverscrollLength` if the scrollbar is too large,
     // to prevent the scrollbar from scrolling towards the wrong direction.
-    thumbExtent = math.min(thumbExtent, effectiveViewport - 2 * mainAxisMargin);
+    thumbExtent = math.min(thumbExtent, trackSize);
 
     final double fractionPast = (before + after > 0.0) ? (before / (before + after)).clamp(0.0, 1.0) : 0;
-    final double thumbOffset = fractionPast * (effectiveViewport - thumbExtent - 2 * mainAxisMargin) + mainAxisMargin + beforePadding;
+    final double thumbOffset = fractionPast * (trackSize - thumbExtent) + mainAxisMargin + beforePadding;
 
     _paintThumbCrossAxis(canvas, size, thumbOffset, thumbExtent, direction);
   }
