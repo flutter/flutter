@@ -35,6 +35,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     if (style != null)
       properties.defaultDiagnosticsTreeStyle = style;
 
@@ -180,10 +181,12 @@ void validatePropertyJsonSerializationHelper(final Map<String, Object> json, Dia
 
 void main() {
   test('TreeDiagnosticsMixin control test', () async {
-    void goldenStyleTest(String description,
-        {DiagnosticsTreeStyle style,
-        DiagnosticsTreeStyle lastChildStyle,
-        String golden = ''}) {
+    void goldenStyleTest(
+      String description, {
+      DiagnosticsTreeStyle style,
+      DiagnosticsTreeStyle lastChildStyle,
+      String golden = '',
+    }) {
       final TestTree tree = TestTree(children: <TestTree>[
         TestTree(name: 'node A', style: style),
         TestTree(
@@ -315,7 +318,8 @@ void main() {
   });
 
   test('TreeDiagnosticsMixin tree with properties test', () async {
-    void goldenStyleTest(String description, {
+    void goldenStyleTest(
+      String description, {
       DiagnosticsTreeStyle style,
       DiagnosticsTreeStyle lastChildStyle,
       @required String golden,
@@ -626,7 +630,7 @@ void main() {
                 StringProperty('node_type', '<leaf node>', showName: false, quoted: false),
                 IntProperty('foo', 42),
               ],
-              style: DiagnosticsTreeStyle.dense
+              style: DiagnosticsTreeStyle.dense,
             ),
           ],
         ),
@@ -948,7 +952,7 @@ void main() {
   });
 
   test('callback property test', () {
-    final Function onClick = () {};
+    final Function onClick = () { };
     final ObjectFlagProperty<Function> present = ObjectFlagProperty<Function>(
       'onClick',
       onClick,
@@ -1241,7 +1245,7 @@ void main() {
       'name',
       rect,
       showName: false,
-      level: DiagnosticLevel.warning
+      level: DiagnosticLevel.warning,
     );
     expect(hideName.value, equals(rect));
     expect(hideName.level, equals(DiagnosticLevel.warning));
@@ -1382,7 +1386,7 @@ void main() {
   });
 
   test('has property test', () {
-    final Function onClick = () {};
+    final Function onClick = () { };
     final ObjectFlagProperty<Function> has = ObjectFlagProperty<Function>.has(
       'onClick',
       onClick,

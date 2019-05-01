@@ -54,7 +54,7 @@ class _ElevationDemoState extends State<ElevationDemo> {
             onPressed: () {
               setState(() => _showElevation = !_showElevation);
             },
-          )
+          ),
         ],
       ),
       body: ListView(

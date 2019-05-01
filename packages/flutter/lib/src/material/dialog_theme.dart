@@ -96,7 +96,7 @@ class DialogTheme extends Diagnosticable {
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
       titleTextStyle: TextStyle.lerp(a?.titleTextStyle, b?.titleTextStyle, t),
-      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t)
+      contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
     );
   }
 

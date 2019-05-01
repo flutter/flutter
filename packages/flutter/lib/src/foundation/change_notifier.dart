@@ -213,7 +213,7 @@ class ChangeNotifier implements Listenable {
             informationCollector: (StringBuffer information) {
               information.writeln('The $runtimeType sending notification was:');
               information.write('  $this');
-            }
+            },
           ));
         }
       }
@@ -228,7 +228,7 @@ class _MergingListenable extends Listenable {
 
   @override
   void addListener(VoidCallback listener) {
-    for (final Listenable child  in _children) {
+    for (final Listenable child in _children) {
       child?.addListener(listener);
     }
   }
@@ -248,14 +248,18 @@ class _MergingListenable extends Listenable {
 
 /// A [ChangeNotifier] that holds a single value.
 ///
-/// When [value] is replaced, this class notifies its listeners.
+/// When [value] is replaced with something that is not equal to the old
+/// value as evaluated by the equality operator ==, this class notifies its
+/// listeners.
 class ValueNotifier<T> extends ChangeNotifier implements ValueListenable<T> {
   /// Creates a [ChangeNotifier] that wraps this value.
   ValueNotifier(this._value);
 
   /// The current value stored in this notifier.
   ///
-  /// When the value is replaced, this class notifies its listeners.
+  /// When the value is replaced with something that is not equal to the old
+  /// value as evaluated by the equality operator ==, this class notifies its
+  /// listeners.
   @override
   T get value => _value;
   T _value;

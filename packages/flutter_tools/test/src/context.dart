@@ -38,7 +38,9 @@ MockDoctor get testDoctor => context[Doctor];
 typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
-void testUsingContext(String description, dynamic testMethod(), {
+void testUsingContext(
+  String description,
+  dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
@@ -84,6 +86,7 @@ void testUsingContext(String description, dynamic testMethod(), {
           Usage: () => MockUsage(),
           XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
+          TimeoutConfiguration: () => const TimeoutConfiguration(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -292,7 +295,7 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  XcodeProjectInfo getInfo(String projectPath) {
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -301,7 +304,10 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  @override
+  bool get isStable => false;
+}
 
 class MockClock extends Mock implements SystemClock {}
 

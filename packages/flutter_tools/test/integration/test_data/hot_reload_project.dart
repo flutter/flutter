@@ -77,7 +77,7 @@ class HotReloadProject extends Project {
   void uncommentHotReloadPrint() {
     final String newMainContents = main.replaceAll(
       '// printHotReloadWorked();',
-      'printHotReloadWorked();'
+      'printHotReloadWorked();',
     );
     writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
   }

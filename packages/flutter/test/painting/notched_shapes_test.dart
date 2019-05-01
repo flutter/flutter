@@ -23,7 +23,7 @@ void main() {
           expectedPath,
           areaToCompare: host.inflate(5.0),
           sampleSize: 40,
-        )
+        ),
       );
     });
 
@@ -55,7 +55,7 @@ void main() {
           Path()..addRect(host),
           areaToCompare: host.inflate(800.0),
           sampleSize: 100,
-        )
+        ),
       );
     });
 
@@ -79,7 +79,7 @@ void main() {
             ..close(),
           areaToCompare: Rect.fromLTWH(-300.0, -300.0, 600.0, 600.0),
           sampleSize: 100,
-        )
+        ),
       );
     });
 
@@ -101,7 +101,7 @@ void main() {
             ..close(),
           areaToCompare: Rect.fromLTWH(-300.0, -300.0, 600.0, 600.0),
           sampleSize: 100,
-        )
+        ),
       );
     });
   });

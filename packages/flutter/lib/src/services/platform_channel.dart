@@ -27,7 +27,7 @@ import 'platform_messages.dart';
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name] and [codec].
   ///
@@ -105,7 +105,7 @@ class BasicMessageChannel<T> {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class MethodChannel {
   /// Creates a [MethodChannel] with the specified [name].
   ///
@@ -148,7 +148,7 @@ class MethodChannel {
   /// {@tool sample}
   ///
   /// The code might be packaged up as a musical plugin, see
-  /// <https://flutter.io/developing-packages/>:
+  /// <https://flutter.dev/developing-packages/>:
   ///
   /// ```dart
   /// class Music {
@@ -290,7 +290,7 @@ class MethodChannel {
   ///  * <https://docs.flutter.io/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     assert(method != null);
     final ByteData result = await BinaryMessages.send(
       name,
@@ -312,9 +312,9 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) async {
+  Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
     final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
-    return result.cast<T>();
+    return result?.cast<T>();
   }
 
   /// An implementation of [invokeMethod] that can return typed maps.
@@ -326,9 +326,9 @@ class MethodChannel {
   /// See also:
   ///
   ///  * [invokeMethod], which this call delegates to.
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) async {
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
     final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
-    return result.cast<K, V>();
+    return result?.cast<K, V>();
   }
 
   /// Sets a callback for receiving method calls on this channel.
@@ -405,7 +405,7 @@ class OptionalMethodChannel extends MethodChannel {
     : super(name, codec);
 
   @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
+  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
     try {
       final T result = await super.invokeMethod<T>(method, arguments);
       return result;
@@ -415,13 +415,13 @@ class OptionalMethodChannel extends MethodChannel {
   }
 
   @override
-  Future<List<T>> invokeListMethod<T>(String method, [dynamic arguments]) async {
+  Future<List<T>> invokeListMethod<T>(String method, [ dynamic arguments ]) async {
     final List<dynamic> result = await invokeMethod<List<dynamic>>(method, arguments);
     return result.cast<T>();
   }
 
   @override
-  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) async {
+  Future<Map<K, V>> invokeMapMethod<K, V>(String method, [ dynamic arguments ]) async {
     final Map<dynamic, dynamic> result = await invokeMethod<Map<dynamic, dynamic>>(method, arguments);
     return result.cast<K, V>();
   }
@@ -441,7 +441,7 @@ class OptionalMethodChannel extends MethodChannel {
 /// The logical identity of the channel is given by its name. Identically named
 /// channels will interfere with each other's communication.
 ///
-/// See: <https://flutter.io/platform-channels/>
+/// See: <https://flutter.dev/platform-channels/>
 class EventChannel {
   /// Creates an [EventChannel] with the specified [name].
   ///
@@ -470,7 +470,7 @@ class EventChannel {
   /// through the [FlutterError] facility. Stream activation happens only when
   /// stream listener count changes from 0 to 1. Stream deactivation happens
   /// only when stream listener count changes from 1 to 0.
-  Stream<dynamic> receiveBroadcastStream([dynamic arguments]) {
+  Stream<dynamic> receiveBroadcastStream([ dynamic arguments ]) {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {

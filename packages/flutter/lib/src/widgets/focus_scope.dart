@@ -37,8 +37,12 @@ class _FocusScopeMarker extends InheritedWidget {
 /// FocusScope.of(context).setFirstFocus(node);
 /// ```
 ///
-/// When a [FocusScope] is removed from the tree, the previously active
-/// [FocusScope] becomes active again.
+/// If a [FocusScope] is removed from the widget tree, then the previously
+/// focused node will be focused, but only if the [node] is the same [node]
+/// object as in the previous frame. To assure this, you can use a GlobalKey to
+/// keep the [FocusScope] widget from being rebuilt from one frame to the next,
+/// or pass in the [node] from a parent that is not rebuilt. If there is no next
+/// sibling, then the parent scope node will be focused.
 ///
 /// See also:
 ///

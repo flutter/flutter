@@ -6,6 +6,49 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  testWidgets('Dialog interaction', (WidgetTester tester) async {
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextField(
+              autofocus: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    final BuildContext context = tester.element(find.byType(TextField));
+
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
+    );
+
+    await tester.pump();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    Navigator.of(tester.element(find.text('Dialog'))).pop();
+    await tester.pump();
+
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byType(TextField));
+    await tester.idle();
+
+    expect(tester.testTextInput.isVisible, isTrue);
+
+    await tester.pumpWidget(Container());
+
+    expect(tester.testTextInput.isVisible, isFalse);
+  });
+
   testWidgets('Request focus shows keyboard', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
@@ -87,50 +130,7 @@ void main() {
     await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
-  });
-
-  testWidgets('Dialog interaction', (WidgetTester tester) async {
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    await tester.pumpWidget(
-      const MaterialApp(
-        home: Material(
-          child: Center(
-            child: TextField(
-              autofocus: true,
-            ),
-          ),
-        ),
-      ),
-    );
-
-    expect(tester.testTextInput.isVisible, isTrue);
-
-    final BuildContext context = tester.element(find.byType(TextField));
-
-    showDialog<void>(
-      context: context,
-      builder: (BuildContext context) => const SimpleDialog(title: Text('Dialog')),
-    );
-
-    await tester.pump();
-
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    Navigator.of(tester.element(find.text('Dialog'))).pop();
-    await tester.pump();
-
-    expect(tester.testTextInput.isVisible, isFalse);
-
-    await tester.tap(find.byType(TextField));
-    await tester.idle();
-
-    expect(tester.testTextInput.isVisible, isTrue);
-
-    await tester.pumpWidget(Container());
-
-    expect(tester.testTextInput.isVisible, isFalse);
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/29384.
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();

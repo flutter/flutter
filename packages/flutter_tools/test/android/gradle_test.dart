@@ -252,7 +252,8 @@ someOtherTask
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.android_arm, any)).thenReturn('engine');
+      when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
+          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
 
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
@@ -337,7 +338,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -355,7 +356,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -373,7 +374,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -390,7 +391,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -415,13 +416,13 @@ flutter:
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: 3),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3'),
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: 4),
+        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: '4'),
         expectedBuildName: '1.0.3',
         expectedBuildNumber: '4',
       );

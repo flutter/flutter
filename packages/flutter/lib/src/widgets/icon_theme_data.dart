@@ -32,7 +32,7 @@ class IconThemeData extends Diagnosticable {
 
   /// Creates a copy of this icon theme but with the given fields replaced with
   /// the new values.
-  IconThemeData copyWith({Color color, double opacity, double size}) {
+  IconThemeData copyWith({ Color color, double opacity, double size }) {
     return IconThemeData(
       color: color ?? this.color,
       opacity: opacity ?? this.opacity,

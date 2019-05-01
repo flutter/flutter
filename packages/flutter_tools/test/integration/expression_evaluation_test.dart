@@ -144,17 +144,16 @@ Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
 
 Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
   final InstanceRef res = await flutter.evaluateInFrame('new DateTime.now().year');
-    expect(res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
+  expect(res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
 }
 
 Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
   final DateTime now = DateTime.now();
-    final InstanceRef resp = await flutter.evaluateInFrame('new DateTime.now()');
-    expect(resp.classRef.name, equals('DateTime'));
-    // Ensure we got a reasonable approximation. The more accurate we try to
-    // make this, the more likely it'll fail due to differences in the time
-    // in the remote VM and the local VM at the time the code runs.
-    final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
-    expect(res.valueAsString,
-        equals('${now.year}-${now.month}-${now.day}'));
+  final InstanceRef resp = await flutter.evaluateInFrame('new DateTime.now()');
+  expect(resp.classRef.name, equals('DateTime'));
+  // Ensure we got a reasonable approximation. The more accurate we try to
+  // make this, the more likely it'll fail due to differences in the time
+  // in the remote VM and the local VM at the time the code runs.
+  final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
+  expect(res.valueAsString, equals('${now.year}-${now.month}-${now.day}'));
 }

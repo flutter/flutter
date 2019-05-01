@@ -78,7 +78,7 @@ mixin ServicesBinding on BindingBase {
       if (split >= 0) {
         result.add(LicenseEntryWithLineBreaks(
           license.substring(0, split).split('\n'),
-          license.substring(split + 2)
+          license.substring(split + 2),
         ));
       } else {
         result.add(LicenseEntryWithLineBreaks(const <String>[], license));

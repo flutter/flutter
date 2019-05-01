@@ -7,7 +7,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  for (String language in kSupportedLanguages) {
+  for (String language in kMaterialSupportedLanguages) {
     testWidgets('translations exist for $language', (WidgetTester tester) async {
       final Locale locale = Locale(language);
 
@@ -247,7 +247,7 @@ void main() {
     expect(localizations is MaterialLocalizationZh, true);
   });
 
-testWidgets('Serbian resolution', (WidgetTester tester) async {
+  testWidgets('Serbian resolution', (WidgetTester tester) async {
     Locale locale = const Locale.fromSubtags(languageCode: 'sr', scriptCode: null, countryCode: null);
     expect(GlobalMaterialLocalizations.delegate.isSupported(locale), isTrue);
     MaterialLocalizations localizations = await GlobalMaterialLocalizations.delegate.load(locale);

@@ -139,7 +139,7 @@ class SimControl {
     return result;
   }
 
-  Future<RunResult> launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
     final List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
       args.addAll(launchArgs);
@@ -297,7 +297,6 @@ class IOSSimulator extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -322,10 +321,12 @@ class IOSSimulator extends Device {
       if (debuggingOptions.buildInfo.isDebug)
         args.addAll(<String>[
           '--enable-checked-mode',
-          '--verify-entry-points'
+          '--verify-entry-points',
         ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
+      if (debuggingOptions.disableServiceAuthCodes)
+        args.add('--disable-service-auth-codes');
       if (debuggingOptions.skiaDeterministicRendering)
         args.add('--skia-deterministic-rendering');
       if (debuggingOptions.useTestFonts)
@@ -434,7 +435,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
     assert(app is IOSApp);
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
@@ -500,7 +501,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
     _appName = app == null ? null : app.name.replaceAll('.app', '');
   }
@@ -700,7 +701,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     if (hostPort == null || hostPort == 0) {
       hostPort = devicePort;
     }

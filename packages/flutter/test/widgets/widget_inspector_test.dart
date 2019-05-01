@@ -440,7 +440,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await tester.pump();
 
       expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/29108
 
     testWidgets('WidgetInspector long press', (WidgetTester tester) async {
       bool didLongPress = false;
@@ -880,7 +880,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This RichText widget is created by the build method of the Text widget
       // thus the creation location is in text.dart not basic.dart
       final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']).pathSegments;
-      expect(pathSegmentsFramework.join('/'), endsWith('/packages/flutter/lib/src/widgets/text.dart'));
+      expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
@@ -964,7 +964,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(selectionChangedCount, equals(2));
       expect(service.selection.current, equals(elementB.renderObject));
 
-      await service.testExtension('setSelectionById', <String, String>{'arg' : service.toId(elementA, 'my-group'), 'objectGroup': 'my-group'});
+      await service.testExtension('setSelectionById', <String, String>{'arg': service.toId(elementA, 'my-group'), 'objectGroup': 'my-group'});
       expect(selectionChangedCount, equals(3));
       expect(service.selection.currentElement, equals(elementA));
       expect(service.selection.current, equals(elementA.renderObject));
@@ -1281,7 +1281,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // the RichText object not the Text element.
       final Map<String, Object> regularSelection = await service.testExtension('getSelectedWidget', <String, String>{'arg': null, 'objectGroup': 'my-group'});
       expect(service.toObject(regularSelection['valueId']), richTextDiagnostic.value);
-   }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1406,7 +1406,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This RichText widget is created by the build method of the Text widget
       // thus the creation location is in text.dart not basic.dart
       final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']).pathSegments;
-      expect(pathSegmentsFramework.join('/'), endsWith('/packages/flutter/lib/src/widgets/text.dart'));
+      expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
@@ -1760,8 +1760,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });
 
-    testWidgets('ext.flutter.inspector.screenshot',
-        (WidgetTester tester) async {
+    testWidgets('ext.flutter.inspector.screenshot', (WidgetTester tester) async {
       final GlobalKey outerContainerKey = GlobalKey();
       final GlobalKey paddingKey = GlobalKey();
       final GlobalKey redContainerKey = GlobalKey();
@@ -2168,7 +2167,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_small.1.png'),
         skip: !Platform.isLinux,
       );
 

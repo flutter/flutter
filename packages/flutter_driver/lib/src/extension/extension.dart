@@ -135,6 +135,7 @@ class FlutterDriverExtension {
     _finders.addAll(<String, FinderConstructor>{
       'ByText': (SerializableFinder finder) => _createByTextFinder(finder),
       'ByTooltipMessage': (SerializableFinder finder) => _createByTooltipMessageFinder(finder),
+      'BySemanticsLabel': (SerializableFinder finder) => _createBySemanticsLabelFinder(finder),
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
       'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
@@ -194,7 +195,7 @@ class FlutterDriverExtension {
     }
   }
 
-  Map<String, dynamic> _makeResponse(dynamic response, {bool isError = false}) {
+  Map<String, dynamic> _makeResponse(dynamic response, { bool isError = false }) {
     return <String, dynamic>{
       'isError': isError,
       'response': response,
@@ -208,7 +209,7 @@ class FlutterDriverExtension {
   }
 
   // Waits until at the end of a frame the provided [condition] is [true].
-  Future<void> _waitUntilFrame(bool condition(), [Completer<void> completer]) {
+  Future<void> _waitUntilFrame(bool condition(), [ Completer<void> completer ]) {
     completer ??= Completer<void>();
     if (!condition()) {
       SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
@@ -260,6 +261,22 @@ class FlutterDriverExtension {
         return widget.message == arguments.text;
       return false;
     }, description: 'widget with text tooltip "${arguments.text}"');
+  }
+
+  Finder _createBySemanticsLabelFinder(BySemanticsLabel arguments) {
+    return find.byElementPredicate((Element element) {
+      if (element is! RenderObjectElement) {
+        return false;
+      }
+      final String semanticsLabel = element.renderObject?.debugSemantics?.label;
+      if (semanticsLabel == null) {
+        return false;
+      }
+      final Pattern label = arguments.label;
+      return label is RegExp
+          ? label.hasMatch(semanticsLabel)
+          : label == semanticsLabel;
+    }, description: 'widget with semantic label "${arguments.label}"');
   }
 
   Finder _createByValueKeyFinder(ByValueKey arguments) {

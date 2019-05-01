@@ -50,7 +50,7 @@ class RelativeRect {
       rect.left - container.left,
       rect.top - container.top,
       container.right - rect.right,
-      container.bottom - rect.bottom
+      container.bottom - rect.bottom,
     );
   }
 
@@ -104,7 +104,7 @@ class RelativeRect {
       math.max(left, other.left),
       math.max(top, other.top),
       math.max(right, other.right),
-      math.max(bottom, other.bottom)
+      math.max(bottom, other.bottom),
     );
   }
 

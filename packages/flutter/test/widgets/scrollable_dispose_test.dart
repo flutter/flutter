@@ -19,7 +19,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: FlipWidget(
           left: ListView(children: textWidgets),
-          right: Container()
+          right: Container(),
         ),
       ),
     );

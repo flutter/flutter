@@ -24,7 +24,7 @@ void beginFrame(Duration timeStamp) {
   canvas.scale(devicePixelRatio, devicePixelRatio);
   canvas.drawParagraph(paragraph, ui.Offset(
     (logicalSize.width - paragraph.maxIntrinsicWidth) / 2.0,
-    (logicalSize.height - paragraph.height) / 2.0
+    (logicalSize.height - paragraph.height) / 2.0,
   ));
   final ui.Picture picture = recorder.endRecording();
 

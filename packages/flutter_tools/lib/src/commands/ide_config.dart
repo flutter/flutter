@@ -43,6 +43,9 @@ class IdeConfigCommand extends FlutterCommand {
   final String name = 'ide-config';
 
   @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+
+  @override
   final String description = 'Configure the IDE for use in the Flutter tree.\n\n'
       'If run on a Flutter tree that is already configured for the IDE, this '
       'command will add any new configurations, recreate any files that are '
@@ -121,7 +124,7 @@ class IdeConfigCommand extends FlutterCommand {
       return;
     }
 
-    final Set<String> manifest = Set<String>();
+    final Set<String> manifest = <String>{};
     final List<FileSystemEntity> flutterFiles = _flutterRoot.listSync(recursive: true);
     for (FileSystemEntity entity in flutterFiles) {
       final String relativePath = fs.path.relative(entity.path, from: _flutterRoot.absolute.path);
@@ -223,7 +226,7 @@ class IdeConfigCommand extends FlutterCommand {
       throwToolExit('Currently, the only supported IDE is IntelliJ\n$usage', exitCode: 2);
     }
 
-    await Cache.instance.updateAll();
+    await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
     if (argResults['update-templates']) {
       _handleTemplateUpdate();
@@ -266,7 +269,7 @@ class IdeConfigCommand extends FlutterCommand {
 
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
-String _validateFlutterDir(String dirPath, {String flutterRoot}) {
+String _validateFlutterDir(String dirPath, { String flutterRoot }) {
   final FileSystemEntityType type = fs.typeSync(dirPath);
 
   if (type != FileSystemEntityType.notFound) {

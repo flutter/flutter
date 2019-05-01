@@ -256,7 +256,7 @@ void main() {
                       child: const Text('X'),
                       onPressed: () async {
                         result = Navigator.of(context).pushNamed('/a');
-                      }
+                      },
                   ),
                 );
               }
@@ -271,7 +271,7 @@ void main() {
                   },
                 ),
               );
-            }
+            },
           },
         )
     );
@@ -285,7 +285,7 @@ void main() {
     expect(await result, equals('all done'));
   });
 
-    testWidgets('Two-step initial route', (WidgetTester tester) async {
+  testWidgets('Two-step initial route', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
       '/': (BuildContext context) => const Text('route "/"'),
       '/a': (BuildContext context) => const Text('route "/a"'),
@@ -379,6 +379,17 @@ void main() {
     );
     expect(tester.takeException(), isFlutterError);
     expect(log, <String>['onGenerateRoute /', 'onUnknownRoute /']);
+  });
+
+  testWidgets('MaterialApp with builder and no route information works.', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/18904
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (BuildContext context, Widget child) {
+          return const SizedBox();
+        },
+      ),
+    );
   });
 
   testWidgets('Can get text scale from media query', (WidgetTester tester) async {

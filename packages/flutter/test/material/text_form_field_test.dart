@@ -50,7 +50,7 @@ void main() {
   });
 
   testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
-    final VoidCallback onEditingComplete = () {};
+    final VoidCallback onEditingComplete = () { };
 
     await tester.pumpWidget(
       MaterialApp(
@@ -196,7 +196,7 @@ void main() {
       home: Material(
         child: Center(
             child: TextFormField(
-              buildCounter: (BuildContext context, {int currentLength, int maxLength, bool isFocused}) {
+              buildCounter: (BuildContext context, { int currentLength, int maxLength, bool isFocused }) {
                 return Text('${currentLength.toString()} of ${maxLength.toString()}');
               },
               maxLength: 10,

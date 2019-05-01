@@ -189,7 +189,7 @@ class _AnimatedIconPainter extends CustomPainter {
 class _PathFrames {
   const _PathFrames({
     @required this.commands,
-    @required this.opacities
+    @required this.opacities,
   });
 
   final List<_PathCommand> commands;
@@ -248,7 +248,7 @@ class _PathCubicTo extends _PathCommand {
     path.cubicTo(
       controlPoint1.dx, controlPoint1.dy,
       controlPoint2.dx, controlPoint2.dy,
-      targetPoint.dx, targetPoint.dy
+      targetPoint.dx, targetPoint.dy,
     );
   }
 }

@@ -84,12 +84,12 @@ void main() {
         exception: 'MESSAGE',
       ).toString(),
       'Error caught by Flutter framework.\n'
-      'MESSAGE'
+      'MESSAGE',
     );
     expect(
       const FlutterErrorDetails().toString(),
       'Error caught by Flutter framework.\n'
-      '  null'
+      '  null',
     );
   });
 }

@@ -10,29 +10,38 @@ import 'package:xml/xml.dart' as xml;
 
 import 'android/android_sdk.dart';
 import 'android/gradle.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/os.dart' show os;
 import 'base/process.dart';
+import 'base/user_messages.dart';
 import 'build_info.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
+import 'linux/application_package.dart';
 import 'macos/application_package.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
+import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
   static ApplicationPackageFactory get instance => context[ApplicationPackageFactory];
 
   Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform,
-      {File applicationBinary}) async {
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
+        if (androidSdk?.licensesAvailable == true  && androidSdk.latestVersion == null) {
+          await checkGradleDependencies();
+        }
         return applicationBinary == null
             ? await AndroidApk.fromAndroidProject((await FlutterProject.current()).android)
             : AndroidApk.fromApk(applicationBinary);
@@ -43,11 +52,19 @@ class ApplicationPackageFactory {
       case TargetPlatform.tester:
         return FlutterTesterApp.fromCurrentDirectory();
       case TargetPlatform.darwin_x64:
-        return applicationBinary != null
-          ? MacOSApp.fromPrebuiltApp(applicationBinary)
-          : null;
+        return applicationBinary == null
+            ? MacOSApp.fromMacOSProject((await FlutterProject.current()).macos)
+            : MacOSApp.fromPrebuiltApp(applicationBinary);
+      case TargetPlatform.web:
+        return WebApplicationPackage(await FlutterProject.current());
       case TargetPlatform.linux_x64:
+        return applicationBinary == null
+            ? LinuxApp.fromLinuxProject((await FlutterProject.current()).linux)
+            : LinuxApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.windows_x64:
+        return applicationBinary == null
+            ? WindowsApp.fromWindowsProject((await FlutterProject.current()).windows)
+            : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia:
         return null;
     }
@@ -78,7 +95,7 @@ class AndroidApk extends ApplicationPackage {
     String id,
     @required this.file,
     @required this.versionCode,
-    @required this.launchActivity
+    @required this.launchActivity,
   }) : assert(file != null),
        assert(launchActivity != null),
        super(id: id);
@@ -87,11 +104,11 @@ class AndroidApk extends ApplicationPackage {
   factory AndroidApk.fromApk(File apk) {
     final String aaptPath = androidSdk?.latestVersion?.aaptPath;
     if (aaptPath == null) {
-      printError('Unable to locate the Android SDK; please run \'flutter doctor\'.');
+      printError(userMessages.aaptNotFound);
       return null;
     }
 
-     final List<String> aaptArgs = <String>[
+    final List<String> aaptArgs = <String>[
        aaptPath,
       'dump',
       'xmltree',
@@ -116,7 +133,7 @@ class AndroidApk extends ApplicationPackage {
       id: data.packageName,
       file: apk,
       versionCode: int.tryParse(data.versionCode),
-      launchActivity: '${data.packageName}/${data.launchableActivityName}'
+      launchActivity: '${data.packageName}/${data.launchableActivityName}',
     );
   }
 
@@ -153,7 +170,20 @@ class AndroidApk extends ApplicationPackage {
       return null;
 
     final String manifestString = manifest.readAsStringSync();
-    final xml.XmlDocument document = xml.parse(manifestString);
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(manifestString);
+    } on xml.XmlParserException catch (exception) {
+      String manifestLocation;
+      if (androidProject.isUsingGradle) {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
+      } else {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
+      }
+      printError('AndroidManifest.xml is not a valid XML document.');
+      printError('Please check $manifestLocation for errors.');
+      throwToolExit('XML Parser error message: ${exception.toString()}');
+    }
 
     final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty)
@@ -197,7 +227,7 @@ class AndroidApk extends ApplicationPackage {
       id: packageId,
       file: apkFile,
       versionCode: null,
-      launchActivity: launchActivity
+      launchActivity: launchActivity,
     );
   }
 
@@ -276,8 +306,13 @@ abstract class IOSApp extends ApplicationPackage {
   }
 
   factory IOSApp.fromIosProject(IosProject project) {
-    if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
+    if (getCurrentHostPlatform() != HostPlatform.darwin_x64) {
       return null;
+    }
+    // TODO(jonahwilliams): do more verification in this check.
+    if (!project.exists) {
+      return null;
+    }
     return BuildableIOSApp(project);
   }
 
@@ -352,6 +387,7 @@ class ApplicationPackageStore {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
+      case TargetPlatform.web:
         return null;
     }
     return null;
@@ -435,7 +471,7 @@ class ApkManifestData {
       final int level = line.length - trimLine.length;
 
       // Handle level out
-      while(level <= currentElement.level) {
+      while (level <= currentElement.level) {
         currentElement = currentElement.parent;
       }
 

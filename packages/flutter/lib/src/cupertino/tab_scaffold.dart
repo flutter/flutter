@@ -20,8 +20,14 @@ import 'theme.dart';
 /// pages as there are [tabBar.items]. Inactive tabs will be moved [Offstage]
 /// and their animations disabled.
 ///
-/// Use [CupertinoTabView] as the content of each tab to support tabs with parallel
-/// navigation state and history.
+/// Use [CupertinoTabView] as the root widget of each tab to support tabs with
+/// parallel navigation state and history. Since each [CupertinoTabView] contains
+/// a [Navigator], rebuilding the [CupertinoTabView] with a different
+/// [WidgetBuilder] instance in [CupertinoTabView.builder] will not recreate
+/// the [CupertinoTabView]'s navigation stack or update its UI. To update the
+/// contents of the [CupertinoTabView] after it's built, trigger a rebuild
+/// (via [State.setState], for instance) from its descendant rather than from
+/// its ancestor.
 ///
 /// {@tool sample}
 ///
@@ -194,14 +200,12 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       tabNumber: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
+    EdgeInsets contentPadding = EdgeInsets.zero;
 
     if (widget.resizeToAvoidBottomInset) {
       // Remove the view inset and add it back as a padding in the inner content.
       newMediaQuery = newMediaQuery.removeViewInsets(removeBottom: true);
-      content = Padding(
-        padding: EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom),
-        child: content,
-      );
+      contentPadding = EdgeInsets.only(bottom: existingMediaQuery.viewInsets.bottom);
     }
 
     if (widget.tabBar != null &&
@@ -219,10 +223,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // translucent, let main content draw behind the tab bar but hint the
       // obstructed area.
       if (widget.tabBar.opaque(context)) {
-        content = Padding(
-          padding: EdgeInsets.only(bottom: bottomPadding),
-          child: content,
-        );
+        contentPadding = EdgeInsets.only(bottom: bottomPadding);
       } else {
         newMediaQuery = newMediaQuery.copyWith(
           padding: newMediaQuery.padding.copyWith(
@@ -234,7 +235,10 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
     content = MediaQuery(
       data: newMediaQuery,
-      child: content,
+      child: Padding(
+        padding: contentPadding,
+        child: content,
+      ),
     );
 
     // The main content being at the bottom is added to the stack first.
@@ -255,7 +259,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
             // Chain the user's original callback.
             if (widget.tabBar.onTap != null)
               widget.tabBar.onTap(newIndex);
-          }
+          },
         ),
       ));
     }

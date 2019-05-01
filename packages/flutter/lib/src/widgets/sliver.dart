@@ -161,7 +161,7 @@ abstract class SliverChildDelegate {
   ///
   /// Useful for subclasses that which to track which children are included in
   /// the underlying render tree.
-  void didFinishLayout(int firstIndex, int lastIndex) {}
+  void didFinishLayout(int firstIndex, int lastIndex) { }
 
   /// Called whenever a new instance of the child delegate class is
   /// provided to the sliver.
@@ -255,7 +255,7 @@ abstract class SliverChildDelegate {
 ///
 /// In certain cases, only a subset of child widgets should be annotated
 /// with a semantic index. For example, in [new ListView.separated()] the
-/// separators do not have an index assocaited with them. This is done by
+/// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
 ///
@@ -460,7 +460,7 @@ class SliverChildBuilderDelegate extends SliverChildDelegate {
 ///
 /// In certain cases, only a subset of child widgets should be annotated
 /// with a semantic index. For example, in [new ListView.separated()] the
-/// separators do not have an index assocaited with them. This is done by
+/// separators do not have an index associated with them. This is done by
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
 ///
@@ -656,6 +656,8 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
 /// means [SliverList] cannot learn their main axis extent. Instead, newly
 /// materialized children are placed adjacent to existing children.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ORiTTaVY6mM}
+///
 /// If the children have a fixed extent in the main axis, consider using
 /// [SliverFixedExtentList] rather than [SliverList] because
 /// [SliverFixedExtentList] does not need to perform layout on its children to
@@ -761,6 +763,8 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///
 /// The main axis direction of a grid is the direction in which it scrolls; the
 /// cross axis direction is the orthogonal direction.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ORiTTaVY6mM}
 ///
 /// {@tool sample}
 ///
@@ -1081,7 +1085,8 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -1171,9 +1176,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   void visitChildren(ElementVisitor visitor) {
-   // The toList() is to make a copy so that the underlying list can be modified by
-   // the visitor:
-   assert(!_childElements.values.any((Element child) => child == null));
+    // The toList() is to make a copy so that the underlying list can be modified by
+    // the visitor:
+    assert(!_childElements.values.any((Element child) => child == null));
     _childElements.values.toList().forEach(visitor);
   }
 
@@ -1286,8 +1291,8 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   }
 }
 
-// Return an ErrorWidget for the given Exception
-ErrorWidget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
+// Return a Widget for the given Exception
+Widget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
   final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stackTrace,

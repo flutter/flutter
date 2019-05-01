@@ -30,7 +30,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -64,7 +64,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -98,7 +98,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -120,7 +120,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -142,7 +142,7 @@ void main() {
             rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
-          )
+          ),
         ],
       ),
     ));
@@ -166,15 +166,15 @@ void main() {
                       padding: const EdgeInsets.all(5.0),
                       child: Container(
                           color: Colors.blue,
-                          height: 50
+                          height: 50,
                       ),
-                    )
+                    ),
                   );
                 }),
               ),
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     await expectLater(
@@ -182,5 +182,15 @@ void main() {
       matchesGoldenFile('opacity_test.offset.1.png'),
       skip: !Platform.isLinux,
     );
+  });
+
+  testWidgets('empty opacity does not crash', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(child: Opacity(opacity: 0.5, child: Container())),
+    );
+    final Element element = find.byType(RepaintBoundary).first.evaluate().single;
+    // The following line will send the layer to engine and cause crash if an
+    // empty opacity layer is sent.
+    await element.renderObject.layer.toImage(Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
   });
 }

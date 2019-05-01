@@ -1,6 +1,8 @@
 // Copyright 2017 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -8,7 +10,7 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // scrolling by this offset will move the picker to the next item
-const Offset _kRowOffset = Offset(0.0, -32.0);
+const Offset _kRowOffset = Offset(0.0, -50.0);
 
 void main() {
   group('Countdown timer picker', () {
@@ -25,7 +27,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             initialTimerDuration: const Duration(days: 1),
           );
         },
@@ -35,7 +37,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             initialTimerDuration: const Duration(seconds: -1),
           );
         },
@@ -47,7 +49,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             minuteInterval: 0,
           );
         },
@@ -56,7 +58,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             minuteInterval: -1,
           );
         },
@@ -65,7 +67,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             minuteInterval: 7,
           );
         },
@@ -77,7 +79,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             secondInterval: 0,
           );
         },
@@ -86,7 +88,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             secondInterval: -1,
           );
         },
@@ -95,7 +97,7 @@ void main() {
       expect(
         () {
           CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             secondInterval: 7,
           );
         },
@@ -107,7 +109,7 @@ void main() {
       await tester.pumpWidget(
         CupertinoApp(
           home: CupertinoTimerPicker(
-            onTimerDurationChanged: (_) {},
+            onTimerDurationChanged: (_) { },
             initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
           ),
         ),
@@ -136,7 +138,7 @@ void main() {
           home: Directionality(
             textDirection: TextDirection.rtl,
             child: CupertinoTimerPicker(
-              onTimerDurationChanged: (_) {},
+              onTimerDurationChanged: (_) { },
               initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
             ),
           ),
@@ -167,7 +169,7 @@ void main() {
             height: 400.0,
             width: 400.0,
             child: CupertinoTimerPicker(
-              onTimerDurationChanged: (_) {},
+              onTimerDurationChanged: (_) { },
               initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
             ),
           ),
@@ -184,7 +186,7 @@ void main() {
             height: 400.0,
             width: 800.0,
             child: CupertinoTimerPicker(
-              onTimerDurationChanged: (_) {},
+              onTimerDurationChanged: (_) { },
               initialTimerDuration: const Duration(hours: 12, minutes: 30, seconds: 59),
             ),
           ),
@@ -237,7 +239,7 @@ void main() {
         () {
           CupertinoDatePicker(
             mode: null,
-            onDateTimeChanged: (_) {},
+            onDateTimeChanged: (_) { },
             initialDateTime: DateTime.now(),
           );
         },
@@ -259,9 +261,34 @@ void main() {
 
     testWidgets('initial date is set to default value', (WidgetTester tester) async {
       final CupertinoDatePicker picker = CupertinoDatePicker(
-        onDateTimeChanged: (_) {},
+        onDateTimeChanged: (_) { },
       );
       expect(picker.initialDateTime, isNotNull);
+    });
+
+    testWidgets('initial date honors minuteInterval', (WidgetTester tester) async {
+        DateTime newDateTime;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              width: 400,
+              height: 400,
+              child: CupertinoDatePicker(
+                onDateTimeChanged: (DateTime d) => newDateTime = d,
+                initialDateTime: DateTime(2018, 10, 10, 10, 3),
+                minuteInterval: 3,
+              )
+            )
+          )
+        );
+
+        // Drag the minute picker to the next slot (03 -> 06).
+        // The `initialDateTime` and the `minuteInterval` values are specifically choosen
+        // so that `find.text` finds exactly one widget.
+        await tester.drag(find.text('03'), _kRowOffset);
+        await tester.pump();
+
+        expect(newDateTime.minute, 6);
     });
 
     testWidgets('changing initialDateTime after first build does not do anything', (WidgetTester tester) async {
@@ -280,7 +307,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('10'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('10'), const Offset(0.0, 32.0), touchSlopY: 0);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -301,7 +328,7 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('9'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('9'), const Offset(0.0, 32.0), touchSlopY: 0);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -317,7 +344,7 @@ void main() {
             width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 9, 15, 0, 0),
             ),
           ),
@@ -337,7 +364,7 @@ void main() {
             width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 9, 15, 3, 14),
             ),
           ),
@@ -357,7 +384,7 @@ void main() {
             textDirection: TextDirection.ltr,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
@@ -375,7 +402,7 @@ void main() {
             width: 800.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
@@ -397,7 +424,7 @@ void main() {
             width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
@@ -415,7 +442,7 @@ void main() {
             width: 800.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.date,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
@@ -437,7 +464,7 @@ void main() {
             width: 400.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
@@ -455,7 +482,7 @@ void main() {
             width: 800.0,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.time,
-              onDateTimeChanged: (_) {},
+              onDateTimeChanged: (_) { },
               initialDateTime: DateTime(2018, 1, 1, 10, 30),
             ),
           ),
@@ -487,7 +514,8 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('March'), const Offset(0.0, 32.0));
+      await tester.drag(find.text('March'), const Offset(0, 32.0), touchSlopY: 0.0);
+
       // Momentarily, the 2018 and the incorrect 30 of February is aligned.
       expect(
         tester.getTopLeft(find.text('2018')).dy,
@@ -525,15 +553,14 @@ void main() {
         ),
       );
 
-      await tester.drag(find.text('27'), const Offset(0.0, -32.0));
+      await tester.drag(find.text('27'), const Offset(0.0, -32.0), touchSlopY: 0.0);
       await tester.pump();
       expect(
         date,
         DateTime(2018, 2, 28),
       );
 
-
-      await tester.drag(find.text('28'), const Offset(0.0, -32.0));
+      await tester.drag(find.text('28'), const Offset(0.0, -32.0), touchSlopY: 0.0);
       await tester.pump(); // Once to trigger the post frame animate call.
 
       // Callback doesn't transiently go into invalid dates.
@@ -558,6 +585,87 @@ void main() {
         tester.getTopLeft(find.text('2018')).dy,
         tester.getTopLeft(find.text('28')).dy,
       );
+    });
+
+    group('Picker handles initial noon/midnight times', () {
+      testWidgets('midnight', (WidgetTester tester) async {
+        DateTime date;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                onDateTimeChanged: (DateTime newDate) {
+                  date = newDate;
+                },
+                initialDateTime: DateTime(2019, 1, 1, 0, 15),
+              ),
+            ),
+          ),
+        );
+
+        // 0:15 -> 0:16
+        await tester.drag(find.text('15'), _kRowOffset);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(date, DateTime(2019, 1, 1, 0, 16));
+      });
+
+      testWidgets('noon', (WidgetTester tester) async {
+        DateTime date;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                onDateTimeChanged: (DateTime newDate) {
+                  date = newDate;
+                },
+                initialDateTime: DateTime(2019, 1, 1, 12, 15),
+              ),
+            ),
+          ),
+        );
+
+        // 12:15 -> 12:16
+        await tester.drag(find.text('15'), _kRowOffset);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(date, DateTime(2019, 1, 1, 12, 16));
+      });
+
+      testWidgets('noon in 24 hour time', (WidgetTester tester) async {
+        DateTime date;
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: SizedBox(
+              height: 400.0,
+              width: 400.0,
+              child: CupertinoDatePicker(
+                use24hFormat: true,
+                mode: CupertinoDatePickerMode.time,
+                onDateTimeChanged: (DateTime newDate) {
+                  date = newDate;
+                },
+                initialDateTime: DateTime(2019, 1, 1, 12, 25),
+              ),
+            ),
+          ),
+        );
+
+        // 12:25 -> 12:26
+        await tester.drag(find.text('25'), _kRowOffset);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 500));
+
+        expect(date, DateTime(2019, 1, 1, 12, 26));
+      });
     });
 
     testWidgets('picker persists am/pm value when scrolling hours', (WidgetTester tester) async {
@@ -625,6 +733,8 @@ void main() {
         ),
       );
 
+      const Offset deltaOffset = Offset(0.0, -18.0);
+
       // 11:59 -> 12:59
       await tester.drag(find.text('11'), _kRowOffset);
       await tester.pump();
@@ -640,14 +750,14 @@ void main() {
       expect(date, DateTime(2018, 1, 1, 11, 59));
 
       // 11:59 -> 9:59
-      await tester.drag(find.text('11'), -_kRowOffset * 2);
+      await tester.drag(find.text('11'), -((_kRowOffset - deltaOffset) * 2 + deltaOffset));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
       expect(date, DateTime(2018, 1, 1, 9, 59));
 
       // 9:59 -> 15:59
-      await tester.drag(find.text('9'), _kRowOffset * 6);
+      await tester.drag(find.text('9'), (_kRowOffset - deltaOffset) * 6 + deltaOffset);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
@@ -728,9 +838,40 @@ void main() {
     expect(lastSelectedItem, 1);
     handle.dispose();
   });
+
+  testWidgets('DatePicker golden tests', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: SizedBox(
+            width: 200,
+            child: CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.dateAndTime,
+              initialDateTime: DateTime(2019, 1, 1, 4),
+              onDateTimeChanged: (_) {},
+            )
+          )
+        )
+      );
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.initial.png'),
+        skip: !Platform.isLinux
+      );
+
+      // Slightly drag the hour component to make the current hour off-center.
+      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
+      await tester.pump();
+
+      await expectLater(
+        find.byType(CupertinoDatePicker),
+        matchesGoldenFile('date_picker_test.datetime.drag.png'),
+        skip: !Platform.isLinux
+      );
+  });
 }
 
-Widget _buildPicker({FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged}) {
+Widget _buildPicker({ FixedExtentScrollController controller, ValueChanged<int> onSelectedItemChanged }) {
   return Directionality(
     textDirection: TextDirection.ltr,
     child: CupertinoPicker(

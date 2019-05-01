@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert' show jsonEncode;
+
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -34,7 +36,7 @@ void main() {
                                              r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
     });
@@ -55,7 +57,7 @@ void main() {
       expect(
           mockLogger.errorText,
           matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
     });
@@ -146,7 +148,8 @@ void main() {
           await tenMillisecondsLater;
           doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
           expect(ansiSpinner.seemsSlow, isTrue);
-          expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
+          // Check the 2nd line to verify there's a newline before the warning
+          expect(outputStdout()[1], contains('This is taking an unexpectedly long time.'));
           ansiSpinner.stop();
           expect(outputStdout().join('\n'), isNot(contains('(!)')));
           done = true;
@@ -164,7 +167,7 @@ void main() {
           final Status status = logger.startProgress(
             'Hello',
             progressId: null,
-            timeout: kSlowOperation,
+            timeout: timeoutConfiguration.slowOperation,
             progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
           );
           expect(outputStderr().length, equals(1));
@@ -239,6 +242,16 @@ void main() {
           doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
           expect(ansiStatus.seemsSlow, isTrue);
           expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
+
+          // Test that the number of '\b' is correct.
+          for (String line in outputStdout()) {
+            int currLength = 0;
+            for (int i = 0; i < line.length; i += 1) {
+              currLength += line[i] == '\b' ? -1 : 1;
+              expect(currLength, isNonNegative, reason: 'The following line has overflow backtraces:\n' + jsonEncode(line));
+            }
+          }
+
           ansiStatus.stop();
           expect(outputStdout().join('\n'), contains('(!)'));
           done = true;
@@ -345,7 +358,7 @@ void main() {
       called = 0;
       summaryStatus = SummaryStatus(
         message: 'Hello world',
-        timeout: kSlowOperation,
+        timeout: timeoutConfiguration.slowOperation,
         padding: 20,
         onFinish: () => called++,
       );
@@ -581,7 +594,7 @@ void main() {
         final Status status = logger.startProgress(
           'Hello',
           progressId: null,
-          timeout: kSlowOperation,
+          timeout: timeoutConfiguration.slowOperation,
           progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
         );
         expect(outputStderr().length, equals(1));
@@ -649,8 +662,8 @@ void main() {
 
     testUsingContext('sequential startProgress calls with StdoutLogger', () async {
       final Logger logger = context[Logger];
-      logger.startProgress('AAA', timeout: kFastOperation)..stop();
-      logger.startProgress('BBB', timeout: kFastOperation)..stop();
+      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
+      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
       final List<String> output = outputStdout();
       expect(output.length, equals(3));
       // There's 61 spaces at the start: 59 (padding default) - 3 (length of AAA) + 5 (margin).
@@ -667,8 +680,8 @@ void main() {
 
     testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
       final Logger logger = context[Logger];
-      logger.startProgress('AAA', timeout: kFastOperation)..stop();
-      logger.startProgress('BBB', timeout: kFastOperation)..stop();
+      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
+      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
       expect(outputStdout(), <Matcher>[
         matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA$'),
         matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] AAA \(completed.*\)$'),
@@ -684,8 +697,8 @@ void main() {
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
       final BufferLogger logger = context[Logger];
-      logger.startProgress('AAA', timeout: kFastOperation)..stop();
-      logger.startProgress('BBB', timeout: kFastOperation)..stop();
+      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
+      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
       expect(logger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
       Logger: () => BufferLogger(),

@@ -7,8 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  testWidgets('receiveAction() forwards exception when exception occurs during action processing',
-          (WidgetTester tester) async {
+  testWidgets('receiveAction() forwards exception when exception occurs during action processing', (WidgetTester tester) async {
     // Setup a widget that can receive focus so that we can open the keyboard.
     const Widget widget = MaterialApp(
       home: Material(

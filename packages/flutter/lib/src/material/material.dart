@@ -53,7 +53,7 @@ enum MaterialType {
 ///
 ///  * [MaterialType]
 ///  * [Material]
-final Map<MaterialType, BorderRadius> kMaterialEdges = <MaterialType, BorderRadius> {
+final Map<MaterialType, BorderRadius> kMaterialEdges = <MaterialType, BorderRadius>{
   MaterialType.canvas: null,
   MaterialType.card: BorderRadius.circular(2.0),
   MaterialType.circle: null,
@@ -149,7 +149,7 @@ abstract class MaterialInkController {
 ///
 /// See also:
 ///
-///  * [MergeableMaterial], a piece of material that can split and remerge.
+///  * [MergeableMaterial], a piece of material that can split and re-merge.
 ///  * [Card], a wrapper for a [Material] of [type] [MaterialType.card].
 ///  * <https://material.io/design/>
 class Material extends StatefulWidget {
@@ -320,13 +320,19 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     final Color backgroundColor = _getBackgroundColor(context);
-    assert(backgroundColor != null || widget.type == MaterialType.transparency);
+    assert(
+      backgroundColor != null || widget.type == MaterialType.transparency,
+      'If Material type is not MaterialType.transparency, a color must '
+      'either be passed in through the `color` property, or be defined '
+      'in the theme (ex. canvasColor != null if type is set to '
+      'MaterialType.canvas)'
+    );
     Widget contents = widget.child;
     if (contents != null) {
       contents = AnimatedDefaultTextStyle(
         style: widget.textStyle ?? Theme.of(context).textTheme.body1,
         duration: widget.animationDuration,
-        child: contents
+        child: contents,
       );
     }
     contents = NotificationListener<LayoutChangedNotification>(
@@ -340,7 +346,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         color: backgroundColor,
         child: contents,
         vsync: this,
-      )
+      ),
     );
 
     // PhysicalModel has a temporary workaround for a performance issue that
@@ -713,7 +719,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipper: ShapeBorderClipper(
         shape: shape,
-        textDirection: Directionality.of(context)
+        textDirection: Directionality.of(context),
       ),
       clipBehavior: widget.clipBehavior,
       elevation: _elevation.evaluate(animation),

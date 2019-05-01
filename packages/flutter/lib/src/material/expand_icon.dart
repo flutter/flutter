@@ -13,7 +13,7 @@ import 'material_localizations.dart';
 import 'theme.dart';
 
 /// A widget representing a rotating expand/collapse button. The icon rotates
-/// 180 deg when pressed, then reverts the animation on a second press.
+/// 180 degrees when pressed, then reverts the animation on a second press.
 /// The underlying icon is [Icons.expand_more].
 ///
 /// The expand icon does not include a semantic label for accessibility. In
@@ -30,7 +30,7 @@ class ExpandIcon extends StatefulWidget {
     this.isExpanded = false,
     this.size = 24.0,
     @required this.onPressed,
-    this.padding = const EdgeInsets.all(8.0)
+    this.padding = const EdgeInsets.all(8.0),
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),
@@ -120,7 +120,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
-          child: const Icon(Icons.expand_more)
+          child: const Icon(Icons.expand_more),
         ),
       ),
     );

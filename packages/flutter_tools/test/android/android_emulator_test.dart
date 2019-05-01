@@ -30,7 +30,7 @@ void main() {
       final Map<String, String> properties = <String, String>{
         'hw.device.name': name,
         'hw.device.manufacturer': manufacturer,
-        'avd.ini.displayname': label
+        'avd.ini.displayname': label,
       };
       final AndroidEmulator emulator =
           AndroidEmulator(emulatorID, properties);

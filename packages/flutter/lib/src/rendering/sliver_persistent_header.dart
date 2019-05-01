@@ -524,6 +524,7 @@ abstract class RenderSliverFloatingPinnedPersistentHeader extends RenderSliverFl
     final double layoutExtent = maxExtent - constraints.scrollOffset;
     geometry = SliverGeometry(
       scrollExtent: maxExtent,
+      paintOrigin: math.min(constraints.overlap, 0.0),
       paintExtent: clampedPaintExtent,
       layoutExtent: layoutExtent.clamp(0.0, clampedPaintExtent),
       maxPaintExtent: maxExtent,

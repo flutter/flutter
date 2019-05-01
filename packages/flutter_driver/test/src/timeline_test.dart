@@ -23,11 +23,11 @@ void main() {
             'tts': 567,
             'args': <String, dynamic>{
               'arg1': true,
-            }
+            },
           },
           // Tests that we don't choke on missing data
-          <String, dynamic>{}
-        ]
+          <String, dynamic>{},
+        ],
       });
 
       expect(timeline.events, hasLength(2));
@@ -42,7 +42,7 @@ void main() {
       expect(e1.threadDuration, const Duration(microseconds: 245));
       expect(e1.timestampMicros, 456);
       expect(e1.threadTimestampMicros, 567);
-      expect(e1.arguments, <String, dynamic>{ 'arg1': true });
+      expect(e1.arguments, <String, dynamic>{'arg1': true});
 
       final TimelineEvent e2 = timeline.events[1];
       expect(e2.name, isNull);

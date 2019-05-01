@@ -16,7 +16,7 @@ class LogsCommand extends FlutterCommand {
     argParser.addFlag('clear',
       negatable: false,
       abbr: 'c',
-      help: 'Clear log history before reading from logs.'
+      help: 'Clear log history before reading from logs.',
     );
   }
 
@@ -25,6 +25,9 @@ class LogsCommand extends FlutterCommand {
 
   @override
   final String description = 'Show log output for running Flutter apps.';
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   Device device;
 
@@ -57,7 +60,7 @@ class LogsCommand extends FlutterCommand {
       },
       onError: (dynamic error) {
         exitCompleter.complete(error is int ? error : 1);
-      }
+      },
     );
 
     // When terminating, close down the log reader.

@@ -262,7 +262,12 @@ abstract class ImageProvider<T> {
     assert(configuration != null);
     final ImageStream stream = ImageStream();
     T obtainedKey;
+    bool didError = false;
     Future<void> handleError(dynamic exception, StackTrace stack) async {
+      if (didError) {
+        return;
+      }
+      didError = true;
       await null; // wait an event turn in case a listener has been added to the image stream.
       final _ErrorImageCompleter imageCompleter = _ErrorImageCompleter();
       stream.setCompleter(imageCompleter);
@@ -277,16 +282,42 @@ abstract class ImageProvider<T> {
           if (obtainedKey != null) {
             information.writeln('Image key: $obtainedKey');
           }
-        }
+        },
       );
     }
-    obtainKey(configuration).then<void>((T key) {
-      obtainedKey = key;
-      final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(key, () => load(key), onError: handleError);
-      if (completer != null) {
-        stream.setCompleter(completer);
+
+    // If an error is added to a synchronous completer before a listener has been
+    // added, it can throw an error both into the zone and up the stack. Thus, it
+    // looks like the error has been caught, but it is in fact also bubbling to the
+    // zone. Since we cannot prevent all usage of Completer.sync here, or rather
+    // that changing them would be too breaking, we instead hook into the same
+    // zone mechanism to intercept the uncaught error and deliver it to the
+    // image stream's error handler. Note that these errors may be duplicated,
+    // hence the need for the `didError` flag.
+    final Zone dangerZone = Zone.current.fork(
+      specification: ZoneSpecification(
+        handleUncaughtError: (Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
+          handleError(error, stackTrace);
+        }
+      )
+    );
+    dangerZone.runGuarded(() {
+      Future<T> key;
+      try {
+        key = obtainKey(configuration);
+      } catch (error, stackTrace) {
+        handleError(error, stackTrace);
+        return;
       }
-    }).catchError(handleError);
+      key.then<void>((T key) {
+        obtainedKey = key;
+        final ImageStreamCompleter completer = PaintingBinding.instance
+            .imageCache.putIfAbsent(key, () => load(key), onError: handleError);
+        if (completer != null) {
+          stream.setCompleter(completer);
+        }
+      }).catchError(handleError);
+    });
     return stream;
   }
 
@@ -307,7 +338,7 @@ abstract class ImageProvider<T> {
   /// {@tool sample}
   ///
   /// The following sample code shows how an image loaded using the [Image]
-  /// widget can be evicted using a [NetworkImage] with a matching url.
+  /// widget can be evicted using a [NetworkImage] with a matching URL.
   ///
   /// ```dart
   /// class MyWidget extends StatelessWidget {
@@ -328,7 +359,7 @@ abstract class ImageProvider<T> {
   /// }
   /// ```
   /// {@end-tool}
-  Future<bool> evict({ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty}) async {
+  Future<bool> evict({ ImageCache cache, ImageConfiguration configuration = ImageConfiguration.empty }) async {
     cache ??= imageCache;
     final T key = await obtainKey(configuration);
     return cache.evict(key);
@@ -366,7 +397,7 @@ class AssetBundleImageKey {
   const AssetBundleImageKey({
     @required this.bundle,
     @required this.name,
-    @required this.scale
+    @required this.scale,
   }) : assert(bundle != null),
        assert(name != null),
        assert(scale != null);
@@ -420,7 +451,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -451,7 +482,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
   /// The arguments must not be null.
-  const NetworkImage(this.url, { this.scale = 1.0 , this.headers })
+  const NetworkImage(this.url, { this.scale = 1.0, this.headers })
     : assert(url != null),
       assert(scale != null);
 
@@ -477,7 +508,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       informationCollector: (StringBuffer information) {
         information.writeln('Image provider: $this');
         information.write('Image key: $key');
-      }
+      },
     );
   }
 
@@ -550,7 +581,7 @@ class FileImage extends ImageProvider<FileImage> {
       scale: key.scale,
       informationCollector: (StringBuffer information) {
         information.writeln('Path: ${file?.path}');
-      }
+      },
     );
   }
 
@@ -615,7 +646,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   ImageStreamCompleter load(MemoryImage key) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
-      scale: key.scale
+      scale: key.scale,
     );
   }
 
@@ -721,7 +752,8 @@ class ExactAssetImage extends AssetBundleImageProvider {
   /// The [package] argument must be non-null when fetching an asset that is
   /// included in a package. See the documentation for the [ExactAssetImage] class
   /// itself for details.
-  const ExactAssetImage(this.assetName, {
+  const ExactAssetImage(
+    this.assetName, {
     this.scale = 1.0,
     this.bundle,
     this.package,
@@ -757,7 +789,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
     return SynchronousFuture<AssetBundleImageKey>(AssetBundleImageKey(
       bundle: bundle ?? configuration.bundle ?? rootBundle,
       name: keyName,
-      scale: scale
+      scale: scale,
     ));
   }
 

@@ -66,7 +66,7 @@ const List<TravelDestination> destinations = <TravelDestination>[
     city: 'Thanjavur',
     location: 'Thanjavur, Tamil Nadu',
     type: CardDemoType.selectable,
-  )
+  ),
 ];
 
 class TravelDestinationItem extends StatelessWidget {
@@ -135,7 +135,10 @@ class TappableTravelDestinationItem extends StatelessWidget {
                   onTap: () {
                     print('Card was tapped');
                   },
-                  splashColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                  // Generally, material cards use onSurface with 12% opacity for the pressed state.
+                  splashColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                  // Generally, material cards do not have a highlight overlay.
+                  highlightColor: Colors.transparent,
                   child: TravelDestinationContent(destination: destination),
                 ),
               ),
@@ -167,6 +170,8 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
     return SafeArea(
       top: false,
       bottom: false,
@@ -188,27 +193,32 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
                       _isSelected = !_isSelected;
                     });
                   },
-                  splashColor: Theme.of(context).colorScheme.primary.withAlpha(30),
+                  // Generally, material cards use onSurface with 12% opacity for the pressed state.
+                  splashColor: colorScheme.onSurface.withOpacity(0.12),
+                  // Generally, material cards do not have a highlight overlay.
+                  highlightColor: Colors.transparent,
                   child: Stack(
                     children: <Widget>[
                       Container(
                         color: _isSelected
-                          ? Theme.of(context).colorScheme.primary.withAlpha(41)
+                          // Generally, material cards use primary with 8% opacity for the selected state.
+                          // See: https://material.io/design/interaction/states.html#anatomy
+                          ? colorScheme.primary.withOpacity(0.08)
                           : Colors.transparent,
                       ),
                       TravelDestinationContent(destination: widget.destination),
                       Align(
                         alignment: Alignment.topRight,
                         child: Padding(
-                          padding: const EdgeInsets.all(4.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Icon(
                             Icons.check_circle,
-                            color: _isSelected ? Colors.white : Colors.transparent,
+                            color: _isSelected ? colorScheme.primary : Colors.transparent,
                           ),
-                        )
+                        ),
                       ),
                     ],
-                  )
+                  ),
                 ),
               ),
             ),
@@ -222,7 +232,7 @@ class _SelectableTravelDestinationItemState extends State<SelectableTravelDestin
 class SectionTitle extends StatelessWidget {
   const SectionTitle({
     Key key,
-    this.title
+    this.title,
   }) : super(key: key);
 
   final String title;
@@ -267,7 +277,7 @@ class TravelDestinationContent extends StatelessWidget {
                 image: AssetImage(destination.assetName, package: destination.assetPackage),
                 fit: BoxFit.cover,
                 child: Container(),
-              )
+              ),
             ),
             Positioned(
               bottom: 16.0,
@@ -398,8 +408,8 @@ class _CardsDemoState extends State<CardsDemo> {
             margin: const EdgeInsets.only(bottom: 8.0),
             child: child,
           );
-        }).toList()
-      )
+        }).toList(),
+      ),
     );
   }
 }

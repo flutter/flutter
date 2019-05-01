@@ -75,8 +75,8 @@ class PaginatedDataTable extends StatefulWidget {
     this.rowsPerPage = defaultRowsPerPage,
     this.availableRowsPerPage = const <int>[defaultRowsPerPage, defaultRowsPerPage * 2, defaultRowsPerPage * 5, defaultRowsPerPage * 10],
     this.onRowsPerPageChanged,
-    this.dragStartBehavior = DragStartBehavior.down,
-    @required this.source
+    this.dragStartBehavior = DragStartBehavior.start,
+    @required this.source,
   }) : assert(header != null),
        assert(columns != null),
        assert(dragStartBehavior != null),
@@ -238,7 +238,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   DataRow _getBlankRowFor(int index) {
     return DataRow.byIndex(
       index: index,
-      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList()
+      cells: widget.columns.map<DataCell>((DataColumn column) => DataCell.empty).toList(),
     );
   }
 
@@ -257,7 +257,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
     }
     return DataRow.byIndex(
       index: index,
-      cells: cells
+      cells: cells,
     );
   }
 
@@ -336,7 +336,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         .map<DropdownMenuItem<int>>((int value) {
           return DropdownMenuItem<int>(
             value: value,
-            child: Text('$value')
+            child: Text('$value'),
           );
         })
         .toList();
@@ -367,7 +367,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           _firstRowIndex + 1,
           _firstRowIndex + widget.rowsPerPage,
           _rowCount,
-          _rowCountApproximate
+          _rowCountApproximate,
         )
       ),
       Container(width: 32.0),
@@ -375,14 +375,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
         icon: const Icon(Icons.chevron_left),
         padding: EdgeInsets.zero,
         tooltip: localizations.previousPageTooltip,
-        onPressed: _firstRowIndex <= 0 ? null : _handlePrevious
+        onPressed: _firstRowIndex <= 0 ? null : _handlePrevious,
       ),
       Container(width: 24.0),
       IconButton(
         icon: const Icon(Icons.chevron_right),
         padding: EdgeInsets.zero,
         tooltip: localizations.nextPageTooltip,
-        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext
+        onPressed: (!_rowCountApproximate && (_firstRowIndex + widget.rowsPerPage >= _rowCount)) ? null : _handleNext,
       ),
       Container(width: 14.0),
     ]);
@@ -413,7 +413,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                       padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
-                        children: headerWidgets
+                        children: headerWidgets,
                       ),
                     ),
                   ),
@@ -430,8 +430,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               sortColumnIndex: widget.sortColumnIndex,
               sortAscending: widget.sortAscending,
               onSelectAll: widget.onSelectAll,
-              rows: _getRows(_firstRowIndex, widget.rowsPerPage)
-            )
+              rows: _getRows(_firstRowIndex, widget.rowsPerPage),
+            ),
           ),
           DefaultTextStyle(
             style: footerTextStyle,

@@ -25,10 +25,13 @@ import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'linux/linux_workflow.dart';
+import 'macos/macos_workflow.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
+import 'windows/windows_workflow.dart';
 
 Doctor get doctor => context[Doctor];
 
@@ -89,6 +92,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
       if (fuchsiaWorkflow.appliesToHostPlatform)
         _workflows.add(fuchsiaWorkflow);
+
+      if (linuxWorkflow.appliesToHostPlatform)
+        _workflows.add(linuxWorkflow);
+
+      if (macOSWorkflow.appliesToHostPlatform)
+        _workflows.add(macOSWorkflow);
+
+      if (windowsWorkflow.appliesToHostPlatform)
+        _workflows.add(windowsWorkflow);
+
     }
     return _workflows;
   }
@@ -170,9 +183,7 @@ class Doctor {
   }
 
   Future<bool> checkRemoteArtifacts(String engineRevision) async {
-    final Cache cache = Cache();
-    final FlutterEngine engine = FlutterEngine(cache);
-    return await engine.areRemoteArtifactsAvailable(engineVersion: engineRevision);
+    return Cache.instance.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
   /// Print information about the state of installed tooling.
@@ -189,7 +200,7 @@ class Doctor {
     for (ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = Status.withSpinner(
-        timeout: kFastOperation,
+        timeout: timeoutConfiguration.fastOperation,
         slowWarningCallback: () => validator.slowWarning,
       );
       ValidationResult result;
@@ -312,7 +323,7 @@ class GroupedValidator extends DoctorValidator {
   String _currentSlowWarning = 'Initializing...';
 
   @override
-  Future<ValidationResult> validate() async  {
+  Future<ValidationResult> validate() async {
     final List<ValidatorTask> tasks = <ValidatorTask>[];
     for (DoctorValidator validator in subValidators) {
       tasks.add(ValidatorTask(validator, validator.validate()));
@@ -467,7 +478,7 @@ class FlutterValidator extends DoctorValidator {
     }
 
     return ValidationResult(valid, messages,
-      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName)
+      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
 }
@@ -501,8 +512,8 @@ abstract class IntelliJValidator extends DoctorValidator {
   String get pluginsPath;
 
   static final Map<String, String> _idToTitle = <String, String>{
-    'IntelliJIdea' : 'IntelliJ IDEA Ultimate Edition',
-    'IdeaIC' : 'IntelliJ IDEA Community Edition',
+    'IntelliJIdea': 'IntelliJ IDEA Ultimate Edition',
+    'IdeaIC': 'IntelliJ IDEA Community Edition',
   };
 
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
@@ -615,9 +626,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   final String id;
 
   static final Map<String, String> _dirNameToId = <String, String>{
-    'IntelliJ IDEA.app' : 'IntelliJIdea',
-    'IntelliJ IDEA Ultimate.app' : 'IntelliJIdea',
-    'IntelliJ IDEA CE.app' : 'IdeaIC',
+    'IntelliJ IDEA.app': 'IntelliJIdea',
+    'IntelliJ IDEA Ultimate.app': 'IntelliJIdea',
+    'IntelliJ IDEA CE.app': 'IdeaIC',
   };
 
   static Iterable<DoctorValidator> get installed {

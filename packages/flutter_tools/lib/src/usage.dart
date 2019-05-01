@@ -91,8 +91,11 @@ class Usage {
     _analytics.sendScreenView(command, parameters: parameters);
   }
 
-  void sendEvent(String category, String parameter,
-      { Map<String, String> parameters }) {
+  void sendEvent(
+    String category,
+    String parameter, {
+    Map<String, String> parameters,
+  }) {
     if (suppressAnalytics)
       return;
 
@@ -106,7 +109,7 @@ class Usage {
     String variableName,
     Duration duration, {
     String label,
-    }) {
+  }) {
     if (!suppressAnalytics) {
       _analytics.sendTiming(
         variableName,
@@ -145,7 +148,7 @@ class Usage {
     printStatus('');
     printStatus('''
   ╔════════════════════════════════════════════════════════════════════════════╗
-  ║                 Welcome to Flutter! - https://flutter.io                   ║
+  ║                 Welcome to Flutter! - https://flutter.dev                  ║
   ║                                                                            ║
   ║ The Flutter tool anonymously reports feature usage statistics and crash    ║
   ║ reports to Google in order to help Google contribute improvements to       ║

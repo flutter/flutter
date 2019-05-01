@@ -359,7 +359,7 @@ void main() {
         textDirection: TextDirection.ltr,
           children: <Widget>[
             Expanded(
-              child: Container()
+              child: Container(),
             ),
           ],
         ),

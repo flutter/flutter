@@ -170,7 +170,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) {

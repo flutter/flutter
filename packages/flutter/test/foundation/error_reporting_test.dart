@@ -126,7 +126,7 @@ Future<void> main() async {
       'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word'
+      'word word word word word word word word word word word word word word word word word word word word',
     );
     console.clear();
     FlutterError.resetErrorCount();

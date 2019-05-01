@@ -26,9 +26,9 @@ void main() {
                   MaterialButton(
                     child: const Text('Button'),
                     onPressed: () { },
-                  )
+                  ),
                 ],
-              )
+              ),
             ),
           ),
         ),
@@ -67,7 +67,7 @@ void main() {
                 ],
               ),
             ],
-          )
+          ),
         ],
       ),
       ignoreTransform: true,
@@ -91,9 +91,9 @@ void main() {
               child: Column(
                 children: const <Widget>[
                   Text('First child'),
-                  Text('Second child')
+                  Text('Second child'),
                 ],
-              )
+              ),
             ),
           ),
         ),

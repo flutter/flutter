@@ -42,11 +42,12 @@ void main() {
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
 
-  testUsingContext('licensesAccepted throws if cannot run sdkmanager', () async {
+  testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager', () async {
     processManager.succeed = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
-    expect(licenseValidator.licensesAccepted, throwsToolExit());
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
+    expect(licenseStatus, LicensesAccepted.unknown);
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
@@ -74,7 +75,7 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
        '[=======================================] 100% Computing updates...             ',
-       'All SDK package licenses accepted.'
+       'All SDK package licenses accepted.',
     ]);
 
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
@@ -178,8 +179,27 @@ void main() {
     Stdio: () => stdio,
   });
 
+  testUsingContext('detects license-only SDK installation', () async {
+    when(sdk.licensesAvailable).thenReturn(true);
+    when(sdk.platformToolsAvailable).thenReturn(false);
+    final ValidationResult validationResult = await AndroidValidator().validate();
+    expect(validationResult.type, ValidationType.partial);
+    expect(
+      validationResult.messages.last.message,
+      userMessages.androidSdkLicenseOnly(kAndroidHome),
+    );
+  }, overrides: <Type, Generator>{
+    AndroidSdk: () => sdk,
+    FileSystem: () => fs,
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    ProcessManager: () => processManager,
+    Stdio: () => stdio,
+  });
+
   testUsingContext('detects minium required SDK and buildtools', () async {
     final AndroidSdkVersion mockSdkVersion = MockAndroidSdkVersion();
+    when(sdk.licensesAvailable).thenReturn(true);
+    when(sdk.platformToolsAvailable).thenReturn(true);
 
     // Test with invalid SDK and build tools
     when(mockSdkVersion.sdkLevel).thenReturn(26);

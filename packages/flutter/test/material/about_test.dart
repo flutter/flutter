@@ -26,7 +26,7 @@ void main() {
                   applicationLegalese: 'I am the very model of a modern major general.',
                   aboutBoxChildren: <Widget>[
                     Text('About box'),
-                  ]
+                  ],
                 ),
               ],
             ),
@@ -55,7 +55,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license')
+        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license'),
       ]);
     });
 
@@ -78,13 +78,13 @@ void main() {
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB')
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
       ]);
     });
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license')
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
       ]);
     });
 
@@ -114,7 +114,7 @@ void main() {
 
     LicenseRegistry.addLicense(() {
       return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF')
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
       ]);
     });
 

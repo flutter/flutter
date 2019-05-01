@@ -28,28 +28,39 @@ import 'theme_data.dart';
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
 ///
-/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overidden
+/// Raised buttons have a minimum size of 88.0 by 36.0 which can be overridden
 /// with [ButtonTheme].
 ///
-/// {@tool snippet --template=stateless_widget}
+/// {@tool snippet --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to render a disabled RaisedButton, an enabled RaisedButton
 /// and lastly a RaisedButton with gradient background.
 ///
+/// ![Three raised buttons, one enabled, another disabled, and the last one
+/// styled with a blue gradient background](https://flutter.github.io/assets-for-api-docs/assets/material/raised_button.png)
+///
 /// ```dart
-/// Scaffold(
-///   body: Center(
+/// Widget build(BuildContext context) {
+///   return Center(
 ///     child: Column(
 ///       mainAxisSize: MainAxisSize.min,
 ///       children: <Widget>[
-///         RaisedButton(
+///         const RaisedButton(
 ///           onPressed: null,
-///           child: const Text('Disabled Button'),
+///           child: Text(
+///             'Disabled Button',
+///             style: TextStyle(fontSize: 20)
+///           ),
 ///         ),
+///         const SizedBox(height: 30),
 ///         RaisedButton(
 ///           onPressed: () {},
-///           child: const Text('Enabled Button'),
+///           child: const Text(
+///             'Enabled Button',
+///             style: TextStyle(fontSize: 20)
+///           ),
 ///         ),
+///         const SizedBox(height: 30),
 ///         RaisedButton(
 ///           onPressed: () {},
 ///           textColor: Colors.white,
@@ -57,17 +68,24 @@ import 'theme_data.dart';
 ///           child: Container(
 ///             decoration: const BoxDecoration(
 ///               gradient: LinearGradient(
-///                 colors: <Color>[Colors.red, Colors.green, Colors.blue],
+///                 colors: <Color>[
+///                   Color(0xFF0D47A1),
+///                   Color(0xFF1976D2),
+///                   Color(0xFF42A5F5),
+///                 ],
 ///               ),
 ///             ),
 ///             padding: const EdgeInsets.all(10.0),
-///             child: Text('Gradient Button'),
+///             child: const Text(
+///               'Gradient Button',
+///               style: TextStyle(fontSize: 20)
+///             ),
 ///           ),
 ///         ),
 ///       ],
 ///     ),
-///   ),
-/// )
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

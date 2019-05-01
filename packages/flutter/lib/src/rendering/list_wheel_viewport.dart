@@ -42,7 +42,7 @@ abstract class ListWheelChildManager {
   /// nothing.
   ///
   /// It is possible to create children with negative indices.
-  void createChild(int index, {@required RenderBox after});
+  void createChild(int index, { @required RenderBox after });
 
   /// Removes the child element corresponding with the given RenderBox.
   void removeChild(RenderBox child);
@@ -102,7 +102,7 @@ class ListWheelParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// 3. The **transformed cylindrical space viewport painting coordinates**.
 ///    Children from system 2 get their positions transformed into a cylindrical
-///    projection matrix instead of its cartesian offset with respect to the
+///    projection matrix instead of its Cartesian offset with respect to the
 ///    scroll offset.
 ///
 ///    Children in this coordinate system are painted.
@@ -572,7 +572,7 @@ class RenderListWheelViewport
   /// Returns the scroll offset of the child with the given index.
   double indexToScrollOffset(int index) => index * itemExtent;
 
-  void _createChild(int index, {RenderBox after}) {
+  void _createChild(int index, { RenderBox after }) {
     invokeLayoutCallback<BoxConstraints>((BoxConstraints constraints) {
       assert(constraints == this.constraints);
       childManager.createChild(index, after: after);
@@ -763,7 +763,7 @@ class RenderListWheelViewport
     final Offset untransformedPaintingCoordinates = offset
         + Offset(
             layoutOffset.dx,
-            _getUntransformedPaintingCoordinateY(layoutOffset.dy)
+            _getUntransformedPaintingCoordinateY(layoutOffset.dy),
         );
 
     // Get child's center as a fraction of the viewport's height.
@@ -804,12 +804,12 @@ class RenderListWheelViewport
   /// Paint child with the magnifier active - the child will be rendered
   /// differently if it intersects with the magnifier.
   void _paintChildWithMagnifier(
-      PaintingContext context,
-      Offset offset,
-      RenderBox child,
-      Matrix4 cylindricalTransform,
-      Offset offsetToCenter,
-      Offset untransformedPaintingCoordinates,
+    PaintingContext context,
+    Offset offset,
+    RenderBox child,
+    Matrix4 cylindricalTransform,
+    Offset offsetToCenter,
+    Offset untransformedPaintingCoordinates,
   ) {
     final double magnifierTopLinePosition =
         size.height / 2 - _itemExtent * _magnification / 2;
@@ -870,7 +870,7 @@ class RenderListWheelViewport
               child,
               cylindricalTransform,
               offsetToCenter);
-          }
+          },
       );
     } else {
       _paintChildCylindrically(
@@ -884,11 +884,11 @@ class RenderListWheelViewport
 
   // / Paint the child cylindrically at given offset.
   void _paintChildCylindrically(
-      PaintingContext context,
-      Offset offset,
-      RenderBox child,
-      Matrix4 cylindricalTransform,
-      Offset offsetToCenter,
+    PaintingContext context,
+    Offset offset,
+    RenderBox child,
+    Matrix4 cylindricalTransform,
+    Offset offsetToCenter,
   ) {
     context.pushTransform(
       // Text with TransformLayers and no cullRects currently have an issue rendering
@@ -952,7 +952,7 @@ class RenderListWheelViewport
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     // `target` is only fully revealed when in the selected/center position. Therefore,
     // this method always returns the offset that shows `target` in the center position,
     // which is the same offset for all `alignment` values.

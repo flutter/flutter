@@ -55,7 +55,7 @@ void main() {
 
     testWidgets('ListWheelScrollView needs positive magnification', (WidgetTester tester) async {
       expect(
-            () {
+        () {
           ListWheelScrollView(
             useMagnifier: true,
             magnification: -1.0,
@@ -79,7 +79,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildLoopingListDelegate(
               children: List<Widget>.generate(10, (int index) {
                 return Container(
@@ -96,13 +96,13 @@ void main() {
       // The first item is at the center of the viewport.
       expect(
       tester.getTopLeft(find.widgetWithText(Container, '0')),
-      const Offset(0.0, 250.0)
+      const Offset(0.0, 250.0),
       );
 
       // The last item is just before the first item.
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '9')),
-        const Offset(0.0, 150.0)
+        const Offset(0.0, 150.0),
       );
 
       controller.jumpTo(1000.0);
@@ -111,7 +111,7 @@ void main() {
       // We have passed the end of the list, the list should have looped back.
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '0')),
-        const Offset(0.0, 250.0)
+        const Offset(0.0, 250.0),
       );
     });
 
@@ -125,7 +125,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
                 return Container(
@@ -144,7 +144,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '-1000')),
-        const Offset(0.0, 250.0)
+        const Offset(0.0, 250.0),
       );
 
       // Can be scrolled infinitely for positive indexes.
@@ -152,7 +152,7 @@ void main() {
       await tester.pump();
       expect(
         tester.getTopLeft(find.widgetWithText(Container, '1000')),
-        const Offset(0.0, 250.0)
+        const Offset(0.0, 250.0),
       );
     });
 
@@ -168,7 +168,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
                 if (index < -15 || index > -5)
@@ -277,7 +277,7 @@ void main() {
     });
 
     testWidgets('builder is never called twice for same index', (WidgetTester tester) async {
-      final Set<int> builtChildren = Set<int>();
+      final Set<int> builtChildren = <int>{};
       final FixedExtentScrollController controller =
         FixedExtentScrollController();
 
@@ -287,7 +287,7 @@ void main() {
           child: ListWheelScrollView.useDelegate(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             childDelegate: ListWheelChildBuilderDelegate(
               builder: (BuildContext context, int index) {
                 expect(builtChildren.contains(index), false);
@@ -323,7 +323,7 @@ void main() {
           child: ListWheelScrollView(
             controller: controller,
             itemExtent: 100.0,
-            onSelectedItemChanged: (_) {},
+            onSelectedItemChanged: (_) { },
             children: List<Widget>.generate(16, (int index) {
               return Text(index.toString());
             }),

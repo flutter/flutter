@@ -39,16 +39,16 @@ void main() {
 
 class TestRenderObject extends RenderObject {
   @override
-  void debugAssertDoesMeetConstraints() {}
+  void debugAssertDoesMeetConstraints() { }
 
   @override
   Rect get paintBounds => null;
 
   @override
-  void performLayout() {}
+  void performLayout() { }
 
   @override
-  void performResize() {}
+  void performResize() { }
 
   @override
   Rect get semanticBounds => Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);

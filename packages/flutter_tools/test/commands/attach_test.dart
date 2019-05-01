@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:multicast_dns/multicast_dns.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -119,6 +120,7 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
+            flutterProject: anyNamed('flutterProject'),
             ipv6: false,
           ),
         ).thenReturn(mockHotRunner);
@@ -150,6 +152,7 @@ void main() {
             debuggingOptions: anyNamed('debuggingOptions'),
             packagesFilePath: anyNamed('packagesFilePath'),
             usesTerminalUI: anyNamed('usesTerminalUI'),
+            flutterProject: anyNamed('flutterProject'),
             ipv6: false,
           ),
         )..called(1);
@@ -175,7 +178,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
           throwsToolExit(
-            message: 'When the --debug-port is unknown, this command determines '
+            message: 'When the --debug-port or --debug-uri is unknown, this command determines '
                      'the value of --ipv6 on its own.',
           ),
         );
@@ -190,7 +193,7 @@ void main() {
         await expectLater(
           createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
           throwsToolExit(
-            message: 'When the --debug-port is unknown, this command does not use '
+            message: 'When the --debug-port or --debug-uri is unknown, this command does not use '
                      'the value of --observatory-port.',
           ),
         );
@@ -224,6 +227,7 @@ void main() {
         debuggingOptions: anyNamed('debuggingOptions'),
         packagesFilePath: anyNamed('packagesFilePath'),
         usesTerminalUI: anyNamed('usesTerminalUI'),
+        flutterProject: anyNamed('flutterProject'),
         ipv6: false,
       )).thenReturn(mockHotRunner);
 
@@ -236,8 +240,8 @@ void main() {
             mockLogReader.addLine(
                 'Observatory listening on http://127.0.0.1:$devicePort');
           });
-        return mockLogReader;
-      });
+          return mockLogReader;
+        });
       final File foo = fs.file('lib/foo.dart')
         ..createSync();
 
@@ -253,6 +257,7 @@ void main() {
         debuggingOptions: anyNamed('debuggingOptions'),
         packagesFilePath: anyNamed('packagesFilePath'),
         usesTerminalUI: anyNamed('usesTerminalUI'),
+        flutterProject: anyNamed('flutterProject'),
         ipv6: false,
       )).called(1);
     }, overrides: <Type, Generator>{
@@ -422,7 +427,120 @@ void main() {
       FileSystem: () => testFileSystem,
     });
   });
+
+  group('mDNS Discovery', () {
+    final int year3000 = DateTime(3000).millisecondsSinceEpoch;
+
+    MDnsClient getMockClient(
+      List<PtrResourceRecord> ptrRecords,
+      Map<String, List<SrvResourceRecord>> srvResponse,
+    ) {
+      final MDnsClient client = MockMDnsClient();
+
+      when(client.lookup<PtrResourceRecord>(
+        ResourceRecordQuery.serverPointer(MDnsObservatoryDiscovery.dartObservatoryName),
+      )).thenAnswer((_) => Stream<PtrResourceRecord>.fromIterable(ptrRecords));
+
+      for (final MapEntry<String, List<SrvResourceRecord>> entry in srvResponse.entries) {
+        when(client.lookup<SrvResourceRecord>(
+          ResourceRecordQuery.service(entry.key),
+        )).thenAnswer((_) => Stream<SrvResourceRecord>.fromIterable(entry.value));
+      }
+      return client;
+    }
+
+    testUsingContext('No ports available', () async {
+      final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query())?.port;
+      expect(port, isNull);
+    });
+
+    testUsingContext('One port available, no appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query())?.port;
+      expect(port, 123);
+    });
+
+    testUsingContext('Multiple ports available, without appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+          'fiz': <SrvResourceRecord>[
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      expect(() => portDiscovery.query(), throwsToolExit());
+    });
+
+    testUsingContext('Multiple ports available, with appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+          'fiz': <SrvResourceRecord>[
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
+      expect(port, 321);
+    });
+
+    testUsingContext('Multiple ports available per process, with appId', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+          PtrResourceRecord('baz', year3000, domainName: 'fiz'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+          'fiz': <SrvResourceRecord>[
+            SrvResourceRecord('fiz', year3000, port: 4321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
+      expect(port, 1234);
+    });
+  });
 }
+
+class MockMDnsClient extends Mock implements MDnsClient {}
 
 class MockPortForwarder extends Mock implements DevicePortForwarder {}
 

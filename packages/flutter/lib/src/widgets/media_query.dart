@@ -47,7 +47,7 @@ enum Orientation {
 /// same as the window that contains the app.
 ///
 /// Widgets whose layouts consume space defined by [viewInsets] or
-/// [padding] shoud enclose their children in secondary MediaQuery
+/// [padding] should enclose their children in secondary MediaQuery
 /// widgets that reduce those properties by the same amount.
 /// The [removePadding] and [removeInsets] methods are useful for this.
 @immutable

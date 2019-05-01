@@ -42,7 +42,7 @@ void main() {
 
     expect(callbackTracker, equals(<int>[
       0, 1, 2, 3, 4, 5, // visible
-      6, 7, 8 // in cached area
+      6, 7, 8, // in cached area
     ]));
 
     callbackTracker.clear();
@@ -109,7 +109,7 @@ void main() {
     expect(callbackTracker, equals(<int>[
       0, 1, 2,
       3, 4, 5, //visible
-      6, 7
+      6, 7,
     ]));
     callbackTracker.clear();
 
@@ -189,7 +189,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        child: Text('$index', textDirection: TextDirection.ltr)
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -452,9 +452,9 @@ void main() {
                       Container(height: 80.0, child: text),
                       Container(height: 70.0, child: text),
                     ],
-                  )
+                  ),
               ),
-            )
+            ),
         )
     );
 
@@ -483,9 +483,9 @@ void main() {
                                   child: const Text('hey'),
                                 )).childrenDelegate),
                       ],
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
     );
 

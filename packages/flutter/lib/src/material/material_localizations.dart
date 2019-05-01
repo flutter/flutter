@@ -31,8 +31,8 @@ import 'typography.dart';
 //    you must add it to every other language (all the other *.arb files in that
 //    same directory), listing the translation as `TBD`. After that you have to
 //    re-generate lib/src/l10n/localizations.dart by running
-//    `dart dev/tools/gen_localizations.dart --overwrite`. There is a README
-//    file with further information in the lib/src/l10n/ directory.
+//    `dart dev/tools/localization/gen_localizations.dart --overwrite`. There is
+//    a README file with further information in the lib/src/l10n/ directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
@@ -95,7 +95,7 @@ abstract class MaterialLocalizations {
   /// there are, e.g. 'Tab 1 of 2' in United States English.
   ///
   /// `tabIndex` and `tabCount` must be greater than or equal to one.
-  String tabLabel({int tabIndex, int tabCount});
+  String tabLabel({ int tabIndex, int tabCount });
 
   /// Title for the [PaginatedDataTable]'s selected row count header.
   String selectedRowCountTitle(int selectedRowCount);
@@ -599,7 +599,7 @@ class DefaultMaterialLocalizations implements MaterialLocalizations {
   String get rowsPerPageTitle => 'Rows per page:';
 
   @override
-  String tabLabel({int tabIndex, int tabCount}) {
+  String tabLabel({ int tabIndex, int tabCount }) {
     assert(tabIndex >= 1);
     assert(tabCount >= 1);
     return 'Tab $tabIndex of $tabCount';

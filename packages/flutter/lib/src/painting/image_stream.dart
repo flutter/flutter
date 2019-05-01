@@ -194,8 +194,8 @@ class ImageStream extends Diagnosticable {
   /// Returns an object which can be used with `==` to determine if this
   /// [ImageStream] shares the same listeners list as another [ImageStream].
   ///
-  /// This can be used to avoid unregistering and reregistering listeners after
-  /// calling [ImageProvider.resolve] on a new, but possibly equivalent,
+  /// This can be used to avoid un-registering and re-registering listeners
+  /// after calling [ImageProvider.resolve] on a new, but possibly equivalent,
   /// [ImageProvider].
   ///
   /// The key may change once in the lifetime of the object. When it changes, it
@@ -505,12 +505,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
-       _scale = scale,
-       _framesEmitted = 0,
-       _timer = null {
+       _scale = scale {
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       reportError(
         context: 'resolving an image codec',
@@ -531,17 +529,23 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   // The requested duration for the current frame;
   Duration _frameDuration;
   // How many frames have been emitted so far.
-  int _framesEmitted;
+  int _framesEmitted = 0;
   Timer _timer;
+
+  // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
+  bool _frameCallbackScheduled = false;
 
   void _handleCodecReady(ui.Codec codec) {
     _codec = codec;
     assert(_codec != null);
 
-    _decodeNextFrameAndSchedule();
+    if (hasListeners) {
+      _decodeNextFrameAndSchedule();
+    }
   }
 
   void _handleAppFrame(Duration timestamp) {
+    _frameCallbackScheduled = false;
     if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
@@ -557,7 +561,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
     final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
     _timer = Timer(delay * timeDilation, () {
-      SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+      _scheduleAppFrame();
     });
   }
 
@@ -589,6 +593,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
       return;
     }
+    _scheduleAppFrame();
+  }
+
+  void _scheduleAppFrame() {
+    if (_frameCallbackScheduled) {
+      return;
+    }
+    _frameCallbackScheduled = true;
     SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
   }
 
