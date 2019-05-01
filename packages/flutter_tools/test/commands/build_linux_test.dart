@@ -87,8 +87,8 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
-    expect(fs.file('build/linux/release/lib/libflutter_linux.so').existsSync(), true);
-    expect(fs.file('build/linux/cache/flutter_library/icudtl.dat').existsSync(), true);
+    expect(fs.file('linux/flutter/libflutter_linux.so').existsSync(), true);
+    expect(fs.file('linux/flutter/icudtl.dat').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
