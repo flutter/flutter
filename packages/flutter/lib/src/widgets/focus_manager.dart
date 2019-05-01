@@ -62,7 +62,7 @@ class FocusAttachment {
     assert(_node != null);
     if (isAttached) {
       if (_node.hasPrimaryFocus) {
-       _node.unfocus();
+        _node.unfocus();
       }
       _node._parent?._removeChild(_node);
       _node._attachment = null;
