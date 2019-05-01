@@ -20,7 +20,7 @@ CustomPainter _buildPainter({
   double crossAxisMargin = 0.0,
   Radius radius,
   double minLength = _kMinThumbExtent,
-  double minOverscrollLength = _kMinThumbExtent,
+  double minOverscrollLength,
   ScrollMetrics scrollMetrics,
 }) {
   return ScrollbarPainter(
@@ -32,7 +32,7 @@ CustomPainter _buildPainter({
     crossAxisMargin: crossAxisMargin,
     radius: radius,
     minLength: minLength,
-    minOverscrollLength: minOverscrollLength,
+    minOverscrollLength: minOverscrollLength ?? minLength,
     fadeoutOpacityAnimation: kAlwaysCompleteAnimation,
   )..update(scrollMetrics, scrollMetrics.axisDirection);
 }
@@ -158,7 +158,6 @@ void main() {
         painter = _buildPainter(
           mainAxisMargin: margin,
           minLength: minLen,
-          minOverscrollLength: minLen,
           scrollMetrics: defaultMetrics
         );
 
@@ -169,7 +168,6 @@ void main() {
         );
 
         painter.paint(testCanvas, size);
-
         expect(captureRect().top, margin);
 
         // Overscroll to double.infinity (down).

@@ -184,6 +184,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     }
 
     final Rect thumbRect = Offset(x, y) & thumbSize;
+    print('$thumbRect, ${_lastMetrics.pixels}');
     if (radius == null)
       canvas.drawRect(thumbRect, _paint);
     else
@@ -210,7 +211,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double trackSize = viewport - totalPadding - 2 * mainAxisMargin;
 
     // Skip painting if there's not enough space.
-    if (effectiveInside <= 0 || trackSize <= 0) {
+    if (viewport <= totalPadding || trackSize <= 0) {
       return;
     }
 

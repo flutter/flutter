@@ -51,22 +51,44 @@ void main() {
   testWidgets('Paints iOS spec with nav bar', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
-        home: CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: const Text('Title')),
-          child: const CupertinoScrollbar(
-            child: SingleChildScrollView(
-              child: SizedBox(width: 4000, height: 4000)
+        home: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
+          ),
+          child: CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(
+              middle: const Text('Title'),
+              backgroundColor: const Color(0x11111111)
+            ),
+            child: CupertinoScrollbar(
+              child: ListView(
+                children: const <Widget> [SizedBox(width: 4000, height: 4000)]
+              )
             )
           )
         )
       )
     );
 
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-    await gesture.moveBy(const Offset(0.0, -10.0));
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await gesture.moveBy(const Offset(0.0, -10));
     // Move back to original position.
-    await gesture.moveBy(const Offset(0.0, 10.0));
+    await gesture.moveBy(const Offset(0.0, 10));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.byType(CupertinoScrollbar), paints..rrect(
+        //color: _kScrollbarColor,
+        rrect: RRect.fromRectAndRadius(
+          const Rect.fromLTWH(
+            800.0 - 3 - 2.5, // Screen width - margin - thickness.
+            44 + 20 + 3.0, // nav bar height + top margin
+            2.5, // Thickness.
+            // Fraction visible * scrollbar height
+            (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
+          ),
+          const Radius.circular(1.25),
+        ),
+    ));
   });
 }
