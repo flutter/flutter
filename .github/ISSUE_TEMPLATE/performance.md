@@ -20,7 +20,7 @@ assignees: ''
      Please read our guide to filing a bug first: https://flutter.dev/docs/resources/bug-reports
 -->
 
-## Steps to Reproduce
+## Details
 
 <!--
 1.  Please tell us exactly how to reproduce the problem you are running into.
@@ -42,6 +42,8 @@ assignees: ''
      and Read Timeline Traces" on this blog post:
        https://medium.com/flutter-io/profiling-flutter-applications-using-the-timeline-a1a434964af03#a499
 -->
+
+## Logs
 
 <!--
      Run `flutter analyze` and attach any output of that command below.
