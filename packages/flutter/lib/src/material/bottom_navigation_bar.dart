@@ -183,8 +183,8 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedIconTheme = const IconThemeData(),
     double selectedFontSize = 14.0,
     double unselectedFontSize = 12.0,
-    TextStyle selectedLabelStyle = const TextStyle(inherit: false),
-    TextStyle unselectedLabelStyle = const TextStyle(inherit: false),
+    TextStyle selectedLabelStyle,
+    TextStyle unselectedLabelStyle,
     this.showSelectedLabels = true,
     bool showUnselectedLabels,
   }) : assert(items != null),
@@ -202,9 +202,7 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       assert(selectedLabelStyle != null),
        selectedLabelStyle = _defaultTextStyle(selectedLabelStyle, selectedFontSize),
-       assert(unselectedLabelStyle != null),
        unselectedLabelStyle = _defaultTextStyle(unselectedLabelStyle, unselectedFontSize),
        assert(showSelectedLabels != null),
        type = _type(type, items),
@@ -305,10 +303,10 @@ class BottomNavigationBar extends StatefulWidget {
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
 
-  /// Convenience getter for knowing the font size of the selected [BottomNavigationBarItem].
+  /// Returns the font size of the selected [BottomNavigationBarItem].
   double get selectedFontSize => selectedLabelStyle.fontSize;
 
-  /// Convenience getter for knowing the font size of the unselected [BottomNavigationBarItem]s.
+  /// Returns the font size of the unselected [BottomNavigationBarItem]s.
   double get unselectedFontSize => unselectedLabelStyle.fontSize;
 
   // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
@@ -342,13 +340,13 @@ class BottomNavigationBar extends StatefulWidget {
     return false;
   }
 
-  // Used by the [BottomNavigation] constructor to set the `selectedLabelStyle`
-  // and `unselectedLabelStyle` parameters.
+  // Used by the [BottomNavigationBar] constructor to initialize the
+  // `selectedLabelStyle` and `unselectedLabelStyle` properties.
   //
   // If the given [TextStyle] has a non-null `fontSize`, it should be used.
   // Otherwise, the [selectedFontSize] parameter should be used.
   static TextStyle _defaultTextStyle(TextStyle textStyle, double fontSize) {
-    textStyle ??= const TextStyle(inherit: false);
+    textStyle ??= const TextStyle();
     // Prefer the font size on textStyle if present.
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
