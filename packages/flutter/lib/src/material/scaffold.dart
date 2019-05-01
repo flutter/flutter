@@ -1541,6 +1541,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     bool isPersistent, {
     AnimationController animationController,
     Color backgroundColor,
+    double elevation,
+    ShapeBorder shape,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1619,6 +1621,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       builder: builder,
       isPersistent: isPersistent,
       backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
     );
 
     if (!isPersistent)
@@ -1673,6 +1677,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   PersistentBottomSheetController<T> showBottomSheet<T>(
     WidgetBuilder builder, {
     Color backgroundColor,
+    double elevation,
+    ShapeBorder shape,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -1694,6 +1700,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         false,
         animationController: controller,
         backgroundColor: backgroundColor,
+        elevation: elevation,
+        shape: shape,
       );
     });
     return _currentBottomSheet;
@@ -2216,6 +2224,8 @@ class _StandardBottomSheet extends StatefulWidget {
     this.builder,
     this.isPersistent = false,
     this.backgroundColor,
+    this.elevation,
+    this.shape,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -2225,6 +2235,8 @@ class _StandardBottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
   final bool isPersistent;
   final Color backgroundColor;
+  final double elevation;
+  final ShapeBorder shape;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -2311,6 +2323,8 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             onClosing: widget.onClosing,
             builder: widget.builder,
             backgroundColor: widget.backgroundColor,
+            elevation: widget.elevation,
+            shape: widget.shape,
           ),
         ),
       );
