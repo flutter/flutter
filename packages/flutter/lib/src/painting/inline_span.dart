@@ -16,14 +16,6 @@ class TrackingInt {
   TrackingInt([this.value = 0]);
 
   int value;
-
-  @override operator +(TrackingInt other) => value + other.value;
-  @override operator -(TrackingInt other) => value - other.value;
-  @override operator *(TrackingInt other) => value * other.value;
-  @override operator /(TrackingInt other) => value / other.value;
-  @override operator <(TrackingInt other) => value < other.value;
-  @override operator >(TrackingInt other) => value > other.value;
-  @override operator ==(TrackingInt other) => value == other.value;
 }
 
 /// Called on each span as [InlineSpan.visitChildren] walks the [InlineSpan] tree.

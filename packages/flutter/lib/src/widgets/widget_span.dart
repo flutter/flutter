@@ -181,11 +181,6 @@ class WidgetSpan extends PlaceholderSpan {
     return true;
   }
 
-  @override
-  bool debugAssertIsValidVisitor() {
-    return true;
-  }
-
   /// Describe the difference between this widget span and another [InlineSpan],
   /// in terms of how much damage it will make to the rendering. The comparison
   /// is deep.
@@ -253,7 +248,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  bool _debugAssertIsValidVisitor() {
+  bool debugAssertIsValidVisitor() {
     return true;
   }
 }

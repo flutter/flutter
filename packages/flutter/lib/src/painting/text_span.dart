@@ -221,7 +221,7 @@ class TextSpan extends InlineSpan {
   @override
   InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
-    TrackingInt offset = TrackingInt();
+    final TrackingInt offset = TrackingInt();
     TextSpan result;
     visitChildren((InlineSpan span) {
       result = span.computeSpanForPosition(position, offset);
@@ -232,6 +232,7 @@ class TextSpan extends InlineSpan {
     });
     return result;
   }
+  @override
   InlineSpan computeSpanForPosition(TextPosition position, TrackingInt offset) {
     if (text == null) {
       return null;
@@ -262,6 +263,7 @@ class TextSpan extends InlineSpan {
     computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
     return buffer.toString();
   }
+  @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     assert(debugAssertIsValid());
     if (semanticsLabel != null && includeSemanticsLabels) {
@@ -288,15 +290,15 @@ class TextSpan extends InlineSpan {
   int codeUnitAt(int index) {
     if (index < 0)
       return null;
-    TrackingInt offset = TrackingInt();
-    TrackingInt result = TrackingInt(null);
+    final TrackingInt offset = TrackingInt();
+    final TrackingInt result = TrackingInt(null);
     visitChildren((InlineSpan span) {
       return span.codeUnitAtVisitor(TrackingInt(index), offset, result);
 
     });
     return result.value;
   }
-
+  @override
   bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
     if (text == null) {
       return true;
@@ -334,6 +336,7 @@ class TextSpan extends InlineSpan {
     }());
     return true;
   }
+  @override
   bool debugAssertIsValidVisitor() {
     if (children != null) {
       for (InlineSpan child in children) {
