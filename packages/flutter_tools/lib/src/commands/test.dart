@@ -13,6 +13,7 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
+import '../devfs.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
@@ -126,12 +127,13 @@ class TestCommand extends FastFlutterCommand {
       await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
-    if (buildTestAssets) {
-      await _buildTestAsset();
-    }
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
+      await _buildTestAsset();
+    }
 
     Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
@@ -169,7 +171,7 @@ class TestCommand extends FastFlutterCommand {
     CoverageCollector collector;
     if (argResults['coverage'] || argResults['merge-coverage']) {
       collector = CoverageCollector(
-        flutterProject: await FlutterProject.current(),
+        flutterProject: FlutterProject.current(),
       );
     }
 
@@ -239,7 +241,30 @@ class TestCommand extends FastFlutterCommand {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')), assetBundle.entries);
+    if (_needRebuild(assetBundle.entries)) {
+      await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
+          assetBundle.entries);
+    }
+  }
+  bool _needRebuild(Map<String, DevFSContent> entries) {
+    final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    if (!manifest.existsSync()) {
+      return true;
+    }
+    final DateTime lastModified = manifest.lastModifiedSync();
+    final File pub = fs.file('pubspec.yaml');
+    if (pub.lastModifiedSync().isAfter(lastModified)) {
+      return true;
+    }
+
+    for (DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+      // Calling isModified to access file stats first in order for isModifiedAfter
+      // to work.
+      if (entry.isModified && entry.isModifiedAfter(lastModified)) {
+        return true;
+      }
+    }
+    return false;
   }
 }
 

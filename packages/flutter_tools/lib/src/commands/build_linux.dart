@@ -52,7 +52,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     if (!platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
