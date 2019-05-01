@@ -17,7 +17,7 @@ class _UpdateCountedPhysicalModel extends PhysicalModel {
 
 class _UpdateCountedPhysicalShape extends PhysicalShape {
   _UpdateCountedPhysicalShape({Clip clipBehavior = Clip.none})
-      : super(clipBehavior: clipBehavior, color: Colors.red, clipper: ShapeBorderClipper(shape: CircleBorder()));
+      : super(clipBehavior: clipBehavior, color: Colors.red, clipper: const ShapeBorderClipper(shape: CircleBorder()));
 }
 
 void main() {
