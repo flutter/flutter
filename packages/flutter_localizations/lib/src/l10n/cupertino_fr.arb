@@ -1,10 +1,10 @@
 {
   "timerPickerSecondLabelOne": "s",
-  "datePickerHourSemanticsLabelOne": "$hour h",
-  "datePickerHourSemanticsLabelOther": "$hour h",
+  "datePickerHourSemanticsLabelOne": "$hour heure",
+  "datePickerHourSemanticsLabelOther": "$hour heures",
   "datePickerMinuteSemanticsLabelOne": "1 minute",
   "datePickerMinuteSemanticsLabelOther": "$minute minutes",
-  "datePickerDateOrder": "mja",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",

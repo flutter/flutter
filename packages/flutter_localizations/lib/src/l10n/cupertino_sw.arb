@@ -4,7 +4,7 @@
   "datePickerMinuteSemanticsLabelOne": "Dakika 1",
   "datePickerMinuteSemanticsLabelOther": "Dakika $minute",
   "datePickerDateOrder": "dmy",
-  "datePickerDateTimeOrder": "tarehe_saa_kipindiChaSiku",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
   "alertDialogLabel": "Arifa",
