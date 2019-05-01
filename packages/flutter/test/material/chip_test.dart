@@ -271,6 +271,13 @@ void main() {
       );
     }
 
+    void chipRectContains(Rect chipRect, Rect rect) {
+      expect(chipRect.contains(rect.topLeft), true);
+      expect(chipRect.contains(rect.topRight), true);
+      expect(chipRect.contains(rect.bottomLeft), true);
+      expect(chipRect.contains(rect.bottomRight), true);
+    }
+
     Rect chipRect;
     Rect avatarRect;
     Rect labelRect;
@@ -283,10 +290,7 @@ void main() {
     labelRect = tester.getRect(
       find.text(text),
     );
-    expect(chipRect.contains(labelRect.topLeft), true);
-    expect(chipRect.contains(labelRect.topRight), true);
-    expect(chipRect.contains(labelRect.bottomLeft), true);
-    expect(chipRect.contains(labelRect.bottomRight), true);
+    chipRectContains(chipRect, labelRect);
 
     await tester.pumpWidget(chipBuilder(
       text,
@@ -296,19 +300,12 @@ void main() {
 
     chipRect = tester.getRect(find.byType(Chip));
     avatarRect = tester.getRect(find.byType(CircleAvatar));
-
-    expect(chipRect.contains(avatarRect.topLeft), true);
-    expect(chipRect.contains(avatarRect.topRight), true);
-    expect(chipRect.contains(avatarRect.bottomLeft), true);
-    expect(chipRect.contains(avatarRect.bottomRight), true);
+    chipRectContains(chipRect, avatarRect);
 
     labelRect = tester.getRect(
       find.text(text),
     );
-    expect(chipRect.contains(labelRect.topLeft), true);
-    expect(chipRect.contains(labelRect.topRight), true);
-    expect(chipRect.contains(labelRect.bottomLeft), true);
-    expect(chipRect.contains(labelRect.bottomRight), true);
+    chipRectContains(chipRect, labelRect);
 
     await tester.pumpWidget(chipBuilder(
       text,
@@ -319,24 +316,15 @@ void main() {
 
     chipRect = tester.getRect(find.byType(Chip));
     avatarRect = tester.getRect(find.byType(CircleAvatar));
-    expect(chipRect.contains(avatarRect.topLeft), true);
-    expect(chipRect.contains(avatarRect.topRight), true);
-    expect(chipRect.contains(avatarRect.bottomLeft), true);
-    expect(chipRect.contains(avatarRect.bottomRight), true);
+    chipRectContains(chipRect, avatarRect);
 
     labelRect = tester.getRect(
       find.text(text),
     );
-    expect(chipRect.contains(labelRect.topLeft), true);
-    expect(chipRect.contains(labelRect.topRight), true);
-    expect(chipRect.contains(labelRect.bottomLeft), true);
-    expect(chipRect.contains(labelRect.bottomRight), true);
+    chipRectContains(chipRect, labelRect);
 
     deleteIconRect = tester.getRect(find.byIcon(Icons.cancel));
-    expect(chipRect.contains(deleteIconRect.topLeft), true);
-    expect(chipRect.contains(deleteIconRect.topRight), true);
-    expect(chipRect.contains(deleteIconRect.bottomLeft), true);
-    expect(chipRect.contains(deleteIconRect.bottomRight), true);
+    chipRectContains(chipRect, deleteIconRect);
   });
 
   testWidgets('Chip in row works ok', (WidgetTester tester) async {
