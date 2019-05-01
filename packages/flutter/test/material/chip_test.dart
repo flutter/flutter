@@ -287,9 +287,7 @@ void main() {
     await tester.pumpWidget(chipBuilder(text));
 
     chipRect = tester.getRect(find.byType(Chip));
-    labelRect = tester.getRect(
-      find.text(text),
-    );
+    labelRect = tester.getRect(find.text(text));
     chipRectContains(chipRect, labelRect);
 
     await tester.pumpWidget(chipBuilder(
@@ -302,9 +300,7 @@ void main() {
     avatarRect = tester.getRect(find.byType(CircleAvatar));
     chipRectContains(chipRect, avatarRect);
 
-    labelRect = tester.getRect(
-      find.text(text),
-    );
+    labelRect = tester.getRect(find.text(text));
     chipRectContains(chipRect, labelRect);
 
     await tester.pumpWidget(chipBuilder(
@@ -318,9 +314,7 @@ void main() {
     avatarRect = tester.getRect(find.byType(CircleAvatar));
     chipRectContains(chipRect, avatarRect);
 
-    labelRect = tester.getRect(
-      find.text(text),
-    );
+    labelRect = tester.getRect(find.text(text));
     chipRectContains(chipRect, labelRect);
 
     deleteIconRect = tester.getRect(find.byIcon(Icons.cancel));
