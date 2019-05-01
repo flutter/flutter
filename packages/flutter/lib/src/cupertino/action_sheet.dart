@@ -714,16 +714,24 @@ class _RenderCupertinoAlert extends RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    bool isHit = false;
     final MultiChildLayoutParentData contentSectionParentData = contentSection.parentData;
     final MultiChildLayoutParentData actionsSectionParentData = actionsSection.parentData;
-    if (contentSection.hitTest(result, position: position - contentSectionParentData.offset)) {
-      isHit = true;
-    } else if (actionsSection.hitTest(result,
-        position: position - actionsSectionParentData.offset)) {
-      isHit = true;
-    }
-    return isHit;
+    return result.addWithPaintOffset(
+             offset: contentSectionParentData.offset,
+             position: position,
+             hitTest: (HitTestResult result, Offset transformed) {
+               assert(transformed == position - contentSectionParentData.offset);
+               return contentSection.hitTest(result, position: transformed);
+             },
+           )
+        || result.addWithPaintOffset(
+             offset: actionsSectionParentData.offset,
+             position: position,
+             hitTest: (HitTestResult result, Offset transformed) {
+               assert(transformed == position - actionsSectionParentData.offset);
+               return actionsSection.hitTest(result, position: transformed);
+             },
+           );
   }
 }
 

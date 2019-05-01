@@ -766,6 +766,17 @@ class SliverGeometry extends Diagnosticable {
   }
 }
 
+/// Method signature for hit testing a [RenderSLiver].
+///
+/// Used by [SliverHitTestResult.addWithAxisOffset] to hit test [RenderSliver]
+/// children.
+///
+/// See also:
+///
+///  * [RenderSliver.hitTest], which documents more details around hit testing
+///    [RenderSliver]s.
+typedef SliverHitTest = bool Function(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition });
+
 /// The result of performing a hit test on [RenderSliver]s.
 class SliverHitTestResult extends HitTestResult {
   /// Creates an empty hit test result for hit testing on [RenderSliver].
@@ -790,6 +801,43 @@ class SliverHitTestResult extends HitTestResult {
   ///  * [BoxHitTestResult.wrap], which turns a [SliverHitTestResult] into a
   ///    [BoxHitTestResult] for hit testing on [RenderBox] children.
   SliverHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+
+  /// Transforms `mainAxisPosition` and `crossAxisPosition` to the local
+  /// coordinate system of a child before hit-testing the child.
+  ///
+  /// For the transform `mainAxisOffset` is subtracted from `mainAxisPosition`
+  /// and `crossAxisOffset` is subtracted from `crossAxisPosition`.
+  ///
+  /// The `paintOffset` describes how the paint position of a point painted at
+  /// the provided `mainAxisPosition` and `crossAxisPosition` would change after
+  /// `mainAxisOffset` and `crossAxisOffset` have been applied. This
+  /// `paintOffset` is used to properly convert [PointerEvent]s to the local
+  /// coordinate system of the event receiver.
+  ///
+  /// The `paintOffset` may be null if `mainAxisOffset` and `crossAxisOffset` are
+  /// both zero.
+  ///
+  /// The function returns the return value of `hitTest`.
+  bool addWithAxisOffset({
+    @required Offset paintOffset,
+    @required double mainAxisOffset,
+    @required double crossAxisOffset,
+    @required double mainAxisPosition,
+    @required double crossAxisPosition,
+    @required SliverHitTest hitTest,
+  }) {
+    assert(mainAxisOffset != null);
+    assert(crossAxisOffset != null);
+    assert(mainAxisPosition != null);
+    assert(crossAxisPosition != null);
+    assert(hitTest != null);
+    // TODO(goderbauer): use paintOffset when transforming pointer events is implemented.
+    return hitTest(
+      this,
+      mainAxisPosition: mainAxisPosition - mainAxisOffset,
+      crossAxisPosition: crossAxisPosition - crossAxisOffset,
+    );
+  }
 }
 
 /// A hit test entry used by [RenderSliver].
@@ -1523,20 +1571,39 @@ abstract class RenderSliverHelpers implements RenderSliver {
   @protected
   bool hitTestBoxChild(BoxHitTestResult result, RenderBox child, { @required double mainAxisPosition, @required double crossAxisPosition }) {
     final bool rightWayUp = _getRightWayUp(constraints);
-    double absolutePosition = mainAxisPosition - childMainAxisPosition(child);
-    final double absoluteCrossAxisPosition = crossAxisPosition - childCrossAxisPosition(child);
+    double delta = childMainAxisPosition(child);
+    final double crossAxisDelta = childCrossAxisPosition(child);
+    double absolutePosition = mainAxisPosition - delta;
+    final double absoluteCrossAxisPosition = crossAxisPosition - crossAxisDelta;
+    Offset paintOffset, transformedPosition;
     assert(constraints.axis != null);
     switch (constraints.axis) {
       case Axis.horizontal:
-        if (!rightWayUp)
+        if (!rightWayUp) {
           absolutePosition = child.size.width - absolutePosition;
-        return child.hitTest(result, position: Offset(absolutePosition, absoluteCrossAxisPosition));
+          delta = geometry.paintExtent - child.size.width - delta;
+        }
+        paintOffset = Offset(delta, crossAxisDelta);
+        transformedPosition = Offset(absolutePosition, absoluteCrossAxisPosition);
+        break;
       case Axis.vertical:
-        if (!rightWayUp)
+        if (!rightWayUp) {
           absolutePosition = child.size.height - absolutePosition;
-        return child.hitTest(result, position: Offset(absoluteCrossAxisPosition, absolutePosition));
+          delta = geometry.paintExtent - child.size.height - delta;
+        }
+        paintOffset = Offset(crossAxisDelta, delta);
+        transformedPosition = Offset(absoluteCrossAxisPosition, absolutePosition);
+        break;
     }
-    return false;
+    assert(paintOffset != null);
+    assert(transformedPosition != null);
+    return result.addWithPaintOffset(
+      offset: paintOffset,
+      position: null, // Manually adapting from sliver to box position above.
+      hitTest: (BoxHitTestResult result, Offset _) {
+        return child.hitTest(result, position: transformedPosition);
+      },
+    );
   }
 
   /// Utility function for [applyPaintTransform] for use when the children are

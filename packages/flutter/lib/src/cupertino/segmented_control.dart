@@ -709,7 +709,15 @@ class _RenderSegmentedControl<T> extends RenderBox
     while (child != null) {
       final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       if (childParentData.surroundingRect.contains(position)) {
-        return child.hitTest(result, position: (Offset.zero & child.size).center);
+        final Offset center = (Offset.zero & child.size).center;
+        return result.addWithRawTransform(
+          transform: MatrixUtils.forceToPoint(center),
+          position: center,
+          hitTest: (HitTestResult result, Offset position) {
+            assert(position == center);
+            return child.hitTest(result, position: center);
+          },
+        );
       }
       child = childParentData.previousSibling;
     }
