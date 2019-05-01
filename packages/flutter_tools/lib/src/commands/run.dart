@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -25,7 +26,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   RunCommandBase({ bool verboseHelp = false }) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
     addDynamicModeFlags(verboseHelp: verboseHelp);
-    addDynamicPatchingFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     argParser
       ..addFlag('trace-startup',
@@ -169,6 +169,11 @@ class RunCommand extends RunCommandBase {
               'results out to "refresh_benchmark.json", and exit. This flag is '
               'intended for use in generating automated flutter benchmarks.',
       )
+      ..addFlag('disable-service-auth-codes',
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).')
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -262,6 +267,7 @@ class RunCommand extends RunCommandBase {
       return DebuggingOptions.enabled(
         buildInfo,
         startPaused: argResults['start-paused'],
+        disableServiceAuthCodes: argResults['disable-service-auth-codes'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
@@ -359,9 +365,11 @@ class RunCommand extends RunCommandBase {
       expFlags = argResults[FlutterOptions.kEnableExperiment];
     }
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
+    final FlutterProject flutterProject = FlutterProject.current();
     for (Device device in devices) {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,
+        flutterProject: flutterProject,
         trackWidgetCreation: argResults['track-widget-creation'],
         dillOutputPath: argResults['output-dill'],
         fileSystemRoots: argResults['filesystem-root'],
@@ -369,6 +377,7 @@ class RunCommand extends RunCommandBase {
         viewFilter: argResults['isolate-filter'],
         experimentalFlags: expFlags,
         target: argResults['target'],
+        buildMode: getBuildMode(),
       );
       flutterDevices.add(flutterDevice);
     }

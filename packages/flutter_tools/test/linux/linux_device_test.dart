@@ -2,11 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
+import 'package:flutter_tools/src/linux/application_package.dart';
 import 'package:flutter_tools/src/linux/linux_device.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -15,21 +21,30 @@ void main() {
   group(LinuxDevice, () {
     final LinuxDevice device = LinuxDevice();
     final MockPlatform notLinux = MockPlatform();
+    final MockProcessManager mockProcessManager = MockProcessManager();
+
     when(notLinux.isLinux).thenReturn(false);
     when(notLinux.environment).thenReturn(const <String, String>{});
-
-    test('defaults', () async {
-      expect(await device.targetPlatform, TargetPlatform.linux_x64);
-      expect(device.name, 'Linux');
+    when(mockProcessManager.run(<String>[
+      'ps', 'aux',
+    ])).thenAnswer((Invocation invocation) async {
+      final MockProcessResult result = MockProcessResult();
+      when(result.exitCode).thenReturn(0);
+      when<String>(result.stdout).thenReturn('');
+      return result;
     });
 
-    test('unimplemented methods', () {
-      expect(() => device.installApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.uninstallApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.isLatestBuildInstalled(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.startApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.stopApp(null), throwsA(isInstanceOf<UnimplementedError>()));
-      expect(() => device.isAppInstalled(null), throwsA(isInstanceOf<UnimplementedError>()));
+    testUsingContext('defaults', () async {
+      final PrebuiltLinuxApp linuxApp = PrebuiltLinuxApp(executable: 'foo');
+      expect(await device.targetPlatform, TargetPlatform.linux_x64);
+      expect(device.name, 'Linux');
+      expect(await device.installApp(linuxApp), true);
+      expect(await device.uninstallApp(linuxApp), true);
+      expect(await device.isLatestBuildInstalled(linuxApp), true);
+      expect(await device.isAppInstalled(linuxApp), true);
+      expect(await device.stopApp(linuxApp), true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
     });
 
     test('noop port forwarding', () async {
@@ -46,6 +61,37 @@ void main() {
       Platform: () => notLinux,
     });
   });
+
+  testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('linux').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(LinuxDevice().isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(LinuxDevice().isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
 }
 
 class MockPlatform extends Mock implements Platform {}
+
+class MockFileSystem extends Mock implements FileSystem {}
+
+class MockFile extends Mock implements File {}
+
+class MockProcessManager extends Mock implements ProcessManager {}
+
+class MockProcess extends Mock implements Process {}
+
+class MockProcessResult extends Mock implements ProcessResult {}

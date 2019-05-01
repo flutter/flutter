@@ -8,37 +8,76 @@ import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
 
-/// The bit of [PointerEvent.buttons] that corresponds to a unified behavior of
-/// "basic operation".
+/// The bit of [PointerEvent.buttons] that corresponds to a cross-device
+/// behavior of "primary operation".
 ///
-/// It is equivalent to:
+/// More specifially, it includes:
 ///
 ///  * [kTouchContact]: The pointer contacts the touch screen.
 ///  * [kStylusContact]: The stylus contacts the screen.
 ///  * [kPrimaryMouseButton]: The primary mouse button.
+///
+/// See also:
+///
+///  * [kSecondaryButton], which describes a cross-device behavior of
+///    "secondary operation".
 const int kPrimaryButton = 0x01;
+
+/// The bit of [PointerEvent.buttons] that corresponds to a cross-device
+/// behavior of "secondary operation".
+///
+/// It is equivalent to:
+///
+///  * [kPrimaryStylusButton]: The stylus contacts the screen.
+///  * [kSecondaryMouseButton]: The primary mouse button.
+///
+/// See also:
+///
+///  * [kPrimaryButton], which describes a cross-device behavior of
+///    "primary operation".
+const int kSecondaryButton = 0x02;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
 ///
 /// The primary mouse button is typically the left button on the top of the
 /// mouse but can be reconfigured to be a different physical button.
+///
+/// See also:
+///
+///  * [kPrimaryButton], which has the same value but describes its cross-device
+///    concept.
 const int kPrimaryMouseButton = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the secondary mouse button.
 ///
 /// The secondary mouse button is typically the right button on the top of the
 /// mouse but can be reconfigured to be a different physical button.
-const int kSecondaryMouseButton = 0x02;
+///
+/// See also:
+///
+///  * [kSecondaryButton], which has the same value but describes its cross-device
+///    concept.
+const int kSecondaryMouseButton = kSecondaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to when a stylus
 /// contacting the screen.
+///
+/// See also:
+///
+///  * [kPrimaryButton], which has the same value but describes its cross-device
+///    concept.
 const int kStylusContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary stylus button.
 ///
 /// The primary stylus button is typically the top of the stylus and near the
 /// tip but can be reconfigured to be a different physical button.
-const int kPrimaryStylusButton = 0x02;
+///
+/// See also:
+///
+///  * [kSecondaryButton], which has the same value but describes its cross-device
+///    concept.
+const int kPrimaryStylusButton = kSecondaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the middle mouse button.
 ///
@@ -67,6 +106,11 @@ const int kForwardMouseButton = 0x10;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the pointer contacting
 /// a touch screen.
+///
+/// See also:
+///
+///  * [kPrimaryButton], which has the same value but describes its cross-device
+///    concept.
 const int kTouchContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
@@ -85,6 +129,47 @@ int nthMouseButton(int number) => (kPrimaryMouseButton << (number - 1)) & kMaxUn
 /// See [kPrimaryStylusButton] and [kSecondaryStylusButton] for semantic names
 /// for some stylus buttons.
 int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMaxUnsignedSMI;
+
+/// Returns the button of `buttons` with the smallest integer.
+///
+/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// This function returns the set bit closest to the least significant bit.
+///
+/// It returns zero when `buttons` is zero.
+///
+/// Example:
+///
+/// ```dart
+///   assert(rightmostButton(0x1) == 0x1);
+///   assert(rightmostButton(0x11) == 0x1);
+///   assert(rightmostButton(0) == 0);
+/// ```
+///
+/// See also:
+///
+///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
+int smallestButton(int buttons) => buttons & (-buttons);
+
+/// Returns whether `buttons` contains one and only one button.
+///
+/// The `buttons` parameter is a bitfield where each set bit represents a button.
+/// This function returns whether there is only one set bit in the given integer.
+///
+/// It returns false when `buttons` is zero.
+///
+/// Example:
+///
+/// ```dart
+///   assert(isSingleButton(0x1) == true);
+///   assert(isSingleButton(0x11) == false);
+///   assert(isSingleButton(0) == false);
+/// ```
+///
+/// See also:
+///
+///   * [smallestButton], which returns the button in a `buttons` bitfield with
+///     the smallest integer button.
+bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
 ///
@@ -672,7 +757,7 @@ class PointerDownEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,
@@ -727,7 +812,7 @@ class PointerMoveEvent extends PointerEvent {
     int device = 0,
     Offset position = Offset.zero,
     Offset delta = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,

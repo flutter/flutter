@@ -1152,9 +1152,10 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
     CustomClipper<T> clipper,
-    this.clipBehavior = Clip.antiAlias,
-  }) : _clipper = clipper,
-       assert(clipBehavior != null),
+    Clip clipBehavior = Clip.antiAlias,
+  }) : assert(clipBehavior != null),
+       _clipper = clipper,
+       _clipBehavior = clipBehavior,
        super(child);
 
   /// If non-null, determines which clip to use on the child.
@@ -1198,7 +1199,14 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T _clip;
 
-  final Clip clipBehavior;
+  Clip get clipBehavior => _clipBehavior;
+  set clipBehavior(Clip value) {
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+    }
+  }
+  Clip _clipBehavior;
 
   @override
   void performLayout() {
@@ -2543,7 +2551,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   /// no longer directed towards this receiver.
   PointerCancelEventListener onPointerCancel;
 
-  /// Called when a pointer signal occures over this object.
+  /// Called when a pointer signal occurs over this object.
   PointerSignalEventListener onPointerSignal;
 
   // Object used for annotation of the layer used for hover hit detection.
@@ -2557,6 +2565,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
+    assert(_onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
+    "Shouldn't call _updateAnnotations if nothing has changed.");
     if (_hoverAnnotation != null && attached) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
@@ -2572,6 +2582,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     } else {
       _hoverAnnotation = null;
     }
+    // Needs to paint in any case, in order to insert/remove the annotation
+    // layer associated with the updated _hoverAnnotation.
+    markNeedsPaint();
   }
 
   @override
@@ -4681,7 +4694,7 @@ class RenderFollowerLayer extends RenderProxyBox {
       _layer,
       super.paint,
       Offset.zero,
-      childPaintBounds: Rect.fromLTRB(
+      childPaintBounds: const Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
         double.negativeInfinity,
         double.negativeInfinity,

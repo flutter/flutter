@@ -120,7 +120,7 @@ void main() {
     const Border border = Border(top: BorderSide(width: 10.0), right: BorderSide(width: 20.0));
     const BorderDirectional borderDirectional = BorderDirectional(top: BorderSide(width: 10.0), end: BorderSide(width: 20.0));
     expect(
-      border.getOuterPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      border.getOuterPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       isPathThat(
         includes: <Offset>[
           const Offset(50.0, 60.0),
@@ -146,7 +146,7 @@ void main() {
       ),
     );
     expect(
-      border.getInnerPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      border.getInnerPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       // inner path is a rect from 50.0,70.0 to 90.0,190.0
       isPathThat(
         includes: <Offset>[
@@ -184,7 +184,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getOuterPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      borderDirectional.getOuterPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       isPathThat(
         includes: <Offset>[
           const Offset(50.0, 60.0),
@@ -210,7 +210,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getInnerPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      borderDirectional.getInnerPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       // inner path is a rect from 70.0,70.0 to 110.0,190.0
       isPathThat(
         includes: <Offset>[
@@ -251,7 +251,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getOuterPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
+      borderDirectional.getOuterPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
       isPathThat(
         includes: <Offset>[
           const Offset(50.0, 60.0),
@@ -277,7 +277,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getInnerPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
+      borderDirectional.getInnerPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
       // inner path is a rect from 50.0,70.0 to 90.0,190.0
       isPathThat(
         includes: <Offset>[
@@ -590,7 +590,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
+          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
       },
       paints
         ..path(
@@ -602,7 +602,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
+          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
       },
       paints
         ..path(
@@ -614,7 +614,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
       },
       paintsAssertion, // no TextDirection
     );

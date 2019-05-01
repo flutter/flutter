@@ -408,7 +408,7 @@ void main() {
     );
     expect(
       tester.getRect(find.byType(Placeholder)),
-      Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+      const Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
     );
     await tester.pumpWidget(
       const MediaQuery(
@@ -422,12 +422,12 @@ void main() {
     );
     expect( // no change because this is an animation
       tester.getRect(find.byType(Placeholder)),
-      Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
+      const Rect.fromLTRB(10.0 + 40.0, 20.0 + 24.0, 800.0 - (40.0 + 30.0), 600.0 - (24.0 + 40.0)),
     );
     await tester.pump(const Duration(seconds: 1));
     expect( // animation finished
       tester.getRect(find.byType(Placeholder)),
-      Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
+      const Rect.fromLTRB(40.0, 24.0, 800.0 - 40.0, 600.0 - 24.0),
     );
   });
 
