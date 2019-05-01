@@ -829,22 +829,27 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
 
     // Align items along the main axis.
-    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
+    // Unfortunately, using full precision floating point here causes false
+    // positives on the overflow detection.
+    // We apply a similar hack here as _applyFloatingPointHack in
+    // text_painter.dart.
+    final double idealSize = canFlex && mainAxisSize == MainAxisSize.max
+      ? maxMainSize.ceilToDouble()
+      : allocatedSize.ceilToDouble();
     double actualSize;
-    double actualSizeDelta;
     switch (_direction) {
       case Axis.horizontal:
         size = constraints.constrain(Size(idealSize, crossSize));
-        actualSize = size.width;
-        crossSize = size.height;
+        actualSize = size.width.ceilToDouble();
+        crossSize = size.height.ceilToDouble();
         break;
       case Axis.vertical:
         size = constraints.constrain(Size(crossSize, idealSize));
-        actualSize = size.height;
-        crossSize = size.width;
+        actualSize = size.height.ceilToDouble();
+        crossSize = size.width.ceilToDouble();
         break;
     }
-    actualSizeDelta = actualSize - allocatedSize;
+    final double actualSizeDelta = (actualSize - allocatedSize).ceilToDouble();
     _overflow = math.max(0.0, -actualSizeDelta);
 
     final double remainingSpace = math.max(0.0, actualSizeDelta);
