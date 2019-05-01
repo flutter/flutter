@@ -61,7 +61,9 @@ class FocusAttachment {
   void detach() {
     assert(_node != null);
     if (isAttached) {
-      _node.unfocus();
+      if (_node.hasPrimaryFocus) {
+       _node.unfocus();
+      }
       _node._parent?._removeChild(_node);
       _node._attachment = null;
     }
@@ -495,13 +497,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Has no effect on nodes that return true from [hasFocus], but false from
   /// [hasPrimaryFocus].
   void unfocus() {
-    final FocusScopeNode scope = enclosingScope;
-    if (scope == null) {
-      // This node isn't part of a tree.
+    if (hasPrimaryFocus) {
+      final FocusScopeNode scope = enclosingScope;
+      assert(scope != null, 'Node has primary focus, but no enclosingScope.');
+      scope._focusedChildren.remove(this);
+      _manager?._willUnfocusNode(this);
       return;
     }
-    scope._focusedChildren.remove(this);
-    _manager?._willUnfocusNode(this);
+    if (hasFocus) {
+      // If we are in the focus chain, but not the primary focus, then unfocus
+      // the primary instead.
+      _manager._currentFocus.unfocus();
+    }
   }
 
   /// Removes the keyboard token from this focus node if it has one.
