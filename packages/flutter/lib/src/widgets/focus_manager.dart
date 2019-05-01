@@ -61,6 +61,9 @@ class FocusAttachment {
   void detach() {
     assert(_node != null);
     if (isAttached) {
+      if (_node.hasPrimaryFocus) {
+        _node.unfocus();
+      }
       _node._parent?._removeChild(_node);
       _node._attachment = null;
     }
@@ -494,13 +497,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Has no effect on nodes that return true from [hasFocus], but false from
   /// [hasPrimaryFocus].
   void unfocus() {
-    final FocusScopeNode scope = enclosingScope;
-    if (scope == null) {
-      // This node isn't part of a tree.
+    if (hasPrimaryFocus) {
+      final FocusScopeNode scope = enclosingScope;
+      assert(scope != null, 'Node has primary focus, but no enclosingScope.');
+      scope._focusedChildren.remove(this);
+      _manager?._willUnfocusNode(this);
       return;
     }
-    scope._focusedChildren.remove(this);
-    _manager?._willUnfocusNode(this);
+    if (hasFocus) {
+      // If we are in the focus chain, but not the primary focus, then unfocus
+      // the primary instead.
+      _manager._currentFocus.unfocus();
+    }
   }
 
   /// Removes the keyboard token from this focus node if it has one.
@@ -545,13 +553,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // Removes the given FocusNode and its children as a child of this node.
   @mustCallSuper
   void _removeChild(FocusNode node) {
+    assert(node != null);
     assert(_children.contains(node), "Tried to remove a node that wasn't a child.");
     assert(node._parent == this);
     assert(node._manager == _manager);
 
-    // If the child was (or requested to be) the primary focus, then unfocus it
-    // and cancel any outstanding request to be focused.
-    node.unfocus();
+    node.enclosingScope?._focusedChildren?.remove(node);
 
     node._parent = null;
     _children.remove(node);
@@ -577,32 +584,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
     assert(_manager == null || child != _manager.rootScope, "Reparenting the root node isn't allowed.");
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Loops are not allowed.');
-    FocusNode oldPrimaryFocus;
-    if (child._manager != null) {
-      // We want to find out what the primary focus is, since the new child
-      // might be an ancestor of the primary focus, and the primary focus should
-      // move with the child.
-      oldPrimaryFocus = child.hasFocus ? child._manager._currentFocus : null;
-      assert(oldPrimaryFocus == null || oldPrimaryFocus == child || oldPrimaryFocus.ancestors.contains(child),
-        "child has focus, but primary focus isn't a descendant of it.");
-    }
-    // If the child currently has focus, we have to do some extra work to keep
-    // that focus, and to notify any scopes that used to be ancestors, and no
-    // longer have focus after we move it.
-    final Set<FocusNode> oldFocusPath = oldPrimaryFocus?.ancestors?.toSet() ?? <FocusNode>{};
+    final bool hadFocus = child.hasFocus;
     child._parent?._removeChild(child);
     _children.add(child);
     child._parent = this;
     child._updateManager(_manager);
-    if (oldPrimaryFocus != null) {
-      final Set<FocusNode> newFocusPath = _manager?._currentFocus?.ancestors?.toSet() ?? <FocusNode>{};
-      // Nodes that will no longer be focused need to be marked dirty.
-      for (FocusNode node in oldFocusPath.difference(newFocusPath)) {
-        node._markAsDirty();
-      }
-      // If the node used to have focus, make sure it keeps it's old primary
-      // focus when it moves.
-      oldPrimaryFocus.requestFocus();
+    if (hadFocus) {
+      // Update the focus chain for the current focus without changing it.
+      _manager?._currentFocus?._setAsFocusedChild();
     }
   }
 
@@ -792,18 +781,10 @@ class FocusScopeNode extends FocusNode {
       _reparent(scope);
     }
     assert(scope.ancestors.contains(this), '$FocusScopeNode $scope must be a child of $this to set it as first focus.');
-    // Move down the tree, checking each focusedChild until we get to a node
-    // that either isn't a scope node, or has no focused child, and then request
-    // focus on that node.
-    FocusNode descendantFocus = scope.focusedChild;
-    while (descendantFocus is FocusScopeNode && descendantFocus != null) {
-      final FocusScopeNode descendantScope = descendantFocus;
-      descendantFocus = descendantScope.focusedChild;
-    }
-    if (descendantFocus != null) {
-      descendantFocus?._doRequestFocus(isFromPolicy: false);
-    } else {
+    if (hasFocus) {
       scope._doRequestFocus(isFromPolicy: false);
+    } else {
+      scope._setAsFocusedChild();
     }
   }
 
@@ -843,6 +824,7 @@ class FocusScopeNode extends FocusNode {
     }
     if (primaryFocus is FocusScopeNode) {
       // We didn't find a FocusNode at the leaf, so we're focusing the scope.
+      _setAsFocusedChild();
       _markAsDirty(newFocus: primaryFocus);
     } else {
       primaryFocus.requestFocus();
