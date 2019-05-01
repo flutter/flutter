@@ -110,7 +110,7 @@ void main() {
     // width to the left of 0 offset box rect and nothing is drawn inside the
     // box's rect.
     expect(box, paints..rect(
-      rect: Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
+      rect: const Rect.fromLTWH(-800.0, 0.0, 800.0, 600.0)
     ));
 
     await tester.pumpAndSettle();

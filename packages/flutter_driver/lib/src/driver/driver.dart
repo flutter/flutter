@@ -934,6 +934,16 @@ void restoreVmServiceConnectFunction() {
 }
 
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (error is rpc.RpcException) {
+    final rpc.RpcException rpcException = error;
+    if (rpcException.data != null && rpcException.data['id'] == null) {
+      // This can happen, e.g., if a client tries to call us before methods have
+      // been registered, but the client doesn't care for a response.
+      _log.trace('RPC client sent a notification that resulted in an error:\n$error');
+      return;
+    }
+    assert(false, 'json_rpc_2 failed to send an exception back to the client.');
+  }
   _log.trace('Unhandled RPC error:\n$error\n$stack');
   assert(false);
 }
