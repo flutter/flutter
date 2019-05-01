@@ -395,7 +395,7 @@ class TextTreeConfiguration {
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.sparse]
+///  * [DiagnosticsTreeStyle.sparse], uses this style for ASCII art display.
 final TextTreeConfiguration sparseTextConfiguration = TextTreeConfiguration(
   prefixLineOne:            '├─',
   prefixOtherLines:         ' ',
@@ -473,7 +473,7 @@ final TextTreeConfiguration dashedTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.dense]
+///  * [DiagnosticsTreeStyle.dense], uses this style for ASCII art display.
 final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
@@ -512,7 +512,7 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 ///
 /// /// See also:
 ///
-///  * [DiagnosticsTreeStyle.transition]
+///  * [DiagnosticsTreeStyle.transition], uses this style for ASCII art display.
 final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
   prefixLineOne:           '╞═╦══ ',
   prefixLastChildLineOne:  '╘═╦══ ',
@@ -580,10 +580,9 @@ final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
 /// ════════════════════════════════════════════════════════════════
 /// ```
 ///
-/// /// See also:
+/// See also:
 ///
-///  * [DiagnosticsTreeStyle.error]
-// TODO(jacobr): cleanup this style to create nice flower boxes in other cases
+///  * [DiagnosticsTreeStyle.error], uses this style for ASCII art display.
 final TextTreeConfiguration errorTextConfiguration = TextTreeConfiguration(
   prefixLineOne:           '╞═╦',
   prefixLastChildLineOne:  '╘═╦',
@@ -624,7 +623,7 @@ final TextTreeConfiguration errorTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.whitespace]
+///  * [DiagnosticsTreeStyle.whitespace], uses this style for ASCII art display.
 final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
   prefixLineOne: '',
   prefixLastChildLineOne: '',
@@ -659,7 +658,7 @@ final TextTreeConfiguration whitespaceTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.flat]
+///  * [DiagnosticsTreeStyle.flat], uses this style for ASCII art display.
 final TextTreeConfiguration flatTextConfiguration = TextTreeConfiguration(
   prefixLineOne: '',
   prefixLastChildLineOne: '',
@@ -682,7 +681,7 @@ final TextTreeConfiguration flatTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.singleLine]
+///  * [DiagnosticsTreeStyle.singleLine], uses this style for ASCII art display.
 final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',
@@ -711,7 +710,8 @@ final TextTreeConfiguration singleLineTextConfiguration = TextTreeConfiguration(
 ///
 /// See also:
 ///
-///  * [DiagnosticsTreeStyle.errorProperty]
+///  * [DiagnosticsTreeStyle.errorProperty], uses this style for ASCII art
+///    display.
 final TextTreeConfiguration errorPropertyTextConfiguration = TextTreeConfiguration(
   propertySeparator: ', ',
   beforeProperties: '(',

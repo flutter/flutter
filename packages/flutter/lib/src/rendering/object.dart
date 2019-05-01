@@ -573,7 +573,7 @@ abstract class Constraints {
   /// The `informationCollector` argument takes an optional callback which is
   /// called when an exception is to be thrown. The collected information is
   /// then included in the message after the error line.
-  //
+  ///
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,

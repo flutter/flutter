@@ -2083,7 +2083,9 @@ abstract class BuildContext {
   List<DiagnosticsNode> describeMissingAncestor({ @required Type expectedAncestorType });
 
   /// Adds a description of the ownership chain from a specific [Element]
-  /// to the error report. It's useful for debugging the source of an element.
+  /// to the error report.
+  ///
+  /// The ownership chain is useful for debugging the source of an element.
   DiagnosticsNode describeOwnershipChain(String name);
 }
 
