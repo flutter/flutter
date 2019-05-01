@@ -470,6 +470,8 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   // Set during layout if overflow occurred on the main axis.
   double _overflow;
+  // Check whether any meaningful overflow is present. Values below an epsilon
+  // are treated as not overflowing.
   bool get _hasOverflow => _overflow > 1e-9;
 
   @override
