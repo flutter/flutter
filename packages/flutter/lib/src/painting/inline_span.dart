@@ -103,7 +103,7 @@ abstract class InlineSpan extends DiagnosticableTree {
 
   /// Returns the text span that contains the given position in the text. 
   InlineSpan getSpanForPosition(TextPosition position);
-  InlineSpan _computeSpanForPosition(TextPosition position, TrackingInt offset);
+  InlineSpan computeSpanForPosition(TextPosition position, TrackingInt offset);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
@@ -126,7 +126,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// Returns null if the index is out of bounds.
   int codeUnitAt(int index);
-  bool _codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result);
+  bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result);
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -137,7 +137,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// assert(myInlineSpan.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid();
-  bool _debugAssertIsValidVisitor();
+  bool debugAssertIsValidVisitor();
 
   /// Describe the difference between this span and another, in terms of
   /// how much damage it will make to the rendering. The comparison is deep.

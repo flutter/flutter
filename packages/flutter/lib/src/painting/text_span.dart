@@ -221,33 +221,18 @@ class TextSpan extends InlineSpan {
   @override
   InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
-    // final TextAffinity affinity = position.affinity;
-    // final int targetOffset = position.offset;
     TrackingInt offset = TrackingInt();
     TextSpan result;
     visitChildren((InlineSpan span) {
-      result = _computeSpanForPosition(position, offset);
+      result = span.computeSpanForPosition(position, offset);
       if (result != null) {
         return false;
       }
       return true;
-      // assert(result == null);
-      // if (span is TextSpan) {
-      //   final TextSpan textSpan = span;
-      //   final int endOffset = offset + textSpan.text.length;
-      //   if (targetOffset == offset && affinity == TextAffinity.downstream ||
-      //       targetOffset > offset && targetOffset < endOffset ||
-      //       targetOffset == endOffset && affinity == TextAffinity.upstream) {
-      //     result = span;
-      //     return false;
-      //   }
-      //   offset = endOffset;
-      // }
-      // return true;
     });
     return result;
   }
-  InlineSpan _computeSpanForPosition(TextPosition position, TrackingInt offset) {
+  InlineSpan computeSpanForPosition(TextPosition position, TrackingInt offset) {
     if (text == null) {
       return null;
     }
@@ -273,23 +258,6 @@ class TextSpan extends InlineSpan {
   /// represented as a 0xFFFC 'object replacement character'.
   @override
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
-    // assert(debugAssertIsValid());
-    // final StringBuffer buffer = StringBuffer();
-    // if (semanticsLabel != null && includeSemanticsLabels) {
-    //   buffer.write(semanticsLabel);
-    // } else if (text != null) {
-    //   buffer.write(text);
-    // }
-    // if (children != null) {
-    //   for (InlineSpan child in children) {
-    //     buffer.write(child.toPlainText(
-    //       includeSemanticsLabels: includeSemanticsLabels,
-    //       includePlaceholders: includePlaceholders,
-    //     ));
-    //   }
-    // }
-    // return buffer.toString();
-
     final StringBuffer buffer = StringBuffer();
     computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
     return buffer.toString();
@@ -323,21 +291,13 @@ class TextSpan extends InlineSpan {
     TrackingInt offset = TrackingInt();
     TrackingInt result = TrackingInt(null);
     visitChildren((InlineSpan span) {
-      return _codeUnitAtVisitor(TrackingInt(index), offset, result);
-      // if (span is TextSpan) {
-      //   final TextSpan textSpan = span;
-      //   if (index - offset < textSpan.text.length) {
-      //     result = textSpan.text.codeUnitAt(index - offset);
-      //     return false;
-      //   }
-      //   offset += textSpan.text.length;
-      // }
-      // return true;
+      return span.codeUnitAtVisitor(TrackingInt(index), offset, result);
+
     });
     return result.value;
   }
 
-  bool _codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
+  bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
     if (text == null) {
       return true;
     }
@@ -361,14 +321,7 @@ class TextSpan extends InlineSpan {
   bool debugAssertIsValid() {
     assert(() {
       if (!visitChildren((InlineSpan span) {
-        return _debugAssertIsValidVisitor();
-        // if (span.children != null) {
-        //   for (InlineSpan child in span.children) {
-        //     if (child == null)
-        //       return false;
-        //   }
-        // }
-        // return true;
+        return span.debugAssertIsValidVisitor();
       })) {
         throw FlutterError(
           'TextSpan contains a null child.\n'
@@ -381,7 +334,7 @@ class TextSpan extends InlineSpan {
     }());
     return true;
   }
-  bool _debugAssertIsValidVisitor() {
+  bool debugAssertIsValidVisitor() {
     if (children != null) {
       for (InlineSpan child in children) {
         if (child == null)

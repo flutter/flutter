@@ -168,7 +168,7 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  InlineSpan _computeSpanForPosition(TextPosition position, TrackingInt offset) {
+  InlineSpan computeSpanForPosition(TextPosition position, TrackingInt offset) {
     return null;
   }
 
@@ -177,7 +177,12 @@ class WidgetSpan extends PlaceholderSpan {
     return null;
   }
   @override
-  bool _codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
+  bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
+    return true;
+  }
+
+  @override
+  bool debugAssertIsValidVisitor() {
     return true;
   }
 
