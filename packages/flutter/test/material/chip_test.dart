@@ -282,7 +282,7 @@ void main() {
     Rect avatarRect;
     Rect labelRect;
     Rect deleteIconRect;
-    const String text = 'very long text that be clipped';
+    const String text = 'Very long text that will be clipped';
 
     await tester.pumpWidget(chipBuilder(text));
 
