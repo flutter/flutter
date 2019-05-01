@@ -16,6 +16,7 @@ import 'app_bar.dart';
 import 'bottom_sheet.dart';
 import 'button_bar.dart';
 import 'button_theme.dart';
+import 'colors.dart';
 import 'divider.dart';
 import 'drawer.dart';
 import 'flexible_space_bar.dart';
@@ -26,7 +27,6 @@ import 'snack_bar.dart';
 import 'snack_bar_theme.dart';
 import 'theme.dart';
 import 'theme_data.dart';
-import 'colors.dart';
 
 // Examples can assume:
 // TabController tabController;
