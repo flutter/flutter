@@ -284,7 +284,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         listener(_currentImage, true);
       } catch (exception, stack) {
         reportError(
-          context: 'by a synchronously-called image listener',
+          context: ErrorDescription('by a synchronously-called image listener'),
           exception: exception,
           stack: stack,
         );
@@ -298,7 +298,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
           FlutterErrorDetails(
             exception: exception,
             library: 'image resource service',
-            context: 'by a synchronously-called image error listener',
+            context: ErrorDescription('by a synchronously-called image error listener'),
             stack: stack,
           ),
         );
@@ -336,7 +336,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         listener(image, false);
       } catch (exception, stack) {
         reportError(
-          context: 'by an image listener',
+          context: ErrorDescription('by an image listener'),
           exception: exception,
           stack: stack,
         );
@@ -374,7 +374,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// See [FlutterErrorDetails] for further details on these values.
   @protected
   void reportError({
-    String context,
+    DiagnosticsNode context,
     dynamic exception,
     StackTrace stack,
     InformationCollector informationCollector,
@@ -405,7 +405,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         } catch (exception, stack) {
           FlutterError.reportError(
             FlutterErrorDetails(
-              context: 'when reporting an error to an image listener',
+              context: ErrorDescription('when reporting an error to an image listener'),
               library: 'image resource service',
               exception: exception,
               stack: stack,
@@ -451,7 +451,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
       : assert(image != null) {
     image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
       reportError(
-        context: 'resolving a single-frame image stream',
+        context: ErrorDescription('resolving a single-frame image stream'),
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
@@ -511,7 +511,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
        _scale = scale {
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       reportError(
-        context: 'resolving an image codec',
+        context: ErrorDescription('resolving an image codec'),
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
@@ -579,7 +579,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _nextFrame = await _codec.getNextFrame();
     } catch (exception, stack) {
       reportError(
-        context: 'resolving an image frame',
+        context: ErrorDescription('resolving an image frame'),
         exception: exception,
         stack: stack,
         informationCollector: _informationCollector,
