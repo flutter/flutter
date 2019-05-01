@@ -244,7 +244,7 @@ class Text extends StatelessWidget {
        textSpan = null,
        super(key: key);
 
-  /// Creates a text widget with a [TextSpan].
+  /// Creates a text widget with a [InlineSpan].
   ///
   /// The [textSpan] parameter must not be null.
   const Text.rich(
@@ -272,10 +272,10 @@ class Text extends StatelessWidget {
   /// This will be null if a [textSpan] is provided instead.
   final String data;
 
-  /// The text to display as a [TextSpan].
+  /// The text to display as a [InlineSpan].
   ///
   /// This will be null if [data] is provided instead.
-  final TextSpan textSpan;
+  final InlineSpan textSpan;
 
   /// If non-null, the style to use for this text.
   ///

@@ -136,8 +136,8 @@ class TextSpan extends InlineSpan {
   ///
   ///   @override
   ///   Widget build(BuildContext context) {
-  ///     return RichText(
-  ///       text: TextSpan(
+  ///     return Text.rich(
+  ///       TextSpan(
   ///         text: 'Can you ',
   ///         style: TextStyle(color: Colors.black),
   ///         children: <InlineSpan>[

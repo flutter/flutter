@@ -52,14 +52,14 @@ enum InlineWidgetAlignment {
 /// widget's responsibility to size itself appropriately, the text will
 /// not enforce any constraints.
 ///
-/// The [child] property may contain its own children, including
-/// [RichText] widgets which may include additional [WidgetSpan]s. Child
-/// [RichText] widgets will be laid out independently and occupy a
-/// rectangular space in the parent text layout.
+/// The [child] property may contain its own [Widget] children (if applicable),
+/// including [Text] and [RichText] widgets which may include additional
+/// [WidgetSpan]s. Child [Text] and [RichText] widgets will be laid out
+/// independently and occupy a rectangular space in the parent text layout.
 ///
 /// [WidgetSpan]s will be ignored when passed into a [TextPainter] directly.
 /// To properly layout and paint the [widget], [WidgetSpan] should be passed
-/// into a [RichText] widget.
+/// into a [Text.rich] widget.
 ///
 /// {@tool sample}
 ///

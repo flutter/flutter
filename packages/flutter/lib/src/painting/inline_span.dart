@@ -42,8 +42,8 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 /// name with a [TextField] embedded inline.
 ///
 /// ```dart
-/// RichText(
-///   text: TextSpan(
+/// Text.rich(
+///   TextSpan(
 ///     text: 'My name is ',
 ///     style: TextStyle(color: Colors.black),
 ///     children: <InlineSpan>[
@@ -147,12 +147,12 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// assert(myInlineSpan.debugAssertIsValid());
   /// ```
   bool debugAssertIsValid();
-  @protected
 
   /// Performs the check at each InlineSpan for if the contents are valid. Returns
   /// false when contents are invalid.
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
+  @protected
   bool debugAssertIsValidVisitor();
 
   /// Describe the difference between this span and another, in terms of
