@@ -36,6 +36,7 @@ import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/macos_workflow.dart';
+import 'platform_step.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
@@ -87,6 +88,7 @@ Future<T> runInContext<T>(
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
+      PlatformBuilders: () => const PlatformBuilders(),
       PlistBuddy: () => const PlistBuddy(),
       SimControl: () => SimControl(),
       SystemClock: () => const SystemClock(),
