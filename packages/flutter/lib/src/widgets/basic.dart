@@ -4706,6 +4706,141 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///  * [CustomMultiChildLayout], which uses a delegate to position multiple
 ///    children.
 ///  * The [catalog of layout widgets](https://flutter.dev/widgets/layout/).
+///
+/// {@tool snippet --template=freeform}
+///
+/// This example uses the [Flow] widget to create a menu that opens and closes
+/// as it is interacted with. The [FlowDelegate] uses the [AnimationController]
+/// to paint the children of the [Flow].
+///
+/// ![A menu created using the Flow widget opens and closes.](https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4)
+///
+/// ```dart imports
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart main
+/// void main() => runApp(FlowApp());
+/// ```
+///
+/// ```dart preamble
+/// class FlowApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Flow Example'),
+///         ),
+///         body: FlowMenu(),
+///       ),
+///     );
+///   }
+/// }
+///
+/// class FlowMenu extends StatefulWidget {
+///   @override
+///   _FlowMenuState createState() => _FlowMenuState();
+/// }
+/// ```
+///
+/// ```dart
+/// class _FlowMenuState extends State<FlowMenu>
+///   with SingleTickerProviderStateMixin {
+///   AnimationController menuAnimation;
+///   int active = 1;
+///   final Map<int, IconData> menuItems = <IconData>[
+///     Icons.home,
+///     Icons.new_releases,
+///     Icons.notifications,
+///     Icons.settings,
+///     Icons.menu,
+///   ].asMap();
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     menuAnimation = AnimationController(
+///       lowerBound: 1,
+///       upperBound: 1000,
+///       duration: const Duration(milliseconds: 250),
+///       vsync: this,
+///     );
+///   }
+///
+///   Widget buildItem(int k, IconData v) {
+///     return GestureDetector(
+///       onTap: () {
+///         if (k != 4) active = k;
+///         menuAnimation.value == 1000
+///           ? menuAnimation.reverse()
+///           : menuAnimation.forward();
+///         setState(() {});
+///       },
+///       child: Container(
+///         width: MediaQuery.of(context).size.width / 5,
+///         decoration: BoxDecoration(
+///           shape: BoxShape.circle,
+///           color: active == k ? Colors.amber[700] : Colors.blue,
+///           boxShadow: const <BoxShadow>[
+///             BoxShadow(
+///               color: Colors.black12,
+///               blurRadius: 10,
+///             )
+///           ]),
+///         child: Center(
+///           child: Icon(
+///             v,
+///             color: Colors.white,
+///             size: 50,
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Flow(
+///       delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
+///       children: menuItems
+///         .map<int, Widget>(
+///           (int k, IconData v) => MapEntry<int, Widget>(k, buildItem(k, v)))
+///         .values
+///         .toList(),
+///     );
+///   }
+/// }
+///
+/// class FlowMenuDelegate extends FlowDelegate {
+///   FlowMenuDelegate({this.menuAnimation}) : super(repaint: menuAnimation);
+///
+///   final Animation<double> menuAnimation;
+///
+///   @override
+///   bool shouldRepaint(FlowMenuDelegate oldDelegate) {
+///     return menuAnimation != oldDelegate.menuAnimation;
+///   }
+///
+///   @override
+///   void paintChildren(FlowPaintingContext context) {
+///     double dx = 0.0;
+///     for (int i = 0; i < context.childCount; ++i) {
+///       dx = context.getChildSize(i).width * i;
+///       context.paintChild(
+///         i,
+///         transform: Matrix4.translationValues(
+///           dx * 0.001 * menuAnimation.value,
+///           0,
+///           0,
+///         ),
+///       );
+///     }
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 class Flow extends MultiChildRenderObjectWidget {
   /// Creates a flow layout.
   ///
