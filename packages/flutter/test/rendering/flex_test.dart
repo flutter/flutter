@@ -26,6 +26,7 @@ void main() {
     const double slightlyLarger = 438.8571428571429;
     const double slightlySmaller = 438.85714285714283;
     final List<dynamic> exceptions = <dynamic>[];
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
     FlutterError.onError = (FlutterErrorDetails details) {
       exceptions.add(details.exception);
     };
@@ -48,6 +49,7 @@ void main() {
     pumpFrame(phase: EnginePhase.paint);
 
     expect(exceptions, isEmpty);
+    FlutterError.onError = oldHandler;
   });
 
   test('Vertical Overflow', () {
