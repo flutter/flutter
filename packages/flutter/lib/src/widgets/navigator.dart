@@ -399,7 +399,10 @@ class NavigatorObserver {
 /// the use of routes and the Navigator is appropriate. On certain platforms,
 /// such as Android, the system UI will provide a back button (outside the
 /// bounds of your application) that will allow the user to navigate back
-/// to earlier routes in your application's stack.
+/// to earlier routes in your application's stack. On platforms that don't
+/// have this build-in navigation mechanism, the use of an [AppBar] (typically
+/// used in the [Scaffold.appBar] property) can automatically add a back
+/// button for user navigation.
 ///
 /// ### Displaying a full-screen route
 ///
