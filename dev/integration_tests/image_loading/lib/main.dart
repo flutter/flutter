@@ -16,7 +16,7 @@ void main() {
     handleUncaughtError:(Zone zone, ZoneDelegate delegate, Zone parent, Object error, StackTrace stackTrace) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: error,
-      context: ErrorDescription('In the Zone handleUncaughtError handler'),
+      context: 'In the Zone handleUncaughtError handler',
       silent: false,
     ));
   });

@@ -522,7 +522,7 @@ abstract class BindingBase {
         FlutterError.reportError(FlutterErrorDetails(
           exception: caughtException,
           stack: caughtStack,
-          context: ErrorDescription('during a service extension callback for "$method"'),
+          context: 'during a service extension callback for "$method"',
         ));
         return developer.ServiceExtensionResponse.error(
           developer.ServiceExtensionResponse.extensionError,

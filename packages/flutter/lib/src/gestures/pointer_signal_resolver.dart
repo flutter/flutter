@@ -55,9 +55,10 @@ class PointerSignalResolver {
         exception: exception,
         stack: stack,
         library: 'gesture library',
-        context: ErrorDescription('while resolving a PointerSignalEvent'),
-        informationCollector: () sync* {
-          yield DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+        context: 'while resolving a PointerSignalEvent',
+        informationCollector: (StringBuffer information) {
+          information.writeln('Event:');
+          information.write('  $event');
         },
       ));
     }

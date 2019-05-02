@@ -501,7 +501,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.dumpErrorToConsole(FlutterErrorDetails(
           exception: exception,
           stack: _unmangle(stack),
-          context: ErrorDescription('running a test (but after the test had completed)'),
+          context: 'running a test (but after the test had completed)',
           library: 'Flutter test framework',
         ), forceReport: true);
         return;
@@ -534,33 +534,31 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // _this_ zone, the test framework would find this zone was the current
       // zone and helpfully throw the error in this zone, causing us to be
       // directly called again.
-      DiagnosticsNode treeDump;
+      String treeDump;
       try {
-        treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
-        // TODO(jacobr): this is a hack to make sure the tree can safely be fully dumped.
-        // Potentially everything is good enough without this case.
-        treeDump.toStringDeep();
+        treeDump = renderViewElement?.toStringDeep() ?? '<no tree>';
       } catch (exception) {
-        treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>', level: DiagnosticLevel.error);
+        treeDump = '<additional error caught while dumping tree: $exception>';
       }
-      final List<DiagnosticsNode> omittedFrames = <DiagnosticsNode>[];
-      final int stackLinesToOmit = reportExpectCall(stack, omittedFrames);
+      final StringBuffer expectLine = StringBuffer();
+      final int stackLinesToOmit = reportExpectCall(stack, expectLine);
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: _unmangle(stack),
-        context: ErrorDescription('running a test'),
+        context: 'running a test',
         library: 'Flutter test framework',
         stackFilter: (Iterable<String> frames) {
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
-        informationCollector: () sync* {
+        informationCollector: (StringBuffer information) {
           if (stackLinesToOmit > 0)
-            yield* omittedFrames;
+            information.writeln(expectLine.toString());
           if (showAppDumpInErrors) {
-            yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
+            information.writeln('At the time of the failure, the widget tree looked as follows:');
+            information.writeln('# ${treeDump.split("\n").takeWhile((String s) => s != "").join("\n# ")}');
           }
           if (description.isNotEmpty)
-            yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.errorProperty);
+            information.writeln('The test description was:\n$description');
         },
       ));
       assert(_parentZone != null);
@@ -849,7 +847,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           exception: exception,
           stack: stack,
           library: 'Flutter test framework',
-          context: ErrorDescription('while running async test code'),
+          context: 'while running async test code',
         ));
         return null;
       }).whenComplete(() {
@@ -1337,7 +1335,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         exception: error,
         stack: stack,
         library: 'Flutter test framework',
-        context: ErrorSummary('while running async test code'),
+        context: 'while running async test code',
       ));
       return null;
     } finally {

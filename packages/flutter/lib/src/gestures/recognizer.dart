@@ -169,11 +169,12 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
         exception: exception,
         stack: stack,
         library: 'gesture',
-        context: ErrorDescription('while handling a gesture'),
-        informationCollector: () sync* {
-          yield StringProperty('Handler', name);
-          yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
-        }
+        context: 'while handling a gesture',
+        informationCollector: (StringBuffer information) {
+          information.writeln('Handler: $name');
+          information.writeln('Recognizer:');
+          information.writeln('  $this');
+        },
       ));
     }
     return result;
