@@ -904,7 +904,7 @@ class Scaffold extends StatefulWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
-    this.drawerScrimColor = Colors.black54,
+    this.drawerScrimColor,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(drawerDragStartBehavior != null),
