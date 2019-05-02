@@ -132,7 +132,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dialog default action styles', (WidgetTester tester) async {
+  testWidgets('Dialog default action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       child: Text('Ok'),
@@ -140,7 +140,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w400));
+    expect(widget.style.fontWeight, equals(FontWeight.bold));
   });
 
   testWidgets('Dialog destructive action style', (WidgetTester tester) async {
