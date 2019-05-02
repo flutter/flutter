@@ -237,7 +237,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _color = ColorTween(begin: Colors.transparent, end: widget.scrimColor ?? Colors.black54,);
+    _color = _buildScrimColorTween();
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
@@ -254,7 +254,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void didUpdateWidget(DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrimColor != oldWidget.scrimColor)
-      _color = ColorTween(begin: Colors.transparent, end: widget.scrimColor ?? Colors.black54,);
+      _color = _buildScrimColorTween();
   }
 
   void _animationChanged() {
@@ -395,6 +395,10 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
 
   ColorTween _color;
   final GlobalKey _gestureDetectorKey = GlobalKey();
+
+  ColorTween _buildScrimColorTween() {
+    return ColorTween(begin: Colors.transparent, end: widget.scrimColor ?? Colors.black54);
+  }
 
   AlignmentDirectional get _drawerOuterAlignment {
     assert(widget.alignment != null);
