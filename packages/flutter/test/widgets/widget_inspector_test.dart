@@ -1896,8 +1896,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(expectedChildLayerCount, equals(2));
       await expectLater(
         layer.toImage(renderObject.semanticBounds.inflate(50.0)),
-        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.repaint_boundary_margin.png'),
       );
 
       // Regression test for how rendering with a pixel scale other than 1.0
@@ -1907,8 +1906,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 0.5,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin_small.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.repaint_boundary_margin_small.png'),
       );
 
       await expectLater(
@@ -1916,8 +1914,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 2.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin_large.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.repaint_boundary_margin_large.png'),
       );
 
       final Layer layerParent = layer.parent;
@@ -1932,8 +1929,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 300.0,
           height: 300.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.repaint_boundary.png'),
       );
 
       // Verify that taking a screenshot didn't change the layers associated with
@@ -1950,8 +1946,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
           margin: 50.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.repaint_boundary_margin.png'),
       );
 
       // Verify that taking a screenshot didn't change the layers associated with
@@ -1971,8 +1966,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.repaint_boundary_debugPaint.png'),
       );
       // Verify that taking a screenshot with debug paint on did not change
       // the number of children the layer has.
@@ -1982,8 +1976,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // hasn't changed the regular render of the widget.
       await expectLater(
         find.byType(RepaintBoundaryWithDebugPaint),
-        matchesGoldenFile('inspector.repaint_boundary.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.repaint_boundary.png'),
       );
 
       expect(renderObject.debugLayer, equals(layer));
@@ -1996,8 +1989,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 100.0,
           height: 100.0,
         ),
-        matchesGoldenFile('inspector.container.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.container.png'),
       );
 
       await expectLater(
@@ -2007,8 +1999,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.container_debugPaint.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.container_debugPaint.png'),
       );
 
       {
@@ -2028,8 +2019,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             height: 100.0,
             debugPaint: true,
           ),
-          matchesGoldenFile('inspector.container_debugPaint.png'),
-          skip: !Platform.isLinux,
+          matchesSkiaGoldFile('inspector.container_debugPaint.png'),
         );
         expect(container.debugNeedsLayout, isFalse);
       }
@@ -2041,8 +2031,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 50.0,
           height: 100.0,
         ),
-        matchesGoldenFile('inspector.container_small.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.container_small.png'),
       );
 
       await expectLater(
@@ -2052,8 +2041,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 400.0,
           maxPixelRatio: 3.0,
         ),
-        matchesGoldenFile('inspector.container_large.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.container_large.png'),
       );
 
       // This screenshot will show the clip rect debug paint but no other
@@ -2065,8 +2053,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.clipRect_debugPaint.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.clipRect_debugPaint.png'),
       );
 
       final Element clipRect = find.byType(ClipRRect).evaluate().single;
@@ -2080,10 +2067,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       );
       // Add a margin so that the clip icon shows up in the screenshot.
       // This golden image is platform dependent due to the clip icon.
+      final String platform = Platform.operatingSystem;
       await expectLater(
         clipRectScreenshot,
-        matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.clipRect_debugPaint_margin.$platform.png'),
       );
 
       // Verify we get the same image if we go through the service extension
@@ -2122,8 +2109,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.padding_debugPaint.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.padding_debugPaint.png'),
       );
 
       // The bounds for this box crop its rendered content.
@@ -2134,8 +2120,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint.1.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.sizedBox_debugPaint.png'),
       );
 
       // Verify that setting a margin includes the previously cropped content.
@@ -2147,8 +2132,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           margin: 50.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.sizedBox_debugPaint_margin.png'),
       );
     });
 
@@ -2219,8 +2203,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile('inspector.composited_transform.only_offsets.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.only_offsets.png'),
       );
 
       await expectLater(
@@ -2229,14 +2212,12 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 5000.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.only_offsets_follower.png'),
       );
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_small.1.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.only_offsets_small.png'),
       );
 
       await expectLater(
@@ -2245,8 +2226,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.only_offsets_target.png'),
       );
     });
 
@@ -2318,8 +2298,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // screenshots of specific subtrees are reasonable.
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile('inspector.composited_transform.with_rotations.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.with_rotations.png'),
       );
 
       await expectLater(
@@ -2328,8 +2307,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_small.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.with_rotations_small.png'),
       );
 
       await expectLater(
@@ -2338,8 +2316,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_target.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.with_rotations_target.png'),
       );
 
       await expectLater(
@@ -2348,8 +2325,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('inspector.composited_transform.with_rotations_follower.png'),
       );
 
       // Make sure taking screenshots hasn't modified the positions of the

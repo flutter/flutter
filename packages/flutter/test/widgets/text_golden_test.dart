@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -31,7 +29,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Centered.png'),
+      matchesSkiaGoldFile('text_golden.Centered.png'),
     );
 
     await tester.pumpWidget(
@@ -55,9 +53,9 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Centered.wrap.png'),
+      matchesSkiaGoldFile('text_golden.Centered.wrap.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
@@ -86,7 +84,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.gradient.png'),
+      matchesSkiaGoldFile('text_golden.Foreground.gradient.png'),
     );
 
     await tester.pumpWidget(
@@ -108,7 +106,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.stroke.png'),
+      matchesSkiaGoldFile('text_golden.Foreground.stroke.png'),
     );
 
     await tester.pumpWidget(
@@ -131,9 +129,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
+      matchesSkiaGoldFile('text_golden.Foreground.stroke_and_gradient.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
@@ -181,9 +179,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Background.png'),
+      matchesSkiaGoldFile('text_golden.Background.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -217,9 +215,9 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('text_golden.Fade.1.png'),
+      matchesSkiaGoldFile('text_golden.Fade.1.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -242,10 +240,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutDefault.png'),
+      matchesSkiaGoldFile('text_golden.StrutDefault.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text 1', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -270,10 +267,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.1.1.png'),
+      matchesSkiaGoldFile('text_golden.Strut.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -299,10 +295,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.2.1.png'),
+      matchesSkiaGoldFile('text_golden.Strut.2.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text rich', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -351,10 +346,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.3.1.png'),
+      matchesSkiaGoldFile('text_golden.Strut.3.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text font fallback', (WidgetTester tester) async {
     // Font Fallback
@@ -387,10 +381,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.4.1.png'),
+      matchesSkiaGoldFile('text_golden.Strut.4.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -439,10 +432,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutForce.1.1.png'),
+      matchesSkiaGoldFile('text_golden.StrutForce.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
-                  // Disabled for now until font inconsistency is resolved.
+  });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -478,9 +470,9 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Decoration.1.0.png'),
+      matchesSkiaGoldFile('text_golden.Decoration.1.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -517,7 +509,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.DecorationThickness.1.0.png'),
+      matchesSkiaGoldFile('text_golden.DecorationThickness.1.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  });
 }
