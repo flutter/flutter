@@ -181,10 +181,10 @@ class BottomNavigationBar extends StatefulWidget {
     this.unselectedItemColor,
     this.selectedIconTheme = const IconThemeData(),
     this.unselectedIconTheme = const IconThemeData(),
-    double selectedFontSize = 14.0,
-    double unselectedFontSize = 12.0,
-    TextStyle selectedLabelStyle,
-    TextStyle unselectedLabelStyle,
+    this.selectedFontSize = 14.0,
+    this.unselectedFontSize = 12.0,
+    this.selectedLabelStyle,
+    this.unselectedLabelStyle,
     this.showSelectedLabels = true,
     bool showUnselectedLabels,
   }) : assert(items != null),
@@ -202,8 +202,6 @@ class BottomNavigationBar extends StatefulWidget {
        ),
        assert(selectedFontSize != null && selectedFontSize >= 0.0),
        assert(unselectedFontSize != null && unselectedFontSize >= 0.0),
-       selectedLabelStyle = _defaultTextStyle(selectedLabelStyle, selectedFontSize),
-       unselectedLabelStyle = _defaultTextStyle(unselectedLabelStyle, unselectedFontSize),
        assert(showSelectedLabels != null),
        type = _type(type, items),
        selectedItemColor = selectedItemColor ?? fixedColor,
@@ -297,17 +295,26 @@ class BottomNavigationBar extends StatefulWidget {
   /// selected.
   final TextStyle unselectedLabelStyle;
 
+  /// The font size of the [BottomNavigationBarItem] labels when they are selected.
+  ///
+  /// If [selectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  ///
+  /// Defaults to `14.0`.
+  final double selectedFontSize;
+
+  /// The font size of the [BottomNavigationBarItem] labels when they are not
+  /// selected.
+  ///
+  /// If [unselectedLabelStyle.fontSize] is non-null, it will be used instead of this.
+  ///
+  /// Defaults to `12.0`.
+  final double unselectedFontSize;
+
   /// Whether the labels are shown for the selected [BottomNavigationBarItem].
   final bool showUnselectedLabels;
 
   /// Whether the labels are shown for the unselected [BottomNavigationBarItem]s.
   final bool showSelectedLabels;
-
-  /// Returns the font size of the selected [BottomNavigationBarItem].
-  double get selectedFontSize => selectedLabelStyle.fontSize;
-
-  /// Returns the font size of the unselected [BottomNavigationBarItem]s.
-  double get unselectedFontSize => unselectedLabelStyle.fontSize;
 
   // Used by the [BottomNavigationBar] constructor to set the [type] parameter.
   //
@@ -338,17 +345,6 @@ class BottomNavigationBar extends StatefulWidget {
     }
     assert(false);
     return false;
-  }
-
-  // Used by the [BottomNavigationBar] constructor to initialize the
-  // `selectedLabelStyle` and `unselectedLabelStyle` properties.
-  //
-  // If the given [TextStyle] has a non-null `fontSize`, it should be used.
-  // Otherwise, the [selectedFontSize] parameter should be used.
-  static TextStyle _defaultTextStyle(TextStyle textStyle, double fontSize) {
-    textStyle ??= const TextStyle();
-    // Prefer the font size on textStyle if present.
-    return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
 
   @override
@@ -777,11 +773,24 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
     }
   }
 
+  // If the given [TextStyle] has a non-null `fontSize`, it should be used.
+  // Otherwise, the [selectedFontSize] parameter should be used.
+  static TextStyle _effectiveTextStyle(TextStyle textStyle, double fontSize) {
+    textStyle ??= const TextStyle(inherit: false);
+    // Prefer the font size on textStyle if present.
+    return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
+  }
+
   List<Widget> _createTiles() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     assert(localizations != null);
 
     final ThemeData themeData = Theme.of(context);
+
+    final TextStyle effectiveSelectedLabelStyle =
+      _effectiveTextStyle(widget.selectedLabelStyle, widget.selectedFontSize);
+    final TextStyle effectiveUnselectedLabelStyle =
+      _effectiveTextStyle(widget.unselectedLabelStyle, widget.unselectedFontSize);
 
     Color themeColor;
     switch (themeData.brightness) {
@@ -818,8 +827,8 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
         widget.iconSize,
         selectedIconTheme: widget.selectedIconTheme,
         unselectedIconTheme: widget.unselectedIconTheme,
-        selectedLabelStyle: widget.selectedLabelStyle,
-        unselectedLabelStyle: widget.unselectedLabelStyle,
+        selectedLabelStyle: effectiveSelectedLabelStyle,
+        unselectedLabelStyle: effectiveUnselectedLabelStyle,
         onTap: () {
           if (widget.onTap != null)
             widget.onTap(i);
