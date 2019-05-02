@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
@@ -101,19 +102,58 @@ class HitTestResult {
 
   final Queue<Matrix4> _transforms = Queue<Matrix4>();
 
-  void _pushTransform(Matrix4 transform) {
-    // TODO(goderbauer): It needs to be "moreOrLessEqualTo" due to rounding errors.
-//    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
-//      'The third row and third column of a transform matrix for pointer '
-//      'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
-//      point is directly under the pointer device. Did you forget to run the paint '
-//      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
-//      'The provided matrix is:\n$transform'
-//    );
+  /// Pushes a new transform matrix that is to be applied to all future
+  /// [HitTestEntry]s added via [add] until it is removed via [popTransform].
+  ///
+  /// This method is only to be used by subclasses, which must provide
+  /// coordinate space specific public wrappers around this function for their
+  /// users (see [BoxHitTestResult.addWithPaintTransform] for such an example).
+  ///
+  /// The provided `transform` matrix should describe how to transform
+  /// [PointerEvent]s from the coordinate space of the method caller to the
+  /// coordinate space of its children. In most cases `transform` is derived
+  /// from running the inverted result of [RenderObject.applyPaintTransform]
+  /// through [PointerEvent.paintTransformToPointerEventTransform] to remove
+  /// the perspective component.
+  ///
+  /// [HitTestable]s need to call this method indirectly through a convenience
+  /// method defined on a subclass before hit testing a child that does not
+  /// have the same origin as the parent. After hit testing the child,
+  /// [popTransform] has to be called to remove the child-specific `transform`.
+  ///
+  /// See also:
+  ///  * [BoxHitTestResult.addWithPaintTransform], which is a public wrapper
+  ///    around this function for hit testing on [RenderBox]s.
+  ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper
+  ///    around this function for hit testing on [RenderSlivers]s.
+  @protected
+  void pushTransform(Matrix4 transform) {
+    assert(transform != null);
+    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
+      'The third row and third column of a transform matrix for pointer '
+      'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
+      'point is directly under the pointer device. Did you forget to run the paint '
+      'matrix through PointerEvent.paintTransformToPointerEventTransform?'
+      'The provided matrix is:\n$transform'
+    );
     _transforms.add(_transforms.isEmpty ? transform :  transform * _transforms.last);
   }
 
-  void _popTransform() {
+  /// Removes the last transform added via [pushTransform].
+  ///
+  /// This method is only to be used by subclasses, which must provide
+  /// coordinate space specific public wrappers around this function for their
+  /// users (see [BoxHitTestResult.addWithPaintTransform] for such an example).
+  ///
+  /// This method must be called after hit testing is done on a child that
+  /// required a call to [pushTransform].
+  ///
+  /// See also:
+  ///
+  ///  * [pushTransform], which describes the use case of this function pair in
+  ///    more details.
+  @protected
+  void popTransform() {
     assert(_transforms.isNotEmpty);
     _transforms.removeLast();
   }

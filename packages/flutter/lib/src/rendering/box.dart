@@ -650,8 +650,10 @@ class BoxHitTestResult extends HitTestResult {
   /// Transforms `position` to the local coordinate system of a child before
   /// hit-testing the child.
   ///
-  /// Since the provided paint `transform` describes the transform from the
-  /// child to the parent, the matrix is inverted before it is used to transform
+  /// The provided paint `transform` (which describes the transform from the
+  /// child to the parent in 3D) is processed by
+  /// [PointerEvent.paintTransformToPointerEventTransform] to remove the
+  /// perspective component and inverted before it is used to transform
   /// `position` from the coordinate system of the parent to the system of the
   /// child.
   ///
@@ -711,6 +713,7 @@ class BoxHitTestResult extends HitTestResult {
         // Objects are not visible on screen and cannot be hit-tested.
         return false;
       }
+      transform = PointerEvent.paintTransformToPointerEventTransform(transform);
     }
     return addWithRawTransform(
       transform: transform,
@@ -773,7 +776,14 @@ class BoxHitTestResult extends HitTestResult {
     final Offset transformedPosition = position == null || transform == null
         ? position
         : MatrixUtils.transformPoint(transform, position);
-    return hitTest(this, transformedPosition);
+    if (transform != null) {
+      pushTransform(transform);
+    }
+    final bool isHit = hitTest(this, transformedPosition);
+    if (transform != null) {
+      popTransform();
+    }
+    return isHit;
   }
 }
 
