@@ -126,8 +126,8 @@ class DefaultTextStyle extends InheritedWidget {
   /// [Text.maxLines].
   final int maxLines;
 
-  /// The strategy to use when calculating the width of the Text. See
-  /// [TextWidthBasis] for possible values and their implications.
+  /// The strategy to use when calculating the width of the Text.
+  /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
   /// The closest instance of this class that encloses the given context.

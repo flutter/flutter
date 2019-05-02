@@ -15,7 +15,9 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
-/// The different ways of considering the width of a Text widget.
+/// The different ways of considering the width of one or more lines of text.
+///
+/// See [Text.widthType].
 enum TextWidthBasis {
   /// Multiline text will take up the full width given by the parent. For single
   /// line text, only the minimum amount of width needed to contain the text
