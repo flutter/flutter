@@ -91,7 +91,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesSkiaGoldFile('editable_text_test.0.png'),
     );
-  },);
+  });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -142,7 +142,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesSkiaGoldFile('editable_text_test.1.png'),
     );
-  },);
+  });
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(

@@ -55,7 +55,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.Centered.wrap.png'),
     );
-  },);
+  });
 
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
@@ -131,7 +131,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesSkiaGoldFile('text_golden.Foreground.stroke_and_gradient.png'),
     );
-  },);
+  });
 
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
@@ -181,7 +181,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesSkiaGoldFile('text_golden.Background.png'),
     );
-  },);
+  });
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -217,7 +217,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesSkiaGoldFile('text_golden.Fade.1.png'),
     );
-  },);
+  });
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -242,7 +242,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.StrutDefault.png'),
     );
-  },);
+  });
 
   testWidgets('Strut text 1', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -269,7 +269,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.Strut.1.png'),
     );
-  },);
+  });
 
   testWidgets('Strut text 2', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -297,7 +297,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.Strut.2.png'),
     );
-  },);
+  });
 
   testWidgets('Strut text rich', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -348,7 +348,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.Strut.3.png'),
     );
-  },);
+  });
 
   testWidgets('Strut text font fallback', (WidgetTester tester) async {
     // Font Fallback
@@ -383,7 +383,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.Strut.4.png'),
     );
-  },);
+  });
 
   testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -434,7 +434,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.StrutForce.1.png'),
     );
-  },);
+  });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -472,7 +472,7 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.Decoration.1.png'),
     );
-  },);
+  });
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -511,5 +511,5 @@ void main() {
       find.byType(Container),
       matchesSkiaGoldFile('text_golden.DecorationThickness.1.png'),
     );
-  },);
+  });
 }
