@@ -690,9 +690,6 @@ class SliverGeometry extends Diagnosticable {
   ///  * [RenderViewport.cacheExtent] for a description of a viewport's cache area.
   final double cacheExtent;
 
-  /// The epsilon of tolerable double precision error.
-  static const double precisionErrorTolerance = 1e-10;
-
   /// Asserts that this geometry is internally consistent.
   ///
   /// Does nothing if asserts are disabled. Always returns true.
