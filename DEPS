@@ -445,6 +445,50 @@ deps = {
      'condition': 'download_android_deps',
      'dep_type': 'cipd',
    },
+
+   # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
+   # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
+
+   'src/fuchsia/sdk/mac': {
+     'packages': [
+       {
+        'package': 'fuchsia/sdk/core/mac-amd64',
+        'version': 'jlQvNeRMq6X81_VYiFI_Ol311YCXak0xACebeb8f6TcC'
+       }
+     ],
+     'condition': 'host_os == "mac"',
+     'dep_type': 'cipd',
+   },
+   'src/fuchsia/toolchain/mac': {
+     'packages': [
+       {
+        'package': 'fuchsia/clang/mac-amd64',
+        'version': '4OfgjQg8g3Ztj2OYJ4Zlz9Q6DGYjOTuHh3G8MSMhxg4C'
+       }
+     ],
+     'condition': 'host_os == "mac"',
+     'dep_type': 'cipd',
+   },
+   'src/fuchsia/sdk/linux': {
+     'packages': [
+       {
+        'package': 'fuchsia/sdk/core/linux-amd64',
+        'version': '9-zyx3CzWylM-x9RYdL5UTT9uU-sl_0ysOCcEGCtot0C'
+       }
+     ],
+     'condition': 'host_os == "linux"',
+     'dep_type': 'cipd',
+   },
+   'src/fuchsia/toolchain/linux': {
+     'packages': [
+       {
+        'package': 'fuchsia/clang/linux-amd64',
+        'version': 'WPg0zzXLyTjFNrOrz4uA5vPaXUuEYvTJ5DPyYdiaN3MC'
+       }
+     ],
+     'condition': 'host_os == "linux"',
+     'dep_type': 'cipd',
+   },
 }
 
 hooks = [

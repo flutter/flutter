@@ -2048,6 +2048,22 @@ class _RepositoryFlutterDirectory extends _RepositoryDirectory {
   }
 }
 
+class _RepositoryFuchsiaDirectory extends _RepositoryDirectory {
+  _RepositoryFuchsiaDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  String get libraryName => 'fuchsia_sdk';
+
+  @override
+  bool get isLicenseRoot => true;
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != 'toolchain'
+        && super.shouldRecurse(entry);
+  }
+}
+
 class _RepositoryFlutterThirdPartyDirectory extends _RepositoryDirectory {
   _RepositoryFlutterThirdPartyDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
 
@@ -2133,6 +2149,8 @@ class _RepositoryRoot extends _RepositoryDirectory {
       return _RepositoryRootThirdPartyDirectory(this, entry);
     if (entry.name == 'flutter')
       return _RepositoryFlutterDirectory(this, entry);
+    if (entry.name == 'fuchsia')
+      return _RepositoryFuchsiaDirectory(this, entry);
     return super.createSubdirectory(entry);
   }
 
