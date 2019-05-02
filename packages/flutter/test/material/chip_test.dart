@@ -248,6 +248,79 @@ void main() {
     );
   });
 
+  testWidgets(
+      'Chip constrains the avatar, label, and delete icons to the bounds of '
+      'the chip when it exceeds the available space', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/11523
+    Widget chipBuilder (String text, {Widget avatar, VoidCallback onDeleted}) {
+      return MaterialApp(
+        home: Scaffold(
+          body: Container(
+            width: 150,
+            child: Column(
+              children: <Widget>[
+                Chip(
+                  avatar: avatar,
+                  label: Text(text),
+                  onDeleted: onDeleted,
+                ),
+              ]
+            ),
+          ),
+        ),
+      );
+    }
+
+    void chipRectContains(Rect chipRect, Rect rect) {
+      expect(chipRect.contains(rect.topLeft), true);
+      expect(chipRect.contains(rect.topRight), true);
+      expect(chipRect.contains(rect.bottomLeft), true);
+      expect(chipRect.contains(rect.bottomRight), true);
+    }
+
+    Rect chipRect;
+    Rect avatarRect;
+    Rect labelRect;
+    Rect deleteIconRect;
+    const String text = 'Very long text that will be clipped';
+
+    await tester.pumpWidget(chipBuilder(text));
+
+    chipRect = tester.getRect(find.byType(Chip));
+    labelRect = tester.getRect(find.text(text));
+    chipRectContains(chipRect, labelRect);
+
+    await tester.pumpWidget(chipBuilder(
+      text,
+      avatar: const CircleAvatar(child: Text('A')),
+    ));
+    await tester.pumpAndSettle();
+
+    chipRect = tester.getRect(find.byType(Chip));
+    avatarRect = tester.getRect(find.byType(CircleAvatar));
+    chipRectContains(chipRect, avatarRect);
+
+    labelRect = tester.getRect(find.text(text));
+    chipRectContains(chipRect, labelRect);
+
+    await tester.pumpWidget(chipBuilder(
+      text,
+      avatar: const CircleAvatar(child: Text('A')),
+      onDeleted: () {},
+    ));
+    await tester.pumpAndSettle();
+
+    chipRect = tester.getRect(find.byType(Chip));
+    avatarRect = tester.getRect(find.byType(CircleAvatar));
+    chipRectContains(chipRect, avatarRect);
+
+    labelRect = tester.getRect(find.text(text));
+    chipRectContains(chipRect, labelRect);
+
+    deleteIconRect = tester.getRect(find.byIcon(Icons.cancel));
+    chipRectContains(chipRect, deleteIconRect);
+  });
+
   testWidgets('Chip in row works ok', (WidgetTester tester) async {
     const TextStyle style = TextStyle(fontFamily: 'Ahem', fontSize: 10.0);
     await tester.pumpWidget(
