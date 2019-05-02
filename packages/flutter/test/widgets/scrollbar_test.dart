@@ -247,6 +247,7 @@ void main() {
     testWidgets('down', (WidgetTester tester) async {
       p.update(
         metrics.copyWith(
+          viewportDimension: size.height,
           pixels: double.negativeInfinity,
         ),
         AxisDirection.down
@@ -261,6 +262,7 @@ void main() {
       // Bottom overscroll.
       p.update(
         metrics.copyWith(
+          viewportDimension: size.height,
           pixels: double.infinity,
         ),
         AxisDirection.down
@@ -275,6 +277,7 @@ void main() {
     testWidgets('up', (WidgetTester tester) async {
       p.update(
         metrics.copyWith(
+          viewportDimension: size.height,
           pixels: double.infinity,
           axisDirection: AxisDirection.up
         ),
@@ -290,6 +293,7 @@ void main() {
       // Bottom overscroll.
       p.update(
         metrics.copyWith(
+          viewportDimension: size.height,
           pixels: double.negativeInfinity,
           axisDirection: AxisDirection.up
         ),
@@ -305,6 +309,7 @@ void main() {
     testWidgets('left', (WidgetTester tester) async {
       p.update(
         metrics.copyWith(
+          viewportDimension: size.width,
           pixels: double.negativeInfinity,
           axisDirection: AxisDirection.left
         ),
@@ -320,6 +325,7 @@ void main() {
       // Left overscroll.
       p.update(
         metrics.copyWith(
+          viewportDimension: size.width,
           pixels: double.infinity,
           axisDirection: AxisDirection.left
         ),
@@ -335,6 +341,7 @@ void main() {
     testWidgets('right', (WidgetTester tester) async {
       p.update(
         metrics.copyWith(
+          viewportDimension: size.width,
           pixels: double.infinity,
           axisDirection: AxisDirection.right
         ),
@@ -350,6 +357,7 @@ void main() {
       // Left overscroll.
       p.update(
         metrics.copyWith(
+          viewportDimension: size.width,
           pixels: double.negativeInfinity,
           axisDirection: AxisDirection.right
         ),
