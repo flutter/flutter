@@ -669,7 +669,8 @@ class BoxHitTestResult extends HitTestResult {
   /// position is not required to do the actual hit testing in that protocol.
   ///
   /// {@tool sample}
-  /// This method is used in [RenderBox.hitTestChildren]:
+  /// This method is used in [RenderBox.hitTestChildren] when the child and
+  /// parent don't share the same origin.
   ///
   /// ```dart
   /// abstract class Foo extends RenderBox {

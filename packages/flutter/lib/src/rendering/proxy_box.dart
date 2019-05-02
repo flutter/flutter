@@ -2610,7 +2610,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   Matrix4 _getLayerTransform() {
     assert(_lastAnnotationLayerUsed != null);
-    Matrix4 result = Matrix4.identity();
+    Matrix4 result = Matrix4.translationValues(_lastAnnotationLayerUsed.offset.dx, _lastAnnotationLayerUsed.offset.dy, 0);
     Layer previous = _lastAnnotationLayerUsed;
     Layer current = previous.parent;
     while (current?.parent != null) {
@@ -2644,7 +2644,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     super.detach();
   }
 
-  Layer _lastAnnotationLayerUsed;
+  AnnotatedRegionLayer<MouseTrackerAnnotation> _lastAnnotationLayerUsed;
 
   @override
   bool get needsCompositing => _hoverAnnotation != null;
