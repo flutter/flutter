@@ -237,7 +237,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
-    _color = _buildScrimColorTween();
+    _scrimColorTween = _buildScrimColorTween();
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
@@ -254,7 +254,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   void didUpdateWidget(DrawerController oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.scrimColor != oldWidget.scrimColor)
-      _color = _buildScrimColorTween();
+      _scrimColorTween = _buildScrimColorTween();
   }
 
   void _animationChanged() {
@@ -393,7 +393,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       widget.drawerCallback(false);
   }
 
-  ColorTween _color;
+  ColorTween _scrimColorTween;
   final GlobalKey _gestureDetectorKey = GlobalKey();
 
   ColorTween _buildScrimColorTween() {
@@ -464,7 +464,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
                     child: Container( // The drawer's "scrim"
-                      color: _color.evaluate(_controller),
+                      color: _scrimColorTween.evaluate(_controller),
                     ),
                   ),
                 ),
