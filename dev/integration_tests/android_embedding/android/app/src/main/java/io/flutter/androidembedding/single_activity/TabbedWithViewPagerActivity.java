@@ -1,12 +1,11 @@
 package io.flutter.androidembedding.single_activity;
 
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.app.AppCompatActivity;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,6 +15,7 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 
+import androidx.viewpager.widget.ViewPager;
 import io.flutter.androidembedding.R;
 import io.flutter.embedding.android.FlutterFragment;
 import io.flutter.embedding.android.FlutterView;
@@ -28,7 +28,7 @@ public class TabbedWithViewPagerActivity extends AppCompatActivity {
    * {@link FragmentPagerAdapter} derivative, which will keep every
    * loaded fragment in memory. If this becomes too memory intensive, it
    * may be best to switch to a
-   * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+   * {@link androidx.fragment.app.FragmentStatePagerAdapter}.
    */
   private SectionsPagerAdapter mSectionsPagerAdapter;
 

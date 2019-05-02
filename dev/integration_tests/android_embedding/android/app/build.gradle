@@ -54,12 +54,16 @@ flutter {
 }
 
 dependencies {
-    implementation 'com.android.support:support-annotations:28.0.0'
-    implementation 'com.android.support:support-fragment:28.0.0'
-    implementation 'com.android.support:design:28.0.0'
-    implementation 'com.android.support.constraint:constraint-layout:1.1.3'
+    implementation 'androidx.annotation:annotation:1.0.0'
+    implementation 'androidx.fragment:fragment:1.0.0'
+    implementation 'com.google.android.material:material:1.0.0-rc01'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.2'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
     androidTestImplementation 'androidx.test:runner:1.1.1'
     androidTestImplementation 'androidx.test:rules:1.1.1'
+
+    // For alarm manager plugin
+//    implementation 'androidx.appcompat:appcompat:1.0.0'
+    api 'androidx.core:core:1.0.1'
 }
