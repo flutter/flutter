@@ -138,8 +138,15 @@ class _BarcodeScannerState extends State<BarcodeScanner>
                   _scannerHint = 'Loading information...';
                   _closeWindow = true;
                   _frameColor = Colors.black87;
-                  _showBottomSheet();
                 });
+
+                _animation.dispose();
+                _animation = null;
+
+                _timer.cancel();
+                _timer = null;
+
+                _showBottomSheet();
                 return;
               } else if (validRect.overlaps(barcode.boundingBox)) {
                 setState(() {
@@ -160,9 +167,14 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 
   @override
   void dispose() {
+    _controller?.stopImageStream();
     _controller?.dispose();
-    _animation.dispose();
-    _timer.cancel();
+    _animation?.dispose();
+    _timer?.cancel();
+    SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[
+      SystemUiOverlay.top,
+      SystemUiOverlay.bottom,
+    ]);
     super.dispose();
   }
 
@@ -181,6 +193,9 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     } on CameraException catch (e) {
       print(e);
     }
+
+    _controller.dispose();
+    _controller = null;
 
     setState(() {
       _barcodePictureFilePath = filePath;
@@ -391,10 +406,12 @@ class _BarcodeScannerState extends State<BarcodeScanner>
           ),
           Container(
             constraints: BoxConstraints.expand(),
-            child: CustomPaint(
-                painter: SquareChartPainter(
-              _squareTween.animate(_animation),
-            )),
+            child: _timer != null && _animation != null
+                ? CustomPaint(
+                    painter: SquareChartPainter(
+                    _squareTween.animate(_animation),
+                  ))
+                : null,
           ),
           AppBar(
             leading: IconButton(
