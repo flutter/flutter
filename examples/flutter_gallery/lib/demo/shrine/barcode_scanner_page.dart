@@ -224,11 +224,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   Widget _buildCameraPreview() {
-    final Size size = MediaQuery.of(context).size;
-    final double deviceRatio = size.width / size.height;
-
-    return Transform.scale(
-      scale: _cameraController.value.aspectRatio / deviceRatio,
+    return Container(
+      constraints: BoxConstraints.expand(),
+      color: Colors.black,
       child: Center(
         child: AspectRatio(
           aspectRatio: _cameraController.value.aspectRatio,
@@ -366,7 +364,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       );
     }
 
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       key: _scaffoldKey,
       body: Stack(
         children: <Widget>[
@@ -465,7 +464,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           ),
         ],
       ),
-    );
+    ));
   }
 }
 
