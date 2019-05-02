@@ -1,4 +1,4 @@
-Signature: 61ebfeb786df50543b0ae89ea1474e94
+Signature: f74704a33d8906cec9b1968b23b2f957
 
 UNUSED LICENSES:
 
@@ -5294,6 +5294,7 @@ FILE: ../../../third_party/skia/experimental/editor/editor_application.cpp
 FILE: ../../../third_party/skia/experimental/editor/run_handler.cpp
 FILE: ../../../third_party/skia/experimental/editor/run_handler.h
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
+FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
 FILE: ../../../third_party/skia/src/gpu/GrPersistentCacheUtils.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrComposeLerpRedEffect.fp
