@@ -3,7 +3,6 @@
 # found in the LICENSE file.
 
 import("//build/config/android/config.gni")
-import("//build/config/android/rules.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
@@ -90,10 +89,13 @@ shared_library("flutter_shell_native") {
   ldflags = [ "-Wl,--version-script=" + rebase_path("android_exports.lst") ]
 }
 
-java_library("flutter_shell_java") {
-  supports_android = true
+action("flutter_shell_java") {
+  script = "//build/android/gyp/javac.py"
+  depfile = "$target_gen_dir/$target_name.d"
 
-  java_files = [
+  jar_path = "$root_out_dir/flutter_java.jar"
+
+  sources = [
     "io/flutter/app/FlutterActivity.java",
     "io/flutter/app/FlutterActivityDelegate.java",
     "io/flutter/app/FlutterActivityEvents.java",
@@ -171,56 +173,41 @@ java_library("flutter_shell_java") {
     "io/flutter/view/VsyncWaiter.java",
   ]
 
-  java_files +=
-      [ "$flutter_root/third_party/bsdiff/io/flutter/util/BSDiff.java" ]
+  sources += [ "$flutter_root/third_party/bsdiff/io/flutter/util/BSDiff.java" ]
 
-  deps = [
-    ":android_arch_lifecycle_common",
-    ":android_arch_lifecycle_viewmodel",
-    ":android_support_annotations",
-    ":android_support_compat",
-    ":android_support_fragment",
-    ":android_support_v13",
+  android_support_jars = [
+    "//third_party/android_support/android_support_v13.jar",
+    "//third_party/android_support/android_support_compat.jar",
+    "//third_party/android_support/android_support_annotations.jar",
+    "//third_party/android_support/android_support_fragment.jar",
+    "//third_party/android_support/android_arch_lifecycle_common.jar",
+    "//third_party/android_support/android_arch_lifecycle_viewmodel.jar",
   ]
 
-  jar_path = "$root_out_dir/flutter_java.jar"
-}
+  outputs = [
+    depfile,
+    jar_path,
+    jar_path + ".md5.stamp",
+  ]
+  inputs = [
+    android_sdk_jar,
+  ]
+  inputs += android_support_jars
 
-java_prebuilt("android_support_v13") {
-  supports_android = true
+  _rebased_jar_path = rebase_path(jar_path, root_build_dir)
+  _rebased_depfile = rebase_path(depfile, root_build_dir)
+  _rebased_android_sdk_jar = rebase_path(android_sdk_jar, root_build_dir)
+  _rebased_classpath = [ _rebased_android_sdk_jar ] +
+                       rebase_path(android_support_jars, root_build_dir)
 
-  jar_path = "//third_party/android_support/android_support_v13.jar"
-}
+  args = [
+    "--depfile=$_rebased_depfile",
+    "--jar-path=$_rebased_jar_path",
+    "--classpath=$_rebased_classpath",
+    "--bootclasspath=$_rebased_android_sdk_jar",
+  ]
 
-java_prebuilt("android_support_compat") {
-  supports_android = true
-
-  jar_path = "//third_party/android_support/android_support_compat.jar"
-}
-
-java_prebuilt("android_support_annotations") {
-  supports_android = true
-
-  jar_path = "//third_party/android_support/android_support_annotations.jar"
-}
-
-java_prebuilt("android_support_fragment") {
-  supports_android = true
-
-  jar_path = "//third_party/android_support/android_support_fragment.jar"
-}
-
-java_prebuilt("android_arch_lifecycle_common") {
-  supports_android = true
-
-  jar_path = "//third_party/android_support/android_arch_lifecycle_common.jar"
-}
-
-java_prebuilt("android_arch_lifecycle_viewmodel") {
-  supports_android = true
-
-  jar_path =
-      "//third_party/android_support/android_arch_lifecycle_viewmodel.jar"
+  args += rebase_path(sources, root_build_dir)
 }
 
 action("icudtl_object") {
