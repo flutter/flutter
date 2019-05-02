@@ -302,15 +302,25 @@ class RenderEditable extends RenderBox {
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
       Rect.zero,
     );
-
-    _selectionStartInViewport.value = visibleRegion.contains(startOffset + effectiveOffset);
+    // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
+    // Check if the selection is visible with an approximation because a
+    // difference between rounded and unrounded values causes the caret to be
+    // reported as having a slightly (< 0.5) negative y offset. This rounding
+    // happens in paragraph.cc's layout and TextPainer's
+    // _applyFloatingPointHack. Ideally, the rounding mismatch will be fixed and
+    // this can be changed to be a strict check instead of an approximation.
+    const double visibleRegionSlop = 0.5;
+    _selectionStartInViewport.value = visibleRegion
+      .inflate(visibleRegionSlop)
+      .contains(startOffset + effectiveOffset);
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
       Rect.zero,
     );
-
-    _selectionEndInViewport.value = visibleRegion.contains(endOffset + effectiveOffset);
+    _selectionEndInViewport.value = visibleRegion
+      .inflate(visibleRegionSlop)
+      .contains(endOffset + effectiveOffset);
   }
 
   static const int _kLeftArrowCode = 21;
@@ -1455,7 +1465,8 @@ class RenderEditable extends RenderBox {
   }
 
   TextSelection _selectWordAtOffset(TextPosition position) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     final TextRange word = _textPainter.getWordBoundary(position);
     // When long-pressing past the end of the text, we want a collapsed cursor.
     if (position.offset >= word.end)
@@ -1480,8 +1491,9 @@ class RenderEditable extends RenderBox {
   // heights for Android, especially when non-alphabetic languages
   // are involved. The current implementation overrides the height set
   // here with the full measured height of the text on Android which looks
-  // superior (subjectively and in terms of fidelity). We should rework
-  // this properly to once again match the platform.
+  // superior (subjectively and in terms of fidelity) in _paintCaret. We
+  // should rework this properly to once again match the platform. The constant
+  // _kCaretHeightOffset scales poorly for small font sizes.
   //
   /// On iOS, the cursor is taller than the the cursor on Android. The height
   /// of the cursor for iOS is approximate and obtained through an eyeball
@@ -1489,9 +1501,9 @@ class RenderEditable extends RenderBox {
   Rect get _getCaretPrototype {
     switch(defaultTargetPlatform){
       case TargetPlatform.iOS:
-        return Rect.fromLTWH(0.0, -_kCaretHeightOffset + .5, cursorWidth, preferredLineHeight + 2);
+        return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       default:
-        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+        return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
   }
   @override
@@ -1526,27 +1538,44 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintCaret(Canvas canvas, Offset effectiveOffset, TextPosition textPosition) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
 
     // If the floating cursor is enabled, the text cursor's color is [backgroundCursorColor] while
     // the floating cursor's color is _cursorColor;
     final Paint paint = Paint()
       ..color = _floatingCursorOn ? backgroundCursorColor : _cursorColor;
-
-    Rect caretRect = _caretPrototype.shift(_textPainter.getOffsetForCaret(textPosition, _caretPrototype) + effectiveOffset);
+    final Offset caretOffset = _textPainter.getOffsetForCaret(textPosition, _caretPrototype) + effectiveOffset;
+    Rect caretRect = _caretPrototype.shift(caretOffset);
     if (_cursorOffset != null)
       caretRect = caretRect.shift(_cursorOffset);
 
-    // Override the height to take the full height of the glyph at the TextPosition
-    // when not on iOS. iOS has special handling that creates a taller caret.
-    // TODO(garyq): See the TODO for _getCaretPrototype.
-    if (defaultTargetPlatform != TargetPlatform.iOS && _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
-      caretRect = Rect.fromLTRB(
-        caretRect.left,
-        (caretRect.bottom + caretRect.top) / 2 - (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) / 2),
-        caretRect.right,
-        (caretRect.bottom + caretRect.top) / 2 + (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) / 2),
-      );
+    if (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS: {
+          final double heightDiff = _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) - caretRect.height;
+          // Center the caret vertically along the text.
+          caretRect = Rect.fromLTWH(
+            caretRect.left,
+            caretRect.top + heightDiff / 2,
+            caretRect.width,
+            caretRect.height,
+          );
+          break;
+        }
+        default: {
+          // Override the height to take the full height of the glyph at the TextPosition
+          // when not on iOS. iOS has special handling that creates a taller caret.
+          // TODO(garyq): See the TODO for _getCaretPrototype.
+          caretRect = Rect.fromLTWH(
+            caretRect.left,
+            caretRect.top,
+            caretRect.width,
+            _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
+          );
+          break;
+        }
+      }
     }
 
     caretRect = caretRect.shift(_getPixelPerfectCursorOffset(caretRect));
@@ -1589,7 +1618,8 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintFloatingCaret(Canvas canvas, Offset effectiveOffset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     assert(_floatingCursorOn);
 
     // We always want the floating cursor to render at full opacity.
@@ -1676,7 +1706,8 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintSelection(Canvas canvas, Offset effectiveOffset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     assert(_selectionRects != null);
     final Paint paint = Paint()..color = _selectionColor;
     for (ui.TextBox box in _selectionRects)
@@ -1684,7 +1715,8 @@ class RenderEditable extends RenderBox {
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    assert(_textLayoutLastWidth == constraints.maxWidth);
+    assert(_textLayoutLastWidth == constraints.maxWidth,
+      'Last width ($_textLayoutLastWidth) not the same as max width constraint (${constraints.maxWidth}).');
     final Offset effectiveOffset = offset + _paintOffset;
 
     bool showSelection = false;

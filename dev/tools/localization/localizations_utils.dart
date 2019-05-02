@@ -231,19 +231,35 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       'overwrite',
       abbr: 'w',
       defaultsTo: false,
+    )
+    ..addFlag(
+      'material',
+      help: 'Whether to print the generated classes for the Material package only. Ignored when --overwrite is passed.',
+      defaultsTo: false,
+    )
+    ..addFlag(
+      'cupertino',
+      help: 'Whether to print the generated classes for the Cupertino package only. Ignored when --overwrite is passed.',
+      defaultsTo: false,
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
   final bool writeToFile = args['overwrite'];
+  final bool materialOnly = args['material'];
+  final bool cupertinoOnly = args['cupertino'];
 
-  return GeneratorOptions(writeToFile: writeToFile);
+  return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
 }
 
 class GeneratorOptions {
   GeneratorOptions({
     @required this.writeToFile,
+    @required this.materialOnly,
+    @required this.cupertinoOnly,
   });
 
   final bool writeToFile;
+  final bool materialOnly;
+  final bool cupertinoOnly;
 }
 
 const String registry = 'https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry';

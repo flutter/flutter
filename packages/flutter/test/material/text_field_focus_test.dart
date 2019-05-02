@@ -9,11 +9,14 @@ void main() {
   testWidgets('Dialog interaction', (WidgetTester tester) async {
     expect(tester.testTextInput.isVisible, isFalse);
 
+    final FocusNode focusNode = FocusNode(debugLabel: 'Editable Text Node');
+
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Material(
           child: Center(
             child: TextField(
+              focusNode: focusNode,
               autofocus: true,
             ),
           ),
@@ -130,7 +133,7 @@ void main() {
     await tester.pumpWidget(Container());
 
     expect(tester.testTextInput.isVisible, isFalse);
-  }, skip: true); // https://github.com/flutter/flutter/issues/29384.
+  });
 
   testWidgets('Focus triggers keep-alive', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();

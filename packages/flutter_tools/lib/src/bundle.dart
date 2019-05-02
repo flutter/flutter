@@ -61,9 +61,6 @@ Future<void> build({
   bool reportLicensedPackages = false,
   bool trackWidgetCreation = false,
   String compilationTraceFilePath,
-  bool createPatch = false,
-  String buildNumber,
-  String baselineDir,
   List<String> extraFrontEndOptions = const <String>[],
   List<String> extraGenSnapshotOptions = const <String>[],
   List<String> fileSystemRoots,
@@ -73,7 +70,7 @@ Future<void> build({
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
   applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
-  final FlutterProject flutterProject = await FlutterProject.current();
+  final FlutterProject flutterProject = FlutterProject.current();
 
   if (compilationTraceFilePath != null) {
     if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
@@ -134,9 +131,6 @@ Future<void> build({
         packagesPath: packagesPath,
         compilationTraceFilePath: compilationTraceFilePath,
         extraGenSnapshotOptions: extraGenSnapshotOptions,
-        createPatch: createPatch,
-        buildNumber: buildNumber,
-        baselineDir: baselineDir,
       );
       if (snapshotExitCode != 0) {
         throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');

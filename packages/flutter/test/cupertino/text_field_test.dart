@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -349,6 +350,61 @@ void main() {
 
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('cursor android golden', (WidgetTester tester) async {
+    final Widget widget = CupertinoApp(
+      home: Center(
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(400, 400)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.0.1.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final Widget widget = CupertinoApp(
+      home: Center(
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(400, 400)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    debugDefaultTargetPlatformOverride = null;
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.1.1.png'),
+    );
+  }, skip: !Platform.isLinux);
 
   testWidgets(
     'can control text content via controller',
@@ -2090,5 +2146,40 @@ void main() {
 
     final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorColor, const Color(0xFFF44336));
+  });
+
+  testWidgets('iOS shows selection handles', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String testText = 'lorem ipsum';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(),
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable =
+      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pumpAndSettle();
+
+    final List<Widget> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
+
+    expect(left.opacity.value, equals(1.0));
+    expect(right.opacity.value, equals(1.0));
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }

@@ -2188,29 +2188,40 @@ class _RenderChip extends RenderBox {
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
     if (constraints.maxWidth.isFinite) {
+      final double maxWidth = math.max(
+        0.0,
+        constraints.maxWidth
+        - iconSizes
+        - theme.labelPadding.horizontal
+        - theme.padding.horizontal,
+      );
       label.layout(
         constraints.copyWith(
           minWidth: 0.0,
-          maxWidth: math.max(
-            0.0,
-            constraints.maxWidth - iconSizes - theme.labelPadding.horizontal,
-          ),
+          maxWidth: maxWidth,
           minHeight: rawSize.height,
           maxHeight: size.height,
         ),
         parentUsesSize: true,
       );
-    } else {
-      label.layout(
-        BoxConstraints(
-          minHeight: rawSize.height,
-          maxHeight: size.height,
-          minWidth: 0.0,
-          maxWidth: size.width,
-        ),
-        parentUsesSize: true,
+
+      final Size updatedSize = _boxSize(label);
+      return Size(
+        updatedSize.width + theme.labelPadding.horizontal,
+        updatedSize.height + theme.labelPadding.vertical,
       );
     }
+
+    label.layout(
+      BoxConstraints(
+        minHeight: rawSize.height,
+        maxHeight: size.height,
+        minWidth: 0.0,
+        maxWidth: size.width,
+      ),
+      parentUsesSize: true,
+    );
+
     return Size(
       rawSize.width + theme.labelPadding.horizontal,
       rawSize.height + theme.labelPadding.vertical,
