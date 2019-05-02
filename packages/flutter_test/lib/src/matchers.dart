@@ -207,10 +207,11 @@ Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
 /// Two values are considered equal if the difference between them is within
-/// 1e-10 of the larger one. This is an arbitrary value which can be adjusted
-/// using the `epsilon` argument. This matcher is intended to compare floating
-/// point numbers that are the result of different sequences of operations, such
-/// that they may have accumulated slightly different errors.
+/// [precisionErrorTolerance] of the larger one. This is an arbitrary value
+/// which can be adjusted using the `epsilon` argument. This matcher is intended
+/// to compare floating point numbers that are the result of different sequences
+/// of operations, such that they may have accumulated slightly different
+/// errors.
 ///
 /// See also:
 ///
@@ -218,24 +219,25 @@ Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 ///    required and not named.
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
-Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
+Matcher moreOrLessEquals(double value, { double epsilon = precisionErrorTolerance }) {
   return _MoreOrLessEquals(value, epsilon);
 }
 
 /// Asserts that two [Rect]s are equal, within some tolerated error.
 ///
 /// Two values are considered equal if the difference between them is within
-/// 1e-10 of the larger one. This is an arbitrary value which can be adjusted
-/// using the `epsilon` argument. This matcher is intended to compare floating
-/// point numbers that are the result of different sequences of operations, such
-/// that they may have accumulated slightly different errors.
+/// [precisionErrorTolerance] of the larger one. This is an arbitrary value
+/// which can be adjusted using the `epsilon` argument. This matcher is intended
+/// to compare floating point numbers that are the result of different sequences
+/// of operations, such that they may have accumulated slightly different
+/// errors.
 ///
 /// See also:
 ///
 ///  * [moreOrLessEquals], which is for [double]s.
 ///  * [within], which offers a generic version of this functionality that can
 ///    be used to match [Rect]s as well as other types.
-Matcher rectMoreOrLessEquals(Rect value, { double epsilon = 1e-10 }) {
+Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolerance }) {
   return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
 }
 
