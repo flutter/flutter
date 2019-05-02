@@ -530,11 +530,14 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// If a [TabController] is not provided, then a [DefaultTabController] ancestor
 /// must be provided instead. The tab controller's [TabController.length] must
-/// equal the length of the [tabs] list.
+/// equal the length of the [tabs] list and the length of the
+/// [TabBarView.children] list.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
+///
+/// To see a sample implementation, visit the [TabController] documentation.
 ///
 /// See also:
 ///
@@ -580,7 +583,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Typically a list of two or more [Tab] widgets.
   ///
-  /// The length of this list must match the [controller]'s [TabController.length].
+  /// The length of this list must match the [controller]'s [TabController.length]
+  /// and the length of the [TabBarView.children] list.
   final List<Widget> tabs;
 
   /// This widget's selection and animation state.
@@ -779,16 +783,6 @@ class _TabBarState extends State<TabBar> {
       return true;
     }());
 
-    assert(() {
-      if (newController.length != widget.tabs.length) {
-        throw FlutterError(
-          'Controller\'s length property (${newController.length}) does not match the \n'
-          'number of tab elements (${widget.tabs.length}) present in TabBar\'s tabs property.'
-        );
-      }
-      return true;
-    }());
-
     if (newController == _controller)
       return;
 
@@ -956,6 +950,15 @@ class _TabBarState extends State<TabBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(() {
+      if (_controller.length != widget.tabs.length) {
+        throw FlutterError(
+          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'number of tabs (${widget.tabs.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -1069,6 +1072,11 @@ class _TabBarState extends State<TabBar> {
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
+///
+/// The tab controller's [TabController.length] must equal the length of the
+/// [children] list and the length of the [TabBar.tabs] list.
+///
+/// To see a sample implementation, visit the [TabController] documentation.
 class TabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
@@ -1089,7 +1097,8 @@ class TabBarView extends StatefulWidget {
   /// will be used.
   final TabController controller;
 
-  /// One widget per tab.
+  /// One widget per tab. Its length must match the length of the [TabBar.tabs]
+  /// list, as well as the [controller]'s [TabController.length].
   final List<Widget> children;
 
   /// How the page view should respond to user input.
@@ -1129,16 +1138,6 @@ class _TabBarViewState extends State<TabBarView> {
           'TabController using the "controller" property, or you must ensure that there '
           'is a DefaultTabController above the ${widget.runtimeType}.\n'
           'In this case, there was neither an explicit controller nor a default controller.'
-        );
-      }
-      return true;
-    }());
-
-    assert(() {
-      if (newController.length != widget.children.length) {
-        throw FlutterError(
-          'Controller\'s length property (${newController.length}) does not match the \n'
-          'number of elements (${widget.children.length}) present in TabBarView\'s children property.'
         );
       }
       return true;
@@ -1258,6 +1257,15 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      if (_controller.length != widget.children.length) {
+        throw FlutterError(
+          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'number of tabs (${widget.children.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView(

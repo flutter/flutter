@@ -129,6 +129,9 @@ class RadioListTile<T> extends StatelessWidget {
   ///
   /// If null, the radio button will be displayed as disabled.
   ///
+  /// The provided callback will not be invoked if this radio button is already
+  /// selected.
+  ///
   /// The callback provided to [onChanged] should update the state of the parent
   /// [StatefulWidget] using the [State.setState] method, so that the parent
   /// gets rebuilt; for example:
@@ -228,7 +231,7 @@ class RadioListTile<T> extends StatelessWidget {
           isThreeLine: isThreeLine,
           dense: dense,
           enabled: onChanged != null,
-          onTap: onChanged != null ? () { onChanged(value); } : null,
+          onTap: onChanged != null  && !checked ? () { onChanged(value); } : null,
           selected: selected,
         ),
       ),

@@ -58,7 +58,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     // Height is 36.0.
-    final Rect scrollbarRect = Rect.fromLTWH(795.0, 4.28659793814433, 2.5, 36.0);
+    const Rect scrollbarRect = Rect.fromLTWH(795.0, 4.28659793814433, 2.5, 36.0);
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       rrect: RRect.fromRectAndRadius(scrollbarRect, const Radius.circular(1.25)),
     ));

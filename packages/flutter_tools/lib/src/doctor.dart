@@ -25,16 +25,19 @@ import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'linux/linux_workflow.dart';
+import 'macos/macos_workflow.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
+import 'windows/windows_workflow.dart';
 
-Doctor get doctor => context[Doctor];
+Doctor get doctor => context.get<Doctor>();
 
 abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
-  static DoctorValidatorsProvider get instance => context[DoctorValidatorsProvider];
+  static DoctorValidatorsProvider get instance => context.get<DoctorValidatorsProvider>();
 
   static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
 
@@ -89,6 +92,16 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
       if (fuchsiaWorkflow.appliesToHostPlatform)
         _workflows.add(fuchsiaWorkflow);
+
+      if (linuxWorkflow.appliesToHostPlatform)
+        _workflows.add(linuxWorkflow);
+
+      if (macOSWorkflow.appliesToHostPlatform)
+        _workflows.add(macOSWorkflow);
+
+      if (windowsWorkflow.appliesToHostPlatform)
+        _workflows.add(windowsWorkflow);
+
     }
     return _workflows;
   }

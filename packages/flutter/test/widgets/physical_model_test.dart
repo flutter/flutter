@@ -9,7 +9,49 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _UpdateCountedPhysicalModel extends PhysicalModel {
+  _UpdateCountedPhysicalModel({Clip clipBehavior = Clip.none})
+    : super(clipBehavior: clipBehavior, color: Colors.red);
+}
+
+class _UpdateCountedPhysicalShape extends PhysicalShape {
+  _UpdateCountedPhysicalShape({Clip clipBehavior = Clip.none})
+      : super(clipBehavior: clipBehavior, color: Colors.red, clipper: const ShapeBorderClipper(shape: CircleBorder()));
+}
+
 void main() {
+  testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalModel()),
+    );
+
+    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
+
+    expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
+
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalModel(clipBehavior: Clip.antiAlias)),
+    );
+
+    expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
+  });
+
+  testWidgets('PhysicalShape updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalShape()),
+    );
+
+    final RenderPhysicalShape renderPhysicalShape = tester.allRenderObjects.whereType<RenderPhysicalShape>().first;
+
+    expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
+
+    await tester.pumpWidget(
+      MaterialApp(home: _UpdateCountedPhysicalShape(clipBehavior: Clip.antiAlias)),
+    );
+
+    expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));
+  });
+
   testWidgets('PhysicalModel - creates a physical model layer when it needs compositing', (WidgetTester tester) async {
     debugDisableShadows = false;
     await tester.pumpWidget(
@@ -62,7 +104,10 @@ void main() {
       ),
     );
 
-    expect(tester.takeException(), startsWith('A RenderFlex overflowed by '));
+    final dynamic exception = tester.takeException();
+    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
       matchesSkiaGoldFile('physical_model_overflow.png'),
@@ -206,7 +251,7 @@ void main() {
       // These would be overlapping if we only took the rectangular bounds of the circle.
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -217,7 +262,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(20, 20, 140, 150),
+          rect: const Rect.fromLTWH(20, 20, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -244,7 +289,7 @@ void main() {
     testWidgets('not non-rect entirely overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(20, 20, 140, 150),
+          rect: const Rect.fromLTWH(20, 20, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -255,7 +300,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(50, 50, 100, 100),
+          rect: const Rect.fromLTWH(50, 50, 100, 100),
           child: Container(
             width: 300,
             height: 300,
@@ -282,7 +327,7 @@ void main() {
     testWidgets('non-rect partially overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -293,7 +338,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(30, 20, 150, 150),
+          rect: const Rect.fromLTWH(30, 20, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -323,7 +368,7 @@ void main() {
     testWidgets('child partially overlapping, wrong painting order', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -341,7 +386,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(30, 20, 180, 180),
+          rect: const Rect.fromLTWH(30, 20, 180, 180),
           child: Container(
             width: 300,
             height: 300,
@@ -367,7 +412,7 @@ void main() {
     testWidgets('non-rect partially overlapping, wrong painting order, check disabled', (WidgetTester tester) async {
        final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(150, 150, 150, 150),
+          rect: const Rect.fromLTWH(150, 150, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -378,7 +423,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(30, 20, 150, 150),
+          rect: const Rect.fromLTWH(30, 20, 150, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -411,7 +456,7 @@ void main() {
 
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(140, 100, 140, 150),
+          rect: const Rect.fromLTWH(140, 100, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -425,7 +470,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(50, 50, 100, 100),
+          rect: const Rect.fromLTWH(50, 50, 100, 100),
           child: Container(
             width: 300,
             height: 300,
@@ -452,7 +497,7 @@ void main() {
     testWidgets('with a RenderTransform, overlapping', (WidgetTester tester) async {
       final List<Widget> children = <Widget>[
         Positioned.fromRect(
-          rect: Rect.fromLTWH(140, 100, 140, 150),
+          rect: const Rect.fromLTWH(140, 100, 140, 150),
           child: Container(
             width: 300,
             height: 300,
@@ -466,7 +511,7 @@ void main() {
           ),
         ),
         Positioned.fromRect(
-          rect: Rect.fromLTWH(50, 50, 100, 100),
+          rect: const Rect.fromLTWH(50, 50, 100, 100),
           child: Container(
             width: 300,
             height: 300,

@@ -129,7 +129,7 @@ void main() {
       final Layer textureParentLayer = tester.layers[tester.layers.length - 2];
       expect(textureParentLayer, isInstanceOf<ClipRectLayer>());
       final ClipRectLayer clipRect = textureParentLayer;
-      expect(clipRect.clipRect, Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
+      expect(clipRect.clipRect, const Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
@@ -837,7 +837,7 @@ void main() {
 
       // Platform view has not been created yet, no platformViewId.
       expect(semantics.platformViewId, null);
-      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));
       // A 200x100 rect positioned at bottom right of a 800x600 box.
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);
@@ -846,7 +846,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(semantics.platformViewId, currentViewId + 1);
-      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));
       // A 200x100 rect positioned at bottom right of a 800x600 box.
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);
@@ -1505,7 +1505,7 @@ void main() {
       final SemanticsNode semantics = tester.getSemantics(find.byType(UiKitView));
 
       expect(semantics.platformViewId, currentViewId + 1);
-      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));
       // A 200x100 rect positioned at bottom right of a 800x600 box.
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);
