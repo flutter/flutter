@@ -1375,6 +1375,14 @@ class Paragraph {
   List<int> getWordBoundary(int offset) {
     throw UnimplementedError();
   }
+
+  /// The distance from the left edge of the leftmost glyph to the right edge of
+  /// the rightmost glyph in the paragraph.
+  ///
+  /// Valid only after [layout] has been called.
+  double get longestLine {
+    throw UnimplementedError();
+  }
 }
 
 /// Builds a [Paragraph] containing text with the given styling information.

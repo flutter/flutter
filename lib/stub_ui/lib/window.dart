@@ -386,6 +386,15 @@ class Locale {
       out.write('_$countryCode');
     return out.toString();
   }
+
+  /// Returns a syntactically valid Unicode BCP47 Locale Identifier.
+  ///
+  /// Some examples of such identifiers: "en", "es-419", "hi-Deva-IN" and
+  /// "zh-Hans-CN". See http://www.unicode.org/reports/tr35/ for technical
+  /// details.
+  String toLanguageTag() {
+    throw UnimplementedError();
+  }
 }
 
 /// The most basic interface to the host operating system's user interface.

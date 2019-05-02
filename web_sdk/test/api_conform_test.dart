@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:analyzer/analyzer.dart';
 
-int main() {
+void main() {
   // These files just contain imports to the part files;
   final CompilationUnit uiUnit = parseDartFile('lib/ui/ui.dart',
       parseFunctionBodies: false, suppressErrors: false);
@@ -86,10 +88,10 @@ int main() {
   }
   if (failed) {
     print('Failure!');
-    return 1;
+    exit(1);
   }
   print('Success!');
-  return 0;
+  exit(0);
 }
 
 // Collects all public classes defined by the part files of [unit].
