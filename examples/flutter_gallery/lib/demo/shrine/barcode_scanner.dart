@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui' show lerpDouble;
 
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/foundation.dart';
@@ -30,7 +31,8 @@ class BarcodeScanner extends StatefulWidget {
   _BarcodeScannerState createState() => _BarcodeScannerState();
 }
 
-class _BarcodeScannerState extends State<BarcodeScanner> {
+class _BarcodeScannerState extends State<BarcodeScanner>
+    with TickerProviderStateMixin {
   static const double _validRectSideLength = 256;
 
   CameraController _controller;
@@ -40,11 +42,30 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
   Color _frameColor = Colors.white54;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  AnimationController _animation;
+  SquareTween _squareTween;
+  Timer _timer;
+
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
     _startScanningBarcodes();
+    _animation = AnimationController(
+      duration: const Duration(milliseconds: 1300),
+      vsync: this,
+    );
+
+    _squareTween = SquareTween(
+      Square(_validRectSideLength, Colors.white),
+      Square(_validRectSideLength + 100, Colors.transparent),
+    );
+
+    _animation.forward();
+    _timer = Timer.periodic(
+      Duration(milliseconds: 3000),
+      (_) => _animation.forward(from: 0),
+    );
   }
 
   Future<void> _startScanningBarcodes() async {
@@ -140,6 +161,8 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
   @override
   void dispose() {
     _controller?.dispose();
+    _animation.dispose();
+    _timer.cancel();
     super.dispose();
   }
 
@@ -301,7 +324,9 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
     } else if (_controller != null && _controller.value.isInitialized) {
       background = _buildCameraPreview();
     } else {
-      background = Container();
+      background = Container(
+        color: Colors.black,
+      );
     }
 
     return Scaffold(
@@ -363,6 +388,13 @@ class _BarcodeScannerState extends State<BarcodeScanner> {
                 ),
               ),
             ),
+          ),
+          Container(
+            constraints: BoxConstraints.expand(),
+            child: CustomPaint(
+                painter: SquareChartPainter(
+              _squareTween.animate(_animation),
+            )),
           ),
           AppBar(
             leading: IconButton(
@@ -448,4 +480,60 @@ class WindowPainter extends CustomPainter {
   @override
   bool shouldRepaint(WindowPainter oldDelegate) =>
       oldDelegate.closeWindow != closeWindow;
+}
+
+class Square {
+  Square(this.width, this.color);
+
+  final double width;
+  final Color color;
+
+  static Square lerp(Square begin, Square end, double t) {
+    Color color;
+    if (t > 0.75) {
+      color = Color.lerp(begin.color, end.color, (t - .75) / .25);
+    } else {
+      color = begin.color;
+    }
+
+    return Square(lerpDouble(begin.width, end.width, t), color);
+  }
+}
+
+class SquareTween extends Tween<Square> {
+  SquareTween(Square begin, Square end) : super(begin: begin, end: end);
+
+  @override
+  Square lerp(double t) => Square.lerp(begin, end, t);
+}
+
+class SquareChartPainter extends CustomPainter {
+  SquareChartPainter(this.animation) : super(repaint: animation);
+
+  final Animation<Square> animation;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Square square = animation.value;
+
+    final Paint paint = Paint()
+      ..strokeWidth = 3
+      ..color = square.color
+      ..style = PaintingStyle.stroke;
+
+    final Offset center = size.center(Offset.zero);
+    final double halfWidth = square.width / 2;
+
+    final Rect rect = Rect.fromLTRB(
+      center.dx - halfWidth,
+      center.dy - halfWidth,
+      center.dx + halfWidth,
+      center.dy + halfWidth,
+    );
+
+    canvas.drawRect(rect, paint);
+  }
+
+  @override
+  bool shouldRepaint(SquareChartPainter oldDelegate) => false;
 }
