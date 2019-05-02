@@ -27,7 +27,7 @@ import 'barcode_scanner_utils.dart';
 import 'colors.dart';
 
 class BarcodeScanner extends StatefulWidget {
-  const BarcodeScanner(this.validSquareWidth);
+  const BarcodeScanner({this.validSquareWidth = 256});
 
   final double validSquareWidth;
 
@@ -56,7 +56,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
   }
 
   void _initCameraAndScanner() {
-    getCamera(CameraLensDirection.back).then(
+    BarcodeScannerUtils.getCamera(CameraLensDirection.back).then(
       (CameraDescription camera) async {
         await _openCamera(camera);
         await _startStreamingImagesToScanner(camera.sensorOrientation);
@@ -117,11 +117,11 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 
       isDetecting = true;
 
-      final ImageRotation rotation = rotationIntToImageRotation(
-        sensorOrientation,
-      );
-
-      detect(image, detector.detectInImage, rotation).then(
+      BarcodeScannerUtils.detect(
+        image: image,
+        detectInImage: detector.detectInImage,
+        imageRotation: sensorOrientation,
+      ).then(
         (dynamic result) {
           _handleResult(
             barcodes: result,
@@ -429,7 +429,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
                       square: Square(widget.validSquareWidth, Colors.white),
                     )
                   : SquareOutlinePainter(
-                      SquareTween(
+                      animation: SquareTween(
                         Square(widget.validSquareWidth, Colors.white),
                         Square(
                           widget.validSquareWidth + 100,
@@ -471,15 +471,17 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 
 class WindowPainter extends CustomPainter {
   WindowPainter({
-    this.windowSize,
+    @required this.windowSize,
     this.outerFrameColor = Colors.white54,
     this.innerFrameColor = kShrineBrown600,
+    this.innerFrameStrokeWidth = 2,
     this.closeWindow = false,
   });
 
   final Size windowSize;
   final Color outerFrameColor;
   final Color innerFrameColor;
+  final double innerFrameStrokeWidth;
   final bool closeWindow;
 
   @override
@@ -526,7 +528,7 @@ class WindowPainter extends CustomPainter {
         Paint()
           ..color = innerFrameColor
           ..style = PaintingStyle.stroke
-          ..strokeWidth = 3);
+          ..strokeWidth = innerFrameStrokeWidth);
   }
 
   @override
@@ -560,16 +562,20 @@ class SquareTween extends Tween<Square> {
 }
 
 class SquareOutlinePainter extends CustomPainter {
-  SquareOutlinePainter(this.animation) : super(repaint: animation);
+  SquareOutlinePainter({
+    @required this.animation,
+    this.strokeWidth = 2,
+  }) : super(repaint: animation);
 
   final Animation<Square> animation;
+  final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Square square = animation.value;
 
     final Paint paint = Paint()
-      ..strokeWidth = 3
+      ..strokeWidth = strokeWidth
       ..color = square.color
       ..style = PaintingStyle.stroke;
 
@@ -591,10 +597,15 @@ class SquareOutlinePainter extends CustomPainter {
 }
 
 class SquareTracePainter extends CustomPainter {
-  SquareTracePainter({this.animation, this.square}) : super(repaint: animation);
+  SquareTracePainter({
+    @required this.animation,
+    @required this.square,
+    this.strokeWidth = 2,
+  }) : super(repaint: animation);
 
   final Animation<double> animation;
   final Square square;
+  final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -611,7 +622,7 @@ class SquareTracePainter extends CustomPainter {
     );
 
     final Paint paint = Paint()
-      ..strokeWidth = 3
+      ..strokeWidth = strokeWidth
       ..color = square.color;
 
     canvas.drawLine(

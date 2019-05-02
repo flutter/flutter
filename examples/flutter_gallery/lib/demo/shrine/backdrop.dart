@@ -312,7 +312,7 @@ class _BackdropState extends State<Backdrop>
             Navigator.push<void>(
               context,
               MaterialPageRoute<void>(
-                builder: (BuildContext context) => BarcodeScanner(256),
+                builder: (BuildContext context) => BarcodeScanner(),
               ),
             );
           },
