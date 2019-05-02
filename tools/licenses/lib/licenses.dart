@@ -278,6 +278,7 @@ abstract class License implements Comparable<License> {
         type = LicenseType.mpl;
         break;
       case 'http://opensource.org/licenses/MIT':
+      case 'https://opensource.org/licenses/MIT':
       case 'http://opensource->org/licenses/MIT': // i don't even
         body = system.File('data/mit').readAsStringSync();
         type = LicenseType.mit;

@@ -510,6 +510,42 @@ final List<LicenseFileReferencePattern> csReferencesByFilename = <LicenseFileRef
     )
   ),
 
+  // Seen in Fuchsia SDK files
+  LicenseFileReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    fileIndex: 3,
+    needsCopyright: false,
+    pattern: RegExp(
+      kIndent +
+      r'Copyright .+\. All rights reserved\. '
+      r'This is a GENERATED file, see //zircon/system/host/abigen\. '
+      r'The license governing this file can be found in the (LICENSE) file\.'
+      .replaceAll(' ', _linebreak),
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
+  // Seen in Fuchsia SDK files.
+  // TODO(chinmaygarde): This is a broken license file that is being patched
+  // upstream. Remove this once DX-1477 is patched.
+  LicenseFileReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    fileIndex: 3,
+    needsCopyright: false,
+    pattern: RegExp(
+      kIndent +
+      r'Use of this source code is governed by a BSD-style license that can be '
+      r'Copyright .+\. All rights reserved\. '
+      r'found in the (LICENSE) file\.'
+      .replaceAll(' ', _linebreak),
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
 ];
 
 
@@ -674,6 +710,25 @@ final List<MultipleVersionedLicenseReferencePattern> csReferencesByUrl = <Multip
       r'Use of this source code is governed by a BS?D-style *\n'
       r'^\1\2license that can be found in the LICENSE file or at *\n'
       r'^\1\2(https://developers.google.com/open-source/licenses/bsd)',
+      multiLine: true,
+      caseSensitive: false,
+    )
+  ),
+
+  // MIT
+  MultipleVersionedLicenseReferencePattern(
+    firstPrefixIndex: 1,
+    indentPrefixIndex: 2,
+    licenseIndices: const <int>[3],
+    checkLocalFirst: false,
+    pattern: RegExp(
+      kIndent +
+      (
+       r'Use of this source code is governed by a MIT-style '
+       r'license that can be found in the LICENSE file or at '
+       r'(https://opensource.org/licenses/MIT)'
+       .replaceAll(' ', _linebreak)
+      ),
       multiLine: true,
       caseSensitive: false,
     )
