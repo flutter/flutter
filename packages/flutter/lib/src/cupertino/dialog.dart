@@ -1035,7 +1035,8 @@ class CupertinoDialogAction extends StatelessWidget {
     this.textStyle,
     @required this.child,
   }) : assert(child != null),
-       assert(isDefaultAction != null || isDestructiveAction != null),
+       assert(isDefaultAction != null),
+       assert(isDestructiveAction != null),
        assert(!(isDefaultAction && isDestructiveAction),
           "Action can't be default and destructive at the same time");
 
