@@ -719,9 +719,9 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.2.0.png'),
+      matchesSkiaGoldFile('editable_text_test.2.png'),
     );
     debugDefaultTargetPlatformOverride = null;
-  }, skip: !Platform.isLinux);
+  });
 
 }
