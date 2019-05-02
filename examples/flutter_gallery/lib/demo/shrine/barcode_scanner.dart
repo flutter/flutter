@@ -43,12 +43,12 @@ class _BarcodeScannerState extends State<BarcodeScanner>
   String _barcodePictureFilePath;
   Color _frameColor = Colors.white54;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool _barcodeFound = false;
 
   AnimationController _squareAnimation;
   SquareTween _squareTween;
   Timer _squareAnimationTimer;
 
-  AnimationController _squareTraceAnimation;
   Tween<double> _squareTraceTween;
 
   @override
@@ -60,17 +60,6 @@ class _BarcodeScannerState extends State<BarcodeScanner>
       duration: const Duration(milliseconds: 1300),
       vsync: this,
     );
-
-    _squareTraceAnimation = AnimationController(
-      duration: const Duration(milliseconds: 2000),
-      vsync: this,
-    );
-
-    _squareTraceAnimation.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        _showBottomSheet();
-      }
-    });
 
     _squareTraceTween = Tween<double>(
       begin: 0,
@@ -87,6 +76,15 @@ class _BarcodeScannerState extends State<BarcodeScanner>
       Duration(milliseconds: 3000),
       (_) => _squareAnimation.forward(from: 0),
     );
+  }
+
+  void _handleBarcodeFound() {
+    setState(() {
+      _barcodeFound = true;
+      _scannerHint = 'Loading information...';
+      _closeWindow = true;
+      _frameColor = Colors.black87;
+    });
   }
 
   Future<void> _startScanningBarcodes() async {
@@ -155,19 +153,20 @@ class _BarcodeScannerState extends State<BarcodeScanner>
                   _takePicture();
                 });
 
-                setState(() {
-                  _scannerHint = 'Loading information...';
-                  _closeWindow = true;
-                  _frameColor = Colors.black87;
-                });
-
-                _squareAnimation.dispose();
-                _squareAnimation = null;
+                _handleBarcodeFound();
 
                 _squareAnimationTimer.cancel();
                 _squareAnimationTimer = null;
 
-                _squareTraceAnimation.forward();
+                _squareAnimation.duration = Duration(milliseconds: 2000);
+
+                _squareAnimation.addStatusListener((AnimationStatus status) {
+                  if (status == AnimationStatus.completed) {
+                    _showBottomSheet();
+                  }
+                });
+
+                _squareAnimation.forward(from: 0);
                 return;
               } else if (validRect.overlaps(barcode.boundingBox)) {
                 setState(() {
@@ -192,7 +191,6 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     _controller?.dispose();
     _squareAnimation?.dispose();
     _squareAnimationTimer?.cancel();
-    _squareTraceAnimation?.dispose();
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[
       SystemUiOverlay.top,
       SystemUiOverlay.bottom,
@@ -439,12 +437,11 @@ class _BarcodeScannerState extends State<BarcodeScanner>
           ),
           Container(
             constraints: BoxConstraints.expand(),
-            child: _squareTraceAnimation != null &&
-                    _squareTraceAnimation.isAnimating
+            child: _barcodeFound
                 ? CustomPaint(
                     painter: SquareTracePainter(
                       animation: _squareTraceTween.animate(
-                        _squareTraceAnimation,
+                        _squareAnimation,
                       ),
                       square: Square(widget.validSquareWidth, Colors.white),
                     ),
