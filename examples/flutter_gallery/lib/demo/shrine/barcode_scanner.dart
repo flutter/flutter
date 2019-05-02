@@ -122,6 +122,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
             return;
           }
 
+          // Flip since photo is vertical
           final double widthScale = image.height / size.width;
           final double heightScale = image.width / size.height;
 
@@ -148,6 +149,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
                   _takePicture();
                 });
 
+                _animationController.value = 1;
                 _animationController.duration = Duration(milliseconds: 2000);
                 _handleBarcodeFound();
                 return;
@@ -358,7 +360,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
               painter: WindowPainter(
                 windowSize:
                     Size(widget.validSquareWidth, widget.validSquareWidth),
-                windowFrameColor: _frameColor,
+                outerFrameColor: _frameColor,
                 closeWindow: _closeWindow,
               ),
             ),
@@ -392,18 +394,6 @@ class _BarcodeScannerState extends State<BarcodeScanner>
                       .textTheme
                       .body1
                       .copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-          Container(
-            constraints: BoxConstraints.expand(),
-            child: Center(
-              child: Container(
-                width: widget.validSquareWidth,
-                height: widget.validSquareWidth,
-                decoration: BoxDecoration(
-                  border: Border.all(width: 3, color: kShrineBrown600),
                 ),
               ),
             ),
@@ -464,13 +454,15 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 
 class WindowPainter extends CustomPainter {
   WindowPainter({
-    @required this.windowSize,
-    @required this.windowFrameColor,
+    this.windowSize,
+    this.outerFrameColor = Colors.white54,
+    this.innerFrameColor = kShrineBrown600,
     this.closeWindow = false,
   });
 
   final Size windowSize;
-  final Color windowFrameColor;
+  final Color outerFrameColor;
+  final Color innerFrameColor;
   final bool closeWindow;
 
   @override
@@ -502,7 +494,7 @@ class WindowPainter extends CustomPainter {
       size.height,
     );
 
-    final Paint paint = Paint()..color = windowFrameColor;
+    final Paint paint = Paint()..color = outerFrameColor;
     canvas.drawRect(left, paint);
     canvas.drawRect(top, paint);
     canvas.drawRect(right, paint);
@@ -511,6 +503,13 @@ class WindowPainter extends CustomPainter {
     if (closeWindow) {
       canvas.drawRect(windowRect, paint);
     }
+
+    canvas.drawRect(
+        windowRect,
+        Paint()
+          ..color = innerFrameColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 3);
   }
 
   @override
