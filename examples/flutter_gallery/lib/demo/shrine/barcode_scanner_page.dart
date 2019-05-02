@@ -23,19 +23,19 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'barcode_scanner_utils.dart';
+import 'package:flutter_gallery/demo/shrine/supplemental/barcode_scanner_utils.dart';
 import 'colors.dart';
 
-class BarcodeScanner extends StatefulWidget {
-  const BarcodeScanner({this.validSquareWidth = 256});
+class BarcodeScannerPage extends StatefulWidget {
+  const BarcodeScannerPage({this.validSquareWidth = 256});
 
   final double validSquareWidth;
 
   @override
-  _BarcodeScannerState createState() => _BarcodeScannerState();
+  _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
 }
 
-class _BarcodeScannerState extends State<BarcodeScanner>
+class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     with TickerProviderStateMixin {
   CameraController _cameraController;
   AnimationController _animationController;
