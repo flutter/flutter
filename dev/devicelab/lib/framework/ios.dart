@@ -33,7 +33,7 @@ Future<void> prepareProvisioningCertificates(String flutterProjectPath) async {
 
 Future<void> runPodInstallForCustomPodfile(String flutterProjectPath) async {
   final String iosPath = path.join(flutterProjectPath, 'ios');
-  exec('pod', <String>['install', '--project-directory=$iosPath']);
+  exec('pod', <String>['install', '--project-directory=$iosPath']); // TODO!
 }
 
 Future<void> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
