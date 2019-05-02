@@ -31,3 +31,10 @@ const bool kProfileMode = bool.fromEnvironment('dart.vm.profile', defaultValue: 
 /// a particular block of code will not be executed in debug mode, and hence
 /// can be removed.
 const bool kDebugMode = !kReleaseMode && !kProfileMode;
+
+/// The epsilon of tolerable double precision error.
+///
+/// This is used in various places in the framework to allow for floating point
+/// precision loss in calculations. Differences below this threshold are safe to
+/// disregard.
+const double precisionErrorTolerance = 1e-10;

@@ -66,7 +66,8 @@ void main() {
       any,
       environment: anyNamed('environment'),
       workingDirectory: anyNamed('workingDirectory'),
-    )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(mockProcessResult));
+    )).thenAnswer((Invocation invocation) =>
+        Future<ProcessResult>.value(mockProcessResult));
     when(mockProcessResult.exitCode).thenReturn(1);
     when<String>(mockProcessResult.stdout).thenReturn('');
     when<String>(mockProcessResult.stderr).thenReturn('');
@@ -79,7 +80,8 @@ void main() {
       any,
       environment: anyNamed('environment'),
       workingDirectory: anyNamed('workingDirectory'),
-    )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(emptyStdoutProcessResult));
+    )).thenAnswer((Invocation invocation) =>
+        Future<ProcessResult>.value(emptyStdoutProcessResult));
     when(emptyStdoutProcessResult.exitCode).thenReturn(0);
     when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
     when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
@@ -92,23 +94,26 @@ void main() {
       } on ToolExit catch (err) {
         toolExit = err;
       }
-      expect(toolExit.message, contains('No Dart Observatories found. Are you running a debug build?'));
+      expect(
+          toolExit.message,
+          contains(
+              'No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
-        sshConfig: mockFile,
-        devFinder: mockFile,
-      ),
+            sshConfig: mockFile,
+            devFinder: mockFile,
+          ),
     });
 
     group('device logs', () {
       const String exampleUtcLogs = '''
-[2018-11-09 01:27:45][3][297950920][log] INFO: example_app(flutter): Error doing thing
+[2018-11-09 01:27:45][3][297950920][log] INFO: example_app.cmx(flutter): Error doing thing
 [2018-11-09 01:27:58][46257][46269][foo] INFO: Using a thing
 [2018-11-09 01:29:58][46257][46269][foo] INFO: Blah blah blah
-[2018-11-09 01:29:58][46257][46269][foo] INFO: other_app(flutter): Do thing
+[2018-11-09 01:29:58][46257][46269][foo] INFO: other_app.cmx(flutter): Do thing
 [2018-11-09 01:30:02][41175][41187][bar] INFO: Invoking a bar
-[2018-11-09 01:30:12][52580][52983][log] INFO: example_app(flutter): Did thing this time
+[2018-11-09 01:30:12][52580][52983][log] INFO: example_app.cmx(flutter): Did thing this time
 
   ''';
       final MockProcessManager mockProcessManager = MockProcessManager();
@@ -116,10 +121,16 @@ void main() {
       Completer<int> exitCode;
       StreamController<List<int>> stdout;
       StreamController<List<int>> stderr;
-      when(mockProcessManager.start(any)).thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
+      when(mockProcessManager.start(any))
+          .thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
       when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
       when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
       when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
+
+      final MockFile devFinder = MockFile();
+      final MockFile sshConfig = MockFile();
+      when(devFinder.absolute).thenReturn(devFinder);
+      when(sshConfig.absolute).thenReturn(sshConfig);
 
       setUp(() {
         stdout = StreamController<List<int>>(sync: true);
@@ -133,7 +144,8 @@ void main() {
 
       testUsingContext('can be parsed for an app', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
+        final DeviceLogReader reader = device.getLogReader(
+            app: FuchsiaModulePackage(name: 'example_app.cmx'));
         final List<String> logLines = <String>[];
         final Completer<void> lock = Completer<void>();
         reader.logLines.listen((String line) {
@@ -155,11 +167,14 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 25, 45)),
+        FuchsiaArtifacts: () =>
+            FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
       });
 
       testUsingContext('cuts off prior logs', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app'));
+        final DeviceLogReader reader = device.getLogReader(
+            app: FuchsiaModulePackage(name: 'example_app.cmx'));
         final List<String> logLines = <String>[];
         final Completer<void> lock = Completer<void>();
         reader.logLines.listen((String line) {
@@ -178,6 +193,8 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 29, 45)),
+        FuchsiaArtifacts: () =>
+            FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
       });
 
       testUsingContext('can be parsed for all apps', () async {
@@ -205,12 +222,15 @@ void main() {
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
         SystemClock: () => SystemClock.fixed(DateTime(2018, 11, 9, 1, 25, 45)),
+        FuchsiaArtifacts: () =>
+            FuchsiaArtifacts(devFinder: devFinder, sshConfig: sshConfig),
       });
     });
   });
 
   group(FuchsiaIsolateDiscoveryProtocol, () {
-    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) {
+    Future<Uri> findUri(
+        List<MockFlutterView> views, String expectedIsolateName) {
       final MockPortForwarder portForwarder = MockPortForwarder();
       final MockVMService vmService = MockVMService();
       final MockVM vm = MockVM();
@@ -220,33 +240,43 @@ void main() {
       for (MockFlutterView view in views) {
         view.owner = vm;
       }
-      final MockFuchsiaDevice fuchsiaDevice = MockFuchsiaDevice('123', portForwarder, false);
-      final FuchsiaIsolateDiscoveryProtocol discoveryProtocol = FuchsiaIsolateDiscoveryProtocol(
+      final MockFuchsiaDevice fuchsiaDevice =
+          MockFuchsiaDevice('123', portForwarder, false);
+      final FuchsiaIsolateDiscoveryProtocol discoveryProtocol =
+          FuchsiaIsolateDiscoveryProtocol(
         fuchsiaDevice,
         expectedIsolateName,
         (Uri uri) async => vmService,
         true, // only poll once.
       );
-      when(fuchsiaDevice.servicePorts()).thenAnswer((Invocation invocation) async => <int>[1]);
-      when(portForwarder.forward(1)).thenAnswer((Invocation invocation) async => 2);
-      when(vmService.getVM()).thenAnswer((Invocation invocation) => Future<void>.value(null));
-      when(vmService.refreshViews()).thenAnswer((Invocation invocation) => Future<void>.value(null));
+      when(fuchsiaDevice.servicePorts())
+          .thenAnswer((Invocation invocation) async => <int>[1]);
+      when(portForwarder.forward(1))
+          .thenAnswer((Invocation invocation) async => 2);
+      when(vmService.getVM())
+          .thenAnswer((Invocation invocation) => Future<void>.value(null));
+      when(vmService.refreshViews())
+          .thenAnswer((Invocation invocation) => Future<void>.value(null));
       when(vmService.httpAddress).thenReturn(Uri.parse('example'));
       return discoveryProtocol.uri;
     }
-    testUsingContext('can find flutter view with matching isolate name', () async {
+
+    testUsingContext('can find flutter view with matching isolate name',
+        () async {
       const String expectedIsolateName = 'foobar';
       final Uri uri = await findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.
         MockFlutterView(MockIsolate('wrong name')), // wrong name.
         MockFlutterView(MockIsolate(expectedIsolateName)), // matching name.
       ], expectedIsolateName);
-      expect(uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
+      expect(
+          uri.toString(), 'http://${InternetAddress.loopbackIPv4.address}:0/');
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(),
     });
 
-    testUsingContext('can handle flutter view without matching isolate name', () async {
+    testUsingContext('can handle flutter view without matching isolate name',
+        () async {
       const String expectedIsolateName = 'foobar';
       final Future<Uri> uri = findUri(<MockFlutterView>[
         MockFlutterView(null), // no ui isolate.
