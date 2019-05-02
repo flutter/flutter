@@ -12,7 +12,10 @@ import 'scroll_metrics.dart';
 
 const double _kMinThumbExtent = 18.0;
 
-/// A [CustomPainter] for painting scrollbars.
+/// A [CustomPainter] for painting scrollbars. The size of the scrollbar along
+/// its scroll direction is typically proportional to the percentage of content
+/// completely visible on screen, as long as its size isn't less than [minLength]
+/// and it isn't overscrolling.
 ///
 /// Unlike [CustomPainter]s that subclasses [CustomPainter] and only repaint
 /// when [shouldRepaint] returns true (which requires this [CustomPainter] to
@@ -100,8 +103,9 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// well as its side to the nearest edge, in pixels.
   ///
   /// This is typically set to the current [MediaQueryData.padding] to avoid
-  /// partial obstructions such as display notches. If you want additonal
-  /// margins around the scrollbar, see [mainAxisMargin] or [crossAxisMargin].
+  /// partial obstructions such as display notches. Contents that overlaps
+  /// [padding] will be considered not visible in the scrollbar size calculation.
+  /// If you only want additonal margins around the scrollbar, see [mainAxisMargin].
   ///
   /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
   /// directions must be greater than or equal to zero.
@@ -113,7 +117,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// When the size of the scrollbar track in the view port is smaller than
   /// [minLength], the size of the scrollbar may shrink to a smaller size than
-  /// [minLength] to fit in the track. E.g., when [minLength] is set to
+  /// [minLength] to fit in the scrollable area. E.g., when [minLength] is set to
   /// `double.infinite`, it will not be respected if the size of the scrollbar
   /// track is finite.
   ///
@@ -126,7 +130,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// When overscrolling, if the size of the scrollbar track in the view port
   /// is smaller than [minOverscrollLength], the size of the scrollbar may become
-  /// smaller than [minOverscrollLength] in order to fit in.
+  /// smaller than [minOverscrollLength] in order to fit in the scrollable area.
   ///
   /// The value is less than or equal to [minLength] and greater than or equal to 0.
   /// If unspecified or set to null, it will defaults to the value of [minLength].
@@ -201,7 +205,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ) {
     // Thumb extent reflects fraction of content visible, as long as this
     // isn't less than the absolute minimum size.
-    // contentExtent >= viewportDimension, so (contentExtent - totalPadding) > 0
+    // contentExtent >= viewportDimension, so (contentExtent - mainAxisPadding) > 0
     final double fractionVisible = ((extentInside - mainAxisPadding) / (contentExtent - mainAxisPadding))
       .clamp(0.0, 1.0);
 
