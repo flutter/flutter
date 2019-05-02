@@ -39,7 +39,7 @@ void main() {
       expect(() => platformBuilders.selectPlatform(buildInfo: buildInfo), throwsA(isA<ToolExit>()));
     }));
 
-    test('Fails if more than no builders match', () => testbed.run(() {
+    test('Fails if no builders match', () => testbed.run(() {
       const PlatformBuilders platformBuilders = PlatformBuilders(<PlatformBuildStep>[
         FakePlatformStep(
           buildModes: <BuildMode>{ BuildMode.debug, },
