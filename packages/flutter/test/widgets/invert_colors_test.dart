@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -22,8 +20,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('invert_colors_test.0.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('invert_colors_test.0.png'),
     );
   });
 
@@ -41,8 +38,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('invert_colors_test.1.png'),
-      skip: !Platform.isLinux,
+      matchesSkiaGoldFile('invert_colors_test.1.png'),
     );
   });
 }
