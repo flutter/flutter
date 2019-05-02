@@ -560,7 +560,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
       return result.addWithPaintOffset(
         offset: _paintOffset,
         position: position,
-        hitTest: (HitTestResult result, Offset transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position + -_paintOffset);
           return child.hitTest(result, position: transformed);
         },

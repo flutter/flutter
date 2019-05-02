@@ -781,7 +781,7 @@ class _RenderCupertinoDialog extends RenderBox {
     return result.addWithPaintOffset(
              offset: contentSectionParentData.offset,
              position: position,
-             hitTest: (HitTestResult result, Offset transformed) {
+             hitTest: (BoxHitTestResult result, Offset transformed) {
                assert(transformed == position - contentSectionParentData.offset);
                return contentSection.hitTest(result, position: transformed);
              },
@@ -789,7 +789,7 @@ class _RenderCupertinoDialog extends RenderBox {
         || result.addWithPaintOffset(
              offset: actionsSectionParentData.offset,
              position: position,
-             hitTest: (HitTestResult result, Offset transformed) {
+             hitTest: (BoxHitTestResult result, Offset transformed) {
                assert(transformed == position - actionsSectionParentData.offset);
                return actionsSection.hitTest(result, position: transformed);
              },

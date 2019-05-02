@@ -1284,7 +1284,7 @@ class _RenderDecoration extends RenderBox {
       final bool isHit = result.addWithPaintOffset(
         offset: offset,
         position: position,
-        hitTest: (HitTestResult result, Offset transformed) {
+        hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(transformed == position - offset);
           return child.hitTest(result, position: transformed);
         },

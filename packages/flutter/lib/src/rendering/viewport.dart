@@ -581,7 +581,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       final bool isHit = result.addWithPaintTransform(
         transform: transform,
         position: null, // Manually adapting from box to sliver position below.
-        hitTest: (HitTestResult result, Offset _) {
+        hitTest: (BoxHitTestResult result, Offset _) {
           return child.hitTest(
             sliverResult,
             mainAxisPosition: computeChildMainAxisPosition(child, mainAxisPosition),

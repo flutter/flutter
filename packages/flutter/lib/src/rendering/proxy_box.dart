@@ -2126,7 +2126,7 @@ class RenderTransform extends RenderProxyBox {
     return result.addWithPaintTransform(
       transform: transformHitTests ? _effectiveTransform : null,
       position: position,
-      hitTest: (HitTestResult result, Offset position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);
       },
     );
@@ -2307,7 +2307,7 @@ class RenderFittedBox extends RenderProxyBox {
     return result.addWithPaintTransform(
       transform: _transform,
       position: position,
-      hitTest: (HitTestResult result, Offset position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);
       },
     );
@@ -2392,7 +2392,7 @@ class RenderFractionalTranslation extends RenderProxyBox {
           ? Offset(translation.dx * size.width, translation.dy * size.height)
           : null,
       position: position,
-      hitTest: (HitTestResult result, Offset position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);
       },
     );
@@ -4665,7 +4665,7 @@ class RenderFollowerLayer extends RenderProxyBox {
     return result.addWithPaintTransform(
       transform: getCurrentTransform(),
       position: position,
-      hitTest: (HitTestResult result, Offset position) {
+      hitTest: (BoxHitTestResult result, Offset position) {
         return super.hitTestChildren(result, position: position);
       },
     );

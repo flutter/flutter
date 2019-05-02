@@ -1113,7 +1113,7 @@ class RenderTable extends RenderBox {
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
           position: position,
-          hitTest: (HitTestResult result, Offset transformed) {
+          hitTest: (BoxHitTestResult result, Offset transformed) {
             assert(transformed == position - childParentData.offset);
             return child.hitTest(result, position: transformed);
           },

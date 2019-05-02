@@ -713,7 +713,7 @@ class _RenderSegmentedControl<T> extends RenderBox
         return result.addWithRawTransform(
           transform: MatrixUtils.forceToPoint(center),
           position: center,
-          hitTest: (HitTestResult result, Offset position) {
+          hitTest: (BoxHitTestResult result, Offset position) {
             assert(position == center);
             return child.hitTest(result, position: center);
           },
