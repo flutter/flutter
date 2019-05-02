@@ -287,7 +287,7 @@ Information about project "Runner":
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
-      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -305,7 +305,7 @@ Information about project "Runner":
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true, targetPlatform: TargetPlatform.ios);
-      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -323,7 +323,7 @@ Information about project "Runner":
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
-      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -342,7 +342,7 @@ Information about project "Runner":
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, targetPlatform: TargetPlatform.ios);
 
-      final FlutterProject project = await FlutterProject.fromPath('path/to/project');
+      final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
         buildInfo: buildInfo,
@@ -382,7 +382,7 @@ Information about project "Runner":
       writeEmptySchemaFile(fs);
 
       await updateGeneratedXcodeProperties(
-        project: await FlutterProject.fromPath('path/to/project'),
+        project: FlutterProject.fromPath('path/to/project'),
         buildInfo: buildInfo,
       );
 

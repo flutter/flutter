@@ -393,14 +393,14 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
           exception: exception,
           stack: exceptionStack,
           library: 'scheduler library',
-          context: 'during a task callback',
-          informationCollector: (callbackStack == null) ? null : (StringBuffer information) {
-            information.writeln(
-              '\nThis exception was thrown in the context of a task callback. '
-              'When the task callback was _registered_ (as opposed to when the '
-              'exception was thrown), this was the stack:'
+          context: ErrorDescription('during a task callback'),
+          informationCollector: (callbackStack == null) ? null : () sync* {
+            yield DiagnosticsStackTrace(
+              '\nThis exception was thrown in the context of a scheduler callback. '
+              'When the scheduler callback was _registered_ (as opposed to when the '
+              'exception was thrown), this was the stack',
+              callbackStack,
             );
-            FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
           },
         ));
       }
@@ -493,22 +493,22 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         FlutterError.reportError(FlutterErrorDetails(
           exception: reason,
           library: 'scheduler library',
-          informationCollector: (StringBuffer information) {
+            informationCollector: () sync* {
             if (count == 1) {
-              information.writeln(
+              // TODO(jacobr): I have added an extra line break in this case.
+              yield ErrorDescription(
                 'There was one transient callback left. '
                 'The stack trace for when it was registered is as follows:'
               );
             } else {
-              information.writeln(
+              yield ErrorDescription(
                 'There were $count transient callbacks left. '
                 'The stack traces for when they were registered are as follows:'
               );
             }
             for (int id in callbacks.keys) {
               final _FrameCallbackEntry entry = callbacks[id];
-              information.writeln('── callback $id ──');
-              FlutterError.defaultStackFilter(entry.debugStack.toString().trimRight().split('\n')).forEach(information.writeln);
+              yield DiagnosticsStackTrace('── callback $id ──', entry.debugStack, showSeparator: false);
             }
           },
         ));
@@ -1015,14 +1015,14 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         exception: exception,
         stack: exceptionStack,
         library: 'scheduler library',
-        context: 'during a scheduler callback',
-        informationCollector: (callbackStack == null) ? null : (StringBuffer information) {
-          information.writeln(
+        context: ErrorDescription('during a scheduler callback'),
+        informationCollector: (callbackStack == null) ? null : () sync* {
+          yield DiagnosticsStackTrace(
             '\nThis exception was thrown in the context of a scheduler callback. '
             'When the scheduler callback was _registered_ (as opposed to when the '
-            'exception was thrown), this was the stack:'
+            'exception was thrown), this was the stack',
+            callbackStack,
           );
-          FlutterError.defaultStackFilter(callbackStack.toString().trimRight().split('\n')).forEach(information.writeln);
         },
       ));
     }

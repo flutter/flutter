@@ -25,7 +25,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics.rootChild(
             id: 1,
-            rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
           ),
@@ -59,7 +59,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics.rootChild(
             id: 1,
-            rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
           ),
@@ -93,7 +93,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics.rootChild(
             id: 1,
-            rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
           ),
@@ -115,7 +115,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics.rootChild(
             id: 1,
-            rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
           ),
@@ -137,7 +137,7 @@ void main() {
         children: <TestSemantics>[
           TestSemantics.rootChild(
             id: 1,
-            rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
             label: 'a',
             textDirection: TextDirection.rtl,
           ),
@@ -179,5 +179,15 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesSkiaGoldFile('opacity_test.offset.png'),
     );
+  });
+
+  testWidgets('empty opacity does not crash', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      RepaintBoundary(child: Opacity(opacity: 0.5, child: Container())),
+    );
+    final Element element = find.byType(RepaintBoundary).first.evaluate().single;
+    // The following line will send the layer to engine and cause crash if an
+    // empty opacity layer is sent.
+    await element.renderObject.layer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
   });
 }

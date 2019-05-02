@@ -1327,7 +1327,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesSkiaGoldFile('segmented_control_test.0.png'),
     );
-  },);
+  });
 
   testWidgets('Golden Test Pressed State', (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
@@ -1365,5 +1365,5 @@ void main() {
       find.byType(RepaintBoundary),
       matchesSkiaGoldFile('segmented_control_test.1.png'),
     );
-  },);
+  });
 }

@@ -497,11 +497,14 @@ class BoxConstraints extends Constraints {
     InformationCollector informationCollector,
   }) {
     assert(() {
-      void throwError(String message) {
-        final StringBuffer information = StringBuffer();
-        if (informationCollector != null)
-          informationCollector(information);
-        throw FlutterError('$message\n${information}The offending constraints were:\n  $this');
+      void throwError(DiagnosticsNode message) {
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[message];
+        if (informationCollector != null) {
+          information.addAll(informationCollector());
+        }
+
+        information.add(DiagnosticsProperty<BoxConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty));
+        throw FlutterError.fromParts(information);
       }
       if (minWidth.isNaN || maxWidth.isNaN || minHeight.isNaN || maxHeight.isNaN) {
         final List<String> affectedFieldsList = <String>[];
@@ -524,27 +527,27 @@ class BoxConstraints extends Constraints {
         } else {
           whichFields = affectedFieldsList.single;
         }
-        throwError('BoxConstraints has ${affectedFieldsList.length == 1 ? 'a NaN value' : 'NaN values' } in $whichFields.');
+        throwError(ErrorSummary('BoxConstraints has ${affectedFieldsList.length == 1 ? 'a NaN value' : 'NaN values' } in $whichFields.'));
       }
       if (minWidth < 0.0 && minHeight < 0.0)
-        throwError('BoxConstraints has both a negative minimum width and a negative minimum height.');
+        throwError(ErrorSummary('BoxConstraints has both a negative minimum width and a negative minimum height.'));
       if (minWidth < 0.0)
-        throwError('BoxConstraints has a negative minimum width.');
+        throwError(ErrorSummary('BoxConstraints has a negative minimum width.'));
       if (minHeight < 0.0)
-        throwError('BoxConstraints has a negative minimum height.');
+        throwError(ErrorSummary('BoxConstraints has a negative minimum height.'));
       if (maxWidth < minWidth && maxHeight < minHeight)
-        throwError('BoxConstraints has both width and height constraints non-normalized.');
+        throwError(ErrorSummary('BoxConstraints has both width and height constraints non-normalized.'));
       if (maxWidth < minWidth)
-        throwError('BoxConstraints has non-normalized width constraints.');
+        throwError(ErrorSummary('BoxConstraints has non-normalized width constraints.'));
       if (maxHeight < minHeight)
-        throwError('BoxConstraints has non-normalized height constraints.');
+        throwError(ErrorSummary('BoxConstraints has non-normalized height constraints.'));
       if (isAppliedConstraint) {
         if (minWidth.isInfinite && minHeight.isInfinite)
-          throwError('BoxConstraints forces an infinite width and infinite height.');
+          throwError(ErrorSummary('BoxConstraints forces an infinite width and infinite height.'));
         if (minWidth.isInfinite)
-          throwError('BoxConstraints forces an infinite width.');
+          throwError(ErrorSummary('BoxConstraints forces an infinite width.'));
         if (minHeight.isInfinite)
-          throwError('BoxConstraints forces an infinite height.');
+          throwError(ErrorSummary('BoxConstraints forces an infinite height.'));
       }
       assert(isNormalized);
       return true;
@@ -1512,28 +1515,23 @@ abstract class RenderBox extends RenderObject {
           (!sizedByParent && debugDoingThisLayout))
         return true;
       assert(!debugDoingThisResize);
-      String contract, violation, hint;
+      final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+      information.add(ErrorSummary('RenderBox size setter called incorrectly.'));
       if (debugDoingThisLayout) {
         assert(sizedByParent);
-        violation = 'It appears that the size setter was called from performLayout().';
-        hint = '';
+        information.add(ErrorDescription('It appears that the size setter was called from performLayout().'));
       } else {
-        violation = 'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).';
+        information.add(ErrorDescription(
+          'The size setter was called from outside layout (neither performResize() nor performLayout() were being run for this object).'
+        ));
         if (owner != null && owner.debugDoingLayout)
-          hint = 'Only the object itself can set its size. It is a contract violation for other objects to set it.';
+          information.add(ErrorDescription('Only the object itself can set its size. It is a contract violation for other objects to set it.'));
       }
       if (sizedByParent)
-        contract = 'Because this RenderBox has sizedByParent set to true, it must set its size in performResize().';
+        information.add(ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().'));
       else
-        contract = 'Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().';
-      throw FlutterError(
-        'RenderBox size setter called incorrectly.\n'
-        '$violation\n'
-        '$hint\n'
-        '$contract\n'
-        'The RenderBox in question is:\n'
-        '  $this'
-      );
+        information.add(ErrorDescription('Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().'));
+      throw FlutterError.fromParts(information);
     }());
     assert(() {
       value = debugAdoptSize(value);
@@ -1713,78 +1711,80 @@ abstract class RenderBox extends RenderObject {
     assert(() {
       if (!hasSize) {
         assert(!debugNeedsLayout); // this is called in the size= setter during layout, but in that case we have a size
-        String contract;
+        DiagnosticsNode contract;
         if (sizedByParent)
-          contract = 'Because this RenderBox has sizedByParent set to true, it must set its size in performResize().\n';
+          contract = ErrorDescription('Because this RenderBox has sizedByParent set to true, it must set its size in performResize().');
         else
-          contract = 'Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().\n';
-        throw FlutterError(
-          'RenderBox did not set its size during layout.\n'
-          '$contract'
-          'It appears that this did not happen; layout completed, but the size property is still null.\n'
-          'The RenderBox in question is:\n'
-          '  $this'
-        );
+          contract = ErrorDescription('Because this RenderBox has sizedByParent set to false, it must set its size in performLayout().');
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('RenderBox did not set its size during layout.'),
+          contract,
+          ErrorDescription('It appears that this did not happen; layout completed, but the size property is still null.'),
+          DiagnosticsProperty<RenderBox>('The RenderBox in question is', this, style: DiagnosticsTreeStyle.errorProperty)
+        ]);
       }
       // verify that the size is not infinite
       if (!_size.isFinite) {
-        final StringBuffer information = StringBuffer();
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[
+          ErrorSummary('$runtimeType object was given an infinite size during layout.'),
+          ErrorDescription(
+            'This probably means that it is a render object that tries to be '
+            'as big as possible, but it was put inside another render object '
+            'that allows its children to pick their own size.'
+          )
+        ];
         if (!constraints.hasBoundedWidth) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedWidth && node.parent is RenderBox)
             node = node.parent;
-          information.writeln('The nearest ancestor providing an unbounded width constraint is:');
-          information.write('  ');
-          information.writeln(node.toStringShallow(joiner: '\n  '));
+
+          information.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
         }
         if (!constraints.hasBoundedHeight) {
           RenderBox node = this;
           while (!node.constraints.hasBoundedHeight && node.parent is RenderBox)
             node = node.parent;
-          information.writeln('The nearest ancestor providing an unbounded height constraint is:');
-          information.write('  ');
-          information.writeln(node.toStringShallow(joiner: '\n  '));
 
+          information.add(node.describeForError('The nearest ancestor providing an unbounded height constraint is'));
         }
-        throw FlutterError(
-          '$runtimeType object was given an infinite size during layout.\n'
+        final List<DiagnosticsNode> errorParts = <DiagnosticsNode>[];
+        errorParts.add(ErrorSummary('$runtimeType object was given an infinite size during layout.'));
+        errorParts.add(ErrorDescription(
           'This probably means that it is a render object that tries to be '
           'as big as possible, but it was put inside another render object '
-          'that allows its children to pick their own size.\n'
-          '$information'
-          'The constraints that applied to the $runtimeType were:\n'
-          '  $constraints\n'
-          'The exact size it was given was:\n'
-          '  $_size\n'
-          'See https://flutter.dev/layout/ for more information.'
-        );
-      }
+          'that allows its children to pick their own size.'
+        ));
+        errorParts.addAll(information);
+        errorParts.add(DiagnosticsProperty<BoxConstraints>('The constraints that applied to the $runtimeType were', constraints, style: DiagnosticsTreeStyle.errorProperty));
+        errorParts.add(DiagnosticsProperty<Size>('The exact size it was given was', _size, style: DiagnosticsTreeStyle.errorProperty));
+        errorParts.add(ErrorHint('See https://flutter.dev/docs/development/ui/layout/box-constraints for more information.'));
+        throw FlutterError.fromParts(errorParts);
+     }
       // verify that the size is within the constraints
       if (!constraints.isSatisfiedBy(_size)) {
-        throw FlutterError(
-          '$runtimeType does not meet its constraints.\n'
-          'Constraints: $constraints\n'
-          'Size: $_size\n'
-          'If you are not writing your own RenderBox subclass, then this is not '
-          'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('$runtimeType does not meet its constraints.'),
+          DiagnosticsProperty<BoxConstraints>('Constraints', constraints, style: DiagnosticsTreeStyle.errorProperty),
+          DiagnosticsProperty<Size>('Size', _size, style: DiagnosticsTreeStyle.errorProperty),
+          ErrorHint(
+            'If you are not writing your own RenderBox subclass, then this is not '
+            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          ),
+        ]);
       }
       if (debugCheckIntrinsicSizes) {
         // verify that the intrinsics are sane
         assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
-        final StringBuffer failures = StringBuffer();
-        int failureCount = 0;
+        final List<DiagnosticsNode> failures = <DiagnosticsNode>[];
 
         double testIntrinsic(double function(double extent), String name, double constraint) {
           final double result = function(constraint);
           if (result < 0) {
-            failures.writeln(' * $name($constraint) returned a negative value: $result');
-            failureCount += 1;
+            failures.add(ErrorDescription(' * $name($constraint) returned a negative value: $result'));
           }
           if (!result.isFinite) {
-            failures.writeln(' * $name($constraint) returned a non-finite value: $result');
-            failureCount += 1;
+            failures.add(ErrorDescription(' * $name($constraint) returned a non-finite value: $result'));
           }
           return result;
         }
@@ -1793,8 +1793,7 @@ abstract class RenderBox extends RenderObject {
           final double min = testIntrinsic(getMin, 'getMinIntrinsic$name', constraint);
           final double max = testIntrinsic(getMax, 'getMaxIntrinsic$name', constraint);
           if (min > max) {
-            failures.writeln(' * getMinIntrinsic$name($constraint) returned a larger value ($min) than getMaxIntrinsic$name($constraint) ($max)');
-            failureCount += 1;
+            failures.add(ErrorDescription(' * getMinIntrinsic$name($constraint) returned a larger value ($min) than getMaxIntrinsic$name($constraint) ($max)'));
           }
         }
 
@@ -1809,13 +1808,15 @@ abstract class RenderBox extends RenderObject {
 
         RenderObject.debugCheckingIntrinsics = false;
         if (failures.isNotEmpty) {
-          assert(failureCount > 0);
-          throw FlutterError(
-            'The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.\n'
-            'The following ${failureCount > 1 ? "failures" : "failure"} was detected:\n'
-            '$failures'
-            'If you are not writing your own RenderBox subclass, then this is not\n'
-            'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          // TODO(jacobr): consider nesting the failures object so it is collapsible.
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('The intrinsic dimension methods of the $runtimeType class returned values that violate the intrinsic protocol contract.'),
+            ErrorDescription('The following ${failures.length > 1 ? "failures" : "failure"} was detected:') // should this be tagged as an error or not?
+          ]..addAll(failures)
+           ..add(ErrorHint(
+              'If you are not writing your own RenderBox subclass, then this is not\n'
+              'your fault. Contact support: https://github.com/flutter/flutter/issues/new?template=BUG.md'
+            ))
           );
         }
       }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -91,7 +92,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesSkiaGoldFile('editable_text_test.0.png'),
     );
-  },);
+  });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -142,7 +143,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesSkiaGoldFile('editable_text_test.1.png'),
     );
-  },);
+  });
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
@@ -573,6 +574,8 @@ void main() {
   });
 
   testWidgets('Floating cursor is painted on iOS', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
     final TextEditingController controller = TextEditingController();
     const TextStyle textStyle = TextStyle();
     const String text = 'hello world this is fun and cool and awesome!';
@@ -615,14 +618,14 @@ void main() {
     expect(editable, paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(463.3333435058594, 2.0833332538604736, 465.3333435058594, 14.083333015441895),
+          const Rect.fromLTRB(463.3333435058594, -0.916666666666668, 465.3333435058594, 17.083333015441895),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff8e8e93),
       )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(463.8333435058594, 1.0833336114883423, 466.8333435058594, 15.083333969116211),
+          const Rect.fromLTRB(463.8333435058594, -0.916666666666668, 466.8333435058594, 19.083333969116211),
           const Radius.circular(1.0),
         ),
         color: const Color(0xbf2196f3),
@@ -640,14 +643,14 @@ void main() {
     expect(find.byType(EditableText), paints
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(191.3333282470703, 2.0833332538604736, 193.3333282470703, 14.083333015441895),
+          const Rect.fromLTRB(191.3333282470703, -0.916666666666668, 193.3333282470703, 17.083333015441895),
           const Radius.circular(2.0),
         ),
         color: const Color(0xff8e8e93),
       )
       ..rrect(
         rrect: RRect.fromRectAndRadius(
-          Rect.fromLTRB(193.83334350585938, 1.0833336114883423, 196.83334350585938, 15.083333969116211),
+          const Rect.fromLTRB(193.83334350585938, -0.916666666666668, 196.83334350585938, 19.083333969116211),
           const Radius.circular(1.0)),
         color: const Color(0xbf2196f3),
       ),
@@ -655,5 +658,70 @@ void main() {
 
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
+    debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('cursor layout iOS', (WidgetTester tester) async {
+    final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
+
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    String changedValue;
+    final Widget widget = MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS),
+      home: RepaintBoundary(
+        key: const ValueKey<int>(1),
+        child: Column(
+          children: <Widget>[
+            const SizedBox(width: 10, height: 10),
+            EditableText(
+              backgroundCursorColor: Colors.grey,
+              key: editableTextKey,
+              controller: TextEditingController(),
+              focusNode: FocusNode(),
+              style: Typography(platform: TargetPlatform.iOS).black.subhead,
+              cursorColor: Colors.blue,
+              selectionControls: materialTextSelectionControls,
+              keyboardType: TextInputType.text,
+              onChanged: (String value) {
+                changedValue = value;
+              },
+              cursorWidth: 15.0,
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    // Populate a fake clipboard.
+    const String clipboardContent = 'Hello world!';
+    SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
+      if (methodCall.method == 'Clipboard.getData')
+        return const <String, dynamic>{'text': clipboardContent};
+      return null;
+    });
+
+    // Long-press to bring up the text editing controls.
+    final Finder textFinder = find.byKey(editableTextKey);
+    await tester.longPress(textFinder);
+    tester.state<EditableTextState>(textFinder).showToolbar();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    await tester.tap(find.text('PASTE'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(changedValue, clipboardContent);
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('editable_text_test.2.0.png'),
+    );
+    debugDefaultTargetPlatformOverride = null;
+  }, skip: !Platform.isLinux);
+
 }

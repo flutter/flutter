@@ -63,7 +63,7 @@ void main() {
           ],
           label: '+',
           textDirection: TextDirection.ltr,
-          rect: Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 48.0, 48.0),
           children: <TestSemantics>[],
         ),
       ]

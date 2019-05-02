@@ -106,7 +106,10 @@ void main() {
 
   testWidgets('Last tab gets focus', (WidgetTester tester) async {
     // 2 nodes for 2 tabs
-    final List<FocusNode> focusNodes = <FocusNode>[FocusNode(), FocusNode()];
+    final List<FocusNode> focusNodes = <FocusNode>[
+      FocusNode(debugLabel: 'Node 1'),
+      FocusNode(debugLabel: 'Node 2'),
+    ];
 
     await tester.pumpWidget(
       CupertinoApp(
@@ -139,7 +142,10 @@ void main() {
 
   testWidgets('Do not affect focus order in the route', (WidgetTester tester) async {
     final List<FocusNode> focusNodes = <FocusNode>[
-      FocusNode(), FocusNode(), FocusNode(), FocusNode(),
+      FocusNode(debugLabel: 'Node 1'),
+      FocusNode(debugLabel: 'Node 2'),
+      FocusNode(debugLabel: 'Node 3'),
+      FocusNode(debugLabel: 'Node 4'),
     ];
 
     await tester.pumpWidget(
@@ -324,7 +330,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
+    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     // Don't generate more media query padding from the translucent bottom
     // tab since the tab is behind the keyboard now.
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
@@ -351,7 +357,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 600));
+    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 600));
     // Media query padding shows up in the inner content because it wasn't masked
     // by the view inset.
     expect(MediaQuery.of(innerContext).padding.bottom, 50);
@@ -383,7 +389,7 @@ void main() {
       ),
     );
 
-    expect(tester.getRect(find.byType(Placeholder)), Rect.fromLTWH(0, 0, 800, 400));
+    expect(tester.getRect(find.byType(Placeholder)), const Rect.fromLTWH(0, 0, 800, 400));
     expect(MediaQuery.of(innerContext).padding.bottom, 0);
   });
 

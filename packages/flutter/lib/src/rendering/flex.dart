@@ -470,6 +470,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   // Set during layout if overflow occurred on the main axis.
   double _overflow;
+  // Check whether any meaningful overflow is present. Values below an epsilon
+  // are treated as not overflowing.
+  bool get _hasOverflow => _overflow > precisionErrorTolerance;
 
   @override
   void setupParentData(RenderBox child) {
@@ -653,15 +656,16 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
           final String identity = _direction == Axis.horizontal ? 'row' : 'column';
           final String axis = _direction == Axis.horizontal ? 'horizontal' : 'vertical';
           final String dimension = _direction == Axis.horizontal ? 'width' : 'height';
-          String error, message;
-          String addendum = '';
+          DiagnosticsNode error, message;
+          final List<DiagnosticsNode> addendum = <DiagnosticsNode>[];
           if (!canFlex && (mainAxisSize == MainAxisSize.max || _getFit(child) == FlexFit.tight)) {
-            error = 'RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.';
-            message = 'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
-                      'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
-                      'axis. Setting a flex on a child (e.g. using Expanded) indicates that the child is to '
-                      'expand to fill the remaining space in the $axis direction.';
-            final StringBuffer information = StringBuffer();
+            error = ErrorSummary('RenderFlex children have non-zero flex but incoming $dimension constraints are unbounded.');
+            message = ErrorDescription(
+              'When a $identity is in a parent that does not provide a finite $dimension constraint, for example '
+              'if it is in a $axis scrollable, it will try to shrink-wrap its children along the $axis '
+              'axis. Setting a flex on a child (e.g. using Expanded) indicates that the child is to '
+              'expand to fill the remaining space in the $axis direction.'
+            );
             RenderBox node = this;
             switch (_direction) {
               case Axis.horizontal:
@@ -678,36 +682,38 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
                 break;
             }
             if (node != null) {
-              information.writeln('The nearest ancestor providing an unbounded width constraint is:');
-              information.write('  ');
-              information.writeln(node.toStringShallow(joiner: '\n  '));
+              addendum.add(node.describeForError('The nearest ancestor providing an unbounded width constraint is'));
             }
-            information.writeln('See also: https://flutter.dev/layout/');
-            addendum = information.toString();
+            addendum.add(ErrorHint('See also: https://flutter.dev/layout/'));
           } else {
             return true;
           }
-          throw FlutterError(
-            '$error\n'
-            '$message\n'
-            'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
-            'cannot simultaneously expand to fit its parent.\n'
-            'Consider setting mainAxisSize to MainAxisSize.min and using FlexFit.loose fits for the flexible '
-            'children (using Flexible rather than Expanded). This will allow the flexible children '
-            'to size themselves to less than the infinite remaining space they would otherwise be '
-            'forced to take, and then will cause the RenderFlex to shrink-wrap the children '
-            'rather than expanding to fit the maximum constraints provided by the parent.\n'
-            'The affected RenderFlex is:\n'
-            '  $this\n'
-            'The creator information is set to:\n'
-            '  $debugCreator\n'
-            '$addendum'
-            'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
-            '  https://flutter.dev/debugging/#rendering-layer\n'
-            '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html\n'
-            'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
-            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            error,
+            message,
+            ErrorDescription(
+              'These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child '
+              'cannot simultaneously expand to fit its parent.'
+            ),
+            ErrorHint(
+              'Consider setting mainAxisSize to MainAxisSize.min and using FlexFit.loose fits for the flexible '
+              'children (using Flexible rather than Expanded). This will allow the flexible children '
+              'to size themselves to less than the infinite remaining space they would otherwise be '
+              'forced to take, and then will cause the RenderFlex to shrink-wrap the children '
+              'rather than expanding to fit the maximum constraints provided by the parent.'
+            ),
+            ErrorDescription(
+              'If this message did not help you determine the problem, consider using debugDumpRenderTree():\n'
+              '  https://flutter.dev/debugging/#rendering-layer\n'
+              '  http://docs.flutter.io/flutter/rendering/debugDumpRenderTree.html'
+            ),
+            describeForError('The affected RenderFlex is', style: DiagnosticsTreeStyle.errorProperty),
+            DiagnosticsProperty<dynamic>('The creator information is set to', debugCreator, style: DiagnosticsTreeStyle.errorProperty)
+          ]..addAll(addendum)
+           ..add(ErrorDescription(
+             'If none of the above helps enough to fix this problem, please don\'t hesitate to file a bug:\n'
+             '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          )));
         }());
         totalFlex += childParentData.flex;
         lastFlexChild = child;
@@ -846,7 +852,6 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     }
     actualSizeDelta = actualSize - allocatedSize;
     _overflow = math.max(0.0, -actualSizeDelta);
-
     final double remainingSpace = math.max(0.0, actualSizeDelta);
     double leadingSpace;
     double betweenSpace;
@@ -938,7 +943,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_overflow <= 0.0) {
+    if (!_hasOverflow) {
       defaultPaint(context, offset);
       return;
     }
@@ -953,19 +958,28 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     assert(() {
       // Only set this if it's null to save work. It gets reset to null if the
       // _direction changes.
-      final String debugOverflowHints =
-        'The overflowing $runtimeType has an orientation of $_direction.\n'
-        'The edge of the $runtimeType that is overflowing has been marked '
-        'in the rendering with a yellow and black striped pattern. This is '
-        'usually caused by the contents being too big for the $runtimeType. '
-        'Consider applying a flex factor (e.g. using an Expanded widget) to '
-        'force the children of the $runtimeType to fit within the available '
-        'space instead of being sized to their natural size.\n'
-        'This is considered an error condition because it indicates that there '
-        'is content that cannot be seen. If the content is legitimately bigger '
-        'than the available space, consider clipping it with a ClipRect widget '
-        'before putting it in the flex, or using a scrollable container rather '
-        'than a Flex, like a ListView.';
+      final List<DiagnosticsNode> debugOverflowHints = <DiagnosticsNode>[
+        ErrorDescription(
+          'The overflowing $runtimeType has an orientation of $_direction.'
+        ),
+        ErrorDescription(
+          'The edge of the $runtimeType that is overflowing has been marked '
+          'in the rendering with a yellow and black striped pattern. This is '
+          'usually caused by the contents being too big for the $runtimeType.'
+        ),
+        ErrorHint(
+          'Consider applying a flex factor (e.g. using an Expanded widget) to '
+          'force the children of the $runtimeType to fit within the available '
+          'space instead of being sized to their natural size.'
+        ),
+        ErrorHint(
+          'This is considered an error condition because it indicates that there '
+          'is content that cannot be seen. If the content is legitimately bigger '
+          'than the available space, consider clipping it with a ClipRect widget '
+          'before putting it in the flex, or using a scrollable container rather '
+          'than a Flex, like a ListView.'
+        )
+      ];
 
       // Simulate a child rect that overflows by the right amount. This child
       // rect is never used for drawing, just for determining the overflow
@@ -985,12 +999,12 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
   }
 
   @override
-  Rect describeApproximatePaintClip(RenderObject child) => _overflow > 0.0 ? Offset.zero & size : null;
+  Rect describeApproximatePaintClip(RenderObject child) => _hasOverflow ? Offset.zero & size : null;
 
   @override
   String toStringShort() {
     String header = super.toStringShort();
-    if (_overflow is double && _overflow > 0.0)
+    if (_overflow is double && _hasOverflow)
       header += ' OVERFLOWING';
     return header;
   }
