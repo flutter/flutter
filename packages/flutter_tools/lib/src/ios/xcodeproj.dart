@@ -183,7 +183,7 @@ class XcodeProjectInterpreter {
   Map<String, String> getBuildSettings(String projectPath, String target) {
     final BuildInfo buildInfo = FlutterCommand.current.getBuildInfo();
     final String ios = projectPath.substring(0, projectPath.lastIndexOf('/'));
-    final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfo(ios);
+    final XcodeProjectInfo projectInfo = xcodeProjectInterpreter.getInfoSync(ios);
     final String scheme = projectInfo.schemeFor(buildInfo);
     final String configuration =
         projectInfo.buildConfigurationFor(buildInfo, scheme);
@@ -205,6 +205,13 @@ class XcodeProjectInterpreter {
       _executable, '-list',
     ], workingDirectory: projectPath);
     return XcodeProjectInfo.fromXcodeBuildOutput(result.toString());
+  }
+
+  XcodeProjectInfo getInfoSync(String projectPath)  {
+    final String result =  runCheckedSync(<String>[
+      _executable, '-list',
+    ], workingDirectory: projectPath);
+    return XcodeProjectInfo.fromXcodeBuildOutput(result);
   }
 }
 

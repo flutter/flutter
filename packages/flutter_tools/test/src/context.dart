@@ -302,6 +302,14 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
       <String>['Runner'],
     );
   }
+  @override
+  XcodeProjectInfo getInfoSync(String projectPath) {
+    return XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+    );
+  }
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {
