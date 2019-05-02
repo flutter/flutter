@@ -68,9 +68,9 @@ class _BackdropTitle extends AnimatedWidget {
     this.onPress,
     @required this.frontTitle,
     @required this.backTitle,
-  }) : assert(frontTitle != null),
-       assert(backTitle != null),
-       super(key: key, listenable: listenable);
+  })  : assert(frontTitle != null),
+        assert(backTitle != null),
+        super(key: key, listenable: listenable);
 
   final Function onPress;
   final Widget frontTitle;
@@ -97,14 +97,16 @@ class _BackdropTitle extends AnimatedWidget {
             icon: Stack(children: <Widget>[
               Opacity(
                 opacity: animation.value,
-                child: const ImageIcon(AssetImage('packages/shrine_images/slanted_menu.png')),
+                child: const ImageIcon(
+                    AssetImage('packages/shrine_images/slanted_menu.png')),
               ),
               FractionalTranslation(
                 translation: Tween<Offset>(
                   begin: Offset.zero,
                   end: const Offset(1.0, 0.0),
                 ).evaluate(animation),
-                child: const ImageIcon(AssetImage('packages/shrine_images/diamond.png')),
+                child: const ImageIcon(
+                    AssetImage('packages/shrine_images/diamond.png')),
               ),
             ]),
           ),
@@ -159,11 +161,11 @@ class Backdrop extends StatefulWidget {
     @required this.frontTitle,
     @required this.backTitle,
     @required this.controller,
-  }) : assert(frontLayer != null),
-       assert(backLayer != null),
-       assert(frontTitle != null),
-       assert(backTitle != null),
-       assert(controller != null);
+  })  : assert(frontLayer != null),
+        assert(backLayer != null),
+        assert(frontTitle != null),
+        assert(backTitle != null),
+        assert(controller != null);
 
   final Widget frontLayer;
   final Widget backLayer;
@@ -175,7 +177,8 @@ class Backdrop extends StatefulWidget {
   _BackdropState createState() => _BackdropState();
 }
 
-class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin {
+class _BackdropState extends State<Backdrop>
+    with SingleTickerProviderStateMixin {
   final GlobalKey _backdropKey = GlobalKey(debugLabel: 'Backdrop');
   AnimationController _controller;
   Animation<RelativeRect> _layerAnimation;
@@ -194,7 +197,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
 
   bool get _frontLayerVisible {
     final AnimationStatus status = _controller.status;
-    return status == AnimationStatus.completed || status == AnimationStatus.forward;
+    return status == AnimationStatus.completed ||
+        status == AnimationStatus.forward;
   }
 
   void _toggleBackdropLayerVisibility() {
@@ -307,7 +311,9 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => BarcodeScanner()),
+              MaterialPageRoute<void>(
+                builder: (BuildContext context) => BarcodeScanner(256),
+              ),
             );
           },
         ),
@@ -316,7 +322,8 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
           onPressed: () {
             Navigator.push<void>(
               context,
-              MaterialPageRoute<void>(builder: (BuildContext context) => LoginPage()),
+              MaterialPageRoute<void>(
+                  builder: (BuildContext context) => LoginPage()),
             );
           },
         ),

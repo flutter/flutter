@@ -27,14 +27,16 @@ import 'barcode_scanner_utils.dart';
 import 'colors.dart';
 
 class BarcodeScanner extends StatefulWidget {
+  const BarcodeScanner(this.validSquareWidth);
+
+  final double validSquareWidth;
+
   @override
   _BarcodeScannerState createState() => _BarcodeScannerState();
 }
 
 class _BarcodeScannerState extends State<BarcodeScanner>
     with TickerProviderStateMixin {
-  static const double _validRectSideLength = 256;
-
   CameraController _controller;
   String _scannerHint;
   bool _closeWindow = false;
@@ -42,29 +44,48 @@ class _BarcodeScannerState extends State<BarcodeScanner>
   Color _frameColor = Colors.white54;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  AnimationController _animation;
+  AnimationController _squareAnimation;
   SquareTween _squareTween;
-  Timer _timer;
+  Timer _squareAnimationTimer;
+
+  AnimationController _squareTraceAnimation;
+  Tween<double> _squareTraceTween;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
     _startScanningBarcodes();
-    _animation = AnimationController(
+    _squareAnimation = AnimationController(
       duration: const Duration(milliseconds: 1300),
       vsync: this,
     );
 
-    _squareTween = SquareTween(
-      Square(_validRectSideLength, Colors.white),
-      Square(_validRectSideLength + 100, Colors.transparent),
+    _squareTraceAnimation = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
     );
 
-    _animation.forward();
-    _timer = Timer.periodic(
+    _squareTraceAnimation.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        _showBottomSheet();
+      }
+    });
+
+    _squareTraceTween = Tween<double>(
+      begin: 0,
+      end: widget.validSquareWidth,
+    );
+
+    _squareTween = SquareTween(
+      Square(widget.validSquareWidth, Colors.white),
+      Square(widget.validSquareWidth + 100, Colors.transparent),
+    );
+
+    _squareAnimation.forward();
+    _squareAnimationTimer = Timer.periodic(
       Duration(milliseconds: 3000),
-      (_) => _animation.forward(from: 0),
+      (_) => _squareAnimation.forward(from: 0),
     );
   }
 
@@ -112,13 +133,13 @@ class _BarcodeScannerState extends State<BarcodeScanner>
           final double heightScale = image.width / size.height;
 
           final Offset center = size.center(Offset.zero);
-          const double halfRectSideLength = _validRectSideLength / 2;
+          final double halfRectSideLength = widget.validSquareWidth / 2;
 
           final Rect validRect = Rect.fromLTWH(
             widthScale * (center.dx - halfRectSideLength),
             heightScale * (center.dy - halfRectSideLength),
-            widthScale * _validRectSideLength,
-            heightScale * _validRectSideLength,
+            widthScale * widget.validSquareWidth,
+            heightScale * widget.validSquareWidth,
           );
 
           final List<Barcode> barcodes = result;
@@ -140,13 +161,13 @@ class _BarcodeScannerState extends State<BarcodeScanner>
                   _frameColor = Colors.black87;
                 });
 
-                _animation.dispose();
-                _animation = null;
+                _squareAnimation.dispose();
+                _squareAnimation = null;
 
-                _timer.cancel();
-                _timer = null;
+                _squareAnimationTimer.cancel();
+                _squareAnimationTimer = null;
 
-                _showBottomSheet();
+                _squareTraceAnimation.forward();
                 return;
               } else if (validRect.overlaps(barcode.boundingBox)) {
                 setState(() {
@@ -169,8 +190,9 @@ class _BarcodeScannerState extends State<BarcodeScanner>
   void dispose() {
     _controller?.stopImageStream();
     _controller?.dispose();
-    _animation?.dispose();
-    _timer?.cancel();
+    _squareAnimation?.dispose();
+    _squareAnimationTimer?.cancel();
+    _squareTraceAnimation?.dispose();
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[
       SystemUiOverlay.top,
       SystemUiOverlay.bottom,
@@ -353,7 +375,8 @@ class _BarcodeScannerState extends State<BarcodeScanner>
             constraints: BoxConstraints.expand(),
             child: CustomPaint(
               painter: WindowPainter(
-                windowSize: Size(_validRectSideLength, _validRectSideLength),
+                windowSize:
+                    Size(widget.validSquareWidth, widget.validSquareWidth),
                 windowFrameColor: _frameColor,
                 closeWindow: _closeWindow,
               ),
@@ -396,8 +419,8 @@ class _BarcodeScannerState extends State<BarcodeScanner>
             constraints: BoxConstraints.expand(),
             child: Center(
               child: Container(
-                width: _validRectSideLength,
-                height: _validRectSideLength,
+                width: widget.validSquareWidth,
+                height: widget.validSquareWidth,
                 decoration: BoxDecoration(
                   border: Border.all(width: 3, color: kShrineBrown600),
                 ),
@@ -406,11 +429,26 @@ class _BarcodeScannerState extends State<BarcodeScanner>
           ),
           Container(
             constraints: BoxConstraints.expand(),
-            child: _timer != null && _animation != null
+            child: _squareAnimationTimer != null && _squareAnimation != null
                 ? CustomPaint(
-                    painter: SquareChartPainter(
-                    _squareTween.animate(_animation),
-                  ))
+                    painter: SquarePainter(
+                      _squareTween.animate(_squareAnimation),
+                    ),
+                  )
+                : null,
+          ),
+          Container(
+            constraints: BoxConstraints.expand(),
+            child: _squareTraceAnimation != null &&
+                    _squareTraceAnimation.isAnimating
+                ? CustomPaint(
+                    painter: SquareTracePainter(
+                      animation: _squareTraceTween.animate(
+                        _squareTraceAnimation,
+                      ),
+                      square: Square(widget.validSquareWidth, Colors.white),
+                    ),
+                  )
                 : null,
           ),
           AppBar(
@@ -524,8 +562,8 @@ class SquareTween extends Tween<Square> {
   Square lerp(double t) => Square.lerp(begin, end, t);
 }
 
-class SquareChartPainter extends CustomPainter {
-  SquareChartPainter(this.animation) : super(repaint: animation);
+class SquarePainter extends CustomPainter {
+  SquarePainter(this.animation) : super(repaint: animation);
 
   final Animation<Square> animation;
 
@@ -552,5 +590,58 @@ class SquareChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SquareChartPainter oldDelegate) => false;
+  bool shouldRepaint(SquarePainter oldDelegate) => false;
+}
+
+class SquareTracePainter extends CustomPainter {
+  SquareTracePainter({this.animation, this.square}) : super(repaint: animation);
+
+  final Animation<double> animation;
+  final Square square;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double value = animation.value;
+
+    final Offset center = size.center(Offset.zero);
+    final double halfWidth = square.width / 2;
+
+    final Rect rect = Rect.fromLTRB(
+      center.dx - halfWidth,
+      center.dy - halfWidth,
+      center.dx + halfWidth,
+      center.dy + halfWidth,
+    );
+
+    final Paint paint = Paint()
+      ..strokeWidth = 3
+      ..color = square.color;
+
+    canvas.drawLine(
+      rect.bottomRight,
+      Offset(rect.right, rect.top + (square.width - value)),
+      paint,
+    );
+
+    canvas.drawLine(
+      rect.bottomRight,
+      Offset(rect.left + (square.width - value), rect.bottom),
+      paint,
+    );
+
+    canvas.drawLine(
+      rect.topLeft,
+      Offset(rect.left, rect.top + value),
+      paint,
+    );
+
+    canvas.drawLine(
+      rect.topLeft,
+      Offset(rect.left + value, rect.top),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(SquareTracePainter oldDelegate) => false;
 }
