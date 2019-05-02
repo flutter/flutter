@@ -37,7 +37,7 @@ class BarcodeScanner extends StatefulWidget {
 
 class _BarcodeScannerState extends State<BarcodeScanner>
     with TickerProviderStateMixin {
-  CameraController _controller;
+  CameraController _cameraController;
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
@@ -45,37 +45,32 @@ class _BarcodeScannerState extends State<BarcodeScanner>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _barcodeFound = false;
 
-  AnimationController _squareAnimation;
-  SquareTween _squareTween;
-  Timer _squareAnimationTimer;
-
-  Tween<double> _squareTraceTween;
+  AnimationController _animationController;
 
   @override
   void initState() {
     super.initState();
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
     _startScanningBarcodes();
-    _squareAnimation = AnimationController(
+
+    _animationController = AnimationController(
       duration: const Duration(milliseconds: 1300),
       vsync: this,
     );
 
-    _squareTraceTween = Tween<double>(
-      begin: 0,
-      end: widget.validSquareWidth,
-    );
+    _animationController.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        if (_barcodeFound) {
+          _showBottomSheet();
+        } else {
+          Future<void>.delayed(Duration(milliseconds: 1600), () {
+            _animationController.forward(from: 0);
+          });
+        }
+      }
+    });
 
-    _squareTween = SquareTween(
-      Square(widget.validSquareWidth, Colors.white),
-      Square(widget.validSquareWidth + 100, Colors.transparent),
-    );
-
-    _squareAnimation.forward();
-    _squareAnimationTimer = Timer.periodic(
-      Duration(milliseconds: 3000),
-      (_) => _squareAnimation.forward(from: 0),
-    );
+    _animationController.forward();
   }
 
   void _handleBarcodeFound() {
@@ -99,8 +94,8 @@ class _BarcodeScannerState extends State<BarcodeScanner>
             ? ResolutionPreset.medium
             : ResolutionPreset.low;
 
-    _controller = CameraController(camera, preset);
-    await _controller.initialize();
+    _cameraController = CameraController(camera, preset);
+    await _cameraController.initialize();
 
     setState(() {});
   }
@@ -110,7 +105,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     bool isDetecting = false;
     final Size size = MediaQuery.of(context).size;
 
-    _controller.startImageStream((CameraImage image) {
+    _cameraController.startImageStream((CameraImage image) {
       if (isDetecting) {
         return;
       }
@@ -123,7 +118,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 
       detect(image, detector.detectInImage, rotation).then(
         (dynamic result) {
-          if (!_controller.value.isStreamingImages) {
+          if (!_cameraController.value.isStreamingImages) {
             return;
           }
 
@@ -149,24 +144,12 @@ class _BarcodeScannerState extends State<BarcodeScanner>
               final bool doesContain = intersection == barcode.boundingBox;
 
               if (doesContain) {
-                _controller.stopImageStream().then((_) {
+                _cameraController.stopImageStream().then((_) {
                   _takePicture();
                 });
 
+                _animationController.duration = Duration(milliseconds: 2000);
                 _handleBarcodeFound();
-
-                _squareAnimationTimer.cancel();
-                _squareAnimationTimer = null;
-
-                _squareAnimation.duration = Duration(milliseconds: 2000);
-
-                _squareAnimation.addStatusListener((AnimationStatus status) {
-                  if (status == AnimationStatus.completed) {
-                    _showBottomSheet();
-                  }
-                });
-
-                _squareAnimation.forward(from: 0);
                 return;
               } else if (validRect.overlaps(barcode.boundingBox)) {
                 setState(() {
@@ -187,10 +170,9 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 
   @override
   void dispose() {
-    _controller?.stopImageStream();
-    _controller?.dispose();
-    _squareAnimation?.dispose();
-    _squareAnimationTimer?.cancel();
+    _cameraController?.stopImageStream();
+    _cameraController?.dispose();
+    _animationController?.dispose();
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[
       SystemUiOverlay.top,
       SystemUiOverlay.bottom,
@@ -209,13 +191,13 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     final String filePath = '$dirPath/${_timestamp()}.jpg';
 
     try {
-      await _controller.takePicture(filePath);
+      await _cameraController.takePicture(filePath);
     } on CameraException catch (e) {
       print(e);
     }
 
-    _controller.dispose();
-    _controller = null;
+    _cameraController.dispose();
+    _cameraController = null;
 
     setState(() {
       _barcodePictureFilePath = filePath;
@@ -227,11 +209,11 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     final double deviceRatio = size.width / size.height;
 
     return Transform.scale(
-      scale: _controller.value.aspectRatio / deviceRatio,
+      scale: _cameraController.value.aspectRatio / deviceRatio,
       child: Center(
         child: AspectRatio(
-          aspectRatio: _controller.value.aspectRatio,
-          child: CameraPreview(_controller),
+          aspectRatio: _cameraController.value.aspectRatio,
+          child: CameraPreview(_cameraController),
         ),
       ),
     );
@@ -356,7 +338,8 @@ class _BarcodeScannerState extends State<BarcodeScanner>
           fit: BoxFit.fill,
         ),
       );
-    } else if (_controller != null && _controller.value.isInitialized) {
+    } else if (_cameraController != null &&
+        _cameraController.value.isInitialized) {
       background = _buildCameraPreview();
     } else {
       background = Container(
@@ -427,26 +410,27 @@ class _BarcodeScannerState extends State<BarcodeScanner>
           ),
           Container(
             constraints: BoxConstraints.expand(),
-            child: _squareAnimationTimer != null && _squareAnimation != null
-                ? CustomPaint(
-                    painter: SquarePainter(
-                      _squareTween.animate(_squareAnimation),
-                    ),
-                  )
-                : null,
-          ),
-          Container(
-            constraints: BoxConstraints.expand(),
-            child: _barcodeFound
-                ? CustomPaint(
-                    painter: SquareTracePainter(
-                      animation: _squareTraceTween.animate(
-                        _squareAnimation,
+            child: CustomPaint(
+              painter: _barcodeFound
+                  ? SquareTracePainter(
+                      animation: Tween<double>(
+                        begin: 0,
+                        end: widget.validSquareWidth,
+                      ).animate(
+                        _animationController,
                       ),
                       square: Square(widget.validSquareWidth, Colors.white),
+                    )
+                  : SquarePainter(
+                      SquareTween(
+                        Square(widget.validSquareWidth, Colors.white),
+                        Square(
+                          widget.validSquareWidth + 100,
+                          Colors.transparent,
+                        ),
+                      ).animate(_animationController),
                     ),
-                  )
-                : null,
+            ),
           ),
           AppBar(
             leading: IconButton(
