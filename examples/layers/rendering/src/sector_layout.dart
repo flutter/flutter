@@ -6,6 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart';
+import 'package:meta/meta.dart';
 
 const double kTwoPi = 2 * math.pi;
 
@@ -130,15 +131,15 @@ abstract class RenderSector extends RenderObject {
   @override
   Rect get semanticBounds => Rect.fromLTWH(-deltaRadius, -deltaRadius, 2.0 * deltaRadius, 2.0 * deltaRadius);
 
-  bool hitTest(HitTestResult result, { double radius, double theta }) {
+  bool hitTest(SectorHitTestResult result, { double radius, double theta }) {
     if (radius < parentData.radius || radius >= parentData.radius + deltaRadius ||
         theta < parentData.theta || theta >= parentData.theta + deltaTheta)
       return false;
     hitTestChildren(result, radius: radius, theta: theta);
-    result.add(HitTestEntry(this));
+    result.add(SliverHitTestEntry(this, radius: radius, theta: theta));
     return true;
   }
-  void hitTestChildren(HitTestResult result, { double radius, double theta }) { }
+  void hitTestChildren(SectorHitTestResult result, { double radius, double theta }) { }
 
   double deltaRadius;
   double deltaTheta;
@@ -190,7 +191,7 @@ class RenderSectorWithChildren extends RenderDecoratedSector with ContainerRende
   RenderSectorWithChildren(BoxDecoration decoration) : super(decoration);
 
   @override
-  void hitTestChildren(HitTestResult result, { double radius, double theta }) {
+  void hitTestChildren(SectorHitTestResult result, { double radius, double theta }) {
     RenderSector child = lastChild;
     while (child != null) {
       if (child.hitTest(result, radius: radius, theta: theta))
@@ -530,7 +531,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (child == null)
       return false;
     double x = position.dx;
@@ -547,7 +548,7 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
       return false;
     if (theta > child.deltaTheta)
       return false;
-    child.hitTest(result, radius: radius, theta: theta);
+    child.hitTest(SectorHitTestResult.wrap(result), radius: radius, theta: theta);
     result.add(BoxHitTestEntry(this, position));
     return true;
   }
@@ -584,4 +585,49 @@ class RenderSolidColor extends RenderDecoratedSector {
       decoration = BoxDecoration(color: backgroundColor);
     }
   }
+}
+
+/// The result of performing a hit test on [RenderSector]s.
+class SectorHitTestResult extends HitTestResult {
+  /// Creates an empty hit test result for hit testing on [RenderSector].
+  SectorHitTestResult() : super();
+
+  /// Wraps `result` to create a [HitTestResult] that implements the
+  /// [SectorHitTestResult] protocol for hit testing on [RenderSector]s.
+  ///
+  /// This method is used by [RenderObject]s that adapt between the
+  /// [RenderSector]-world and the non-[RenderSector]-world to convert a (subtype of)
+  /// [HitTestResult] to a [SectorHitTestResult] for hit testing on [RenderSector]s.
+  ///
+  /// The [HitTestEntry]s added to the returned [SectorHitTestResult] are also
+  /// added to the wrapped `result` (both share the same underlying data
+  /// structure to store [HitTestEntry]s).
+  ///
+  /// See also:
+  ///
+  ///  * [HitTestResult.wrap], which turns a [SectorHitTestResult] back into a
+  ///    generic [HitTestResult].
+  SectorHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+}
+
+/// A hit test entry used by [RenderSector].
+class SliverHitTestEntry extends HitTestEntry {
+  /// Creates a box hit test entry.
+  ///
+  /// The [radius] and [theta] argument must not be null.
+  SliverHitTestEntry(RenderSector target, { @required this.radius,  @required this.theta })
+      : assert(radius != null),
+        assert(theta != null),
+        super(target);
+
+  @override
+  RenderSector get target => super.target;
+
+  /// The radius component of the hit test position in the local coordinates of
+  /// [target].
+  final double radius;
+
+  /// The theta component of the hit test position in the local coordinates of
+  /// [target].
+  final double theta;
 }
