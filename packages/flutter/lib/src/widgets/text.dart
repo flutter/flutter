@@ -33,14 +33,12 @@ class DefaultTextStyle extends InheritedWidget {
     this.softWrap = true,
     this.overflow = TextOverflow.clip,
     this.maxLines,
-    this.textWidthBasis = TextWidthBasis.parent,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(maxLines == null || maxLines > 0),
        assert(child != null),
-       assert(textWidthBasis != null),
        super(key: key, child: child);
 
   /// A const-constructible default text style that provides fallback values.
@@ -54,8 +52,7 @@ class DefaultTextStyle extends InheritedWidget {
       textAlign = null,
       softWrap = true,
       maxLines = null,
-      overflow = TextOverflow.clip,
-      textWidthBasis = TextWidthBasis.parent;
+      overflow = TextOverflow.clip;
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -80,7 +77,6 @@ class DefaultTextStyle extends InheritedWidget {
     bool softWrap,
     TextOverflow overflow,
     int maxLines,
-    TextWidthBasis textWidthBasis,
     @required Widget child,
   }) {
     assert(child != null);
@@ -94,7 +90,6 @@ class DefaultTextStyle extends InheritedWidget {
           softWrap: softWrap ?? parent.softWrap,
           overflow: overflow ?? parent.overflow,
           maxLines: maxLines ?? parent.maxLines,
-          textWidthBasis: textWidthBasis ?? parent.textWidthBasis,
           child: child,
         );
       },
@@ -126,10 +121,6 @@ class DefaultTextStyle extends InheritedWidget {
   /// [Text.maxLines].
   final int maxLines;
 
-  /// The strategy to use when calculating the width of the Text. See
-  /// [TextWidthBasis] for possible values and their implications.
-  final TextWidthBasis textWidthBasis;
-
   /// The closest instance of this class that encloses the given context.
   ///
   /// If no such instance exists, returns an instance created by
@@ -150,8 +141,7 @@ class DefaultTextStyle extends InheritedWidget {
         textAlign != oldWidget.textAlign ||
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
-        maxLines != oldWidget.maxLines ||
-        textWidthBasis != oldWidget.textWidthBasis;
+        maxLines != oldWidget.maxLines;
   }
 
   @override
@@ -162,7 +152,6 @@ class DefaultTextStyle extends InheritedWidget {
     properties.add(FlagProperty('softWrap', value: softWrap, ifTrue: 'wrapping at box width', ifFalse: 'no wrapping except at line break characters', showName: true));
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
   }
 }
 
@@ -248,7 +237,6 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-    this.textWidthBasis,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -272,7 +260,6 @@ class Text extends StatelessWidget {
     this.textScaleFactor,
     this.maxLines,
     this.semanticsLabel,
-    this.textWidthBasis,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -372,9 +359,6 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
-  final TextWidthBasis textWidthBasis;
-
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -392,7 +376,6 @@ class Text extends StatelessWidget {
       textScaleFactor: textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
-      textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
