@@ -8,6 +8,7 @@ import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
 import '../android/android_workflow.dart';
+import '../android/apk.dart';
 import '../application_package.dart';
 import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
@@ -19,7 +20,6 @@ import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../platform_step.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 
@@ -374,11 +374,10 @@ class AndroidDevice extends Device {
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
-      final PlatformBuildStep platformStep = platformBuilders.selectPlatform(buildInfo: buildInfo);
-      await platformStep.build(
-        project: project,
-        target: mainPath,
-        buildInfo: buildInfo,
+      await buildApk(
+          project: project,
+          target: mainPath,
+          buildInfo: buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
