@@ -136,7 +136,7 @@ abstract class RenderSector extends RenderObject {
         theta < parentData.theta || theta >= parentData.theta + deltaTheta)
       return false;
     hitTestChildren(result, radius: radius, theta: theta);
-    result.add(SliverHitTestEntry(this, radius: radius, theta: theta));
+    result.add(SectorHitTestEntry(this, radius: radius, theta: theta));
     return true;
   }
   void hitTestChildren(SectorHitTestResult result, { double radius, double theta }) { }
@@ -611,11 +611,11 @@ class SectorHitTestResult extends HitTestResult {
 }
 
 /// A hit test entry used by [RenderSector].
-class SliverHitTestEntry extends HitTestEntry {
+class SectorHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [radius] and [theta] argument must not be null.
-  SliverHitTestEntry(RenderSector target, { @required this.radius,  @required this.theta })
+  SectorHitTestEntry(RenderSector target, { @required this.radius,  @required this.theta })
       : assert(radius != null),
         assert(theta != null),
         super(target);
