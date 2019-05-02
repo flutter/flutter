@@ -114,7 +114,7 @@ example:org-dartlang-app:/
     });
 
     testUsingContext('single dart successful compilation', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
             Future<List<int>>.value(utf8.encode(
@@ -137,7 +137,7 @@ example:org-dartlang-app:/
     });
 
     testUsingContext('single dart failed compilation', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
 
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
@@ -163,7 +163,7 @@ example:org-dartlang-app:/
     testUsingContext('single dart abnormal compiler termination', () async {
       when(mockFrontendServer.exitCode).thenAnswer((_) async => 255);
 
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
 
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
@@ -221,7 +221,7 @@ example:org-dartlang-app:/
     });
 
     testUsingContext('single dart compile', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
 
       when(mockFrontendServer.stdout)
           .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
@@ -265,7 +265,7 @@ example:org-dartlang-app:/
     });
 
     testUsingContext('compile and recompile', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
 
       final StreamController<List<int>> streamController = StreamController<List<int>>();
       when(mockFrontendServer.stdout)
@@ -309,7 +309,7 @@ example:org-dartlang-app:/
     });
 
     testUsingContext('compile and recompile twice', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
 
       final StreamController<List<int>> streamController = StreamController<List<int>>();
       when(mockFrontendServer.stdout)
@@ -380,7 +380,7 @@ example:org-dartlang-app:/
     });
 
     testUsingContext('compile single expression', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
 
       final Completer<List<int>> compileResponseCompleter =
           Completer<List<int>>();
@@ -432,7 +432,7 @@ example:org-dartlang-app:/
     });
 
     testUsingContext('compile expressions without awaiting', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
 
       final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
       final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();

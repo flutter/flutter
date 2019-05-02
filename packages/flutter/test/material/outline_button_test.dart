@@ -120,7 +120,7 @@ void main() {
       );
     }
 
-    final Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
+    const Rect clipRect = Rect.fromLTRB(0.0, 0.0, 116.0, 36.0);
     final Path clipPath = Path()..addRect(clipRect);
 
     final Finder outlineButton = find.byType(OutlineButton);
@@ -244,7 +244,7 @@ void main() {
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,

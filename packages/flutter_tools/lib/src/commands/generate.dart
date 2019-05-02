@@ -29,7 +29,7 @@ class GenerateCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {

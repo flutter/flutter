@@ -933,12 +933,24 @@ void restoreVmServiceConnectFunction() {
   vmServiceConnectFunction = _waitAndConnect;
 }
 
+void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  _log.trace('Unhandled RPC error:\n$error\n$stack');
+  // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+  // assert(false);
+}
+
 /// Waits for a real Dart VM service to become available, then connects using
 /// the [VMServiceClient].
 Future<VMServiceClientConnection> _waitAndConnect(String url) async {
   Uri uri = Uri.parse(url);
+  final List<String> pathSegments = <String>[];
+  // If there's an authentication code (default), we need to add it to our path.
+  if (uri.pathSegments.isNotEmpty) {
+    pathSegments.add(uri.pathSegments.first);
+  }
+  pathSegments.add('ws');
   if (uri.scheme == 'http')
-    uri = uri.replace(scheme: 'ws', path: '/ws');
+    uri = uri.replace(scheme: 'ws', pathSegments: pathSegments);
   int attempts = 0;
   while (true) {
     WebSocket ws1;
@@ -948,7 +960,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       ws2 = await WebSocket.connect(uri.toString());
       return VMServiceClientConnection(
         VMServiceClient(IOWebSocketChannel(ws1).cast()),
-        rpc.Peer(IOWebSocketChannel(ws2).cast())..listen(),
+        rpc.Peer(IOWebSocketChannel(ws2).cast(), onUnhandledError: _unhandledJsonRpcError)..listen(),
       );
     } catch (e) {
       await ws1?.close();

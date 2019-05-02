@@ -199,11 +199,11 @@ class TestSemantics {
   ///
   /// See also [new TestSemantics.root], which uses this value to describe the
   /// root node.
-  static final Rect rootRect = Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
+  static const Rect rootRect = Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
 
   /// The test screen's size in logical pixels, useful for the [rect] of
   /// full-screen widgets other than the root node.
-  static final Rect fullScreen = Rect.fromLTWH(0.0, 0.0, 800.0, 600.0);
+  static const Rect fullScreen = Rect.fromLTWH(0.0, 0.0, 800.0, 600.0);
 
   /// The transform from this node's coordinate system to its parent's coordinate system.
   ///

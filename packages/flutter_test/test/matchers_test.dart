@@ -149,7 +149,8 @@ void main() {
     expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#000000')));
     expect('Foo#a3b4d', isNot(equalsIgnoringHashCodes('Foo#123456')));
 
-    expect('Foo#A3b4D', isNot(equalsIgnoringHashCodes('Foo#00000')));
+    expect('FOO#A3b4D', equalsIgnoringHashCodes('FOO#00000'));
+    expect('FOO#A3b4J', isNot(equalsIgnoringHashCodes('FOO#00000')));
 
     expect('Foo#12345(Bar#9110f)',
         equalsIgnoringHashCodes('Foo#00000(Bar#00000)'));
@@ -185,6 +186,23 @@ void main() {
     expect(-11.0, moreOrLessEquals(11.0, epsilon: 100.0));
   });
 
+  test('rectMoreOrLessEquals', () {
+    expect(
+      const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+      rectMoreOrLessEquals(const Rect.fromLTRB(0.0, 0.0, 10.0, 10.00000000001)),
+    );
+
+    expect(
+      const Rect.fromLTRB(11.0, 11.0, 20.0, 20.0),
+      isNot(rectMoreOrLessEquals(const Rect.fromLTRB(-11.0, -11.0, 20.0, 20.0), epsilon: 1.0)),
+    );
+
+    expect(
+      const Rect.fromLTRB(11.0, 11.0, 20.0, 20.0),
+      rectMoreOrLessEquals(const Rect.fromLTRB(-11.0, -11.0, 20.0, 20.0), epsilon: 100.0),
+    );
+  });
+
   test('within', () {
     expect(0.0, within<double>(distance: 0.1, from: 0.05));
     expect(0.0, isNot(within<double>(distance: 0.1, from: 0.2)));
@@ -202,8 +220,8 @@ void main() {
     expect(const Offset(1.0, 0.0), within(distance: 1.0, from: const Offset(0.0, 0.0)));
     expect(const Offset(1.0, 0.0), isNot(within(distance: 1.0, from: const Offset(-1.0, 0.0))));
 
-    expect(Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), within<Rect>(distance: 4.0, from: Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)));
-    expect(Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), isNot(within<Rect>(distance: 3.9, from: Rect.fromLTRB(1.0, 3.0, 5.0, 7.0))));
+    expect(const Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), within<Rect>(distance: 4.0, from: const Rect.fromLTRB(1.0, 3.0, 5.0, 7.0)));
+    expect(const Rect.fromLTRB(0.0, 1.0, 2.0, 3.0), isNot(within<Rect>(distance: 3.9, from: const Rect.fromLTRB(1.0, 3.0, 5.0, 7.0))));
 
     expect(const Size(1.0, 1.0), within<Size>(distance: 1.415, from: const Size(2.0, 2.0)));
     expect(const Size(1.0, 1.0), isNot(within<Size>(distance: 1.414, from: const Size(2.0, 2.0))));
@@ -225,39 +243,39 @@ void main() {
         Path(),
         coversSameAreaAs(
           Path(),
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
 
     test('mismatch', () {
       final Path rectPath = Path()
-        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+        ..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       expect(
         Path(),
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
 
     test('mismatch out of examined area', () {
       final Path rectPath = Path()
-        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
-      rectPath.addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+        ..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+      rectPath.addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       expect(
         Path(),
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 4.0, 4.0),
+          areaToCompare: const Rect.fromLTRB(0.0, 0.0, 4.0, 4.0),
         ),
       );
     });
 
     test('differently constructed rects match', () {
       final Path rectPath = Path()
-        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+        ..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       final Path linePath = Path()
         ..moveTo(5.0, 5.0)
         ..lineTo(5.0, 6.0)
@@ -268,14 +286,14 @@ void main() {
         linePath,
         coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         ),
       );
     });
 
     test('partially overlapping paths', () {
       final Path rectPath = Path()
-        ..addRect(Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
+        ..addRect(const Rect.fromLTRB(5.0, 5.0, 6.0, 6.0));
       final Path linePath = Path()
         ..moveTo(5.0, 5.0)
         ..lineTo(5.0, 6.0)
@@ -286,7 +304,7 @@ void main() {
         linePath,
         isNot(coversSameAreaAs(
           rectPath,
-          areaToCompare: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+          areaToCompare: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         )),
       );
     });
@@ -493,7 +511,7 @@ void main() {
         decreasedValue: 'd',
         hint: 'e',
         textDirection: TextDirection.ltr,
-        rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+        rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
         elevation: 3.0,
         thickness: 4.0,
         textSelection: null,
@@ -509,7 +527,7 @@ void main() {
       node.data = data;
 
       expect(node, matchesSemantics(
-         rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+         rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
          size: const Size(10.0, 10.0),
          elevation: 3.0,
          thickness: 4.0,

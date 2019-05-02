@@ -29,10 +29,40 @@ void main() {
 
     await tester.pump();
     expect(buildCount, equals(1));
-
     bottomSheet.setState(() { });
     await tester.pump();
     expect(buildCount, equals(2));
+  });
+
+  testWidgets('Verify that a persistent BottomSheet cannot be dismissed', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        body: const Center(child: Text('body')),
+        bottomSheet: DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return ListView(
+              controller: controller,
+              shrinkWrap: true,
+              children: <Widget>[
+                Container(height: 100.0, child: const Text('One')),
+                Container(height: 100.0, child: const Text('Two')),
+                Container(height: 100.0, child: const Text('Three')),
+              ],
+            );
+          },
+        ),
+      )
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
   });
 
   testWidgets('Verify that a scrollable BottomSheet can be dismissed', (WidgetTester tester) async {
@@ -67,6 +97,210 @@ void main() {
     expect(find.text('Two'), findsNothing);
   });
 
+  testWidgets('Verify that a scrollControlled BottomSheet can be dismissed', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body'))
+      )
+    ));
+
+    scaffoldKey.currentState.showBottomSheet<void>(
+      (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return ListView(
+              shrinkWrap: true,
+              controller: controller,
+              children: <Widget>[
+                Container(height: 100.0, child: const Text('One')),
+                Container(height: 100.0, child: const Text('Two')),
+                Container(height: 100.0, child: const Text('Three')),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, 400.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsNothing);
+  });
+
+  testWidgets('Verify that a persistent BottomSheet can fling up and hide the fab', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: Text('body')),
+          bottomSheet: DraggableScrollableSheet(
+            expand: false,
+            builder: (_, ScrollController controller) {
+              return ListView.builder(
+                itemExtent: 50.0,
+                itemCount: 50,
+                itemBuilder: (_, int index) => Text('Item $index'),
+                controller: controller,
+              );
+            },
+          ),
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: Text('fab'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsOneWidget);
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    await tester.drag(find.text('Item 2'), const Offset(0, -20.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsOneWidget);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 22'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
+  });
+
+  testWidgets('Verify that a back button resets a persistent BottomSheet', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(),
+          body: const Center(child: Text('body')),
+          bottomSheet: DraggableScrollableSheet(
+            expand: false,
+            builder: (_, ScrollController controller) {
+              return ListView.builder(
+                itemExtent: 50.0,
+                itemCount: 50,
+                itemBuilder: (_, int index) => Text('Item $index'),
+                controller: controller,
+              );
+            },
+          ),
+          floatingActionButton: const FloatingActionButton(
+            onPressed: null,
+            child: Text('fab'),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+
+    await tester.drag(find.text('Item 2'), const Offset(0, -20.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+    // We've started to drag up, we should have a back button now for a11y
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+
+    await tester.fling(find.text('Item 2'), const Offset(0.0, -600.0), 2000.0);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Item 2'), findsNothing);
+    expect(find.text('Item 22'), findsOneWidget);
+    expect(find.byType(BackButton).hitTestable(), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(BackButton).hitTestable(), findsNothing);
+    expect(find.text('Item 2'), findsOneWidget);
+    expect(find.text('Item 22'), findsNothing);
+  });
+
+  testWidgets('Verify that a scrollable BottomSheet hides the fab when scrolled up', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+        floatingActionButton: const FloatingActionButton(
+          onPressed: null,
+          child: Text('fab'),
+        ),
+      )
+    ));
+
+    scaffoldKey.currentState.showBottomSheet<void>(
+      (BuildContext context) {
+        return DraggableScrollableSheet(
+          expand: false,
+          builder: (_, ScrollController controller) {
+            return ListView(
+              controller: controller,
+              shrinkWrap: true,
+              children: <Widget>[
+                Container(height: 100.0, child: const Text('One')),
+                Container(height: 100.0, child: const Text('Two')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+                Container(height: 100.0, child: const Text('Three')),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsOneWidget);
+
+    await tester.drag(find.text('Two'), const Offset(0.0, -600.0));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Two'), findsOneWidget);
+    expect(find.byType(FloatingActionButton), findsOneWidget);
+    expect(find.byType(FloatingActionButton).hitTestable(), findsNothing);
+  });
+
   testWidgets('showBottomSheet()', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(MaterialApp(
@@ -83,7 +317,7 @@ void main() {
           builder: (BuildContext context) {
             buildCount += 1;
             return Container(height: 200.0);
-          }
+          },
         );
       },
     );
@@ -190,5 +424,63 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('showModalBottomSheet'), findsNothing);
     expect(find.byKey(bottomSheetKey), findsNothing);
+  });
+
+  testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const Color color = Colors.pink;
+    const double elevation = 9.0;
+    final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    scaffoldKey.currentState.showBottomSheet<void>((BuildContext context) {
+      return ListView(
+        shrinkWrap: true,
+        primary: false,
+        children: <Widget>[
+          Container(height: 100.0, child: const Text('One')),
+          Container(height: 100.0, child: const Text('Two')),
+          Container(height: 100.0, child: const Text('Three')),
+        ],
+      );
+    }, backgroundColor: color, elevation: elevation, shape: shape);
+
+    await tester.pumpAndSettle();
+
+    final BottomSheet bottomSheet = tester.widget(find.byType(BottomSheet));
+    expect(bottomSheet.backgroundColor, color);
+    expect(bottomSheet.elevation, elevation);
+    expect(bottomSheet.shape, shape);
+  });
+
+  testWidgets('PersistentBottomSheetController.close dismisses the bottom sheet', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body'))
+      )
+    ));
+
+    final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {
+      return Builder(
+        builder: (BuildContext context) {
+          return Container(height: 200.0);
+        }
+      );
+    });
+
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsOneWidget);
+
+    bottomSheet.close();
+    await tester.pump();
+    expect(find.byType(BottomSheet), findsNothing);
   });
 }

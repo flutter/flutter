@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
@@ -1171,6 +1172,128 @@ void main() {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
   });
 
+  testWidgets('Hero createRectTween for Navigator that is not full screen', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/25272
+
+    RectTween createRectTween(Rect begin, Rect end) {
+      return RectTween(begin: begin, end: end);
+    }
+
+    final Map<String, WidgetBuilder> createRectTweenHeroRoutes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: Container(height: 100.0, width: 100.0, key: firstKey),
+            ),
+            FlatButton(
+              child: const Text('two'),
+              onPressed: () { Navigator.pushNamed(context, '/two'); },
+            ),
+          ],
+        ),
+      ),
+      '/two': (BuildContext context) => Material(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 200.0,
+              child: FlatButton(
+                child: const Text('pop'),
+                onPressed: () { Navigator.pop(context); },
+              ),
+            ),
+            Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: Container(height: 200.0, width: 100.0, key: secondKey),
+            ),
+          ],
+        ),
+      ),
+    };
+
+    const double leftPadding = 10.0;
+
+    // MaterialApp and its Navigator are offset from the left
+    await tester.pumpWidget(Padding(
+      padding: const EdgeInsets.only(left: leftPadding),
+      child: MaterialApp(routes: createRectTweenHeroRoutes),
+    ));
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(leftPadding + 50.0, 50.0));
+
+    const double epsilon = 0.001;
+    const Duration duration = Duration(milliseconds: 300);
+    const Curve curve = Curves.fastOutSlowIn;
+    final RectTween pushRectTween = RectTween(
+      begin: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
+      end: const Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
+    );
+
+    await tester.tap(find.text('two'));
+    await tester.pump(); // begin navigation
+
+    // Verify that the rect of the secondKey Hero transforms as the
+    // pushRectTween rect for the push /two flight.
+
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(50.0 + leftPadding, 50.0));
+
+    await tester.pump(duration * 0.25);
+    Rect actualHeroRect = tester.getRect(find.byKey(secondKey));
+    Rect predictedHeroRect = pushRectTween.lerp(curve.transform(0.25));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(secondKey));
+    predictedHeroRect = pushRectTween.lerp(curve.transform(0.5));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(secondKey));
+    predictedHeroRect = pushRectTween.lerp(curve.transform(0.75));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(400.0 + leftPadding / 2, 300.0));
+
+    // Verify that the rect of the firstKey Hero transforms as the
+    // pushRectTween rect for the pop /two flight.
+
+    await tester.tap(find.text('pop'));
+    await tester.pump(); // begin navigation
+
+    final RectTween popRectTween = RectTween(
+      begin: const Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
+      end: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
+    );
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(400.0 + leftPadding / 2, 300.0));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(firstKey));
+    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.25));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(firstKey));
+    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.5));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(firstKey));
+    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.75));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0 + leftPadding, 50.0));
+  });
+
+
   testWidgets('Pop interrupts push, reverses flight', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(routes: routes));
     await tester.tap(find.text('twoInset'));
@@ -1778,5 +1901,68 @@ void main() {
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isInCard);
     expect(tester.getSize(find.byKey(smallContainer)), const Size(100,100));
+  });
+
+  testWidgets('On an iOS back swipe and snap, only a single flight should take place', (WidgetTester tester) async {
+    int shuttlesBuilt = 0;
+    final HeroFlightShuttleBuilder shuttleBuilder = (
+      BuildContext flightContext,
+      Animation<double> animation,
+      HeroFlightDirection flightDirection,
+      BuildContext fromHeroContext,
+      BuildContext toHeroContext,
+    ) {
+      shuttlesBuilt += 1;
+      return const Text("I'm flying in a jetplane");
+    };
+
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: Hero(
+          tag: navigatorKey,
+          // Since we're popping, only the destination route's builder is used.
+          flightShuttleBuilder: shuttleBuilder,
+          transitionOnUserGestures: true,
+          child: const Text('1')
+        ),
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoPageScaffold(
+          child: Hero(
+            tag: navigatorKey,
+            transitionOnUserGestures: true,
+            child: const Text('2')
+          ),
+        );
+      }
+    );
+
+    navigatorKey.currentState.push(route2);
+    await tester.pumpAndSettle();
+
+    expect(shuttlesBuilt, 1);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5.0, 200.0));
+    await gesture.moveBy(const Offset(500.0, 0.0));
+    await tester.pump();
+    // Starting the back swipe creates a new hero shuttle.
+    expect(shuttlesBuilt, 2);
+
+    await gesture.up();
+    await tester.pump();
+    // After the lift, no additional shuttles should be created since it's the
+    // same hero flight.
+    expect(shuttlesBuilt, 2);
+
+    // Did go far enough to snap out of this route.
+    await tester.pump(const Duration(milliseconds: 301));
+    expect(find.text('2'), findsNothing);
+    // Still one shuttle.
+    expect(shuttlesBuilt, 2);
   });
 }

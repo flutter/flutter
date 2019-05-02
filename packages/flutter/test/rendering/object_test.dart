@@ -51,7 +51,7 @@ class TestRenderObject extends RenderObject {
   void performResize() { }
 
   @override
-  Rect get semanticBounds => Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
+  Rect get semanticBounds => const Rect.fromLTWH(0.0, 0.0, 10.0, 20.0);
 
   int describeSemanticsConfigurationCallCount = 0;
 
@@ -62,4 +62,3 @@ class TestRenderObject extends RenderObject {
     describeSemanticsConfigurationCallCount++;
   }
 }
-
