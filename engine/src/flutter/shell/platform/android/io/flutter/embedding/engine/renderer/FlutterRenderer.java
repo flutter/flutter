@@ -10,6 +10,7 @@ import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.Surface;
 
 import java.nio.ByteBuffer;
@@ -41,6 +42,14 @@ public class FlutterRenderer implements TextureRegistry {
 
   public FlutterRenderer(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
+  }
+
+  /**
+   * Returns true if this {@code FlutterRenderer} is attached to the given {@link RenderSurface},
+   * false otherwise.
+   */
+  public boolean isAttachedTo(@NonNull RenderSurface renderSurface) {
+    return this.renderSurface == renderSurface;
   }
 
   public void attachToRenderSurface(@NonNull RenderSurface renderSurface) {
