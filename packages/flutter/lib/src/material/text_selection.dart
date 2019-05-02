@@ -156,7 +156,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     final double y = (availableHeight < _kToolbarHeight)
         ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight + _kToolbarScreenPadding
         : startTextSelectionPoint.point.dy - globalEditableRegion.height;
-    final Offset position = Offset(x, y);
+    final Offset preciseMidpoint = Offset(x, y);
 
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
@@ -164,7 +164,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
         delegate: _TextSelectionToolbarLayout(
           MediaQuery.of(context).size,
           globalEditableRegion,
-          position,
+          preciseMidpoint,
         ),
         child: _TextSelectionToolbar(
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,

@@ -47,12 +47,16 @@ class _PointerState {
 // https://github.com/flutter/flutter/issues/30454
 int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
   switch (kind) {
+    case PointerDeviceKind.mouse:
+      return buttons;
     case PointerDeviceKind.touch:
     case PointerDeviceKind.stylus:
     case PointerDeviceKind.invertedStylus:
       return buttons | kPrimaryButton;
     default:
-      return buttons;
+      // We have no information about the device but we know we never want
+      // buttons to be 0 when the pointer is down.
+      return buttons == 0 ? kPrimaryButton : buttons;
   }
 }
 

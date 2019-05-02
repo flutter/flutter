@@ -427,7 +427,7 @@ flutter:
   module: {}
 ''');
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
@@ -438,7 +438,7 @@ flutter:
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('ios').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
@@ -448,7 +448,7 @@ flutter:
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{

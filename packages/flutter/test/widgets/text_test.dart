@@ -252,15 +252,15 @@ void main() {
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             TestSemantics(
-              rect: Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
+              rect: const Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
               label: 'hello world ',
               textDirection: TextDirection.ltr, // text direction is declared as LTR.
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
+              rect: const Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'RIS',
               textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
               actions: <SemanticsAction>[
@@ -268,12 +268,12 @@ void main() {
               ],
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
+              rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
               label: ' OD you OD WOH ', // Still RTL.
               textDirection: TextDirection.rtl,
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
+              rect: const Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
               label: 'YOB',
               textDirection: TextDirection.rtl, // Still RTL.
               actions: <SemanticsAction>[
@@ -281,7 +281,7 @@ void main() {
               ],
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
+              rect: const Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
               label: ' good bye',
               textDirection: TextDirection.rtl, // Begin as RTL but pop to LTR.
             ),
@@ -311,7 +311,7 @@ void main() {
       text: 'a long long long long text, should be clip',
     );
 
-    expect(find.byType(Text), paints..clipRect(rect: Rect.fromLTWH(0, 0, 50, 50)));
+    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
   });
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
@@ -331,7 +331,7 @@ void main() {
       text: 'a long long long long text, should be clip',
     );
 
-    expect(find.byType(Text), paints..clipRect(rect: Rect.fromLTWH(0, 0, 50, 50)));
+    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
   });
 
   testWidgets('Overflow is clipping correctly - short text with overflow: fade', (WidgetTester tester) async {

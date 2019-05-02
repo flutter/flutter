@@ -1192,7 +1192,7 @@ void main() {
   });
 
   test('object property test', () {
-    final Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
+    const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
     final DiagnosticsNode simple = DiagnosticsProperty<Rect>(
       'name',
       rect,
@@ -1267,7 +1267,7 @@ void main() {
   });
 
   test('lazy object property test', () {
-    final Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
+    const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
     final DiagnosticsNode simple = DiagnosticsProperty<Rect>.lazy(
       'name',
       () => rect,
@@ -1448,7 +1448,7 @@ void main() {
     validateIterablePropertyJsonSerialization(hideNullProperty);
 
     final List<Object> objects = <Object>[
-      Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
+      const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0),
       const Color.fromARGB(255, 255, 255, 255),
     ];
     final IterableProperty<Object> objectsProperty = IterableProperty<Object>(

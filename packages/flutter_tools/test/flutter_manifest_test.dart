@@ -21,7 +21,7 @@ void main() {
 
   group('FlutterManifest', () {
     testUsingContext('is empty when the pubspec.yaml file is empty', () async {
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString('');
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString('');
       expect(flutterManifest.isEmpty, true);
       expect(flutterManifest.appName, '');
       expect(flutterManifest.usesMaterialDesign, false);
@@ -37,7 +37,7 @@ dependencies:
   flutter:
     sdk: flutter
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest, isNotNull);
       expect(flutterManifest.isEmpty, false);
       expect(flutterManifest.appName, 'test');
@@ -56,7 +56,7 @@ dependencies:
 flutter:
   uses-material-design: true
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.usesMaterialDesign, true);
     });
 
@@ -72,7 +72,7 @@ flutter:
     - a/foo
     - a/bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.assets.length, 2);
       expect(flutterManifest.assets[0], Uri.parse('a/foo'));
       expect(flutterManifest.assets[1], Uri.parse('a/bar'));
@@ -91,7 +91,7 @@ flutter:
       fonts:
         - asset: a/bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
       expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
@@ -123,7 +123,7 @@ flutter:
         - asset: a/bar
           weight: 400
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
       expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
@@ -160,7 +160,7 @@ flutter:
           weight: 400
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
 
       expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
@@ -204,7 +204,7 @@ flutter:
           asset: a/baz
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final dynamic expectedFontsDescriptor = <dynamic>[
           {'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}, // ignore: always_specify_types
           {'fonts': [{'asset': 'a/baz'}, {'style': 'italic', 'weight': 400, 'asset': 'a/baz'}], 'family': 'bar'}, // ignore: always_specify_types
@@ -265,7 +265,7 @@ flutter:
           weight: 400
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
       expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
@@ -304,7 +304,7 @@ flutter:
           style: italic
     - family: bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
       expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
@@ -338,7 +338,7 @@ flutter:
       fonts:
         - weight: 400
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest.fontsDescriptor, <dynamic>[]);
       final List<Font> fonts = flutterManifest.fonts;
@@ -353,7 +353,7 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
       expect(flutterManifest.isModule, false);
       expect(flutterManifest.isPlugin, false);
@@ -367,7 +367,7 @@ flutter:
   module:
     androidPackage: com.example
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isModule, true);
       expect(flutterManifest.androidPackage, 'com.example');
     });
@@ -379,7 +379,7 @@ flutter:
   plugin:
     androidPackage: com.example
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isPlugin, true);
       expect(flutterManifest.androidPackage, 'com.example');
     });
@@ -390,7 +390,7 @@ flutter:
       String expectedBuildName,
       String expectedBuildNumber,
     }) async {
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.appVersion, expectedAppVersion);
       expect(flutterManifest.buildName, expectedBuildName);
       expect(flutterManifest.buildNumber, expectedBuildNumber);
@@ -490,7 +490,7 @@ dependencies:
 flutter:
 ''';
 
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
     }
 
