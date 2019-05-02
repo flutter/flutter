@@ -38,6 +38,7 @@ class BarcodeScanner extends StatefulWidget {
 class _BarcodeScannerState extends State<BarcodeScanner>
     with TickerProviderStateMixin {
   CameraController _cameraController;
+  AnimationController _animationController;
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
@@ -45,14 +46,25 @@ class _BarcodeScannerState extends State<BarcodeScanner>
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _barcodeFound = false;
 
-  AnimationController _animationController;
-
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
-    _startScanningBarcodes();
 
+    SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
+    _initCameraAndScanner();
+    _initAnimation();
+  }
+
+  void _initCameraAndScanner() {
+    getCamera(CameraLensDirection.back).then(
+      (CameraDescription camera) async {
+        await _openCamera(camera);
+        await _startStreamingImagesToScanner(camera.sensorOrientation);
+      },
+    );
+  }
+
+  void _initAnimation() {
     _animationController = AnimationController(
       duration: const Duration(milliseconds: 1300),
       vsync: this,
@@ -82,12 +94,6 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     });
   }
 
-  Future<void> _startScanningBarcodes() async {
-    final CameraDescription camera = await getCamera(CameraLensDirection.back);
-    await _openCamera(camera);
-    await _streamImages(camera.sensorOrientation);
-  }
-
   Future<void> _openCamera(CameraDescription camera) async {
     final ResolutionPreset preset =
         defaultTargetPlatform == TargetPlatform.android
@@ -100,10 +106,9 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     setState(() {});
   }
 
-  Future<void> _streamImages(int sensorOrientation) async {
+  Future<void> _startStreamingImagesToScanner(int sensorOrientation) async {
     final BarcodeDetector detector = FirebaseVision.instance.barcodeDetector();
     bool isDetecting = false;
-    final Size size = MediaQuery.of(context).size;
 
     _cameraController.startImageStream((CameraImage image) {
       if (isDetecting) {
@@ -118,55 +123,65 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 
       detect(image, detector.detectInImage, rotation).then(
         (dynamic result) {
-          if (!_cameraController.value.isStreamingImages) {
-            return;
-          }
-
-          // Flip since photo is vertical
-          final double widthScale = image.height / size.width;
-          final double heightScale = image.width / size.height;
-
-          final Offset center = size.center(Offset.zero);
-          final double halfRectSideLength = widget.validSquareWidth / 2;
-
-          final Rect validRect = Rect.fromLTWH(
-            widthScale * (center.dx - halfRectSideLength),
-            heightScale * (center.dy - halfRectSideLength),
-            widthScale * widget.validSquareWidth,
-            heightScale * widget.validSquareWidth,
+          _handleResult(
+            barcodes: result,
+            screenSize: MediaQuery.of(context).size,
+            imageSize: Size(
+              image.width.toDouble(),
+              image.height.toDouble(),
+            ),
           );
-
-          final List<Barcode> barcodes = result;
-          if (barcodes.isNotEmpty) {
-            for (Barcode barcode in barcodes) {
-              final Rect intersection =
-                  validRect.intersect(barcode.boundingBox);
-
-              final bool doesContain = intersection == barcode.boundingBox;
-
-              if (doesContain) {
-                _cameraController.stopImageStream().then((_) {
-                  _takePicture();
-                });
-
-                _animationController.value = 1;
-                _animationController.duration = Duration(milliseconds: 2000);
-                _handleBarcodeFound();
-                return;
-              } else if (validRect.overlaps(barcode.boundingBox)) {
-                setState(() {
-                  _scannerHint = 'Move closer to the barcode';
-                });
-                return;
-              }
-            }
-          }
-
-          setState(() {
-            _scannerHint = null;
-          });
         },
       ).whenComplete(() => isDetecting = false);
+    });
+  }
+
+  void _handleResult({
+    List<Barcode> barcodes,
+    Size screenSize,
+    Size imageSize,
+  }) {
+    if (!_cameraController.value.isStreamingImages || barcodes.isEmpty) {
+      return;
+    }
+
+    // Flip since photo is vertical
+    final double widthScale = imageSize.height / screenSize.width;
+    final double heightScale = imageSize.width / screenSize.height;
+
+    final Offset center = screenSize.center(Offset.zero);
+    final double halfRectSideLength = widget.validSquareWidth / 2;
+
+    final Rect validRect = Rect.fromLTWH(
+      widthScale * (center.dx - halfRectSideLength),
+      heightScale * (center.dy - halfRectSideLength),
+      widthScale * widget.validSquareWidth,
+      heightScale * widget.validSquareWidth,
+    );
+
+    for (Barcode barcode in barcodes) {
+      final Rect intersection = validRect.intersect(barcode.boundingBox);
+
+      final bool doesContain = intersection == barcode.boundingBox;
+
+      if (doesContain) {
+        _cameraController.stopImageStream().then((_) {
+          _takePicture();
+        });
+
+        _animationController.duration = Duration(milliseconds: 2000);
+        _handleBarcodeFound();
+        return;
+      } else if (validRect.overlaps(barcode.boundingBox)) {
+        setState(() {
+          _scannerHint = 'Move closer to the barcode';
+        });
+        return;
+      }
+    }
+
+    setState(() {
+      _scannerHint = null;
     });
   }
 
@@ -175,14 +190,14 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     _cameraController?.stopImageStream();
     _cameraController?.dispose();
     _animationController?.dispose();
+
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[
       SystemUiOverlay.top,
       SystemUiOverlay.bottom,
     ]);
+
     super.dispose();
   }
-
-  String _timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
   Future<void> _takePicture() async {
     final Directory extDir = await getApplicationDocumentsDirectory();
@@ -190,7 +205,9 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     final String dirPath = '${extDir.path}/Pictures/barcodePics';
     await Directory(dirPath).create(recursive: true);
 
-    final String filePath = '$dirPath/${_timestamp()}.jpg';
+    final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final String filePath = '$dirPath/$timestamp.jpg';
 
     try {
       await _cameraController.takePicture(filePath);
@@ -337,7 +354,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
         constraints: BoxConstraints.expand(),
         child: Image.file(
           File(_barcodePictureFilePath),
-          fit: BoxFit.fill,
+          fit: BoxFit.contain,
         ),
       );
     } else if (_cameraController != null &&
@@ -411,7 +428,7 @@ class _BarcodeScannerState extends State<BarcodeScanner>
                       ),
                       square: Square(widget.validSquareWidth, Colors.white),
                     )
-                  : SquarePainter(
+                  : SquareOutlinePainter(
                       SquareTween(
                         Square(widget.validSquareWidth, Colors.white),
                         Square(
@@ -542,8 +559,8 @@ class SquareTween extends Tween<Square> {
   Square lerp(double t) => Square.lerp(begin, end, t);
 }
 
-class SquarePainter extends CustomPainter {
-  SquarePainter(this.animation) : super(repaint: animation);
+class SquareOutlinePainter extends CustomPainter {
+  SquareOutlinePainter(this.animation) : super(repaint: animation);
 
   final Animation<Square> animation;
 
@@ -570,7 +587,7 @@ class SquarePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SquarePainter oldDelegate) => false;
+  bool shouldRepaint(SquareOutlinePainter oldDelegate) => false;
 }
 
 class SquareTracePainter extends CustomPainter {
