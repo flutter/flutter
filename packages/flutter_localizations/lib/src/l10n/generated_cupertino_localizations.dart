@@ -197,6 +197,94 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get todayLabel => r'aujourd' "'" r'hui';
 }
 
+/// The translations for Portuguese (`pt`).
+class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for French.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationPt({
+    String localeName = 'pt',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get alertDialogLabel => r'Alerta';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get copyButtonLabel => r'Copiar';
+
+  @override
+  String get cutButtonLabel => r'Cortar';
+
+  @override
+  String get datePickerDateOrderString => r'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
+
+  @override
+  String get datePickerHourSemanticsLabelOne => r'$hour hora';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour horas';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
+
+  @override
+  String get pasteButtonLabel => r'Colar';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get selectAllButtonLabel => r'Selecionar Tudo.';
+
+  @override
+  String get timerPickerHourLabelOne => r'hora';
+
+  @override
+  String get timerPickerHourLabelOther => r'horas';
+
+  @override
+  String get timerPickerMinuteLabelOne => r'minuto';
+
+  @override
+  String get timerPickerMinuteLabelOther => r'minutos';
+
+  @override
+  String get timerPickerSecondLabelOne => r's';
+
+  @override
+  String get timerPickerSecondLabelOther => r's';
+
+  @override
+  String get todayLabel => r'Hoje';
+}
+
 /// The set of supported languages, as language code strings.
 ///
 /// The [GlobalCupertinoLocalizations.delegate] can generate localizations for
@@ -211,6 +299,7 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <String>[
   'en', // English
   'fr', // French
+  'pt', // Portuguese
 ]);
 
 /// Creates a [GlobalCupertinoLocalizations] instance for the given `locale`.
