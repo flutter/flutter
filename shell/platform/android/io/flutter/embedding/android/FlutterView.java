@@ -547,7 +547,7 @@ public class FlutterView extends FrameLayout {
   }
 
   private boolean isAttachedToFlutterEngine() {
-    return flutterEngine != null;
+    return flutterEngine != null && flutterEngine.getRenderer().isAttachedTo(renderSurface);
   }
 
   /**
