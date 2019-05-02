@@ -1034,7 +1034,8 @@ class CupertinoDialogAction extends StatelessWidget {
     this.isDestructiveAction = false,
     this.textStyle,
     @required this.child,
-  }) : assert(child != null);
+  }) : assert(child != null),
+       assert(isDefaultAction != null || isDestructiveAction != null);
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.
