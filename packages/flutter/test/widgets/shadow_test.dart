@@ -60,7 +60,7 @@ void main() {
       );
     }
     debugDisableShadows = true;
-  },);
+  });
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -124,5 +124,5 @@ void main() {
       );
     }
     debugDisableShadows = true;
-  },);
+  });
 }

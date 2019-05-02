@@ -2027,8 +2027,7 @@ void main() {
         find.byType(InputDecorator),
         matchesSkiaGoldFile('input_decorator.outline_icon_label.rtl.png'),
       );
-    },
-  );
+    });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305

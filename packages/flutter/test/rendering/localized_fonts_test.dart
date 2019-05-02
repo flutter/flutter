@@ -51,8 +51,7 @@ void main() {
         find.byType(RichText),
         matchesSkiaGoldFile('localized_fonts.rich_text.styled_text_span.png'),
       );
-    },
-  );
+    });
 
   testWidgets(
     'Text with locale-specific glyphs, ambient locale',
@@ -102,8 +101,7 @@ void main() {
         find.byType(Row),
         matchesSkiaGoldFile('localized_fonts.text_ambient_locale.chars.png'),
       );
-    },
-  );
+    });
 
   testWidgets(
     'Text with locale-specific glyphs, explicit locale',
@@ -145,7 +143,6 @@ void main() {
         find.byType(Row),
         matchesSkiaGoldFile('localized_fonts.text_explicit_locale.chars.png'),
       );
-    },
-  );
+    });
 
 }

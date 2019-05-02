@@ -79,7 +79,7 @@ void main() {
       find.byKey(key),
       matchesSkiaGoldFile('bottom_app_bar.custom_shape.2.png'),
     );
-  },);
+  });
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
