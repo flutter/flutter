@@ -90,7 +90,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
         'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
       );
     }());
-    _ticker = Ticker(onTick, debugLabel: 'created by $this');
+    _ticker = Ticker(onTick, debugLabel: kDebugMode ? 'created by $this' : null);
     // We assume that this is called from initState, build, or some sort of
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're

@@ -501,7 +501,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         FlutterError.dumpErrorToConsole(FlutterErrorDetails(
           exception: exception,
           stack: _unmangle(stack),
-          context: 'running a test (but after the test had completed)',
+          context: ErrorDescription('running a test (but after the test had completed)'),
           library: 'Flutter test framework',
         ), forceReport: true);
         return;
@@ -534,31 +534,33 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       // _this_ zone, the test framework would find this zone was the current
       // zone and helpfully throw the error in this zone, causing us to be
       // directly called again.
-      String treeDump;
+      DiagnosticsNode treeDump;
       try {
-        treeDump = renderViewElement?.toStringDeep() ?? '<no tree>';
+        treeDump = renderViewElement?.toDiagnosticsNode() ?? DiagnosticsNode.message('<no tree>');
+        // TODO(jacobr): this is a hack to make sure the tree can safely be fully dumped.
+        // Potentially everything is good enough without this case.
+        treeDump.toStringDeep();
       } catch (exception) {
-        treeDump = '<additional error caught while dumping tree: $exception>';
+        treeDump = DiagnosticsNode.message('<additional error caught while dumping tree: $exception>', level: DiagnosticLevel.error);
       }
-      final StringBuffer expectLine = StringBuffer();
-      final int stackLinesToOmit = reportExpectCall(stack, expectLine);
+      final List<DiagnosticsNode> omittedFrames = <DiagnosticsNode>[];
+      final int stackLinesToOmit = reportExpectCall(stack, omittedFrames);
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: _unmangle(stack),
-        context: 'running a test',
+        context: ErrorDescription('running a test'),
         library: 'Flutter test framework',
         stackFilter: (Iterable<String> frames) {
           return FlutterError.defaultStackFilter(frames.skip(stackLinesToOmit));
         },
-        informationCollector: (StringBuffer information) {
+        informationCollector: () sync* {
           if (stackLinesToOmit > 0)
-            information.writeln(expectLine.toString());
+            yield* omittedFrames;
           if (showAppDumpInErrors) {
-            information.writeln('At the time of the failure, the widget tree looked as follows:');
-            information.writeln('# ${treeDump.split("\n").takeWhile((String s) => s != "").join("\n# ")}');
+            yield DiagnosticsProperty<DiagnosticsNode>('At the time of the failure, the widget tree looked as follows', treeDump, linePrefix: '# ', style: DiagnosticsTreeStyle.flat);
           }
           if (description.isNotEmpty)
-            information.writeln('The test description was:\n$description');
+            yield DiagnosticsProperty<String>('The test description was', description, style: DiagnosticsTreeStyle.errorProperty);
         },
       ));
       assert(_parentZone != null);
@@ -740,7 +742,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   int get microtaskCount => _currentFakeAsync.microtaskCount;
 
-  static Set<String> _allowedKeys;
+  /// A whitelist [Set] that is used in mocking the asset message channel.
+  static Set<String> _allowedAssetKeys;
 
   void _mockFlutterAssets() {
     if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
@@ -748,29 +751,39 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
     final String assetFolderPath = Platform.environment['UNIT_TEST_ASSETS'];
     _ensureInitialized(assetFolderPath);
-    BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
-      final String key = utf8.decode(message.buffer.asUint8List());
-      if (_allowedKeys.contains(key)) {
-        final File asset = File(path.join(assetFolderPath, key));
-        final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
-        return Future<ByteData>.value(encoded.buffer.asByteData());
-      }
-    });
+
+    if (_allowedAssetKeys.isNotEmpty) {
+      BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
+        final String key = utf8.decode(message.buffer.asUint8List());
+        if (_allowedAssetKeys.contains(key)) {
+          final File asset = File(path.join(assetFolderPath, key));
+          final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+          return Future<ByteData>.value(encoded.buffer.asByteData());
+        }
+      });
+    }
   }
 
   void _ensureInitialized(String assetFolderPath) {
-    if (_allowedKeys == null) {
-      final File manifestFile = File(
-          path.join(assetFolderPath, 'AssetManifest.json'));
-      final Map<String, dynamic> manifest = json.decode(
-          manifestFile.readAsStringSync());
-      _allowedKeys = <String>{
-        'AssetManifest.json',
-      };
-      for (List<dynamic> value in manifest.values) {
-        final List<String> strList = List<String>.from(value);
-        _allowedKeys.addAll(strList);
-      }
+    if (_allowedAssetKeys != null) {
+      return;
+    }
+    final File manifestFile = File(
+        path.join(assetFolderPath, 'AssetManifest.json'));
+    // If the file does not exist, it means there is no asset declared in
+    // the project.
+    if (!manifestFile.existsSync()) {
+      _allowedAssetKeys = <String>{};
+      return;
+    }
+    final Map<String, dynamic> manifest = json.decode(
+        manifestFile.readAsStringSync());
+    _allowedAssetKeys = <String>{
+      'AssetManifest.json',
+    };
+    for (List<dynamic> value in manifest.values) {
+      final List<String> strList = List<String>.from(value);
+      _allowedAssetKeys.addAll(strList);
     }
   }
 
@@ -836,7 +849,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           exception: exception,
           stack: stack,
           library: 'Flutter test framework',
-          context: 'while running async test code',
+          context: ErrorDescription('while running async test code'),
         ));
         return null;
       }).whenComplete(() {
@@ -1324,7 +1337,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
         exception: error,
         stack: stack,
         library: 'Flutter test framework',
-        context: 'while running async test code',
+        context: ErrorSummary('while running async test code'),
       ));
       return null;
     } finally {
