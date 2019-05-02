@@ -4,8 +4,7 @@
 
 import 'dart:async';
 
-import '../build_info.dart';
-import '../platform_step.dart';
+import '../android/apk.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
@@ -48,12 +47,10 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final BuildInfo buildInfo = getBuildInfo();
-    final PlatformBuildStep platformStep = platformBuilders.selectPlatform(buildInfo: buildInfo);
-    await platformStep.build(
+    await buildApk(
       project: FlutterProject.current(),
       target: targetFile,
-      buildInfo: buildInfo,
+      buildInfo: getBuildInfo(),
     );
     return null;
   }
