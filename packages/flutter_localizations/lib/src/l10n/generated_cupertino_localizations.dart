@@ -270,16 +270,16 @@ class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
   String get timerPickerHourLabelOther => r'horas';
 
   @override
-  String get timerPickerMinuteLabelOne => r'minuto';
+  String get timerPickerMinuteLabelOne => r'min';
 
   @override
-  String get timerPickerMinuteLabelOther => r'minutos';
+  String get timerPickerMinuteLabelOther => r'min';
 
   @override
-  String get timerPickerSecondLabelOne => r's';
+  String get timerPickerSecondLabelOne => r'seg';
 
   @override
-  String get timerPickerSecondLabelOther => r's';
+  String get timerPickerSecondLabelOther => r'seg';
 
   @override
   String get todayLabel => r'Hoje';
