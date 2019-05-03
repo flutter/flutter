@@ -45,6 +45,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   Color _frameColor = Colors.white54;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _barcodeFound = false;
+  Size _previewSize;
 
   @override
   void initState() {
@@ -102,13 +103,14 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
     _cameraController = CameraController(camera, preset);
     await _cameraController.initialize();
-
+    _previewSize = _cameraController.value.previewSize;
     setState(() {});
   }
 
   Future<void> _startStreamingImagesToScanner(int sensorOrientation) async {
     final BarcodeDetector detector = FirebaseVision.instance.barcodeDetector();
     bool isDetecting = false;
+    final MediaQueryData data = MediaQuery.of(context);
 
     _cameraController.startImageStream((CameraImage image) {
       if (isDetecting) {
@@ -125,7 +127,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
         (dynamic result) {
           _handleResult(
             barcodes: result,
-            screenSize: MediaQuery.of(context).size,
+            data: data,
             imageSize: Size(
               image.width.toDouble(),
               image.height.toDouble(),
@@ -137,13 +139,15 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   void _handleResult({
-    List<Barcode> barcodes,
-    Size screenSize,
-    Size imageSize,
+    @required List<Barcode> barcodes,
+    @required MediaQueryData data,
+    @required Size imageSize,
   }) {
     if (!_cameraController.value.isStreamingImages || barcodes.isEmpty) {
       return;
     }
+
+    final Size screenSize = data.size;
 
     // Flip since photo is vertical
     final double widthScale = imageSize.height / screenSize.width;
@@ -227,7 +231,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     return Container(
       color: Colors.black,
       child: Transform.scale(
-        scale: 1,
+        scale: _getImageZoom(MediaQuery.of(context)),
         child: Center(
           child: AspectRatio(
             aspectRatio: _cameraController.value.aspectRatio,
@@ -236,6 +240,17 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
         ),
       ),
     );
+  }
+
+  double _getImageZoom(MediaQueryData data) {
+    final double logicalWidth = data.size.width;
+    final double logicalHeight = _previewSize.aspectRatio * logicalWidth;
+
+    final EdgeInsets padding = data.padding;
+    final double maxLogicalHeight =
+        data.size.height - padding.top - padding.bottom;
+
+    return maxLogicalHeight / logicalHeight;
   }
 
   void _showBottomSheet() {
@@ -351,10 +366,15 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     Widget background;
     if (_barcodePictureFilePath != null) {
       background = Container(
-        constraints: const BoxConstraints.expand(),
-        child: Image.file(
-          File(_barcodePictureFilePath),
-          fit: BoxFit.contain,
+        color: Colors.black,
+        child: Transform.scale(
+          scale: _getImageZoom(MediaQuery.of(context)),
+          child: Center(
+            child: Image.file(
+              File(_barcodePictureFilePath),
+              fit: BoxFit.fitWidth,
+            ),
+          ),
         ),
       );
     } else if (_cameraController != null &&
