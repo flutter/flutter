@@ -11,12 +11,15 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
+// import 'context_menu.dart';
 import 'debug.dart';
+import 'dropdown.dart';
 import 'feedback.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
+import 'popup_menu.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -665,6 +668,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _startSplash(details.globalPosition);
   }
 
+  void _handleSecondaryTapDown(TapDownDetails details) {
+    _renderEditable.handleSecondaryTapDown(details);
+  }
+
   void _handleForcePressStarted(ForcePressDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWordsInRange(
@@ -764,6 +771,18 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
       from: startDetails.globalPosition,
       to: updateDetails.globalPosition,
       cause: SelectionChangedCause.drag,
+    );
+  }
+
+  void _handleContextMenu(ContextMenuDetails details) {
+    showMenu(
+      context: context,
+      position: RelativeRect.fromSize(details.location & Size.zero, MediaQuery.of(context).size),
+      items: <PopupMenuEntry<void>>[
+        PopupMenuItem<void>(
+          child: Text('Selection ${details.withinSelection}'),
+        ),
+      ],
     );
   }
 
@@ -884,6 +903,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
+        onContextMenu: _handleContextMenu,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
@@ -929,6 +949,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
         child: TextSelectionGestureDetector(
           onTapDown: _handleTapDown,
+          onSecondaryTapDown: _handleSecondaryTapDown,
           onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
           onSingleTapUp: _handleSingleTapUp,
           onSingleTapCancel: _handleSingleTapCancel,

@@ -701,6 +701,7 @@ class TextSelectionGestureDetector extends StatefulWidget {
   const TextSelectionGestureDetector({
     Key key,
     this.onTapDown,
+    this.onSecondaryTapDown,
     this.onForcePressStart,
     this.onForcePressEnd,
     this.onSingleTapUp,
@@ -721,6 +722,11 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// double click or a long press, except touches that include enough movement
   /// to not qualify as taps (e.g. pans and flings).
   final GestureTapDownCallback onTapDown;
+
+  /// Called for every secondary tap down. It triggers either after a short
+  /// timeout of pressing the secondary button, or when releasing the button,
+  /// whichever comes first.
+  final GestureTapDownCallback onSecondaryTapDown;
 
   /// Called when a pointer has tapped down and the force of the pointer has
   /// just become greater than [ForcePressGestureDetector.startPressure].
@@ -836,6 +842,12 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
     }
   }
 
+  void _handleSecondaryTapDown(TapDownDetails details) {
+    if (widget.onSecondaryTapDown != null) {
+      widget.onSecondaryTapDown(details);
+    }
+  }
+
   DragStartDetails _lastDragStartDetails;
   DragUpdateDetails _lastDragUpdateDetails;
   Timer _dragUpdateThrottleTimer;
@@ -942,7 +954,8 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
         instance
           ..onTapDown = _handleTapDown
           ..onTapUp = _handleTapUp
-          ..onTapCancel = _handleTapCancel;
+          ..onTapCancel = _handleTapCancel
+          ..onSecondaryTapDown = _handleSecondaryTapDown;
       },
     );
 

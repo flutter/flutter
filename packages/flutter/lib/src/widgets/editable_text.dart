@@ -290,6 +290,7 @@ class EditableText extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
+    this.onContextMenu,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
@@ -644,6 +645,8 @@ class EditableText extends StatefulWidget {
   /// Called when the user changes the selection of text (including the cursor
   /// location).
   final SelectionChangedCallback onSelectionChanged;
+
+  final ContextMenuHandler onContextMenu;
 
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
@@ -1157,6 +1160,25 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  void _handleContextTap(TextPosition tapPosition) {
+    final TextSelection selection = _value.selection;
+    final bool withinSelection = selection.start <= tapPosition.offset
+      && selection.end > tapPosition.offset;
+    if (withinSelection) {
+      _handleContextMenu(ContextMenuDetails(
+        location: details.globalPosition,
+        withinSelection: true,
+      ));
+    } else {
+      _lastTapDownPosition = details.globalPosition;
+      selectPosition(cause: SelectionChangedCause.tap);
+      _handleContextMenu(ContextMenuDetails(
+        location: details.globalPosition,
+        withinSelection: false,
+      ));
+    }
+  }
+
   // Animation configuration for scrolling the caret back on screen.
   static const Duration _caretAnimationDuration = Duration(milliseconds: 100);
   static const Curve _caretAnimationCurve = Curves.fastOutSlowIn;
@@ -1316,10 +1338,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleFocusChanged() {
+    print('_handleFocusChanged $this');
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
     if (_hasFocus) {
+      final FocusScopeNode scopeNode = FocusScope.of(context);
+      assert(scopeNode != null);
+      scopeNode.removeListener(_handleScopeFocusChanged);
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
       _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
@@ -1330,10 +1356,41 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
-      // Clear the selection and composition state if this widget lost focus.
-      _value = TextEditingValue(text: _value.text);
+      // Changes upon losing focus:
+      //  - Text: always keep
+      //  - Composing: always clear
+      //  - Selection: clear if the new focus is within the same scope
+      final FocusScopeNode scopeNode = FocusScope.of(context);
+      assert(scopeNode != null);
+      final bool keepSelection = !scopeNode.hasFocus;
+      print('$scopeNode $keepSelection');
+      _value = TextEditingValue(
+        text: _value.text,
+        selection: keepSelection ?
+          _value.selection :
+          const TextSelection.collapsed(offset: -1),
+      );
+      print(_value);
+      // If selection is not cleared, clear it when the focus goes out of the
+      // scope
+      if (keepSelection) {
+        scopeNode.addListener(_handleScopeFocusChanged);
+      }
     }
     updateKeepAlive();
+  }
+
+  void _handleScopeFocusChanged() {
+    // This callback is only registered when EditableText loses focus with an
+    // uncollapsed selection, and the new focus is within the same scope.
+    // It clears selection when focus goes out of the scope.
+    final FocusScopeNode scopeNode = FocusScope.of(context);
+    assert(scopeNode != null);
+    assert(scopeNode.hasFocus);
+    scopeNode.removeListener(_handleScopeFocusChanged);
+    _value = TextEditingValue(
+      text: _value.text,
+    );
   }
 
   TextDirection get _textDirection {
@@ -1406,6 +1463,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
+    final Color selectionColor = _hasFocus ? widget.selectionColor : const Color.fromARGB(255, 170, 170, 170);
     return Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
@@ -1433,7 +1491,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               minLines: widget.minLines,
               expands: widget.expands,
               strutStyle: widget.strutStyle,
-              selectionColor: widget.selectionColor,
+              selectionColor: selectionColor,
               textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
               textDirection: _textDirection,
@@ -1443,6 +1501,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
+              onContextMenu: _handleContextMenu,
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
@@ -1515,6 +1574,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.offset,
     this.onSelectionChanged,
     this.onCaretChanged,
+    this.onContextMenu,
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
@@ -1547,6 +1607,7 @@ class _Editable extends LeafRenderObjectWidget {
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
   final CaretChangedHandler onCaretChanged;
+  final ContextTapHandler onContextTap;
   final bool rendererIgnoresPointer;
   final double cursorWidth;
   final Radius cursorRadius;
@@ -1577,6 +1638,7 @@ class _Editable extends LeafRenderObjectWidget {
       offset: offset,
       onSelectionChanged: onSelectionChanged,
       onCaretChanged: onCaretChanged,
+      onContextTap: onContextTap,
       ignorePointer: rendererIgnoresPointer,
       obscureText: obscureText,
       cursorWidth: cursorWidth,
@@ -1609,6 +1671,7 @@ class _Editable extends LeafRenderObjectWidget {
       ..offset = offset
       ..onSelectionChanged = onSelectionChanged
       ..onCaretChanged = onCaretChanged
+      ..onContextTap = onContextTap
       ..ignorePointer = rendererIgnoresPointer
       ..obscureText = obscureText
       ..cursorWidth = cursorWidth
