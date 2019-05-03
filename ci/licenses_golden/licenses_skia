@@ -1,4 +1,4 @@
-Signature: 4147c76fdde1ec4babb2a742395a8dd6
+Signature: 0e7774857f902219d918f486d54846b8
 
 UNUSED LICENSES:
 
@@ -4453,6 +4453,7 @@ FILE: ../../../third_party/skia/docs/examples/Color_Type_RGBA_F16.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_Type_RGB_101010.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_Type_RGB_565.cpp
 FILE: ../../../third_party/skia/docs/examples/Color_Type_RGB_888.cpp
+FILE: ../../../third_party/skia/docs/examples/Colors.cpp
 FILE: ../../../third_party/skia/docs/examples/Conic_Weight_a.cpp
 FILE: ../../../third_party/skia/docs/examples/Conic_Weight_b.cpp
 FILE: ../../../third_party/skia/docs/examples/Conic_Weight_c.cpp
