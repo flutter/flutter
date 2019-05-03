@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-  testWidgets('FlatButton implements debugFillDescription', (WidgetTester tester) async {
+  testWidgets('FlatButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     FlatButton(
         onPressed: () { },
@@ -30,6 +30,33 @@ void main() {
       'highlightColor: Color(0xff1565c0)',
       'splashColor: Color(0xff9e9e9e)',
     ]);
+  });
+
+  testWidgets('Default FlatButton meets a11y contrast guidelines', (WidgetTester tester) async {
+    final SemanticsHandle handle = tester.ensureSemantics();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FlatButton(
+              child: const Text('FlatButton'),
+              onPressed: () { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default, not disabled
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Highlighted (pressed)
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    await tester.startGesture(center);
+    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    handle.dispose();
   });
 
   testWidgets('FlatButton has no clip by default', (WidgetTester tester) async {
