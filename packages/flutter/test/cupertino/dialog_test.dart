@@ -155,6 +155,15 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
+  testWidgets('Dialog disabled action style', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
+      child: Text('Ok'),
+    )));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color.opacity, greaterThanOrEqualTo(127 / 255));
+    expect(widget.style.color.opacity, lessThanOrEqualTo(128 / 255));
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
