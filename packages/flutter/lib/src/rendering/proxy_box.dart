@@ -2258,10 +2258,6 @@ class RenderFittedBox extends RenderProxyBox {
     _transform = null;
   }
 
-  double _divHandleZero(double a, double b) {
-    return a == 0 ? 0 : a / b;
-  }
-
   void _updatePaintData() {
     if (_transform != null)
       return;
@@ -2273,8 +2269,8 @@ class RenderFittedBox extends RenderProxyBox {
       _resolve();
       final Size childSize = child.size;
       final FittedSizes sizes = applyBoxFit(_fit, childSize, size);
-      final double scaleX = _divHandleZero(sizes.destination.width, sizes.source.width);
-      final double scaleY = _divHandleZero(sizes.destination.height, sizes.source.height);
+      final double scaleX = sizes.destination.width / sizes.source.width;
+      final double scaleY = sizes.destination.height / sizes.source.height;
       final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
       final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
@@ -2296,7 +2292,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size.isEmpty)
+    if (size.isEmpty || child.size.isEmpty)
       return;
     _updatePaintData();
     if (child != null) {
