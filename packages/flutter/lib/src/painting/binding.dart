@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:typed_data' show Uint8List;
-import 'dart:ui' as ui show instantiateImageCodec, Codec, Size;
+import 'dart:ui' as ui show instantiateImageCodec, kDoNotResizeDimension, Codec, Size;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
@@ -114,19 +114,17 @@ mixin PaintingBinding on BindingBase, ServicesBinding {
 
   // ignore: deprecated_member_use_from_same_package
   /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
-  Future<ui.Codec> instantiateImageCodec(Uint8List list, {ui.Size size}) {
-    if (size == null) {
-      return ui.instantiateImageCodec(
-        list,
-        decodedCacheRatioCap: decodedCacheRatioCap, // ignore: deprecated_member_use_from_same_package
-      );
-    } else {
-      return ui.instantiateImageCodec(
-        list,
-        decodedCacheRatioCap: decodedCacheRatioCap, // ignore: deprecated_member_use_from_same_package
-        // TODO(iskakaushik): size: size,
-      );
-    }
+  Future<ui.Codec> instantiateImageCodec(
+    Uint8List list, {
+    int targetWidth = ui.kDoNotResizeDimension,
+    int targetHeight = ui.kDoNotResizeDimension,
+  }) {
+    return ui.instantiateImageCodec(
+      list,
+      decodedCacheRatioCap: decodedCacheRatioCap, // ignore: deprecated_member_use_from_same_package
+      targetWidth: targetWidth,
+      targetHeight: targetHeight,
+    );
   }
 
   @override
