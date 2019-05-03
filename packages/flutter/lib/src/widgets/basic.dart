@@ -4715,15 +4715,11 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 /// ![A menu created using the Flow widget opens and closes.](https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4)
 ///
-/// ```dart imports
-/// import 'package:flutter/material.dart';
-/// ```
-///
 /// ```dart main
-/// void main() => runApp(FlowApp());
-/// ```
+/// import 'package:flutter/material.dart';
 ///
-/// ```dart preamble
+/// void main() => runApp(FlowApp());
+///
 /// class FlowApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
@@ -4742,9 +4738,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   @override
 ///   _FlowMenuState createState() => _FlowMenuState();
 /// }
-/// ```
 ///
-/// ```dart
 /// class _FlowMenuState extends State<FlowMenu>
 ///   with SingleTickerProviderStateMixin {
 ///   AnimationController menuAnimation;
