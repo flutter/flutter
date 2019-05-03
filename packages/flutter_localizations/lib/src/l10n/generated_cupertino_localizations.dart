@@ -197,6 +197,182 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   String get todayLabel => r'aujourd' "'" r'hui';
 }
 
+/// The translations for Portuguese (`pt`).
+class CupertinoLocalizationPt extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Portuguese.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationPt({
+    String localeName = 'pt',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get alertDialogLabel => r'Alerta';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get copyButtonLabel => r'Copiar';
+
+  @override
+  String get cutButtonLabel => r'Cortar';
+
+  @override
+  String get datePickerDateOrderString => r'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
+
+  @override
+  String get datePickerHourSemanticsLabelOne => r'$hour hora';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour horas';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
+
+  @override
+  String get pasteButtonLabel => r'Colar';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get selectAllButtonLabel => r'Selecionar Tudo';
+
+  @override
+  String get timerPickerHourLabelOne => r'hora';
+
+  @override
+  String get timerPickerHourLabelOther => r'horas';
+
+  @override
+  String get timerPickerMinuteLabelOne => r'min';
+
+  @override
+  String get timerPickerMinuteLabelOther => r'min';
+
+  @override
+  String get timerPickerSecondLabelOne => r'seg';
+
+  @override
+  String get timerPickerSecondLabelOther => r'seg';
+
+  @override
+  String get todayLabel => r'Hoje';
+}
+
+/// The translations for Portuguese, as used in Portugal (`pt_PT`).
+class CupertinoLocalizationPtPt extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Portuguese, as used in Portugal.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationPtPt({
+    String localeName = 'pt_PT',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get alertDialogLabel => r'Alerta';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get copyButtonLabel => r'Copiar';
+
+  @override
+  String get cutButtonLabel => r'Cortar';
+
+  @override
+  String get datePickerDateOrderString => r'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
+
+  @override
+  String get datePickerHourSemanticsLabelOne => r'$hour hora';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour horas';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuto';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute minutos';
+
+  @override
+  String get pasteButtonLabel => r'Colar';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get selectAllButtonLabel => r'Selecionar tudo';
+
+  @override
+  String get timerPickerHourLabelOne => r'hora';
+
+  @override
+  String get timerPickerHourLabelOther => r'horas';
+
+  @override
+  String get timerPickerMinuteLabelOne => r'min';
+
+  @override
+  String get timerPickerMinuteLabelOther => r'min';
+
+  @override
+  String get timerPickerSecondLabelOne => r's';
+
+  @override
+  String get timerPickerSecondLabelOther => r's';
+
+  @override
+  String get todayLabel => r'Hoje';
+}
+
 /// The set of supported languages, as language code strings.
 ///
 /// The [GlobalCupertinoLocalizations.delegate] can generate localizations for
@@ -211,6 +387,8 @@ class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
 final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <String>[
   'en', // English
   'fr', // French
+  'pt', // Portuguese
+  'pt_PT', // Portuguese, as used in Portugal
 ]);
 
 /// Creates a [GlobalCupertinoLocalizations] instance for the given `locale`.
@@ -225,6 +403,8 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 /// {@template flutter.localizations.cupertino.languages}
 ///  * `en` - English
 ///  * `fr` - French
+///  * `pt` - Portuguese
+///  * `pt_PT` - Portuguese (Portugal)
 /// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
@@ -244,6 +424,10 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
     case 'en':
       return CupertinoLocalizationEn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fr':
+      return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'pt':
+      return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'pt_PT':
       return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
   }
   assert(false, 'getCupertinoTranslation() called for unsupported locale "$locale"');
