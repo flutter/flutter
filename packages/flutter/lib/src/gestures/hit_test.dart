@@ -71,7 +71,9 @@ class HitTestEntry {
 /// The result of performing a hit test.
 class HitTestResult {
   /// Creates an empty hit test result.
-  HitTestResult() : _path = <HitTestEntry>[];
+  HitTestResult()
+     : _path = <HitTestEntry>[],
+       _transforms = Queue<Matrix4>();
 
   /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
   /// generic [HitTestResult].
@@ -79,7 +81,9 @@ class HitTestResult {
   /// The [HitTestEntry]s added to the returned [HitTestResult] are also
   /// added to the wrapped `result` (both share the same underlying data
   /// structure to store [HitTestEntry]s).
-  HitTestResult.wrap(HitTestResult result) : _path = result._path;
+  HitTestResult.wrap(HitTestResult result)
+     : _path = result._path,
+       _transforms = result._transforms;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
@@ -88,6 +92,8 @@ class HitTestResult {
   /// specific (i.e., first) entry and proceeds in order through the path.
   Iterable<HitTestEntry> get path => _path;
   final List<HitTestEntry> _path;
+
+  final Queue<Matrix4> _transforms;
 
   /// Add a [HitTestEntry] to the path.
   ///
@@ -99,8 +105,6 @@ class HitTestResult {
     entry._transform = _transforms.isEmpty ? null : _transforms.last;
     _path.add(entry);
   }
-
-  final Queue<Matrix4> _transforms = Queue<Matrix4>();
 
   /// Pushes a new transform matrix that is to be applied to all future
   /// [HitTestEntry]s added via [add] until it is removed via [popTransform].
