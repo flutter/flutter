@@ -46,25 +46,32 @@ class AndroidPlatformBuildStep extends PlatformBuildStep {
   }
 
   @override
-  Set<TargetPlatform> get targetPlatforms => const <TargetPlatform>{
-    TargetPlatform.android_arm,
-    TargetPlatform.android_arm64,
-    TargetPlatform.android_x64,
-    TargetPlatform.android_x86,
-  };
-
-  @override
-  Set<BuildMode> get buildModes => const <BuildMode>{
-    BuildMode.debug,
-    BuildMode.dynamicProfile,
-    BuildMode.dynamicRelease,
-    BuildMode.profile,
-    BuildMode.release,
-  };
-
-  @override
   Set<DevelopmentArtifact> get developmentArtifacts => const <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
     DevelopmentArtifact.android,
+  };
+
+  @override
+  Map<TargetPlatform, Set<BuildMode>> get supported => const <TargetPlatform, Set<BuildMode>>{
+    TargetPlatform.android_arm: <BuildMode>{
+      BuildMode.debug,
+      BuildMode.dynamicProfile,
+      BuildMode.dynamicRelease,
+      BuildMode.profile,
+      BuildMode.release,
+    },
+    TargetPlatform.android_arm64: <BuildMode>{
+      BuildMode.debug,
+      BuildMode.dynamicProfile,
+      BuildMode.dynamicRelease,
+      BuildMode.profile,
+      BuildMode.release,
+    },
+    TargetPlatform.android_x64: <BuildMode>{
+      BuildMode.debug,
+    },
+    TargetPlatform.android_x86: <BuildMode>{
+      BuildMode.debug,
+    },
   };
 }

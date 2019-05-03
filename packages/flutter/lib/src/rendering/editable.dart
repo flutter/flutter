@@ -1501,9 +1501,9 @@ class RenderEditable extends RenderBox {
   Rect get _getCaretPrototype {
     switch(defaultTargetPlatform){
       case TargetPlatform.iOS:
-        return Rect.fromLTWH(0.0, -_kCaretHeightOffset + .5, cursorWidth, preferredLineHeight + 2);
+        return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       default:
-        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+        return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
   }
   @override
@@ -1550,19 +1550,32 @@ class RenderEditable extends RenderBox {
     if (_cursorOffset != null)
       caretRect = caretRect.shift(_cursorOffset);
 
-    // Override the height to take the full height of the glyph at the TextPosition
-    // when not on iOS. iOS has special handling that creates a taller caret.
-    // TODO(garyq): See the TODO for _getCaretPrototype.
-    if (defaultTargetPlatform != TargetPlatform.iOS && _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
-      caretRect = Rect.fromLTWH(
-        caretRect.left,
-        // Offset by _kCaretHeightOffset to counteract the same value added in
-        // _getCaretPrototype. This prevents this from scaling poorly for small
-        // font sizes.
-        caretRect.top - _kCaretHeightOffset,
-        caretRect.width,
-        _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
-      );
+    if (_textPainter.getFullHeightForCaret(textPosition, _caretPrototype) != null) {
+      switch (defaultTargetPlatform) {
+        case TargetPlatform.iOS: {
+          final double heightDiff = _textPainter.getFullHeightForCaret(textPosition, _caretPrototype) - caretRect.height;
+          // Center the caret vertically along the text.
+          caretRect = Rect.fromLTWH(
+            caretRect.left,
+            caretRect.top + heightDiff / 2,
+            caretRect.width,
+            caretRect.height,
+          );
+          break;
+        }
+        default: {
+          // Override the height to take the full height of the glyph at the TextPosition
+          // when not on iOS. iOS has special handling that creates a taller caret.
+          // TODO(garyq): See the TODO for _getCaretPrototype.
+          caretRect = Rect.fromLTWH(
+            caretRect.left,
+            caretRect.top,
+            caretRect.width,
+            _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
+          );
+          break;
+        }
+      }
     }
 
     caretRect = caretRect.shift(_getPixelPerfectCursorOffset(caretRect));

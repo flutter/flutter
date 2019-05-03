@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import '../base/common.dart';
 import '../build_info.dart';
 import '../platform_step.dart';
 import '../project.dart';
@@ -49,7 +50,12 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = getBuildInfo();
-    final PlatformBuildStep platformStep = platformBuilders.selectPlatform(buildInfo: buildInfo);
+    PlatformBuildStep platformStep;
+    try {
+      platformStep = platformBuilders.selectPlatform(buildInfo: buildInfo);
+    } on Exception catch (err) {
+      throwToolExit('$err');
+    }
     await platformStep.build(
       project: FlutterProject.current(),
       target: targetFile,

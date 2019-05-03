@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/platform_step.dart';
@@ -22,12 +21,14 @@ void main() {
     test('Fails if more than one builder matches', () => testbed.run(() {
       const PlatformBuilders platformBuilders = PlatformBuilders(<PlatformBuildStep>[
         FakePlatformStep(
-          buildModes: <BuildMode>{ BuildMode.debug, },
-          targetPlatforms: <TargetPlatform>{ TargetPlatform.android_arm }
+          supported: <TargetPlatform, Set<BuildMode>>{
+            TargetPlatform.android_arm: <BuildMode>{ BuildMode.debug, },
+          }
         ),
         FakePlatformStep(
-          buildModes: <BuildMode>{ BuildMode.debug, },
-          targetPlatforms: <TargetPlatform>{ TargetPlatform.android_arm }
+          supported: <TargetPlatform, Set<BuildMode>>{
+            TargetPlatform.android_arm: <BuildMode>{ BuildMode.debug, },
+          }
         ),
       ]);
       const BuildInfo buildInfo = BuildInfo(
@@ -36,14 +37,16 @@ void main() {
         targetPlatform: TargetPlatform.android_arm,
       );
 
-      expect(() => platformBuilders.selectPlatform(buildInfo: buildInfo), throwsA(isA<ToolExit>()));
+      expect(() => platformBuilders.selectPlatform(buildInfo: buildInfo),
+        throwsA(isA<AmbiguousPlatformBuilder>()));
     }));
 
     test('Fails if more than no builders match', () => testbed.run(() {
       const PlatformBuilders platformBuilders = PlatformBuilders(<PlatformBuildStep>[
         FakePlatformStep(
-          buildModes: <BuildMode>{ BuildMode.debug, },
-          targetPlatforms: <TargetPlatform>{ TargetPlatform.android_arm }
+          supported: <TargetPlatform, Set<BuildMode>>{
+            TargetPlatform.android_arm: <BuildMode>{ BuildMode.debug, }
+          }
         ),
       ]);
       const BuildInfo buildInfo = BuildInfo(
@@ -52,18 +55,21 @@ void main() {
         targetPlatform: TargetPlatform.ios,
       );
 
-      expect(() => platformBuilders.selectPlatform(buildInfo: buildInfo), throwsA(isA<ToolExit>()));
+      expect(() => platformBuilders.selectPlatform(buildInfo: buildInfo),
+        throwsA(isA<MissingPlatformBuilder>()));
     }));
 
     test('Finds a matching step', () => testbed.run(() {
       const PlatformBuildStep iosStep = FakePlatformStep(
-        buildModes: <BuildMode>{ BuildMode.debug, },
-        targetPlatforms: <TargetPlatform>{ TargetPlatform.ios }
+        supported: <TargetPlatform, Set<BuildMode>>{
+          TargetPlatform.ios: <BuildMode>{ BuildMode.debug },
+        }
       );
       const PlatformBuilders platformBuilders = PlatformBuilders(<PlatformBuildStep>[
         FakePlatformStep(
-          buildModes: <BuildMode>{ BuildMode.debug, },
-          targetPlatforms: <TargetPlatform>{ TargetPlatform.android_arm }
+          supported: <TargetPlatform, Set<BuildMode>>{
+            TargetPlatform.android_arm: <BuildMode>{ BuildMode.debug },
+          }
         ),
         iosStep,
       ]);
@@ -80,9 +86,8 @@ void main() {
 
 class FakePlatformStep extends PlatformBuildStep {
   const FakePlatformStep({
-    this.buildModes,
+    this.supported,
     this.developmentArtifacts,
-    this.targetPlatforms,
   });
 
   @override
@@ -91,11 +96,8 @@ class FakePlatformStep extends PlatformBuildStep {
   }
 
   @override
-  final Set<BuildMode> buildModes;
-
-  @override
   final Set<DevelopmentArtifact> developmentArtifacts;
 
   @override
-  final Set<TargetPlatform> targetPlatforms;
+  final Map<TargetPlatform, Set<BuildMode>> supported;
 }

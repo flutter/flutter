@@ -8,6 +8,7 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/process.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/sdk.dart';
@@ -262,12 +263,17 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
       .logLines
       .listen(printStatus);
 
+  BuildInfo buildInfo = command.getBuildInfo();
+  if (buildInfo.targetPlatform == null) {
+    buildInfo = buildInfo.withTargetPlatform(await command.device.targetPlatform);
+  }
+
   final LaunchResult result = await command.device.startApp(
     package,
     mainPath: mainPath,
     route: command.route,
     debuggingOptions: DebuggingOptions.enabled(
-      command.getBuildInfo(),
+      buildInfo,
       startPaused: true,
       observatoryPort: command.observatoryPort,
     ),

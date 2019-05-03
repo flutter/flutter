@@ -358,23 +358,21 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return LaunchResult.failed();
 
-    final TargetPlatform devicePlatform = await targetPlatform;
-    if (!(devicePlatform == TargetPlatform.android_arm ||
-          devicePlatform == TargetPlatform.android_arm64) &&
-        !(debuggingOptions.buildInfo.isDebug ||
-          debuggingOptions.buildInfo.isDynamic)) {
-      printError('Profile and release builds are only supported on ARM targets.');
-      return LaunchResult.failed();
-    }
-
     BuildInfo buildInfo = debuggingOptions.buildInfo;
-    if (buildInfo.targetPlatform == null && devicePlatform == TargetPlatform.android_arm64)
+    if (buildInfo.targetPlatform == null) {
       buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
+    }
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
       final FlutterProject project = FlutterProject.current();
-      final PlatformBuildStep platformStep = platformBuilders.selectPlatform(buildInfo: buildInfo);
+      PlatformBuildStep platformStep;
+      try {
+        platformStep = platformBuilders.selectPlatform(buildInfo: buildInfo);
+      } on Exception catch (err) {
+        printError('$err');
+        return LaunchResult.failed();
+      }
       await platformStep.build(
         project: project,
         target: mainPath,

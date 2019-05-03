@@ -81,7 +81,8 @@ class Cache {
       _artifacts.add(WindowsEngineArtifacts(this));
       _artifacts.add(MacOSEngineArtifacts(this));
       _artifacts.add(LinuxEngineArtifacts(this));
-      _artifacts.add(FuchsiaCacheArtifacts(this));
+      _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
+      _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -190,13 +191,6 @@ class Cache {
   }
   String _engineRevision;
 
-  /// The current version of the Fuchsia SDK the flutter tool will download.
-  String get fuchsiaRevision {
-    _fuchsiaRevision ??= getVersionFor('fuchsia');
-    return _fuchsiaRevision;
-  }
-  String _fuchsiaRevision;
-
   static Cache get instance => context.get<Cache>();
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
@@ -234,7 +228,9 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    final File versionFile = fs.file(fs.path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
+    final File versionFile = fs.file(fs.path.join(
+        _rootOverride?.path ?? flutterRoot, 'bin', 'internal',
+        '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
@@ -851,30 +847,52 @@ class GradleWrapper extends CachedArtifact {
   }
 }
 
-/// The Fuchsia core SDK.
-class FuchsiaCacheArtifacts extends CachedArtifact {
-  FuchsiaCacheArtifacts(Cache cache) : super('fuchsia', cache, const <DevelopmentArtifact> {
+/// Common functionality for pulling Fuchsia SDKs.
+abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
+  _FuchsiaSDKArtifacts(Cache cache, String platform)
+      :_path = 'fuchsia/sdk/core/$platform-amd64',
+       super('fuchsia-$platform', cache, const <DevelopmentArtifact> {
     DevelopmentArtifact.fuchsia,
   });
 
-  static const String _cipdBaseUrl = 'https://chrome-infra-packages.appspot.com/dl';
-  static const String _macOSSdk = 'fuchsia/sdk/core/mac-amd64';
-  static const String _linuxSdk = 'fuchsia/sdk/core/linux-amd64';
+  static const String _cipdBaseUrl =
+      'https://chrome-infra-packages.appspot.com/dl';
 
- @override
-  Future<void> updateInner() async {
-    // Step 1: Determine variant of Fuchsia SDK to download.
-    String packageName;
-    if (platform.isLinux) {
-      packageName = _linuxSdk;
-    } else if (platform.isMacOS) {
-      packageName = _macOSSdk;
-    } else {
-      // Unsupported.
-      return;
+  final String _path;
+
+  @override
+  Directory get location => cache.getArtifactDirectory('fuchsia');
+
+  Future<void> _doUpdate() {
+    final String url = '$_cipdBaseUrl/$_path/+/$version';
+    return _downloadZipArchive('Downloading package fuchsia SDK...',
+                               Uri.parse(url), location);
+  }
+}
+
+/// The Fuchsia core SDK for Linux.
+class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
+  LinuxFuchsiaSDKArtifacts(Cache cache) : super(cache, 'linux');
+
+  @override
+  Future<void> updateInner() {
+    if (!platform.isLinux) {
+      return Future<void>.value();
     }
-    final String url = '$_cipdBaseUrl/$packageName/+/$version';
-    await _downloadZipArchive('Downloading package fuchsia SDK...', Uri.parse(url), location);
+    return _doUpdate();
+  }
+}
+
+/// The Fuchsia core SDK for MacOS.
+class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
+  MacOSFuchsiaSDKArtifacts(Cache cache) : super(cache, 'mac');
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isMacOS) {
+      return Future<void>.value();
+    }
+    return _doUpdate();
   }
 }
 

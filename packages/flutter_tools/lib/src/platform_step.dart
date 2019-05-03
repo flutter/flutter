@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'android/apk.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'build_info.dart';
 import 'cache.dart';
@@ -28,34 +27,62 @@ class PlatformBuilders {
   /// Selects the [PlatformBuildStep] that supports the required [TargetPlatform]
   /// and [BuildMode] requested.
   ///
-  /// Throws a [ToolExit] if zero steps or more than one step match.
+  /// Throws an [AmbiguousPlatformBuilder] if multiple build steps
+  /// match.
+  ///
+  /// Throws a [MissingPlatformBuilder] if no build steps match.
   PlatformBuildStep selectPlatform({
     BuildInfo buildInfo,
   }) {
     PlatformBuildStep selected;
     for (PlatformBuildStep platformStep in _platformSteps) {
-      if (!platformStep.targetPlatforms.contains(buildInfo.targetPlatform)) {
+      final Set<BuildMode> modes = platformStep.supported[buildInfo.targetPlatform];
+      if (modes == null) {
         continue;
       }
-      if (!platformStep.buildModes.contains(buildInfo.mode)) {
+      if (!modes.contains(buildInfo.mode)) {
         continue;
       }
       if (selected != null) {
-        throwToolExit(
-          'Multiple platform steps registered for targetPlatform: ${buildInfo.targetPlatform} '
-          'and build mode: ${buildInfo.mode}.'
+        throw AmbiguousPlatformBuilder(
+          buildInfo.mode,
+          buildInfo.targetPlatform,
         );
       }
       selected = platformStep;
     }
     if (selected == null) {
-      throwToolExit(
-        'No platform steps registered for targetPlatform: ${buildInfo.targetPlatform} '
-        'and build mode: ${buildInfo.mode}.'
+      throw MissingPlatformBuilder(
+        buildInfo.mode,
+        buildInfo.targetPlatform,
       );
     }
     return selected;
   }
+}
+
+/// An exception thrown when there is no builder corresponding to the provided
+/// target platform and build mode combination.
+class MissingPlatformBuilder implements Exception {
+  const MissingPlatformBuilder(this.buildMode, this.targetPlatform);
+
+  final BuildMode buildMode;
+  final TargetPlatform targetPlatform;
+
+  @override
+  String toString() => 'Cannot build for $targetPlatform in $buildMode';
+}
+
+/// An exception thrown when there is are multiple builders corresponding to
+/// the target platform and build mode combination.
+class AmbiguousPlatformBuilder implements Exception {
+  const AmbiguousPlatformBuilder(this.buildMode, this.targetPlatform);
+
+  final BuildMode buildMode;
+  final TargetPlatform targetPlatform;
+
+  @override
+  String toString() => 'Multiple builders for $targetPlatform in $buildMode';
 }
 
 /// The workflow by which a flutter application in packaged into a platform
@@ -70,11 +97,8 @@ abstract class PlatformBuildStep {
     String target,
   });
 
-  /// The targets this platform step supports.
-  Set<TargetPlatform> get targetPlatforms;
-
-  /// The build modes this platform step supports.
-  Set<BuildMode> get buildModes;
+  /// The supported build and platform modes for this target.
+  Map<TargetPlatform, Set<BuildMode>> get supported;
 
   /// Development artifacts required by this platform step.
   Set<DevelopmentArtifact> get developmentArtifacts;
