@@ -68,11 +68,11 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
 }
 
 class _NestedTabBarContainer extends StatelessWidget {
-  final TabController tabController;
-
   const _NestedTabBarContainer({
     this.tabController,
   });
+
+  final TabController tabController;
 
   @override
   Widget build(BuildContext context) {
