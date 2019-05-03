@@ -12,6 +12,8 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import io.flutter.BuildConfig;
@@ -39,7 +41,7 @@ class ResourceExtractor {
     private static final String[] SUPPORTED_ABIS = getSupportedAbis();
 
     @SuppressWarnings("deprecation")
-    static long getVersionCode(PackageInfo packageInfo) {
+    static long getVersionCode(@NonNull PackageInfo packageInfo) {
         // Linter needs P (28) hardcoded or else it will fail these lines.
         if (Build.VERSION.SDK_INT >= 28) {
             return packageInfo.getLongVersionCode();
@@ -48,19 +50,40 @@ class ResourceExtractor {
         }
     }
 
-    private class ExtractTask extends AsyncTask<Void, Void, Void> {
-        ExtractTask() { }
+    private static class ExtractTask extends AsyncTask<Void, Void, Void> {
+        @NonNull
+        private final String mDataDirPath;
+        @NonNull
+        private final HashSet<String> mResources;
+        @NonNull
+        private final AssetManager mAssetManager;
+        @NonNull
+        private final String mPackageName;
+        @NonNull
+        private final PackageManager mPackageManager;
+
+        ExtractTask(@NonNull String dataDirPath,
+                    @NonNull HashSet<String> resources,
+                    @NonNull String packageName,
+                    @NonNull PackageManager packageManager,
+                    @NonNull AssetManager assetManager) {
+            mDataDirPath = dataDirPath;
+            mResources = resources;
+            mAssetManager = assetManager;
+            mPackageName = packageName;
+            mPackageManager = packageManager;
+        }
 
         @Override
         protected Void doInBackground(Void... unused) {
-            final File dataDir = new File(PathUtils.getDataDirectory(mContext));
+            final File dataDir = new File(mDataDirPath);
 
-            final String timestamp = checkTimestamp(dataDir);
+            final String timestamp = checkTimestamp(dataDir, mPackageManager, mPackageName);
             if (timestamp == null) {
                 return null;
             }
 
-            deleteFiles();
+            deleteFiles(mDataDirPath, mResources);
 
             if (!extractAPK(dataDir)) {
                 return null;
@@ -76,23 +99,73 @@ class ResourceExtractor {
 
             return null;
         }
+
+
+        /// Returns true if successfully unpacked APK resources,
+        /// otherwise deletes all resources and returns false.
+        @WorkerThread
+        private boolean extractAPK(@NonNull File dataDir) {
+            for (String asset : mResources) {
+                try {
+                    final String resource = "assets/" + asset;
+                    final File output = new File(dataDir, asset);
+                    if (output.exists()) {
+                        continue;
+                    }
+                    if (output.getParentFile() != null) {
+                        output.getParentFile().mkdirs();
+                    }
+
+                    try (InputStream is = mAssetManager.open(asset);
+                        OutputStream os = new FileOutputStream(output)) {
+                        copy(is, os);
+                    }
+                    if (BuildConfig.DEBUG) {
+                        Log.i(TAG, "Extracted baseline resource " + resource);
+                    }
+                } catch (FileNotFoundException fnfe) {
+                    continue;
+
+                } catch (IOException ioe) {
+                    Log.w(TAG, "Exception unpacking resources: " + ioe.getMessage());
+                    deleteFiles(mDataDirPath, mResources);
+                    return false;
+                }
+            }
+
+            return true;
+        }
     }
 
-    private final Context mContext;
+    @NonNull
+    private final String mDataDirPath;
+    @NonNull
+    private final String mPackageName;
+    @NonNull
+    private final PackageManager mPackageManager;
+    @NonNull
+    private final AssetManager mAssetManager;
+    @NonNull
     private final HashSet<String> mResources;
     private ExtractTask mExtractTask;
 
-    ResourceExtractor(Context context) {
-        mContext = context;
+    ResourceExtractor(@NonNull String dataDirPath,
+                      @NonNull String packageName,
+                      @NonNull PackageManager packageManager,
+                      @NonNull AssetManager assetManager) {
+        mDataDirPath = dataDirPath;
+        mPackageName = packageName;
+        mPackageManager = packageManager;
+        mAssetManager = assetManager;
         mResources = new HashSet<>();
     }
 
-    ResourceExtractor addResource(String resource) {
+    ResourceExtractor addResource(@NonNull String resource) {
         mResources.add(resource);
         return this;
     }
 
-    ResourceExtractor addResources(Collection<String> resources) {
+    ResourceExtractor addResources(@NonNull Collection<String> resources) {
         mResources.addAll(resources);
         return this;
     }
@@ -101,7 +174,7 @@ class ResourceExtractor {
         if (BuildConfig.DEBUG && mExtractTask != null) {
             throw new AssertionError("Attempted to start resource extraction while another extraction was in progress.");
         }
-        mExtractTask = new ExtractTask();
+        mExtractTask = new ExtractTask(mDataDirPath, mResources, mPackageName, mPackageManager, mAssetManager);
         mExtractTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         return this;
     }
@@ -114,11 +187,11 @@ class ResourceExtractor {
         try {
             mExtractTask.get();
         } catch (CancellationException | ExecutionException | InterruptedException e) {
-            deleteFiles();
+            deleteFiles(mDataDirPath, mResources);
         }
     }
 
-    private String[] getExistingTimestamps(File dataDir) {
+    private static String[] getExistingTimestamps(File dataDir) {
         return dataDir.list(new FilenameFilter() {
             @Override
             public boolean accept(File dir, String name) {
@@ -127,9 +200,9 @@ class ResourceExtractor {
         });
     }
 
-    private void deleteFiles() {
-        final File dataDir = new File(PathUtils.getDataDirectory(mContext));
-        for (String resource : mResources) {
+    private static void deleteFiles(@NonNull String dataDirPath, @NonNull HashSet<String> resources) {
+        final File dataDir = new File(dataDirPath);
+        for (String resource : resources) {
             final File file = new File(dataDir, resource);
             if (file.exists()) {
                 file.delete();
@@ -144,50 +217,15 @@ class ResourceExtractor {
         }
     }
 
-    /// Returns true if successfully unpacked APK resources,
-    /// otherwise deletes all resources and returns false.
-    private boolean extractAPK(File dataDir) {
-        final AssetManager manager = mContext.getResources().getAssets();
-
-        for (String asset : mResources) {
-            try {
-                final String resource = "assets/" + asset;
-                final File output = new File(dataDir, asset);
-                if (output.exists()) {
-                    continue;
-                }
-                if (output.getParentFile() != null) {
-                    output.getParentFile().mkdirs();
-                }
-
-                try (InputStream is = manager.open(asset);
-                     OutputStream os = new FileOutputStream(output)) {
-                    copy(is, os);
-                }
-                if (BuildConfig.DEBUG) {
-                    Log.i(TAG, "Extracted baseline resource " + resource);
-                }
-            } catch (FileNotFoundException fnfe) {
-                continue;
-
-            } catch (IOException ioe) {
-                Log.w(TAG, "Exception unpacking resources: " + ioe.getMessage());
-                deleteFiles();
-                return false;
-            }
-        }
-
-        return true;
-    }
-
     // Returns null if extracted resources are found and match the current APK version
     // and update version if any, otherwise returns the current APK and update version.
-    private String checkTimestamp(File dataDir) {
-        PackageManager packageManager = mContext.getPackageManager();
+    private static String checkTimestamp(@NonNull File dataDir,
+                                         @NonNull PackageManager packageManager,
+                                         @NonNull String packageName) {
         PackageInfo packageInfo = null;
 
         try {
-            packageInfo = packageManager.getPackageInfo(mContext.getPackageName(), 0);
+            packageInfo = packageManager.getPackageInfo(packageName, 0);
         } catch (PackageManager.NameNotFoundException e) {
             return TIMESTAMP_PREFIX;
         }
@@ -225,19 +263,10 @@ class ResourceExtractor {
         return null;
     }
 
-    private static void copy(InputStream in, OutputStream out) throws IOException {
+    private static void copy(@NonNull InputStream in, @NonNull OutputStream out) throws IOException {
         byte[] buf = new byte[16 * 1024];
         for (int i; (i = in.read(buf)) >= 0; ) {
             out.write(buf, 0, i);
-        }
-    }
-
-    private String getAPKPath() {
-        try {
-            return mContext.getPackageManager().getApplicationInfo(
-                mContext.getPackageName(), 0).publicSourceDir;
-        } catch (Exception e) {
-            return null;
         }
     }
 
