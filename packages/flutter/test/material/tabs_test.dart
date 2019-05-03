@@ -49,6 +49,7 @@ class StateMarkerState extends State<StateMarker> {
 }
 
 class AlwaysKeepAliveWidget extends StatefulWidget {
+  const AlwaysKeepAliveWidget({ Key key}) : super(key: key);
   static String text = 'AlwaysKeepAlive';
   @override
   AlwaysKeepAliveState createState() => AlwaysKeepAliveState();
@@ -1535,14 +1536,14 @@ void main() {
                         actions: SemanticsAction.tap.index,
                         flags: SemanticsFlag.isSelected.index,
                         label: 'TAB #0\nTab 1 of 2',
-                        rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(0.0, 276.0, 0.0),
                       ),
                       TestSemantics(
                         id: 5,
                         actions: SemanticsAction.tap.index,
                         label: 'TAB #1\nTab 2 of 2',
-                        rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
                     ],
@@ -1799,14 +1800,14 @@ void main() {
                         actions: SemanticsAction.tap.index,
                         flags: SemanticsFlag.isSelected.index,
                         label: 'Semantics override 0\nTab 1 of 2',
-                        rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(0.0, 276.0, 0.0),
                       ),
                       TestSemantics(
                         id: 5,
                         actions: SemanticsAction.tap.index,
                         label: 'Semantics override 1\nTab 2 of 2',
-                        rect: Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
+                        rect: const Rect.fromLTRB(0.0, 0.0, 116.0, kTextTabBarHeight),
                         transform: Matrix4.translationValues(116.0, 276.0, 0.0),
                       ),
                     ],
@@ -1987,6 +1988,56 @@ void main() {
 
   });
 
+  testWidgets('Skipping tabs with global key does not crash', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/24660
+    final List<String> tabs = <String>[
+      'Tab1',
+      'Tab2',
+      'Tab3',
+      'Tab4',
+    ];
+    final TabController controller = TabController(
+      vsync: const TestVSync(),
+      length: tabs.length,
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            width: 300.0,
+            height: 200.0,
+            child: Scaffold(
+              appBar: AppBar(
+                title: const Text('tabs'),
+                bottom: TabBar(
+                  controller: controller,
+                  tabs: tabs.map<Widget>((String tab) => Tab(text: tab)).toList(),
+                ),
+              ),
+              body: TabBarView(
+                controller: controller,
+                children: <Widget>[
+                  Text('1', key: GlobalKey()),
+                  Text('2', key: GlobalKey()),
+                  Text('3', key: GlobalKey()),
+                  Text('4', key: GlobalKey()),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(find.text('1'), findsOneWidget);
+    expect(find.text('4'), findsNothing);
+    await tester.tap(find.text('Tab4'));
+    await tester.pumpAndSettle();
+    expect(controller.index, 3);
+    expect(find.text('4'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
+  });
+
   testWidgets('Skipping tabs with a KeepAlive child works', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/11895
     final List<String> tabs = <String>[
@@ -2018,7 +2069,7 @@ void main() {
               body: TabBarView(
                 controller: controller,
                 children: <Widget>[
-                  AlwaysKeepAliveWidget(),
+                  AlwaysKeepAliveWidget(key: UniqueKey()),
                   const Text('2'),
                   const Text('3'),
                   const Text('4'),
