@@ -268,6 +268,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 /// input callback.
 ///
 /// See also:
+///
 /// * [SliverList], which does not animate items when they are inserted or removed.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.

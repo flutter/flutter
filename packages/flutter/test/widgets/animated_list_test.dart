@@ -241,5 +241,67 @@ void main() {
       expect(itemTop(2), 100.0);
       expect(itemBottom(2), 200.0);
     });
+
+    testWidgets('works in combination with other slivers', (WidgetTester tester) async {
+      final GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(const <Widget>[
+                  SizedBox(height: 100),
+                  SizedBox(height: 100),
+                ])
+              ),
+              SliverAnimatedList(
+                key: listKey,
+                initialItemCount: 3,
+                itemBuilder: (BuildContext context, int index, Animation<double> animation) {
+                  return SizedBox(
+                    height: 100,
+                    child: Text('item $index'),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      );
+
+      expect(tester.getTopLeft(find.text('item 0')).dy, 200);
+      expect(tester.getTopLeft(find.text('item 1')).dy, 300);
+
+      listKey.currentState.insertItem(3);
+      await tester.pumpAndSettle();
+      expect(tester.getTopLeft(find.text('item 3')).dy, 500);
+
+      listKey.currentState.removeItem(0,
+        (BuildContext context, Animation<double> animation) {
+          return SizeTransition(
+            sizeFactor: animation,
+            key: const ObjectKey('removing'),
+            child: const SizedBox(
+              height: 100,
+              child: Text('removing'),
+            ),
+          );
+        },
+        duration: const Duration(seconds: 1),
+      );
+
+      await tester.pump();
+      expect(find.text('item 3'), findsNothing);
+
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(tester.getSize(find.byKey(const ObjectKey('removing'))).height, 50);
+      expect(tester.getTopLeft(find.text('item 0')).dy, 250);
+
+      await tester.pumpAndSettle();
+      expect(find.text('removing'), findsNothing);
+      expect(tester.getTopLeft(find.text('item 0')).dy, 200);
+    });
   });
 }
