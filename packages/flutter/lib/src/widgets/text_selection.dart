@@ -546,6 +546,7 @@ Rect getInteractiveRect(Rect rect) {
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
   Offset _dragPosition;
+  bool _tapDown = false;
 
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
@@ -675,40 +676,60 @@ class _TextSelectionHandleOverlayState
       ? (interactiveRect.height - handleRect.height) / 2
       : 0;
 
+
+    final PanGestureRecognizer recognizer = PanGestureRecognizer(debugOwner: this);
+    recognizer
+      ..onStart = _handleDragStart
+      ..onUpdate = _handleDragUpdate
+      ..dragStartBehavior = widget.dragStartBehavior;
+
     return CompositedTransformFollower(
       link: widget.layerLink,
       offset: interactiveRect.topLeft,
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
-        child: Stack(
-          overflow: Overflow.visible,
-          children: <Widget>[
-            SizedBox(
-              width: interactiveRect.width,
-              height: interactiveRect.height,
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                dragStartBehavior: widget.dragStartBehavior,
-                onPanStart: _handleDragStart,
-                onPanUpdate: _handleDragUpdate,
-                onTap: _handleTap,
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: paddingHorizontal,
-                    top: paddingVertical,
-                    right: paddingHorizontal,
-                    bottom: paddingVertical,
-                  ),
-                  child: widget.selectionControls.buildHandle(
-                    context,
-                    type,
-                    widget.renderObject.preferredLineHeight,
-                  ),
+        child: Container(
+          alignment: Alignment.topLeft,
+          width: interactiveRect.width,
+          height: interactiveRect.height,
+          // This is a RawGestureDetector instead of a GestureDetector so that
+          // it doesn't steal events from the TextField.
+          child: Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: (PointerDownEvent event) {
+              setState(() {
+                _tapDown = true;
+              });
+              recognizer.addPointer(event);
+            },
+            onPointerUp: (PointerUpEvent event) {
+              if (!_tapDown) {
+                return;
+              }
+              _handleTap();
+              setState(() {
+                _tapDown = false;
+              });
+            },
+            // The above Listener handles all interaction, so interaction
+            // further down the tree can be ignored.
+            child: IgnorePointer(
+              child: Container(
+                padding: EdgeInsets.only(
+                  left: paddingHorizontal,
+                  top: paddingVertical,
+                  right: paddingHorizontal,
+                  bottom: paddingVertical,
+                ),
+                child: widget.selectionControls.buildHandle(
+                  context,
+                  type,
+                  widget.renderObject.preferredLineHeight,
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
