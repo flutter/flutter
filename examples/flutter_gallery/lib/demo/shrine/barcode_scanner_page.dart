@@ -75,7 +75,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
         if (_barcodeFound) {
           _showBottomSheet();
         } else {
-          Future<void>.delayed(Duration(milliseconds: 1600), () {
+          Future<void>.delayed(const Duration(milliseconds: 1600), () {
             _animationController.forward(from: 0);
           });
         }
@@ -169,7 +169,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           _takePicture();
         });
 
-        _animationController.duration = Duration(milliseconds: 2000);
+        _animationController.duration = const Duration(milliseconds: 2000);
         _handleBarcodeFound();
         return;
       } else if (validRect.overlaps(barcode.boundingBox)) {
@@ -252,13 +252,13 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 decoration: BoxDecoration(
                   border: Border(bottom: BorderSide(color: Colors.grey)),
                 ),
-                child: Padding(
+                child: const Padding(
                   padding: EdgeInsets.all(16),
                   child: Text('1 result found'),
                 ),
               ),
               Container(
-                margin: EdgeInsets.all(20),
+                margin: const EdgeInsets.all(20),
                 child: Column(
                   children: <Widget>[
                     Row(
@@ -273,7 +273,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                         ),
                         Container(
                           height: 96,
-                          margin: EdgeInsets.only(left: 16),
+                          margin: const EdgeInsets.only(left: 16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
@@ -308,8 +308,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       ],
                     ),
                     Container(
-                      margin: EdgeInsets.only(top: 22, bottom: 25),
-                      child: Text(
+                      margin: const EdgeInsets.only(top: 22, bottom: 25),
+                      child: const Text(
                         'Lightweight yet durable notepad with red leather'
                         'cover for everyday notes. Available in packs of 2.',
                       ),
@@ -324,8 +324,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             Container(
-                              margin: EdgeInsets.only(right: 16),
-                              child: Icon(Icons.add_shopping_cart),
+                              margin: const EdgeInsets.only(right: 16),
+                              child: const Icon(Icons.add_shopping_cart),
                             ),
                             Text('ADD TO CART - \$39.99',
                                 style:
@@ -351,7 +351,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     Widget background;
     if (_barcodePictureFilePath != null) {
       background = Container(
-        constraints: BoxConstraints.expand(),
+        constraints: const BoxConstraints.expand(),
         child: Image.file(
           File(_barcodePictureFilePath),
           fit: BoxFit.contain,
@@ -373,7 +373,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           children: <Widget>[
             background,
             Container(
-              constraints: BoxConstraints.expand(),
+              constraints: const BoxConstraints.expand(),
               child: CustomPaint(
                 painter: WindowPainter(
                   windowSize:
@@ -417,7 +417,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
               ),
             ),
             Container(
-              constraints: BoxConstraints.expand(),
+              constraints: const BoxConstraints.expand(),
               child: CustomPaint(
                 painter: _barcodeFound
                     ? SquareTracePainter(
@@ -442,21 +442,21 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
             ),
             AppBar(
               leading: IconButton(
-                icon: Icon(Icons.close, color: Colors.white),
+                icon: const Icon(Icons.close, color: Colors.white),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               backgroundColor: Colors.transparent,
               elevation: 0.0,
               actions: <Widget>[
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.flash_off,
                     color: Colors.white,
                   ),
                   onPressed: () {},
                 ),
                 IconButton(
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.help_outline,
                     color: Colors.white,
                   ),
