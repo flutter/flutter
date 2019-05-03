@@ -980,6 +980,7 @@ void main() {
 
   testWidgets('Nested TabBarView sets ScrollController pixels to non-null value '
   'when disposed before it is set by the applyViewportDimension', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/18756
     final TabController _mainTabController = TabController(length: 4, vsync: const TestVSync());
     final TabController _nestedTabController = TabController(length: 2, vsync: const TestVSync());
 

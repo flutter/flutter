@@ -252,8 +252,11 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   double _pageToUseOnStartup;
 
   /// If [pixels] isn't set by [applyViewportDimension] before [dispose] is
-  /// called, this could throw an assert as [pixels] will be set to null. This
-  /// can happen when warping over a tab containing a nested [TabBarView].
+  /// called, this could throw an assert as [pixels] will be set to null.
+  ///
+  /// With [Tab]s, this happens when there are nested [TabBarView]s and there
+  /// is an attempt to warp over the nested tab to a tab adjacent to it.
+  ///
   /// This flag will be set to true once the dimensions have been established
   /// and [pixels] is set.
   bool isInitialPixelsValueSet = false;
@@ -261,7 +264,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   void dispose() {
     // Sets `pixels` to a non-null value before `ScrollPosition.dispose` is
-    // invoked if it was never set by `applyViewportDimension`
+    // invoked if it was never set by `applyViewportDimension`.
     if (pixels == null && !isInitialPixelsValueSet) {
       correctPixels(0);
     }
