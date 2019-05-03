@@ -1,4 +1,4 @@
-Signature: 0596bbe39e5f53efb086eec8502b1865
+Signature: 4147c76fdde1ec4babb2a742395a8dd6
 
 UNUSED LICENSES:
 
@@ -5634,6 +5634,8 @@ FILE: ../../../third_party/skia/src/sksl/SkSLDefines.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.cpp
 FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.cpp
 FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.h
+FILE: ../../../third_party/skia/src/utils/SkShaperJSONWriter.cpp
+FILE: ../../../third_party/skia/src/utils/SkShaperJSONWriter.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google Inc.
 
