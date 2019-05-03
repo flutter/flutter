@@ -378,7 +378,7 @@ abstract class ImageProvider<T> {
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
   @protected
-  ImageStreamCompleter load(T key);
+  ImageStreamCompleter load(T key, {int targetHeight, int targetWidth});
 
   @override
   String toString() => '$runtimeType()';
@@ -442,9 +442,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image using [loadAsync].
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key) {
+  ImageStreamCompleter load(AssetBundleImageKey key, {int targetWidth, int targetHeight}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
       informationCollector: () sync* {
         yield DiagnosticsProperty<ImageProvider>('Image provider', this);
@@ -458,11 +458,48 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key, {int targetWidth, int targetHeight}) async {
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
-    return await PaintingBinding.instance.instantiateImageCodec(data.buffer.asUint8List());
+    return await PaintingBinding.instance.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: targetWidth, targetHeight: targetHeight);
+  }
+}
+
+class _SizeAwareCacheKey {
+  const _SizeAwareCacheKey(this._providerCacheKey, this._imageSize);
+
+  final dynamic _providerCacheKey;
+  final Size _imageSize;
+}
+
+/// Re-sizes the image provided to the rendered size.
+///
+/// See also:
+///
+/// * [Image.network] for example usage when `resizeToFit` parameter is set.
+class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
+  /// Creates an object that re-sizes the image to rendered size.
+  const ResizedImage(this._imageProvider);
+
+  final ImageProvider _imageProvider;
+
+  @override
+  ImageStreamCompleter load(_SizeAwareCacheKey key, {int targetWidth, int targetHeight}) {
+    if (key._imageSize != null) {
+      return _imageProvider.load(key._providerCacheKey);
+    } else {
+      final int targetWidth = key._imageSize.width.round();
+      final int targetHeight = key._imageSize.height.round();
+      return _imageProvider.load(key._providerCacheKey, targetHeight:  targetHeight, targetWidth: targetWidth);
+    }
+  }
+
+  @override
+  Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
+    final Size imageSize = configuration.size;
+    final dynamic providerCacheKey = await _imageProvider.obtainKey(configuration);
+    return _SizeAwareCacheKey(providerCacheKey, imageSize);
   }
 }
 
@@ -499,9 +536,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   }
 
   @override
-  ImageStreamCompleter load(NetworkImage key) {
+  ImageStreamCompleter load(NetworkImage key, {int targetWidth, int targetHeight}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
       informationCollector: () sync* {
         yield DiagnosticsProperty<ImageProvider>('Image provider', this);
@@ -512,7 +549,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   static final HttpClient _httpClient = HttpClient();
 
-  Future<ui.Codec> _loadAsync(NetworkImage key) async {
+  Future<ui.Codec> _loadAsync(NetworkImage key, {int targetWidth, int targetHeight}) async {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
@@ -528,7 +565,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     if (bytes.lengthInBytes == 0)
       throw Exception('NetworkImage is an empty file: $resolved');
 
-    return PaintingBinding.instance.instantiateImageCodec(bytes);
+    return PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
   }
 
   @override
@@ -573,9 +610,9 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  ImageStreamCompleter load(FileImage key) {
+  ImageStreamCompleter load(FileImage key, {int targetWidth, int targetHeight}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
       informationCollector: () sync* {
         yield ErrorDescription('Path: ${file?.path}');
@@ -583,7 +620,7 @@ class FileImage extends ImageProvider<FileImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(FileImage key) async {
+  Future<ui.Codec> _loadAsync(FileImage key, {int targetWidth, int targetHeight}) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
@@ -641,17 +678,17 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter load(MemoryImage key) {
+  ImageStreamCompleter load(MemoryImage key, {int targetWidth, int targetHeight}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
     );
   }
 
-  Future<ui.Codec> _loadAsync(MemoryImage key) {
+  Future<ui.Codec> _loadAsync(MemoryImage key, {int targetWidth, int targetHeight}) {
     assert(key == this);
 
-    return PaintingBinding.instance.instantiateImageCodec(bytes);
+    return PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
   }
 
   @override

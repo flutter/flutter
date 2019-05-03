@@ -109,14 +109,12 @@ ImageProvider<dynamic> _resizeIfNeeded(
   bool resizeToFit,
   String src, {
   double scale,
-  Map<String, String> headers,
-  double width,
-  double height,
+  Map<String, String> headers
 }) {
   final ImageProvider<dynamic> networkImage =
       NetworkImage(src, scale: scale, headers: headers);
-  if (resizeToFit && height != null && width != null) {
-    return ResizedImage(networkImage, Size(width, height));
+  if (resizeToFit) {
+    return ResizedImage(networkImage);
   } else {
     return networkImage;
   }
@@ -245,8 +243,6 @@ class Image extends StatefulWidget {
         src,
         scale: scale,
         headers: headers,
-        width: width,
-        height: height,
        ),
        assert(alignment != null),
        assert(repeat != null),
