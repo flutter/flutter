@@ -709,12 +709,11 @@ class BoxHitTestResult extends HitTestResult {
   }) {
     assert(hitTest != null);
     if (transform != null) {
-      transform = Matrix4.tryInvert(transform);
+      transform = Matrix4.tryInvert(PointerEvent.paintTransformToPointerEventTransform(transform));
       if (transform == null) {
         // Objects are not visible on screen and cannot be hit-tested.
         return false;
       }
-      transform = PointerEvent.paintTransformToPointerEventTransform(transform);
     }
     return addWithRawTransform(
       transform: transform,
