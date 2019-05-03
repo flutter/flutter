@@ -238,6 +238,13 @@ class RenderEditable extends RenderBox {
   /// The default value of this property is false.
   bool ignorePointer;
 
+  /// Whether text is composed.
+  ///
+  /// Text is composed when user selects it for editing. The [TextSpan] will have
+  /// children with composing effect and leave text property to be null.
+  @visibleForTesting
+  bool get isComposingText => text.text == null;
+
   /// The pixel ratio of the current device.
   ///
   /// Should be obtained by querying MediaQuery for the devicePixelRatio.

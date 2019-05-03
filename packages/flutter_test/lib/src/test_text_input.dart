@@ -58,6 +58,9 @@ class TestTextInput {
   bool get isRegistered => _isRegistered;
   bool _isRegistered = false;
 
+  /// Whether there are any active clients listening to text input.
+  bool get hasAnyClients => _client > 0;
+
   int _client = 0;
 
   /// Arguments supplied to the TextInput.setClient method call.
