@@ -501,7 +501,7 @@ class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
 
   @override
   ImageStreamCompleter load(_SizeAwareCacheKey key, {int targetWidth, int targetHeight}) {
-    if (key._imageSize != null) {
+    if (key._imageSize == null) {
       return _imageProvider.load(key._providerCacheKey);
     } else {
       final int targetWidth = key._imageSize.width.round();
