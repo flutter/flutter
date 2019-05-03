@@ -42,6 +42,7 @@ if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
 
+artifacts_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
 if [[ -n "$LOCAL_ENGINE" ]]; then
   if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
     EchoError "========================================================================"
@@ -56,6 +57,7 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
     exit -1
   fi
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
+  artifacts_path="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/"
 fi
 
 
