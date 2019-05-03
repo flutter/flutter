@@ -69,17 +69,11 @@ void main() {
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    fs.directory('/bin/cache/artifacts/engine/linux-x64').createSync(recursive: true);
-    fs.file('/bin/cache/artifacts/engine/linux-x64/icudtl.dat').createSync();
-    fs.file('/bin/cache/artifacts/engine/linux-x64/libflutter_linux.so').createSync();
 
     when(mockProcessManager.start(<String>[
       'make',
       '-C',
       '/linux',
-      'BUILD=release',
-      'FLUTTER_ROOT=/',
-      'FLUTTER_BUNDLE_FLAGS=',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
@@ -87,8 +81,7 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
-    expect(fs.file('linux/flutter/libflutter_linux.so').existsSync(), true);
-    expect(fs.file('linux/flutter/icudtl.dat').existsSync(), true);
+    expect(fs.file('linux/flutter/generated_config').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,

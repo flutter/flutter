@@ -14,26 +14,28 @@ import '../globals.dart';
 import '../project.dart';
 
 /// Builds the Linux project through the Makefile.
-Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo) async {
-  /// Cache flutter root in linux directory.
- linuxProject.cacheDirectory.childFile('generated_flutter_root')
-    ..createSync(recursive: true)
-    ..writeAsStringSync(Cache.flutterRoot);
-  final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
+Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
   final Directory artifactDirectory = fs.directory(artifacts.getEngineArtifactsPath(TargetPlatform.linux_x64));
+  final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
+  final String config = '''
+# Generated code do not commit.
+export FLTUTER_ROOT=${Cache.flutterRoot}
+export FLUTTER_ARTIFACT_DIR=$artifactDirectory
+export BUILD=$buildFlag
+export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
+export FLUTTER_TARGET=$target
+export PROJECT_DIR=${linuxProject.project.directory.path}
+''';
 
-  // Copy the source files, headers, icu, and shared library into the Linux
-  // project's cache directory.
-  copyDirectorySync(artifactDirectory, linuxProject.cacheDirectory);
+  /// Cache flutter configuration files in the linux directory.
+  linuxProject.cacheDirectory.childFile('generated_config')
+    ..createSync(recursive: true)
+    ..writeAsStringSync(config);
 
-  final String bundleFlags = buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '';
   final Process process = await processManager.start(<String>[
     'make',
     '-C',
     linuxProject.editableHostAppDirectory.path,
-    'BUILD=$buildFlag',
-    'FLUTTER_ROOT=${Cache.flutterRoot}',
-    'FLUTTER_BUNDLE_FLAGS=$bundleFlags',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Linux application...',
