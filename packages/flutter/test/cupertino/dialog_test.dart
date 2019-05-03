@@ -52,7 +52,7 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
-  testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
+  testWidgets('Dialog destructive action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
       child: Text('Ok'),
@@ -60,8 +60,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.red, greaterThan(widget.style.color.blue));
-    expect(widget.style.color.alpha, lessThan(255));
+    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
   });
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
