@@ -44,7 +44,7 @@ const Tolerance _kFlingTolerance = Tolerance(
 /// Configures how an [AnimationController] behaves when animations are disabled.
 ///
 /// When [AccessibilityFeatures.disableAnimations] is true, the device is asking
-/// flutter to reduce or disable animations as much as possible. To honor this,
+/// Flutter to reduce or disable animations as much as possible. To honor this,
 /// we reduce the duration and the corresponding number of frames for animations.
 /// This enum is used to allow certain [AnimationController]s to opt out of this
 /// behavior.
@@ -209,7 +209,7 @@ class AnimationController extends Animation<double>
   with AnimationEagerListenerMixin, AnimationLocalListenersMixin, AnimationLocalStatusListenersMixin {
   /// Creates an animation controller.
   ///
-  /// * [value] is the initial value of the animation. If defaults to the lower
+  /// * `value` is the initial value of the animation. If defaults to the lower
   ///   bound.
   ///
   /// * [duration] is the length of time this animation should last.
@@ -524,11 +524,10 @@ class AnimationController extends Animation<double>
     return _animateToInternal(target, duration: duration, curve: curve);
   }
 
-  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear, AnimationBehavior animationBehavior }) {
-    final AnimationBehavior behavior = animationBehavior ?? this.animationBehavior;
+  TickerFuture _animateToInternal(double target, { Duration duration, Curve curve = Curves.linear }) {
     double scale = 1.0;
     if (SemanticsBinding.instance.disableAnimations) {
-      switch (behavior) {
+      switch (animationBehavior) {
         case AnimationBehavior.normal:
           // Since the framework cannot handle zero duration animations, we run it at 5% of the normal
           // duration to limit most animations to a single frame.

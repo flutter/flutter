@@ -189,7 +189,10 @@ abstract class MultiDragPointerState {
 ///    start after a long-press gesture.
 abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> extends GestureRecognizer {
   /// Initialize the object.
-  MultiDragGestureRecognizer({ @required Object debugOwner }) : super(debugOwner: debugOwner);
+  MultiDragGestureRecognizer({
+    @required Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   /// Called when this class recognizes the start of a drag gesture.
   ///
@@ -200,7 +203,7 @@ abstract class MultiDragGestureRecognizer<T extends MultiDragPointerState> exten
   Map<int, T> _pointers = <int, T>{};
 
   @override
-  void addPointer(PointerDownEvent event) {
+  void addAllowedPointer(PointerDownEvent event) {
     assert(_pointers != null);
     assert(event.pointer != null);
     assert(event.position != null);
@@ -334,7 +337,10 @@ class _ImmediatePointerState extends MultiDragPointerState {
 ///    start after a long-press gesture.
 class ImmediateMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_ImmediatePointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once.
-  ImmediateMultiDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  ImmediateMultiDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   _ImmediatePointerState createNewPointerState(PointerDownEvent event) {
@@ -380,7 +386,10 @@ class _HorizontalPointerState extends MultiDragPointerState {
 class HorizontalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_HorizontalPointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once
   /// but only if they first move horizontally.
-  HorizontalMultiDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  HorizontalMultiDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   _HorizontalPointerState createNewPointerState(PointerDownEvent event) {
@@ -426,7 +435,10 @@ class _VerticalPointerState extends MultiDragPointerState {
 class VerticalMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_VerticalPointerState> {
   /// Create a gesture recognizer for tracking multiple pointers at once
   /// but only if they first move vertically.
-  VerticalMultiDragGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  VerticalMultiDragGestureRecognizer({
+    Object debugOwner,
+    PointerDeviceKind kind,
+  }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
   _VerticalPointerState createNewPointerState(PointerDownEvent event) {
@@ -528,8 +540,9 @@ class DelayedMultiDragGestureRecognizer extends MultiDragGestureRecognizer<_Dela
   DelayedMultiDragGestureRecognizer({
     this.delay = kLongPressTimeout,
     Object debugOwner,
+    PointerDeviceKind kind,
   }) : assert(delay != null),
-       super(debugOwner: debugOwner);
+       super(debugOwner: debugOwner, kind: kind);
 
   /// The amount of time the pointer must remain in the same place for the drag
   /// to be recognized.

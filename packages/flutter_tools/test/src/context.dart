@@ -30,15 +30,17 @@ import 'common.dart';
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
-BufferLogger get testLogger => context[Logger];
+BufferLogger get testLogger => context.get<Logger>();
 
-MockDeviceManager get testDeviceManager => context[DeviceManager];
-MockDoctor get testDoctor => context[Doctor];
+MockDeviceManager get testDeviceManager => context.get<DeviceManager>();
+MockDoctor get testDoctor => context.get<Doctor>();
 
 typedef ContextInitializer = void Function(AppContext testContext);
 
 @isTest
-void testUsingContext(String description, dynamic testMethod(), {
+void testUsingContext(
+  String description,
+  dynamic testMethod(), {
   Timeout timeout,
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
@@ -84,6 +86,7 @@ void testUsingContext(String description, dynamic testMethod(), {
           Usage: () => MockUsage(),
           XcodeProjectInterpreter: () => MockXcodeProjectInterpreter(),
           FileSystem: () => LocalFileSystemBlockingSetCurrentDirectory(),
+          TimeoutConfiguration: () => const TimeoutConfiguration(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -123,8 +126,8 @@ void testUsingContext(String description, dynamic testMethod(), {
 }
 
 void _printBufferedErrors(AppContext testContext) {
-  if (testContext[Logger] is BufferLogger) {
-    final BufferLogger bufferLogger = testContext[Logger];
+  if (testContext.get<Logger>() is BufferLogger) {
+    final BufferLogger bufferLogger = testContext.get<Logger>();
     if (bufferLogger.errorText.isNotEmpty)
       print(bufferLogger.errorText);
     bufferLogger.clear();
@@ -292,7 +295,7 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
-  XcodeProjectInfo getInfo(String projectPath) {
+  Future<XcodeProjectInfo> getInfo(String projectPath) async {
     return XcodeProjectInfo(
       <String>['Runner'],
       <String>['Debug', 'Release'],
@@ -301,7 +304,10 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 }
 
-class MockFlutterVersion extends Mock implements FlutterVersion {}
+class MockFlutterVersion extends Mock implements FlutterVersion {
+  @override
+  bool get isStable => false;
+}
 
 class MockClock extends Mock implements SystemClock {}
 

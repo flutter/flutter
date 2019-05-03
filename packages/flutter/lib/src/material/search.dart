@@ -108,6 +108,10 @@ abstract class SearchDelegate<T> {
   /// The current value of [query] can be used to determine what the user
   /// searched for.
   ///
+  /// This method might be applied more than once to the same query.
+  /// If your [buildResults] method is computationally expensive, you may want
+  /// to cache the search results for one or more queries.
+  ///
   /// Typically, this method returns a [ListView] with the search results.
   /// When the user taps on a particular search result, [close] should be called
   /// with the selected result as argument. This will close the search page and
@@ -187,7 +191,7 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [showSuggestions] to show the search suggestions again.
   void showResults(BuildContext context) {
-    _focusNode.unfocus();
+    _focusNode?.unfocus();
     _currentBody = _SearchBody.results;
   }
 
@@ -204,7 +208,8 @@ abstract class SearchDelegate<T> {
   ///
   ///  * [showResults] to show the search results.
   void showSuggestions(BuildContext context) {
-    FocusScope.of(context).requestFocus(_focusNode);
+    assert(_focusNode != null, '_focusNode must be set by route before showSuggestions is called.');
+    _focusNode.requestFocus();
     _currentBody = _SearchBody.suggestions;
   }
 
@@ -214,7 +219,7 @@ abstract class SearchDelegate<T> {
   /// to [showSearch] that launched the search initially.
   void close(BuildContext context, T result) {
     _currentBody = null;
-    _focusNode.unfocus();
+    _focusNode?.unfocus();
     Navigator.of(context)
       ..popUntil((Route<dynamic> route) => route == _route)
       ..pop(result);
@@ -228,7 +233,9 @@ abstract class SearchDelegate<T> {
   /// page.
   Animation<double> get transitionAnimation => _proxyAnimation;
 
-  final FocusNode _focusNode = FocusNode();
+  // The focus node to use for manipulating focus on the search page. This is
+  // managed, owned, and set by the _SearchPageRoute using this delegate.
+  FocusNode _focusNode;
 
   final TextEditingController _queryTextController = TextEditingController();
 
@@ -242,7 +249,6 @@ abstract class SearchDelegate<T> {
   }
 
   _SearchPageRoute<T> _route;
-
 }
 
 /// Describes the body that is currently shown under the [AppBar] in the
@@ -309,10 +315,10 @@ class _SearchPageRoute<T> extends PageRoute<T> {
 
   @override
   Widget buildPage(
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      ) {
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+  ) {
     return _SearchPage<T>(
       delegate: delegate,
       animation: animation,
@@ -342,13 +348,18 @@ class _SearchPage<T> extends StatefulWidget {
 }
 
 class _SearchPageState<T> extends State<_SearchPage<T>> {
+  // This node is owned, but not hosted by, the search page. Hosting is done by
+  // the text field.
+  FocusNode focusNode = FocusNode();
+
   @override
   void initState() {
     super.initState();
     queryTextController.addListener(_onQueryChanged);
     widget.animation.addStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.addListener(_onSearchBodyChanged);
-    widget.delegate._focusNode.addListener(_onFocusChanged);
+    focusNode.addListener(_onFocusChanged);
+    widget.delegate._focusNode = focusNode;
   }
 
   @override
@@ -357,7 +368,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     queryTextController.removeListener(_onQueryChanged);
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     widget.delegate._currentBodyNotifier.removeListener(_onSearchBodyChanged);
-    widget.delegate._focusNode.removeListener(_onFocusChanged);
+    widget.delegate._focusNode = null;
+    focusNode.dispose();
   }
 
   void _onAnimationStatusChanged(AnimationStatus status) {
@@ -366,12 +378,12 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     }
     widget.animation.removeStatusListener(_onAnimationStatusChanged);
     if (widget.delegate._currentBody == _SearchBody.suggestions) {
-      FocusScope.of(context).requestFocus(widget.delegate._focusNode);
+      focusNode.requestFocus();
     }
   }
 
   void _onFocusChanged() {
-    if (widget.delegate._focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
+    if (focusNode.hasFocus && widget.delegate._currentBody != _SearchBody.suggestions) {
       widget.delegate.showSuggestions(context);
     }
   }
@@ -432,7 +444,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
           leading: widget.delegate.buildLeading(context),
           title: TextField(
             controller: queryTextController,
-            focusNode: widget.delegate._focusNode,
+            focusNode: focusNode,
             style: theme.textTheme.title,
             textInputAction: TextInputAction.search,
             onSubmitted: (String _) {

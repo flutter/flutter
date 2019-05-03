@@ -55,11 +55,11 @@ void showGalleryAboutDialog(BuildContext context) {
                       '${defaultTargetPlatform == TargetPlatform.iOS ? 'multiple platforms' : 'iOS and Android'} '
                       'from a single codebase. This design lab is a playground '
                       "and showcase of Flutter's many widgets, behaviors, "
-                      'animations, layouts, and more. Learn more about Flutter at '
+                      'animations, layouts, and more. Learn more about Flutter at ',
               ),
               _LinkTextSpan(
                 style: linkStyle,
-                url: 'https://flutter.io',
+                url: 'https://flutter.dev',
               ),
               TextSpan(
                 style: aboutTextStyle,

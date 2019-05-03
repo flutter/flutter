@@ -146,7 +146,7 @@ class IconButton extends StatelessWidget {
     this.splashColor,
     this.disabledColor,
     @required this.onPressed,
-    this.tooltip
+    this.tooltip,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -272,9 +272,9 @@ class IconButton extends StatelessWidget {
               child: IconTheme.merge(
                 data: IconThemeData(
                   size: iconSize,
-                  color: currentColor
+                  color: currentColor,
                 ),
-                child: icon
+                child: icon,
               ),
             ),
           ),
@@ -285,7 +285,7 @@ class IconButton extends StatelessWidget {
     if (tooltip != null) {
       result = Tooltip(
         message: tooltip,
-        child: result
+        child: result,
       );
     }
     return InkResponse(

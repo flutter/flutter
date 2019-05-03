@@ -35,9 +35,8 @@ import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
-import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
-import 'src/commands/trace.dart';
+import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
@@ -81,9 +80,8 @@ Future<void> main(List<String> args) async {
     RunCommand(verboseHelp: verboseHelp),
     ScreenshotCommand(),
     ShellCompletionCommand(),
-    StopCommand(),
     TestCommand(verboseHelp: verboseHelp),
-    TraceCommand(),
+    TrainingCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),
@@ -93,6 +91,6 @@ Future<void> main(List<String> args) async {
      overrides: <Type, Generator>{
        // The build runner instance is not supported in google3 because
        // the build runner packages are not synced internally.
-       CodeGenerator: () => experimentalBuildEnabled ? const BuildRunner() : const UnsupportedCodeGenerator(),
+       CodeGenerator: () => const BuildRunner(),
      });
 }

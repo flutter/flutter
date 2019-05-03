@@ -108,12 +108,14 @@ class MockProcessManager extends Mock implements ProcessManager {
   }
 
   @override
-  Future<Process> start(List<dynamic> command,
-      {String workingDirectory,
-      Map<String, String> environment,
-      bool includeParentEnvironment = true,
-      bool runInShell = false,
-      ProcessStartMode mode = ProcessStartMode.normal}) {
+  Future<Process> start(
+    List<dynamic> command, {
+    String workingDirectory,
+    Map<String, String> environment,
+    bool includeParentEnvironment = true,
+    bool runInShell = false,
+    ProcessStartMode mode = ProcessStartMode.normal,
+  }) {
     final Completer<Process> completer = Completer<Process>();
     completer.complete(MockProcess());
     return completer.future;

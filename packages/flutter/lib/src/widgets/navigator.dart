@@ -394,6 +394,16 @@ class NavigatorObserver {
 /// manages a stack of [Route] objects and provides methods for managing
 /// the stack, like [Navigator.push] and [Navigator.pop].
 ///
+/// When your user interface fits this paradigm of a stack, where the user
+/// should be able to _navigate_ back to an earlier element in the stack,
+/// the use of routes and the Navigator is appropriate. On certain platforms,
+/// such as Android, the system UI will provide a back button (outside the
+/// bounds of your application) that will allow the user to navigate back
+/// to earlier routes in your application's stack. On platforms that don't
+/// have this build-in navigation mechanism, the use of an [AppBar] (typically
+/// used in the [Scaffold.appBar] property) can automatically add a back
+/// button for user navigation.
+///
 /// ### Displaying a full-screen route
 ///
 /// Although you can create a navigator directly, it's most common to use
@@ -564,7 +574,7 @@ class NavigatorObserver {
 ///
 /// The page route is built in two parts, the "page" and the
 /// "transitions". The page becomes a descendant of the child passed to
-/// the `buildTransitions` method. Typically the page is only built once,
+/// the `transitionsBuilder` function. Typically the page is only built once,
 /// because it doesn't depend on its animation parameters (elided with `_`
 /// and `__` in this example). The transition is built on every frame
 /// for its duration.
@@ -741,7 +751,7 @@ class Navigator extends StatefulWidget {
     this.initialRoute,
     @required this.onGenerateRoute,
     this.onUnknownRoute,
-    this.observers = const <NavigatorObserver>[]
+    this.observers = const <NavigatorObserver>[],
   }) : assert(onGenerateRoute != null),
        super(key: key);
 
@@ -1438,9 +1448,9 @@ class Navigator extends StatefulWidget {
   /// instances of [Navigator].
   static NavigatorState of(
     BuildContext context, {
-      bool rootNavigator = false,
-      bool nullOk = false,
-    }) {
+    bool rootNavigator = false,
+    bool nullOk = false,
+  }) {
     final NavigatorState navigator = rootNavigator
         ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
         : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
@@ -1465,10 +1475,10 @@ class Navigator extends StatefulWidget {
 class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   final GlobalKey<OverlayState> _overlayKey = GlobalKey<OverlayState>();
   final List<Route<dynamic>> _history = <Route<dynamic>>[];
-  final Set<Route<dynamic>> _poppedRoutes = Set<Route<dynamic>>();
+  final Set<Route<dynamic>> _poppedRoutes = <Route<dynamic>>{};
 
   /// The [FocusScopeNode] for the [FocusScope] that encloses the routes.
-  final FocusScopeNode focusScopeNode = FocusScopeNode();
+  final FocusScopeNode focusScopeNode = FocusScopeNode(debugLabel: 'Navigator Scope');
 
   final List<OverlayEntry> _initialOverlayEntries = <OverlayEntry>[];
 
@@ -1556,7 +1566,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route.dispose();
     _poppedRoutes.clear();
     _history.clear();
-    focusScopeNode.detach();
+    focusScopeNode.dispose();
     super.dispose();
     assert(() { _debugLocked = false; return true; }());
   }
@@ -2145,7 +2155,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     }
   }
 
-  final Set<int> _activePointers = Set<int>();
+  final Set<int> _activePointers = <int>{};
 
   void _handlePointerDown(PointerDownEvent event) {
     _activePointers.add(event.pointer);

@@ -171,35 +171,35 @@ class ColorScheme extends Diagnosticable {
 
   /// A color that's clearly legible when drawn on [primary].
   ///
-  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [primary]
+  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [primary]
   /// and [onPrimary] is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onPrimary;
 
   /// A color that's clearly legible when drawn on [secondary].
   ///
-  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [secondary]
+  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [secondary]
   /// and [onSecondary] is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onSecondary;
 
   /// A color that's clearly legible when drawn on [surface].
   ///
-  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [surface]
+  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [surface]
   /// and [onSurface] is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onSurface;
 
   /// A color that's clearly legible when drawn on [background].
   ///
-  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [background]
+  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [background]
   /// and [onBackground] is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onBackground;
 
   /// A color that's clearly legible when drawn on [error].
   ///
-  /// To ensure that an app is accessibile, a contrast ratio of 4.5:1 for [error]
+  /// To ensure that an app is accessible, a contrast ratio of 4.5:1 for [error]
   /// and [onError] is recommended. See
   /// <https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html>.
   final Color onError;

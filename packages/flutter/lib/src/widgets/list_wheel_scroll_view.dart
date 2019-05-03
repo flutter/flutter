@@ -254,7 +254,8 @@ class FixedExtentScrollController extends ScrollController {
   /// The returned [Future] resolves when the animation completes.
   ///
   /// The `duration` and `curve` arguments must not be null.
-  Future<void> animateToItem(int itemIndex, {
+  Future<void> animateToItem(
+    int itemIndex, {
     @required Duration duration,
     @required Curve curve,
   }) async {
@@ -356,7 +357,7 @@ int _getItemFromOffset({
 double _clipOffsetToScrollableRange(
   double offset,
   double minScrollExtent,
-  double maxScrollExtent
+  double maxScrollExtent,
 ) {
   return math.min(math.max(offset, minScrollExtent), maxScrollExtent);
 }
@@ -575,6 +576,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.useMagnifier = false,
     this.magnification = 1.0,
     @required this.itemExtent,
+    this.squeeze = 1.0,
     this.onSelectedItemChanged,
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
@@ -588,6 +590,8 @@ class ListWheelScrollView extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
+       assert(squeeze != null),
+       assert(squeeze > 0),
        assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
        assert(
@@ -609,6 +613,7 @@ class ListWheelScrollView extends StatefulWidget {
     this.useMagnifier = false,
     this.magnification = 1.0,
     @required this.itemExtent,
+    this.squeeze = 1.0,
     this.onSelectedItemChanged,
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
@@ -622,6 +627,8 @@ class ListWheelScrollView extends StatefulWidget {
        assert(magnification > 0),
        assert(itemExtent != null),
        assert(itemExtent > 0),
+       assert(squeeze != null),
+       assert(squeeze > 0),
        assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
        assert(
@@ -667,12 +674,17 @@ class ListWheelScrollView extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.useMagnifier}
   final bool useMagnifier;
 
-  /// {@macro RenderListWheelViewport.magnification}
+  /// {@macro flutter.rendering.wheelList.magnification}
   final double magnification;
 
   /// Size of each child in the main axis. Must not be null and must be
   /// positive.
   final double itemExtent;
+
+  /// {@macro flutter.rendering.wheelList.squeeze}
+  ///
+  /// Defaults to 1.
+  final double squeeze;
 
   /// On optional listener that's called when the centered item changes.
   final ValueChanged<int> onSelectedItemChanged;
@@ -746,6 +758,7 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
             useMagnifier: widget.useMagnifier,
             magnification: widget.magnification,
             itemExtent: widget.itemExtent,
+            squeeze: widget.squeeze,
             clipToSize: widget.clipToSize,
             renderChildrenOutsideViewport: widget.renderChildrenOutsideViewport,
             offset: offset,
@@ -940,6 +953,7 @@ class ListWheelViewport extends RenderObjectWidget {
     this.useMagnifier = false,
     this.magnification = 1.0,
     @required this.itemExtent,
+    this.squeeze = 1.0,
     this.clipToSize = true,
     this.renderChildrenOutsideViewport = false,
     @required this.offset,
@@ -953,6 +967,8 @@ class ListWheelViewport extends RenderObjectWidget {
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
        assert(itemExtent != null),
        assert(itemExtent > 0),
+       assert(squeeze != null),
+       assert(squeeze > 0),
        assert(clipToSize != null),
        assert(renderChildrenOutsideViewport != null),
        assert(
@@ -978,6 +994,11 @@ class ListWheelViewport extends RenderObjectWidget {
 
   /// {@macro flutter.rendering.wheelList.itemExtent}
   final double itemExtent;
+
+  /// {@macro flutter.rendering.wheelList.squeeze}
+  ///
+  /// Defaults to 1.
+  final double squeeze;
 
   /// {@macro flutter.rendering.wheelList.clipToSize}
   final bool clipToSize;
@@ -1007,6 +1028,7 @@ class ListWheelViewport extends RenderObjectWidget {
       useMagnifier: useMagnifier,
       magnification: magnification,
       itemExtent: itemExtent,
+      squeeze: squeeze,
       clipToSize: clipToSize,
       renderChildrenOutsideViewport: renderChildrenOutsideViewport,
     );
@@ -1022,6 +1044,7 @@ class ListWheelViewport extends RenderObjectWidget {
       ..useMagnifier = useMagnifier
       ..magnification = magnification
       ..itemExtent = itemExtent
+      ..squeeze = squeeze
       ..clipToSize = clipToSize
       ..renderChildrenOutsideViewport = renderChildrenOutsideViewport;
   }

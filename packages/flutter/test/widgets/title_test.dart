@@ -45,8 +45,7 @@ void main() {
     ), throwsAssertionError);
   });
 
-  testWidgets('should not pass "null" to setApplicationSwitcherDescription',
-          (WidgetTester tester) async {
+  testWidgets('should not pass "null" to setApplicationSwitcherDescription', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
 
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {

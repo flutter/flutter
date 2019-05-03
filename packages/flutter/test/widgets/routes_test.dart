@@ -31,7 +31,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
     log('install');
     final OverlayEntry entry = OverlayEntry(
       builder: (BuildContext context) => Container(),
-      opaque: true
+      opaque: true,
     );
     _entries.add(entry);
     navigator.overlay?.insert(entry, above: insertionPoint);
@@ -94,7 +94,7 @@ Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,
-  List<String> expectations
+  List<String> expectations,
 ) async {
   expect(host, isNotNull);
   test();
@@ -152,7 +152,7 @@ void main() {
         'initial: install',
         'initial: didPush',
         'initial: didChangeNext null',
-      ]
+      ],
     );
     TestRoute second;
     await runNavigatorTest(
@@ -164,7 +164,7 @@ void main() {
         'second: didPush',
         'second: didChangeNext null',
         'initial: didChangeNext second',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -175,7 +175,7 @@ void main() {
         'third: didPush',
         'third: didChangeNext null',
         'second: didChangeNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -187,7 +187,7 @@ void main() {
         'two: didChangeNext third',
         'initial: didChangeNext two',
         'second: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -197,7 +197,7 @@ void main() {
         'third: didPop hello',
         'third: dispose',
         'two: didPopNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -207,7 +207,7 @@ void main() {
         'two: didPop good bye',
         'two: dispose',
         'initial: didPopNext two',
-      ]
+      ],
     );
     await tester.pumpWidget(Container());
     expect(results, equals(<String>['initial: dispose']));
@@ -222,7 +222,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (_) => TestRoute('first')
+          onGenerateRoute: (_) => TestRoute('first'),
         ),
       ),
     );
@@ -235,7 +235,7 @@ void main() {
         'first: install',
         'first: didPush',
         'first: didChangeNext null',
-      ]
+      ],
     );
     TestRoute second;
     await runNavigatorTest(
@@ -247,7 +247,7 @@ void main() {
         'second: didPush',
         'second: didChangeNext null',
         'first: didChangeNext second',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -258,7 +258,7 @@ void main() {
         'third: didPush',
         'third: didChangeNext null',
         'second: didChangeNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -266,7 +266,7 @@ void main() {
       () { host.removeRouteBelow(second); },
       <String>[
         'first: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -276,7 +276,7 @@ void main() {
         'third: didPop good bye',
         'third: dispose',
         'second: didPopNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -287,7 +287,7 @@ void main() {
         'three: didPush',
         'three: didChangeNext null',
         'second: didChangeNext three',
-      ]
+      ],
     );
     TestRoute four;
     await runNavigatorTest(
@@ -299,7 +299,7 @@ void main() {
         'four: didPush',
         'four: didChangeNext null',
         'three: didChangeNext four',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -308,7 +308,7 @@ void main() {
       <String>[
         'second: didChangeNext four',
         'three: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -318,7 +318,7 @@ void main() {
         'four: didPop the end',
         'four: dispose',
         'second: didPopNext four',
-      ]
+      ],
     );
     await tester.pumpWidget(Container());
     expect(results, equals(<String>['second: dispose']));
@@ -333,7 +333,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (_) => TestRoute('A')
+          onGenerateRoute: (_) => TestRoute('A'),
         ),
       ),
     );
@@ -346,7 +346,7 @@ void main() {
         'A: install',
         'A: didPush',
         'A: didChangeNext null',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -357,7 +357,7 @@ void main() {
         'B: didPush',
         'B: didChangeNext null',
         'A: didChangeNext B',
-      ]
+      ],
     );
     TestRoute routeC;
     await runNavigatorTest(
@@ -369,7 +369,7 @@ void main() {
         'C: didPush',
         'C: didChangeNext null',
         'B: didChangeNext C',
-      ]
+      ],
     );
     expect(routeC.isActive, isTrue);
     TestRoute routeB;
@@ -383,7 +383,7 @@ void main() {
         'b: didChangeNext C',
         'A: didChangeNext b',
         'B: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -393,7 +393,7 @@ void main() {
         'C: didPop null',
         'C: dispose',
         'b: didPopNext C',
-      ]
+      ],
     );
     await tester.pumpWidget(Container());
     expect(results, equals(<String>['A: dispose', 'b: dispose']));
@@ -415,7 +415,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (_) => routeA
+          onGenerateRoute: (_) => routeA,
         ),
       ),
     );
@@ -432,7 +432,7 @@ void main() {
         'A: onRemove 1',
         'A: didPop null',
         'A: onRemove 0',
-      ]
+      ],
     );
 
     await runNavigatorTest(
@@ -440,7 +440,7 @@ void main() {
       host,
       () { host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally); },
       <String>[
-      ]
+      ],
     );
   });
 

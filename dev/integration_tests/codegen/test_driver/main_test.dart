@@ -12,6 +12,10 @@ void main() {
       driver = await FlutterDriver.connect();
     });
 
+    tearDownAll(() async {
+      await driver.close();
+    });
+
     test('Can execute generated code', () async {
       const String button = 'Press Button, Get Coffee';
       await driver.tap(find.text(button));

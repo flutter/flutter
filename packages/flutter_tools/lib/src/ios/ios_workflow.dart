@@ -15,9 +15,9 @@ import 'cocoapods.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
 
-IOSWorkflow get iosWorkflow => context[IOSWorkflow];
-IOSValidator get iosValidator => context[IOSValidator];
-CocoaPodsValidator get cocoapodsValidator => context[CocoaPodsValidator];
+IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
+IOSValidator get iosValidator => context.get<IOSValidator>();
+CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 class IOSWorkflow implements Workflow {
   const IOSWorkflow();
@@ -52,6 +52,9 @@ class IOSValidator extends DoctorValidator {
 
   String get iosDeployMinimumVersion => '1.9.4';
 
+  // ios-deploy <= v1.9.3 declares itself as v2.0.0
+  List<String> get iosDeployBadVersions => <String>['2.0.0'];
+
   Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
   bool get hasHomebrew => os.which('brew') != null;
@@ -63,7 +66,8 @@ class IOSValidator extends DoctorValidator {
       return false;
     try {
       final Version version = Version.parse(await iosDeployVersionText);
-      return version >= Version.parse(iosDeployMinimumVersion);
+      return version >= Version.parse(iosDeployMinimumVersion)
+          && !iosDeployBadVersions.map((String v) => Version.parse(v)).contains(version);
     } on FormatException catch (_) {
       return false;
     }
@@ -157,7 +161,7 @@ class IOSValidator extends DoctorValidator {
     return ValidationResult(
         <ValidationType>[xcodeStatus, packageManagerStatus].reduce(_mergeValidationTypes),
         messages,
-        statusInfo: xcodeVersionInfo
+        statusInfo: xcodeVersionInfo,
     );
   }
 
@@ -192,8 +196,7 @@ class CocoaPodsValidator extends DoctorValidator {
           status = ValidationType.missing;
           messages.add(ValidationMessage.error(
               userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
-        }
-        else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
+        } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(
               userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));

@@ -16,7 +16,7 @@ class PathClipper extends CustomClipper<Path> {
   Path getClip(Size size) {
     log.add('getClip');
     return Path()
-      ..addRect(Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
+      ..addRect(const Rect.fromLTWH(50.0, 50.0, 100.0, 100.0));
   }
   @override
   bool shouldReclip(PathClipper oldClipper) => false;
@@ -40,7 +40,75 @@ class ValueClipper<T> extends CustomClipper<T> {
   }
 }
 
+class _UpdateCountedClipRect extends ClipRect {
+  _UpdateCountedClipRect({Clip clipBehavior = Clip.antiAlias})
+    : super(clipBehavior: clipBehavior);
+}
+
+class _UpdateCountedClipRRect extends ClipRRect {
+  _UpdateCountedClipRRect({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior, borderRadius: BorderRadius.circular(1.0));
+}
+
+class _UpdateCountedClipOval extends ClipOval {
+  _UpdateCountedClipOval({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior);
+}
+
+class _UpdateCountedClipPath extends ClipPath {
+  _UpdateCountedClipPath({Clip clipBehavior = Clip.antiAlias})
+      : super(clipBehavior: clipBehavior);
+}
+
 void main() {
+  testWidgets('ClipRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipRect());
+
+    final RenderClipRect renderClip = tester.allRenderObjects.whereType<RenderClipRect>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipRect(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipRRect updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipRRect());
+
+    final RenderClipRRect renderClip = tester.allRenderObjects.whereType<RenderClipRRect>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipRRect(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipOval updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipOval());
+
+    final RenderClipOval renderClip = tester.allRenderObjects.whereType<RenderClipOval>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipOval(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
+  testWidgets('ClipPath updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
+    await tester.pumpWidget(_UpdateCountedClipPath());
+
+    final RenderClipPath renderClip = tester.allRenderObjects.whereType<RenderClipPath>().first;
+
+    expect(renderClip.clipBehavior, equals(Clip.antiAlias));
+
+    await tester.pumpWidget(_UpdateCountedClipPath(clipBehavior: Clip.hardEdge));
+
+    expect(renderClip.clipBehavior, equals(Clip.hardEdge));
+  });
+
   testWidgets('ClipPath', (WidgetTester tester) async {
     await tester.pumpWidget(
       ClipPath(
@@ -48,7 +116,7 @@ void main() {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
-        )
+        ),
       )
     );
     expect(log, equals(<String>['getClip']));
@@ -68,7 +136,7 @@ void main() {
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
           onTap: () { log.add('tap'); },
-        )
+        ),
       )
     );
     expect(log, equals(<String>[]));
@@ -90,8 +158,8 @@ void main() {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: () { log.add('tap'); },
-          )
-        )
+          ),
+        ),
       )
     );
     expect(log, equals(<String>[]));
@@ -113,13 +181,13 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a']));
@@ -137,13 +205,13 @@ void main() {
           width: 100.0,
           height: 100.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap']));
@@ -155,13 +223,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
@@ -173,13 +241,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('a', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('a', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a']));
@@ -191,13 +259,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('b', Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('b', const Rect.fromLTWH(5.0, 5.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b']));
@@ -209,13 +277,13 @@ void main() {
           width: 200.0,
           height: 200.0,
           child: ClipRect(
-            clipper: ValueClipper<Rect>('c', Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
+            clipper: ValueClipper<Rect>('c', const Rect.fromLTWH(25.0, 25.0, 10.0, 10.0)),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: () { log.add('tap'); },
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
     expect(log, equals(<String>['a', 'tap', 'a', 'b', 'c']));
@@ -235,16 +303,16 @@ void main() {
     );
     expect(tester.renderObject(find.byType(ClipRect)).paint, paints
       ..save()
-      ..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
       ..save()
       ..path() // Placeholder
       ..restore()
-      ..restore()
+      ..restore(),
     );
     debugPaintSizeEnabled = true;
     expect(tester.renderObject(find.byType(ClipRect)).debugPaint, paints
-      ..rect(rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
-      ..paragraph()
+      ..rect(rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0))
+      ..paragraph(),
     );
     debugPaintSizeEnabled = false;
   });
@@ -513,7 +581,7 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.antiAlias.png'),
+      matchesGoldenFile('clip.PhysicalModel.antiAlias.1.png'),
     );
   });
 
@@ -521,7 +589,7 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.hardEdge.png'),
+      matchesGoldenFile('clip.PhysicalModel.hardEdge.1.png'),
     );
   });
 
@@ -573,7 +641,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.default.png'),
+      matchesGoldenFile('clip.PhysicalModel.default.1.png'),
     );
   });
 
@@ -622,7 +690,7 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.antiAlias.png'),
+      matchesGoldenFile('clip.PhysicalShape.antiAlias.1.png'),
     );
   });
 
@@ -630,7 +698,7 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.hardEdge.png'),
+      matchesGoldenFile('clip.PhysicalShape.hardEdge.1.png'),
     );
   });
 
@@ -684,7 +752,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.default.png'),
+      matchesGoldenFile('clip.PhysicalShape.default.1.png'),
     );
   });
 

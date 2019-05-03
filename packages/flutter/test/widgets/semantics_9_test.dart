@@ -118,7 +118,7 @@ void main() {
             child: Semantics(
               label: '#2.1',
               child: Container(),
-            )
+            ),
           ),
           Semantics(
             label: '#3',

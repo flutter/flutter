@@ -70,12 +70,12 @@ void main() {
           value: (dynamic value) {
             final List<String> pair = value;
             return pair[1];
-          }
+          },
         );
 
         return Response(
             'test-report-id',
-            200
+            200,
         );
       }));
 
@@ -97,7 +97,7 @@ void main() {
         path: '/cr/report',
         queryParameters: <String, String>{
           'product': 'Flutter_Tools',
-          'version' : 'test-version',
+          'version': 'test-version',
         },
       ));
       expect(fields['uuid'], '00000000-0000-4000-0000-000000000000');
@@ -109,7 +109,7 @@ void main() {
       expect(fields['error_runtime_type'], 'StateError');
       expect(fields['error_message'], 'Bad state: Test bad state error');
 
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(logger.statusText, 'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');
 
@@ -148,13 +148,14 @@ void main() {
         path: '/fake_server',
         queryParameters: <String, String>{
           'product': 'Flutter_Tools',
-          'version' : 'test-version',
+          'version': 'test-version',
         },
       ));
-    }, overrides: <Type, Generator> {
+    }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
         operatingSystem: 'linux',
         environment: <String, String>{
+          'HOME': '/',
           'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
         },
         script: Uri(scheme: 'data'),
@@ -210,32 +211,32 @@ class _NoopIOSink implements IOSink {
   set encoding(_) => throw UnsupportedError('');
 
   @override
-  void add(_) {}
+  void add(_) { }
 
   @override
-  void write(_) {}
+  void write(_) { }
 
   @override
-  void writeAll(_, [__ = '']) {}
+  void writeAll(_, [ __ = '' ]) { }
 
   @override
-  void writeln([_ = '']) {}
+  void writeln([ _ = '' ]) { }
 
   @override
-  void writeCharCode(_) {}
+  void writeCharCode(_) { }
 
   @override
-  void addError(_, [__]) {}
+  void addError(_, [ __ ]) { }
 
   @override
-  Future<dynamic> addStream(_) async {}
+  Future<dynamic> addStream(_) async { }
 
   @override
-  Future<dynamic> flush() async {}
+  Future<dynamic> flush() async { }
 
   @override
-  Future<dynamic> close() async {}
+  Future<dynamic> close() async { }
 
   @override
-  Future<dynamic> get done async {}
+  Future<dynamic> get done async { }
 }

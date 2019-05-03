@@ -108,8 +108,8 @@ class Tab extends StatelessWidget {
             child: icon,
             margin: const EdgeInsets.only(bottom: 10.0),
           ),
-          _buildLabelText()
-        ]
+          _buildLabelText(),
+        ],
       );
     }
 
@@ -153,16 +153,23 @@ class _TabStyle extends AnimatedWidget {
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+    final Animation<double> animation = listenable;
 
-    final TextStyle defaultStyle = labelStyle ?? tabBarTheme.labelStyle ?? themeData.primaryTextTheme.body2;
-    final TextStyle defaultUnselectedStyle = unselectedLabelStyle
+    // To enable TextStyle.lerp(style1, style2, value), both styles must have
+    // the same value of inherit. Force that to be inherit=true here.
+    final TextStyle defaultStyle = (labelStyle
+      ?? tabBarTheme.labelStyle
+      ?? themeData.primaryTextTheme.body2
+    ).copyWith(inherit: true);
+    final TextStyle defaultUnselectedStyle = (unselectedLabelStyle
       ?? tabBarTheme.unselectedLabelStyle
       ?? labelStyle
-      ?? themeData.primaryTextTheme.body2;
-    final Animation<double> animation = listenable;
+      ?? themeData.primaryTextTheme.body2
+    ).copyWith(inherit: true);
     final TextStyle textStyle = selected
       ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
       : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
+
     final Color selectedColor = labelColor
        ?? tabBarTheme.labelColor
        ?? themeData.primaryTextTheme.body2.color;
@@ -523,11 +530,14 @@ class _TabBarScrollController extends ScrollController {
 ///
 /// If a [TabController] is not provided, then a [DefaultTabController] ancestor
 /// must be provided instead. The tab controller's [TabController.length] must
-/// equal the length of the [tabs] list.
+/// equal the length of the [tabs] list and the length of the
+/// [TabBarView.children] list.
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
 /// Uses values from [TabBarTheme] if it is set in the current context.
+///
+/// To see a sample implementation, visit the [TabController] documentation.
 ///
 /// See also:
 ///
@@ -562,7 +572,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
     this.labelPadding,
     this.unselectedLabelColor,
     this.unselectedLabelStyle,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
     this.onTap,
   }) : assert(tabs != null),
        assert(isScrollable != null),
@@ -573,7 +583,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Typically a list of two or more [Tab] widgets.
   ///
-  /// The length of this list must match the [controller]'s [TabController.length].
+  /// The length of this list must match the [controller]'s [TabController.length]
+  /// and the length of the [TabBarView.children] list.
   final List<Widget> tabs;
 
   /// This widget's selection and animation state.
@@ -648,8 +659,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Unselected tab labels are rendered with the same color rendered at 70%
   /// opacity unless [unselectedLabelColor] is non-null.
   ///
-  /// If this parameter is null then the color of the theme's body2 text color
-  /// is used.
+  /// If this parameter is null then the color of the [ThemeData.primaryTextTheme]'s
+  /// body2 text color is used.
   final Color labelColor;
 
   /// The color of unselected tab labels.
@@ -662,8 +673,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// null then this text style will be used for both selected and unselected
   /// label styles.
   ///
-  /// If this property is null then the text style of the theme's body2
-  /// definition is used.
+  /// If this property is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// body2 definition is used.
   final TextStyle labelStyle;
 
   /// The padding added to each of the tab labels.
@@ -674,7 +685,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The text style of the unselected tab labels
   ///
   /// If this property is null then the [labelStyle] value is used. If [labelStyle]
-  /// is null then the text style of the theme's body2 definition is used.
+  /// is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
@@ -770,6 +782,7 @@ class _TabBarState extends State<TabBar> {
       }
       return true;
     }());
+
     if (newController == _controller)
       return;
 
@@ -937,6 +950,15 @@ class _TabBarState extends State<TabBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(() {
+      if (_controller.length != widget.tabs.length) {
+        throw FlutterError(
+          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'number of tabs (${widget.tabs.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -944,12 +966,14 @@ class _TabBarState extends State<TabBar> {
       );
     }
 
+    final TabBarTheme tabBarTheme = TabBarTheme.of(context);
+
     final List<Widget> wrappedTabs = List<Widget>(widget.tabs.length);
     for (int i = 0; i < widget.tabs.length; i += 1) {
       wrappedTabs[i] = Center(
         heightFactor: 1.0,
         child: Padding(
-          padding: widget.labelPadding ?? kTabLabelPadding,
+          padding: widget.labelPadding ?? tabBarTheme.labelPadding ?? kTabLabelPadding,
           child: KeyedSubtree(
             key: _tabKeys[i],
             child: widget.tabs[i],
@@ -1005,7 +1029,7 @@ class _TabBarState extends State<TabBar> {
                 selected: index == _currentIndex,
                 label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
               ),
-            ]
+            ],
           ),
         ),
       );
@@ -1048,6 +1072,11 @@ class _TabBarState extends State<TabBar> {
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
+///
+/// The tab controller's [TabController.length] must equal the length of the
+/// [children] list and the length of the [TabBar.tabs] list.
+///
+/// To see a sample implementation, visit the [TabController] documentation.
 class TabBarView extends StatefulWidget {
   /// Creates a page view with one child per tab.
   ///
@@ -1057,7 +1086,7 @@ class TabBarView extends StatefulWidget {
     @required this.children,
     this.controller,
     this.physics,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(children != null),
        assert(dragStartBehavior != null),
        super(key: key);
@@ -1068,7 +1097,8 @@ class TabBarView extends StatefulWidget {
   /// will be used.
   final TabController controller;
 
-  /// One widget per tab.
+  /// One widget per tab. Its length must match the length of the [TabBar.tabs]
+  /// list, as well as the [controller]'s [TabController.length].
   final List<Widget> children;
 
   /// How the page view should respond to user input.
@@ -1095,6 +1125,7 @@ class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
   PageController _pageController;
   List<Widget> _children;
+  List<Widget> _childrenWithKey;
   int _currentIndex;
   int _warpUnderwayCount = 0;
 
@@ -1112,6 +1143,7 @@ class _TabBarViewState extends State<TabBarView> {
       }
       return true;
     }());
+
     if (newController == _controller)
       return;
 
@@ -1125,7 +1157,7 @@ class _TabBarViewState extends State<TabBarView> {
   @override
   void initState() {
     super.initState();
-    _children = widget.children;
+    _updateChildren();
   }
 
   @override
@@ -1142,7 +1174,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (widget.controller != oldWidget.controller)
       _updateTabController();
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
-      _children = widget.children;
+      _updateChildren();
   }
 
   @override
@@ -1151,6 +1183,11 @@ class _TabBarViewState extends State<TabBarView> {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
+  }
+
+  void _updateChildren() {
+    _children = widget.children;
+    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
   }
 
   void _handleTabControllerAnimationTick() {
@@ -1175,28 +1212,30 @@ class _TabBarViewState extends State<TabBarView> {
       return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
 
     assert((_currentIndex - previousIndex).abs() > 1);
-    int initialPage;
+    final int initialPage = _currentIndex > previousIndex
+        ? _currentIndex - 1
+        : _currentIndex + 1;
+    final List<Widget> originalChildren = _childrenWithKey;
     setState(() {
       _warpUnderwayCount += 1;
-      _children = List<Widget>.from(widget.children, growable: false);
-      if (_currentIndex > previousIndex) {
-        _children[_currentIndex - 1] = _children[previousIndex];
-        initialPage = _currentIndex - 1;
-      } else {
-        _children[_currentIndex + 1] = _children[previousIndex];
-        initialPage = _currentIndex + 1;
-      }
-    });
 
+      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      final Widget temp = _childrenWithKey[initialPage];
+      _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
+      _childrenWithKey[previousIndex] = temp;
+    });
     _pageController.jumpToPage(initialPage);
 
     await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
       return Future<void>.value();
-
     setState(() {
       _warpUnderwayCount -= 1;
-      _children = widget.children;
+      if (widget.children != _children) {
+        _updateChildren();
+      } else {
+        _childrenWithKey = originalChildren;
+      }
     });
   }
 
@@ -1226,13 +1265,22 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      if (_controller.length != widget.children.length) {
+        throw FlutterError(
+          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'number of tabs (${widget.children.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
-        children: _children,
+        children: _childrenWithKey,
       ),
     );
   }
@@ -1388,7 +1436,7 @@ class TabPageSelector extends StatelessWidget {
             }).toList(),
           ),
         );
-      }
+      },
     );
   }
 }

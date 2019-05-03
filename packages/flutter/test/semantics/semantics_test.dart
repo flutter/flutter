@@ -26,7 +26,7 @@ void main() {
       expect(node.isTagged(tag1), isFalse);
       expect(node.isTagged(tag2), isFalse);
 
-      node.tags = Set<SemanticsTag>()..add(tag1);
+      node.tags = <SemanticsTag>{tag1};
       expect(node.isTagged(tag1), isTrue);
       expect(node.isTagged(tag2), isFalse);
 
@@ -36,12 +36,10 @@ void main() {
     });
 
     test('getSemanticsData includes tags', () {
-      final Set<SemanticsTag> tags = Set<SemanticsTag>()
-        ..add(tag1)
-        ..add(tag2);
+      final Set<SemanticsTag> tags = <SemanticsTag>{tag1, tag2};
 
       final SemanticsNode node = SemanticsNode()
-        ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
+        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0)
         ..tags = tags;
 
       expect(node.getSemanticsData().tags, tags);
@@ -57,7 +55,7 @@ void main() {
         childrenInInversePaintOrder: <SemanticsNode>[
           SemanticsNode()
             ..isMergedIntoParent = true
-            ..rect = Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+            ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
             ..tags = tags,
         ],
       );
@@ -84,10 +82,10 @@ void main() {
               child: TestRender(
                 hasScrollUpAction: true,
                 isSemanticBoundary: true,
-              )
-            )
-          )
-        )
+              ),
+            ),
+          ),
+        ),
       );
 
       layout(root);
@@ -110,11 +108,11 @@ void main() {
 
   test('toStringDeep() does not throw with transform == null', () {
     final SemanticsNode child1 = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0);
     final SemanticsNode child2 = SemanticsNode()
-      ..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0);
     final SemanticsNode root = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -139,7 +137,7 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n'
+      '     Rect.fromLTRB(5.0, 0.0, 10.0, 5.0)\n',
     );
   });
 
@@ -189,11 +187,11 @@ void main() {
 
   test('toStringDeep respects childOrder parameter', () {
     final SemanticsNode child1 = SemanticsNode()
-      ..rect = Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
+      ..rect = const Rect.fromLTRB(15.0, 0.0, 20.0, 5.0);
     final SemanticsNode child2 = SemanticsNode()
-      ..rect = Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
+      ..rect = const Rect.fromLTRB(10.0, 0.0, 15.0, 5.0);
     final SemanticsNode root = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 5.0);
     root.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[child1, child2],
@@ -213,7 +211,7 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
     expect(
@@ -231,26 +229,26 @@ void main() {
       ' └─SemanticsNode#2\n'
       '     STALE\n'
       '     owner: null\n'
-      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n'
+      '     Rect.fromLTRB(10.0, 0.0, 15.0, 5.0)\n',
     );
 
     final SemanticsNode child3 = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 5.0);
     child3.updateWith(
       config: null,
       childrenInInversePaintOrder: <SemanticsNode>[
         SemanticsNode()
-          ..rect = Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
+          ..rect = const Rect.fromLTRB(5.0, 0.0, 10.0, 5.0),
         SemanticsNode()
-          ..rect = Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
+          ..rect = const Rect.fromLTRB(0.0, 0.0, 5.0, 5.0),
       ],
     );
 
     final SemanticsNode rootComplex = SemanticsNode()
-      ..rect = Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
+      ..rect = const Rect.fromLTRB(0.0, 0.0, 25.0, 5.0);
     rootComplex.updateWith(
         config: null,
-        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3]
+        childrenInInversePaintOrder: <SemanticsNode>[child1, child2, child3],
     );
 
     expect(
@@ -283,7 +281,7 @@ void main() {
       '   └─SemanticsNode#6\n'
       '       STALE\n'
       '       owner: null\n'
-      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
     );
 
     expect(
@@ -316,7 +314,7 @@ void main() {
       '   └─SemanticsNode#6\n'
       '       STALE\n'
       '       owner: null\n'
-      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n'
+      '       Rect.fromLTRB(0.0, 0.0, 5.0, 5.0)\n',
     );
   });
 
@@ -326,7 +324,7 @@ void main() {
       minimalProperties.toStringDeep(),
       'SemanticsNode#1\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
-      '   invisible\n'
+      '   invisible\n',
     );
 
     expect(
@@ -348,13 +346,14 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   platformViewId: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n'
+      '   thicknes: 0.0\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -370,7 +369,7 @@ void main() {
       ..textDirection = TextDirection.rtl
       ..sortKey = const OrdinalSortKey(1.0);
     final SemanticsNode allProperties = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.translation(Vector3(10.0, 10.0, 0.0))
       ..updateWith(config: config, childrenInInversePaintOrder: null);
     expect(
@@ -394,7 +393,7 @@ void main() {
     );
 
     final SemanticsNode scaled = SemanticsNode()
-      ..rect = Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
+      ..rect = const Rect.fromLTWH(50.0, 10.0, 20.0, 30.0)
       ..transform = Matrix4.diagonal3(Vector3(10.0, 10.0, 1.0));
     expect(
       scaled.toStringDeep(),
@@ -415,9 +414,9 @@ void main() {
     const CustomSemanticsAction action2 = CustomSemanticsAction(label: 'action2');
     const CustomSemanticsAction action3 = CustomSemanticsAction(label: 'action3');
     configuration.customSemanticsActions = <CustomSemanticsAction, VoidCallback>{
-      action1: () {},
-      action2: () {},
-      action3: () {},
+      action1: () { },
+      action2: () { },
+      action3: () { },
     };
     final SemanticsNode actionNode = SemanticsNode();
     actionNode.updateWith(config: configuration);
@@ -442,13 +441,14 @@ void main() {
       '   hint: ""\n'
       '   textDirection: null\n'
       '   sortKey: null\n'
+      '   platformViewId: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n'
+      '   thicknes: 0.0\n',
     );
 
   });
@@ -501,7 +501,7 @@ void main() {
     final MoveCursorHandler onMoveCursorForwardByCharacter = (bool _) { };
     final MoveCursorHandler onMoveCursorBackwardByCharacter = (bool _) { };
     final VoidCallback onTap = () { };
-    final VoidCallback onCustomAction = () {};
+    final VoidCallback onCustomAction = () { };
 
     config.onShowOnScreen = onShowOnScreen;
     config.onScrollDown = onScrollDown;
@@ -551,7 +551,7 @@ class TestRender extends RenderProxyBox {
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
     this.isSemanticBoundary,
-    RenderObject child
+    RenderObject child,
   }) : super(child);
 
   bool hasTapAction;

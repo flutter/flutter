@@ -11,6 +11,7 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'desktop.dart';
 import 'fuchsia/fuchsia_device.dart';
 
 import 'globals.dart';
@@ -18,10 +19,12 @@ import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'project.dart';
 import 'tester/flutter_tester.dart';
+import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
-DeviceManager get deviceManager => context[DeviceManager];
+DeviceManager get deviceManager => context.get<DeviceManager>();
 
 /// A class to get all available devices.
 class DeviceManager {
@@ -35,10 +38,23 @@ class DeviceManager {
     IOSSimulators(),
     FuchsiaDevices(),
     FlutterTesterDevices(),
-    MacOSDevices(),
-    LinuxDevices(),
-    WindowsDevices(),
-  ]);
+  ] + _conditionalDesktopDevices + _conditionalWebDevices);
+
+  /// Only add desktop devices if the flag is enabled.
+  static List<DeviceDiscovery> get _conditionalDesktopDevices {
+    return flutterDesktopEnabled ? <DeviceDiscovery>[
+      MacOSDevices(),
+      LinuxDevices(),
+      WindowsDevices(),
+    ] : <DeviceDiscovery>[];
+  }
+
+  /// Only add web devices if the flag is enabled.
+  static List<DeviceDiscovery> get _conditionalWebDevices {
+    return flutterWebEnabled ? <DeviceDiscovery>[
+      WebDevices(),
+    ] : <DeviceDiscovery>[];
+  }
 
   String _specifiedDeviceId;
 
@@ -220,6 +236,9 @@ abstract class Device {
     }
   }
 
+  /// Whether the device is supported for the current project directory.
+  bool isSupportedForProject(FlutterProject flutterProject);
+
   /// Check if a version of the given app is already installed
   Future<bool> isAppInstalled(ApplicationPackage app);
 
@@ -247,7 +266,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ApplicationPackage app});
+  DeviceLogReader getLogReader({ ApplicationPackage app });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -271,7 +290,6 @@ abstract class Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   });
@@ -350,13 +368,17 @@ abstract class Device {
 }
 
 class DebuggingOptions {
-  DebuggingOptions.enabled(this.buildInfo, {
+  DebuggingOptions.enabled(
+    this.buildInfo, {
     this.startPaused = false,
+    this.disableServiceAuthCodes = false,
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
     this.traceSystrace = false,
+    this.dumpSkpOnShaderCompilation = false,
     this.useTestFonts = false,
+    this.verboseSystemLogs = false,
     this.observatoryPort,
    }) : debuggingEnabled = true;
 
@@ -364,21 +386,27 @@ class DebuggingOptions {
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
+      disableServiceAuthCodes = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
       traceSkia = false,
       traceSystrace = false,
+      dumpSkpOnShaderCompilation = false,
+      verboseSystemLogs = false,
       observatoryPort = null;
 
   final bool debuggingEnabled;
 
   final BuildInfo buildInfo;
   final bool startPaused;
+  final bool disableServiceAuthCodes;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
   final bool traceSkia;
   final bool traceSystrace;
+  final bool dumpSkpOnShaderCompilation;
   final bool useTestFonts;
+  final bool verboseSystemLogs;
   final int observatoryPort;
 
   bool get hasObservatoryPort => observatoryPort != null;
@@ -425,7 +453,7 @@ abstract class DevicePortForwarder {
   /// Forward [hostPort] on the host to [devicePort] on the device.
   /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, {int hostPort});
+  Future<int> forward(int devicePort, { int hostPort });
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
@@ -471,11 +499,11 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
   const NoOpDevicePortForwarder();
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async => devicePort;
+  Future<int> forward(int devicePort, { int hostPort }) async => devicePort;
 
   @override
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async {}
+  Future<void> unforward(ForwardedPort forwardedPort) async { }
 }

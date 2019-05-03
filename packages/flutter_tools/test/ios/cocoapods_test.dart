@@ -57,17 +57,17 @@ void main() {
     fs = MemoryFileSystem();
     mockProcessManager = MockProcessManager();
     mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-    projectUnderTest = await FlutterProject.fromDirectory(fs.directory('project'));
+    projectUnderTest = FlutterProject.fromDirectory(fs.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.5.0');
     fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc'
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-objc',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Objective-C podfile template');
     fs.file(fs.path.join(
-      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-swift'
+      Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-swift',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Swift podfile template');
@@ -156,7 +156,7 @@ void main() {
         'SWIFT_VERSION': '4.0',
       });
 
-      final FlutterProject project = await FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Swift podfile template');
@@ -168,7 +168,7 @@ void main() {
     testUsingContext('does not recreate Podfile when already present', () async {
       projectUnderTest.ios.podfile..createSync()..writeAsStringSync('Existing Podfile');
 
-      final FlutterProject project = await FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.readAsStringSync(), 'Existing Podfile');
@@ -179,7 +179,7 @@ void main() {
     testUsingContext('does not create Podfile when we cannot interpret Xcode projects', () async {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-      final FlutterProject project = await FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       expect(projectUnderTest.ios.podfile.existsSync(), false);
@@ -197,7 +197,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = await FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -225,7 +225,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = await FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromPath('project');
       await injectPlugins(project);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
@@ -572,5 +572,5 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
-ProcessResult exitsWithError([String stdout = '']) => ProcessResult(1, 1, stdout, '');
-ProcessResult exitsHappy([String stdout = '']) => ProcessResult(1, 0, stdout, '');
+ProcessResult exitsWithError([ String stdout = '' ]) => ProcessResult(1, 1, stdout, '');
+ProcessResult exitsHappy([ String stdout = '' ]) => ProcessResult(1, 0, stdout, '');

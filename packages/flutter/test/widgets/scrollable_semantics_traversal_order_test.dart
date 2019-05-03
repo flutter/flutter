@@ -101,7 +101,7 @@ void main() {
                             label: 'item 14b',
                             textDirection: TextDirection.ltr,
                           ),
-                        ]
+                        ],
                       ),
                       TestSemantics(
                         children: <TestSemantics>[

@@ -49,7 +49,7 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractFrameDurations()
+  int computeMissedFrameBuildBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractFrameDurations()
     .where((Duration duration) => duration > kBuildBudget)
     .length;
 
@@ -76,7 +76,7 @@ class TimelineSummary {
 
   /// The number of frames that missed the [kBuildBudget] on the GPU and
   /// therefore are in the danger of missing frames.
-  int computeMissedFrameRasterizerBudgetCount([Duration frameBuildBudget = kBuildBudget]) => _extractGpuRasterizerDrawEvents()
+  int computeMissedFrameRasterizerBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractGpuRasterizerDrawEvents()
       .where((TimedEvent event) => event.duration > kBuildBudget)
       .length;
 
@@ -85,7 +85,7 @@ class TimelineSummary {
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
-    return <String, dynamic> {
+    return <String, dynamic>{
       'average_frame_build_time_millis': computeAverageFrameBuildTimeMillis(),
       '90th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(90.0),
       '99th_percentile_frame_build_time_millis': computePercentileFrameBuildTimeMillis(99.0),

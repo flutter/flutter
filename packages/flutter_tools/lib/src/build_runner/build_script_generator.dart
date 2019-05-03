@@ -1,4 +1,4 @@
-// Copyright 201 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,7 +40,7 @@ class BuildScriptGenerator {
       literalList(builders, refer('BuilderApplication', 'package:build_runner_core/build_runner_core.dart'))
         .assignFinal('_builders')
         .statement,
-      _createMain()
+      _createMain(),
     ]));
     final DartEmitter emitter = DartEmitter(Allocator.simplePrefixing());
     try {

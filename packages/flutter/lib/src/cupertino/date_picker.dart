@@ -8,19 +8,27 @@ import 'package:flutter/widgets.dart';
 import 'colors.dart';
 import 'localizations.dart';
 import 'picker.dart';
+import 'theme.dart';
 
 // Default aesthetic values obtained by comparing with iOS pickers.
 const double _kItemExtent = 32.0;
 const double _kPickerWidth = 330.0;
 const bool _kUseMagnifier = true;
-const double _kMagnification = 1.05;
+const double _kMagnification = 1.08;
 const double _kDatePickerPadSize = 12.0;
+// The density of a date picker is different from a generic picker.
+// Eyeballed from iOS.
+const double _kSqueeze = 1.25;
 // Considers setting the default background color from the theme, in the future.
 const Color _kBackgroundColor = CupertinoColors.white;
 
 const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
 );
+
+TextStyle _themeTextStyle(BuildContext context) {
+  return CupertinoTheme.of(context).textTheme.dateTimePickerTextStyle;
+}
 
 // Lays out the date picker based on how much space each single column needs.
 //
@@ -58,6 +66,13 @@ class _DatePickerLayoutDelegate extends MultiChildLayoutDelegate {
       if (index == 0 || index == columnWidths.length - 1)
         childWidth += remainingWidth / 2;
 
+      assert(
+        childWidth >= 0,
+        'Insufficient horizontal space to render the CupertinoDatePicker '
+        'because the parent is too narrow at ${size.width}px.\n'
+        'An additional ${-remainingWidth}px is needed to avoid overlapping '
+        'columns.',
+      );
       layoutChild(index, BoxConstraints.tight(Size(childWidth, size.height)));
       positionChild(index, Offset(currentHorizontalOffset, 0.0));
 
@@ -130,6 +145,13 @@ enum _PickerColumnType {
 ///
 ///  * US-English: [July | 13 | 2012]
 ///  * Vietnamese: [13 | Tháng 7 | 2012]
+///
+/// Can be used with [showCupertinoModalPopup] to display the picker modally at
+/// the bottom of the screen.
+///
+/// Sizes itself to its parent and may not render correctly if not given the
+/// full screen width. Content texts are shown with
+/// [CupertinoTextThemeData.dateTimePickerTextStyle].
 ///
 /// See also:
 ///
@@ -279,14 +301,14 @@ class CupertinoDatePicker extends StatefulWidget {
         }
         break;
       case _PickerColumnType.hour:
-        for (int i = 0 ; i < 24; i++) {
+        for (int i = 0; i < 24; i++) {
           final String hour = localizations.datePickerHour(i);
           if (longestText.length < hour.length)
             longestText = hour;
         }
         break;
       case _PickerColumnType.minute:
-        for (int i = 0 ; i < 60; i++) {
+        for (int i = 0; i < 60; i++) {
           final String minute = localizations.datePickerMinute(i);
           if (longestText.length < minute.length)
             longestText = minute;
@@ -299,14 +321,14 @@ class CupertinoDatePicker extends StatefulWidget {
             : localizations.postMeridiemAbbreviation;
         break;
       case _PickerColumnType.dayOfMonth:
-        for (int i = 1 ; i <=31; i++) {
+        for (int i = 1; i <=31; i++) {
           final String dayOfMonth = localizations.datePickerDayOfMonth(i);
           if (longestText.length < dayOfMonth.length)
             longestText = dayOfMonth;
         }
         break;
       case _PickerColumnType.month:
-        for (int i = 1 ; i <=12; i++) {
+        for (int i = 1; i <=12; i++) {
           final String month = localizations.datePickerMonth(i);
           if (longestText.length < month.length)
             longestText = month;
@@ -321,7 +343,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
     final TextPainter painter = TextPainter(
       text: TextSpan(
-        style: DefaultTextStyle.of(context).style,
+        style: _themeTextStyle(context),
         text: longestText,
       ),
       textDirection: Directionality.of(context),
@@ -339,6 +361,10 @@ class CupertinoDatePicker extends StatefulWidget {
 typedef _ColumnBuilder = Widget Function(double offAxisFraction, TransitionBuilder itemPositioningBuilder);
 
 class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
+  // Fraction of the farthest column's vanishing point vs its width. Eyeballed
+  // vs iOS.
+  static const double _kMaximumOffAxisFraction = 0.45;
+
   int textDirectionFactor;
   CupertinoLocalizations localizations;
 
@@ -462,6 +488,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedDayFromInitial = index;
         widget.onDateTimeChanged(_getDateTime());
@@ -478,9 +505,21 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         if (widget.maximumDate != null && dateTime.isAfter(widget.maximumDate))
           return null;
 
+        final DateTime now = DateTime.now();
+        String dateText;
+
+        if (dateTime == DateTime(now.year, now.month, now.day)) {
+          dateText = localizations.todayLabel;
+        } else {
+          dateText = localizations.datePickerMediumDate(dateTime);
+        }
+
         return itemPositioningBuilder(
           context,
-          Text(localizations.datePickerMediumDate(dateTime)),
+          Text(
+            dateText,
+            style: _themeTextStyle(context),
+          ),
         );
       },
     );
@@ -494,6 +533,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         if (widget.use24hFormat) {
           selectedHour = index;
@@ -514,8 +554,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
               duration: const Duration(milliseconds: 300),
               curve: Curves.easeOut,
             );
-          }
-          else {
+          } else {
             widget.onDateTimeChanged(_getDateTime());
           }
         }
@@ -532,6 +571,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           Text(
             localizations.datePickerHour(hour),
             semanticsLabel: localizations.datePickerHourSemanticsLabel(hour),
+            style: _themeTextStyle(context),
           ),
         );
       }),
@@ -541,12 +581,13 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
 
   Widget _buildMinutePicker(double offAxisFraction, TransitionBuilder itemPositioningBuilder) {
     return CupertinoPicker(
-      scrollController: FixedExtentScrollController(initialItem: selectedMinute),
+      scrollController: FixedExtentScrollController(initialItem: selectedMinute ~/ widget.minuteInterval),
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedMinute = index * widget.minuteInterval;
         widget.onDateTimeChanged(_getDateTime());
@@ -558,6 +599,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           Text(
             localizations.datePickerMinute(minute),
             semanticsLabel: localizations.datePickerMinuteSemanticsLabel(minute),
+            style: _themeTextStyle(context),
           ),
         );
       }),
@@ -573,6 +615,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedAmPm = index;
         widget.onDateTimeChanged(_getDateTime());
@@ -583,7 +626,8 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           Text(
             index == 0
               ? localizations.anteMeridiemAbbreviation
-              : localizations.postMeridiemAbbreviation
+              : localizations.postMeridiemAbbreviation,
+            style: _themeTextStyle(context),
           ),
         );
       }),
@@ -608,8 +652,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
         || localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.time_dayPeriod_date) {
         pickerBuilders.add(_buildAmPmPicker);
         columnWidths.add(_getEstimatedColumnWidth(_PickerColumnType.dayPeriod));
-      }
-      else {
+      } else {
         pickerBuilders.insert(0, _buildAmPmPicker);
         columnWidths.insert(0, _getEstimatedColumnWidth(_PickerColumnType.dayPeriod));
       }
@@ -621,8 +664,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
           || localizations.datePickerDateTimeOrder == DatePickerDateTimeOrder.dayPeriod_time_date) {
         pickerBuilders.add(_buildMediumDatePicker);
         columnWidths.add(_getEstimatedColumnWidth(_PickerColumnType.date));
-      }
-      else {
+      } else {
         pickerBuilders.insert(0, _buildMediumDatePicker);
         columnWidths.insert(0, _getEstimatedColumnWidth(_PickerColumnType.date));
       }
@@ -633,9 +675,9 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     for (int i = 0; i < columnWidths.length; i++) {
       double offAxisFraction = 0.0;
       if (i == 0)
-        offAxisFraction = -0.5 * textDirectionFactor;
+        offAxisFraction = -_kMaximumOffAxisFraction * textDirectionFactor;
       else if (i >= 2 || columnWidths.length == 2)
-        offAxisFraction = 0.5 * textDirectionFactor;
+        offAxisFraction = _kMaximumOffAxisFraction * textDirectionFactor;
 
       EdgeInsets padding = const EdgeInsets.only(right: _kDatePickerPadSize);
       if (i == columnWidths.length - 1)
@@ -738,21 +780,22 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedDay = index + 1;
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
           widget.onDateTimeChanged(DateTime(selectedYear, selectedMonth, selectedDay));
       },
       children: List<Widget>.generate(31, (int index) {
-        TextStyle disableTextStyle; // Null if not out of range.
+        TextStyle textStyle = _themeTextStyle(context);
         if (index >= daysInCurrentMonth) {
-          disableTextStyle = const TextStyle(color: CupertinoColors.inactiveGray);
+          textStyle = textStyle.copyWith(color: CupertinoColors.inactiveGray);
         }
         return itemPositioningBuilder(
           context,
           Text(
             localizations.datePickerDayOfMonth(index + 1),
-            style: disableTextStyle,
+            style: textStyle,
           ),
         );
       }),
@@ -768,6 +811,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       useMagnifier: _kUseMagnifier,
       magnification: _kMagnification,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         selectedMonth = index + 1;
         if (DateTime(selectedYear, selectedMonth, selectedDay).day == selectedDay)
@@ -776,7 +820,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
       children: List<Widget>.generate(12, (int index) {
         return itemPositioningBuilder(
           context,
-          Text(localizations.datePickerMonth(index + 1)),
+          Text(
+            localizations.datePickerMonth(index + 1),
+            style: _themeTextStyle(context),
+          ),
         );
       }),
       looping: true,
@@ -805,7 +852,10 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
 
         return itemPositioningBuilder(
           context,
-          Text(localizations.datePickerYear(index)),
+          Text(
+            localizations.datePickerYear(index),
+            style: _themeTextStyle(context),
+          ),
         );
       },
     );
@@ -959,6 +1009,8 @@ enum CupertinoTimerPickerMode {
 ///
 /// There are several modes of the timer picker listed in [CupertinoTimerPickerMode].
 ///
+/// Sizes itself to its parent.
+///
 /// See also:
 ///
 ///  * [CupertinoDatePicker], the class that implements different display modes
@@ -1048,7 +1100,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
   Widget _buildLabel(String text) {
     return Text(
       text,
-      textScaleFactor: 0.8,
+      textScaleFactor: 0.9,
       style: const TextStyle(fontWeight: FontWeight.w600),
     );
   }
@@ -1070,6 +1122,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       offAxisFraction: -0.5 * textDirectionFactor,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedHour = index;
@@ -1148,6 +1201,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedMinute = index * widget.minuteInterval;
@@ -1181,8 +1235,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               ),
             ),
           );
-        }
-        else
+        } else {
           return Semantics(
             label: semanticsLabel,
             excludeSemantics: true,
@@ -1199,6 +1252,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
               ),
             ),
           );
+        }
       }),
     );
   }
@@ -1260,6 +1314,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
       offAxisFraction: offAxisFraction,
       itemExtent: _kItemExtent,
       backgroundColor: _kBackgroundColor,
+      squeeze: _kSqueeze,
       onSelectedItemChanged: (int index) {
         setState(() {
           selectedSecond = index * widget.secondInterval;

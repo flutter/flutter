@@ -29,7 +29,7 @@ TaskFunction createFlavorsTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/flavors',
     'lib/main.dart',
-    extraOptions: <String>['--flavor', 'paid']
+    extraOptions: <String>['--flavor', 'paid'],
   );
 }
 
@@ -66,8 +66,15 @@ TaskFunction createCodegenerationIntegrationTest() {
     '${flutterDirectory.path}/dev/integration_tests/codegen',
     'lib/main.dart',
     environment: <String, String>{
-      'FLUTTER_EXPERIMENTAL_BUILD': 'true'
+      'FLUTTER_EXPERIMENTAL_BUILD': 'true',
     },
+  );
+}
+
+TaskFunction createImageLoadingIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/image_loading',
+    'lib/main.dart',
   );
 }
 

@@ -19,9 +19,9 @@ void main() {
             child: c = RenderOpacity(
               opacity: 1.0
             )
-          )
+          ),
         )
-      )
+      ),
     );
     layout(a, phase: EnginePhase.flushSemantics);
     c.opacity = 0.9;

@@ -27,6 +27,7 @@ class AnalysisServer {
       StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
       StreamController<FileAnalysisErrors>.broadcast();
+  bool _didServerErrorOccur = false;
 
   int _id = 0;
 
@@ -54,13 +55,14 @@ class AnalysisServer {
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
-      'subscriptions': <String>['STATUS']
+      'subscriptions': <String>['STATUS'],
     });
 
     _sendCommand('analysis.setAnalysisRoots',
         <String, dynamic>{'included': directories, 'excluded': <String>[]});
   }
 
+  bool get didServerErrorOccur => _didServerErrorOccur;
   Stream<bool> get onAnalyzing => _analyzingController.stream;
   Stream<FileAnalysisErrors> get onErrors => _errorsController.stream;
 
@@ -70,7 +72,7 @@ class AnalysisServer {
     final String message = json.encode(<String, dynamic>{
       'id': (++_id).toString(),
       'method': method,
-      'params': params
+      'params': params,
     });
     _process.stdin.writeln(message);
     printTrace('==> $message');
@@ -120,6 +122,7 @@ class AnalysisServer {
     if (error['stackTrace'] != null) {
       printError(error['stackTrace']);
     }
+    _didServerErrorOccur = true;
   }
 
   void _handleAnalysisIssues(Map<String, dynamic> issueInfo) {

@@ -194,8 +194,8 @@ class ImageStream extends Diagnosticable {
   /// Returns an object which can be used with `==` to determine if this
   /// [ImageStream] shares the same listeners list as another [ImageStream].
   ///
-  /// This can be used to avoid unregistering and reregistering listeners after
-  /// calling [ImageProvider.resolve] on a new, but possibly equivalent,
+  /// This can be used to avoid un-registering and re-registering listeners
+  /// after calling [ImageProvider.resolve] on a new, but possibly equivalent,
   /// [ImageProvider].
   ///
   /// The key may change once in the lifetime of the object. When it changes, it
@@ -284,7 +284,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         listener(_currentImage, true);
       } catch (exception, stack) {
         reportError(
-          context: 'by a synchronously-called image listener',
+          context: ErrorDescription('by a synchronously-called image listener'),
           exception: exception,
           stack: stack,
         );
@@ -298,7 +298,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
           FlutterErrorDetails(
             exception: exception,
             library: 'image resource service',
-            context: 'by a synchronously-called image error listener',
+            context: ErrorDescription('by a synchronously-called image error listener'),
             stack: stack,
           ),
         );
@@ -336,7 +336,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         listener(image, false);
       } catch (exception, stack) {
         reportError(
-          context: 'by an image listener',
+          context: ErrorDescription('by an image listener'),
           exception: exception,
           stack: stack,
         );
@@ -374,7 +374,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// See [FlutterErrorDetails] for further details on these values.
   @protected
   void reportError({
-    String context,
+    DiagnosticsNode context,
     dynamic exception,
     StackTrace stack,
     InformationCollector informationCollector,
@@ -405,7 +405,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         } catch (exception, stack) {
           FlutterError.reportError(
             FlutterErrorDetails(
-              context: 'when reporting an error to an image listener',
+              context: ErrorDescription('when reporting an error to an image listener'),
               library: 'image resource service',
               exception: exception,
               stack: stack,
@@ -451,7 +451,7 @@ class OneFrameImageStreamCompleter extends ImageStreamCompleter {
       : assert(image != null) {
     image.then<void>(setImage, onError: (dynamic error, StackTrace stack) {
       reportError(
-        context: 'resolving a single-frame image stream',
+        context: ErrorDescription('resolving a single-frame image stream'),
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
@@ -505,15 +505,13 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
-       _scale = scale,
-       _framesEmitted = 0,
-       _timer = null {
+       _scale = scale {
     codec.then<void>(_handleCodecReady, onError: (dynamic error, StackTrace stack) {
       reportError(
-        context: 'resolving an image codec',
+        context: ErrorDescription('resolving an image codec'),
         exception: error,
         stack: stack,
         informationCollector: informationCollector,
@@ -531,17 +529,23 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   // The requested duration for the current frame;
   Duration _frameDuration;
   // How many frames have been emitted so far.
-  int _framesEmitted;
+  int _framesEmitted = 0;
   Timer _timer;
+
+  // Used to guard against registering multiple _handleAppFrame callbacks for the same frame.
+  bool _frameCallbackScheduled = false;
 
   void _handleCodecReady(ui.Codec codec) {
     _codec = codec;
     assert(_codec != null);
 
-    _decodeNextFrameAndSchedule();
+    if (hasListeners) {
+      _decodeNextFrameAndSchedule();
+    }
   }
 
   void _handleAppFrame(Duration timestamp) {
+    _frameCallbackScheduled = false;
     if (!hasListeners)
       return;
     if (_isFirstFrame() || _hasFrameDurationPassed(timestamp)) {
@@ -557,7 +561,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
     }
     final Duration delay = _frameDuration - (timestamp - _shownTimestamp);
     _timer = Timer(delay * timeDilation, () {
-      SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
+      _scheduleAppFrame();
     });
   }
 
@@ -575,7 +579,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _nextFrame = await _codec.getNextFrame();
     } catch (exception, stack) {
       reportError(
-        context: 'resolving an image frame',
+        context: ErrorDescription('resolving an image frame'),
         exception: exception,
         stack: stack,
         informationCollector: _informationCollector,
@@ -589,6 +593,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       _emitFrame(ImageInfo(image: _nextFrame.image, scale: _scale));
       return;
     }
+    _scheduleAppFrame();
+  }
+
+  void _scheduleAppFrame() {
+    if (_frameCallbackScheduled) {
+      return;
+    }
+    _frameCallbackScheduled = true;
     SchedulerBinding.instance.scheduleFrameCallback(_handleAppFrame);
   }
 

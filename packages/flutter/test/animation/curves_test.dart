@@ -46,6 +46,7 @@ void main() {
     assertMaximumSlope(Curves.linear, 20.0);
     assertMaximumSlope(Curves.decelerate, 20.0);
     assertMaximumSlope(Curves.fastOutSlowIn, 20.0);
+    assertMaximumSlope(Curves.slowMiddle, 20.0);
     assertMaximumSlope(Curves.bounceIn, 20.0);
     assertMaximumSlope(Curves.bounceOut, 20.0);
     assertMaximumSlope(Curves.bounceInOut, 20.0);

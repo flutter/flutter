@@ -19,6 +19,8 @@ typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstrain
 /// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
 /// child's size.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
+///
 /// If the child should be smaller than the parent, consider wrapping the child
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView].
@@ -34,7 +36,7 @@ class LayoutBuilder extends RenderObjectWidget {
   /// The [builder] argument must not be null.
   const LayoutBuilder({
     Key key,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 
@@ -111,14 +113,14 @@ class _LayoutBuilderElement extends RenderObjectElement {
           built = widget.builder(this, constraints);
           debugWidgetBuilderValue(widget, built);
         } catch (e, stack) {
-          built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
+          built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $widget'), e, stack));
         }
       }
       try {
         _child = updateChild(_child, built, null);
         assert(_child != null);
       } catch (e, stack) {
-        built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
+        built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $widget'), e, stack));
         _child = updateChild(null, built, slot);
       }
     });
@@ -224,7 +226,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 }
 
 FlutterErrorDetails _debugReportException(
-  String context,
+  DiagnosticsNode context,
   dynamic exception,
   StackTrace stack,
 ) {
@@ -232,7 +234,7 @@ FlutterErrorDetails _debugReportException(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: context,
   );
   FlutterError.reportError(details);
   return details;

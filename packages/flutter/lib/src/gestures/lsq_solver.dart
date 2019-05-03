@@ -55,7 +55,7 @@ class _Matrix {
   _Vector getRow(int row) => _Vector.fromVOL(
     _elements,
     row * _columns,
-    _columns
+    _columns,
   );
 }
 

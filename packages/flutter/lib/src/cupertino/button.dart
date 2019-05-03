@@ -28,6 +28,7 @@ const EdgeInsets _kBackgroundButtonPadding = EdgeInsets.symmetric(
 class CupertinoButton extends StatefulWidget {
   /// Creates an iOS-style button.
   const CupertinoButton({
+    Key key,
     @required this.child,
     this.padding,
     this.color,
@@ -37,7 +38,8 @@ class CupertinoButton extends StatefulWidget {
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
-       _filled = false;
+       _filled = false,
+       super(key: key);
 
   /// Creates an iOS-style button with a filled background.
   ///
@@ -46,6 +48,7 @@ class CupertinoButton extends StatefulWidget {
   /// To specify a custom background color, use the [color] argument of the
   /// default constructor.
   const CupertinoButton.filled({
+    Key key,
     @required this.child,
     this.padding,
     this.disabledColor,
@@ -55,7 +58,8 @@ class CupertinoButton extends StatefulWidget {
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
        color = null,
-       _filled = true;
+       _filled = true,
+       super(key: key);
 
   /// The widget below this widget in the tree.
   ///

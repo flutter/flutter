@@ -57,7 +57,7 @@ class AndroidEmulator extends Emulator {
     // seconds won't be recognized as such... :-/
     return Future.any<void>(<Future<void>>[
       launchResult,
-      Future<void>.delayed(const Duration(seconds: 3))
+      Future<void>.delayed(const Duration(seconds: 3)),
     ]);
   }
 }

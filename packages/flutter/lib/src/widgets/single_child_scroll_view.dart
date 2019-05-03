@@ -204,7 +204,7 @@ class SingleChildScrollView extends StatelessWidget {
     this.physics,
     this.controller,
     this.child,
-    this.dragStartBehavior = DragStartBehavior.down,
+    this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(scrollDirection != null),
        assert(dragStartBehavior != null),
        assert(!(controller != null && primary == true),
@@ -564,7 +564,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
   }
 
   @override
-  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, {Rect rect}) {
+  RevealedOffset getOffsetToReveal(RenderObject target, double alignment, { Rect rect }) {
     rect ??= target.paintBounds;
     if (target is! RenderBox)
       return RevealedOffset(offset: offset.pixels, rect: rect);

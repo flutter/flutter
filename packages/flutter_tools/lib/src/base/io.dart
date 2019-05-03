@@ -37,6 +37,7 @@ import 'process.dart';
 export 'dart:io'
     show
         BytesBuilder,
+        CompressionOptions,
         // Directory         NO! Use `file_system.dart`
         exitCode,
         // File              NO! Use `file_system.dart`
@@ -95,7 +96,7 @@ ExitFunction get exit => _exitFunction;
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
 @visibleForTesting
-void setExitFunctionForTests([ExitFunction exitFunction]) {
+void setExitFunctionForTests([ ExitFunction exitFunction ]) {
   _exitFunction = exitFunction ?? (int exitCode) {
     throw ProcessExit(exitCode, immediate: true);
   };
@@ -162,7 +163,7 @@ class Stdio {
   bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
-Stdio get stdio => context[Stdio];
+Stdio get stdio => context.get<Stdio>();
 io.IOSink get stdout => stdio.stdout;
 Stream<List<int>> get stdin => stdio.stdin;
 io.IOSink get stderr => stdio.stderr;

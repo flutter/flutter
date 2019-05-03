@@ -50,20 +50,20 @@ void main() {
                             Card(
                               elevation: 8.0,
                               child: Text('absolute elevation: 30'),
-                            )
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
                 const Card(
                   elevation: 15.0,
                   child: Text('absolute elevation: 25'),
-                )
+                ),
               ],
             ),
-          )
+          ),
         ],
       ),
     ));
@@ -129,17 +129,17 @@ void main() {
                             Card(
                               elevation: 8.0,
                               child: Text('absolute elevation: 30'),
-                            )
+                            ),
                           ],
                         ),
-                      )
+                      ),
                     ],
                   ),
                 ),
                 const Text('absolute elevation: 10'),
               ],
             ),
-          )
+          ),
         ],
       ),
     ));
@@ -182,8 +182,8 @@ void main() {
             child: Material(
               elevation: 24.0,
               child: Text('Hello'),
-            )
-        )
+            ),
+        ),
     ));
 
     final SemanticsNode node = tester.getSemantics(find.text('Hello'));
@@ -221,8 +221,8 @@ void main() {
                 ),
               ),
             ],
-          )
-        )
+          ),
+        ),
     ));
 
 
@@ -276,8 +276,8 @@ void main() {
                   ),
                 ),
               ],
-            )
-        )
+            ),
+        ),
     ));
 
 

@@ -261,7 +261,7 @@ String _getMessage(SemanticsNode node) {
 const TextStyle _messageStyle = TextStyle(
   color: Color(0xFF000000),
   fontSize: 10.0,
-  height: 0.8
+  height: 0.8,
 );
 
 void _paintMessage(Canvas canvas, SemanticsNode node) {

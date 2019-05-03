@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 // The top of the bottom widget is at 550 (the top of the top widget
 // is at 0). The top of the bottom widget is 500 when it has been
 // scrolled completely into view.
-Widget buildFrame(ScrollPhysics physics, {ScrollController scrollController}) {
+Widget buildFrame(ScrollPhysics physics, { ScrollController scrollController }) {
   return SingleChildScrollView(
     key: UniqueKey(),
     physics: physics,

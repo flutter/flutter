@@ -62,7 +62,7 @@ class ThirdWidget extends StatelessWidget {
           onException(e);
         }
       },
-      behavior: HitTestBehavior.opaque
+      behavior: HitTestBehavior.opaque,
     );
   }
 }
@@ -190,7 +190,7 @@ void main() {
       targetKey: targetKey,
       onException: (dynamic e) {
         exception = e;
-      }
+      },
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
@@ -277,13 +277,13 @@ void main() {
                 log.add('left');
                 Navigator.pushNamed(context, '/second');
               },
-              child: const Text('left')
+              child: const Text('left'),
             ),
             GestureDetector(
               onTap: () { log.add('right'); },
-              child: const Text('right')
+              child: const Text('right'),
             ),
-          ]
+          ],
         );
       },
       '/second': (BuildContext context) => Container(),
@@ -360,8 +360,7 @@ void main() {
     expect(find.text('B'), findsOneWidget);
   });
 
-  testWidgets('Push and pop should trigger the observers',
-      (WidgetTester tester) async {
+  testWidgets('Push and pop should trigger the observers', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),
@@ -566,7 +565,7 @@ void main() {
           },
         );
         return routes[settings.name];
-      }
+      },
     ));
 
     expect(find.text('/'), findsOneWidget);
@@ -723,8 +722,7 @@ void main() {
     expect(log, <String>['pushed / (previous is <none>)', 'pushed B (previous is /)', 'pushed C (previous is B)', 'replaced B with D']);
   });
 
-  testWidgets('didStartUserGesture observable',
-      (WidgetTester tester) async {
+  testWidgets('didStartUserGesture observable', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
        '/': (BuildContext context) => OnTapPage(id: '/', onTap: () { Navigator.pushNamed(context, '/A'); }),
       '/A': (BuildContext context) => OnTapPage(id: 'A', onTap: () { Navigator.pop(context); }),

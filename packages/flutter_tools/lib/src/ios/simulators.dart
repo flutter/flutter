@@ -19,9 +19,11 @@ import '../bundle.dart' as bundle;
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
+import 'plist_utils.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
@@ -40,7 +42,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
 
 class IOSSimulatorUtils {
   /// Returns [IOSSimulatorUtils] active in the current app context (i.e. zone).
-  static IOSSimulatorUtils get instance => context[IOSSimulatorUtils];
+  static IOSSimulatorUtils get instance => context.get<IOSSimulatorUtils>();
 
   List<IOSSimulator> getAttachedDevices() {
     if (!xcode.isInstalledAndMeetsVersionCheck)
@@ -55,7 +57,7 @@ class IOSSimulatorUtils {
 /// A wrapper around the `simctl` command line tool.
 class SimControl {
   /// Returns [SimControl] active in the current app context (i.e. zone).
-  static SimControl get instance => context[SimControl];
+  static SimControl get instance => context.get<SimControl>();
 
   /// Runs `simctl list --json` and returns the JSON of the corresponding
   /// [section].
@@ -139,7 +141,7 @@ class SimControl {
     return result;
   }
 
-  Future<RunResult> launch(String deviceId, String appIdentifier, [List<String> launchArgs]) {
+  Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
     final List<String> args = <String>[_xcrunPath, 'simctl', 'launch', deviceId, appIdentifier];
     if (launchArgs != null)
       args.addAll(launchArgs);
@@ -297,7 +299,6 @@ class IOSSimulator extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
@@ -322,10 +323,12 @@ class IOSSimulator extends Device {
       if (debuggingOptions.buildInfo.isDebug)
         args.addAll(<String>[
           '--enable-checked-mode',
-          '--verify-entry-points'
+          '--verify-entry-points',
         ]);
       if (debuggingOptions.startPaused)
         args.add('--start-paused');
+      if (debuggingOptions.disableServiceAuthCodes)
+        args.add('--disable-service-auth-codes');
       if (debuggingOptions.skiaDeterministicRendering)
         args.add('--skia-deterministic-rendering');
       if (debuggingOptions.useTestFonts)
@@ -341,7 +344,15 @@ class IOSSimulator extends Device {
 
     // Launch the updated application in the simulator.
     try {
-      await SimControl.instance.launch(id, package.id, args);
+      // Use the built application's Info.plist to get the bundle identifier,
+      // which should always yield the correct value and does not require
+      // parsing the xcodeproj or configuration files.
+      // See https://github.com/flutter/flutter/issues/31037 for more information.
+      final IOSApp iosApp = package;
+      final String plistPath = fs.path.join(iosApp.simulatorBundlePath, 'Info.plist');
+      final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
+
+      await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
       printError('$error');
       return LaunchResult.failed();
@@ -434,7 +445,7 @@ class IOSSimulator extends Device {
   }
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
     assert(app is IOSApp);
     _logReaders ??= <ApplicationPackage, _IOSSimulatorLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSSimulatorLogReader(this, app));
@@ -472,6 +483,11 @@ class IOSSimulator extends Device {
   Future<void> takeScreenshot(File outputFile) {
     return SimControl.instance.takeScreenshot(id, outputFile.path);
   }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.ios.existsSync();
+  }
 }
 
 /// Launches the device log reader process on the host.
@@ -500,7 +516,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   _IOSSimulatorLogReader(this.device, IOSApp app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
     _appName = app == null ? null : app.name.replaceAll('.app', '');
   }
@@ -700,7 +716,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   }
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     if (hostPort == null || hostPort == 0) {
       hostPort = devicePort;
     }

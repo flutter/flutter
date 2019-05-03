@@ -153,7 +153,7 @@ void main() {
         // Let `idevicescreenshot` fail with exit code 1.
         when(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
             environment: null,
-            workingDirectory: null
+            workingDirectory: null,
         )).thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(4, 1, '', '')));
 
         expect(() async => await iMobileDevice.takeScreenshot(mockOutputFile), throwsA(anything));
@@ -170,7 +170,7 @@ void main() {
         await iMobileDevice.takeScreenshot(mockOutputFile);
         verify(mockProcessManager.run(<String>['idevicescreenshot', outputPath],
             environment: null,
-            workingDirectory: null
+            workingDirectory: null,
         ));
       }, overrides: <Type, Generator>{
         ProcessManager: () => mockProcessManager,
@@ -442,7 +442,7 @@ Could not build the precompiled application for the device.''',
     const List<String> flutterAssetPbxProjLines = <String>[
       '/* flutter_assets */',
       '/* App.framework',
-      'another line'
+      'another line',
     ];
 
     const List<String> appFlxPbxProjLines = <String>[

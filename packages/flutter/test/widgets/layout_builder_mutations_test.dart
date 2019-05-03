@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 class Wrapper extends StatelessWidget {
   const Wrapper({
     Key key,
-    @required this.child
+    @required this.child,
   }) : assert(child != null),
        super(key: key);
 
@@ -36,10 +36,10 @@ void main() {
           child: Wrapper(
             child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return Wrapper(
-                child: SizedBox(key: victimKey)
+                child: SizedBox(key: victimKey),
               );
-            })
-          )
+            }),
+          ),
         ),
       ],
     ));
@@ -50,16 +50,16 @@ void main() {
         Wrapper(
           child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
             return Wrapper(
-              child: SizedBox(key: victimKey)
+              child: SizedBox(key: victimKey),
             );
-          })
+          }),
         ),
         Wrapper(
           child: Wrapper(
             child: LayoutBuilder(builder: (BuildContext context, BoxConstraints constraints) {
               return const SizedBox();
-            })
-          )
+            }),
+          ),
         ),
       ],
     ));

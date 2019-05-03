@@ -9,10 +9,10 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Sliver in a box', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const DecoratedBox(
-        decoration: BoxDecoration(),
+      DecoratedBox(
+        decoration: const BoxDecoration(),
         child: SliverList(
-          delegate: SliverChildListDelegate(<Widget>[]),
+          delegate: SliverChildListDelegate(const <Widget>[]),
         ),
       ),
     );
@@ -21,9 +21,9 @@ void main() {
 
     await tester.pumpWidget(
       Row(
-        children: const <Widget>[
+        children: <Widget>[
           SliverList(
-            delegate: SliverChildListDelegate(<Widget>[]),
+            delegate: SliverChildListDelegate(const <Widget>[]),
           ),
         ],
       ),

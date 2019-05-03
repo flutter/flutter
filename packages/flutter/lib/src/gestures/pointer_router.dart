@@ -76,14 +76,13 @@ class PointerRouter {
         exception: exception,
         stack: stack,
         library: 'gesture library',
-        context: 'while routing a pointer event',
+        context: ErrorDescription('while routing a pointer event'),
         router: this,
         route: route,
         event: event,
-        informationCollector: (StringBuffer information) {
-          information.writeln('Event:');
-          information.write('  $event');
-        }
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+        },
       ));
     }
   }
@@ -123,12 +122,12 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     dynamic exception,
     StackTrace stack,
     String library,
-    String context,
+    DiagnosticsNode context,
     this.router,
     this.route,
     this.event,
     InformationCollector informationCollector,
-    bool silent = false
+    bool silent = false,
   }) : super(
     exception: exception,
     stack: stack,

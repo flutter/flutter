@@ -17,7 +17,7 @@ void main() {
 
     await tester.pumpWidget(
       const Center(
-          child: Text('Hello!', textDirection: TextDirection.ltr)
+          child: Text('Hello!', textDirection: TextDirection.ltr),
       ),
     );
 
@@ -27,9 +27,9 @@ void main() {
           id: 1,
           label: 'Hello!',
           textDirection: TextDirection.ltr,
-          rect: Rect.fromLTRB(0.0, 0.0, 84.0, 14.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 84.0, 14.0),
           transform: Matrix4.translationValues(358.0, 293.0, 0.0),
-        )
+        ),
       ],
     )));
 
@@ -56,20 +56,20 @@ void main() {
       children: <TestSemantics>[
         TestSemantics.rootChild(
           id: 2,
-          rect: Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
+          rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             TestSemantics(
               id: 3,
-              rect: Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
+              rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 600.0),
               flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
                 TestSemantics(
                   id: 4,
                   label: 'Hello!',
                   textDirection: TextDirection.ltr,
-                  rect: Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
+                  rect: const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0),
                   transform: Matrix4.translationValues(395.0, 295.0, 0.0),
-                )
+                ),
               ],
             ),
           ],

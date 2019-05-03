@@ -164,8 +164,8 @@ class ChipTheme extends InheritedWidget {
 ///  * [ThemeData], which has a default [ChipThemeData].
 class ChipThemeData extends Diagnosticable {
   /// Create a [ChipThemeData] given a set of exact values. All the values
-  /// must be specified except for [elevation] and [pressElevation], which may
-  /// be null.
+  /// must be specified except for [shadowColor], [selectedShadowColor],
+  /// [elevation], and [pressElevation], which may be null.
   ///
   /// This will rarely be used directly. It is used by [lerp] to
   /// create intermediate themes based on two themes.
@@ -175,6 +175,8 @@ class ChipThemeData extends Diagnosticable {
     @required this.disabledColor,
     @required this.selectedColor,
     @required this.secondarySelectedColor,
+    this.shadowColor,
+    this.selectedShadowColor,
     @required this.labelPadding,
     @required this.padding,
     @required this.shape,
@@ -299,6 +301,25 @@ class ChipThemeData extends Diagnosticable {
   /// The chip is selected when [selected] is true.
   final Color secondarySelectedColor;
 
+  /// Color of the chip's shadow when the elevation is greater than 0.
+  ///
+  /// If null, the chip defaults to [Colors.black].
+  ///
+  /// See also:
+  ///
+  ///  * [selectedShadowColor]
+  final Color shadowColor;
+
+  /// Color of the chip's shadow when the elevation is greater than 0 and the
+  /// chip is selected.
+  ///
+  /// If null, the chip defaults to [Colors.black].
+  ///
+  /// See also:
+  ///
+  ///  * [shadowColor]
+  final Color selectedShadowColor;
+
   /// The padding around the [label] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
@@ -351,6 +372,8 @@ class ChipThemeData extends Diagnosticable {
     Color disabledColor,
     Color selectedColor,
     Color secondarySelectedColor,
+    Color shadowColor,
+    Color selectedShadowColor,
     EdgeInsetsGeometry labelPadding,
     EdgeInsetsGeometry padding,
     ShapeBorder shape,
@@ -366,6 +389,8 @@ class ChipThemeData extends Diagnosticable {
       disabledColor: disabledColor ?? this.disabledColor,
       selectedColor: selectedColor ?? this.selectedColor,
       secondarySelectedColor: secondarySelectedColor ?? this.secondarySelectedColor,
+      shadowColor: shadowColor ?? this.shadowColor,
+      selectedShadowColor: selectedShadowColor ?? this.selectedShadowColor,
       labelPadding: labelPadding ?? this.labelPadding,
       padding: padding ?? this.padding,
       shape: shape ?? this.shape,
@@ -392,6 +417,8 @@ class ChipThemeData extends Diagnosticable {
       disabledColor: Color.lerp(a?.disabledColor, b?.disabledColor, t),
       selectedColor: Color.lerp(a?.selectedColor, b?.selectedColor, t),
       secondarySelectedColor: Color.lerp(a?.secondarySelectedColor, b?.secondarySelectedColor, t),
+      shadowColor: Color.lerp(a?.shadowColor, b?.shadowColor, t),
+      selectedShadowColor: Color.lerp(a?.selectedShadowColor, b?.selectedShadowColor, t),
       labelPadding: EdgeInsetsGeometry.lerp(a?.labelPadding, b?.labelPadding, t),
       padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -411,6 +438,8 @@ class ChipThemeData extends Diagnosticable {
       disabledColor,
       selectedColor,
       secondarySelectedColor,
+      shadowColor,
+      selectedShadowColor,
       labelPadding,
       padding,
       shape,
@@ -436,6 +465,8 @@ class ChipThemeData extends Diagnosticable {
         && otherData.disabledColor == disabledColor
         && otherData.selectedColor == selectedColor
         && otherData.secondarySelectedColor == secondarySelectedColor
+        && otherData.shadowColor == shadowColor
+        && otherData.selectedShadowColor == selectedShadowColor
         && otherData.labelPadding == labelPadding
         && otherData.padding == padding
         && otherData.shape == shape
@@ -460,6 +491,8 @@ class ChipThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
     properties.add(DiagnosticsProperty<Color>('selectedColor', selectedColor, defaultValue: defaultData.selectedColor));
     properties.add(DiagnosticsProperty<Color>('secondarySelectedColor', secondarySelectedColor, defaultValue: defaultData.secondarySelectedColor));
+    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
+    properties.add(DiagnosticsProperty<Color>('selectedShadowColor', selectedShadowColor, defaultValue: defaultData.selectedShadowColor));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: defaultData.labelPadding));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));

@@ -400,14 +400,14 @@ class _GalleryHomeState extends State<GalleryHome> with SingleTickerProviderStat
             child: const Banner(
               message: 'PREVIEW',
               location: BannerLocation.topEnd,
-            )
+            ),
           ),
-        ]
+        ],
       );
     }
     home = AnnotatedRegion<SystemUiOverlayStyle>(
       child: home,
-      value: SystemUiOverlayStyle.light
+      value: SystemUiOverlayStyle.light,
     );
 
     return home;

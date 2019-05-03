@@ -10,14 +10,11 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, {
+  const BuildInfo(
+    this.mode,
+    this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
-    this.createBaseline = false,
-    this.createPatch = false,
-    this.patchNumber,
-    this.patchDir,
-    this.baselineDir,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -46,25 +43,6 @@ class BuildInfo {
 
   /// Dart compilation trace file to use for JIT VM snapshot.
   final String compilationTraceFilePath;
-
-  /// Save baseline package.
-  final bool createBaseline;
-
-  /// Build differential snapshot.
-  final bool createPatch;
-
-  /// Internal version number of dynamic patch (not displayed to users).
-  /// Each patch may have a unique number to differentiate from previous
-  /// patches for the same versionCode on Android or CFBundleVersion on iOS.
-  final int patchNumber;
-
-  /// The directory where to store generated dynamic patches.
-  final String patchDir;
-
-  /// The directory where to store generated baseline packages.
-  /// Built packages, such as APK files on Android, are saved and can be used
-  /// to generate dynamic patches in later builds.
-  final String baselineDir;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -125,7 +103,6 @@ class BuildInfo {
       BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
-          createPatch: createPatch,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,
@@ -405,9 +382,19 @@ String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
 }
 
+/// Returns the macOS build output directory.
+String getMacOSBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'macos');
+}
+
 /// Returns the web build output directory.
 String getWebBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'web');
+}
+
+/// Returns the linux build output directory.
+String getLinuxBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'linux');
 }
 
 /// Returns directory used by incremental compiler (IKG - incremental kernel

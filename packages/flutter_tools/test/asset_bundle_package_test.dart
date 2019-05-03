@@ -26,7 +26,7 @@ void main() {
     // rolls into Flutter.
     return path?.replaceAll('/', fs.path.separator);
   }
-  void writePubspecFile(String path, String name, {List<String> assets}) {
+  void writePubspecFile(String path, String name, { List<String> assets }) {
     String assetsSection;
     if (assets == null) {
       assetsSection = '';

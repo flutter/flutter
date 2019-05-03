@@ -232,7 +232,7 @@ class UiKitView extends StatefulWidget {
 
   /// Passed as the `arguments` argument of [-\[FlutterPlatformViewFactory createWithFrame:viewIdentifier:arguments:\]](/objcdoc/Protocols/FlutterPlatformViewFactory.html#/c:objc(pl)FlutterPlatformViewFactory(im)createWithFrame:viewIdentifier:arguments:)
   ///
-  /// This can be used by plugins to pass constructor parameters to the embedded Android view.
+  /// This can be used by plugins to pass constructor parameters to the embedded iOS view.
   final dynamic creationParams;
 
   /// The codec used to encode `creationParams` before sending it to the
@@ -297,7 +297,7 @@ class _AndroidViewState extends State<AndroidView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
@@ -367,10 +367,12 @@ class _AndroidViewState extends State<AndroidView> {
       id: _id,
       viewType: widget.viewType,
       layoutDirection: _layoutDirection,
-      onPlatformViewCreated: widget.onPlatformViewCreated,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
     );
+    if (widget.onPlatformViewCreated != null) {
+      _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
+    }
   }
 }
 
@@ -380,7 +382,7 @@ class _UiKitViewState extends State<UiKitView> {
   bool _initialized = false;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
-    Set<Factory<OneSequenceGestureRecognizer>>();
+    <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {

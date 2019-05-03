@@ -296,7 +296,16 @@ class AndroidDevice implements Device {
     stream = StreamController<String>(
       onListen: () async {
         await adb(<String>['logcat', '--clear']);
-        final Process process = await startProcess(adbPath, <String>['-s', deviceId, 'logcat']);
+        final Process process = await startProcess(
+          adbPath,
+          // Make logcat less chatty by filtering down to just ActivityManager
+          // (to let us know when app starts), flutter (needed by tests to see
+          // log output), and fatal messages (hopefully catches tombstones).
+          // For local testing, this can just be:
+          //   <String>['-s', deviceId, 'logcat']
+          // to view the whole log, or just run logcat alongside this.
+          <String>['-s', deviceId, 'logcat', 'ActivityManager:I', 'flutter:V', '*:F'],
+        );
         process.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())

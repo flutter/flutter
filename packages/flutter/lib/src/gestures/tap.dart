@@ -172,8 +172,14 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
       _finalPosition = event.position;
-      _checkUp();
+      if (_wonArenaForPrimaryPointer) {
+        resolve(GestureDisposition.accepted);
+        _checkUp();
+      }
     } else if (event is PointerCancelEvent) {
+      if (_sentTapDown && onTapCancel != null) {
+        invokeCallback<void>('onTapCancel', onTapCancel);
+      }
       _reset();
     }
   }
@@ -183,6 +189,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
       // This can happen if the superclass decides the primary pointer
       // exceeded the touch slop, or if the recognizer is disposed.
+      assert(_sentTapDown);
       if (onTapCancel != null)
         invokeCallback<void>('spontaneous onTapCancel', onTapCancel);
       _reset();
@@ -211,7 +218,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
-      if (onTapCancel != null)
+      if (_sentTapDown && onTapCancel != null)
         invokeCallback<void>('forced onTapCancel', onTapCancel);
       _reset();
     }
@@ -226,16 +233,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   void _checkUp() {
-    if (_wonArenaForPrimaryPointer && _finalPosition != null) {
-      resolve(GestureDisposition.accepted);
-      if (!_wonArenaForPrimaryPointer || _finalPosition == null) {
-        // It is possible that resolve has just recursively called _checkUp
-        // (see https://github.com/flutter/flutter/issues/12470).
-        // In that case _wonArenaForPrimaryPointer will be false (as _checkUp
-        // calls _reset) and we return here to avoid double invocation of the
-        // tap callbacks.
-        return;
-      }
+    if (_finalPosition != null) {
       if (onTapUp != null)
         invokeCallback<void>('onTapUp', () { onTapUp(TapUpDetails(globalPosition: _finalPosition)); });
       if (onTap != null)

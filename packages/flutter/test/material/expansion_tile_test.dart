@@ -74,9 +74,9 @@ void main() {
                 children: <Widget>[
                   ListTile(
                     key: tileKey,
-                    title: const Text('0')
-                  )
-                ]
+                    title: const Text('0'),
+                  ),
+                ],
               ),
               ExpansionTile(
                 key: collapsedKey,
@@ -85,21 +85,21 @@ void main() {
                 children: <Widget>[
                   ListTile(
                     key: tileKey,
-                    title: const Text('0')
-                  )
-                ]
+                    title: const Text('0'),
+                  ),
+                ],
               ),
               const ExpansionTile(
                 key: defaultKey,
                 title: Text('Default'),
                 children: <Widget>[
                   ListTile(title: Text('0')),
-                ]
-              )
-            ]
-          )
-        )
-      )
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     ));
 
     double getHeight(Key key) => tester.getSize(find.byKey(key)).height;

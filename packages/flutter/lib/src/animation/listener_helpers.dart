@@ -129,11 +129,14 @@ mixin AnimationLocalListenersMixin {
           exception: exception,
           stack: stack,
           library: 'animation library',
-          context: 'while notifying listeners for $runtimeType',
-          informationCollector: (StringBuffer information) {
-            information.writeln('The $runtimeType notifying listeners was:');
-            information.write('  $this');
-          }
+          context: ErrorDescription('while notifying listeners for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<AnimationLocalListenersMixin>(
+              'The $runtimeType notifying listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
         ));
       }
     }
@@ -195,11 +198,14 @@ mixin AnimationLocalStatusListenersMixin {
           exception: exception,
           stack: stack,
           library: 'animation library',
-          context: 'while notifying status listeners for $runtimeType',
-          informationCollector: (StringBuffer information) {
-            information.writeln('The $runtimeType notifying status listeners was:');
-            information.write('  $this');
-          }
+          context: ErrorDescription('while notifying status listeners for $runtimeType'),
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<AnimationLocalStatusListenersMixin>(
+              'The $runtimeType notifying status listeners was',
+              this,
+              style: DiagnosticsTreeStyle.errorProperty,
+            );
+          },
         ));
       }
     }

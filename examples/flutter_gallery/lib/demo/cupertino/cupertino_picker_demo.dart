@@ -67,7 +67,7 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
         ),
         child: GestureDetector(
           // Blocks taps from propagating to the modal sheet and popping.
-          onTap: () {},
+          onTap: () { },
           child: SafeArea(
             top: false,
             child: picker,
@@ -95,8 +95,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   setState(() => _selectedColorIndex = index);
                 },
                 children: List<Widget>.generate(coolColorNames.length, (int index) {
-                  return Center(child:
-                  Text(coolColorNames[index]),
+                  return Center(
+                    child: Text(coolColorNames[index]),
                   );
                 }),
               ),

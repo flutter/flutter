@@ -44,7 +44,7 @@ class _AccountPictures extends StatelessWidget {
                     height: 48.0,
                     child: picture,
                  ),
-                )
+                ),
               );
             }).toList(),
           ),
@@ -56,7 +56,7 @@ class _AccountPictures extends StatelessWidget {
             child: SizedBox(
               width: 72.0,
               height: 72.0,
-              child: currentAccountPicture
+              child: currentAccountPicture,
             ),
           ),
         ),
@@ -113,8 +113,12 @@ class _AccountDetailsState extends State<_AccountDetails> with SingleTickerProvi
   @override
   void didUpdateWidget (_AccountDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_animation.status == AnimationStatus.dismissed ||
-        _animation.status == AnimationStatus.reverse) {
+    // If the state of the arrow did not change, there is no need to trigger the animation
+    if (oldWidget.isOpen == widget.isOpen) {
+      return;
+    }
+
+    if (widget.isOpen) {
       _controller.forward();
     } else {
       _controller.reverse();
@@ -309,7 +313,7 @@ class UserAccountsDrawerHeader extends StatefulWidget {
     this.otherAccountsPictures,
     @required this.accountName,
     @required this.accountEmail,
-    this.onDetailsPressed
+    this.onDetailsPressed,
   }) : super(key: key);
 
   /// The header's background. If decoration is null then a [BoxDecoration]
@@ -379,7 +383,7 @@ class _UserAccountsDrawerHeaderState extends State<UserAccountsDrawerHeader> {
                     currentAccountPicture: widget.currentAccountPicture,
                     otherAccountsPictures: widget.otherAccountsPictures,
                   ),
-                )
+                ),
               ),
               _AccountDetails(
                 accountName: widget.accountName,

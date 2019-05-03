@@ -13,7 +13,7 @@ import '../globals.dart';
 import '../ios/ios_workflow.dart';
 import '../ios/plist_utils.dart' as plist;
 
-AndroidStudio get androidStudio => context[AndroidStudio];
+AndroidStudio get androidStudio => context.get<AndroidStudio>();
 
 // Android Studio layout:
 
@@ -30,9 +30,13 @@ final RegExp _dotHomeStudioVersionMatcher =
 String get javaPath => androidStudio?.javaPath;
 
 class AndroidStudio implements Comparable<AndroidStudio> {
-  AndroidStudio(this.directory,
-      {Version version, this.configured, this.studioAppName = 'AndroidStudio', this.presetPluginsPath})
-      : version = version ?? Version.unknown {
+  AndroidStudio(
+    this.directory, {
+    Version version,
+    this.configured,
+    this.studioAppName = 'AndroidStudio',
+    this.presetPluginsPath,
+  }) : version = version ?? Version.unknown {
     _init();
   }
 
@@ -219,7 +223,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool _hasStudioAt(String path, {Version newerThan}) {
+    bool _hasStudioAt(String path, { Version newerThan }) {
       return studios.any((AndroidStudio studio) {
         if (studio.directory != path)
           return false;

@@ -301,7 +301,7 @@ void main() {
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -250.0));
 
-    expect(log, equals(<double>[ 250.0 ]));
+    expect(log, equals(<double>[ 20.0, 250.0 ]));
     log.clear();
 
     controller.dispose();

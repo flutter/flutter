@@ -57,6 +57,15 @@ class CupertinoTabView extends StatefulWidget {
   ///
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
+  ///
+  /// Rebuilding a [CupertinoTabView] with a different [builder] will not clear
+  /// its current navigation stack or update its descendant. Instead, trigger a
+  /// rebuild from a descendant in its subtree. This can be done via methods such
+  /// as:
+  ///
+  ///  * Calling [State.setState] on a descendant [StatefulWidget]'s [State]
+  ///  * Modifying an [InheritedWidget] that a descendant registered itself
+  ///    as a dependent to.
   final WidgetBuilder builder;
 
   /// A key to use when building this widget's [Navigator].
@@ -165,9 +174,9 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     if (name == Navigator.defaultRouteName && widget.builder != null) {
       routeBuilder = widget.builder;
       title = widget.defaultTitle;
-    }
-    else if (widget.routes != null)
+    } else if (widget.routes != null) {
       routeBuilder = widget.routes[name];
+    }
     if (routeBuilder != null) {
       return CupertinoPageRoute<dynamic>(
         builder: routeBuilder,

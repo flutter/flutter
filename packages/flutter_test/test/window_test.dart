@@ -20,7 +20,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
         binding.window.devicePixelRatioTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -34,7 +34,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, Size fakeValue) {
         binding.window.physicalSizeTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -48,7 +48,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
         binding.window.viewInsetsTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -62,7 +62,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, WindowPadding fakeValue) {
         binding.window.paddingTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -76,7 +76,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, Locale fakeValue) {
         binding.window.localeTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -90,7 +90,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, List<Locale> fakeValue) {
         binding.window.localesTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -104,7 +104,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
         binding.window.textScaleFactorTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -118,7 +118,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, bool fakeValue) {
         binding.window.alwaysUse24HourFormatTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -132,7 +132,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, String fakeValue) {
         binding.window.defaultRouteNameTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -146,7 +146,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, AccessibilityFeatures fakeValue) {
         binding.window.accessibilityFeaturesTestValue = fakeValue;
-      }
+      },
     );
   });
 
@@ -160,7 +160,7 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, Brightness fakeValue) {
         binding.window.platformBrightnessTestValue = fakeValue;
-      }
+      },
     );
   });
 

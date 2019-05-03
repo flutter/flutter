@@ -40,7 +40,7 @@ class _LoginPageState extends State<LoginPage> {
             // home screen using onGenerateRoute and so rootNavigator must be
             // set to true in order to get out of Shrine completely.
             Navigator.of(context, rootNavigator: true).pop();
-          }
+          },
         ),
       ),
       body: SafeArea(

@@ -431,7 +431,7 @@ void main() {
                 child: remove ? Container() : TextFormField(
                   autofocus: true,
                   onSaved: (String value) { fieldValue = value; },
-                  validator: (String value) { return value.isEmpty ? null : 'yes'; }
+                  validator: (String value) { return value.isEmpty ? null : 'yes'; },
                 ),
               ),
             ),

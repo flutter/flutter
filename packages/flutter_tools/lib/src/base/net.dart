@@ -33,11 +33,11 @@ Future<List<int>> fetchUrl(Uri url) async {
 Future<bool> doesRemoteFileExist(Uri url) async =>
   (await _attempt(url, onlyHeaders: true)) != null;
 
-Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
+Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
   printTrace('Downloading: $url');
   HttpClient httpClient;
-  if (context[HttpClientFactory] != null) {
-    httpClient = (context[HttpClientFactory] as HttpClientFactory)(); // ignore: avoid_as
+  if (context.get<HttpClientFactory>() != null) {
+    httpClient = context.get<HttpClientFactory>()();
   } else {
     httpClient = HttpClient();
   }

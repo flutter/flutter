@@ -49,7 +49,7 @@ Future<void> main(List<String> arguments) async {
   // Create the pubspec.yaml file.
   final StringBuffer buf = StringBuffer();
   buf.writeln('name: Flutter');
-  buf.writeln('homepage: https://flutter.io');
+  buf.writeln('homepage: https://flutter.dev');
   buf.writeln('version: $version');
   buf.writeln('dependencies:');
   for (String package in findPackageNames()) {
@@ -389,8 +389,8 @@ void changePackageToSdkInTitlebar() {
   final File indexFile = File('$kPublishRoot/index.html');
   String indexContents = indexFile.readAsStringSync();
   indexContents = indexContents.replaceFirst(
-    '<li><a href="https://flutter.io">Flutter package</a></li>',
-    '<li><a href="https://flutter.io">Flutter SDK</a></li>',
+    '<li><a href="https://flutter.dev">Flutter package</a></li>',
+    '<li><a href="https://flutter.dev">Flutter SDK</a></li>',
   );
 
   indexFile.writeAsStringSync(indexContents);

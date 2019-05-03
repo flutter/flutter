@@ -24,7 +24,7 @@ import '../src/context.dart';
 
 final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
-  Platform: _kNoColorOutputPlatform
+  Platform: _kNoColorOutputPlatform,
 };
 
 void main() {
@@ -133,8 +133,7 @@ void main() {
         ..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
     });
 
-    testUsingContext('reports success when NO_PROXY is configured correctly',
-        () async {
+    testUsingContext('reports success when NO_PROXY is configured correctly', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -144,12 +143,11 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost,127.0.0.1'
+          'NO_PROXY': 'localhost,127.0.0.1',
         },
     });
 
-    testUsingContext('reports success when no_proxy is configured correctly',
-        () async {
+    testUsingContext('reports success when no_proxy is configured correctly', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -159,12 +157,11 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'http_proxy': 'fakeproxy.local',
-          'no_proxy': 'localhost,127.0.0.1'
+          'no_proxy': 'localhost,127.0.0.1',
         },
     });
 
-    testUsingContext('reports issues when NO_PROXY is missing localhost',
-        () async {
+    testUsingContext('reports issues when NO_PROXY is missing localhost', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -174,12 +171,11 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': '127.0.0.1'
+          'NO_PROXY': '127.0.0.1',
         },
     });
 
-    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1',
-        () async {
+    testUsingContext('reports issues when NO_PROXY is missing 127.0.0.1', () async {
       final ValidationResult results = await ProxyValidator().validate();
       final List<ValidationMessage> issues = results.messages
           .where((ValidationMessage msg) => msg.isError || msg.isHint)
@@ -189,7 +185,7 @@ void main() {
       Platform: () => FakePlatform()
         ..environment = <String, String>{
           'HTTP_PROXY': 'fakeproxy.local',
-          'NO_PROXY': 'localhost'
+          'NO_PROXY': 'localhost',
         },
     });
   });
@@ -212,7 +208,7 @@ void main() {
   });
 
 
- group('doctor with fake validators', () {
+  group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(
@@ -635,7 +631,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
     return <DoctorValidator>[
       PassingValidator('Passing Validator'),
       PassingValidator('Another Passing Validator'),
-      PassingValidator('Providing validators is fun')
+      PassingValidator('Providing validators is fun'),
     ];
   }
 
@@ -699,11 +695,11 @@ class FakeGroupedDoctor extends Doctor {
       _validators = <DoctorValidator>[];
       _validators.add(GroupedValidator(<DoctorValidator>[
         PassingGroupedValidator('Category 1'),
-        PassingGroupedValidator('Category 1')
+        PassingGroupedValidator('Category 1'),
       ]));
       _validators.add(GroupedValidator(<DoctorValidator>[
         PassingGroupedValidator('Category 2'),
-        MissingGroupedValidator('Category 2')
+        MissingGroupedValidator('Category 2'),
       ]));
     }
     return _validators;

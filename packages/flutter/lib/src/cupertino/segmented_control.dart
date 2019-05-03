@@ -210,10 +210,10 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
       duration: _kFadeDuration,
       vsync: this,
     )..addListener(() {
-        setState(() {
-          // State of background/text colors has changed
-        });
+      setState(() {
+        // State of background/text colors has changed
       });
+    });
   }
 
   bool _updateColors() {
@@ -709,7 +709,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, {@required Offset position}) {
+  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
     assert(position != null);
     RenderBox child = lastChild;
     while (child != null) {

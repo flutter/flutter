@@ -25,7 +25,7 @@ void main() {
 
   group('config', () {
     testUsingContext('machine flag', () async {
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
 

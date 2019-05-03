@@ -23,7 +23,7 @@ import 'xcodeproj.dart';
 const String noCocoaPodsConsequence = '''
   CocoaPods is used to retrieve the iOS platform side's plugin code that responds to your plugin usage on the Dart side.
   Without resolving iOS dependencies with CocoaPods, plugins will not work on iOS.
-  For more info, see https://flutter.io/platform-plugins''';
+  For more info, see https://flutter.dev/platform-plugins''';
 
 const String unknownCocoaPodsConsequence = '''
   Flutter is unable to determine the installed CocoaPods's version.
@@ -37,7 +37,7 @@ const String cocoaPodsUpgradeInstructions = '''
   brew upgrade cocoapods
   pod setup''';
 
-CocoaPods get cocoaPods => context[CocoaPods];
+CocoaPods get cocoaPods => context.get<CocoaPods>();
 
 /// Result of evaluating the CocoaPods installation.
 enum CocoaPodsStatus {
@@ -254,7 +254,7 @@ class CocoaPods {
   }
 
   Future<void> _runPodInstall(IosProject iosProject, String engineDirectory) async {
-    final Status status = logger.startProgress('Running pod install...', timeout: kSlowOperation);
+    final Status status = logger.startProgress('Running pod install...', timeout: timeoutConfiguration.slowOperation);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: iosProject.hostAppRoot.path,

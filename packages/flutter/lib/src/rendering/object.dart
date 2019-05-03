@@ -17,7 +17,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 
-export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
+export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, ErrorSummary, ErrorDescription, ErrorHint, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
@@ -388,7 +388,7 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
   /// * `clipBehavior` controls how the rectangle is clipped.
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.hardEdge}) {
+  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge }) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
       pushLayer(ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
@@ -410,7 +410,7 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the path is clipped.
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
@@ -434,7 +434,7 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the rounded rectangle is clipped.
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, {Clip clipBehavior = Clip.antiAlias}) {
+  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
@@ -577,7 +577,7 @@ abstract class Constraints {
   /// Returns the same as [isNormalized] if asserts are disabled.
   bool debugAssertIsValid({
     bool isAppliedConstraint = false,
-    InformationCollector informationCollector
+    InformationCollector informationCollector,
   }) {
     assert(isNormalized);
     return isNormalized;
@@ -749,9 +749,9 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushLayout() {
-    profile(() {
+    if (!kReleaseMode) {
       Timeline.startSync('Layout', arguments: timelineWhitelistArguments);
-    });
+    }
     assert(() {
       _debugDoingLayout = true;
       return true;
@@ -771,9 +771,9 @@ class PipelineOwner {
         _debugDoingLayout = false;
         return true;
       }());
-      profile(() {
+      if (!kReleaseMode) {
         Timeline.finishSync();
-      });
+      }
     }
   }
 
@@ -809,14 +809,18 @@ class PipelineOwner {
   /// Called as part of the rendering pipeline after [flushLayout] and before
   /// [flushPaint].
   void flushCompositingBits() {
-    profile(() { Timeline.startSync('Compositing bits'); });
+    if (!kReleaseMode) {
+      Timeline.startSync('Compositing bits');
+    }
     _nodesNeedingCompositingBitsUpdate.sort((RenderObject a, RenderObject b) => a.depth - b.depth);
     for (RenderObject node in _nodesNeedingCompositingBitsUpdate) {
       if (node._needsCompositingBitsUpdate && node.owner == this)
         node._updateCompositingBits();
     }
     _nodesNeedingCompositingBitsUpdate.clear();
-    profile(() { Timeline.finishSync(); });
+    if (!kReleaseMode) {
+      Timeline.finishSync();
+    }
   }
 
   List<RenderObject> _nodesNeedingPaint = <RenderObject>[];
@@ -837,7 +841,9 @@ class PipelineOwner {
   ///
   /// See [RendererBinding] for an example of how this function is used.
   void flushPaint() {
-    profile(() { Timeline.startSync('Paint', arguments: timelineWhitelistArguments); });
+    if (!kReleaseMode) {
+      Timeline.startSync('Paint', arguments: timelineWhitelistArguments);
+    }
     assert(() {
       _debugDoingPaint = true;
       return true;
@@ -862,7 +868,9 @@ class PipelineOwner {
         _debugDoingPaint = false;
         return true;
       }());
-      profile(() { Timeline.finishSync(); });
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
     }
   }
 
@@ -921,7 +929,7 @@ class PipelineOwner {
   }
 
   bool _debugDoingSemantics = false;
-  final Set<RenderObject> _nodesNeedingSemantics = Set<RenderObject>();
+  final Set<RenderObject> _nodesNeedingSemantics = <RenderObject>{};
 
   /// Update the semantics for render objects marked as needing a semantics
   /// update.
@@ -937,7 +945,9 @@ class PipelineOwner {
   void flushSemantics() {
     if (_semanticsOwner == null)
       return;
-    profile(() { Timeline.startSync('Semantics'); });
+    if (!kReleaseMode) {
+      Timeline.startSync('Semantics');
+    }
     assert(_semanticsOwner != null);
     assert(() { _debugDoingSemantics = true; return true; }());
     try {
@@ -952,7 +962,9 @@ class PipelineOwner {
     } finally {
       assert(_nodesNeedingSemantics.isEmpty);
       assert(() { _debugDoingSemantics = false; return true; }());
-      profile(() { Timeline.finishSync(); });
+      if (!kReleaseMode) {
+        Timeline.finishSync();
+      }
     }
   }
 }
@@ -1175,37 +1187,15 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       exception: exception,
       stack: stack,
       library: 'rendering library',
-      context: 'during $method()',
+      context: ErrorDescription('during $method()'),
       renderObject: this,
-      informationCollector: (StringBuffer information) {
-        information.writeln('The following RenderObject was being processed when the exception was fired:');
-        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-        final List<String> descendants = <String>[];
-        const int maxDepth = 5;
-        int depth = 0;
-        const int maxLines = 25;
-        int lines = 0;
-        void visitor(RenderObject child) {
-          if (lines < maxLines) {
-            depth += 1;
-            descendants.add('${"  " * depth}$child');
-            if (depth < maxDepth)
-              child.visitChildren(visitor);
-            depth -= 1;
-          } else if (lines == maxLines) {
-            descendants.add('  ...(descendants list truncated after $lines lines)');
-          }
-          lines += 1;
-        }
-        visitChildren(visitor);
-        if (lines > 1) {
-          information.writeln('This RenderObject had the following descendants (showing up to depth $maxDepth):');
-        } else if (descendants.length == 1) {
-          information.writeln('This RenderObject had the following child:');
-        } else {
-          information.writeln('This RenderObject has no descendants.');
-        }
-        information.writeAll(descendants, '\n');
+      informationCollector: () sync* {
+        yield describeForError('The following RenderObject was being processed when the exception was fired');
+        // TODO(jacobr): this error message has a code smell. Consider whether
+        // displaying the truncated children is really useful for command line
+        // users. Inspector users can see the full tree by clicking on the
+        // render object so this may not be that useful.
+        yield describeForError('This RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
       }
     ));
   }
@@ -1546,7 +1536,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
-      informationCollector: (StringBuffer information) {
+      informationCollector: () sync* {
         final List<String> stack = StackTrace.current.toString().split('\n');
         int targetFrame;
         final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
@@ -1557,20 +1547,18 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           }
         }
         if (targetFrame != null && targetFrame < stack.length) {
-          information.writeln(
-            'These invalid constraints were provided to $runtimeType\'s layout() '
-            'function by the following function, which probably computed the '
-            'invalid constraints in question:'
-          );
           final Pattern targetFramePattern = RegExp(r'^#[0-9]+ +(.+)$');
           final Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
-          if (targetFrameMatch != null && targetFrameMatch.groupCount > 0) {
-            information.writeln('  ${targetFrameMatch.group(1)}');
-          } else {
-            information.writeln(stack[targetFrame]);
-          }
+          final String problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
+          // TODO(jacobr): this case is similar to displaying a single stack frame.
+          yield ErrorDescription(
+            'These invalid constraints were provided to $runtimeType\'s layout() '
+            'function by the following function, which probably computed the '
+            'invalid constraints in question:\n'
+            '  $problemFunction'
+          );
         }
-      }
+      },
     ));
     assert(!_debugDoingThisResize);
     assert(!_debugDoingThisLayout);
@@ -1735,7 +1723,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   void rotate({
     int oldAngle, // 0..3
     int newAngle, // 0..3
-    Duration time
+    Duration time,
   }) { }
 
   // when the parent has rotated (e.g. when the screen has been turned
@@ -2422,7 +2410,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
 
     final bool producesForkingFragment = !config.hasBeenAnnotated && !config.isSemanticBoundary;
     final List<_InterestingSemanticsFragment> fragments = <_InterestingSemanticsFragment>[];
-    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = Set<_InterestingSemanticsFragment>();
+    final Set<_InterestingSemanticsFragment> toBeMarkedExplicit = <_InterestingSemanticsFragment>{};
     final bool childrenMergeIntoParent = mergeIntoParent || config.isMergingSemanticsOfDescendants;
 
     // When set to true there's currently not enough information in this subtree
@@ -2537,9 +2525,9 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// to the tree. If new [SemanticsNode]s are instantiated in this method
   /// they must be disposed in [clearSemantics].
   void assembleSemanticsNode(
-      SemanticsNode node,
-      SemanticsConfiguration config,
-      Iterable<SemanticsNode> children,
+    SemanticsNode node,
+    SemanticsConfiguration config,
+    Iterable<SemanticsNode> children,
   ) {
     assert(node == _semantics);
     node.updateWith(config: config, childrenInInversePaintOrder: children);
@@ -2651,6 +2639,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
     properties.add(DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
@@ -2698,6 +2687,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         curve: curve,
       );
     }
+  }
+
+  /// Adds a debug representation of a [RenderObject] optimized for including in
+  /// error messages.
+  ///
+  /// The default [style] of [DiagnosticsTreeStyle.shallow] ensures that all of
+  /// the properties of the render object are included in the error output but
+  /// none of the children of the object are.
+  ///
+  /// You should always include a RenderObject in an error message if it is the
+  /// [RenderObject] causing the failure or contract violation of the error.
+  DiagnosticsNode describeForError(String name, { DiagnosticsTreeStyle style = DiagnosticsTreeStyle.shallow }) {
+    return toDiagnosticsNode(name: name, style: style);
   }
 }
 
@@ -3095,10 +3097,10 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     dynamic exception,
     StackTrace stack,
     String library,
-    String context,
+    DiagnosticsNode context,
     this.renderObject,
     InformationCollector informationCollector,
-    bool silent = false
+    bool silent = false,
   }) : super(
     exception: exception,
     stack: stack,
@@ -3180,7 +3182,7 @@ class _ContainerSemanticsFragment extends _SemanticsFragment {
 abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   _InterestingSemanticsFragment({
     @required RenderObject owner,
-    @required bool dropsSemanticsOfPreviousSiblings
+    @required bool dropsSemanticsOfPreviousSiblings,
   }) : assert(owner != null),
        _ancestorChain = <RenderObject>[owner],
        super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
@@ -3244,7 +3246,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
   void addTags(Iterable<SemanticsTag> tags) {
     if (tags == null || tags.isEmpty)
       return;
-    _tagsForChildren ??= Set<SemanticsTag>();
+    _tagsForChildren ??= <SemanticsTag>{};
     _tagsForChildren.addAll(tags);
   }
 
@@ -3273,7 +3275,7 @@ class _RootSemanticsFragment extends _InterestingSemanticsFragment {
   }) : super(owner: owner, dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
   @override
-  Iterable<SemanticsNode> compileChildren({Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment}) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
     assert(_tagsForChildren == null || _tagsForChildren.isEmpty);
     assert(parentSemanticsClipRect == null);
     assert(parentPaintClipRect == null);
@@ -3363,7 +3365,7 @@ class _SwitchableSemanticsFragment extends _InterestingSemanticsFragment {
   final List<_InterestingSemanticsFragment> _children = <_InterestingSemanticsFragment>[];
 
   @override
-  Iterable<SemanticsNode> compileChildren({Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment}) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
     if (!_isExplicit) {
       owner._semantics = null;
       for (_InterestingSemanticsFragment fragment in _children) {
@@ -3486,7 +3488,7 @@ class _AbortingSemanticsFragment extends _InterestingSemanticsFragment {
   }
 
   @override
-  Iterable<SemanticsNode> compileChildren({Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment}) sync* {
+  Iterable<SemanticsNode> compileChildren({ Rect parentSemanticsClipRect, Rect parentPaintClipRect, double elevationAdjustment }) sync* {
     yield owner._semantics;
   }
 
