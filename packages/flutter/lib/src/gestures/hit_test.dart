@@ -133,7 +133,9 @@ class HitTestResult {
   @protected
   void pushTransform(Matrix4 transform) {
     assert(transform != null);
-    assert(transform.getRow(2) == Vector4(0, 0, 1, 0) && transform.getColumn(2) == Vector4(0, 0, 1, 0),
+    assert(
+      _vectorMoreOrLessEquals(transform.getRow(2), Vector4(0, 0, 1, 0)) &&
+      _vectorMoreOrLessEquals(transform.getColumn(2), Vector4(0, 0, 1, 0)),
       'The third row and third column of a transform matrix for pointer '
       'events must be Vector4(0, 0, 1, 0) to ensure that a transformed '
       'point is directly under the pointer device. Did you forget to run the paint '
@@ -160,6 +162,12 @@ class HitTestResult {
   void popTransform() {
     assert(_transforms.isNotEmpty);
     _transforms.removeLast();
+  }
+
+  bool _vectorMoreOrLessEquals(Vector4 a, Vector4 b) {
+    const double epsilon = 0.000001;
+    final Vector4 difference = a - b;
+    return difference.storage.every((double component) => component.abs() < epsilon);
   }
 
   @override
