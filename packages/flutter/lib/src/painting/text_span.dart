@@ -303,7 +303,8 @@ class TextSpan extends InlineSpan {
   /// Describe the difference between this text span and another, in terms of
   /// how much damage it will make to the rendering. The comparison is deep.
   ///
-  /// Comparing a [TextSpan] with a [WidgetSpan] will result in [RenderComparison.layout].
+  /// Comparing [InlineSpan] objects of different types, for example, comparing
+  /// a [TextSpan] to a [WidgetSpan], always results in [RenderComparison.layout].
   ///
   /// See also:
   ///

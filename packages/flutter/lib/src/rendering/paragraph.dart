@@ -253,8 +253,7 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMinIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics())
-      return 0;
+    assert(_debugCanComputeIntrinsics());
     if (_needsLayout) {
       _computeChildrenWidthWithMinIntrinsics(height);
       _layoutText();
@@ -270,8 +269,7 @@ class RenderParagraph extends RenderBox
 
   @override
   double computeMaxIntrinsicWidth(double height) {
-    if (!_canComputeIntrinsics())
-      return 0;
+    assert(!_debugCanComputeIntrinsics());
     if (_needsLayout) {
       _computeChildrenWidthWithMaxIntrinsics(height);
       _layoutText(); // layout with infinite width.
@@ -286,8 +284,7 @@ class RenderParagraph extends RenderBox
   }
 
   double _computeIntrinsicHeight(double width) {
-    if (!_canComputeIntrinsics())
-      return 0;
+    assert(_debugCanComputeIntrinsics());
     _computeChildrenHeightWithMinIntrinsics(width);
     _layoutText(minWidth: width, maxWidth: width);
     // Purposefully not markNeedsLayout(). markNeedsLayout() calls
@@ -321,24 +318,27 @@ class RenderParagraph extends RenderBox
   /// Intrinsics cannot be calculated without a full layout for
   /// alignments that require the baseline (baseline, aboveBaseline,
   /// belowBaseline)
-  bool _canComputeIntrinsics() {
-    for (PlaceholderSpan span in _placeholderSpans) {
-      switch (span.alignment) {
-        case ui.PlaceholderAlignment.baseline:
-        case ui.PlaceholderAlignment.aboveBaseline:
-        case ui.PlaceholderAlignment.belowBaseline: {
-          assert(RenderObject.debugCheckingIntrinsics,
-            'Intrinsics are not available for PlaceholderAlignment.baseline, '
-            'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline,');
-          return false;
-        }
-        case ui.PlaceholderAlignment.top:
-        case ui.PlaceholderAlignment.middle:
-        case ui.PlaceholderAlignment.bottom: {
-          continue;
+  bool _debugCanComputeIntrinsics() {
+    assert(() {
+      for (PlaceholderSpan span in _placeholderSpans) {
+        switch (span.alignment) {
+          case ui.PlaceholderAlignment.baseline:
+          case ui.PlaceholderAlignment.aboveBaseline:
+          case ui.PlaceholderAlignment.belowBaseline: {
+            assert(RenderObject.debugCheckingIntrinsics,
+              'Intrinsics are not available for PlaceholderAlignment.baseline, '
+              'PlaceholderAlignment.aboveBaseline, or PlaceholderAlignment.belowBaseline,');
+            break;
+          }
+          case ui.PlaceholderAlignment.top:
+          case ui.PlaceholderAlignment.middle:
+          case ui.PlaceholderAlignment.bottom: {
+            continue;
+          }
         }
       }
-    }
+      return true;
+    }());
     return true;
   }
 

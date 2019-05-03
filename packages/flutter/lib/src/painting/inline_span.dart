@@ -110,7 +110,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   }
 
   /// Performs the check at each InlineSpan for if the index falls within the range
-  /// of the span and returns the TextSpan if it does.
+  /// of the span and returns the Span if it does.
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
   @protected
