@@ -181,6 +181,10 @@ class FlutterProject {
       return null;
     }
     final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    // If the pubspec file is empty, this will be null.
+    if (pubspec == null) {
+      return null;
+    }
     return pubspec['builders'];
   }
 
