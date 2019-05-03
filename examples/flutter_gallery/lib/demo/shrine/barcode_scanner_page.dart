@@ -23,55 +23,75 @@ import 'package:camera/camera.dart';
 import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
-import 'barcode_scanner_utils.dart';
+import 'package:flutter_gallery/demo/shrine/supplemental/barcode_scanner_utils.dart';
 import 'colors.dart';
 
-class BarcodeScanner extends StatefulWidget {
+class BarcodeScannerPage extends StatefulWidget {
+  const BarcodeScannerPage({this.validSquareWidth = 256});
+
+  final double validSquareWidth;
+
   @override
-  _BarcodeScannerState createState() => _BarcodeScannerState();
+  _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
 }
 
-class _BarcodeScannerState extends State<BarcodeScanner>
+class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     with TickerProviderStateMixin {
-  static const double _validRectSideLength = 256;
-
-  CameraController _controller;
+  CameraController _cameraController;
+  AnimationController _animationController;
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
   Color _frameColor = Colors.white54;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
-  AnimationController _animation;
-  SquareTween _squareTween;
-  Timer _timer;
+  bool _barcodeFound = false;
 
   @override
   void initState() {
     super.initState();
+
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
-    _startScanningBarcodes();
-    _animation = AnimationController(
+    _initCameraAndScanner();
+    _initAnimation();
+  }
+
+  void _initCameraAndScanner() {
+    BarcodeScannerUtils.getCamera(CameraLensDirection.back).then(
+      (CameraDescription camera) async {
+        await _openCamera(camera);
+        await _startStreamingImagesToScanner(camera.sensorOrientation);
+      },
+    );
+  }
+
+  void _initAnimation() {
+    _animationController = AnimationController(
       duration: const Duration(milliseconds: 1300),
       vsync: this,
     );
 
-    _squareTween = SquareTween(
-      Square(_validRectSideLength, Colors.white),
-      Square(_validRectSideLength + 100, Colors.transparent),
-    );
+    _animationController.addStatusListener((AnimationStatus status) {
+      if (status == AnimationStatus.completed) {
+        if (_barcodeFound) {
+          _showBottomSheet();
+        } else {
+          Future<void>.delayed(Duration(milliseconds: 1600), () {
+            _animationController.forward(from: 0);
+          });
+        }
+      }
+    });
 
-    _animation.forward();
-    _timer = Timer.periodic(
-      Duration(milliseconds: 3000),
-      (_) => _animation.forward(from: 0),
-    );
+    _animationController.forward();
   }
 
-  Future<void> _startScanningBarcodes() async {
-    final CameraDescription camera = await getCamera(CameraLensDirection.back);
-    await _openCamera(camera);
-    await _streamImages(camera.sensorOrientation);
+  void _handleBarcodeFound() {
+    setState(() {
+      _barcodeFound = true;
+      _scannerHint = 'Loading information...';
+      _closeWindow = true;
+      _frameColor = Colors.black87;
+    });
   }
 
   Future<void> _openCamera(CameraDescription camera) async {
@@ -80,93 +100,104 @@ class _BarcodeScannerState extends State<BarcodeScanner>
             ? ResolutionPreset.medium
             : ResolutionPreset.low;
 
-    _controller = CameraController(camera, preset);
-    await _controller.initialize();
+    _cameraController = CameraController(camera, preset);
+    await _cameraController.initialize();
 
     setState(() {});
   }
 
-  Future<void> _streamImages(int sensorOrientation) async {
+  Future<void> _startStreamingImagesToScanner(int sensorOrientation) async {
     final BarcodeDetector detector = FirebaseVision.instance.barcodeDetector();
     bool isDetecting = false;
-    final Size size = MediaQuery.of(context).size;
 
-    _controller.startImageStream((CameraImage image) {
+    _cameraController.startImageStream((CameraImage image) {
       if (isDetecting) {
         return;
       }
 
       isDetecting = true;
 
-      final ImageRotation rotation = rotationIntToImageRotation(
-        sensorOrientation,
-      );
-
-      detect(image, detector.detectInImage, rotation).then(
+      BarcodeScannerUtils.detect(
+        image: image,
+        detectInImage: detector.detectInImage,
+        imageRotation: sensorOrientation,
+      ).then(
         (dynamic result) {
-          if (!_controller.value.isStreamingImages) {
-            return;
-          }
-
-          final double widthScale = image.height / size.width;
-          final double heightScale = image.width / size.height;
-
-          final Offset center = size.center(Offset.zero);
-          const double halfRectSideLength = _validRectSideLength / 2;
-
-          final Rect validRect = Rect.fromLTWH(
-            widthScale * (center.dx - halfRectSideLength),
-            heightScale * (center.dy - halfRectSideLength),
-            widthScale * _validRectSideLength,
-            heightScale * _validRectSideLength,
+          _handleResult(
+            barcodes: result,
+            screenSize: MediaQuery.of(context).size,
+            imageSize: Size(
+              image.width.toDouble(),
+              image.height.toDouble(),
+            ),
           );
-
-          final List<Barcode> barcodes = result;
-          if (barcodes.isNotEmpty) {
-            for (Barcode barcode in barcodes) {
-              final Rect intersection =
-                  validRect.intersect(barcode.boundingBox);
-
-              final bool doesContain = intersection == barcode.boundingBox;
-
-              if (doesContain) {
-                _controller.stopImageStream().then((_) {
-                  _takePicture();
-                });
-
-                setState(() {
-                  _scannerHint = 'Loading information...';
-                  _closeWindow = true;
-                  _frameColor = Colors.black87;
-                  _showBottomSheet();
-                });
-                return;
-              } else if (validRect.overlaps(barcode.boundingBox)) {
-                setState(() {
-                  _scannerHint = 'Move closer to the barcode';
-                });
-                return;
-              }
-            }
-          }
-
-          setState(() {
-            _scannerHint = null;
-          });
         },
       ).whenComplete(() => isDetecting = false);
     });
   }
 
-  @override
-  void dispose() {
-    _controller?.dispose();
-    _animation.dispose();
-    _timer.cancel();
-    super.dispose();
+  void _handleResult({
+    List<Barcode> barcodes,
+    Size screenSize,
+    Size imageSize,
+  }) {
+    if (!_cameraController.value.isStreamingImages || barcodes.isEmpty) {
+      return;
+    }
+
+    // Flip since photo is vertical
+    final double widthScale = imageSize.height / screenSize.width;
+    final double heightScale = imageSize.width / screenSize.height;
+
+    final Offset center = screenSize.center(Offset.zero);
+    final double halfRectSideLength = widget.validSquareWidth / 2;
+
+    final Rect validRect = Rect.fromLTWH(
+      widthScale * (center.dx - halfRectSideLength),
+      heightScale * (center.dy - halfRectSideLength),
+      widthScale * widget.validSquareWidth,
+      heightScale * widget.validSquareWidth,
+    );
+
+    for (Barcode barcode in barcodes) {
+      final Rect intersection = validRect.intersect(barcode.boundingBox);
+
+      final bool doesContain = intersection == barcode.boundingBox;
+
+      if (doesContain) {
+        _cameraController.stopImageStream().then((_) {
+          _takePicture();
+        });
+
+        _animationController.duration = Duration(milliseconds: 2000);
+        _handleBarcodeFound();
+        return;
+      } else if (validRect.overlaps(barcode.boundingBox)) {
+        setState(() {
+          _scannerHint = 'Move closer to the barcode';
+        });
+        return;
+      }
+    }
+
+    setState(() {
+      _scannerHint = null;
+    });
   }
 
-  String _timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
+  @override
+  void dispose() {
+    _cameraController?.stopImageStream();
+    _cameraController?.dispose();
+    _animationController?.dispose();
+
+    SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[
+      SystemUiOverlay.top,
+      SystemUiOverlay.bottom,
+    ]);
+
+    super.dispose();
+  }
 
   Future<void> _takePicture() async {
     final Directory extDir = await getApplicationDocumentsDirectory();
@@ -174,13 +205,18 @@ class _BarcodeScannerState extends State<BarcodeScanner>
     final String dirPath = '${extDir.path}/Pictures/barcodePics';
     await Directory(dirPath).create(recursive: true);
 
-    final String filePath = '$dirPath/${_timestamp()}.jpg';
+    final String timestamp = DateTime.now().millisecondsSinceEpoch.toString();
+
+    final String filePath = '$dirPath/$timestamp.jpg';
 
     try {
-      await _controller.takePicture(filePath);
+      await _cameraController.takePicture(filePath);
     } on CameraException catch (e) {
       print(e);
     }
+
+    _cameraController.dispose();
+    _cameraController = null;
 
     setState(() {
       _barcodePictureFilePath = filePath;
@@ -188,15 +224,15 @@ class _BarcodeScannerState extends State<BarcodeScanner>
   }
 
   Widget _buildCameraPreview() {
-    final Size size = MediaQuery.of(context).size;
-    final double deviceRatio = size.width / size.height;
-
-    return Transform.scale(
-      scale: _controller.value.aspectRatio / deviceRatio,
-      child: Center(
-        child: AspectRatio(
-          aspectRatio: _controller.value.aspectRatio,
-          child: CameraPreview(_controller),
+    return Container(
+      color: Colors.black,
+      child: Transform.scale(
+        scale: 1,
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: _cameraController.value.aspectRatio,
+            child: CameraPreview(_cameraController),
+          ),
         ),
       ),
     );
@@ -318,10 +354,11 @@ class _BarcodeScannerState extends State<BarcodeScanner>
         constraints: BoxConstraints.expand(),
         child: Image.file(
           File(_barcodePictureFilePath),
-          fit: BoxFit.fill,
+          fit: BoxFit.contain,
         ),
       );
-    } else if (_controller != null && _controller.value.isInitialized) {
+    } else if (_cameraController != null &&
+        _cameraController.value.isInitialized) {
       background = _buildCameraPreview();
     } else {
       background = Container(
@@ -329,98 +366,106 @@ class _BarcodeScannerState extends State<BarcodeScanner>
       );
     }
 
-    return Scaffold(
-      key: _scaffoldKey,
-      body: Stack(
-        children: <Widget>[
-          background,
-          Container(
-            constraints: BoxConstraints.expand(),
-            child: CustomPaint(
-              painter: WindowPainter(
-                windowSize: Size(_validRectSideLength, _validRectSideLength),
-                windowFrameColor: _frameColor,
-                closeWindow: _closeWindow,
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            child: Container(
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: const <Color>[Colors.black87, Colors.transparent],
+    return SafeArea(
+      child: Scaffold(
+        key: _scaffoldKey,
+        body: Stack(
+          children: <Widget>[
+            background,
+            Container(
+              constraints: BoxConstraints.expand(),
+              child: CustomPaint(
+                painter: WindowPainter(
+                  windowSize:
+                      Size(widget.validSquareWidth, widget.validSquareWidth),
+                  outerFrameColor: _frameColor,
+                  closeWindow: _closeWindow,
                 ),
               ),
             ),
-          ),
-          Positioned(
-            left: 0.0,
-            bottom: 0.0,
-            right: 0.0,
-            height: 56,
-            child: Container(
-              color: kShrinePink50,
-              child: Center(
-                child: Text(
-                  _scannerHint ?? 'Point your camera at a barcode',
-                  style: Theme.of(context)
-                      .textTheme
-                      .body1
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-          Container(
-            constraints: BoxConstraints.expand(),
-            child: Center(
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
               child: Container(
-                width: _validRectSideLength,
-                height: _validRectSideLength,
+                height: 56,
                 decoration: BoxDecoration(
-                  border: Border.all(width: 3, color: kShrineBrown600),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: const <Color>[Colors.black87, Colors.transparent],
+                  ),
                 ),
               ),
             ),
-          ),
-          Container(
-            constraints: BoxConstraints.expand(),
-            child: CustomPaint(
-                painter: SquareChartPainter(
-              _squareTween.animate(_animation),
-            )),
-          ),
-          AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
+            Positioned(
+              left: 0.0,
+              bottom: 0.0,
+              right: 0.0,
+              height: 56,
+              child: Container(
+                color: kShrinePink50,
+                child: Center(
+                  child: Text(
+                    _scannerHint ?? 'Point your camera at a barcode',
+                    style: Theme.of(context)
+                        .textTheme
+                        .body1
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
             ),
-            backgroundColor: Colors.transparent,
-            elevation: 0.0,
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.flash_off,
-                  color: Colors.white,
-                ),
-                onPressed: () {},
+            Container(
+              constraints: BoxConstraints.expand(),
+              child: CustomPaint(
+                painter: _barcodeFound
+                    ? SquareTracePainter(
+                        animation: Tween<double>(
+                          begin: 0,
+                          end: widget.validSquareWidth,
+                        ).animate(
+                          _animationController,
+                        ),
+                        square: Square(widget.validSquareWidth, Colors.white),
+                      )
+                    : SquareOutlinePainter(
+                        animation: SquareTween(
+                          Square(widget.validSquareWidth, Colors.white),
+                          Square(
+                            widget.validSquareWidth + 100,
+                            Colors.transparent,
+                          ),
+                        ).animate(_animationController),
+                      ),
               ),
-              IconButton(
-                icon: Icon(
-                  Icons.help_outline,
-                  color: Colors.white,
-                ),
-                onPressed: () {},
+            ),
+            AppBar(
+              leading: IconButton(
+                icon: Icon(Icons.close, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-            ],
-          ),
-        ],
+              backgroundColor: Colors.transparent,
+              elevation: 0.0,
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(
+                    Icons.flash_off,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.help_outline,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -429,12 +474,16 @@ class _BarcodeScannerState extends State<BarcodeScanner>
 class WindowPainter extends CustomPainter {
   WindowPainter({
     @required this.windowSize,
-    @required this.windowFrameColor,
+    this.outerFrameColor = Colors.white54,
+    this.innerFrameColor = kShrineBrown600,
+    this.innerFrameStrokeWidth = 2,
     this.closeWindow = false,
   });
 
   final Size windowSize;
-  final Color windowFrameColor;
+  final Color outerFrameColor;
+  final Color innerFrameColor;
+  final double innerFrameStrokeWidth;
   final bool closeWindow;
 
   @override
@@ -466,7 +515,7 @@ class WindowPainter extends CustomPainter {
       size.height,
     );
 
-    final Paint paint = Paint()..color = windowFrameColor;
+    final Paint paint = Paint()..color = outerFrameColor;
     canvas.drawRect(left, paint);
     canvas.drawRect(top, paint);
     canvas.drawRect(right, paint);
@@ -475,6 +524,13 @@ class WindowPainter extends CustomPainter {
     if (closeWindow) {
       canvas.drawRect(windowRect, paint);
     }
+
+    canvas.drawRect(
+        windowRect,
+        Paint()
+          ..color = innerFrameColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = innerFrameStrokeWidth);
   }
 
   @override
@@ -507,17 +563,21 @@ class SquareTween extends Tween<Square> {
   Square lerp(double t) => Square.lerp(begin, end, t);
 }
 
-class SquareChartPainter extends CustomPainter {
-  SquareChartPainter(this.animation) : super(repaint: animation);
+class SquareOutlinePainter extends CustomPainter {
+  SquareOutlinePainter({
+    @required this.animation,
+    this.strokeWidth = 2,
+  }) : super(repaint: animation);
 
   final Animation<Square> animation;
+  final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Square square = animation.value;
 
     final Paint paint = Paint()
-      ..strokeWidth = 3
+      ..strokeWidth = strokeWidth
       ..color = square.color
       ..style = PaintingStyle.stroke;
 
@@ -535,5 +595,63 @@ class SquareChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SquareChartPainter oldDelegate) => false;
+  bool shouldRepaint(SquareOutlinePainter oldDelegate) => false;
+}
+
+class SquareTracePainter extends CustomPainter {
+  SquareTracePainter({
+    @required this.animation,
+    @required this.square,
+    this.strokeWidth = 2,
+  }) : super(repaint: animation);
+
+  final Animation<double> animation;
+  final Square square;
+  final double strokeWidth;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final double value = animation.value;
+
+    final Offset center = size.center(Offset.zero);
+    final double halfWidth = square.width / 2;
+
+    final Rect rect = Rect.fromLTRB(
+      center.dx - halfWidth,
+      center.dy - halfWidth,
+      center.dx + halfWidth,
+      center.dy + halfWidth,
+    );
+
+    final Paint paint = Paint()
+      ..strokeWidth = strokeWidth
+      ..color = square.color;
+
+    canvas.drawLine(
+      rect.bottomRight,
+      Offset(rect.right, rect.top + (square.width - value)),
+      paint,
+    );
+
+    canvas.drawLine(
+      rect.bottomRight,
+      Offset(rect.left + (square.width - value), rect.bottom),
+      paint,
+    );
+
+    canvas.drawLine(
+      rect.topLeft,
+      Offset(rect.left, rect.top + value),
+      paint,
+    );
+
+    canvas.drawLine(
+      rect.topLeft,
+      Offset(rect.left + value, rect.top),
+      paint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(SquareTracePainter oldDelegate) => false;
 }
