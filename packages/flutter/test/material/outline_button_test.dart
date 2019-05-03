@@ -36,7 +36,6 @@ void main() {
   });
 
   testWidgets('Default OutlineButton meets a11y contrast guidelines', (WidgetTester tester) async {
-    final SemanticsHandle handle = tester.ensureSemantics();
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -56,11 +55,12 @@ void main() {
     // Highlighted (pressed)
     final Offset center = tester.getCenter(find.byType(OutlineButton));
     await tester.startGesture(center);
-    await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
+    await tester.pump(); // start the splash and highlight animations
+    await tester.pump(const Duration(milliseconds: 800)); // wait for splash and highlight to be well under way
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-
-    handle.dispose();
-  });
+  },
+    semanticsEnabled: true,
+  );
 
   testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
     int pressedCount = 0;
