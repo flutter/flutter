@@ -662,29 +662,6 @@ void main() {
         WidgetSpan(child: SizedBox(width: 50, height: 30)),
       ]
     );
-    painter.layout(maxWidth: 400);
-
-    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 0), ui.Rect.zero);
-    expect(caretOffset.dx, 0);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: text.length), ui.Rect.zero);
-    expect(caretOffset.dx, 56);
-
-    // Since no placeholder dimensions were yet provided,
-    // the WidgetSpans are skipped.
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
-    expect(caretOffset.dx, 14);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
-    expect(caretOffset.dx, 56);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 5), ui.Rect.zero);
-    expect(caretOffset.dx, 70);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 6), ui.Rect.zero);
-    expect(caretOffset.dx, 84);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 10), ui.Rect.zero);
-    expect(caretOffset.dx, 140);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 11), ui.Rect.zero);
-    expect(caretOffset.dx, 154);
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 12), ui.Rect.zero);
-    expect(caretOffset.dx, 168);
 
     // We provide dimensions for the widgets
     painter.setPlaceholderDimensions(<PlaceholderDimensions>[
@@ -707,7 +684,7 @@ void main() {
     painter.layout(maxWidth: 500);
 
     // Now, each of the WidgetSpans will have their own placeholder 'hole'.
-    caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
+    Offset caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 1), ui.Rect.zero);
     expect(caretOffset.dx, 14);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 4), ui.Rect.zero);
     expect(caretOffset.dx, 56);

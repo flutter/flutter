@@ -144,17 +144,17 @@ class WidgetSpan extends PlaceholderSpan {
     final bool hasStyle = style != null;
     if (hasStyle)
       builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
-    if (dimensions != null) {
-      assert(builder.placeholderCount < dimensions.length);
-      final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
-      builder.addPlaceholder(
-        currentDimensions.size.width,
-        currentDimensions.size.height,
-        alignment,
-        baseline: currentDimensions.baseline,
-        baselineOffset: currentDimensions.baselineOffset,
-      );
-    }
+    assert(dimensions != null);
+    assert(builder.placeholderCount < dimensions.length);
+    final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
+    builder.addPlaceholder(
+      currentDimensions.size.width,
+      currentDimensions.size.height,
+      alignment,
+      baseline: currentDimensions.baseline,
+      baselineOffset: currentDimensions.baselineOffset,
+    );
+    
     if (hasStyle)
       builder.pop();
   }
@@ -162,23 +162,17 @@ class WidgetSpan extends PlaceholderSpan {
   /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
-    if (!visitor(this))
-      return false;
-    return true;
+    return visitor(this);
   }
 
   @override
-  InlineSpan getSpanForPositionVisitor(TextPosition position, TrackingInt offset) {
+  InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
     return null;
   }
 
   @override
-  int codeUnitAt(int index) {
+  int codeUnitAtVisitor(int index, Accumulator offset) {
     return null;
-  }
-  @override
-  bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
-    return true;
   }
 
   /// Describe the difference between this widget span and another [InlineSpan],
@@ -210,9 +204,6 @@ class WidgetSpan extends PlaceholderSpan {
   }
 
   @override
-  int get hashCode => hashValues(child, style, alignment, baseline);
-
-  @override
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
@@ -224,6 +215,9 @@ class WidgetSpan extends PlaceholderSpan {
         && typedOther.baseline == baseline
         && typedOther.style == style;
   }
+
+  @override
+  int get hashCode => hashValues(child, alignment, baseline, super.hashCode);
 
   /// Returns the text span that contains the given position in the text.
   @override

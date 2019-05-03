@@ -1541,7 +1541,6 @@ abstract class RenderBox extends RenderObject {
     }());
     _size = value;
     assert(() {
-      // RenderObject.debugCheckingIntrinsics = false;
       debugAssertDoesMeetConstraints();
       return true;
     }());
@@ -1775,7 +1774,7 @@ abstract class RenderBox extends RenderObject {
       }
       if (debugCheckIntrinsicSizes) {
         // verify that the intrinsics are sane
-        // assert(!RenderObject.debugCheckingIntrinsics);
+        assert(!RenderObject.debugCheckingIntrinsics);
         RenderObject.debugCheckingIntrinsics = true;
         final StringBuffer failures = StringBuffer();
         int failureCount = 0;

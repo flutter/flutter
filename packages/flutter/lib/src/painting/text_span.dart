@@ -219,21 +219,7 @@ class TextSpan extends InlineSpan {
 
   /// Returns the text span that contains the given position in the text.
   @override
-  InlineSpan getSpanForPosition(TextPosition position) {
-    assert(debugAssertIsValid());
-    final TrackingInt offset = TrackingInt();
-    TextSpan result;
-    visitChildren((InlineSpan span) {
-      result = span.getSpanForPositionVisitor(position, offset);
-      if (result != null) {
-        return false;
-      }
-      return true;
-    });
-    return result;
-  }
-  @override
-  InlineSpan getSpanForPositionVisitor(TextPosition position, TrackingInt offset) {
+  InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
     if (text == null) {
       return null;
     }
@@ -245,7 +231,7 @@ class TextSpan extends InlineSpan {
         endOffset == targetOffset && affinity == TextAffinity.upstream) {
       return this;
     }
-    offset.value = endOffset;
+    offset.increment(text.length);
     return null;
   }
 
@@ -257,12 +243,6 @@ class TextSpan extends InlineSpan {
   ///
   /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.
-  @override
-  String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
-    final StringBuffer buffer = StringBuffer();
-    computeToPlainText(buffer, includeSemanticsLabels: includeSemanticsLabels, includePlaceholders: includePlaceholders);
-    return buffer.toString();
-  }
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     assert(debugAssertIsValid());
@@ -281,34 +261,16 @@ class TextSpan extends InlineSpan {
     }
   }
 
-  /// Returns the UTF-16 code unit at the given index in the flattened string.
-  ///
-  /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
-  ///
-  /// Returns null if the index is out of bounds.
   @override
-  int codeUnitAt(int index) {
-    if (index < 0)
-      return null;
-    final TrackingInt offset = TrackingInt();
-    final TrackingInt result = TrackingInt(null);
-    visitChildren((InlineSpan span) {
-      return span.codeUnitAtVisitor(TrackingInt(index), offset, result);
-
-    });
-    return result.value;
-  }
-  @override
-  bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result) {
+  int codeUnitAtVisitor(int index, Accumulator offset) {
     if (text == null) {
-      return true;
+      return null;
     }
-    if (index.value - offset.value < text.length) {
-      result.value = text.codeUnitAt(index.value - offset.value);
-      return false;
+    if (index - offset.value < text.length) {
+      return text.codeUnitAt(index - offset.value);
     }
-    offset.value += text.length;
-    return true;
+    offset.increment(text.length);
+    return null;
   }
 
   /// In checked mode, throws an exception if the object is not in a
@@ -322,29 +284,20 @@ class TextSpan extends InlineSpan {
   @override
   bool debugAssertIsValid() {
     assert(() {
-      if (!visitChildren((InlineSpan span) {
-        return span.debugAssertIsValidVisitor();
-      })) {
-        throw FlutterError(
-          'TextSpan contains a null child.\n'
-          'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
-          'The full text in question was:\n'
-          '${toStringDeep(prefixLineOne: '  ')}'
-        );
+      if (children != null) {
+        for (InlineSpan child in children) {
+          assert(child != null,
+            'TextSpan contains a null child.\n...'
+            'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
+            'The full text in question was:\n'
+            '${toStringDeep(prefixLineOne: '  ')}'
+          );
+          assert(child.debugAssertIsValid());
+        }
       }
       return true;
     }());
-    return true;
-  }
-  @override
-  bool debugAssertIsValidVisitor() {
-    if (children != null) {
-      for (InlineSpan child in children) {
-        if (child == null)
-          return false;
-      }
-    }
-    return true;
+    return super.debugAssertIsValid();
   }
 
   /// Describe the difference between this text span and another, in terms of

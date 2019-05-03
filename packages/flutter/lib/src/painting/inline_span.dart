@@ -13,12 +13,15 @@ import 'text_style.dart';
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
-class TrackingInt {
-  TrackingInt([this.value = 0]);
-
-  int value;
+class Accumulator {
+  Accumulator([this._value = 0]);
+  int get value => _value;
+  int _value;
+  void increment(int addend) {
+    assert(addend >= 0);
+    _value += addend;
+  }
 }
-
 /// Called on each span as [InlineSpan.visitChildren] walks the [InlineSpan] tree.
 ///
 /// Returns true when the walk should continue, and false to stop visiting further
@@ -95,14 +98,23 @@ abstract class InlineSpan extends DiagnosticableTree {
   bool visitChildren(InlineSpanVisitor visitor);
 
   /// Returns the text span that contains the given position in the text. 
-  InlineSpan getSpanForPosition(TextPosition position);
+  InlineSpan getSpanForPosition(TextPosition position) {
+    assert(debugAssertIsValid());
+    final Accumulator offset = Accumulator();
+    InlineSpan result;
+    visitChildren((InlineSpan span) {
+      result = span.getSpanForPositionVisitor(position, offset);
+      return result == null;
+    });
+    return result;
+  }
 
   /// Performs the check at each InlineSpan for if the index falls within the range
   /// of the span and returns the TextSpan if it does.
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
   @protected
-  InlineSpan getSpanForPositionVisitor(TextPosition position, TrackingInt offset);
+  InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset);
 
   /// Flattens the [InlineSpan] tree into a single string.
   ///
@@ -121,6 +133,8 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Walks the InlineSpan tree and writes the plain text representation to [buffer].
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
+  ///
+  /// The plain-text representation of this [InlineSpan] is written into the [buffer].
   @protected
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
 
@@ -129,14 +143,24 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
   ///
   /// Returns null if the index is out of bounds.
-  int codeUnitAt(int index);
+  int codeUnitAt(int index) {
+    if (index < 0)
+      return null;
+    final Accumulator offset = Accumulator();
+    int result;
+    visitChildren((InlineSpan span) {
+      result = span.codeUnitAtVisitor(index, offset);
+      return result == null;
+    });
+    return result;
+  }
 
   /// Performs the check at each InlineSpan for if the index falls within the range
   /// of the span and stores the corresponding code unit in [result] if it does.
   ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
-  bool codeUnitAtVisitor(TrackingInt index, TrackingInt offset, TrackingInt result);
+  int codeUnitAtVisitor(int index, Accumulator offset);
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
@@ -146,14 +170,24 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// ```dart
   /// assert(myInlineSpan.debugAssertIsValid());
   /// ```
-  bool debugAssertIsValid();
-
-  /// Performs the check at each InlineSpan for if the contents are valid. Returns
-  /// false when contents are invalid.
-  ///
-  /// This method should not be directly called. Use [toPlainText] instead.
-  @protected
-  bool debugAssertIsValidVisitor();
+  /// 
+  bool debugAssertIsValid() => true;
+  // bool debugAssertIsValid() {
+  //   assert(() {
+  //     if (!visitChildren((InlineSpan span) {
+  //       return span.debugAssertIsValidVisitor();
+  //     })) {
+  //       throw FlutterError(
+  //         'TextSpan contains a null child.\n'
+  //         'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
+  //         'The full text in question was:\n'
+  //         '${toStringDeep(prefixLineOne: '  ')}'
+  //       );
+  //     }
+  //     return true;
+  //   }());
+  //   return true;
+  // }
 
   /// Describe the difference between this span and another, in terms of
   /// how much damage it will make to the rendering. The comparison is deep.
@@ -176,7 +210,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   }
 
   @override
-  int get hashCode => hashValues(style, 0);
+  int get hashCode => style.hashCode;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -85,8 +85,8 @@ class RenderParagraph extends RenderBox
          locale: locale,
          strutStyle: strutStyle,
        ) {
-   addAll(children);
-   _extractPlaceholderSpans(text);
+    addAll(children);
+    _extractPlaceholderSpans(text);
   }
 
   @override
@@ -121,8 +121,8 @@ class RenderParagraph extends RenderBox
   }
 
   List<PlaceholderSpan> _placeholderSpans;
-  // Traverses the InlineSpan tree and depth-first collects the list of
-  // child WidgetsSpans. Populates _placeholderSpans.
+  // Traverses the InlineSpan tree and depth-first collects all
+  // [PlaceholderSpan]s. Populates _placeholderSpans.
   void _extractPlaceholderSpans(InlineSpan span) {
     _placeholderSpans = <PlaceholderSpan>[];
     span.visitChildren((InlineSpan span) {
