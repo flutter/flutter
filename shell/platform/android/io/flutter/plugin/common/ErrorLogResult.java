@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.common;
 
+import io.flutter.BuildConfig;
+
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -30,11 +32,15 @@ public class ErrorLogResult implements MethodChannel.Result {
     @Override
     public void error(String errorCode, @Nullable String errorMessage, @Nullable Object errorDetails) {
         String details = (errorDetails != null) ? " details: " + errorDetails : "";
-        Log.println(level, tag, errorMessage + details);
+        if (level >= Log.WARN || BuildConfig.DEBUG) {
+            Log.println(level, tag, errorMessage + details);
+        }
     }
 
     @Override
     public void notImplemented() {
-      Log.println(level, tag, "method not implemented");
+        if (level >= Log.WARN || BuildConfig.DEBUG) {
+            Log.println(level, tag, "method not implemented");
+        }
     }
 }

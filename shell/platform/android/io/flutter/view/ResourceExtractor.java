@@ -164,9 +164,9 @@ class ResourceExtractor {
                      OutputStream os = new FileOutputStream(output)) {
                     copy(is, os);
                 }
-
-                Log.i(TAG, "Extracted baseline resource " + resource);
-
+                if (BuildConfig.DEBUG) {
+                    Log.i(TAG, "Extracted baseline resource " + resource);
+                }
             } catch (FileNotFoundException fnfe) {
                 continue;
 
@@ -202,17 +202,23 @@ class ResourceExtractor {
         final String[] existingTimestamps = getExistingTimestamps(dataDir);
 
         if (existingTimestamps == null) {
-            Log.i(TAG, "No extracted resources found");
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG, "No extracted resources found");
+            }
             return expectedTimestamp;
         }
 
         if (existingTimestamps.length == 1) {
-            Log.i(TAG, "Found extracted resources " + existingTimestamps[0]);
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG, "Found extracted resources " + existingTimestamps[0]);
+            }
         }
 
         if (existingTimestamps.length != 1
                 || !expectedTimestamp.equals(existingTimestamps[0])) {
-            Log.i(TAG, "Resource version mismatch " + expectedTimestamp);
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG, "Resource version mismatch " + expectedTimestamp);
+            }
             return expectedTimestamp;
         }
 

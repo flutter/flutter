@@ -118,7 +118,7 @@
         errorLine2="                  ~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java"
-            line="22"
+            line="24"
             column="19"/>
     </issue>
 
@@ -129,52 +129,8 @@
         errorLine2="                  ~~~~~~~~~~~">
         <location
             file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
-            line="51"
+            line="52"
             column="19"/>
-    </issue>
-
-    <issue
-        id="LogConditional"
-        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
-        errorLine1="            Log.i(TAG,"
-        errorLine2="            ^">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/AccessibilityBridge.java"
-            line="1824"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="LogConditional"
-        message="The log call Log.println(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
-        errorLine1="        Log.println(level, tag, errorMessage + details);"
-        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/plugin/common/ErrorLogResult.java"
-            line="33"
-            column="9"/>
-    </issue>
-
-    <issue
-        id="LogConditional"
-        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
-        errorLine1="            Log.i(TAG, &quot;Cleaning &quot; + mFilesToDelete.length + &quot; resources.&quot;);"
-        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java"
-            line="35"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="LogConditional"
-        message="The log call Log.i(...) should be conditional: surround with `if (Log.isLoggable(...))` or `if (BuildConfig.DEBUG) { ... }`"
-        errorLine1="                Log.i(TAG, &quot;Extracted baseline resource &quot; + resource);"
-        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
-            line="168"
-            column="17"/>
     </issue>
 
     <issue

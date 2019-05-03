@@ -9,6 +9,8 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 
+import io.flutter.BuildConfig;
+
 import java.io.File;
 import java.io.FilenameFilter;
 
@@ -32,7 +34,9 @@ class ResourceCleaner {
 
         @Override
         protected Void doInBackground(Void... unused) {
-            Log.i(TAG, "Cleaning " + mFilesToDelete.length + " resources.");
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG, "Cleaning " + mFilesToDelete.length + " resources.");
+            }
             for (File file : mFilesToDelete) {
                 if (file.exists()) {
                     deleteRecursively(file);

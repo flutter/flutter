@@ -1821,16 +1821,18 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         }
 
         private void log(@NonNull String indent, boolean recursive) {
-            Log.i(TAG,
-                    indent + "SemanticsNode id=" + id + " label=" + label + " actions=" + actions
-                            + " flags=" + flags + "\n" + indent + "  +-- textDirection="
-                            + textDirection + "\n" + indent + "  +-- rect.ltrb=(" + left + ", "
-                            + top + ", " + right + ", " + bottom + ")\n" + indent
-                            + "  +-- transform=" + Arrays.toString(transform) + "\n");
-            if (childrenInTraversalOrder != null && recursive) {
-                String childIndent = indent + "  ";
-                for (SemanticsNode child : childrenInTraversalOrder) {
-                    child.log(childIndent, recursive);
+            if (BuildConfig.DEBUG) {
+                Log.i(TAG,
+                        indent + "SemanticsNode id=" + id + " label=" + label + " actions=" + actions
+                                + " flags=" + flags + "\n" + indent + "  +-- textDirection="
+                                + textDirection + "\n" + indent + "  +-- rect.ltrb=(" + left + ", "
+                                + top + ", " + right + ", " + bottom + ")\n" + indent
+                                + "  +-- transform=" + Arrays.toString(transform) + "\n");
+                if (childrenInTraversalOrder != null && recursive) {
+                    String childIndent = indent + "  ";
+                    for (SemanticsNode child : childrenInTraversalOrder) {
+                        child.log(childIndent, recursive);
+                    }
                 }
             }
         }

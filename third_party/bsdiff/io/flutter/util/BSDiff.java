@@ -4,6 +4,8 @@
 
 package io.flutter.util;
 
+import io.flutter.BuildConfig;
+
 import java.io.*;
 import java.util.zip.GZIPInputStream;
 
