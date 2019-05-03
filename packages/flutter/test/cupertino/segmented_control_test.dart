@@ -119,6 +119,56 @@ void main() {
     }
   });
 
+  testWidgets('Default padding is set', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              key: const ValueKey<String>('Segmented Control'),
+              children: children,
+              onValueChanged: (int newValue) {},
+              groupValue: 1,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.byType(Padding), findsOneWidget);
+    final Padding paddingWidget = find.byType(Padding).evaluate().single.widget;
+    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 16.0));
+  });
+
+  testWidgets('Custom padding is set', (WidgetTester tester) async {
+    final Map<int, Widget> children = <int, Widget>{};
+    children[0] = const Text('Child 1');
+    children[1] = const Text('Child 2');
+
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+          return boilerplate(
+            child: CupertinoSegmentedControl<int>(
+              padding: const EdgeInsets.all(4.0),
+              children: children,
+              onValueChanged: (int newValue) {},
+              groupValue: 1,
+            ),
+          );
+        },
+      ),
+    );
+
+    expect(find.byType(Padding), findsOneWidget);
+    final Padding paddingWidget = find.byType(Padding).evaluate().single.widget;
+    expect(paddingWidget.padding, const EdgeInsets.all(4.0));
+  });
+
   testWidgets('Value attribute must be the key of one of the children widgets',
           (WidgetTester tester) async {
     final Map<int, Widget> children = <int, Widget>{};
