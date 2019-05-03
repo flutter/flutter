@@ -407,7 +407,7 @@ void main() {
       // Given a box constraint of 150, the Center will occupy all that height.
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
 
       await tester.drag(find.text('0'), const Offset(0.0, -300.0), touchSlopY: 0);
@@ -443,11 +443,11 @@ void main() {
       await tester.pump(const Duration(seconds: 2));
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
       );
       expect(
         tester.getRect(find.widgetWithText(Center, '0')),
-        Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
+        const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
       );
 
       debugDefaultTargetPlatformOverride = null;
@@ -484,7 +484,7 @@ void main() {
       ));
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
       verify(mockHelper.refreshTask());
 
@@ -501,11 +501,11 @@ void main() {
       ));
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
       );
       expect(
         tester.getRect(find.widgetWithText(Center, '0')),
-        Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
+        const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
       );
 
       refreshCompleter.complete(null);
@@ -522,7 +522,7 @@ void main() {
       expect(find.text('-1'), findsNothing);
       expect(
         tester.getRect(find.widgetWithText(Center, '0')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
       );
 
       debugDefaultTargetPlatformOverride = null;
@@ -559,7 +559,7 @@ void main() {
       ));
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 150.0),
       );
       verify(mockHelper.refreshTask());
 
@@ -576,11 +576,11 @@ void main() {
       ));
       expect(
         tester.getRect(find.widgetWithText(Center, '-1')),
-        Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
+        const Rect.fromLTRB(0.0, 0.0, 800.0, 60.0),
       );
       expect(
         tester.getRect(find.widgetWithText(Center, '0')),
-        Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
+        const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
       );
 
       refreshCompleter.complete(null);
@@ -687,7 +687,7 @@ void main() {
         expect(find.text('-1'), findsNothing);
         expect(
           tester.getRect(find.widgetWithText(Center, '0')),
-          Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
 
         // Start another drag. It's now in drag mode.
@@ -745,7 +745,7 @@ void main() {
         ));
         expect(
           tester.getRect(find.widgetWithText(Center, '0')),
-          Rect.fromLTRB(0.0, 150.0, 800.0, 350.0),
+          const Rect.fromLTRB(0.0, 150.0, 800.0, 350.0),
         );
 
         await gesture.up();
@@ -754,7 +754,7 @@ void main() {
         expect(find.text('-1'), findsNothing);
         expect(
           tester.getRect(find.widgetWithText(Center, '0')),
-          Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
 
         debugDefaultTargetPlatformOverride = null;
@@ -846,7 +846,7 @@ void main() {
         expect(find.text('-1'), findsNothing);
         expect(
           tester.getRect(find.widgetWithText(Center, '0')),
-          Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
 
         debugDefaultTargetPlatformOverride = null;
@@ -930,7 +930,7 @@ void main() {
         expect(find.text('-1'), findsNothing);
         expect(
           tester.getRect(find.widgetWithText(Center, '0')),
-          Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
 
         debugDefaultTargetPlatformOverride = null;
@@ -1116,7 +1116,7 @@ void main() {
         );
         expect(
           tester.getRect(find.widgetWithText(Container, '0')),
-          Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
+          const Rect.fromLTRB(0.0, 60.0, 800.0, 260.0),
         );
 
         refreshCompleter.complete(null);
@@ -1298,7 +1298,7 @@ void main() {
         );
         expect(
           tester.getRect(find.widgetWithText(Center, '0')),
-          Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
+          const Rect.fromLTRB(0.0, 0.0, 800.0, 200.0),
         );
         verify(mockHelper.refreshTask()); // The refresh function still called.
 

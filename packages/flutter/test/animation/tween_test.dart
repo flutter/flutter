@@ -58,8 +58,8 @@ void main() {
   });
 
   test('RectTween', () {
-    final Rect a = Rect.fromLTWH(5.0, 3.0, 7.0, 11.0);
-    final Rect b = Rect.fromLTWH(8.0, 12.0, 14.0, 18.0);
+    const Rect a = Rect.fromLTWH(5.0, 3.0, 7.0, 11.0);
+    const Rect b = Rect.fromLTWH(8.0, 12.0, 14.0, 18.0);
     final RectTween tween = RectTween(begin: a, end: b);
     expect(tween.lerp(0.5), equals(Rect.lerp(a, b, 0.5)));
     expect(tween, hasOneLineDescription);

@@ -304,7 +304,7 @@ class CreateCommand extends FlutterCommand {
 
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
-      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
@@ -385,7 +385,7 @@ class CreateCommand extends FlutterCommand {
       printStatus('Your module code is in $relativeMainPath.');
     } else {
       // Run doctor; tell the user the next steps.
-      final FlutterProject project = await FlutterProject.fromPath(projectDirPath);
+      final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = fs.path.normalize(fs.path.relative(app.directory.path));
       final String relativeAppMain = fs.path.join(relativeAppPath, 'lib', 'main.dart');
@@ -443,7 +443,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         directory: directory.path,
         offline: argResults['offline'],
       );
-      final FlutterProject project = await FlutterProject.fromDirectory(directory);
+      final FlutterProject project = FlutterProject.fromDirectory(directory);
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
     return generatedCount;
@@ -480,7 +480,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         offline: argResults['offline'],
       );
     }
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     final String projectName = templateContext['projectName'];
@@ -501,7 +501,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
     if (argResults['with-driver-test']) {

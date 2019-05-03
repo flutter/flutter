@@ -53,11 +53,15 @@ enum HeroFlightDirection {
   pop,
 }
 
-// The bounding box for context in global coordinates.
-Rect _globalBoundingBoxFor(BuildContext context) {
+// The bounding box for context in ancestorContext coordinate system, or in the global
+// coordinate system when null.
+Rect _boundingBoxFor(BuildContext context, [BuildContext ancestorContext]) {
   final RenderBox box = context.findRenderObject();
   assert(box != null && box.hasSize);
-  return MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
+  return MatrixUtils.transformRect(
+      box.getTransformTo(ancestorContext?.findRenderObject()),
+      Offset.zero & box.size,
+  );
 }
 
 /// A widget that marks its child as being a candidate for
@@ -496,8 +500,8 @@ class _HeroFlight {
     manifest.toHero.startFlight();
 
     heroRectTween = _doCreateRectTween(
-      _globalBoundingBoxFor(manifest.fromHero.context),
-      _globalBoundingBoxFor(manifest.toHero.context),
+      _boundingBoxFor(manifest.fromHero.context, manifest.fromRoute.subtreeContext),
+      _boundingBoxFor(manifest.toHero.context, manifest.toRoute.subtreeContext),
     );
 
     overlayEntry = OverlayEntry(builder: _buildOverlay);
@@ -540,7 +544,10 @@ class _HeroFlight {
       if (manifest.fromHero != newManifest.toHero) {
         manifest.fromHero.endFlight();
         newManifest.toHero.startFlight();
-        heroRectTween = _doCreateRectTween(heroRectTween.end, _globalBoundingBoxFor(newManifest.toHero.context));
+        heroRectTween = _doCreateRectTween(
+            heroRectTween.end,
+            _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
+        );
       } else {
         // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
         heroRectTween = _doCreateRectTween(heroRectTween.end, heroRectTween.begin);
@@ -552,7 +559,10 @@ class _HeroFlight {
       assert(manifest.fromHero != newManifest.fromHero);
       assert(manifest.toHero != newManifest.toHero);
 
-      heroRectTween = _doCreateRectTween(heroRectTween.evaluate(_proxyAnimation), _globalBoundingBoxFor(newManifest.toHero.context));
+      heroRectTween = _doCreateRectTween(
+          heroRectTween.evaluate(_proxyAnimation),
+          _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
+      );
       shuttle = null;
 
       if (newManifest.type == HeroFlightDirection.pop)
@@ -706,7 +716,7 @@ class HeroController extends NavigatorObserver {
       return;
     }
 
-    final Rect navigatorRect = _globalBoundingBoxFor(navigator.context);
+    final Rect navigatorRect = _boundingBoxFor(navigator.context);
 
     // At this point the toHeroes may have been built and laid out for the first time.
     final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext, isUserGestureTransition, navigator);

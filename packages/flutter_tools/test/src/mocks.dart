@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show IOSink;
+import 'dart:io' as io show IOSink, ProcessSignal;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
@@ -194,6 +194,38 @@ class MockProcess extends Mock implements Process {
 
   @override
   final Stream<List<int>> stderr;
+}
+
+/// A fake process implemenation which can be provided all necessary values.
+class FakeProcess implements Process {
+  FakeProcess({
+    this.pid = 1,
+    Future<int> exitCode,
+    Stream<List<int>> stdin,
+    this.stdout = const Stream<List<int>>.empty(),
+    this.stderr = const Stream<List<int>>.empty(),
+  }) : exitCode = exitCode ?? Future<int>.value(0),
+       stdin = stdin ?? MemoryIOSink();
+
+  @override
+  final int pid;
+
+  @override
+  final Future<int> exitCode;
+
+  @override
+  final io.IOSink stdin;
+
+  @override
+  final Stream<List<int>> stdout;
+
+  @override
+  final Stream<List<int>> stderr;
+
+  @override
+  bool kill([io.ProcessSignal signal = io.ProcessSignal.sigterm]) {
+    return true;
+  }
 }
 
 /// A process that prompts the user to proceed, then asynchronously writes
