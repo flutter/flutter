@@ -294,22 +294,26 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     return null;
   }
 
-  /// Gets anchor for material-style text selection handles. The anchor is at
-  /// the bottom baseline of the selection cursor position.
+  /// Gets anchor for cupertino-style text selection handles.
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     final Size handleSize = getHandleSize(textLineHeight);
     switch (type) {
+      // The circle is at the top for the left handle, and the anchor point is
+      // all the way at the bottom of the line.
       case TextSelectionHandleType.left:
         return Offset(
           handleSize.width / 2,
           handleSize.height,
         );
+      // The right handle is vertically flipped, and the anchor point is near
+      // the top of the circle to give slight overlap.
       case TextSelectionHandleType.right:
         return Offset(
           handleSize.width / 2,
           handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
         );
+      // A collapsed handle anchors itself so that it's centered.
       default:
         return Offset(
           handleSize.width / 2,
