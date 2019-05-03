@@ -95,7 +95,7 @@ public class FlutterJNI {
 
   @UiThread
   public static native String nativeGetObservatoryUri();
-  
+
   private Long nativePlatformViewId;
   private FlutterRenderer.RenderSurface renderSurface;
   private AccessibilityDelegate accessibilityDelegate;
