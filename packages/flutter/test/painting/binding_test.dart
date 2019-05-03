@@ -14,16 +14,6 @@ import 'painting_utils.dart';
 void main() {
   final PaintingBindingSpy binding = PaintingBindingSpy();
 
-  test('decodedCacheRatio', () async {
-    // final PaintingBinding binding = PaintingBinding.instance;
-    // Has default value.
-    expect(binding.decodedCacheRatioCap, isNot(null)); // ignore: deprecated_member_use_from_same_package
-
-    // Can be set.
-    binding.decodedCacheRatioCap = 1.0; // ignore: deprecated_member_use_from_same_package
-    expect(binding.decodedCacheRatioCap, 1.0); // ignore: deprecated_member_use_from_same_package
-  });
-
   test('instantiateImageCodec used for loading images', () async {
     expect(binding.instantiateImageCodecCalledCount, 0);
 
