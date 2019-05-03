@@ -545,7 +545,6 @@ abstract class WidgetController {
       kind: kind,
       pointer: pointer ?? _getNextPointer(),
     );
-    await gesture.addPointer();
     return gesture;
   }
 

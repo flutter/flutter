@@ -12,11 +12,6 @@ import 'feedback.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-const Duration _kFadeInDuration = Duration(milliseconds: 150);
-const Duration _kFadeOutDuration = Duration(milliseconds: 75);
-const Duration _kDefaultShowDuration = Duration(milliseconds: 1500);
-const Duration _kDefaultWaitDuration = Duration(milliseconds: 0);
-
 /// A material design tooltip.
 ///
 /// Tooltips provide text labels that help explain the function of a button or
@@ -47,30 +42,37 @@ class Tooltip extends StatefulWidget {
   const Tooltip({
     Key key,
     @required this.message,
-    this.height = 32.0,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16.0),
-    this.verticalOffset = 24.0,
+    this.height = _defaultTooltipHeight,
+    this.padding = _defaultPadding,
+    this.verticalOffset = _defaultVerticalOffset,
     this.preferBelow = true,
     this.excludeFromSemantics = false,
     this.decoration,
-    this.waitDuration = _kDefaultWaitDuration,
-    this.showDuration = _kDefaultShowDuration,
+    this.waitDuration = _defaultWaitDuration,
+    this.showDuration = _defaultShowDuration,
     this.child,
-  })  : assert(message != null),
-        assert(height != null),
-        assert(padding != null),
-        assert(verticalOffset != null),
-        assert(preferBelow != null),
-        assert(excludeFromSemantics != null),
-        assert(waitDuration != null),
-        assert(showDuration != null),
-        super(key: key);
+  }) : assert(message != null),
+       assert(height != null),
+       assert(padding != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null),
+       assert(excludeFromSemantics != null),
+       assert(waitDuration != null),
+       assert(showDuration != null),
+       super(key: key);
+
+  static const Duration _defaultShowDuration = Duration(milliseconds: 1500);
+  static const Duration _defaultWaitDuration = Duration(milliseconds: 0);
+  static const double _defaultTooltipHeight = 32.0;
+  static const double _defaultVerticalOffset = 24.0;
+  static const EdgeInsetsGeometry _defaultPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
   /// The text to display in the tooltip.
   final String message;
 
-  /// The amount of vertical space the tooltip should occupy (inside its
-  /// padding).
+  /// They height of the tooltip's [child].
+  ///
+  /// If the [child] is null, then this is the intrinsic height.
   final double height;
 
   /// The amount of space by which to inset the child.
@@ -78,8 +80,7 @@ class Tooltip extends StatefulWidget {
   /// Defaults to 16.0 logical pixels in each direction.
   final EdgeInsetsGeometry padding;
 
-  /// The amount of vertical distance between the widget and the displayed
-  /// tooltip.
+  /// The vertical gap between the widget and the displayed tooltip.
   final double verticalOffset;
 
   /// Whether the tooltip defaults to being displayed below the widget.
@@ -98,10 +99,11 @@ class Tooltip extends StatefulWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  /// Specifies the decoration of the tooltip window.
+  /// Specifies the tooltip's shape and background color.
   ///
   /// If not specified, defaults to a rounded rectangle with a border radius of
-  /// 4.0, and a color derived from the text theme.
+  /// 4.0, and a color derived from the [ThemeData.textTheme] if the
+  /// [ThemeData.brightness] is dark, and [ThemeData.primaryTextTheme] if not.
   final Decoration decoration;
 
   /// The amount of time that a pointer must hover over the widget before it
@@ -122,14 +124,20 @@ class Tooltip extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('message', message, showName: false));
-    properties.add(DoubleProperty('vertical offset', verticalOffset));
+    properties.add(DoubleProperty('height', height, defaultValue: _defaultTooltipHeight));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: _defaultPadding));
+    properties.add(DoubleProperty('vertical offset', verticalOffset, defaultValue: _defaultVerticalOffset));
     properties.add(FlagProperty('position', value: preferBelow, ifTrue: 'below', ifFalse: 'above', showName: true));
-    properties.add(DiagnosticsProperty<Duration>('waitDuration', waitDuration, defaultValue: _kDefaultWaitDuration));
-    properties.add(DiagnosticsProperty<Duration>('showDuration', showDuration, defaultValue: _kDefaultShowDuration));
+    properties.add(FlagProperty('semantics', value: excludeFromSemantics, ifTrue: 'excluded', showName: true, defaultValue: false));
+    properties.add(DiagnosticsProperty<Duration>('wait duration', waitDuration, defaultValue: _defaultWaitDuration));
+    properties.add(DiagnosticsProperty<Duration>('show duration', showDuration, defaultValue: _defaultShowDuration));
   }
 }
 
 class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
+  static const Duration _fadeInDuration = Duration(milliseconds: 150);
+  static const Duration _fadeOutDuration = Duration(milliseconds: 75);
+
   AnimationController _controller;
   OverlayEntry _entry;
   Timer _hideTimer;
@@ -141,7 +149,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void initState() {
     super.initState();
     _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    _controller = AnimationController(duration: _kFadeInDuration, vsync: this)
+    _controller = AnimationController(duration: _fadeInDuration, vsync: this)
       ..addStatusListener(_handleStatusChanged);
     // Listen to see when a mouse is added.
     RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChange);
@@ -152,9 +160,13 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
 
   // Forces a rebuild if a mouse has been added or removed.
   void _handleMouseTrackerChange() {
-    if (mounted) {
+    if (!mounted) {
+      return;
+    }
+    final bool mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (mouseIsConnected != _mouseIsConnected) {
       setState((){
-        _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
+        _mouseIsConnected = mouseIsConnected;
       });
     }
   }
@@ -165,7 +177,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     }
   }
 
-  void _hideTooltip({bool immediately = false}) {
+  void _hideTooltip({ bool immediately = false }) {
     _showTimer?.cancel();
     _showTimer = null;
     if (immediately) {
@@ -183,7 +195,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
     _longPressActivated = false;
   }
 
-  void _showTooltip({bool immediately = false}) {
+  void _showTooltip({ bool immediately = false }) {
     _hideTimer?.cancel();
     _hideTimer = null;
     if (immediately) {
@@ -214,6 +226,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _createNewEntry() {
     final RenderBox box = context.findRenderObject();
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
+    assert(_fadeOutDuration < _fadeInDuration);
 
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
@@ -231,7 +244,7 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
         // _kFadeInDuration, then the equation below will need to change.
         reverseCurve: Interval(
           0.0,
-          _kFadeOutDuration.inMilliseconds / _kFadeInDuration.inMilliseconds,
+          _fadeOutDuration.inMilliseconds / _fadeInDuration.inMilliseconds,
           curve: Curves.fastOutSlowIn,
         ),
       ),
@@ -247,6 +260,8 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   void _removeEntry() {
     _hideTimer?.cancel();
     _hideTimer = null;
+    _showTimer?.cancel();
+    _showTimer = null;
     _entry?.remove();
     _entry = null;
   }
@@ -323,9 +338,9 @@ class _TooltipPositionDelegate extends SingleChildLayoutDelegate {
     @required this.target,
     @required this.verticalOffset,
     @required this.preferBelow,
-  })  : assert(target != null),
-        assert(verticalOffset != null),
-        assert(preferBelow != null);
+  }) : assert(target != null),
+       assert(verticalOffset != null),
+       assert(preferBelow != null);
 
   /// The offset of the target the tooltip is positioned near in the global
   /// coordinate system.
@@ -388,7 +403,7 @@ class _TooltipOverlay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final ThemeData darkTheme = ThemeData(
+    final ThemeData tooltipTheme = ThemeData(
       brightness: Brightness.dark,
       textTheme: theme.brightness == Brightness.dark ? theme.textTheme : theme.primaryTextTheme,
       platform: theme.platform,
@@ -407,14 +422,14 @@ class _TooltipOverlay extends StatelessWidget {
               constraints: BoxConstraints(minHeight: height),
               child: Container(
                 decoration: decoration ?? BoxDecoration(
-                  color: darkTheme.backgroundColor.withOpacity(0.9),
+                  color: tooltipTheme.backgroundColor.withOpacity(0.9),
                   borderRadius: BorderRadius.circular(4.0),
                 ),
                 padding: padding,
                 child: Center(
                   widthFactor: 1.0,
                   heightFactor: 1.0,
-                  child: Text(message, style: darkTheme.textTheme.body1),
+                  child: Text(message, style: tooltipTheme.textTheme.body1),
                 ),
               ),
             ),
