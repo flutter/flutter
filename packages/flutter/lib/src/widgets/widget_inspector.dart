@@ -1487,17 +1487,32 @@ mixin WidgetInspectorService {
     }
 
     if (config.includeProperties) {
-      List<DiagnosticsNode> properties = node.getProperties();
-      if (properties.isEmpty && value is Diagnosticable) {
-        properties = value.toDiagnosticsNode().getProperties();
+      final List<DiagnosticsNode> properties = node.getProperties();
+      if (properties.isEmpty && node is DiagnosticsProperty
+          && config.expandPropertyValues && value is Diagnosticable) {
+        // Special case to expand property values.
+        json['properties'] = _nodesToJson(
+          value.toDiagnosticsNode().getProperties().where(
+            (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info),
+          ),
+          _SerializeConfig(groupName: config.groupName,
+            subtreeDepth: 0,
+            expandPropertyValues: false,
+          ),
+          parent: node,
+        );
+      } else {
+        json['properties'] = _nodesToJson(
+          properties.where(
+                (DiagnosticsNode node) => !node.isFiltered(
+                createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel
+                    .info),
+          ),
+          _SerializeConfig.merge(
+              config, subtreeDepth: math.max(0, config.subtreeDepth - 1)),
+          parent: node,
+        );
       }
-      json['properties'] = _nodesToJson(
-        properties.where(
-          (DiagnosticsNode node) => !node.isFiltered(createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel.info),
-        ),
-        _SerializeConfig.merge(config, subtreeDepth: math.max(0, config.subtreeDepth - 1)),
-        parent: node,
-      );
     }
 
     if (node is DiagnosticsProperty) {
@@ -1514,18 +1529,6 @@ mixin WidgetInspectorService {
         json['valueProperties'] = <String, Object>{
           'codePoint': value.codePoint,
         };
-      }
-      if (config.expandPropertyValues && value is Diagnosticable) {
-        json['properties'] = _nodesToJson(
-          value.toDiagnosticsNode().getProperties().where(
-                (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info),
-          ),
-          _SerializeConfig(groupName: config.groupName,
-              subtreeDepth: 0,
-              expandPropertyValues: false,
-          ),
-          parent: node,
-        );
       }
     }
     return json;

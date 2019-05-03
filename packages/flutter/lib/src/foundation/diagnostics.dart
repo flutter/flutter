@@ -2486,7 +2486,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
       json['exception'] = exception.toString();
     json['propertyType'] = propertyType.toString();
     json['defaultLevel'] = describeEnum(_defaultLevel);
-    if (T is Diagnosticable || T is DiagnosticsNode)
+    if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     return json;
   }
