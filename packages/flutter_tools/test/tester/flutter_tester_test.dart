@@ -84,12 +84,6 @@ void main() {
       expect(device.name, 'Flutter test device');
       expect(device.portForwarder, isNot(isNull));
       expect(await device.targetPlatform, TargetPlatform.tester);
-
-      expect(await device.installApp(null), isTrue);
-      expect(await device.isAppInstalled(null), isFalse);
-      expect(await device.isLatestBuildInstalled(null), isFalse);
-      expect(await device.uninstallApp(null), isTrue);
-
       expect(device.isSupported(), isTrue);
     });
 

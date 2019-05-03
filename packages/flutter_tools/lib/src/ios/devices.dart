@@ -111,7 +111,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   Future<List<Device>> pollingGetDevices() => IOSDevice.getAttachedDevices();
 }
 
-class IOSDevice extends Device {
+class IOSDevice extends Device with InstallTarget {
   IOSDevice(String id, { this.name, String sdkVersion })
       : _sdkVersion = sdkVersion,
         super(id) {

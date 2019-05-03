@@ -171,18 +171,6 @@ class FuchsiaDevice extends Device {
   bool get supportsStartPaused => false;
 
   @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
-
-  @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
-
-  @override
-  Future<bool> installApp(ApplicationPackage app) => Future<bool>.value(false);
-
-  @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => false;
-
-  @override
   bool isSupported() => true;
 
   @override

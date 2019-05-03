@@ -58,7 +58,7 @@ class AndroidDevices extends PollingDeviceDiscovery {
   Future<List<String>> getDiagnostics() async => getAdbDeviceDiagnostics();
 }
 
-class AndroidDevice extends Device {
+class AndroidDevice extends Device with InstallTarget {
   AndroidDevice(
     String id, {
     this.productID,

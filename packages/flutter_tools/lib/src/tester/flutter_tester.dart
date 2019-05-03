@@ -75,15 +75,6 @@ class FlutterTesterDevice extends Device {
   DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader;
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
-
-  @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => false;
-
-  @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => false;
-
-  @override
   bool isSupported() => true;
 
   bool _isRunning = false;
@@ -190,9 +181,6 @@ class FlutterTesterDevice extends Device {
     _process = null;
     return true;
   }
-
-  @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;

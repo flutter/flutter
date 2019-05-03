@@ -213,7 +213,7 @@ class SimDevice {
   bool get isBooted => state == 'Booted';
 }
 
-class IOSSimulator extends Device {
+class IOSSimulator extends Device with InstallTarget {
   IOSSimulator(String id, { this.name, this.category }) : super(id);
 
   @override

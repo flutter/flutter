@@ -39,10 +39,6 @@ void main() {
       when(mockMacOSApp.executable(any)).thenReturn('foo');
       expect(await device.targetPlatform, TargetPlatform.darwin_x64);
       expect(device.name, 'macOS');
-      expect(await device.installApp(mockMacOSApp), true);
-      expect(await device.uninstallApp(mockMacOSApp), true);
-      expect(await device.isLatestBuildInstalled(mockMacOSApp), true);
-      expect(await device.isAppInstalled(mockMacOSApp), true);
       expect(await device.stopApp(mockMacOSApp), false);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,

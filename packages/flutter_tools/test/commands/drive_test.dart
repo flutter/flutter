@@ -22,7 +22,7 @@ import '../src/mocks.dart';
 void main() {
   group('drive', () {
     DriveCommand command;
-    Device mockDevice;
+    MockDevice mockDevice;
     MemoryFileSystem fs;
     Directory tempDir;
 
@@ -418,12 +418,12 @@ void main() {
   });
 }
 
-class MockDevice extends Mock implements Device {
+class MockDevice extends Mock implements Device, InstallTarget {
   MockDevice() {
     when(isSupported()).thenReturn(true);
   }
 }
 
-class MockAndroidDevice extends Mock implements AndroidDevice { }
+class MockAndroidDevice extends MockDevice implements AndroidDevice { }
 
-class MockLaunchResult extends Mock implements LaunchResult { }
+class MockLaunchResult extends MockDevice implements LaunchResult { }

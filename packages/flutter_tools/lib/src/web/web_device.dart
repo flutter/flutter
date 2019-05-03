@@ -70,15 +70,6 @@ class WebDevice extends Device {
   }
 
   @override
-  Future<bool> installApp(ApplicationPackage app) async => true;
-
-  @override
-  Future<bool> isAppInstalled(ApplicationPackage app) async => true;
-
-  @override
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app) async => true;
-
-  @override
   Future<bool> get isLocalEmulator async => false;
 
   @override
@@ -131,9 +122,6 @@ class WebDevice extends Device {
 
   @override
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.web;
-
-  @override
-  Future<bool> uninstallApp(ApplicationPackage app) async => true;
 
   Future<void> _basicAssetServer(HttpRequest request) async {
     if (request.method != 'GET') {

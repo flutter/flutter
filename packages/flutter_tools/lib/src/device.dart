@@ -204,6 +204,22 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
   String toString() => '$name device discovery';
 }
 
+/// A device which can have programs "installed" on it.
+mixin InstallTarget on Device {
+  /// Check if a version of the given app is already installed
+  Future<bool> isAppInstalled(ApplicationPackage app);
+
+  /// Check if the latest build of the [app] is already installed.
+  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
+
+  /// Install an app package on the current device
+  Future<bool> installApp(ApplicationPackage app);
+
+  /// Uninstall an app package from the current device
+  Future<bool> uninstallApp(ApplicationPackage app);
+}
+
+/// A place where Flutter can run.
 abstract class Device {
 
   Device(this.id);
@@ -238,18 +254,6 @@ abstract class Device {
 
   /// Whether the device is supported for the current project directory.
   bool isSupportedForProject(FlutterProject flutterProject);
-
-  /// Check if a version of the given app is already installed
-  Future<bool> isAppInstalled(ApplicationPackage app);
-
-  /// Check if the latest build of the [app] is already installed.
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
-
-  /// Install an app package on the current device
-  Future<bool> installApp(ApplicationPackage app);
-
-  /// Uninstall an app package from the current device
-  Future<bool> uninstallApp(ApplicationPackage app);
 
   /// Check if the device is supported by Flutter
   bool isSupported();

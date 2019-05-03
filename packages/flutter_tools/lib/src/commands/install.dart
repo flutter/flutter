@@ -51,11 +51,16 @@ Future<bool> installApp(Device device, ApplicationPackage package, { bool uninst
   if (package == null)
     return false;
 
-  if (uninstall && await device.isAppInstalled(package)) {
-    printStatus('Uninstalling old version...');
-    if (!await device.uninstallApp(package))
-      printError('Warning: uninstalling old version failed');
+  if (device is InstallTarget) {
+    if (uninstall && await device.isAppInstalled(package)) {
+      printStatus('Uninstalling old version...');
+      if (!await device.uninstallApp(package)) {
+        printError('Warning: uninstalling old version failed');
+      }
+    }
+    return device.installApp(package);
+  } else {
+    printError('Device: $device does not support installation.');
+    return false;
   }
-
-  return device.installApp(package);
 }
