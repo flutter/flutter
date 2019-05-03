@@ -50,8 +50,11 @@ class VideoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget fullScreenRoutePageBuilder(BuildContext context,
-        Animation<double> animation, Animation<double> secondaryAnimation) {
+    Widget fullScreenRoutePageBuilder(
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) {
       return _buildFullScreenVideo();
     }
 

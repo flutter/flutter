@@ -315,9 +315,11 @@ class TestWindow implements Window {
   }
 
   @override
-  void sendPlatformMessage(String name,
-                           ByteData data,
-                           PlatformMessageResponseCallback callback) {
+  void sendPlatformMessage(
+    String name,
+    ByteData data,
+    PlatformMessageResponseCallback callback,
+  ) {
     _window.sendPlatformMessage(name, data, callback);
   }
 

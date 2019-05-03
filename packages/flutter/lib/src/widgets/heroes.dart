@@ -77,10 +77,12 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 /// same tag, a hero animation is triggered.
 ///
 /// If a [Hero] is already in flight when navigation occurs, its
-/// flight animation will be redirected to its new destination.
-
-/// The widget shown in-flight during the transition is, by default, the
+/// flight animation will be redirected to its new destination. The
+/// widget shown in-flight during the transition is, by default, the
 /// destination route's [Hero]'s child.
+///
+/// For a Hero animation to trigger, the Hero has to exist on the very first
+/// frame of the new page's animation.
 ///
 /// Routes must not contain more than one [Hero] for each [tag].
 ///

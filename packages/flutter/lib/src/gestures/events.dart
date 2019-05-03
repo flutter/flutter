@@ -518,30 +518,35 @@ class PointerEnterEvent extends PointerEvent {
 
   /// Creates an enter event from a [PointerHoverEvent].
   ///
-  /// This is used by the [MouseTracker] to synthesize enter events, since it
-  /// only actually receives hover events.
-  PointerEnterEvent.fromHoverEvent(PointerHoverEvent hover) : super(
-    timeStamp: hover?.timeStamp,
-    kind: hover?.kind,
-    device: hover?.device,
-    position: hover?.position,
-    delta: hover?.delta,
-    buttons: hover?.buttons,
-    down: hover?.down,
-    obscured: hover?.obscured,
-    pressure: hover?.pressure,
-    pressureMin: hover?.pressureMin,
-    pressureMax: hover?.pressureMax,
-    distance: hover?.distance,
-    distanceMax: hover?.distanceMax,
-    size: hover?.size,
-    radiusMajor: hover?.radiusMajor,
-    radiusMinor: hover?.radiusMinor,
-    radiusMin: hover?.radiusMin,
-    radiusMax: hover?.radiusMax,
-    orientation: hover?.orientation,
-    tilt: hover?.tilt,
-    synthesized: hover?.synthesized,
+  /// Deprecated. Please use [PointerEnterEvent.fromMouseEvent] instead.
+  @Deprecated('use PointerEnterEvent.fromMouseEvent instead')
+  PointerEnterEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
+
+  /// Creates an enter event from a [PointerEvent].
+  ///
+  /// This is used by the [MouseTracker] to synthesize enter events.
+  PointerEnterEvent.fromMouseEvent(PointerEvent event) : super(
+    timeStamp: event?.timeStamp,
+    kind: event?.kind,
+    device: event?.device,
+    position: event?.position,
+    delta: event?.delta,
+    buttons: event?.buttons,
+    down: event?.down,
+    obscured: event?.obscured,
+    pressure: event?.pressure,
+    pressureMin: event?.pressureMin,
+    pressureMax: event?.pressureMax,
+    distance: event?.distance,
+    distanceMax: event?.distanceMax,
+    size: event?.size,
+    radiusMajor: event?.radiusMajor,
+    radiusMinor: event?.radiusMinor,
+    radiusMin: event?.radiusMin,
+    radiusMax: event?.radiusMax,
+    orientation: event?.orientation,
+    tilt: event?.tilt,
+    synthesized: event?.synthesized,
   );
 }
 
@@ -606,30 +611,35 @@ class PointerExitEvent extends PointerEvent {
 
   /// Creates an exit event from a [PointerHoverEvent].
   ///
-  /// This is used by the [MouseTracker] to synthesize exit events, since it
-  /// only actually receives hover events.
-  PointerExitEvent.fromHoverEvent(PointerHoverEvent hover) : super(
-    timeStamp: hover?.timeStamp,
-    kind: hover?.kind,
-    device: hover?.device,
-    position: hover?.position,
-    delta: hover?.delta,
-    buttons: hover?.buttons,
-    down: hover?.down,
-    obscured: hover?.obscured,
-    pressure: hover?.pressure,
-    pressureMin: hover?.pressureMin,
-    pressureMax: hover?.pressureMax,
-    distance: hover?.distance,
-    distanceMax: hover?.distanceMax,
-    size: hover?.size,
-    radiusMajor: hover?.radiusMajor,
-    radiusMinor: hover?.radiusMinor,
-    radiusMin: hover?.radiusMin,
-    radiusMax: hover?.radiusMax,
-    orientation: hover?.orientation,
-    tilt: hover?.tilt,
-    synthesized: hover?.synthesized,
+  /// Deprecated. Please use [PointerExitEvent.fromMouseEvent] instead.
+  @Deprecated('use PointerExitEvent.fromMouseEvent instead')
+  PointerExitEvent.fromHoverEvent(PointerHoverEvent event) : this.fromMouseEvent(event);
+
+  /// Creates an exit event from a [PointerEvent].
+  ///
+  /// This is used by the [MouseTracker] to synthesize exit events.
+  PointerExitEvent.fromMouseEvent(PointerEvent event) : super(
+    timeStamp: event?.timeStamp,
+    kind: event?.kind,
+    device: event?.device,
+    position: event?.position,
+    delta: event?.delta,
+    buttons: event?.buttons,
+    down: event?.down,
+    obscured: event?.obscured,
+    pressure: event?.pressure,
+    pressureMin: event?.pressureMin,
+    pressureMax: event?.pressureMax,
+    distance: event?.distance,
+    distanceMax: event?.distanceMax,
+    size: event?.size,
+    radiusMajor: event?.radiusMajor,
+    radiusMinor: event?.radiusMinor,
+    radiusMin: event?.radiusMin,
+    radiusMax: event?.radiusMax,
+    orientation: event?.orientation,
+    tilt: event?.tilt,
+    synthesized: event?.synthesized,
   );
 }
 

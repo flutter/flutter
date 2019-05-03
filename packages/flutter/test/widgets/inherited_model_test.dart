@@ -241,7 +241,7 @@ void main() {
                 child: ABCModel( // The "inner" model
                   a: 100 + _a,
                   b: 100 + _b,
-                  aspects: <String>{'a'},
+                  aspects: const <String>{'a'},
                   child: Center(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,

@@ -123,7 +123,7 @@ void main() {
         generator: residentCompiler,
         pathToReload: 'lib/foo.txt.dill',
         trackWidgetCreation: false,
-        invalidatedFiles: <String>[],
+        invalidatedFiles: <Uri>[],
       );
       vmService.expectMessages(<String>[
         'writeFile test lib/foo.txt.dill',

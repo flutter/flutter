@@ -41,8 +41,8 @@ class. For example:
 
 ```dart
 Widget build(BuildContext context) {
-  return new FlatButton(
-    child: new Text(
+  return FlatButton(
+    child: Text(
       MaterialLocalizations.of(context).cancelButtonLabel,
     ),
   );

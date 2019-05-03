@@ -21,7 +21,8 @@ class ClampedSimulation extends Simulation {
   ///
   /// The named arguments specify the ranges for the clamping behavior, as
   /// applied to [x] and [dx].
-  ClampedSimulation(this.simulation, {
+  ClampedSimulation(
+    this.simulation, {
     this.xMin = double.negativeInfinity,
     this.xMax = double.infinity,
     this.dxMin = double.negativeInfinity,

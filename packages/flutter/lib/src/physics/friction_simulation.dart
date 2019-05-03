@@ -18,7 +18,10 @@ class FrictionSimulation extends Simulation {
   /// drag coefficient, a unitless value; the initial position, in the same
   /// length units as used for [x]; and the initial velocity, in the same
   /// velocity units as used for [dx].
-  FrictionSimulation(double drag, double position, double velocity, {
+  FrictionSimulation(
+    double drag,
+    double position,
+    double velocity, {
     Tolerance tolerance = Tolerance.defaultTolerance,
   }) : _drag = drag,
        _dragLog = math.log(drag),

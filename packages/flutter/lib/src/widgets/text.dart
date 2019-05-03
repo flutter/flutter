@@ -224,7 +224,8 @@ class Text extends StatelessWidget {
   /// closest enclosing [DefaultTextStyle].
   ///
   /// The [data] parameter must not be null.
-  const Text(this.data, {
+  const Text(
+    this.data, {
     Key key,
     this.style,
     this.strutStyle,
@@ -246,7 +247,8 @@ class Text extends StatelessWidget {
   /// Creates a text widget with a [TextSpan].
   ///
   /// The [textSpan] parameter must not be null.
-  const Text.rich(this.textSpan, {
+  const Text.rich(
+    this.textSpan, {
     Key key,
     this.style,
     this.strutStyle,

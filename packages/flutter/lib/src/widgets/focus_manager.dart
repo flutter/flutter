@@ -153,7 +153,7 @@ class FocusScopeNode extends Object with DiagnosticableTreeMixin {
   List<FocusScopeNode> _getFocusPath() {
     final List<FocusScopeNode> nodes = <FocusScopeNode>[this];
     FocusScopeNode node = _parent;
-    while(node != null && node != _manager?.rootScope) {
+    while (node != null && node != _manager?.rootScope) {
       nodes.add(node);
       node = node._parent;
     }

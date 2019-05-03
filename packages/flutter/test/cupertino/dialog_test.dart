@@ -847,15 +847,11 @@ void main() {
     // Enter animation.
     await tester.pump();
     Transform transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.2, 0.01));
+    expect(transform.transform[0], closeTo(1.3, 0.01));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.182, 0.001));
-
-    await tester.pump(const Duration(milliseconds: 50));
-    transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.108, 0.001));
+    expect(transform.transform[0], closeTo(1.145, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
@@ -863,11 +859,15 @@ void main() {
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
-    expect(transform.transform[0], closeTo(1.015, 0.001));
+    expect(transform.transform[0], closeTo(1.013, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
     expect(transform.transform[0], closeTo(1.003, 0.001));
+
+    await tester.pump(const Duration(milliseconds: 50));
+    transform = tester.widget(find.byType(Transform));
+    expect(transform.transform[0], closeTo(1.000, 0.001));
 
     await tester.pump(const Duration(milliseconds: 50));
     transform = tester.widget(find.byType(Transform));
@@ -951,23 +951,23 @@ void main() {
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.358, 0.001));
+    expect(transition.opacity.value, closeTo(0.500, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.231, 0.001));
+    expect(transition.opacity.value, closeTo(0.332, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.128, 0.001));
+    expect(transition.opacity.value, closeTo(0.188, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.056, 0.001));
+    expect(transition.opacity.value, closeTo(0.081, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
-    expect(transition.opacity.value, closeTo(0.013, 0.001));
+    expect(transition.opacity.value, closeTo(0.019, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
     transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);

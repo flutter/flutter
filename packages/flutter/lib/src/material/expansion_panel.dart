@@ -203,7 +203,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             newChild.value == widget.initialOpenPanelValue)
           _currentOpenPanel = newChild;
       }
-    } else if(oldWidget._allowOnlyOnePanelOpen) {
+    } else if (oldWidget._allowOnlyOnePanelOpen) {
       _currentOpenPanel = null;
     }
   }

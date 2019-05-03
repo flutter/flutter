@@ -57,9 +57,10 @@ class SectorDimensions {
   const SectorDimensions({ this.deltaRadius = 0.0, this.deltaTheta = 0.0 });
 
   factory SectorDimensions.withConstraints(
-    SectorConstraints constraints,
-    { double deltaRadius = 0.0, double deltaTheta = 0.0, }
-  ) {
+    SectorConstraints constraints, {
+    double deltaRadius = 0.0,
+    double deltaTheta = 0.0,
+  }) {
     return SectorDimensions(
       deltaRadius: constraints.constrainDeltaRadius(deltaRadius),
       deltaTheta: constraints.constrainDeltaTheta(deltaTheta),
@@ -440,8 +441,8 @@ class RenderSectorSlice extends RenderSectorWithChildren {
 
 class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChildMixin<RenderSector> {
 
-  RenderBoxToRenderSectorAdapter({ double innerRadius = 0.0, RenderSector child }) :
-    _innerRadius = innerRadius {
+  RenderBoxToRenderSectorAdapter({ double innerRadius = 0.0, RenderSector child })
+    : _innerRadius = innerRadius {
     this.child = child;
   }
 
@@ -554,7 +555,8 @@ class RenderBoxToRenderSectorAdapter extends RenderBox with RenderObjectWithChil
 }
 
 class RenderSolidColor extends RenderDecoratedSector {
-  RenderSolidColor(this.backgroundColor, {
+  RenderSolidColor(
+    this.backgroundColor, {
     this.desiredDeltaRadius = double.infinity,
     this.desiredDeltaTheta = kTwoPi,
   }) : super(BoxDecoration(color: backgroundColor));

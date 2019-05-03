@@ -140,7 +140,7 @@ abstract class BindingBase {
       registerServiceExtension(
         name: 'saveCompilationTrace',
         callback: (Map<String, String> parameters) async {
-          return <String, dynamic> {
+          return <String, dynamic>{
             'value': ui.saveCompilationTrace(),
           };
         },
@@ -323,7 +323,7 @@ abstract class BindingBase {
           await setter(parameters['enabled'] == 'true');
           _postExtensionStateChangedEvent(name, await getter() ? 'true' : 'false');
         }
-        return <String, dynamic>{ 'enabled': await getter() ? 'true' : 'false' };
+        return <String, dynamic>{'enabled': await getter() ? 'true' : 'false'};
       },
     );
   }
@@ -357,7 +357,7 @@ abstract class BindingBase {
           await setter(double.parse(parameters[name]));
           _postExtensionStateChangedEvent(name, (await getter()).toString());
         }
-        return <String, dynamic>{ name: (await getter()).toString() };
+        return <String, dynamic>{name: (await getter()).toString()};
       },
     );
   }
@@ -419,7 +419,7 @@ abstract class BindingBase {
           await setter(parameters['value']);
           _postExtensionStateChangedEvent(name, await getter());
         }
-        return <String, dynamic>{ 'value': await getter() };
+        return <String, dynamic>{'value': await getter()};
       },
     );
   }

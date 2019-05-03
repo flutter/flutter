@@ -18,9 +18,9 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../codegen.dart';
-import '../dart/package_map.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -48,7 +48,7 @@ class BuildRunner extends CodeGenerator {
 
     // Check if contents of builders changed. If so, invalidate build script
     // and regnerate.
-    final YamlMap builders = await flutterProject.builders;
+    final YamlMap builders = flutterProject.builders;
     final List<int> appliedBuilderDigest = _produceScriptId(builders);
     if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
       final List<int> previousAppliedBuilderDigest = scriptIdFile.readAsBytesSync();
@@ -79,7 +79,7 @@ class BuildRunner extends CodeGenerator {
 
       stringBuffer.writeln('name: flutter_tool');
       stringBuffer.writeln('dependencies:');
-      final YamlMap builders = await flutterProject.builders;
+      final YamlMap builders = flutterProject.builders;
       if (builders != null) {
         for (String name in builders.keys) {
           final Object node = builders[name];
@@ -118,7 +118,8 @@ class BuildRunner extends CodeGenerator {
   }
 
   @override
-  Future<CodegenDaemon> daemon(FlutterProject flutterProject, {
+  Future<CodegenDaemon> daemon(
+    FlutterProject flutterProject, {
     String mainPath,
     bool linkPlatformKernelIn = false,
     bool targetProductVm = false,
@@ -126,7 +127,6 @@ class BuildRunner extends CodeGenerator {
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
     await generateBuildScript(flutterProject);
-    _generatePackages(flutterProject);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final File buildSnapshot = flutterProject
         .dartTool
@@ -147,6 +147,7 @@ class BuildRunner extends CodeGenerator {
         buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
+         '--delete-conflicting-outputs'
       ];
       buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command, logHandler: (ServerLog log) => printTrace(log.toString()));
     } finally {
@@ -156,18 +157,6 @@ class BuildRunner extends CodeGenerator {
       builder.target = flutterProject.manifest.appName;
     }));
     return _BuildRunnerCodegenDaemon(buildDaemonClient);
-  }
-
-  // Create generated packages file which adds a multi-root scheme to the user's
-  // project directory. Currently we only replace the root package with a multiroot
-  // scheme. To support codegen on arbitrary packages we would need to do
-  // this for each dependency.
-  void _generatePackages(FlutterProject flutterProject) {
-    final String oldPackagesContents = fs.file(PackageMap.globalPackagesPath).readAsStringSync();
-    final String appName = flutterProject.manifest.appName;
-    final String newPackagesContents = oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$kMultiRootScheme:/');
-    final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
-    fs.file(generatedPackagesPath).writeAsStringSync(newPackagesContents);
   }
 }
 
@@ -204,10 +193,12 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
 // Sorts the builders by name and produces a hashcode of the resulting iterable.
 List<int> _produceScriptId(YamlMap builders) {
   if (builders == null || builders.isEmpty) {
-    return md5.convert(<int>[]).bytes;
+    return md5.convert(platform.version.codeUnits).bytes;
   }
   final List<String> orderedBuilders = builders.keys
     .cast<String>()
     .toList()..sort();
-  return md5.convert(orderedBuilders.join('').codeUnits).bytes;
+  return md5.convert(orderedBuilders
+    .followedBy(<String>[platform.version])
+    .join('').codeUnits).bytes;
 }

@@ -146,7 +146,7 @@ void main() {
       expect(testLogger.statusText, contains('iPhone Developer: Profile 1 (1111AAAA11)'));
       expect(testLogger.errorText, isEmpty);
       verify(mockStdIn.write('This is a mock certificate'));
-      expect(signingConfigs, <String, String> {'DEVELOPMENT_TEAM': '3333CCCC33'});
+      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '3333CCCC33'});
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -217,7 +217,7 @@ void main() {
       );
       expect(testLogger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
-      expect(signingConfigs, <String, String> {'DEVELOPMENT_TEAM':'4444DDDD44'});
+      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
 
       verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
     },
@@ -288,7 +288,7 @@ void main() {
       );
       expect(testLogger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
-      expect(signingConfigs, <String, String> {'DEVELOPMENT_TEAM':'5555EEEE55'});
+      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '5555EEEE55'});
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -360,7 +360,7 @@ void main() {
       );
       expect(testLogger.errorText, isEmpty);
       verify(mockOpenSslStdIn.write('This is a mock certificate'));
-      expect(signingConfigs, <String, String> {'DEVELOPMENT_TEAM':'4444DDDD44'});
+      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
     },
     overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -432,7 +432,7 @@ void main() {
         testLogger.statusText,
         contains('Certificate choice "iPhone Developer: Profile 3 (3333CCCC33)"'),
       );
-      expect(signingConfigs, <String, String> {'DEVELOPMENT_TEAM':'4444DDDD44'});
+      expect(signingConfigs, <String, String>{'DEVELOPMENT_TEAM': '4444DDDD44'});
       verify(config.setValue('ios-signing-cert', 'iPhone Developer: Profile 3 (3333CCCC33)'));
     },
     overrides: <Type, Generator>{

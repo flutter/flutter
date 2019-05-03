@@ -121,7 +121,7 @@ function upgrade_flutter () {
 
     retry_upgrade
 
-    "$DART" --snapshot="$SNAPSHOT_PATH" --snapshot-kind=app-jit --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH" training
+    "$DART" $FLUTTER_TOOL_ARGS --snapshot="$SNAPSHOT_PATH" --snapshot-kind=app-jit --packages="$FLUTTER_TOOLS_DIR/.packages" "$SCRIPT_PATH" training
     echo "$revision" > "$STAMP_PATH"
   fi
   # The exit here is duplicitous since the function is run in a subshell,

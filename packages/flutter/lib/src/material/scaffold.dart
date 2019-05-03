@@ -291,9 +291,9 @@ class _BodyBoxConstraints extends BoxConstraints {
     double minHeight = 0.0,
     double maxHeight = double.infinity,
     @required this.bottomWidgetsHeight,
-  }) :  assert(bottomWidgetsHeight != null),
-        assert(bottomWidgetsHeight >= 0),
-        super(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight);
+  }) : assert(bottomWidgetsHeight != null),
+       assert(bottomWidgetsHeight >= 0),
+       super(minWidth: minWidth, maxWidth: maxWidth, minHeight: minHeight, maxHeight: maxHeight);
 
   final double bottomWidgetsHeight;
 
@@ -581,8 +581,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
       // If we start out with a child, have the child appear fully visible instead
       // of animating in.
       _currentController.value = 1.0;
-    }
-    else {
+    } else {
       // If we start without a child we update the geometry object with a
       // floating action button scale of 0, as it is not showing on the screen.
       _updateGeometryScale(0.0);

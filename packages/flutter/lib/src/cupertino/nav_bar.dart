@@ -2001,8 +2001,7 @@ class _NavigationBarComponentsTransition {
     // text.
     if (bottomLargeTitle != null &&
         topBackLabel != null &&
-        bottomLargeExpanded
-    ) {
+        bottomLargeExpanded) {
       return PositionedTransition(
         rect: animation.drive(slideFromLeadingEdge(
           fromKey: bottomComponents.largeTitleKey,

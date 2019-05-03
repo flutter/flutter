@@ -17,6 +17,7 @@ import 'chip_theme.dart';
 import 'color_scheme.dart';
 import 'colors.dart';
 import 'dialog_theme.dart';
+import 'floating_action_button_theme.dart';
 import 'ink_splash.dart';
 import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
@@ -159,6 +160,7 @@ class ThemeData extends Diagnosticable {
     BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
+    FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
   }) {
@@ -257,6 +259,7 @@ class ThemeData extends Diagnosticable {
       labelStyle: textTheme.body2,
     );
     dialogTheme ??= const DialogTheme();
+    floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
 
     return ThemeData.raw(
@@ -308,6 +311,7 @@ class ThemeData extends Diagnosticable {
       bottomAppBarTheme: bottomAppBarTheme,
       colorScheme: colorScheme,
       dialogTheme: dialogTheme,
+      floatingActionButtonTheme: floatingActionButtonTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
     );
@@ -372,6 +376,7 @@ class ThemeData extends Diagnosticable {
     @required this.bottomAppBarTheme,
     @required this.colorScheme,
     @required this.dialogTheme,
+    @required this.floatingActionButtonTheme,
     @required this.typography,
     @required this.cupertinoOverrideTheme,
   }) : assert(brightness != null),
@@ -421,6 +426,7 @@ class ThemeData extends Diagnosticable {
        assert(bottomAppBarTheme != null),
        assert(colorScheme != null),
        assert(dialogTheme != null),
+       assert(floatingActionButtonTheme != null),
        assert(typography != null);
 
   // Warning: make sure these properties are in the exact same order as in
@@ -662,6 +668,10 @@ class ThemeData extends Diagnosticable {
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
 
+  /// A theme for customizing the shape, elevation, and color of a
+  /// [FloatingActionButton].
+  final FloatingActionButtonThemeData floatingActionButtonTheme;
+
   /// The color and geometry [TextTheme] values used to configure [textTheme],
   /// [primaryTextTheme], and [accentTextTheme].
   final Typography typography;
@@ -728,6 +738,7 @@ class ThemeData extends Diagnosticable {
     BottomAppBarTheme bottomAppBarTheme,
     ColorScheme colorScheme,
     DialogTheme dialogTheme,
+    FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
   }) {
@@ -781,6 +792,7 @@ class ThemeData extends Diagnosticable {
       bottomAppBarTheme: bottomAppBarTheme ?? this.bottomAppBarTheme,
       colorScheme: colorScheme ?? this.colorScheme,
       dialogTheme: dialogTheme ?? this.dialogTheme,
+      floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
     );
@@ -912,6 +924,7 @@ class ThemeData extends Diagnosticable {
       bottomAppBarTheme: BottomAppBarTheme.lerp(a.bottomAppBarTheme, b.bottomAppBarTheme, t),
       colorScheme: ColorScheme.lerp(a.colorScheme, b.colorScheme, t),
       dialogTheme: DialogTheme.lerp(a.dialogTheme, b.dialogTheme, t),
+      floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
     );
@@ -973,6 +986,7 @@ class ThemeData extends Diagnosticable {
            (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
            (otherData.colorScheme == colorScheme) &&
            (otherData.dialogTheme == dialogTheme) &&
+           (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
            (otherData.typography == typography) &&
            (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme);
   }
@@ -1034,6 +1048,7 @@ class ThemeData extends Diagnosticable {
           bottomAppBarTheme,
           colorScheme,
           dialogTheme,
+          floatingActionButtonTheme,
           typography,
           cupertinoOverrideTheme,
         ),
@@ -1090,6 +1105,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
     properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));
+    properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
   }
