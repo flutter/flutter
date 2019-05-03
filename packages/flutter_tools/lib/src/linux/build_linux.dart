@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -15,22 +16,26 @@ import '../project.dart';
 
 /// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
-  final Directory artifactDirectory = fs.directory(artifacts.getEngineArtifactsPath(TargetPlatform.linux_x64));
   final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
-  final String config = '''
+  final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.
-export FLTUTER_ROOT=${Cache.flutterRoot}
-export FLUTTER_ARTIFACT_DIR=$artifactDirectory
+export FLUTTER_ROOT=${Cache.flutterRoot}
 export BUILD=$buildFlag
 export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
-''';
+''');
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    buffer.writeln('export FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    buffer.writeln('export LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
+  }
 
   /// Cache flutter configuration files in the linux directory.
   linuxProject.cacheDirectory.childFile('generated_config')
     ..createSync(recursive: true)
-    ..writeAsStringSync(config);
+    ..writeAsStringSync(buffer.toString());
 
   final Process process = await processManager.start(<String>[
     'make',
