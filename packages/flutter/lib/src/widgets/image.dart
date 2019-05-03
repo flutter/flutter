@@ -54,6 +54,14 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
+ImageProvider<dynamic> _resizeIfNeeded(bool resizeToFit, ImageProvider<dynamic> provider) {
+  if (resizeToFit) {
+    return ResizedImage(provider);
+  } else {
+    return provider;
+  }
+}
+
 /// Prefetches an image into the image cache.
 ///
 /// Returns a [Future] that will complete when the first image yielded by the
@@ -103,21 +111,6 @@ Future<void> precacheImage(
   }
   stream.addListener(listener, onError: errorListener);
   return completer.future;
-}
-
-ImageProvider<dynamic> _resizeIfNeeded(
-  bool resizeToFit,
-  String src, {
-  double scale,
-  Map<String, String> headers
-}) {
-  final ImageProvider<dynamic> networkImage =
-      NetworkImage(src, scale: scale, headers: headers);
-  if (resizeToFit) {
-    return ResizedImage(networkImage);
-  } else {
-    return networkImage;
-  }
 }
 
 /// A widget that displays an image.
@@ -238,12 +231,7 @@ class Image extends StatefulWidget {
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
     bool resizeToFit = false,
-  }) : image = _resizeIfNeeded(
-        resizeToFit,
-        src,
-        scale: scale,
-        headers: headers,
-       ),
+  }) : image = _resizeIfNeeded(resizeToFit, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -284,7 +272,8 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = FileImage(file, scale: scale),
+    bool resizeToFit = false,
+  }) : image = _resizeIfNeeded(resizeToFit, FileImage(file, scale: scale)),
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
@@ -475,7 +464,8 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = MemoryImage(bytes, scale: scale),
+    bool resizeToFit = false,
+  }) : image = _resizeIfNeeded(resizeToFit, MemoryImage(bytes, scale: scale)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),

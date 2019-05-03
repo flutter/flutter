@@ -4,6 +4,7 @@
 
 import 'dart:typed_data' show Uint8List;
 import 'dart:ui' as ui show instantiateImageCodec, kDoNotResizeDimension, Codec, Size;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
