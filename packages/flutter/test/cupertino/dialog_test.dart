@@ -139,7 +139,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.bold));
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
   testWidgets('Dialog destructive action style', (WidgetTester tester) async {
