@@ -13,8 +13,11 @@ import android.content.res.AssetManager;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
+
+import io.flutter.BuildConfig;
 import io.flutter.util.BSDiff;
 import io.flutter.util.PathUtils;
+
 import org.json.JSONObject;
 
 import java.io.*;
@@ -95,7 +98,9 @@ class ResourceExtractor {
     }
 
     ResourceExtractor start() {
-        assert mExtractTask == null;
+        if (BuildConfig.DEBUG && mExtractTask != null) {
+            throw new AssertionError("Attempted to start resource extraction while another extraction was in progress.");
+        }
         mExtractTask = new ExtractTask();
         mExtractTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         return this;

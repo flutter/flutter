@@ -7,6 +7,7 @@ package io.flutter.plugin.common;
 import android.util.Log;
 import java.nio.ByteBuffer;
 
+import io.flutter.BuildConfig;
 import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
 import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 
@@ -39,9 +40,17 @@ public final class BasicMessageChannel<T> {
      * @param codec a {@link MessageCodec}.
      */
     public BasicMessageChannel(BinaryMessenger messenger, String name, MessageCodec<T> codec) {
-        assert messenger != null;
-        assert name != null;
-        assert codec != null;
+        if (BuildConfig.DEBUG) {
+            if (messenger == null) {
+                throw new AssertionError("Parameter messenger must not be null.");
+            }
+            if (name == null) {
+                throw new AssertionError("Parameter name must not be null.");
+            }
+            if (codec == null) {
+                throw new AssertionError("Parameter codec must not be null.");
+            }
+        }
         this.messenger = messenger;
         this.name = name;
         this.codec = codec;

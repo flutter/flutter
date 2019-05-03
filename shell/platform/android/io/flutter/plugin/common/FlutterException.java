@@ -4,6 +4,8 @@
 
 package io.flutter.plugin.common;
 
+import io.flutter.BuildConfig;
+
 /**
  * Thrown to indicate that a Flutter method invocation failed on the Flutter side.
  */
@@ -13,7 +15,9 @@ public class FlutterException extends RuntimeException {
 
   FlutterException(String code, String message, Object details) {
     super(message);
-    assert code != null;
+    if (BuildConfig.DEBUG && code == null) {
+      throw new AssertionError("Parameter code must not be null.");
+    }
     this.code = code;
     this.details = details;
   }

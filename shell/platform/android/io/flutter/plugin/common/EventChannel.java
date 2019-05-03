@@ -5,6 +5,8 @@
 package io.flutter.plugin.common;
 
 import android.util.Log;
+
+import io.flutter.BuildConfig;
 import io.flutter.plugin.common.BinaryMessenger.BinaryMessageHandler;
 import io.flutter.plugin.common.BinaryMessenger.BinaryReply;
 
@@ -55,9 +57,17 @@ public final class EventChannel {
      * @param codec a {@link MessageCodec}.
      */
     public EventChannel(BinaryMessenger messenger, String name, MethodCodec codec) {
-        assert messenger != null;
-        assert name != null;
-        assert codec != null;
+        if (BuildConfig.DEBUG) {
+            if (messenger == null) {
+                throw new AssertionError("Parameter messenger must not be null.");
+            }
+            if (name == null) {
+                throw new AssertionError("Parameter name must not be null.");
+            }
+            if (codec == null) {
+                throw new AssertionError("Parameter codec must not be null.");
+            }
+        }
         this.messenger = messenger;
         this.name = name;
         this.codec = codec;

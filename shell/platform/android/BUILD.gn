@@ -89,6 +89,23 @@ shared_library("flutter_shell_native") {
   ldflags = [ "-Wl,--version-script=" + rebase_path("android_exports.lst") ]
 }
 
+action("gen_android_build_config_java") {
+  script = "$flutter_root/tools/gen_android_buildconfig.py"
+
+  build_config_java = "$target_gen_dir/io/flutter/BuildConfig.java"
+
+  outputs = [
+    build_config_java,
+  ]
+
+  args = [
+    "--out",
+    rebase_path(build_config_java),
+    "--runtime-mode",
+    flutter_runtime_mode,
+  ]
+}
+
 action("flutter_shell_java") {
   script = "//build/android/gyp/javac.py"
   depfile = "$target_gen_dir/$target_name.d"
@@ -173,6 +190,8 @@ action("flutter_shell_java") {
     "io/flutter/view/VsyncWaiter.java",
   ]
 
+  sources += get_target_outputs(":gen_android_build_config_java")
+
   sources += [ "$flutter_root/third_party/bsdiff/io/flutter/util/BSDiff.java" ]
 
   android_support_jars = [
@@ -208,6 +227,10 @@ action("flutter_shell_java") {
   ]
 
   args += rebase_path(sources, root_build_dir)
+
+  deps = [
+    ":gen_android_build_config_java",
+  ]
 }
 
 action("icudtl_object") {
