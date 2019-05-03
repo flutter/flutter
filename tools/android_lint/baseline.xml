@@ -101,39 +101,6 @@
     </issue>
 
     <issue
-        id="StaticFieldLeak"
-        message="Do not place Android context classes in static fields (static reference to `ResourceExtractor` which has field `mContext` pointing to `Context`); this is a memory leak (and also breaks Instant Run)"
-        errorLine1="    private static ResourceExtractor sResourceExtractor;"
-        errorLine2="            ~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/FlutterMain.java"
-            line="77"
-            column="13"/>
-    </issue>
-
-    <issue
-        id="StaticFieldLeak"
-        message="This AsyncTask class should be static or leaks might occur (io.flutter.view.ResourceCleaner.CleanTask)"
-        errorLine1="    private class CleanTask extends AsyncTask&lt;Void, Void, Void> {"
-        errorLine2="                  ~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceCleaner.java"
-            line="24"
-            column="19"/>
-    </issue>
-
-    <issue
-        id="StaticFieldLeak"
-        message="This AsyncTask class should be static or leaks might occur (io.flutter.view.ResourceExtractor.ExtractTask)"
-        errorLine1="    private class ExtractTask extends AsyncTask&lt;Void, Void, Void> {"
-        errorLine2="                  ~~~~~~~~~~~">
-        <location
-            file="../../../flutter/shell/platform/android/io/flutter/view/ResourceExtractor.java"
-            line="52"
-            column="19"/>
-    </issue>
-
-    <issue
         id="UseSparseArrays"
         message="Use `new SparseArray&lt;SemanticsNode>(...)` instead for better performance"
         errorLine1="    private final Map&lt;Integer, SemanticsNode> flutterSemanticsTree = new HashMap&lt;>();"

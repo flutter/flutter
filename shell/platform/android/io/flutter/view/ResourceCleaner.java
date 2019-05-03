@@ -21,7 +21,7 @@ class ResourceCleaner {
     private static final String TAG = "ResourceCleaner";
     private static final long DELAY_MS = 5000;
 
-    private class CleanTask extends AsyncTask<Void, Void, Void> {
+    private static class CleanTask extends AsyncTask<Void, Void, Void> {
         private final File[] mFilesToDelete;
 
         CleanTask(File[] filesToDelete) {

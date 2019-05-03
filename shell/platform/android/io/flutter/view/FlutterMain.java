@@ -299,7 +299,11 @@ public class FlutterMain {
             Log.e(TAG, "Unable to read application info", e);
         }
 
-        sResourceExtractor = new ResourceExtractor(context);
+        final String dataDirPath = PathUtils.getDataDirectory(context);
+        final String packageName = context.getPackageName();
+        final PackageManager packageManager = context.getPackageManager();
+        final AssetManager assetManager = context.getResources().getAssets();
+        sResourceExtractor = new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager);
 
         sResourceExtractor
             .addResource(fromFlutterAssets(sAotVmSnapshotData))
