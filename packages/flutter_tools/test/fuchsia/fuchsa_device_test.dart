@@ -10,7 +10,9 @@ import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
+import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -58,33 +60,98 @@ void main() {
     });
   });
 
-  group('displays friendly error when', () {
-    final MockProcessManager mockProcessManager = MockProcessManager();
-    final MockProcessResult mockProcessResult = MockProcessResult();
-    final MockFile mockFile = MockFile();
-    when(mockProcessManager.run(
-      any,
-      environment: anyNamed('environment'),
-      workingDirectory: anyNamed('workingDirectory'),
-    )).thenAnswer((Invocation invocation) =>
-        Future<ProcessResult>.value(mockProcessResult));
-    when(mockProcessResult.exitCode).thenReturn(1);
-    when<String>(mockProcessResult.stdout).thenReturn('');
-    when<String>(mockProcessResult.stderr).thenReturn('');
-    when(mockFile.absolute).thenReturn(mockFile);
-    when(mockFile.path).thenReturn('');
+  group('Fuchsia device artifact overrides', () {
+    MockFile devFinder;
+    MockFile sshConfig;
+    MockFile platformDill;
+    MockFile patchedSdk;
 
-    final MockProcessManager emptyStdoutProcessManager = MockProcessManager();
-    final MockProcessResult emptyStdoutProcessResult = MockProcessResult();
-    when(emptyStdoutProcessManager.run(
-      any,
-      environment: anyNamed('environment'),
-      workingDirectory: anyNamed('workingDirectory'),
-    )).thenAnswer((Invocation invocation) =>
-        Future<ProcessResult>.value(emptyStdoutProcessResult));
-    when(emptyStdoutProcessResult.exitCode).thenReturn(0);
-    when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
-    when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
+    setUp(() {
+      devFinder = MockFile();
+      sshConfig = MockFile();
+      platformDill = MockFile();
+      patchedSdk = MockFile();
+      when(devFinder.absolute).thenReturn(devFinder);
+      when(sshConfig.absolute).thenReturn(sshConfig);
+      when(platformDill.absolute).thenReturn(platformDill);
+      when(patchedSdk.absolute).thenReturn(patchedSdk);
+    });
+
+    testUsingContext('exist', () async {
+      final FuchsiaDevice device = FuchsiaDevice('fuchsia-device');
+      expect(device.artifactOverrides, isNotNull);
+      expect(device.artifactOverrides.platformKernelDill, equals(platformDill));
+      expect(device.artifactOverrides.flutterPatchedSdk, equals(patchedSdk));
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(
+            sshConfig: sshConfig,
+            devFinder: devFinder,
+            platformKernelDill: platformDill,
+            flutterPatchedSdk: patchedSdk,
+          ),
+    });
+
+    testUsingContext('are used', () async {
+      final FuchsiaDevice device = FuchsiaDevice('fuchsia-device');
+      expect(device.artifactOverrides, isNotNull);
+      expect(device.artifactOverrides.platformKernelDill, equals(platformDill));
+      expect(device.artifactOverrides.flutterPatchedSdk, equals(patchedSdk));
+      await context.run<void>(
+        body: () {
+          expect(Artifacts.instance.getArtifactPath(Artifact.platformKernelDill),
+                 equals(platformDill.path));
+          expect(Artifacts.instance.getArtifactPath(Artifact.flutterPatchedSdkPath),
+                 equals(patchedSdk.path));
+        },
+        overrides: <Type, Generator>{
+          Artifacts: () => device.artifactOverrides,
+        },
+      );
+    }, overrides: <Type, Generator>{
+      FuchsiaArtifacts: () => FuchsiaArtifacts(
+            sshConfig: sshConfig,
+            devFinder: devFinder,
+            platformKernelDill: platformDill,
+            flutterPatchedSdk: patchedSdk,
+          ),
+    });
+  });
+
+  group('displays friendly error when', () {
+    MockProcessManager mockProcessManager;
+    MockProcessResult mockProcessResult;
+    MockFile mockFile;
+    MockProcessManager emptyStdoutProcessManager;
+    MockProcessResult emptyStdoutProcessResult;
+
+    setUp(() {
+      mockProcessManager = MockProcessManager();
+      mockProcessResult = MockProcessResult();
+      mockFile = MockFile();
+      when(mockProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((Invocation invocation) =>
+          Future<ProcessResult>.value(mockProcessResult));
+      when(mockProcessResult.exitCode).thenReturn(1);
+      when<String>(mockProcessResult.stdout).thenReturn('');
+      when<String>(mockProcessResult.stderr).thenReturn('');
+      when(mockFile.absolute).thenReturn(mockFile);
+      when(mockFile.path).thenReturn('');
+
+      emptyStdoutProcessManager = MockProcessManager();
+      emptyStdoutProcessResult = MockProcessResult();
+      when(emptyStdoutProcessManager.run(
+        any,
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      )).thenAnswer((Invocation invocation) =>
+          Future<ProcessResult>.value(emptyStdoutProcessResult));
+      when(emptyStdoutProcessResult.exitCode).thenReturn(0);
+      when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
+      when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
+    });
 
     testUsingContext('No vmservices found', () async {
       final FuchsiaDevice device = FuchsiaDevice('id');
@@ -116,26 +183,29 @@ void main() {
 [2018-11-09 01:30:12][52580][52983][log] INFO: example_app.cmx(flutter): Did thing this time
 
   ''';
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final MockProcess mockProcess = MockProcess();
+      MockProcessManager mockProcessManager;
+      MockProcess mockProcess;
       Completer<int> exitCode;
       StreamController<List<int>> stdout;
       StreamController<List<int>> stderr;
-      when(mockProcessManager.start(any))
-          .thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
-      when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
-      when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
-      when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
-
-      final MockFile devFinder = MockFile();
-      final MockFile sshConfig = MockFile();
-      when(devFinder.absolute).thenReturn(devFinder);
-      when(sshConfig.absolute).thenReturn(sshConfig);
+      MockFile devFinder;
+      MockFile sshConfig;
 
       setUp(() {
+        mockProcessManager = MockProcessManager();
+        mockProcess = MockProcess();
         stdout = StreamController<List<int>>(sync: true);
         stderr = StreamController<List<int>>(sync: true);
         exitCode = Completer<int>();
+        when(mockProcessManager.start(any))
+            .thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
+        when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
+        when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
+        when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
+        devFinder = MockFile();
+        sshConfig = MockFile();
+        when(devFinder.absolute).thenReturn(devFinder);
+        when(sshConfig.absolute).thenReturn(sshConfig);
       });
 
       tearDown(() {
