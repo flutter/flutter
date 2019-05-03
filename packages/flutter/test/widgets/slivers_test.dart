@@ -206,7 +206,8 @@ void main() {
       addRepaintBoundaries: false,
       addSemanticIndexes: false,
     );
-    expect(builderThrowsDelegate.build(null, 0), errorText);
+    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0);
+    expect(wrapped.child, errorText);
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;
   });

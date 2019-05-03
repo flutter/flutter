@@ -451,6 +451,41 @@ void main() {
     expect(count, 2);
   });
 
+  testWidgets('GlobalKey - dettach and re-attach child to different parents', (WidgetTester tester) async {
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Container(
+          height: 100,
+          child: CustomScrollView(
+            controller: ScrollController(),
+            slivers: <Widget>[
+              SliverList(
+                delegate: SliverChildListDelegate(<Widget>[
+                  Text('child', key: GlobalKey()),
+                ]),
+              )
+            ],
+          ),
+        ),
+      ),
+    ));
+    final SliverMultiBoxAdaptorElement element = tester.element(find.byType(SliverList));
+    Element childElement;
+    // Removing and recreating child with same Global Key should not trigger
+    // duplicate key error.
+    element.visitChildren((Element e) {
+      childElement = e;
+    });
+    element.removeChild(childElement.renderObject);
+    element.createChild(0, after: null);
+    element.visitChildren((Element e) {
+      childElement = e;
+    });
+    element.removeChild(childElement.renderObject);
+    element.createChild(0, after: null);
+  });
+
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {
     StateSetter setState;
 
