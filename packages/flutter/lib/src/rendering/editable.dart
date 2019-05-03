@@ -96,6 +96,25 @@ class TextSelectionPoint {
   }
 }
 
+@immutable
+class ContextMenuDetails {
+  ContextMenuDetails({
+    @required this.withinSelection,
+    @required this.location,
+  }) : assert(withinSelection != null);
+
+  final bool withinSelection;
+
+  final Offset location;
+
+  @override
+  String toString() {
+    return 'ContextDetails(location: ${location.toString()} withinSelection: $withinSelection)';
+  }
+}
+
+typedef ContextMenuHandler = void Function(ContextMenuDetails details);
+
 /// Displays some text in a scrollable container with a potentially blinking
 /// cursor and with gesture recognizers.
 ///
@@ -153,6 +172,7 @@ class RenderEditable extends RenderBox {
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
+    this.onContextMenu,
     this.ignorePointer = false,
     bool obscureText = false,
     Locale locale,
@@ -215,6 +235,7 @@ class RenderEditable extends RenderBox {
     this.hasFocus = hasFocus ?? false;
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = _handleTapDown
+      ..onSecondaryTapDown = _handleSecondaryTapDown
       ..onTap = _handleTap;
     _longPress = LongPressGestureRecognizer(debugOwner: this)
       ..onLongPress = _handleLongPress;
@@ -230,6 +251,8 @@ class RenderEditable extends RenderBox {
 
   /// Called during the paint phase when the caret location changes.
   CaretChangedHandler onCaretChanged;
+
+  ContextTapHandler onContextTap;
 
   /// If true [handleEvent] does nothing and it's assumed that this
   /// renderer will be notified of input gestures via [handleTapDown],
@@ -1309,6 +1332,13 @@ class RenderEditable extends RenderBox {
 
   Offset _lastTapDownPosition;
 
+  void _handleContextMenu(ContextMenuDetails details) {
+    print('CONTEXT ${details.location}');
+    if (onContextMenu != null) {
+      onContextMenu(details);
+    }
+  }
+
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
   /// callback.
@@ -1318,6 +1348,26 @@ class RenderEditable extends RenderBox {
   void handleTapDown(TapDownDetails details) {
     _lastTapDownPosition = details.globalPosition;
   }
+
+  /// If [ignorePointer] is false (the default) then this method is called by
+  /// the internal gesture recognizer's [TapGestureRecognizer.onSecondaryTapDown]
+  /// callback.
+  ///
+  /// When [ignorePointer] is true, an ancestor widget must respond to tap
+  /// down events by calling this method.
+  void handleSecondaryTapDown(TapDownDetails details) {
+    final TextPosition tapPosition = _textPainter.getPositionForOffset(
+      globalToLocal(details.globalPosition - _paintOffset)
+    );
+    if (onContextTap != null)
+      onContextTap(tapPosition);
+  }
+
+  void _handleSecondaryTapDown(TapDownDetails details) {
+    assert(!ignorePointer);
+    handleSecondaryTapDown(details);
+  }
+
   void _handleTapDown(TapDownDetails details) {
     assert(!ignorePointer);
     handleTapDown(details);
