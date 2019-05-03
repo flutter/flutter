@@ -206,12 +206,11 @@ class Image extends StatefulWidget {
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
   ///
-  /// If [resizeToFit] parameter is set to true, [width] and [height] must be
-  /// set for resizing to take effect. This parameter indicates to the engine
-  /// that this image must be resized. The image will be sized to the constraints
-  /// of the layout or [width] and [height] regardless of this parameter. This
-  /// parameter is primarily intended for use to reduce the memory usage of
-  /// [ImageCache].
+  /// If [resizeToFit] is true, it indicates to the engine that this image must
+  /// be resized. The image will be resized to the container's rendered dimensions.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of this parameter. This parameter is primarily
+  /// intended to reduce the memory usage of [ImageCache].
   Image.network(
     String src, {
     Key key,
@@ -255,6 +254,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [resizeToFit] is true, it indicates to the engine that this image must
+  /// be resized. The image will be resized to the container's rendered dimensions.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of this parameter. This parameter is primarily
+  /// intended to reduce the memory usage of [ImageCache].
   Image.file(
     File file, {
     Key key,
@@ -447,6 +452,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [resizeToFit] is true, it indicates to the engine that this image must
+  /// be resized. The image will be resized to the container's rendered dimensions.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of this parameter. This parameter is primarily
+  /// intended to reduce the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
     Key key,

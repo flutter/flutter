@@ -377,6 +377,21 @@ abstract class ImageProvider<T> {
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
+  ///
+  /// If [targetHeight] or [targetWidth] are specified, the image returned
+  /// through the [ImageStreamCompleter] will be resized. It is discouraged
+  /// to use these parameters directly as it could result in the following
+  /// scenario:
+  ///
+  ///   1. call [load] with [h1, w1].
+  ///   2. [ImageCache] will cache image with [h1, w1] dimensions.
+  ///   3. call [load] with [h2, w2], [ImageCache] could return the previously
+  ///      cached image if [obtainKey] does not account for target dimensions.
+  ///
+  /// See also:
+  ///   * [Image.network]'s [resizeToFit] parameter for how this is intended to
+  ///      be consumed.
+  ///   * [ResizedImage] for modifying the key to account for target dimensions.
   @protected
   ImageStreamCompleter load(T key, {int targetHeight, int targetWidth});
 
