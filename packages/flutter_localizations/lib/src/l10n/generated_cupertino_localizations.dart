@@ -373,6 +373,94 @@ class CupertinoLocalizationPtPt extends GlobalCupertinoLocalizations {
   String get todayLabel => r'Hoje';
 }
 
+/// The translations for Turkish (`tr`).
+class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Turkish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationTr({
+    String localeName = 'tr',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get alertDialogLabel => r'Uyarı';
+
+  @override
+  String get anteMeridiemAbbreviation => r'ÖÖ';
+
+  @override
+  String get copyButtonLabel => r'Kopyala';
+
+  @override
+  String get cutButtonLabel => r'Kes';
+
+  @override
+  String get datePickerDateOrderString => r'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
+
+  @override
+  String get datePickerHourSemanticsLabelOne => r'bir saat';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'$hour saat';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => r'bir dakika';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute dakika';
+
+  @override
+  String get pasteButtonLabel => r'Yapıştır';
+
+  @override
+  String get postMeridiemAbbreviation => r'ÖS';
+
+  @override
+  String get selectAllButtonLabel => r'Tümünü Seç';
+
+  @override
+  String get timerPickerHourLabelOne => r'saat';
+
+  @override
+  String get timerPickerHourLabelOther => r'saat';
+
+  @override
+  String get timerPickerMinuteLabelOne => r'dk.';
+
+  @override
+  String get timerPickerMinuteLabelOther => r'dk.';
+
+  @override
+  String get timerPickerSecondLabelOne => r'sn.';
+
+  @override
+  String get timerPickerSecondLabelOther => r'sn.';
+
+  @override
+  String get todayLabel => r'Bugün';
+}
+
 /// The set of supported languages, as language code strings.
 ///
 /// The [GlobalCupertinoLocalizations.delegate] can generate localizations for
@@ -389,6 +477,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
   'fr', // French
   'pt', // Portuguese
   'pt_PT', // Portuguese, as used in Portugal
+  'tr', // Turkish
 ]);
 
 /// Creates a [GlobalCupertinoLocalizations] instance for the given `locale`.
@@ -405,6 +494,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///  * `fr` - French
 ///  * `pt` - Portuguese
 ///  * `pt_PT` - Portuguese (Portugal)
+///  * `tr` - Turkish
 /// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
@@ -429,6 +519,8 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
       return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'pt_PT':
       return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'tr':
+      return CupertinoLocalizationTr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
   }
   assert(false, 'getCupertinoTranslation() called for unsupported locale "$locale"');
   return null;
