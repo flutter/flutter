@@ -1,4 +1,4 @@
-Signature: 1307f36d46669344949662968c626bd6
+Signature: 0596bbe39e5f53efb086eec8502b1865
 
 UNUSED LICENSES:
 
@@ -4203,8 +4203,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/docs/examples/Alpha_Constants_a.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/ShaperBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/ShaperBench.cpp
 FILE: ../../../third_party/skia/docs/examples/Alpha_Constants_a.cpp
 FILE: ../../../third_party/skia/docs/examples/Alpha_Constants_b.cpp
 FILE: ../../../third_party/skia/docs/examples/Alpha_Type_Opaque.cpp
