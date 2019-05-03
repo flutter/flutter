@@ -3,11 +3,9 @@
 # found in the LICENSE file.
 
 assert(is_fuchsia)
+import("//build/fuchsia/sdk.gni")
 
-group("fuchsia") {
-  deps = [
-    "fidl",
-    "pkg",
-    "sysroot",
-  ]
+fuchsia_sdk("sdk_sysroot") {
+  meta = "$fuchsia_sdk_path/meta/manifest.json"
+  enabled_parts = [ "sysroot" ]
 }

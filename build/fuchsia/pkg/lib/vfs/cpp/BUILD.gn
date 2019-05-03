@@ -2,7 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/fuchsia.gni")
+import("//build/fuchsia/sdk.gni")
 
 source_set("cpp") {
   include_dirs = [ "../../.." ]
@@ -40,7 +40,7 @@ source_set("cpp") {
   ]
 
   public_deps = [
-    "$fuchsia_sdk:fdio",
-    "$fuchsia_sdk:fuchsia.io",
+    "$fuchsia_sdk_root/fidl:fuchsia.io",
+    "$fuchsia_sdk_root/pkg:fdio",
   ]
 }
