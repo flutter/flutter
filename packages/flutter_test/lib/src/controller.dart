@@ -539,12 +539,13 @@ abstract class WidgetController {
   /// You can use [startGesture] instead if your gesture begins with a down
   /// event.
   Future<TestGesture> createGesture({int pointer, PointerDeviceKind kind = PointerDeviceKind.touch}) async {
-    return TestGesture(
+    final TestGesture gesture = TestGesture(
       hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
       kind: kind,
       pointer: pointer ?? _getNextPointer(),
     );
+    return gesture;
   }
 
   /// Creates a gesture with an initial down gesture at a particular point, and
