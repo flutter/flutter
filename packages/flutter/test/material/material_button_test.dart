@@ -21,14 +21,14 @@ void main() {
       ),
     );
 
-    // Default, not disabled
+    // Default, not disabled.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    // Highlighted (pressed)
+    // Highlighted (pressed).
     final Offset center = tester.getCenter(find.byType(MaterialButton));
     await tester.startGesture(center);
-    await tester.pump(); // start the splash and highlight animations
-    await tester.pump(const Duration(milliseconds: 800)); // wait for splash and highlight to be well under way
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
