@@ -573,124 +573,86 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-//    testWidgets('scaled for mouse hover', (WidgetTester tester) async {
-//      final List<PointerEvent> events = <PointerEvent>[];
-//      final Key key = UniqueKey();
-//
-//      const double scaleFactor = 2;
-//
-//      await tester.pumpWidget(
-//        Align(
-//          alignment: Alignment.topLeft,
-//          child: Transform(
-//            transform: Matrix4.identity()..scale(scaleFactor),
-//            child: Listener(
-//              onPointerEnter: (PointerEnterEvent event) {
-//                events.add(event);
-//              },
-//              onPointerHover: (PointerHoverEvent event) {
-//                events.add(event);
-//              },
-//              onPointerExit: (PointerExitEvent event) {
-//                events.add(event);
-//              },
-//              child: Container(
-//                key: key,
-//                color: Colors.red,
-//                height: 100,
-//                width: 100,
-//              ),
-//            ),
-//          ),
-//        ),
-//      );
-//
-//      debugDumpLayerTree();
-//
-//      final Offset center = tester.getCenter(find.byKey(key));
-//      final Offset topLeft = tester.getTopLeft(find.byKey(key));
-//      expect(center, isNot(const Offset(50, 50)));
-//
-//      final Matrix4 expectedTransform = Matrix4.identity()
-//        ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0);
-//
-//      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-//      await gesture.moveTo(center);
-//      await tester.pump();
-////      expect(events, hasLength(2));
-////      expect(events.first, isA<PointerEnterEvent>());
-////      expect(events.first.transform, expectedTransform);
-////      expect(events.first.localPosition, const Offset(50, 50));
-////      expect(events.first.position, center);
-////      expect(events.first.delta, Offset.zero);
-////      expect(events.first.localDelta, Offset.zero);
-////      expect(events.last, isA<PointerHoverEvent>());
-////      expect(events.last.transform, expectedTransform);
-////      expect(events.last.localPosition, const Offset(50, 50));
-////      expect(events.last.position, center);
-////      expect(events.last.delta, Offset.zero);
-////      expect(events.last.localDelta, Offset.zero);
-//
-//      events.clear();
-//      await gesture.moveTo(topLeft);
-//      await tester.pump();
-//      print(events.first.transform);
-////      expect(events.single, isA<PointerHoverEvent>());
-////      expect(events.single.transform, expectedTransform);
-////      expect(events.last.localPosition, const Offset(0, 0));
-////      expect(events.last.position, topLeft);
-////      expect(events.last.delta, topLeft - center);
-////      expect(events.last.localDelta, const Offset(-50, -50));
-////
-//      events.clear();
-//      await gesture.moveBy(const Offset(-1, -1));
-//      await tester.pump();
-//      print(events.first.transform);
-////      expect(events.single, isA<PointerExitEvent>());
-////      expect(events.single.transform, expectedTransform);
-////      expect(events.last.localPosition, const Offset(-1, -1));
-////      expect(events.last.position, topLeft - const Offset(1, 1));
-////      expect(events.last.delta, const Offset(-1, -1));
-////      expect(events.last.localDelta, const Offset(-1, -1));
-//
-//      events.clear();
-//
-////      const Offset moved = Offset(20, 30);
-////      final Offset center = tester.getCenter(find.byKey(key));
-////      final TestGesture gesture = await tester.startGesture(center);
-////      await gesture.moveBy(moved);
-////      await gesture.up();
-////
-////      expect(events, hasLength(3));
-////      final PointerDownEvent down = events[0];
-////      final PointerMoveEvent move = events[1];
-////      final PointerUpEvent up = events[2];
-////
-////      final Matrix4 expectedTransform = Matrix4.identity()
-////        ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0);
-////
-////      expect(center, isNot(const Offset(50, 50)));
-////
-////      expect(down.localPosition, const Offset(50, 50));
-////      expect(down.position, center);
-////      expect(down.delta, Offset.zero);
-////      expect(down.localDelta, Offset.zero);
-////      expect(down.transform, expectedTransform);
-////
-////      expect(move.localPosition, const Offset(50, 50) + moved / scaleFactor);
-////      expect(move.position, center + moved);
-////      expect(move.delta, moved);
-////      expect(move.localDelta, moved / scaleFactor);
-////      expect(move.transform, expectedTransform);
-////
-////      expect(up.localPosition, const Offset(50, 50) + moved / scaleFactor);
-////      expect(up.position, center + moved);
-////      expect(up.delta, Offset.zero);
-////      expect(up.localDelta, Offset.zero);
-////      expect(up.transform, expectedTransform);
-//    });
+    testWidgets('scaled for mouse hover', (WidgetTester tester) async {
+      final List<PointerEvent> events = <PointerEvent>[];
+      final Key key = UniqueKey();
 
-    testWidgets('scaled and offset for touch', (WidgetTester tester) async {
+      const double scaleFactor = 2;
+
+      await tester.pumpWidget(
+        Align(
+          alignment: Alignment.topLeft,
+          child: Transform(
+            transform: Matrix4.identity()..scale(scaleFactor),
+            child: Listener(
+              onPointerEnter: (PointerEnterEvent event) {
+                events.add(event);
+              },
+              onPointerHover: (PointerHoverEvent event) {
+                events.add(event);
+              },
+              onPointerExit: (PointerExitEvent event) {
+                events.add(event);
+              },
+              child: Container(
+                key: key,
+                color: Colors.red,
+                height: 100,
+                width: 100,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset center = tester.getCenter(find.byKey(key));
+      final Offset bottomRight = tester.getBottomRight(find.byKey(key));
+      expect(center, isNot(const Offset(50, 50)));
+
+      final Matrix4 expectedTransform = Matrix4.identity()
+        ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(center);
+      await tester.pump();
+      expect(events, hasLength(2));
+      expect(events.first, isA<PointerEnterEvent>());
+      expect(events.first.transform, expectedTransform);
+      expect(events.first.localPosition, const Offset(50, 50));
+      expect(events.first.position, center);
+      expect(events.first.delta, Offset.zero);
+      expect(events.first.localDelta, Offset.zero);
+      expect(events.last, isA<PointerHoverEvent>());
+      expect(events.last.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(50, 50));
+      expect(events.last.position, center);
+      expect(events.last.delta, Offset.zero);
+      expect(events.last.localDelta, Offset.zero);
+
+      events.clear();
+      await gesture.moveTo(bottomRight - const Offset(2, 2));
+      await tester.pump();
+      expect(events.single, isA<PointerHoverEvent>());
+      expect(events.single.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(99, 99));
+      expect(events.last.position, bottomRight - const Offset(2, 2));
+      expect(events.last.delta, bottomRight - const Offset(2, 2) - center);
+      expect(events.last.localDelta, const Offset(49, 49));
+
+      events.clear();
+      await gesture.moveBy(const Offset(4, 4));
+      await tester.pump();
+      expect(events.single, isA<PointerExitEvent>());
+      expect(events.single.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(101, 101));
+      expect(events.last.position, bottomRight + const Offset(2, 2));
+      expect(events.last.delta, const Offset(4, 4));
+      expect(events.last.localDelta, const Offset(2, 2));
+
+      events.clear();
+    });
+
+    testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
@@ -768,14 +730,93 @@ void main() {
       expect(events.single.transform, expectedTransform);
     });
 
-    testWidgets('rotated for touch', (WidgetTester tester) async {
+    testWidgets('scaled and offset for hover', (WidgetTester tester) async {
+      final List<PointerEvent> events = <PointerEvent>[];
+      final Key key = UniqueKey();
+
+      const double scaleFactor = 2;
+
+      await tester.pumpWidget(
+        Center(
+          child: Transform(
+            transform: Matrix4.identity()..scale(scaleFactor),
+            child: Listener(
+              onPointerEnter: (PointerEnterEvent event) {
+                events.add(event);
+              },
+              onPointerHover: (PointerHoverEvent event) {
+                events.add(event);
+              },
+              onPointerExit: (PointerExitEvent event) {
+                events.add(event);
+              },
+              child: Container(
+                key: key,
+                color: Colors.red,
+                height: 100,
+                width: 100,
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset center = tester.getCenter(find.byKey(key));
+      final Offset topLeft = tester.getTopLeft(find.byKey(key));
+      expect(center, isNot(const Offset(50, 50)));
+
+      final Matrix4 expectedTransform = Matrix4.identity()
+        ..scale(1 / scaleFactor, 1 / scaleFactor, 1.0)
+        ..translate(-topLeft.dx, -topLeft.dy, 0);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(center);
+      await tester.pump();
+      expect(events, hasLength(2));
+      expect(events.first, isA<PointerEnterEvent>());
+      expect(events.first.transform, expectedTransform);
+      expect(events.first.localPosition, const Offset(50, 50));
+      expect(events.first.position, center);
+      expect(events.first.delta, Offset.zero);
+      expect(events.first.localDelta, Offset.zero);
+      expect(events.last, isA<PointerHoverEvent>());
+      expect(events.last.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(50, 50));
+      expect(events.last.position, center);
+      expect(events.last.delta, Offset.zero);
+      expect(events.last.localDelta, Offset.zero);
+
+      events.clear();
+      await gesture.moveTo(topLeft);
+      await tester.pump();
+      expect(events.single, isA<PointerHoverEvent>());
+      expect(events.single.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(0, 0));
+      expect(events.last.position, topLeft);
+      expect(events.last.delta, topLeft - center);
+      expect(events.last.localDelta, const Offset(-50, -50));
+
+      events.clear();
+      await gesture.moveBy(const Offset(-2, -2));
+      await tester.pump();
+      expect(events.single, isA<PointerExitEvent>());
+      expect(events.single.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(-1, -1));
+      expect(events.last.position, topLeft - const Offset(2, 2));
+      expect(events.last.delta, const Offset(-2, -2));
+      expect(events.last.localDelta, const Offset(-1, -1));
+
+      events.clear();
+    });
+
+    testWidgets('rotated for touch/signal', (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 
       await tester.pumpWidget(
         Center(
           child: Transform(
-            transform: Matrix4.identity()..rotateZ(math.pi / 2), // 90 degrees clockwise
+            transform: Matrix4.identity()
+              ..rotateZ(math.pi / 2), // 90 degrees clockwise around Container origin
             child: Listener(
               onPointerDown: (PointerDownEvent event) {
                 events.add(event);
@@ -842,6 +883,84 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
+    });
+
+    testWidgets('rotated for  hover', (WidgetTester tester) async {
+      final List<PointerEvent> events = <PointerEvent>[];
+      final Key key = UniqueKey();
+
+      await tester.pumpWidget(
+        Center(
+          child: Transform(
+            transform: Matrix4.identity()
+              ..rotateZ(math.pi / 2), // 90 degrees clockwise around Container origin
+          child: Listener(
+              onPointerEnter: (PointerEnterEvent event) {
+                events.add(event);
+              },
+              onPointerHover: (PointerHoverEvent event) {
+                events.add(event);
+              },
+              onPointerExit: (PointerExitEvent event) {
+                events.add(event);
+              },
+              child: Container(
+                key: key,
+                color: Colors.red,
+                height: 100,
+                width: 150,
+              ),
+            ),
+          ),
+        ),
+      );
+      final Offset center = tester.getCenter(find.byKey(key));
+      final Offset topLeft = tester.getTopLeft(find.byKey(key)); // topRight in global coordinates
+      expect(center, isNot(const Offset(50, 50)));
+
+      const Offset offset = Offset((800 - 150) / 2, (600 - 100) / 2);
+      final Matrix4 expectedTransform = Matrix4.identity()
+        ..rotateZ(-math.pi / 2)
+        ..translate(-offset.dx, -offset.dy, 0.0);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(center);
+      await tester.pump();
+      expect(events, hasLength(2));
+      expect(events.first, isA<PointerEnterEvent>());
+      expect(events.first.transform, expectedTransform);
+      expect(events.first.localPosition, within(distance: 0.001, from: const Offset(75, 50)));
+      expect(events.first.position, center);
+      expect(events.first.delta, Offset.zero);
+      expect(events.first.localDelta, Offset.zero);
+      expect(events.last, isA<PointerHoverEvent>());
+      expect(events.last.transform, expectedTransform);
+      expect(events.last.localPosition, within(distance: 0.001, from: const Offset(75, 50)));
+      expect(events.last.position, center);
+      expect(events.last.delta, Offset.zero);
+      expect(events.last.localDelta, Offset.zero);
+
+      events.clear();
+      await gesture.moveTo(topLeft);
+      await tester.pump();
+      expect(events.single, isA<PointerHoverEvent>());
+      expect(events.single.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(0, 0));
+      expect(events.last.position, topLeft);
+      expect(events.last.delta, const Offset(50, -75));
+      expect(events.last.localDelta, within(distance: 0.001, from: const Offset(-75, -50)));
+
+      events.clear();
+      await gesture.moveBy(const Offset(1, -2));
+      await tester.pump();
+      expect(events.single, isA<PointerExitEvent>());
+      expect(events.single.transform, expectedTransform);
+      expect(events.last.localPosition, const Offset(-2, -1));
+      expect(events.last.position, topLeft + const Offset(1, -2));
+      expect(events.last.delta, const Offset(1, -2));
+      expect(events.last.localDelta, const Offset(-2, -1));
+
+      events.clear();
     });
   });
 }
