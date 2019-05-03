@@ -225,12 +225,14 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
   Widget _buildCameraPreview() {
     return Container(
-      constraints: BoxConstraints.expand(),
       color: Colors.black,
-      child: Center(
-        child: AspectRatio(
-          aspectRatio: _cameraController.value.aspectRatio,
-          child: CameraPreview(_cameraController),
+      child: Transform.scale(
+        scale: 1,
+        child: Center(
+          child: AspectRatio(
+            aspectRatio: _cameraController.value.aspectRatio,
+            child: CameraPreview(_cameraController),
+          ),
         ),
       ),
     );
@@ -365,106 +367,107 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     }
 
     return SafeArea(
-        child: Scaffold(
-      key: _scaffoldKey,
-      body: Stack(
-        children: <Widget>[
-          background,
-          Container(
-            constraints: BoxConstraints.expand(),
-            child: CustomPaint(
-              painter: WindowPainter(
-                windowSize:
-                    Size(widget.validSquareWidth, widget.validSquareWidth),
-                outerFrameColor: _frameColor,
-                closeWindow: _closeWindow,
+      child: Scaffold(
+        key: _scaffoldKey,
+        body: Stack(
+          children: <Widget>[
+            background,
+            Container(
+              constraints: BoxConstraints.expand(),
+              child: CustomPaint(
+                painter: WindowPainter(
+                  windowSize:
+                      Size(widget.validSquareWidth, widget.validSquareWidth),
+                  outerFrameColor: _frameColor,
+                  closeWindow: _closeWindow,
+                ),
               ),
             ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            top: 0,
-            child: Container(
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              child: Container(
+                height: 56,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: const <Color>[Colors.black87, Colors.transparent],
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 0.0,
+              bottom: 0.0,
+              right: 0.0,
               height: 56,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: const <Color>[Colors.black87, Colors.transparent],
+              child: Container(
+                color: kShrinePink50,
+                child: Center(
+                  child: Text(
+                    _scannerHint ?? 'Point your camera at a barcode',
+                    style: Theme.of(context)
+                        .textTheme
+                        .body1
+                        .copyWith(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ),
-          ),
-          Positioned(
-            left: 0.0,
-            bottom: 0.0,
-            right: 0.0,
-            height: 56,
-            child: Container(
-              color: kShrinePink50,
-              child: Center(
-                child: Text(
-                  _scannerHint ?? 'Point your camera at a barcode',
-                  style: Theme.of(context)
-                      .textTheme
-                      .body1
-                      .copyWith(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ),
-          Container(
-            constraints: BoxConstraints.expand(),
-            child: CustomPaint(
-              painter: _barcodeFound
-                  ? SquareTracePainter(
-                      animation: Tween<double>(
-                        begin: 0,
-                        end: widget.validSquareWidth,
-                      ).animate(
-                        _animationController,
-                      ),
-                      square: Square(widget.validSquareWidth, Colors.white),
-                    )
-                  : SquareOutlinePainter(
-                      animation: SquareTween(
-                        Square(widget.validSquareWidth, Colors.white),
-                        Square(
-                          widget.validSquareWidth + 100,
-                          Colors.transparent,
+            Container(
+              constraints: BoxConstraints.expand(),
+              child: CustomPaint(
+                painter: _barcodeFound
+                    ? SquareTracePainter(
+                        animation: Tween<double>(
+                          begin: 0,
+                          end: widget.validSquareWidth,
+                        ).animate(
+                          _animationController,
                         ),
-                      ).animate(_animationController),
-                    ),
-            ),
-          ),
-          AppBar(
-            leading: IconButton(
-              icon: Icon(Icons.close, color: Colors.white),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            backgroundColor: Colors.transparent,
-            elevation: 0.0,
-            actions: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.flash_off,
-                  color: Colors.white,
-                ),
-                onPressed: () {},
+                        square: Square(widget.validSquareWidth, Colors.white),
+                      )
+                    : SquareOutlinePainter(
+                        animation: SquareTween(
+                          Square(widget.validSquareWidth, Colors.white),
+                          Square(
+                            widget.validSquareWidth + 100,
+                            Colors.transparent,
+                          ),
+                        ).animate(_animationController),
+                      ),
               ),
-              IconButton(
-                icon: Icon(
-                  Icons.help_outline,
-                  color: Colors.white,
-                ),
-                onPressed: () {},
+            ),
+            AppBar(
+              leading: IconButton(
+                icon: Icon(Icons.close, color: Colors.white),
+                onPressed: () => Navigator.of(context).pop(),
               ),
-            ],
-          ),
-        ],
+              backgroundColor: Colors.transparent,
+              elevation: 0.0,
+              actions: <Widget>[
+                IconButton(
+                  icon: Icon(
+                    Icons.flash_off,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: Icon(
+                    Icons.help_outline,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {},
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 }
 
