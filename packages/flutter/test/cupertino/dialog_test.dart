@@ -142,15 +142,19 @@ void main() {
     expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Dialog destructive action style', (WidgetTester tester) async {
+  testWidgets('Dialog default and destructive action styles', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
+      isDefaultAction: true,
       isDestructiveAction: true,
       child: Text('Ok'),
     )));
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.withOpacity(1), equals(CupertinoColors.destructiveRed));
+    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
+  });
+
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
