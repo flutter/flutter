@@ -677,15 +677,14 @@ class _TextSelectionHandleOverlayState
 
     return CompositedTransformFollower(
       link: widget.layerLink,
+      offset: interactiveRect.topLeft,
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
         child: Stack(
           overflow: Overflow.visible,
           children: <Widget>[
-            Positioned(
-              top: interactiveRect.top,
-              left: interactiveRect.left,
+            SizedBox(
               width: interactiveRect.width,
               height: interactiveRect.height,
               child: GestureDetector(
