@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Ma",
   "datePickerHourSemanticsLabelOne": "$hour óra",
   "datePickerHourSemanticsLabelOther": "$hour óra",
   "datePickerMinuteSemanticsLabelOne": "1 perc",
@@ -12,8 +13,8 @@
   "timerPickerHourLabelOther": "óra",
   "timerPickerMinuteLabelOne": "perc",
   "timerPickerMinuteLabelOther": "perc",
-  "timerPickerSecondLabelOne": "másodperc",
-  "timerPickerSecondLabelOther": "másodperc",
+  "timerPickerSecondLabelOne": "mp",
+  "timerPickerSecondLabelOther": "mp",
   "cutButtonLabel": "Kivágás",
   "copyButtonLabel": "Másolás",
   "pasteButtonLabel": "Beillesztés",

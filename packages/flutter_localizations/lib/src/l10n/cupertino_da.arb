@@ -1,4 +1,5 @@
 {
+  "todayLabel": "I dag",
   "datePickerHourSemanticsLabelOne": "klokken $hour",
   "datePickerHourSemanticsLabelOther": "klokken $hour",
   "datePickerMinuteSemanticsLabelOne": "1 minut",

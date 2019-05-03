@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Hari ini",
   "datePickerHourSemanticsLabelOne": "Pukul $hour",
   "datePickerHourSemanticsLabelOther": "Pukul $hour",
   "datePickerMinuteSemanticsLabelOne": "1 minit",

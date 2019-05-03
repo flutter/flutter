@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Днес",
   "datePickerHourSemanticsLabelOne": "$hour часа",
   "datePickerHourSemanticsLabelOther": "$hour часа",
   "datePickerMinuteSemanticsLabelOne": "1 минута",

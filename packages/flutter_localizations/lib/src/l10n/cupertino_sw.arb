@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Leo",
   "datePickerHourSemanticsLabelOne": "Saa $hour kamili",
   "datePickerHourSemanticsLabelOther": "Saa $hour kamili",
   "datePickerMinuteSemanticsLabelOne": "Dakika 1",

@@ -1,4 +1,5 @@
 {
+  "todayLabel": "今日",
   "datePickerHourSemanticsLabelOne": "$hour時",
   "datePickerHourSemanticsLabelOther": "$hour時",
   "datePickerMinuteSemanticsLabelOne": "1分",

@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Danas",
   "datePickerHourSemanticsLabelFew": "$hour sata",
   "datePickerMinuteSemanticsLabelFew": "$minute minuta",
   "timerPickerHourLabelFew": "sata",

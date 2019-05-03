@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Այսօր",
   "datePickerHourSemanticsLabelOne": "$hour:00",
   "datePickerHourSemanticsLabelOther": "$hour:00",
   "datePickerMinuteSemanticsLabelOne": "1 րոպե",

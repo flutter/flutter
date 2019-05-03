@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Dnes",
   "datePickerHourSemanticsLabelFew": "$hour hodiny",
   "datePickerHourSemanticsLabelMany": "$hour hodiny",
   "datePickerMinuteSemanticsLabelFew": "$minute minúty",

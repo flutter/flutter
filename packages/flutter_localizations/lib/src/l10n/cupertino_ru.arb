@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Сегодня",
   "datePickerHourSemanticsLabelFew": "$hour часа ровно",
   "datePickerHourSemanticsLabelMany": "$hour часов ровно",
   "datePickerMinuteSemanticsLabelFew": "$minute минуты",

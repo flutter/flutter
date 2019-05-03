@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Hoje",
   "datePickerHourSemanticsLabelOne": "$hour em ponto",
   "datePickerHourSemanticsLabelOther": "$hour em ponto",
   "datePickerMinuteSemanticsLabelOne": "1 minuto",

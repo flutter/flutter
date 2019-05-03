@@ -1,4 +1,5 @@
 {
+  "todayLabel": "วันนี้",
   "datePickerHourSemanticsLabelOne": "$hour นาฬิกา",
   "datePickerHourSemanticsLabelOther": "$hour นาฬิกา",
   "datePickerMinuteSemanticsLabelOne": "1 นาที",

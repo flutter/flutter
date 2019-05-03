@@ -8,7 +8,7 @@
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",
-  "todayLabel": "aujourd'hui",
+  "todayLabel": "Aujourd'hui",
   "alertDialogLabel": "Alerte",
   "timerPickerHourLabelOne": "heure",
   "timerPickerHourLabelOther": "heures",
@@ -18,5 +18,5 @@
   "cutButtonLabel": "Couper",
   "copyButtonLabel": "Copier",
   "pasteButtonLabel": "Coller",
-  "selectAllButtonLabel": "Tout sélectionner"
+  "selectAllButtonLabel": "Tout sélect."
 }

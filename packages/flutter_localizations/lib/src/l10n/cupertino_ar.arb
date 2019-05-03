@@ -1,4 +1,5 @@
 {
+  "todayLabel": "اليوم",
   "timerPickerSecondLabelFew": "ثوانٍ",
   "datePickerHourSemanticsLabelZero": "$hour بالضبط",
   "datePickerHourSemanticsLabelTwo": "$hour بالضبط",
@@ -30,9 +31,9 @@
   "alertDialogLabel": "تنبيه",
   "timerPickerHourLabelOne": "ساعة",
   "timerPickerHourLabelOther": "ساعة",
-  "timerPickerMinuteLabelOne": "دقيقة",
+  "timerPickerMinuteLabelOne": "دقيقة واحدة",
   "timerPickerMinuteLabelOther": "دقيقة",
-  "timerPickerSecondLabelOne": "ثانية",
+  "timerPickerSecondLabelOne": "ثانية واحدة",
   "timerPickerSecondLabelOther": "ثانية",
   "cutButtonLabel": "قص",
   "copyButtonLabel": "نسخ",

@@ -1,4 +1,5 @@
 {
+  "todayLabel": "आज",
   "datePickerHourSemanticsLabelOne": "$hour बजे",
   "datePickerHourSemanticsLabelOther": "$hour बजे",
   "datePickerMinuteSemanticsLabelOne": "1 मिनट",

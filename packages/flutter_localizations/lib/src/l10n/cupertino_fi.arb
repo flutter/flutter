@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Tänään",
   "datePickerHourSemanticsLabelOne": "klo $hour",
   "datePickerHourSemanticsLabelOther": "klo $hour",
   "datePickerMinuteSemanticsLabelOne": "1 minuutti",
@@ -12,8 +13,8 @@
   "timerPickerHourLabelOther": "tuntia",
   "timerPickerMinuteLabelOne": "min",
   "timerPickerMinuteLabelOther": "min",
-  "timerPickerSecondLabelOne": "sekunti",
-  "timerPickerSecondLabelOther": "sekuntia",
+  "timerPickerSecondLabelOne": "s",
+  "timerPickerSecondLabelOther": "s",
   "cutButtonLabel": "Leikkaa",
   "copyButtonLabel": "Kopioi",
   "pasteButtonLabel": "Liitä",

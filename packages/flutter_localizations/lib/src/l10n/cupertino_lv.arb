@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Šodien",
   "datePickerHourSemanticsLabelZero": "plkst. $hour",
   "datePickerMinuteSemanticsLabelZero": "$minute minūtes",
   "timerPickerHourLabelZero": "h",

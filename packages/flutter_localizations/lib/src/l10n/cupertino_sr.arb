@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Данас",
   "datePickerHourSemanticsLabelFew": "$hour сата",
   "datePickerMinuteSemanticsLabelFew": "$minute минута",
   "timerPickerHourLabelFew": "сата",

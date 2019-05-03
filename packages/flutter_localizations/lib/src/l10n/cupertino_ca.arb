@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Avui",
   "datePickerHourSemanticsLabelOne": "$hour en punt",
   "datePickerHourSemanticsLabelOther": "$hour en punt",
   "datePickerMinuteSemanticsLabelOne": "1 minut",

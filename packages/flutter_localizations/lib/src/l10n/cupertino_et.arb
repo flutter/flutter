@@ -1,4 +1,5 @@
 {
+  "todayLabel": "Täna",
   "datePickerHourSemanticsLabelOne": "Kell $hour",
   "datePickerHourSemanticsLabelOther": "Kell $hour",
   "datePickerMinuteSemanticsLabelOne": "1 minut",
