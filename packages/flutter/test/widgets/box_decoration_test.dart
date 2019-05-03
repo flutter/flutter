@@ -244,7 +244,7 @@ Future<void> main() async {
       ..path()
       ..path()
       ..path()
-      ..rect(rect: Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
+      ..rect(rect: const Rect.fromLTRB(355.0, 105.0, 445.0, 195.0))
       ..drrect(
         outer: RRect.fromLTRBAndCorners(
           350.0, 200.0, 450.0, 300.0,

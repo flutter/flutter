@@ -13,7 +13,7 @@ import 'base/process_manager.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
 
-EmulatorManager get emulatorManager => context[EmulatorManager];
+EmulatorManager get emulatorManager => context.get<EmulatorManager>();
 
 /// A class to get all available emulators.
 class EmulatorManager {

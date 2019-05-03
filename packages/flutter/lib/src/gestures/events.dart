@@ -8,20 +8,30 @@ import 'package:flutter/foundation.dart';
 
 export 'dart:ui' show Offset, PointerDeviceKind;
 
-/// The bit of [PointerEvent.buttons] that corresponds to a unified behavior of
-/// "basic operation".
+/// The bit of [PointerEvent.buttons] that corresponds to the "primary
+/// action" on any device.
 ///
-/// It is equivalent to:
+/// More specifially,
 ///
-///  * [kTouchContact]: The pointer contacts the touch screen.
-///  * [kStylusContact]: The stylus contacts the screen.
-///  * [kPrimaryMouseButton]: The primary mouse button.
+///  * For touch screen, it's when the pointer contacts the screen.
+///  * For stylus and inverted stylus, it's when the pen contacts the screen.
+///  * For mouse, it's when the primary button is pressed.
+///
+/// See also:
+///
+///  * [kTouchContact]: an alias of this constant when used by touch screen.
+///  * [kStylusContact]: an alias of this constant when used by stylus.
+///  * [kPrimaryMouseButton]: an alias of this constant when used by mouse.
 const int kPrimaryButton = 0x01;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary mouse button.
 ///
 /// The primary mouse button is typically the left button on the top of the
 /// mouse but can be reconfigured to be a different physical button.
+///
+/// See also:
+///
+///  * [kTouchContact]: an alias of this constant when used by touch screen.
 const int kPrimaryMouseButton = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the secondary mouse button.
@@ -32,6 +42,10 @@ const int kSecondaryMouseButton = 0x02;
 
 /// The bit of [PointerEvent.buttons] that corresponds to when a stylus
 /// contacting the screen.
+///
+/// See also:
+///
+///  * [kPrimaryButton]: an alias of this constant for any device.
 const int kStylusContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the primary stylus button.
@@ -67,6 +81,10 @@ const int kForwardMouseButton = 0x10;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the pointer contacting
 /// a touch screen.
+///
+/// See also:
+///
+///  * [kPrimaryButton]: an alias of this constant for any device.
 const int kTouchContact = kPrimaryButton;
 
 /// The bit of [PointerEvent.buttons] that corresponds to the nth mouse button.
@@ -354,7 +372,6 @@ class PointerAddedEvent extends PointerEvent {
     int device = 0,
     Offset position = Offset.zero,
     bool obscured = false,
-    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -369,7 +386,7 @@ class PointerAddedEvent extends PointerEvent {
          device: device,
          position: position,
          obscured: obscured,
-         pressure: pressure,
+         pressure: 0.0,
          pressureMin: pressureMin,
          pressureMax: pressureMax,
          distance: distance,
@@ -394,7 +411,6 @@ class PointerRemovedEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     bool obscured = false,
-    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distanceMax = 0.0,
@@ -406,7 +422,7 @@ class PointerRemovedEvent extends PointerEvent {
          device: device,
          position: null,
          obscured: obscured,
-         pressure: pressure,
+         pressure: 0.0,
          pressureMin: pressureMin,
          pressureMax: pressureMax,
          distanceMax: distanceMax,
@@ -437,7 +453,6 @@ class PointerHoverEvent extends PointerEvent {
     Offset delta = Offset.zero,
     int buttons = 0,
     bool obscured = false,
-    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -459,7 +474,7 @@ class PointerHoverEvent extends PointerEvent {
          buttons: buttons,
          down: false,
          obscured: obscured,
-         pressure: pressure,
+         pressure: 0.0,
          pressureMin: pressureMin,
          pressureMax: pressureMax,
          distance: distance,
@@ -497,7 +512,6 @@ class PointerEnterEvent extends PointerEvent {
     Offset delta = Offset.zero,
     int buttons = 0,
     bool obscured = false,
-    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -519,7 +533,7 @@ class PointerEnterEvent extends PointerEvent {
          buttons: buttons,
          down: false,
          obscured: obscured,
-         pressure: pressure,
+         pressure: 0.0,
          pressureMin: pressureMin,
          pressureMax: pressureMax,
          distance: distance,
@@ -543,16 +557,14 @@ class PointerEnterEvent extends PointerEvent {
   /// Creates an enter event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize enter events.
-  PointerEnterEvent.fromMouseEvent(PointerEvent event) : super(
+  PointerEnterEvent.fromMouseEvent(PointerEvent event) : this(
     timeStamp: event?.timeStamp,
     kind: event?.kind,
     device: event?.device,
     position: event?.position,
     delta: event?.delta,
     buttons: event?.buttons,
-    down: event?.down,
     obscured: event?.obscured,
-    pressure: event?.pressure,
     pressureMin: event?.pressureMin,
     pressureMax: event?.pressureMax,
     distance: event?.distance,
@@ -590,7 +602,6 @@ class PointerExitEvent extends PointerEvent {
     Offset delta = Offset.zero,
     int buttons = 0,
     bool obscured = false,
-    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -612,7 +623,7 @@ class PointerExitEvent extends PointerEvent {
          buttons: buttons,
          down: false,
          obscured: obscured,
-         pressure: pressure,
+         pressure: 0.0,
          pressureMin: pressureMin,
          pressureMax: pressureMax,
          distance: distance,
@@ -636,16 +647,14 @@ class PointerExitEvent extends PointerEvent {
   /// Creates an exit event from a [PointerEvent].
   ///
   /// This is used by the [MouseTracker] to synthesize exit events.
-  PointerExitEvent.fromMouseEvent(PointerEvent event) : super(
+  PointerExitEvent.fromMouseEvent(PointerEvent event) : this(
     timeStamp: event?.timeStamp,
     kind: event?.kind,
     device: event?.device,
     position: event?.position,
     delta: event?.delta,
     buttons: event?.buttons,
-    down: event?.down,
     obscured: event?.obscured,
-    pressure: event?.pressure,
     pressureMin: event?.pressureMin,
     pressureMax: event?.pressureMax,
     distance: event?.distance,
@@ -672,7 +681,7 @@ class PointerDownEvent extends PointerEvent {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
     Offset position = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,
@@ -727,7 +736,7 @@ class PointerMoveEvent extends PointerEvent {
     int device = 0,
     Offset position = Offset.zero,
     Offset delta = Offset.zero,
-    int buttons = 0,
+    int buttons = kPrimaryButton,
     bool obscured = false,
     double pressure = 1.0,
     double pressureMin = 1.0,
@@ -782,6 +791,8 @@ class PointerUpEvent extends PointerEvent {
     Offset position = Offset.zero,
     int buttons = 0,
     bool obscured = false,
+    // Allow pressure customization here because PointerUpEvent can contain
+    // non-zero pressure. See https://github.com/flutter/flutter/issues/31340
     double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
@@ -890,7 +901,6 @@ class PointerCancelEvent extends PointerEvent {
     Offset position = Offset.zero,
     int buttons = 0,
     bool obscured = false,
-    double pressure = 0.0,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
     double distance = 0.0,
@@ -911,7 +921,7 @@ class PointerCancelEvent extends PointerEvent {
          buttons: buttons,
          down: false,
          obscured: obscured,
-         pressure: pressure,
+         pressure: 0.0,
          pressureMin: pressureMin,
          pressureMax: pressureMax,
          distance: distance,

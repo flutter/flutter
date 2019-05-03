@@ -274,14 +274,12 @@ abstract class ImageProvider<T> {
       imageCompleter.setError(
         exception: exception,
         stack: stack,
-        context: 'while resolving an image',
+        context: ErrorDescription('while resolving an image'),
         silent: true, // could be a network error or whatnot
-        informationCollector: (StringBuffer information) {
-          information.writeln('Image provider: $this');
-          information.writeln('Image configuration: $configuration');
-          if (obtainedKey != null) {
-            information.writeln('Image key: $obtainedKey');
-          }
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+          yield DiagnosticsProperty<ImageConfiguration>('Image configuration', configuration);
+          yield DiagnosticsProperty<T>('Image key', obtainedKey, defaultValue: null);
         },
       );
     }
@@ -459,9 +457,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, size: size),
       scale: key.scale,
-      informationCollector: (StringBuffer information) {
-        information.writeln('Image provider: $this');
-        information.write('Image key: $key');
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+        yield DiagnosticsProperty<AssetBundleImageKey>('Image key', key);
       },
     );
   }
@@ -553,9 +551,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, size: size),
       scale: key.scale,
-      informationCollector: (StringBuffer information) {
-        information.writeln('Image provider: $this');
-        information.write('Image key: $key');
+      informationCollector: () sync* {
+        yield DiagnosticsProperty<ImageProvider>('Image provider', this);
+        yield DiagnosticsProperty<NetworkImage>('Image key', key);
       },
     );
   }
@@ -627,8 +625,8 @@ class FileImage extends ImageProvider<FileImage> {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, size: size),
       scale: key.scale,
-      informationCollector: (StringBuffer information) {
-        information.writeln('Path: ${file?.path}');
+      informationCollector: () sync* {
+        yield ErrorDescription('Path: ${file?.path}');
       },
     );
   }
@@ -863,7 +861,7 @@ class _ErrorImageCompleter extends ImageStreamCompleter {
   _ErrorImageCompleter();
 
   void setError({
-    String context,
+    DiagnosticsNode context,
     dynamic exception,
     StackTrace stack,
     InformationCollector informationCollector,

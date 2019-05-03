@@ -19,7 +19,7 @@ void main() {
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
-    expect(find.byType(Scrollbar), paints..rect(rect: Rect.fromLTRB(800.0 - 6.0, 1.5, 800.0, 91.5)));
+    expect(find.byType(Scrollbar), paints..rect(rect: const Rect.fromLTRB(800.0 - 6.0, 1.5, 800.0, 91.5)));
   });
 
   testWidgets('Viewport basic test (RTL)', (WidgetTester tester) async {
@@ -33,6 +33,6 @@ void main() {
     ));
     expect(find.byType(Scrollbar), isNot(paints..rect()));
     await tester.fling(find.byType(SingleChildScrollView), const Offset(0.0, -10.0), 10.0);
-    expect(find.byType(Scrollbar), paints..rect(rect: Rect.fromLTRB(0.0, 1.5, 6.0, 91.5)));
+    expect(find.byType(Scrollbar), paints..rect(rect: const Rect.fromLTRB(0.0, 1.5, 6.0, 91.5)));
   });
 }
