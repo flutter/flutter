@@ -263,6 +263,10 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
 
   @override
   void dispose() {
+    // TODO (shihaohong): remove workaround once these issues have been
+    // resolved:
+    // 1. https://github.com/flutter/flutter/issues/32054
+    // 2. https://github.com/flutter/flutter/issues/32056
     // Sets `pixels` to a non-null value before `ScrollPosition.dispose` is
     // invoked if it was never set by `applyViewportDimension`.
     if (pixels == null && !isInitialPixelsValueSet) {
