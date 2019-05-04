@@ -232,7 +232,7 @@ class PointerData {
   final double scrollDeltaY;
 
   @override
-  String toString() => '$runtimeType(x: $physicalX, y: $physicalY)';
+  String toString() => 'PointerData(x: $physicalX, y: $physicalY)';
 
   /// Returns a complete textual description of the information in this object.
   String toStringFull() {

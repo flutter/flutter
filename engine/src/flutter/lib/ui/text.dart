@@ -714,7 +714,7 @@ class ParagraphStyle {
 
   @override
   String toString() {
-    return '$runtimeType('
+    return 'ParagraphStyle('
              'textAlign: ${     _encoded[0] & 0x002 == 0x002 ? TextAlign.values[_encoded[1]]     : "unspecified"}, '
              'textDirection: ${ _encoded[0] & 0x004 == 0x004 ? TextDirection.values[_encoded[2]] : "unspecified"}, '
              'fontWeight: ${    _encoded[0] & 0x008 == 0x008 ? FontWeight.values[_encoded[3]]    : "unspecified"}, '
@@ -1174,7 +1174,7 @@ class TextPosition {
 
   @override
   String toString() {
-    return '$runtimeType(offset: $offset, affinity: $affinity)';
+    return 'TextPosition(offset: $offset, affinity: $affinity)';
   }
 }
 
@@ -1223,7 +1223,7 @@ class ParagraphConstraints {
   int get hashCode => width.hashCode;
 
   @override
-  String toString() => '$runtimeType(width: $width)';
+  String toString() => 'ParagraphConstraints(width: $width)';
 }
 
 /// Defines various ways to vertically bound the boxes returned by
