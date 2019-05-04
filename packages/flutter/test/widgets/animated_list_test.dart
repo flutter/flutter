@@ -250,11 +250,11 @@ void main() {
           textDirection: TextDirection.ltr,
           child: CustomScrollView(
             slivers: <Widget>[
-              SliverList(
-                delegate: SliverChildListDelegate(const <Widget>[
+              const SliverList(
+                delegate: SliverChildListDelegate(<Widget>[
                   SizedBox(height: 100),
                   SizedBox(height: 100),
-                ])
+                ]),
               ),
               SliverAnimatedList(
                 key: listKey,
