@@ -386,7 +386,7 @@ void main() {
     });
 
     group('sendCommand error conditions', () {
-      test('local timeout', () async {
+      test('local default timeout', () async {
         final List<String> log = <String>[];
         final StreamSubscription<LogRecord> logSub = flutterDriverLog.listen((LogRecord s) => log.add(s.toString()));
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
@@ -396,7 +396,24 @@ void main() {
         FakeAsync().run((FakeAsync time) {
           driver.waitFor(find.byTooltip('foo'));
           expect(log, <String>[]);
-          time.elapse(const Duration(hours: 1));
+          time.elapse(kUnusuallyLongTimeout);
+        });
+        expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
+        await logSub.cancel();
+      });
+
+      test('local custom timeout', () async {
+        final List<String> log = <String>[];
+        final StreamSubscription<LogRecord> logSub = flutterDriverLog.listen((LogRecord s) => log.add(s.toString()));
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          // completer never completed to trigger timeout
+          return Completer<Map<String, dynamic>>().future;
+        });
+        FakeAsync().run((FakeAsync time) {
+          final Duration customTimeout = kUnusuallyLongTimeout - const Duration(seconds: 1);
+          driver.waitFor(find.byTooltip('foo'), timeout: customTimeout);
+          expect(log, <String>[]);
+          time.elapse(customTimeout);
         });
         expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
         await logSub.cancel();
