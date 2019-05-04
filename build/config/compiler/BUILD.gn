@@ -21,10 +21,6 @@ import("//build/config/sanitizers/sanitizers.gni")
 import("//build/toolchain/ccache.gni")
 import("//build/toolchain/clang.gni")
 
-if (is_fuchsia) {
-  import("//build/fuchsia/sdk.gni")
-}
-
 declare_args() {
   # Normally, Android builds are lightly optimized, even for debug builds, to
   # keep binary size down. Setting this flag to true disables such optimization
@@ -466,14 +462,6 @@ config("compiler") {
         cflags += [ "--target=x86_64-linux-androideabi" ]
         ldflags += [ "--target=x86_64-linux-androideabi" ]
       }
-    }
-  }
-
-  # Fuchsia-specific flags setup.
-  # -----------------------------
-  if (is_fuchsia) {
-    if (using_fuchsia_sdk) {
-      defines += [ "FUCHSIA_SDK" ]
     }
   }
 
