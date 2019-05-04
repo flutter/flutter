@@ -656,7 +656,7 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
   }) {
     assert(_matrix4IsValid(transform));
     assert(
-      scrollChildren == 0 || (scrollChildren > 0 && childrenInHitTestOrder != null),
+      scrollChildren == 0 || scrollChildren == null || (scrollChildren > 0 && childrenInHitTestOrder != null),
       'If a node has scrollChildren, it must have childrenInHitTestOrder',
     );
     _updateNode(
