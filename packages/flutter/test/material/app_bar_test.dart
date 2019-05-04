@@ -1522,10 +1522,10 @@ void main() {
         home: CustomScrollView(
           slivers: const <Widget>[
             SliverAppBar(
-              leading: const Text('L'),
-              title: const Text('No Scaffold'),
+              leading: Text('L'),
+              title: Text('No Scaffold'),
               shape: roundedRectangleBorder,
-              actions: const <Widget>[Text('A1'), Text('A2')],
+              actions: <Widget>[Text('A1'), Text('A2')],
             ),
           ],
         ),
