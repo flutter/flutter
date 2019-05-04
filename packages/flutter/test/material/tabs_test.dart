@@ -67,6 +67,42 @@ class AlwaysKeepAliveState extends State<AlwaysKeepAliveWidget>
   }
 }
 
+class _NestedTabBarContainer extends StatelessWidget {
+  const _NestedTabBarContainer({
+    this.tabController,
+  });
+
+  final TabController tabController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.blue,
+      child: Column(
+        children: <Widget>[
+          TabBar(
+            controller: tabController,
+            tabs: const <Tab>[
+              Tab(text: 'Yellow'),
+              Tab(text: 'Grey'),
+            ],
+          ),
+          Expanded(
+            flex: 1,
+            child: TabBarView(
+              controller: tabController,
+              children: <Widget>[
+                Container(color: Colors.yellow),
+                Container(color: Colors.grey),
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
 Widget buildFrame({
   Key tabBarKey,
   List<String> tabs,
@@ -940,6 +976,51 @@ void main() {
     // Left enough to get to page 0
     pageController.jumpTo(100.0);
     expect(tabController.index, 0);
+  });
+
+  testWidgets('Nested TabBarView sets ScrollController pixels to non-null value '
+  'when disposed before it is set by the applyViewportDimension', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/18756
+    final TabController _mainTabController = TabController(length: 4, vsync: const TestVSync());
+    final TabController _nestedTabController = TabController(length: 2, vsync: const TestVSync());
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Exception for Nested Tabs'),
+            bottom: TabBar(
+              controller: _mainTabController,
+              tabs: const <Widget>[
+                Tab(icon: Icon(Icons.add), text: 'A'),
+                Tab(icon: Icon(Icons.add), text: 'B'),
+                Tab(icon: Icon(Icons.add), text: 'C'),
+                Tab(icon: Icon(Icons.add), text: 'D'),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            controller: _mainTabController,
+            children: <Widget>[
+              Container(color: Colors.red),
+              _NestedTabBarContainer(tabController: _nestedTabController),
+              Container(color: Colors.green),
+              Container(color: Colors.indigo),
+            ],
+          ),
+        ),
+      )
+    );
+
+    // expect first tab to be selected
+    expect(_mainTabController.index, 0);
+
+    // tap on third tab
+    await tester.tap(find.text('C'));
+    await tester.pumpAndSettle();
+
+    // expect third tab to be selected without exceptions
+    expect(_mainTabController.index, 2);
   });
 
   testWidgets('TabBarView scrolls end close to a new page with custom physics', (WidgetTester tester) async {
