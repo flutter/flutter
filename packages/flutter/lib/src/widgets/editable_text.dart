@@ -301,6 +301,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
+    this.scrollController,
     this.scrollPhysics,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -734,6 +735,15 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.widgets.editableText.scrollController}
+  /// The [ScrollController] to use when vertically scrolling the input.
+  ///
+  /// If null, it will instantiate a new ScrollController
+  ///
+  /// See [Scrollable.controller].
+  /// {@endtemplate}
+  final ScrollController scrollController;
+
   /// {@template flutter.widgets.editableText.scrollPhysics}
   /// The [ScrollPhysics] to use when vertically scrolling the input.
   ///
@@ -782,7 +792,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
-  final ScrollController _scrollController = ScrollController();
+  ScrollController get _scrollController => widget.scrollController ?? ScrollController();
   AnimationController _cursorBlinkOpacityController;
 
   final LayerLink _layerLink = LayerLink();
