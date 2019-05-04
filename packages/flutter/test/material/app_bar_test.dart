@@ -1515,13 +1515,12 @@ void main() {
     expect(getMaterialWidget().shape, roundedRectangleBorder);
   });
 
-
   testWidgets('SliverAppBar with shape', (WidgetTester tester) async {
     const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(15.0)));
     await tester.pumpWidget(
       MaterialApp(
         home: CustomScrollView(
-          slivers: <Widget>[
+          slivers: const <Widget>[
             SliverAppBar(
               leading: const Text('L'),
               title: const Text('No Scaffold'),
