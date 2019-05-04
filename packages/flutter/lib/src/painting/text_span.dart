@@ -346,16 +346,17 @@ class TextSpan extends InlineSpan {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
+    if (super != other)
+      return false;
     final TextSpan typedOther = other;
     return typedOther.text == text
-        && typedOther.style == style
         && typedOther.recognizer == recognizer
         && typedOther.semanticsLabel == semanticsLabel
         && listEquals<InlineSpan>(typedOther.children, children);
   }
 
   @override
-  int get hashCode => hashValues(text, style, recognizer, semanticsLabel, hashList(children));
+  int get hashCode => hashValues(super.hashCode, text, recognizer, semanticsLabel, hashList(children));
 
   @override
   String toStringShort() => '$runtimeType';

@@ -51,7 +51,7 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 ///     style: TextStyle(color: Colors.black),
 ///     children: <InlineSpan>[
 ///       WidgetSpan(
-///         alignment: InlineWidgetAlignment.baseline,
+///         alignment: PlaceholderAlignment.baseline,
 ///         baseline: TextBaseline.alphabetic,
 ///         widget: ConstrainedBox(
 ///           constraints: BoxConstraints(maxWidth: 100),
@@ -79,7 +79,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     this.style,
   });
 
-  /// The style to apply to this span.
+  /// The [TextStyle] to apply to this span.
   ///
   /// The [style] is also applied to any child spans when this is an instance
   /// of [TextSpan].
@@ -109,8 +109,8 @@ abstract class InlineSpan extends DiagnosticableTree {
     return result;
   }
 
-  /// Performs the check at each InlineSpan for if the index falls within the range
-  /// of the span and returns the Span if it does.
+  /// Performs the check at each [InlineSpan] for if the [index] falls within the range
+  /// of the span and returns the span if it does.
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
   @protected
@@ -130,9 +130,16 @@ abstract class InlineSpan extends DiagnosticableTree {
     return buffer.toString();
   }
 
-  /// Walks the InlineSpan tree and writes the plain text representation to [buffer].
+  /// Walks the [InlineSpan] tree and writes the plain text representation to [buffer].
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
+  /// 
+  /// Styles are not honored in this process. If `includeSemanticsLabels` is
+  /// true, then the text returned will include the [TextSpan.semanticsLabel]s
+  /// instead of the text contents for [TextSpan]s.
+  ///
+  /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
+  /// represented as a 0xFFFC 'object replacement character'.
   ///
   /// The plain-text representation of this [InlineSpan] is written into the [buffer].
   @protected
@@ -142,7 +149,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
   ///
-  /// Returns null if the index is out of bounds.
+  /// Returns null if the [index] is out of bounds.
   int codeUnitAt(int index) {
     if (index < 0)
       return null;
@@ -155,8 +162,8 @@ abstract class InlineSpan extends DiagnosticableTree {
     return result;
   }
 
-  /// Performs the check at each InlineSpan for if the index falls within the range
-  /// of the span and stores the corresponding code unit in [result] if it does.
+  /// Performs the check at each [InlineSpan] for if the [index] falls within the range
+  /// of the span and returns the corresponding code unit. Returns null otherwise.
   ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
@@ -172,27 +179,12 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// ```
   /// 
   bool debugAssertIsValid() => true;
-  // bool debugAssertIsValid() {
-  //   assert(() {
-  //     if (!visitChildren((InlineSpan span) {
-  //       return span.debugAssertIsValidVisitor();
-  //     })) {
-  //       throw FlutterError(
-  //         'TextSpan contains a null child.\n'
-  //         'A TextSpan object with a non-null child list should not have any nulls in its child list.\n'
-  //         'The full text in question was:\n'
-  //         '${toStringDeep(prefixLineOne: '  ')}'
-  //       );
-  //     }
-  //     return true;
-  //   }());
-  //   return true;
-  // }
 
   /// Describe the difference between this span and another, in terms of
   /// how much damage it will make to the rendering. The comparison is deep.
   ///
-  /// Comparing a [TextSpan] with a [WidgetSpan] will result in [RenderComparison.layout].
+  /// Comparing [InlineSpan] objects of different types, for example, comparing
+  /// a [TextSpan] to a [WidgetSpan], always results in [RenderComparison.layout].
   ///
   /// See also:
   ///

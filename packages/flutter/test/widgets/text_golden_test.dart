@@ -585,7 +585,7 @@ void main() {
                         ),
                         WidgetSpan(
                           child: Checkbox(value: false, onChanged: (bool value) {}),
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic
                         ),
                         WidgetSpan(
@@ -812,7 +812,7 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
@@ -821,7 +821,7 @@ void main() {
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 50.0,
@@ -846,12 +846,12 @@ void main() {
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -860,12 +860,12 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -874,7 +874,7 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.baseline,
+                          alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
                           child: Text('embedded'),
                         ),
@@ -919,7 +919,7 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
@@ -928,7 +928,7 @@ void main() {
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 50.0,
@@ -953,12 +953,12 @@ void main() {
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -967,12 +967,12 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -981,7 +981,7 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.aboveBaseline,
+                          alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Text('embedded'),
                         ),
@@ -1026,7 +1026,7 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.belowBaseline,
+                          alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
@@ -1035,7 +1035,7 @@ void main() {
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.belowBaseline,
+                          alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 50.0,
@@ -1060,12 +1060,12 @@ void main() {
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.belowBaseline,
+                          alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.belowBaseline,
+                          alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -1074,12 +1074,12 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.belowBaseline,
+                          alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.belowBaseline,
+                          alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -1088,7 +1088,7 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.belowBaseline,
+                          alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
                           child: Text('embedded'),
                         ),
@@ -1133,7 +1133,7 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.top,
+                          alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
@@ -1142,7 +1142,7 @@ void main() {
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.top,
+                          alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 50.0,
@@ -1167,12 +1167,12 @@ void main() {
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.top,
+                          alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.top,
+                          alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -1181,12 +1181,12 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.top,
+                          alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.top,
+                          alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -1195,7 +1195,7 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.top,
+                          alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
                           child: Text('embedded'),
                         ),
@@ -1240,7 +1240,7 @@ void main() {
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.middle,
+                          alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: true, onChanged: (bool value) {}),
                         ),
@@ -1249,7 +1249,7 @@ void main() {
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.middle,
+                          alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 50.0,
@@ -1274,12 +1274,12 @@ void main() {
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.middle,
+                          alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.middle,
+                          alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -1288,12 +1288,12 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.middle,
+                          alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
                           child: Checkbox(value: false, onChanged: (bool value) {}),
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.middle,
+                          alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
                           child: SizedBox(
                             width: 20,
@@ -1302,7 +1302,7 @@ void main() {
                           )
                         ),
                         WidgetSpan(
-                          alignment: InlineWidgetAlignment.middle,
+                          alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
                           child: Text('embedded'),
                         ),

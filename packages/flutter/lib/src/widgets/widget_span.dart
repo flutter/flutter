@@ -8,44 +8,6 @@ import 'package:flutter/painting.dart';
 
 import 'framework.dart';
 
-/// Where to vertically align the widget relative to the surrounding text.
-///
-/// This is parallel to [ui.PlaceholderAignment], but refers to widgets.
-enum InlineWidgetAlignment {
-  /// Match the baseline of the widget with the baseline specified in
-  /// [WidgetSpan.baseline]. Using widget-baseline alignment results in
-  /// the inability to use min/max intrinsic width/height on the entire
-  /// [RenderParagraph] due to the requirement that layout be called before
-  /// getting the baseline.
-  ///
-  /// This is useful when aligning text-based inline widgets such as
-  /// [TextField]s and will ensure the text will line up correctly.
-  baseline,
-
-  /// Align the bottom edge of the widget with the baseline specified in
-  /// [WidgetSpan.baseline] such that the widget sits on top of the baseline.
-  aboveBaseline,
-
-  /// Align the top edge of the widget with the baseline specified in
-  /// [WidgetSpan.baseline] such that the widget hangs below the baseline.
-  belowBaseline,
-
-  /// Align the top edge of the widget with the top edge of the font specified
-  /// in [WidgetSpan.style]. When the widget is very tall, the extra space
-  /// will hang from the top and extend through the bottom of the line.
-  top,
-
-  /// Align the bottom edge of the widget with the top edge of the font specified
-  /// in [WidgetSpan.style]. When the widget is very tall, the extra space
-  /// will rise from the bottom and extend through the top of the line.
-  bottom,
-
-  /// Align the middle of the placeholder with the middle of the text. When the
-  /// widget is very tall, the extra space will grow equally from the top and
-  /// bottom of the line.
-  middle,
-}
-
 /// An immutable widget that is embedded inline within text.
 ///
 /// The [child] property is the widget that will be embedded. It is the
@@ -107,22 +69,17 @@ class WidgetSpan extends PlaceholderSpan {
   /// decoration, foreground, background, and spacing options will be used.
   const WidgetSpan({
     @required this.child,
-    InlineWidgetAlignment alignment = InlineWidgetAlignment.bottom,
+    ui.PlaceholderAlignment alignment = ui.PlaceholderAlignment.bottom,
     TextBaseline baseline,
     TextStyle style,
   }) : assert(child != null),
-       assert((alignment == InlineWidgetAlignment.aboveBaseline ||
-               alignment == InlineWidgetAlignment.belowBaseline ||
-               alignment == InlineWidgetAlignment.baseline) ? baseline != null : true),
-       super(alignment:
-           // Convert InlineWidgetAlignment to PlaceholderAlignment in a const fashion.
-           alignment == InlineWidgetAlignment.baseline ? ui.PlaceholderAlignment.baseline :
-           alignment == InlineWidgetAlignment.aboveBaseline ? ui.PlaceholderAlignment.aboveBaseline :
-           alignment == InlineWidgetAlignment.belowBaseline ? ui.PlaceholderAlignment.belowBaseline :
-           alignment == InlineWidgetAlignment.top ? ui.PlaceholderAlignment.top :
-           alignment == InlineWidgetAlignment.bottom ? ui.PlaceholderAlignment.bottom :
-           alignment == InlineWidgetAlignment.middle ? ui.PlaceholderAlignment.middle : null,
-         baseline: baseline, style: style,
+       assert((alignment == ui.PlaceholderAlignment.aboveBaseline ||
+               alignment == ui.PlaceholderAlignment.belowBaseline ||
+               alignment == ui.PlaceholderAlignment.baseline) ? baseline != null : true),
+       super(
+         alignment: alignment,
+         baseline: baseline,
+         style: style,
        );
 
   /// The widget to embed inline within text.
@@ -132,7 +89,7 @@ class WidgetSpan extends PlaceholderSpan {
   /// calculated for the widget.
   ///
   /// Sizes are provided through [dimensions], which should contain a 1:1
-  /// in-order mapping of widget to laid out dimensions. If no such dimension
+  /// in-order mapping of widget to laid-out dimensions. If no such dimension
   /// is provided, the widget will be skipped.
   ///
   /// Since widget sizes are calculated independently from the rest of the
@@ -141,22 +98,24 @@ class WidgetSpan extends PlaceholderSpan {
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
 
-    final bool hasStyle = style != null;
-    if (hasStyle)
-      builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
-    assert(dimensions != null);
-    assert(builder.placeholderCount < dimensions.length);
-    final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
-    builder.addPlaceholder(
-      currentDimensions.size.width,
-      currentDimensions.size.height,
-      alignment,
-      baseline: currentDimensions.baseline,
-      baselineOffset: currentDimensions.baselineOffset,
-    );
-    
-    if (hasStyle)
-      builder.pop();
+    if (dimensions != null) {
+      final bool hasStyle = style != null;
+      if (hasStyle) {
+        builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
+      }
+      assert(builder.placeholderCount < dimensions.length);
+      final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
+      builder.addPlaceholder(
+        currentDimensions.size.width,
+        currentDimensions.size.height,
+        alignment,
+        baseline: currentDimensions.baseline,
+        baselineOffset: currentDimensions.baselineOffset,
+      );
+      if (hasStyle) {
+        builder.pop();
+      }
+    }
   }
 
   /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
@@ -209,15 +168,16 @@ class WidgetSpan extends PlaceholderSpan {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
+    if (super != other)
+      return false;
     final WidgetSpan typedOther = other;
     return typedOther.child == child
         && typedOther.alignment == alignment
-        && typedOther.baseline == baseline
-        && typedOther.style == style;
+        && typedOther.baseline == baseline;
   }
 
   @override
-  int get hashCode => hashValues(child, alignment, baseline, super.hashCode);
+  int get hashCode => hashValues(super.hashCode, child, alignment, baseline);
 
   /// Returns the text span that contains the given position in the text.
   @override
@@ -238,11 +198,6 @@ class WidgetSpan extends PlaceholderSpan {
   bool debugAssertIsValid() {
     // WidgetSpans are always valid as asserts prevent invalid WidgetSpans
     // from being constructed.
-    return true;
-  }
-
-  @override
-  bool debugAssertIsValidVisitor() {
     return true;
   }
 }
