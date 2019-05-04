@@ -63,7 +63,8 @@ const List<TimelineStream> _defaultStreams = <TimelineStream>[TimelineStream.all
 
 /// How long to wait before showing a message saying that
 /// things seem to be taking a long time.
-const Duration _kUnusuallyLongTimeout = Duration(seconds: 5);
+@visibleForTesting
+const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
 
 /// The amount of time we wait prior to making the next attempt to connect to
 /// the VM service.
@@ -100,16 +101,6 @@ Future<T> _warnIfSlow<T>({
   assert(timeout != null);
   assert(message != null);
   return future..timeout(timeout, onTimeout: () { _log.warning(message); });
-}
-
-Duration _maxDuration(Duration a, Duration b) {
-  if (a == null)
-    return b;
-  if (b == null)
-    return a;
-  if (a > b)
-    return a;
-  return b;
 }
 
 /// A convenient accessor to frequently used finders.
@@ -334,7 +325,7 @@ class FlutterDriver {
       // register it. If that happens, show a message but continue waiting.
       await _warnIfSlow<String>(
         future: whenServiceExtensionReady,
-        timeout: _kUnusuallyLongTimeout,
+        timeout: kUnusuallyLongTimeout,
         message: 'Flutter Driver extension is taking a long time to become available. '
                  'Ensure your test app (often "lib/main.dart") imports '
                  '"package:flutter_driver/driver_extension.dart" and '
@@ -416,7 +407,7 @@ class FlutterDriver {
       ).then<Map<String, dynamic>>((Object value) => value);
       response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
-        timeout: _maxDuration(command.timeout, _kUnusuallyLongTimeout),
+        timeout: command.timeout ?? kUnusuallyLongTimeout,
         message: '${command.kind} message is taking a long time to complete...',
       );
       _logCommunication('<<< $response');
@@ -736,7 +727,7 @@ class FlutterDriver {
   /// operation.
   Future<void> startTracing({
     List<TimelineStream> streams = _defaultStreams,
-    Duration timeout = _kUnusuallyLongTimeout,
+    Duration timeout = kUnusuallyLongTimeout,
   }) async {
     assert(streams != null && streams.isNotEmpty);
     assert(timeout != null);
@@ -763,7 +754,7 @@ class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   Future<Timeline> stopTracingAndDownloadTimeline({
-    Duration timeout = _kUnusuallyLongTimeout,
+    Duration timeout = kUnusuallyLongTimeout,
   }) async {
     assert(timeout != null);
     try {
@@ -832,7 +823,7 @@ class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   Future<void> clearTimeline({
-    Duration timeout = _kUnusuallyLongTimeout,
+    Duration timeout = kUnusuallyLongTimeout,
   }) async {
     assert(timeout != null);
     try {
