@@ -164,8 +164,7 @@ class HitTestResult {
     _transforms.removeLast();
   }
 
-  bool _vectorMoreOrLessEquals(Vector4 a, Vector4 b) {
-    const double epsilon = 0.000001;
+  bool _vectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon =  0.000001 }) {
     final Vector4 difference = a - b;
     return difference.storage.every((double component) => component.abs() < epsilon);
   }
