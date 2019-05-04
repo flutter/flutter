@@ -375,7 +375,7 @@ void main() {
     );
 
     testWidgets(
-      'refreshing task keeps the sliver expanded forever until fail',
+      'refreshing task keeps the sliver expanded forever until completes with error',
       (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         final FlutterError error = FlutterError('Oops');
@@ -402,26 +402,6 @@ void main() {
           await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
           await tester.pump();
           // Let it start snapping back.
-          await tester.pump(const Duration(milliseconds: 50));
-
-          verifyInOrder(<void>[
-              mockHelper.builder(
-                any,
-                RefreshIndicatorMode.armed,
-                150.0,
-                100.0, // Default value.
-                60.0, // Default value.
-              ),
-              mockHelper.refreshTask(),
-              mockHelper.builder(
-                any,
-                RefreshIndicatorMode.armed,
-                argThat(moreOrLessEquals(127.10396988577114)),
-                100.0, // Default value.
-                60.0, // Default value.
-              ),
-          ]);
-
           // Reaches refresh state and sliver's at 60.0 in height after a while.
           await tester.pump(const Duration(seconds: 1));
           verify(mockHelper.builder(
@@ -432,7 +412,8 @@ void main() {
               60.0, // Default value.
           ));
 
-          // Stays in that state forever until future completes.
+          clearInteractions(mockHelper);
+          // Stays in that state forever until future completes with error.
           await tester.pump(const Duration(seconds: 1000));
           verifyNoMoreInteractions(mockHelper);
           expect(
