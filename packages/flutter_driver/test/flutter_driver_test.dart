@@ -15,9 +15,6 @@ import 'package:quiver/testing/async.dart';
 
 import 'common.dart';
 
-/// Default timeout value.
-const Duration _kDefaultTimeout = Duration(seconds: 5);
-
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
@@ -399,7 +396,7 @@ void main() {
         FakeAsync().run((FakeAsync time) {
           driver.waitFor(find.byTooltip('foo'));
           expect(log, <String>[]);
-          time.elapse(_kDefaultTimeout);
+          time.elapse(kUnusuallyLongTimeout);
         });
         expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
         await logSub.cancel();
@@ -413,9 +410,10 @@ void main() {
           return Completer<Map<String, dynamic>>().future;
         });
         FakeAsync().run((FakeAsync time) {
-          driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+          final Duration customTimeout = kUnusuallyLongTimeout - const Duration(seconds: 1);
+          driver.waitFor(find.byTooltip('foo'), timeout: customTimeout);
           expect(log, <String>[]);
-          time.elapse(_kTestTimeout);
+          time.elapse(customTimeout);
         });
         expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
         await logSub.cancel();
