@@ -112,7 +112,7 @@ class WindowPadding {
 
   @override
   String toString() {
-    return '$runtimeType(left: $left, top: $top, right: $right, bottom: $bottom)';
+    return 'WindowPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
   }
 }
 
