@@ -121,7 +121,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '35b76cf373251a85c4c902e2c442df24d0764e88',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'd7b8d34745aec6591b28d7c76894820da26a9dc9',
 
    # Fuchsia compatibility
    #
@@ -136,7 +136,7 @@ deps = {
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + '21f1eb3fe269ea43eba862bf6b699cde46587ade',
 
   'src/third_party/googletest':
-   Var('fuchsia_git') + '/third_party/googletest' + '@' + '50a5a788420bd44501a75562de8936fd7ac32117',
+   Var('fuchsia_git') + '/third_party/googletest' + '@' + '46d66506083fc3333d84c260e7bd2eb3816a917a',
 
   'src/third_party/rapidjson':
    Var('fuchsia_git') + '/third_party/rapidjson' + '@' + '32d07c55db1bb6c2ae17cba4033491a667647753',
@@ -373,7 +373,7 @@ deps = {
    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/third_party/libjpeg-turbo':
-   Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '9587e51cf946f1a1d19bb596bc31ba4e6c9d8893',
+   Var('fuchsia_git') + '/third_party/libjpeg-turbo' + '@' + '0fb821f3b2e570b2783a94ccd9a2fb1f4916ae9f',
 
   'src/third_party/libwebp':
    Var('chromium_git') + '/webm/libwebp.git' + '@' + '0.6.0',
