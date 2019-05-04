@@ -1,4 +1,4 @@
-Signature: 0e7774857f902219d918f486d54846b8
+Signature: 7c30ef8a841ff2b68cd88fe8ffb74216
 
 UNUSED LICENSES:
 
@@ -1025,8 +1025,8 @@ FILE: ../../../third_party/skia/gm/croppedrects.cpp
 FILE: ../../../third_party/skia/gm/dashcircle.cpp
 FILE: ../../../third_party/skia/gm/drawregion.cpp
 FILE: ../../../third_party/skia/gm/drawregionmodes.cpp
-FILE: ../../../third_party/skia/gm/encode-platform.cpp
-FILE: ../../../third_party/skia/gm/encode-srgb.cpp
+FILE: ../../../third_party/skia/gm/encode_platform.cpp
+FILE: ../../../third_party/skia/gm/encode_srgb.cpp
 FILE: ../../../third_party/skia/gm/filterbug.cpp
 FILE: ../../../third_party/skia/gm/hardstop_gradients.cpp
 FILE: ../../../third_party/skia/gm/imagemakewithfilter.cpp
@@ -3845,7 +3845,7 @@ FILE: ../../../third_party/skia/gm/crbug_788500.cpp
 FILE: ../../../third_party/skia/gm/crosscontextimage.cpp
 FILE: ../../../third_party/skia/gm/dftext_blob_persp.cpp
 FILE: ../../../third_party/skia/gm/drrect_small_inner.cpp
-FILE: ../../../third_party/skia/gm/encode-alpha-jpeg.cpp
+FILE: ../../../third_party/skia/gm/encode_alpha_jpeg.cpp
 FILE: ../../../third_party/skia/gm/etc1.cpp
 FILE: ../../../third_party/skia/gm/flippity.cpp
 FILE: ../../../third_party/skia/gm/highcontrastfilter.cpp
