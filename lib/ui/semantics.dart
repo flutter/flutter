@@ -654,8 +654,11 @@ class SemanticsUpdateBuilder extends NativeFieldWrapperClass2 {
     Int32List childrenInHitTestOrder,
     Int32List additionalActions,
   }) {
-    if (transform.length != 16)
-      throw new ArgumentError('transform argument must have 16 entries.');
+    assert(_matrix4IsValid(transform));
+    assert(
+      scrollChildren == 0 || (scrollChildren > 0 && childrenInHitTestOrder != null),
+      'If a node has scrollChildren, it must have childrenInHitTestOrder',
+    );
     _updateNode(
       id,
       flags,
