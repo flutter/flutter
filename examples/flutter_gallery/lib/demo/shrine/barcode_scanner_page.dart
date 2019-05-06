@@ -30,10 +30,12 @@ class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage({
     this.validRectangle = const Rectangle(width: 320, height: 144),
     this.frameColor = Colors.black38,
+    this.maxOutlinePercent = 1.2,
   });
 
   final Rectangle validRectangle;
   final Color frameColor;
+  final double maxOutlinePercent;
 
   @override
   _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
@@ -469,11 +471,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                             color: Colors.white,
                           ),
                           Rectangle(
-                            width: widget.validRectangle.width + 100,
-                            height: widget.validRectangle.height +
-                                (100 *
-                                    (widget.validRectangle.height /
-                                        widget.validRectangle.width)),
+                            width: widget.validRectangle.width *
+                                widget.maxOutlinePercent,
+                            height: widget.validRectangle.height *
+                                widget.maxOutlinePercent,
                             color: Colors.transparent,
                           ),
                         ).animate(_animationController),
@@ -587,7 +588,7 @@ class Rectangle {
 
   static Rectangle lerp(Rectangle begin, Rectangle end, double t) {
     Color color;
-    if (t > 0.75) {
+    if (t > .75) {
       color = Color.lerp(begin.color, end.color, (t - .75) / .25);
     } else {
       color = begin.color;
@@ -675,27 +676,32 @@ class RectangleTracePainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..color = rectangle.color;
 
+    final double halfStrokeWidth = strokeWidth / 2;
+
+    final double heightProportion = (halfStrokeWidth + rect.height) * value;
+    final double widthProportion = (halfStrokeWidth + rect.width) * value;
+
     canvas.drawLine(
-      rect.bottomRight,
-      Offset(rect.right, rect.top + (rectangle.width - value)),
+      Offset(rect.right, rect.bottom + halfStrokeWidth),
+      Offset(rect.right, rect.bottom - heightProportion),
       paint,
     );
 
     canvas.drawLine(
-      rect.bottomRight,
-      Offset(rect.left + (rectangle.width - value), rect.bottom),
+      Offset(rect.right + halfStrokeWidth, rect.bottom),
+      Offset(rect.right - widthProportion, rect.bottom),
       paint,
     );
 
     canvas.drawLine(
-      rect.topLeft,
-      Offset(rect.left, rect.top + value),
+      Offset(rect.left, rect.top - halfStrokeWidth),
+      Offset(rect.left, rect.top + heightProportion),
       paint,
     );
 
     canvas.drawLine(
-      rect.topLeft,
-      Offset(rect.left + value, rect.top),
+      Offset(rect.left - halfStrokeWidth, rect.top),
+      Offset(rect.left + widthProportion, rect.top),
       paint,
     );
   }
