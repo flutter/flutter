@@ -72,7 +72,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
   void _initAnimation() {
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1300),
+      duration: const Duration(milliseconds: 750),
       vsync: this,
     );
 
@@ -265,10 +265,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           width: double.infinity,
           height: 368,
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Container(
-                alignment: Alignment.topLeft,
+                height: 56,
+                alignment: Alignment.centerLeft,
                 decoration: BoxDecoration(
                   border: Border(bottom: const BorderSide(color: Colors.grey)),
                 ),
@@ -316,6 +316,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                               Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: const <Widget>[
                                     Text('Material Design'),
                                     Text('120 pages'),
@@ -329,7 +330,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 22, bottom: 25),
-                      child: const Text('A Japanese & English accompaniment to'
+                      child: const Text('A Japanese & English accompaniment to '
                           'the 2016 SPAN conference.'),
                     ),
                     RaisedButton(
