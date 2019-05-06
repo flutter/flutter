@@ -1,4 +1,4 @@
-Signature: 19c005a15afec1d94b1683915791f3d5
+Signature: fa0a95425b4c480b2922ca74481bf3c1
 
 UNUSED LICENSES:
 
@@ -1927,6 +1927,8 @@ FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/helper.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/karma.conf.js
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/package.json
 FILE: ../../../third_party/skia/experimental/wasm-skp-debugger/ready.js
+FILE: ../../../third_party/skia/go.mod
+FILE: ../../../third_party/skia/go.sum
 FILE: ../../../third_party/skia/infra/bots/assets.isolate
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_darwin/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/android_ndk_linux/VERSION
@@ -1943,7 +1945,6 @@ FILE: ../../../third_party/skia/infra/bots/assets/cmake_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/cmake_mac/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/gcloud_linux/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/go/VERSION
-FILE: ../../../third_party/skia/infra/bots/assets/go_deps/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/linux_vulkan_sdk/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/lottie-samples/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/mesa_intel_driver_linux/VERSION
@@ -2349,6 +2350,8 @@ FILE: ../../../third_party/skia/site/user/api/catalog.htm
 FILE: ../../../third_party/skia/site/user/modules/METADATA
 FILE: ../../../third_party/skia/site/user/modules/PathKit_effects.png
 FILE: ../../../third_party/skia/specs/web-img-decode/current/index.html
+FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
+FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
 FILE: ../../../third_party/skia/src/sksl/sksl.inc
