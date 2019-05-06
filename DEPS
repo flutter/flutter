@@ -446,6 +446,16 @@ deps = {
      'dep_type': 'cipd',
    },
 
+   'src/third_party/dart/tools/sdks': {
+     'packages': [
+       {
+         'package': 'dart/dart-sdk/${{platform}}',
+         'version': 'version:2.2.0'
+       }
+     ],
+     'dep_type': 'cipd',
+   },
+
    # Get the SDK from https://chrome-infra-packages.appspot.com/p/fuchsia/sdk/core at the 'latest' tag
    # Get the toolchain from https://chrome-infra-packages.appspot.com/p/fuchsia/clang at the 'goma' tag
 
@@ -509,12 +519,6 @@ hooks = [
     'condition': 'download_windows_deps',
     'pattern': '.',
     'action': ['python', 'src/build/vs_toolchain.py', 'update'],
-  },
-  {
-    # Pull prebuilt dart sdk.
-    'name': 'dart',
-    'pattern': '.',
-    'action': ['python', 'src/tools/dart/update.py'],
   },
   {
     'name': 'download_android_support',
