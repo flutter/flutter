@@ -279,7 +279,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   void _onCurrentIndexChange() {
     assert(
-      _controller.index < 0 || _controller.index >= widget.tabBar.items.length,
+      _controller.index >= 0 && _controller.index < widget.tabBar.items.length,
       "The CupertinoTabController's current index ${_controller.index} is "
       'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
     );
