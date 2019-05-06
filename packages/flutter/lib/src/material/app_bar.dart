@@ -681,7 +681,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.floating,
     @required this.pinned,
     @required this.snapConfiguration,
-    @required this.shape,
   }) : assert(primary || topPadding == 0.0),
        _bottomHeight = bottom?.preferredSize?.height ?? 0.0;
 
@@ -706,7 +705,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final double topPadding;
   final bool floating;
   final bool pinned;
-  final ShapeBorder shape;
 
   final double _bottomHeight;
 
@@ -761,7 +759,6 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         primary: primary,
         centerTitle: centerTitle,
         titleSpacing: titleSpacing,
-        shape: shape,
         toolbarOpacity: toolbarOpacity,
         bottomOpacity: pinned ? 1.0 : (visibleMainHeight / _bottomHeight).clamp(0.0, 1.0),
       ),
@@ -905,7 +902,6 @@ class SliverAppBar extends StatefulWidget {
     this.floating = false,
     this.pinned = false,
     this.snap = false,
-    this.shape,
   }) : assert(automaticallyImplyLeading != null),
        assert(forceElevated != null),
        assert(primary != null),
@@ -1066,12 +1062,6 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
-  /// The material's shape as well its shadow.
-  ///
-  /// A shadow is only displayed if the [elevation] is greater than
-  /// zero.
-  final ShapeBorder shape;
-
   /// The size of the app bar when it is fully expanded.
   ///
   /// By default, the total height of the toolbar and the bottom widget (if
@@ -1225,7 +1215,6 @@ class _SliverAppBarState extends State<SliverAppBar> with TickerProviderStateMix
           topPadding: topPadding,
           floating: widget.floating,
           pinned: widget.pinned,
-          shape: widget.shape,
           snapConfiguration: _snapConfiguration,
         ),
       ),
