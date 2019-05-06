@@ -28,7 +28,7 @@ class PluginRegistrar {
   // provides must remain valid as long as this object exists.
   explicit PluginRegistrar(FlutterDesktopPluginRegistrarRef core_registrar);
 
-  ~PluginRegistrar();
+  virtual ~PluginRegistrar();
 
   // Prevent copying.
   PluginRegistrar(PluginRegistrar const&) = delete;
