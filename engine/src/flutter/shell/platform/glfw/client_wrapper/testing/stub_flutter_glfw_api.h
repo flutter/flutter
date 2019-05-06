@@ -59,6 +59,17 @@ class StubFlutterGlfwApi {
   //  Called for FlutterDesktopWindowSetIcon.
   virtual void SetWindowIcon(uint8_t* pixel_data, int width, int height) {}
 
+  // Called for FlutterDesktopWindowGetFrame.
+  virtual void GetWindowFrame(int* x, int* y, int* width, int* height) {
+    x = y = width = height = 0;
+  }
+
+  // Called for FlutterDesktopWindowGetFrame.
+  virtual void SetWindowFrame(int x, int y, int width, int height) {}
+
+  // Called for FlutterDesktopWindowGetScaleFactor.
+  virtual double GetWindowScaleFactor() { return 1.0; }
+
   // Called for FlutterDesktopRunWindowLoop.
   virtual void RunWindowLoop() {}
 

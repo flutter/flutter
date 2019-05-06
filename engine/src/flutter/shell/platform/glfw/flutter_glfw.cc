@@ -69,8 +69,6 @@ struct FlutterDesktopWindowControllerState {
   // The screen coordinates per inch on the primary monitor. Defaults to a sane
   // value based on pixel_ratio 1.0.
   double monitor_screen_coordinates_per_inch = kDpPerInch;
-  // The ratio of pixels per screen coordinate for the window.
-  double window_pixels_per_screen_coordinate = 1.0;
 };
 
 // Opaque reference for the GLFW window itself. This is separate from the
@@ -82,6 +80,9 @@ struct FlutterDesktopWindow {
 
   // Whether or not to track mouse movements to send kHover events.
   bool hover_tracking_enabled = false;
+
+  // The ratio of pixels per screen coordinate for the window.
+  double pixels_per_screen_coordinate = 1.0;
 };
 
 // Struct for storing state of a Flutter engine instance.
@@ -152,9 +153,9 @@ static void GLFWFramebufferSizeCallback(GLFWwindow* window,
   glfwGetWindowSize(window, &width, nullptr);
 
   auto state = GetSavedWindowState(window);
-  state->window_pixels_per_screen_coordinate = width_px / width;
+  state->window_wrapper->pixels_per_screen_coordinate = width_px / width;
 
-  double dpi = state->window_pixels_per_screen_coordinate *
+  double dpi = state->window_wrapper->pixels_per_screen_coordinate *
                state->monitor_screen_coordinates_per_inch;
   // Limit the ratio to 1 to avoid rendering a smaller UI in standard resolution
   // monitors.
@@ -200,10 +201,12 @@ static void SendPointerEventWithData(GLFWwindow* window,
           std::chrono::high_resolution_clock::now().time_since_epoch())
           .count();
   // Convert all screen coordinates to pixel coordinates.
-  event.x *= state->window_pixels_per_screen_coordinate;
-  event.y *= state->window_pixels_per_screen_coordinate;
-  event.scroll_delta_x *= state->window_pixels_per_screen_coordinate;
-  event.scroll_delta_y *= state->window_pixels_per_screen_coordinate;
+  double pixels_per_coordinate =
+      state->window_wrapper->pixels_per_screen_coordinate;
+  event.x *= pixels_per_coordinate;
+  event.y *= pixels_per_coordinate;
+  event.scroll_delta_x *= pixels_per_coordinate;
+  event.scroll_delta_y *= pixels_per_coordinate;
 
   FlutterEngineSendPointerEvent(state->engine, &event, 1);
 
@@ -579,9 +582,54 @@ void FlutterDesktopWindowSetIcon(FlutterDesktopWindowRef flutter_window,
                                  uint8_t* pixel_data,
                                  int width,
                                  int height) {
-  GLFWwindow* window = flutter_window->window;
   GLFWimage image = {width, height, static_cast<unsigned char*>(pixel_data)};
-  glfwSetWindowIcon(window, pixel_data ? 1 : 0, &image);
+  glfwSetWindowIcon(flutter_window->window, pixel_data ? 1 : 0, &image);
+}
+
+void FlutterDesktopWindowGetFrame(FlutterDesktopWindowRef flutter_window,
+                                  int* x,
+                                  int* y,
+                                  int* width,
+                                  int* height) {
+  glfwGetWindowPos(flutter_window->window, x, y);
+  glfwGetWindowSize(flutter_window->window, width, height);
+  // The above gives content area size and position; adjust for the window
+  // decoration to give actual window frame.
+  int frame_left, frame_top, frame_right, frame_bottom;
+  glfwGetWindowFrameSize(flutter_window->window, &frame_left, &frame_top,
+                         &frame_right, &frame_bottom);
+  if (x) {
+    *x -= frame_left;
+  }
+  if (y) {
+    *y -= frame_top;
+  }
+  if (width) {
+    *width += frame_left + frame_right;
+  }
+  if (height) {
+    *height += frame_top + frame_bottom;
+  }
+}
+
+void FlutterDesktopWindowSetFrame(FlutterDesktopWindowRef flutter_window,
+                                  int x,
+                                  int y,
+                                  int width,
+                                  int height) {
+  // Get the window decoration sizes to adjust, since the GLFW setters take
+  // content position and size.
+  int frame_left, frame_top, frame_right, frame_bottom;
+  glfwGetWindowFrameSize(flutter_window->window, &frame_left, &frame_top,
+                         &frame_right, &frame_bottom);
+  glfwSetWindowPos(flutter_window->window, x + frame_left, y + frame_top);
+  glfwSetWindowSize(flutter_window->window, width - frame_left - frame_right,
+                    height - frame_top - frame_bottom);
+}
+
+double FlutterDesktopWindowGetScaleFactor(
+    FlutterDesktopWindowRef flutter_window) {
+  return flutter_window->pixels_per_screen_coordinate;
 }
 
 void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {

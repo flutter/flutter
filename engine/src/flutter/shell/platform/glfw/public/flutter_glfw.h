@@ -119,6 +119,27 @@ FLUTTER_EXPORT void FlutterDesktopWindowSetIcon(
     int width,
     int height);
 
+// Gets the position and size of |flutter_window| in screen coordinates.
+FLUTTER_EXPORT void FlutterDesktopWindowGetFrame(
+    FlutterDesktopWindowRef flutter_window,
+    int* x,
+    int* y,
+    int* width,
+    int* height);
+
+// Sets the position and size of |flutter_window| in screen coordinates.
+FLUTTER_EXPORT void FlutterDesktopWindowSetFrame(
+    FlutterDesktopWindowRef flutter_window,
+    int x,
+    int y,
+    int width,
+    int height);
+
+// Returns the scale factor--the number of pixels per screen coordinate--for
+// |flutter_window|.
+FLUTTER_EXPORT double FlutterDesktopWindowGetScaleFactor(
+    FlutterDesktopWindowRef flutter_window);
+
 // Runs an instance of a headless Flutter engine.
 //
 // The |assets_path| is the path to the flutter_assets folder for the Flutter
