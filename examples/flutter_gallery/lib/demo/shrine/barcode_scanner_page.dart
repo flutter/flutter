@@ -57,6 +57,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     super.initState();
 
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[]);
+    SystemChrome.setPreferredOrientations(
+      <DeviceOrientation>[DeviceOrientation.portraitUp],
+    );
     _initCameraAndScanner();
     _initAnimation();
   }
@@ -155,16 +158,17 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     final double maxLogicalHeight =
         data.size.height - padding.top - padding.bottom;
 
-    final double heightScale = imageSize.height / maxLogicalHeight;
-    final double halfSquareWidth =
-        heightScale * widget.validRectangle.width / 2;
+    final double imageScale = imageSize.height / maxLogicalHeight;
+    final double halfWidth =
+        imageScale * widget.validRectangle.width / 2;
+    final double halfHeight = imageScale * widget.validRectangle.height / 2;
 
     final Offset center = imageSize.center(Offset.zero);
     final Rect validRect = Rect.fromLTRB(
-      center.dx - halfSquareWidth,
-      center.dy - halfSquareWidth,
-      center.dx + halfSquareWidth,
-      center.dy + halfSquareWidth,
+      center.dx - halfWidth,
+      center.dy - halfHeight,
+      center.dx + halfWidth,
+      center.dy + halfHeight,
     );
 
     for (Barcode barcode in barcodes) {
@@ -199,6 +203,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     _cameraController?.dispose();
     _animationController?.dispose();
 
+    SystemChrome.setPreferredOrientations(<DeviceOrientation>[]);
     SystemChrome.setEnabledSystemUIOverlays(<SystemUiOverlay>[
       SystemUiOverlay.top,
       SystemUiOverlay.bottom,
