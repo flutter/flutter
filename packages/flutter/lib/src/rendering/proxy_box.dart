@@ -2603,16 +2603,35 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     super.attach(owner);
     // Add a listener to listen for changes in mouseIsConnected.
     RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChanged);
+    postActivate();
+  }
+
+  /// Attaches the annotation for this render object, if any.
+  ///
+  /// This is called by [attach], and the [Listener]'s element to tell the
+  /// render object that it will shortly be attached, so that [onEnter] isn't
+  /// called during the build step for the widget that provided the callback, so
+  /// that [State.setState] can safely be called in that callback.
+  void postActivate() {
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
     }
   }
 
-  @override
-  void detach() {
+  /// Detaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [Listener]'s element to tell the render object that
+  /// it will shortly be detached, so that [onExit] isn't called during the
+  /// build step for the widget that provided the callback, so that
+  /// [State.setState] can safely be called in that callback.
+  void preDeactivate() {
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
+  }
+
+  @override
+  void detach() {
     RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChanged);
     super.detach();
   }
