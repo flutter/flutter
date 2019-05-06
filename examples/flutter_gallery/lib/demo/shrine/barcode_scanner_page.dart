@@ -27,10 +27,12 @@ import 'package:flutter_gallery/demo/shrine/supplemental/barcode_scanner_utils.d
 import 'colors.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
-  const BarcodeScannerPage(
-      {this.validSquareWidth = 256, this.frameColor = Colors.black38});
+  const BarcodeScannerPage({
+    this.validRectangle = const Rectangle(width: 320, height: 144),
+    this.frameColor = Colors.black38,
+  });
 
-  final double validSquareWidth;
+  final Rectangle validRectangle;
   final Color frameColor;
 
   @override
@@ -152,7 +154,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
         data.size.height - padding.top - padding.bottom;
 
     final double heightScale = imageSize.height / maxLogicalHeight;
-    final double halfSquareWidth = heightScale * widget.validSquareWidth / 2;
+    final double halfSquareWidth =
+        heightScale * widget.validRectangle.width / 2;
 
     final Offset center = imageSize.center(Offset.zero);
     final Rect validRect = Rect.fromLTRB(
@@ -398,8 +401,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
               constraints: const BoxConstraints.expand(),
               child: CustomPaint(
                 painter: WindowPainter(
-                  windowSize:
-                      Size(widget.validSquareWidth, widget.validSquareWidth),
+                  windowSize: Size(widget.validRectangle.width,
+                      widget.validRectangle.height),
                   outerFrameColor: widget.frameColor,
                   closeWindow: _closeWindow,
                   innerFrameColor: _barcodeFound
@@ -445,21 +448,33 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
               constraints: const BoxConstraints.expand(),
               child: CustomPaint(
                 painter: _barcodeFound
-                    ? SquareTracePainter(
+                    ? RectangleTracePainter(
                         animation: Tween<double>(
                           begin: 0,
-                          end: widget.validSquareWidth,
+                          end: 1.0,
                         ).animate(
                           _animationController,
                         ),
-                        square: Square(widget.validSquareWidth, Colors.white),
+                        rectangle: Rectangle(
+                          width: widget.validRectangle.width,
+                          height: widget.validRectangle.height,
+                          color: Colors.white,
+                        ),
                       )
-                    : SquareOutlinePainter(
-                        animation: SquareTween(
-                          Square(widget.validSquareWidth, Colors.white),
-                          Square(
-                            widget.validSquareWidth + 100,
-                            Colors.transparent,
+                    : RectangleOutlinePainter(
+                        animation: RectangleTween(
+                          Rectangle(
+                            width: widget.validRectangle.width,
+                            height: widget.validRectangle.height,
+                            color: Colors.white,
+                          ),
+                          Rectangle(
+                            width: widget.validRectangle.width + 100,
+                            height: widget.validRectangle.height +
+                                (100 *
+                                    (widget.validRectangle.height /
+                                        widget.validRectangle.width)),
+                            color: Colors.transparent,
                           ),
                         ).animate(_animationController),
                       ),
@@ -563,13 +578,14 @@ class WindowPainter extends CustomPainter {
       oldDelegate.closeWindow != closeWindow;
 }
 
-class Square {
-  Square(this.width, this.color);
+class Rectangle {
+  const Rectangle({this.width, this.height, this.color});
 
   final double width;
+  final double height;
   final Color color;
 
-  static Square lerp(Square begin, Square end, double t) {
+  static Rectangle lerp(Rectangle begin, Rectangle end, double t) {
     Color color;
     if (t > 0.75) {
       color = Color.lerp(begin.color, end.color, (t - .75) / .25);
@@ -577,61 +593,67 @@ class Square {
       color = begin.color;
     }
 
-    return Square(lerpDouble(begin.width, end.width, t), color);
+    return Rectangle(
+      width: lerpDouble(begin.width, end.width, t),
+      height: lerpDouble(begin.height, end.height, t),
+      color: color,
+    );
   }
 }
 
-class SquareTween extends Tween<Square> {
-  SquareTween(Square begin, Square end) : super(begin: begin, end: end);
+class RectangleTween extends Tween<Rectangle> {
+  RectangleTween(Rectangle begin, Rectangle end)
+      : super(begin: begin, end: end);
 
   @override
-  Square lerp(double t) => Square.lerp(begin, end, t);
+  Rectangle lerp(double t) => Rectangle.lerp(begin, end, t);
 }
 
-class SquareOutlinePainter extends CustomPainter {
-  SquareOutlinePainter({
+class RectangleOutlinePainter extends CustomPainter {
+  RectangleOutlinePainter({
     @required this.animation,
-    this.strokeWidth = 2,
+    this.strokeWidth = 3,
   }) : super(repaint: animation);
 
-  final Animation<Square> animation;
+  final Animation<Rectangle> animation;
   final double strokeWidth;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Square square = animation.value;
+    final Rectangle rectangle = animation.value;
 
     final Paint paint = Paint()
       ..strokeWidth = strokeWidth
-      ..color = square.color
+      ..color = rectangle.color
       ..style = PaintingStyle.stroke;
 
     final Offset center = size.center(Offset.zero);
-    final double halfWidth = square.width / 2;
+    final double halfWidth = rectangle.width / 2;
+    final double halfHeight = rectangle.height / 2;
 
     final Rect rect = Rect.fromLTRB(
       center.dx - halfWidth,
-      center.dy - halfWidth,
+      center.dy - halfHeight,
       center.dx + halfWidth,
-      center.dy + halfWidth,
+      center.dy + halfHeight,
     );
 
     canvas.drawRect(rect, paint);
   }
 
   @override
-  bool shouldRepaint(SquareOutlinePainter oldDelegate) => false;
+  bool shouldRepaint(RectangleOutlinePainter oldDelegate) => false;
 }
 
-class SquareTracePainter extends CustomPainter {
-  SquareTracePainter({
+class RectangleTracePainter extends CustomPainter {
+  RectangleTracePainter({
     @required this.animation,
-    @required this.square,
+    @required this.rectangle,
     this.strokeWidth = 3,
   }) : super(repaint: animation);
 
   final Animation<double> animation;
-  final Square square;
+  final Rectangle rectangle;
   final double strokeWidth;
 
   @override
@@ -639,28 +661,29 @@ class SquareTracePainter extends CustomPainter {
     final double value = animation.value;
 
     final Offset center = size.center(Offset.zero);
-    final double halfWidth = square.width / 2;
+    final double halfWidth = rectangle.width / 2;
+    final double halfHeight = rectangle.height / 2;
 
     final Rect rect = Rect.fromLTRB(
       center.dx - halfWidth,
-      center.dy - halfWidth,
+      center.dy - halfHeight,
       center.dx + halfWidth,
-      center.dy + halfWidth,
+      center.dy + halfHeight,
     );
 
     final Paint paint = Paint()
       ..strokeWidth = strokeWidth
-      ..color = square.color;
+      ..color = rectangle.color;
 
     canvas.drawLine(
       rect.bottomRight,
-      Offset(rect.right, rect.top + (square.width - value)),
+      Offset(rect.right, rect.top + (rectangle.width - value)),
       paint,
     );
 
     canvas.drawLine(
       rect.bottomRight,
-      Offset(rect.left + (square.width - value), rect.bottom),
+      Offset(rect.left + (rectangle.width - value), rect.bottom),
       paint,
     );
 
@@ -678,5 +701,5 @@ class SquareTracePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(SquareTracePainter oldDelegate) => false;
+  bool shouldRepaint(RectangleTracePainter oldDelegate) => false;
 }
