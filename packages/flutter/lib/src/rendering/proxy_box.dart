@@ -2571,8 +2571,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
       changed = true;
     }
-    if (RendererBinding.instance.mouseTracker.mouseIsConnected &&
-        (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null)) {
+    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,
         onHover: _onPointerHover,
@@ -2594,11 +2593,16 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
+  void _handleMouseTrackerChanged() {
+    if (attached)
+      markNeedsPaint();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     // Add a listener to listen for changes in mouseIsConnected.
-    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
+    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChanged);
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
     }
@@ -2609,7 +2613,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
-    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
+    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChanged);
     super.detach();
   }
 
@@ -2618,7 +2622,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hoverAnnotation != null) {
+    if (_hoverAnnotation != null && RendererBinding.instance.mouseTracker.mouseIsConnected) {
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
