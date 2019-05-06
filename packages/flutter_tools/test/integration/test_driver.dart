@@ -417,7 +417,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     await _setupProcess(
       <String>[
         'run',
-	'--disable-service-auth-codes',
+        '--disable-service-auth-codes',
         '--machine',
         '-d',
         'flutter-tester',
@@ -608,7 +608,7 @@ class FlutterTestTestDriver extends FlutterTestDriver {
   }) async {
     await _setupProcess(<String>[
         'test',
-	'--disable-service-auth-codes',
+        '--disable-service-auth-codes',
         '--machine',
         '-d',
         'flutter-tester',
