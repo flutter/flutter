@@ -273,6 +273,23 @@ class TextSpan extends InlineSpan {
     return null;
   }
 
+  /// Populates the [semanticsOffsets] and [semanticsElements] with the appropriate data
+  /// to be able to construct a [SemanticsNode].
+  ///
+  /// The beginning and end text offset are added to [semanticsOffsets].
+  ///
+  /// Any recognizers are added to [semanticsElements].
+  @override
+  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
+    if (recognizer != null && (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)) {
+      final int length = semanticsLabel?.length ?? text.length;
+      semanticsOffsets.add(offset.value);
+      semanticsOffsets.add(offset.value + length);
+      semanticsElements.add(recognizer);
+    }
+    offset.increment(text != null ? text.length : 0);
+  }
+
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
   ///

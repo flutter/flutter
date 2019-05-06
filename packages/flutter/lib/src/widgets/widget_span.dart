@@ -63,7 +63,8 @@ class WidgetSpan extends PlaceholderSpan {
   /// Creates a [WidgetSpan] with the given values.
   ///
   /// The [child] property should be non-null. [WidgetSpan] is a leaf node in
-  /// the [InlineSpan] tree
+  /// the [InlineSpan] tree. Child widgets are constrained by the width of the
+  /// paragraph they occupy.
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
@@ -92,29 +93,27 @@ class WidgetSpan extends PlaceholderSpan {
   /// in-order mapping of widget to laid-out dimensions. If no such dimension
   /// is provided, the widget will be skipped.
   ///
-  /// Since widget sizes are calculated independently from the rest of the
-  /// paragraph, the [textScaleFactor] is ignored.
+  /// The [textScaleFactor] will be applied to the laid-out size of the widget.
   @override
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
 
-    if (dimensions != null) {
-      final bool hasStyle = style != null;
-      if (hasStyle) {
-        builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
-      }
-      assert(builder.placeholderCount < dimensions.length);
-      final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
-      builder.addPlaceholder(
-        currentDimensions.size.width,
-        currentDimensions.size.height,
-        alignment,
-        baseline: currentDimensions.baseline,
-        baselineOffset: currentDimensions.baselineOffset,
-      );
-      if (hasStyle) {
-        builder.pop();
-      }
+    assert(dimensions != null);
+    final bool hasStyle = style != null;
+    if (hasStyle) {
+      builder.pushStyle(style.getTextStyle(textScaleFactor: textScaleFactor));
+    }
+    assert(builder.placeholderCount < dimensions.length);
+    final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
+    builder.addPlaceholder(
+      currentDimensions.size.width * textScaleFactor,
+      currentDimensions.size.height * textScaleFactor,
+      alignment,
+      baseline: currentDimensions.baseline,
+      baselineOffset: currentDimensions.baselineOffset,
+    );
+    if (hasStyle) {
+      builder.pop();
     }
   }
 

@@ -471,14 +471,11 @@ class RenderParagraph extends RenderBox
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
-      // Set min constraints to 0, since the text min constraints don't apply
-      // to the inline widgets.
+      // Only constrain the width to the maximum width of the paragraph.
+      // Leave height unconstrained, which will overflow if expanded past.
       child.layout(
         BoxConstraints(
-          minWidth: 0,
-          minHeight: 0,
           maxWidth: constraints.maxWidth,
-          maxHeight: constraints.maxHeight
         ),
         parentUsesSize: true
       );
@@ -737,24 +734,9 @@ class RenderParagraph extends RenderBox
     super.describeSemanticsConfiguration(config);
     _inlineSemanticsOffsets.clear();
     _inlineSemanticsElements.clear();
-    int offset = 0;
+    Accumulator offset = Accumulator();
     text.visitChildren((InlineSpan span) {
-      if (span is TextSpan) {
-        final TextSpan textSpan = span;
-        if (textSpan.recognizer != null && (textSpan.recognizer is TapGestureRecognizer || textSpan.recognizer is LongPressGestureRecognizer)) {
-          final int length = textSpan.semanticsLabel?.length ?? textSpan.text.length;
-          _inlineSemanticsOffsets.add(offset);
-          _inlineSemanticsOffsets.add(offset + length);
-          _inlineSemanticsElements.add(textSpan.recognizer);
-        }
-        offset += textSpan.text != null ? textSpan.text.length : 0;
-      } else if (span is PlaceholderSpan) {
-        // Add this to the list of inline elements that need custom semantics.
-        _inlineSemanticsOffsets.add(offset);
-        _inlineSemanticsOffsets.add(offset + 1);
-        _inlineSemanticsElements.add(null); // null indicates this is a placeholder.
-        offset += 1;
-      }
+      span.describeSemantics(offset, _inlineSemanticsOffsets, _inlineSemanticsElements);
       return true;
     });
     if (_inlineSemanticsOffsets.isNotEmpty) {

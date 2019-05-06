@@ -14,9 +14,15 @@ import 'text_style.dart';
 /// Mutable wrapper of an integer that can be passed by reference to track a
 /// value across a recursive stack.
 class Accumulator {
+  /// [Accumulator] may be initialized with a specified value, otherwise, it will
+  /// initialize to zero.
   Accumulator([this._value = 0]);
+
+  /// The integer stored in this [Accumulator].
   int get value => _value;
   int _value;
+
+  /// Increases the [value] by the [addend].
   void increment(int addend) {
     assert(addend >= 0);
     _value += addend;
@@ -142,6 +148,8 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// represented as a 0xFFFC 'object replacement character'.
   ///
   /// The plain-text representation of this [InlineSpan] is written into the [buffer].
+  /// This method will then recursively call [computeToPlainText] on its childen
+  /// [InlineSpan]s if available.
   @protected
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
 
@@ -168,6 +176,17 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
   int codeUnitAtVisitor(int index, Accumulator offset);
+
+  /// Populates the [semanticsOffsets] and [semanticsElements] with the appropriate data
+  /// to be able to construct a [SemanticsNode].
+  ///
+  /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
+  /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
+  /// replacement character (0xFFFC) that is inserted to represent it.
+  ///
+  /// Any recognizers are added to [semanticsElements]. Null is added to
+  /// [semanticsElements] for [PlaceholderSpan]s.
+  void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements);
 
   /// In checked mode, throws an exception if the object is not in a
   /// valid configuration. Otherwise, returns true.
