@@ -529,13 +529,11 @@ class ContainerLayer extends Layer {
                               'See https://api.flutter.dev/flutter/rendering/debugCheckElevations.html '
                               'for more details.'),
       library: 'rendering library',
-      context: 'during compositing',
-      informationCollector: (StringBuffer buffer) {
-        buffer.writeln('Attempted to composite layer:');
-        buffer.writeln(child);
-        buffer.writeln('after layer:');
-        buffer.writeln(predecessor);
-        buffer.writeln('which occupies the same area at a higher elevation.');
+      context: ErrorDescription('during compositing'),
+      informationCollector: () sync* {
+        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty);
+        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty);
+        yield ErrorDescription('which occupies the same area at a higher elevation.');
       }
     ));
     return <PictureLayer>[

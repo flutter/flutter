@@ -62,6 +62,21 @@ class PlaceholderDimensions {
   }
 }
 
+/// The different ways of considering the width of one or more lines of text.
+///
+/// See [Text.widthType].
+enum TextWidthBasis {
+  /// Multiline text will take up the full width given by the parent. For single
+  /// line text, only the minimum amount of width needed to contain the text
+  /// will be used. A common use case for this is a standard series of
+  /// paragraphs.
+  parent,
+
+  /// The width will be exactly enough to contain the longest line and no
+  /// longer. A common use case for this is chat bubbles.
+  longestLine,
+}
+
 /// This is used to cache and pass the computed metrics regarding the
 /// caret's size and position. This is preferred due to the expensive
 /// nature of the calculation.
@@ -110,10 +125,12 @@ class TextPainter {
     String ellipsis,
     Locale locale,
     StrutStyle strutStyle,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
+       assert(textWidthBasis != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
@@ -121,7 +138,8 @@ class TextPainter {
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
-       _strutStyle = strutStyle;
+       _strutStyle = strutStyle,
+       _textWidthBasis = textWidthBasis;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -283,6 +301,18 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  TextWidthBasis get textWidthBasis => _textWidthBasis;
+  TextWidthBasis _textWidthBasis;
+  set textWidthBasis(TextWidthBasis value) {
+    assert(value != null);
+    if (_textWidthBasis == value)
+      return;
+    _textWidthBasis = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
 
   ui.Paragraph _layoutTemplate;
 
@@ -390,7 +420,9 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double get width {
     assert(!_needsLayout);
-    return _applyFloatingPointHack(_paragraph.width);
+    return _applyFloatingPointHack(
+      textWidthBasis == TextWidthBasis.longestLine ? _paragraph.longestLine : _paragraph.width,
+    );
   }
 
   /// The vertical space required to paint this text.

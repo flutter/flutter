@@ -134,7 +134,7 @@ void main() {
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: <Widget>[
                         Text(character, style: style, locale: const Locale('ja')),
-	                Text(character, style: style, locale: const Locale('zh')),
+                        Text(character, style: style, locale: const Locale('zh')),
                       ],
                     ),
                   ),
