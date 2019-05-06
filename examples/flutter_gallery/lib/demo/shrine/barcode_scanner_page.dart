@@ -27,9 +27,11 @@ import 'package:flutter_gallery/demo/shrine/supplemental/barcode_scanner_utils.d
 import 'colors.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
-  const BarcodeScannerPage({this.validSquareWidth = 256});
+  const BarcodeScannerPage(
+      {this.validSquareWidth = 256, this.frameColor = Colors.white54});
 
   final double validSquareWidth;
+  final Color frameColor;
 
   @override
   _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
@@ -42,7 +44,6 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
-  Color _frameColor = Colors.white54;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool _barcodeFound = false;
   Size _previewSize;
@@ -91,7 +92,6 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       _barcodeFound = true;
       _scannerHint = 'Loading information...';
       _closeWindow = true;
-      _frameColor = Colors.black87;
     });
   }
 
@@ -347,6 +347,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                           ],
                         ),
                       ),
+                      elevation: 8.0,
+                      shape: const BeveledRectangleBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
+                      ),
                     ),
                   ],
                 ),
@@ -397,7 +401,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 painter: WindowPainter(
                   windowSize:
                       Size(widget.validSquareWidth, widget.validSquareWidth),
-                  outerFrameColor: _frameColor,
+                  outerFrameColor: widget.frameColor,
                   closeWindow: _closeWindow,
                 ),
               ),
