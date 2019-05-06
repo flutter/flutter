@@ -299,5 +299,54 @@ void main() {
       expect(events.single, isA<PointerExitEvent>());
       events.clear();
     });
+
+    testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
+      // Pretend that we have a mouse connected.
+      final TestGesture gesture = await tester.startGesture(Offset.zero, kind: PointerDeviceKind.mouse);
+      await gesture.up();
+
+      await tester.pumpWidget(
+        Transform.scale(
+          scale: 2.0,
+          child: Listener(
+            onPointerDown: (PointerDownEvent _) { },
+          ),
+        ),
+      );
+      final RenderPointerListener listener = tester.renderObject(find.byType(Listener));
+      expect(listener.needsCompositing, isFalse);
+      // No TransformLayer for `Transform.scale` is added because composting is
+      // not required and therefore the transform is executed on the canvas
+      // directly. (One TransformLayer is always present for the root
+      // transformation.)
+      expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
+
+      await tester.pumpWidget(
+        Transform.scale(
+          scale: 2.0,
+          child: Listener(
+            onPointerDown: (PointerDownEvent _) { },
+            onPointerHover: (PointerHoverEvent _) { },
+          ),
+        ),
+      );
+      expect(listener.needsCompositing, isTrue);
+      // Composting is required, therefore a dedicated TransformLayer for
+      // `Transform.scale` is added.
+      expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
+
+      await tester.pumpWidget(
+        Transform.scale(
+          scale: 2.0,
+          child: Listener(
+            onPointerDown: (PointerDownEvent _) { },
+          ),
+        ),
+      );
+      expect(listener.needsCompositing, isFalse);
+      // TransformLayer for `Transform.scale` is removed again as transform is
+      // executed directly on the canvas.
+      expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
+    });
   });
 }
