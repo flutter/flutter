@@ -2042,6 +2042,76 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Check the toolbar appears below the TextField when there is not enough space above the TextField to show it',
+    (WidgetTester tester) async {
+      // This is a regression test for
+      // https://github.com/flutter/flutter/issues/29808
+      const String testValue = 'abc def ghi';
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Container(
+            padding: const EdgeInsets.all(30),
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      RenderEditable renderEditable = findRenderEditable(tester);
+      List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+      // Verify the selection toolbar position
+      Offset toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
+      Offset textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(textFieldTopLeft.dy, lessThan(toolbarTopLeft.dy));
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Container(
+            padding: const EdgeInsets.all(150),
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      renderEditable = findRenderEditable(tester);
+      endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+      // Verify the selection toolbar position
+      toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
+      textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
+    }
+  );
+
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
