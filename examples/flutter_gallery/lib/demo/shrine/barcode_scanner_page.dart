@@ -258,13 +258,14 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       (BuildContext context) {
         return Container(
           width: double.infinity,
+          height: 368,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Container(
                 alignment: Alignment.topLeft,
                 decoration: BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Colors.grey)),
+                  border: Border(bottom: const BorderSide(color: Colors.grey)),
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(16),
@@ -401,6 +402,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       Size(widget.validSquareWidth, widget.validSquareWidth),
                   outerFrameColor: widget.frameColor,
                   closeWindow: _closeWindow,
+                  innerFrameColor: _barcodeFound
+                      ? Colors.transparent
+                      : const Color(0xFF442C2E),
                 ),
               ),
             ),
