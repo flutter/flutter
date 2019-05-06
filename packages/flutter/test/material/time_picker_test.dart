@@ -542,6 +542,38 @@ void _tests() {
     semantics.dispose();
   });
 
+  testWidgets('header touch regions are large enough', (WidgetTester tester) async {
+    await mediaQueryBoilerplate(tester, false);
+
+    final Size amSize = tester.getSize(find.ancestor(
+      of: find.text('AM'),
+      matching: find.byType(InkWell),
+    ));
+    expect(amSize.width, greaterThanOrEqualTo(48.0));
+    expect(amSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size pmSize = tester.getSize(find.ancestor(
+      of: find.text('PM'),
+      matching: find.byType(InkWell),
+    ));
+    expect(pmSize.width, greaterThanOrEqualTo(48.0));
+    expect(pmSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size hourSize = tester.getSize(find.ancestor(
+      of: find.text('7'),
+      matching: find.byType(InkWell),
+    ));
+    expect(hourSize.width, greaterThanOrEqualTo(48.0));
+    expect(hourSize.height, greaterThanOrEqualTo(48.0));
+
+    final Size minuteSize = tester.getSize(find.ancestor(
+      of: find.text('00'),
+      matching: find.byType(InkWell),
+    ));
+    expect(minuteSize.width, greaterThanOrEqualTo(48.0));
+    expect(minuteSize.height, greaterThanOrEqualTo(48.0));
+  });
+
   testWidgets('builder parameter', (WidgetTester tester) async {
     Widget buildFrame(TextDirection textDirection) {
       return MaterialApp(
