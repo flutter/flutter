@@ -159,8 +159,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
         data.size.height - padding.top - padding.bottom;
 
     final double imageScale = imageSize.height / maxLogicalHeight;
-    final double halfWidth =
-        imageScale * widget.validRectangle.width / 2;
+    final double halfWidth = imageScale * widget.validRectangle.width / 2;
     final double halfHeight = imageScale * widget.validRectangle.height / 2;
 
     final Offset center = imageSize.center(Offset.zero);
@@ -263,9 +262,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   void _showBottomSheet() {
-    final PersistentBottomSheetController<void> controller =
-        _scaffoldKey.currentState.showBottomSheet<void>(
-      (BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (BuildContext context) {
         return Container(
           width: double.infinity,
           height: 416,
@@ -379,9 +378,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           ),
         );
       },
-    );
-
-    controller.closed.then((_) => Navigator.of(context).pop());
+    ).then((_) => Navigator.of(context).pop());
   }
 
   @override
@@ -423,9 +420,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       widget.validRectangle.height),
                   outerFrameColor: widget.frameColor,
                   closeWindow: _closeWindow,
-                  innerFrameColor: _barcodeFound
-                      ? Colors.transparent
-                      : kShrineFrameBrown,
+                  innerFrameColor:
+                      _barcodeFound ? Colors.transparent : kShrineFrameBrown,
                 ),
               ),
             ),
@@ -604,8 +600,8 @@ class Rectangle {
 
   static Rectangle lerp(Rectangle begin, Rectangle end, double t) {
     Color color;
-    if (t > .75) {
-      color = Color.lerp(begin.color, end.color, (t - .75) / .25);
+    if (t > .5) {
+      color = Color.lerp(begin.color, end.color, (t - .5) / .25);
     } else {
       color = begin.color;
     }
