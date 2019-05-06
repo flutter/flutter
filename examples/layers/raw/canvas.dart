@@ -32,21 +32,41 @@ ui.Picture paint(ui.Rect paintBounds) {
   final double devicePixelRatio = ui.window.devicePixelRatio;
   final ui.Size logicalSize = ui.window.physicalSize / devicePixelRatio;
 
+  // Saves a copy of current transform onto the save stack
   canvas.save();
-  canvas.translate(-mid.dx / 2.0, logicalSize.height * 2.0);
-  canvas.clipRect(ui.Rect.fromLTRB(0.0, -logicalSize.height, logicalSize.width, radius));
 
+  // Note that transforms that occur after this point apply only to the
+  // yellow-bluish rectangle
+
+  // This line will cause the transform to shift entirely outside the paint
+  // boundaries, which will cause the canvas interface to discard its
+  // commands. Comment it out to see it on screen.
+  canvas.translate(-mid.dx / 2.0, logicalSize.height * 2.0);
+
+  // Clips the current transform
+  canvas.clipRect(
+    ui.Rect.fromLTRB(0, radius + 50, logicalSize.width, logicalSize.height),
+    clipOp: ui.ClipOp.difference
+  );
+
+  // Shifts the coordinate space of and rotates the current transform
   canvas.translate(mid.dx, mid.dy);
-  paint.color = const ui.Color.fromARGB(128, 255, 0, 255);
-  canvas.rotate(math.pi/4.0);
+  canvas.rotate(math.pi/4);
 
   final ui.Gradient yellowBlue = ui.Gradient.linear(
     ui.Offset(-radius, -radius),
     const ui.Offset(0.0, 0.0),
     <ui.Color>[const ui.Color(0xFFFFFF00), const ui.Color(0xFF0000FF)],
   );
-  canvas.drawRect(ui.Rect.fromLTRB(-radius, -radius, radius, radius),
-                  ui.Paint()..shader = yellowBlue);
+
+  // Draws a yellow-bluish rectangle
+  canvas.drawRect(
+    ui.Rect.fromLTRB(-radius, -radius, radius, radius),
+    ui.Paint()..shader = yellowBlue,
+  );
+
+  // Note that transforms that occur after this point apply only to the
+  // yellow circle
 
   // Scale x and y by 0.5.
   final Float64List scaleMatrix = Float64List.fromList(<double>[
@@ -56,11 +76,21 @@ ui.Picture paint(ui.Rect paintBounds) {
       0.0, 0.0, 0.0, 1.0,
   ]);
   canvas.transform(scaleMatrix);
+
+  // Sets paint to transparent yellow
   paint.color = const ui.Color.fromARGB(128, 0, 255, 0);
+
+  // Draws a transparent yellow circle
   canvas.drawCircle(ui.Offset.zero, radius, paint);
+
+  // Restores the transform from before `save` was called
   canvas.restore();
 
+  // Sets paint to transparent red
   paint.color = const ui.Color.fromARGB(128, 255, 0, 0);
+
+  // Note that this circle is drawn on top of the previous layer that contains
+  // the rectangle and smaller circle
   canvas.drawCircle(const ui.Offset(150.0, 300.0), radius, paint);
 
   // When we're done issuing painting commands, we end the recording an receive

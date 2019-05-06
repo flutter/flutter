@@ -1152,9 +1152,10 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   _RenderCustomClip({
     RenderBox child,
     CustomClipper<T> clipper,
-    this.clipBehavior = Clip.antiAlias,
-  }) : _clipper = clipper,
-       assert(clipBehavior != null),
+    Clip clipBehavior = Clip.antiAlias,
+  }) : assert(clipBehavior != null),
+       _clipper = clipper,
+       _clipBehavior = clipBehavior,
        super(child);
 
   /// If non-null, determines which clip to use on the child.
@@ -1198,7 +1199,14 @@ abstract class _RenderCustomClip<T> extends RenderProxyBox {
   T get _defaultClip;
   T _clip;
 
-  final Clip clipBehavior;
+  Clip get clipBehavior => _clipBehavior;
+  set clipBehavior(Clip value) {
+    if (value != _clipBehavior) {
+      _clipBehavior = value;
+      markNeedsPaint();
+    }
+  }
+  Clip _clipBehavior;
 
   @override
   void performLayout() {
@@ -2557,12 +2565,14 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
-    assert(_onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
-    "Shouldn't call _updateAnnotations if nothing has changed.");
+    bool changed = false;
+    final bool hadHoverAnnotation = _hoverAnnotation != null;
     if (_hoverAnnotation != null && attached) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+      changed = true;
     }
-    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
+    if (RendererBinding.instance.mouseTracker.mouseIsConnected &&
+        (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null)) {
       _hoverAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,
         onHover: _onPointerHover,
@@ -2570,18 +2580,25 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       );
       if (attached) {
         RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+        changed = true;
       }
     } else {
       _hoverAnnotation = null;
     }
-    // Needs to paint in any case, in order to insert/remove the annotation
-    // layer associated with the updated _hoverAnnotation.
-    markNeedsPaint();
+    if (changed) {
+      markNeedsPaint();
+    }
+    final bool hasHoverAnnotation = _hoverAnnotation != null;
+    if (hadHoverAnnotation != hasHoverAnnotation) {
+      markNeedsCompositingBitsUpdate();
+    }
   }
 
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
+    // Add a listener to listen for changes in mouseIsConnected.
+    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
     }
@@ -2592,8 +2609,12 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
+    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }
+
+  @override
+  bool get needsCompositing => _hoverAnnotation != null;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -4686,7 +4707,7 @@ class RenderFollowerLayer extends RenderProxyBox {
       _layer,
       super.paint,
       Offset.zero,
-      childPaintBounds: Rect.fromLTRB(
+      childPaintBounds: const Rect.fromLTRB(
         // We don't know where we'll end up, so we have no idea what our cull rect should be.
         double.negativeInfinity,
         double.negativeInfinity,

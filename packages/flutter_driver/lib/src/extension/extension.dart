@@ -65,7 +65,7 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 /// Optionally you can pass a [DataHandler] callback. It will be called if the
 /// test calls [FlutterDriver.requestData].
 ///
-/// `slienceErrors` will prevent exceptions from being logged. This is useful
+/// `silenceErrors` will prevent exceptions from being logged. This is useful
 /// for tests where exceptions are expected. Defaults to false. Any errors
 /// will still be returned in the `response` field of the result json along
 /// with an `isError` boolean.

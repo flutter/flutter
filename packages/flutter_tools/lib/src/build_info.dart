@@ -392,6 +392,11 @@ String getWebBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'web');
 }
 
+/// Returns the linux build output directory.
+String getLinuxBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'linux');
+}
+
 /// Returns directory used by incremental compiler (IKG - incremental kernel
 /// generator) to store cached intermediate state.
 String getIncrementalCompilerByteStoreDirectory() {

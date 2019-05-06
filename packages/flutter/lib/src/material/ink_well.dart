@@ -616,6 +616,49 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 /// ancestor to the ink well). The [MaterialType.transparency] material
 /// kind can be used for this purpose.
 ///
+/// ### The ink splashes don't track the size of an animated container
+/// If the size of an InkWell's [Material] ancestor changes while the InkWell's
+/// splashes are expanding, you may notice that the splashes aren't clipped
+/// correctly. This can't be avoided.
+///
+/// An example of this situation is as follows:
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Tap the container to cause it to grow. Then, tap it again and hold before
+/// the widget reaches its maximum size to observe the clipped ink splash.
+///
+/// ```dart
+/// double sideLength = 50;
+///
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: AnimatedContainer(
+///       height: sideLength,
+///       width: sideLength,
+///       duration: Duration(seconds: 2),
+///       curve: Curves.easeIn,
+///       child: Material(
+///         color: Colors.yellow,
+///         child: InkWell(
+///           onTap: () {
+///             setState(() {
+///               sideLength == 50 ? sideLength = 100 : sideLength = 50;
+///             });
+///           },
+///         ),
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// An InkWell's splashes will not properly update to conform to changes if the
+/// size of its underlying [Material], where the splashes are rendered, changes
+/// during animation. You should avoid using InkWells within [Material] widgets
+/// that are changing size.
+///
 /// See also:
 ///
 ///  * [GestureDetector], for listening for gestures without ink splashes.

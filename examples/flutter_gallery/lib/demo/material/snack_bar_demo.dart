@@ -83,6 +83,13 @@ class _SnackBarDemoState extends State<SnackBarDemo> {
         // can refer to the Scaffold with Scaffold.of().
         builder: buildBody
       ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.add),
+        tooltip: 'Create',
+        onPressed: () {
+          print('Floating Action Button was pressed');
+        }
+      ),
     );
   }
 }

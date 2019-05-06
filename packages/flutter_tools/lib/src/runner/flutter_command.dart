@@ -77,7 +77,7 @@ abstract class FlutterCommand extends Command<void> {
   /// The currently executing command (or sub-command).
   ///
   /// Will be `null` until the top-most command has begun execution.
-  static FlutterCommand get current => context[FlutterCommand];
+  static FlutterCommand get current => context.get<FlutterCommand>();
 
   /// The option name for a custom observatory port.
   static const String observatoryPortOption = 'observatory-port';
@@ -474,7 +474,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (shouldRunPub) {
       await pubGet(context: PubContext.getVerifyContext(name));
-      final FlutterProject project = await FlutterProject.current();
+      final FlutterProject project = FlutterProject.current();
       await project.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 
@@ -527,6 +527,13 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     devices = devices.where((Device device) => device.isSupported()).toList();
+    // If the user has not specified all devices and has multiple connected
+    // then filter then list by those supported in the current project. If
+    // this ends up with a single device we can proceed as normal.
+    if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
+      final FlutterProject flutterProject = FlutterProject.current();
+      devices.removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
+    }
 
     if (devices.isEmpty) {
       printStatus(userMessages.flutterNoSupportedDevices);

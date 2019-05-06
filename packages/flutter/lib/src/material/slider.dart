@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'dart:math';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -29,6 +30,8 @@ import 'theme.dart';
 ///
 ///  * [Slider.semanticFormatterCallback], which shows an example use case.
 typedef SemanticFormatterCallback = String Function(double value);
+
+enum _SliderType { material, adaptive }
 
 /// A Material Design slider.
 ///
@@ -89,7 +92,7 @@ typedef SemanticFormatterCallback = String Function(double value);
 ///  * <https://material.io/design/components/sliders.html>
 ///  * [MediaQuery], from which the text scale factor is obtained.
 class Slider extends StatefulWidget {
-  /// Creates a material design slider.
+  /// Creates a Material Design slider.
   ///
   /// The slider itself does not maintain any state. Instead, when the state of
   /// the slider changes, the widget calls the [onChanged] callback. Most
@@ -121,7 +124,37 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
-  }) : assert(value != null),
+  }) : _sliderType = _SliderType.material,
+       assert(value != null),
+       assert(min != null),
+       assert(max != null),
+       assert(min <= max),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0),
+       super(key: key);
+
+  /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
+  /// Material Design slider otherwise.
+  ///
+  /// If a [CupertinoSlider] is created, the following parameters are
+  /// ignored: [label], [inactiveColor], [semanticFormatterCallback].
+  ///
+  /// The target platform is based on the current [Theme]: [ThemeData.platform].
+  const Slider.adaptive({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.onChangeStart,
+    this.onChangeEnd,
+    this.min = 0.0,
+    this.max = 1.0,
+    this.divisions,
+    this.label,
+    this.activeColor,
+    this.inactiveColor,
+    this.semanticFormatterCallback,
+  }) : _sliderType = _SliderType.adaptive,
+       assert(value != null),
        assert(min != null),
        assert(max != null),
        assert(min <= max),
@@ -273,6 +306,8 @@ class Slider extends StatefulWidget {
   ///
   /// If null, then the value indicator will not be displayed.
   ///
+  /// Ignored if this slider is created with [Slider.adaptive].
+  ///
   /// See also:
   ///
   ///  * [SliderComponentShape] for how to create a custom value indicator
@@ -300,6 +335,8 @@ class Slider extends StatefulWidget {
   ///
   /// Using a [SliderTheme] gives much more fine-grained control over the
   /// appearance of various components of the slider.
+  ///
+  /// Ignored if this slider is created with [Slider.adaptive].
   final Color inactiveColor;
 
   /// The callback used to create a semantic value from a slider value.
@@ -331,7 +368,11 @@ class Slider extends StatefulWidget {
   ///  )
   /// ```
   /// {@end-tool}
+  ///
+  /// Ignored if this slider is created with [Slider.adaptive]
   final SemanticFormatterCallback semanticFormatterCallback;
+
+  final _SliderType _sliderType ;
 
   @override
   _SliderState createState() => _SliderState();
@@ -441,6 +482,27 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMediaQuery(context));
 
+    switch (widget._sliderType) {
+      case _SliderType.material:
+        return _buildMaterialSlider(context);
+
+      case _SliderType.adaptive: {
+        final ThemeData theme = Theme.of(context);
+        assert(theme.platform != null);
+        switch (theme.platform) {
+          case TargetPlatform.android:
+          case TargetPlatform.fuchsia:
+            return _buildMaterialSlider(context);
+          case TargetPlatform.iOS:
+            return _buildCupertinoSlider(context);
+        }
+      }
+    }
+    assert(false);
+    return null;
+  }
+
+  Widget _buildMaterialSlider(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     SliderThemeData sliderTheme = SliderTheme.of(context);
 
@@ -486,6 +548,25 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
       semanticFormatterCallback: widget.semanticFormatterCallback,
+    );
+  }
+
+  Widget _buildCupertinoSlider(BuildContext context) {
+    // The render box of a slider has a fixed height but takes up the available
+    // width. Wrapping the [CupertinoSlider] in this manner will help maintain
+    // the same size.
+    return SizedBox(
+      width: double.infinity,
+      child: CupertinoSlider(
+        value: widget.value,
+        onChanged: widget.onChanged,
+        onChangeStart: widget.onChangeStart,
+        onChangeEnd: widget.onChangeEnd,
+        min: widget.min,
+        max: widget.max,
+        divisions: widget.divisions,
+        activeColor: widget.activeColor,
+      ),
     );
   }
 }

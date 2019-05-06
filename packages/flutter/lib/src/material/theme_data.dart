@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app_bar_theme.dart';
 import 'bottom_app_bar_theme.dart';
+import 'bottom_sheet_theme.dart';
 import 'button_theme.dart';
 import 'card_theme.dart';
 import 'chip_theme.dart';
@@ -23,6 +24,7 @@ import 'ink_well.dart' show InteractiveInkFeatureFactory;
 import 'input_decorator.dart';
 import 'page_transitions_theme.dart';
 import 'slider_theme.dart';
+import 'snack_bar_theme.dart';
 import 'tab_bar_theme.dart';
 import 'text_theme.dart';
 import 'typography.dart';
@@ -163,6 +165,8 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
+    SnackBarThemeData snackBarTheme,
+    BottomSheetThemeData bottomSheetTheme,
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
@@ -256,6 +260,8 @@ class ThemeData extends Diagnosticable {
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
+    snackBarTheme ??= const SnackBarThemeData();
+    bottomSheetTheme ??= const BottomSheetThemeData();
 
     return ThemeData.raw(
       brightness: brightness,
@@ -309,6 +315,8 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme,
       typography: typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme,
+      snackBarTheme: snackBarTheme,
+      bottomSheetTheme: bottomSheetTheme,
     );
   }
 
@@ -374,6 +382,8 @@ class ThemeData extends Diagnosticable {
     @required this.floatingActionButtonTheme,
     @required this.typography,
     @required this.cupertinoOverrideTheme,
+    @required this.snackBarTheme,
+    @required this.bottomSheetTheme,
   }) : assert(brightness != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
@@ -422,7 +432,9 @@ class ThemeData extends Diagnosticable {
        assert(colorScheme != null),
        assert(dialogTheme != null),
        assert(floatingActionButtonTheme != null),
-       assert(typography != null);
+       assert(typography != null),
+       assert(snackBarTheme != null),
+       assert(bottomSheetTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
   // hashValues() and in the raw constructor and in the order of fields in
@@ -464,6 +476,11 @@ class ThemeData extends Diagnosticable {
   final Brightness brightness;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
+  ///
+  /// The theme's [colorScheme] property contains [ColorScheme.primary], as
+  /// well as a color that contrasts well with the primary color called
+  /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
+  /// visuals in terms of the theme's [colorScheme].
   final Color primaryColor;
 
   /// The brightness of the [primaryColor]. Used to determine the color of text and
@@ -480,6 +497,13 @@ class ThemeData extends Diagnosticable {
   final Color canvasColor;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
+  ///
+  /// Accent color is also known as the secondary color.
+  ///
+  /// The theme's [colorScheme] property contains [ColorScheme.secondary], as
+  /// well as a color that contrasts well with the secondary color called
+  /// [ColorScheme.onSecondary]. It might be simpler to just configure an app's
+  /// visuals in terms of the theme's [colorScheme].
   final Color accentColor;
 
   /// The brightness of the [accentColor]. Used to determine the color of text
@@ -660,6 +684,9 @@ class ThemeData extends Diagnosticable {
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
+  /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
+  final SnackBarThemeData snackBarTheme;
+
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
 
@@ -682,6 +709,9 @@ class ThemeData extends Diagnosticable {
   /// This cascading effect for individual attributes of the [CupertinoThemeData]
   /// can be overridden using attributes of this [cupertinoOverrideTheme].
   final CupertinoThemeData cupertinoOverrideTheme;
+
+  /// A theme for customizing the color, elevation, and shape of a bottom sheet.
+  final BottomSheetThemeData bottomSheetTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -736,6 +766,8 @@ class ThemeData extends Diagnosticable {
     FloatingActionButtonThemeData floatingActionButtonTheme,
     Typography typography,
     CupertinoThemeData cupertinoOverrideTheme,
+    SnackBarThemeData snackBarTheme,
+    BottomSheetThemeData bottomSheetTheme,
   }) {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
@@ -790,6 +822,8 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: floatingActionButtonTheme ?? this.floatingActionButtonTheme,
       typography: typography ?? this.typography,
       cupertinoOverrideTheme: cupertinoOverrideTheme ?? this.cupertinoOverrideTheme,
+      snackBarTheme: snackBarTheme ?? this.snackBarTheme,
+      bottomSheetTheme: bottomSheetTheme ?? this.bottomSheetTheme,
     );
   }
 
@@ -922,6 +956,8 @@ class ThemeData extends Diagnosticable {
       floatingActionButtonTheme: FloatingActionButtonThemeData.lerp(a.floatingActionButtonTheme, b.floatingActionButtonTheme, t),
       typography: Typography.lerp(a.typography, b.typography, t),
       cupertinoOverrideTheme: t < 0.5 ? a.cupertinoOverrideTheme : b.cupertinoOverrideTheme,
+      snackBarTheme: SnackBarThemeData.lerp(a.snackBarTheme, b.snackBarTheme, t),
+      bottomSheetTheme: BottomSheetThemeData.lerp(a.bottomSheetTheme, b.bottomSheetTheme, t),
     );
   }
 
@@ -983,7 +1019,9 @@ class ThemeData extends Diagnosticable {
            (otherData.dialogTheme == dialogTheme) &&
            (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
            (otherData.typography == typography) &&
-           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme);
+           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
+           (otherData.snackBarTheme == snackBarTheme) &&
+           (otherData.bottomSheetTheme == bottomSheetTheme);
   }
 
   @override
@@ -1046,6 +1084,8 @@ class ThemeData extends Diagnosticable {
           floatingActionButtonTheme,
           typography,
           cupertinoOverrideTheme,
+          snackBarTheme,
+          bottomSheetTheme,
         ),
       ),
     );
@@ -1103,6 +1143,8 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme));
     properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
     properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
+    properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
+    properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
   }
 }
 

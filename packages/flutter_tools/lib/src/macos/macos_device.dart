@@ -75,7 +75,7 @@ class MacOSDevice extends Device {
     // Stop any running applications with the same executable.
     if (!prebuiltApplication) {
       Cache.releaseLockEarly();
-      await buildMacOS(await FlutterProject.current(), debuggingOptions?.buildInfo);
+      await buildMacOS(FlutterProject.current(), debuggingOptions?.buildInfo);
     }
     // Make sure to call stop app after we've built.
     await stopApp(package);
@@ -117,6 +117,11 @@ class MacOSDevice extends Device {
   // to uninstall the application.
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.macos.existsSync();
+  }
 }
 
 class MacOSDevices extends PollingDeviceDiscovery {

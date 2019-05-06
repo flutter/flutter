@@ -51,7 +51,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     final BuildInfo buildInfo = getBuildInfo();
     if (!platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
