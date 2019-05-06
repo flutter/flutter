@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
@@ -273,6 +274,9 @@ abstract class Device {
 
   /// Clear the device's logs.
   void clearLogs();
+
+  /// Optional device-specific artifact overrides.
+  OverrideArtifacts get artifactOverrides => null;
 
   /// Start an app package on the current device.
   ///

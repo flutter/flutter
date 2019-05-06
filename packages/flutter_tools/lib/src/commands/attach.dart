@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'package:multicast_dns/multicast_dns.dart';
 
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/utils.dart';
@@ -160,8 +162,6 @@ class AttachCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final FlutterProject flutterProject = FlutterProject.current();
-
     Cache.releaseLockEarly();
 
     await _validateArguments();
@@ -169,6 +169,19 @@ class AttachCommand extends FlutterCommand {
     writePidFile(argResults['pid-file']);
 
     final Device device = await findTargetDevice();
+
+    final Artifacts artifacts = device.artifactOverrides ?? Artifacts.instance;
+    await context.run<void>(
+      body: () => _attachToDevice(device),
+      overrides: <Type, Generator>{
+        Artifacts: () => artifacts,
+    });
+
+    return null;
+  }
+
+  Future<void> _attachToDevice(Device device) async {
+    final FlutterProject flutterProject = FlutterProject.current();
     Future<int> getDevicePort() async {
       if (debugPort != null) {
         return debugPort;
@@ -310,7 +323,6 @@ class AttachCommand extends FlutterCommand {
         await device.portForwarder.unforward(port);
       }
     }
-    return null;
   }
 
   Future<void> _validateArguments() async { }
