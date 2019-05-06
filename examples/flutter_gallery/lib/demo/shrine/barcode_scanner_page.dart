@@ -147,20 +147,19 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       return;
     }
 
-    final Size screenSize = data.size;
+    final EdgeInsets padding = data.padding;
+    final double maxLogicalHeight =
+        data.size.height - padding.top - padding.bottom;
 
-    // Flip since photo is vertical
-    final double widthScale = imageSize.height / screenSize.width;
-    final double heightScale = imageSize.width / screenSize.height;
+    final double heightScale = imageSize.height / maxLogicalHeight;
+    final double halfSquareWidth = heightScale * widget.validSquareWidth / 2;
 
-    final Offset center = screenSize.center(Offset.zero);
-    final double halfRectSideLength = widget.validSquareWidth / 2;
-
-    final Rect validRect = Rect.fromLTWH(
-      widthScale * (center.dx - halfRectSideLength),
-      heightScale * (center.dy - halfRectSideLength),
-      widthScale * widget.validSquareWidth,
-      heightScale * widget.validSquareWidth,
+    final Offset center = imageSize.center(Offset.zero);
+    final Rect validRect = Rect.fromLTRB(
+      center.dx - halfSquareWidth,
+      center.dy - halfSquareWidth,
+      center.dx + halfSquareWidth,
+      center.dy + halfSquareWidth,
     );
 
     for (Barcode barcode in barcodes) {
