@@ -26,4 +26,22 @@ void main() {
     final TestGestureRecognizer recognizer = TestGestureRecognizer(debugOwner: 0);
     expect(recognizer, hasAGoodToStringDeep);
   });
+
+  test('CombinedOffset', () {
+    const CombinedOffset offset = CombinedOffset(
+      local: Offset(10, 20),
+      global: Offset(30, 40),
+    );
+
+    expect(offset.local, const Offset(10, 20));
+    expect(offset.global, const Offset(30, 40));
+
+    final CombinedOffset sum = const CombinedOffset(
+      local: Offset(50, 60),
+      global: Offset(70, 80),
+    ) + offset;
+
+    expect(sum.local, const Offset(60, 80));
+    expect(sum.global, const Offset(100, 120));
+  });
 }
