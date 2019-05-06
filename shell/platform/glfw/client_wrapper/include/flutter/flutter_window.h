@@ -14,6 +14,14 @@
 
 namespace flutter {
 
+// A data type for window position and size.
+struct WindowFrame {
+  int left;
+  int top;
+  int width;
+  int height;
+};
+
 // A window displaying Flutter content.
 class FlutterWindow {
  public:
@@ -46,6 +54,30 @@ class FlutterWindow {
   // to the default icon.
   void SetIcon(uint8_t* pixel_data, int width, int height) {
     FlutterDesktopWindowSetIcon(window_, pixel_data, width, height);
+  }
+
+  // Returns the frame of the window, including any decoration (e.g., title
+  // bar), in screen coordinates.
+  WindowFrame GetFrame() {
+    WindowFrame frame = {};
+    FlutterDesktopWindowGetFrame(window_, &frame.left, &frame.top, &frame.width,
+                                 &frame.height);
+    return frame;
+  }
+
+  // Set the frame of the window, including any decoration (e.g., title
+  // bar), in screen coordinates.
+  void SetFrame(const WindowFrame& frame) {
+    FlutterDesktopWindowSetFrame(window_, frame.left, frame.top, frame.width,
+                                 frame.height);
+  }
+
+  // Returns the number of pixels per screen coordinate for the window.
+  //
+  // Flutter uses pixel coordinates, so this is the ratio of positions and sizes
+  // seen by Flutter as compared to the screen.
+  double GetScaleFactor() {
+    return FlutterDesktopWindowGetScaleFactor(window_);
   }
 
  private:

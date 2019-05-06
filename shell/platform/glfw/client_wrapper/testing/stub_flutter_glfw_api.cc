@@ -93,6 +93,34 @@ void FlutterDesktopWindowSetIcon(FlutterDesktopWindowRef flutter_window,
   }
 }
 
+void FlutterDesktopWindowGetFrame(FlutterDesktopWindowRef flutter_window,
+                                  int* x,
+                                  int* y,
+                                  int* width,
+                                  int* height) {
+  if (s_stub_implementation) {
+    s_stub_implementation->GetWindowFrame(x, y, width, height);
+  }
+}
+
+void FlutterDesktopWindowSetFrame(FlutterDesktopWindowRef flutter_window,
+                                  int x,
+                                  int y,
+                                  int width,
+                                  int height) {
+  if (s_stub_implementation) {
+    s_stub_implementation->SetWindowFrame(x, y, width, height);
+  }
+}
+
+double FlutterDesktopWindowGetScaleFactor(
+    FlutterDesktopWindowRef flutter_window) {
+  if (s_stub_implementation) {
+    return s_stub_implementation->GetWindowScaleFactor();
+  }
+  return 1.0;
+}
+
 void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {
   if (s_stub_implementation) {
     s_stub_implementation->RunWindowLoop();
