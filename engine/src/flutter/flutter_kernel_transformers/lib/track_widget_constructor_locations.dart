@@ -419,7 +419,7 @@ class WidgetCreatorTracker implements ProgramTransformer {
   }
 
   Component _computeFullProgram(Component deltaProgram) {
-    final Set<Library> libraries = new Set<Library>();
+    final Set<Library> libraries = <Library>{};
     final List<Library> workList = <Library>[];
     for (Library library in deltaProgram.libraries) {
       if (libraries.add(library)) {
