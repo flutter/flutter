@@ -2566,6 +2566,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   void _updateAnnotations() {
     bool changed = false;
+    final bool hadHoverAnnotation = _hoverAnnotation != null;
     if (_hoverAnnotation != null && attached) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
       changed = true;
@@ -2587,6 +2588,10 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     if (changed) {
       markNeedsPaint();
     }
+    final bool hasHoverAnnotation = _hoverAnnotation != null;
+    if (hadHoverAnnotation != hasHoverAnnotation) {
+      markNeedsCompositingBitsUpdate();
+    }
   }
 
   @override
@@ -2607,6 +2612,9 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }
+
+  @override
+  bool get needsCompositing => _hoverAnnotation != null;
 
   @override
   void paint(PaintingContext context, Offset offset) {
