@@ -318,7 +318,7 @@ void main() {
       // No TransformLayer for `Transform.scale` is added because composting is
       // not required and therefore the transform is executed on the canvas
       // directly. (One TransformLayer is always present for the root
-      // transformation.)
+      // transform.)
       expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
 
       await tester.pumpWidget(
