@@ -29,7 +29,7 @@ import 'colors.dart';
 class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage({
     this.validRectangle = const Rectangle(width: 320, height: 144),
-    this.frameColor = Colors.black38,
+    this.frameColor = kShrineScrim,
     this.maxOutlinePercent = 1.2,
   });
 
@@ -425,7 +425,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                   closeWindow: _closeWindow,
                   innerFrameColor: _barcodeFound
                       ? Colors.transparent
-                      : const Color(0xFF442C2E),
+                      : kShrineFrameBrown,
                 ),
               ),
             ),
@@ -572,6 +572,13 @@ class WindowPainter extends CustomPainter {
       size.height,
     );
 
+    canvas.drawRect(
+        windowRect,
+        Paint()
+          ..color = innerFrameColor
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = innerFrameStrokeWidth);
+
     final Paint paint = Paint()..color = outerFrameColor;
     canvas.drawRect(left, paint);
     canvas.drawRect(top, paint);
@@ -581,13 +588,6 @@ class WindowPainter extends CustomPainter {
     if (closeWindow) {
       canvas.drawRect(windowRect, paint);
     }
-
-    canvas.drawRect(
-        windowRect,
-        Paint()
-          ..color = innerFrameColor
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = innerFrameStrokeWidth);
   }
 
   @override
