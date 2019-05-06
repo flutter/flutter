@@ -37,6 +37,7 @@ import 'process.dart';
 export 'dart:io'
     show
         BytesBuilder,
+        CompressionOptions,
         // Directory         NO! Use `file_system.dart`
         exitCode,
         // File              NO! Use `file_system.dart`
@@ -162,7 +163,7 @@ class Stdio {
   bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
-Stdio get stdio => context[Stdio];
+Stdio get stdio => context.get<Stdio>();
 io.IOSink get stdout => stdio.stdout;
 Stream<List<int>> get stdin => stdio.stdin;
 io.IOSink get stderr => stdio.stderr;

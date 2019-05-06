@@ -30,9 +30,9 @@ void main() {
     test('finds a value within the clip in a ClipRectLayer', () {
       final ContainerLayer containerLayer = ContainerLayer();
       final List<ClipRectLayer> layers = <ClipRectLayer>[
-        ClipRectLayer(clipRect: Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)),
-        ClipRectLayer(clipRect: Rect.fromLTRB(0.0, 100.0, 100.0, 200.0)),
-        ClipRectLayer(clipRect: Rect.fromLTRB(0.0, 200.0, 100.0, 300.0)),
+        ClipRectLayer(clipRect: const Rect.fromLTRB(0.0, 0.0, 100.0, 100.0)),
+        ClipRectLayer(clipRect: const Rect.fromLTRB(0.0, 100.0, 100.0, 200.0)),
+        ClipRectLayer(clipRect: const Rect.fromLTRB(0.0, 200.0, 100.0, 300.0)),
       ];
       int i = 0;
       for (ClipRectLayer layer in layers) {
@@ -137,4 +137,3 @@ void main() {
     });
   });
 }
-

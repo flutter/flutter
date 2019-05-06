@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This program generates a getMaterialTranslation() function that looks up the
-// translations provided by the arb files. The returned value is a generated
-// instance of GlobalMaterialLocalizations that corresponds to a single
-// locale.
+// This program generates a getMaterialTranslation() and a
+// getCupertinoTranslation() function that look up the translations provided by
+// the arb files. The returned value is a generated instance of a
+// GlobalMaterialLocalizations or a GlobalCupertinoLocalizations that
+// corresponds to a single locale.
 //
 // The *.arb files are in packages/flutter_localizations/lib/src/l10n.
 //
@@ -13,10 +14,10 @@
 // Each map value is itself a map with resource identifier keys and localized
 // resource string values.
 //
-// The arb filenames are expected to have the form "material_(\w+)\.arb", where
-// the group following "_" identifies the language code and the country code,
-// e.g. "material_en.arb" or "material_en_GB.arb". In most cases both codes are
-// just two characters.
+// The arb filenames are expected to have the form "material_(\w+)\.arb" or
+// "cupertino_(\w+)\.arb" where the group following "_" identifies the language
+// code and the country code, e.g. "material_en.arb" or "material_en_GB.arb".
+// In most cases both codes are just two characters.
 //
 // This app is typically run by hand when a module's .arb files have been
 // updated.
@@ -32,7 +33,8 @@
 // ```
 //
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
-// packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart file:
+// packages/flutter_localizations/lib/src/l10n/generated_material_localizations.dart
+// and packages/flutter_localizations/lib/src/l10n/generated_cupertino_localizations.dart file:
 //
 // ```
 // dart dev/tools/localization/gen_localizations.dart --overwrite
@@ -44,6 +46,7 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
+import 'gen_cupertino_localizations.dart';
 import 'gen_material_localizations.dart';
 import 'localizations_utils.dart';
 import 'localizations_validator.dart';
@@ -56,8 +59,11 @@ String generateArbBasedLocalizationSubclasses({
   @required String baseClass,
   @required HeaderGenerator generateHeader,
   @required ConstructorGenerator generateConstructor,
+  @required String factoryName,
   @required String factoryDeclaration,
   @required String factoryArguments,
+  @required String supportedLanguagesConstant,
+  @required String supportedLanguagesDocMacro,
 }) {
   assert(localeToResources != null);
   assert(localeToResourceAttributes != null);
@@ -65,8 +71,11 @@ String generateArbBasedLocalizationSubclasses({
   assert(baseClass.isNotEmpty);
   assert(generateHeader != null);
   assert(generateConstructor != null);
+  assert(factoryName.isNotEmpty);
   assert(factoryDeclaration.isNotEmpty);
   assert(factoryArguments.isNotEmpty);
+  assert(supportedLanguagesConstant.isNotEmpty);
+  assert(supportedLanguagesDocMacro.isNotEmpty);
 
   final StringBuffer output = StringBuffer();
   output.writeln(generateHeader('dart dev/tools/localization/gen_localizations.dart --overwrite'));
@@ -232,9 +241,9 @@ String generateArbBasedLocalizationSubclasses({
 ///
 /// See also:
 ///
-///  * [getMaterialTranslation], whose documentation describes these values.
-final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
-${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").join('\n')}
+///  * [$factoryName], whose documentation describes these values.
+final Set<String> $supportedLanguagesConstant = HashSet<String>.from(const <String>[
+${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(value)}").toList().join('\n')}
 ]);
 
 /// Creates a [$baseClass] instance for the given `locale`.
@@ -246,7 +255,7 @@ ${languageCodes.map<String>((String value) => "  '$value', // ${describeLocale(v
 ///
 /// The following locales are supported by this package:
 ///
-/// {@template flutter.localizations.languages}
+/// {@template $supportedLanguagesDocMacro}
 $supportedLocales/// {@endtemplate}
 ///
 /// Generally speaking, this method is only intended to be used by
@@ -357,7 +366,7 @@ $factoryDeclaration
   }
   output.writeln('''
   }
-  assert(false, 'getMaterialTranslation() called for unsupported locale "\$locale"');
+  assert(false, '$factoryName() called for unsupported locale "\$locale"');
   return null;
 }''');
 
@@ -397,6 +406,10 @@ String generateKey(String key, Map<String, dynamic> attributes) {
         return '${key}Raw';
     }
   }
+  if (key == 'datePickerDateOrder')
+    return 'datePickerDateOrderString';
+  if (key == 'datePickerDateTimeOrder')
+    return 'datePickerDateTimeOrderString';
   return key;
 }
 
@@ -518,21 +531,48 @@ Future<void> main(List<String> rawArgs) async {
     exitWithError('$exception');
   }
 
-  final String materialLocalizations = generateArbBasedLocalizationSubclasses(
-    localeToResources: materialLocaleToResources,
-    localeToResourceAttributes: materialLocaleToResourceAttributes,
-    generatedClassPrefix: 'MaterialLocalization',
-    baseClass: 'GlobalMaterialLocalizations',
-    generateHeader: generateMaterialHeader,
-    generateConstructor: generateMaterialConstructor,
-    factoryDeclaration: materialFactoryDeclaration,
-    factoryArguments: materialFactoryArguments,
-  );
+  final String materialLocalizations = options.writeToFile || !options.cupertinoOnly
+      ? generateArbBasedLocalizationSubclasses(
+        localeToResources: materialLocaleToResources,
+        localeToResourceAttributes: materialLocaleToResourceAttributes,
+        generatedClassPrefix: 'MaterialLocalization',
+        baseClass: 'GlobalMaterialLocalizations',
+        generateHeader: generateMaterialHeader,
+        generateConstructor: generateMaterialConstructor,
+        factoryName: materialFactoryName,
+        factoryDeclaration: materialFactoryDeclaration,
+        factoryArguments: materialFactoryArguments,
+        supportedLanguagesConstant: materialSupportedLanguagesConstant,
+        supportedLanguagesDocMacro: materialSupportedLanguagesDocMacro,
+      )
+      : null;
+  final String cupertinoLocalizations = options.writeToFile || !options.materialOnly
+      ? generateArbBasedLocalizationSubclasses(
+        localeToResources: cupertinoLocaleToResources,
+        localeToResourceAttributes: cupertinoLocaleToResourceAttributes,
+        generatedClassPrefix: 'CupertinoLocalization',
+        baseClass: 'GlobalCupertinoLocalizations',
+        generateHeader: generateCupertinoHeader,
+        generateConstructor: generateCupertinoConstructor,
+        factoryName: cupertinoFactoryName,
+        factoryDeclaration: cupertinoFactoryDeclaration,
+        factoryArguments: cupertinoFactoryArguments,
+        supportedLanguagesConstant: cupertinoSupportedLanguagesConstant,
+        supportedLanguagesDocMacro: cupertinoSupportedLanguagesDocMacro,
+      )
+      : null;
 
   if (options.writeToFile) {
-    final File localizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
-    localizationsFile.writeAsStringSync(materialLocalizations, flush: true);
+    final File materialLocalizationsFile = File(path.join(directory.path, 'generated_material_localizations.dart'));
+    materialLocalizationsFile.writeAsStringSync(materialLocalizations, flush: true);
+    final File cupertinoLocalizationsFile = File(path.join(directory.path, 'generated_cupertino_localizations.dart'));
+    cupertinoLocalizationsFile.writeAsStringSync(cupertinoLocalizations, flush: true);
   } else {
-    stdout.write(materialLocalizations);
+    if (!options.cupertinoOnly) {
+      stdout.write(materialLocalizations);
+    }
+    if (!options.materialOnly) {
+      stdout.write(cupertinoLocalizations);
+    }
   }
 }

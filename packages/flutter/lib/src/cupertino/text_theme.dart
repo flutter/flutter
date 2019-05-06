@@ -83,6 +83,46 @@ const TextStyle _kDefaultLargeTitleDarkTextStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+const TextStyle _kDefaultPickerLightTextStyle = TextStyle(
+  inherit: false,
+  fontFamily: '.SF Pro Display',
+  fontSize: 25.0,
+  fontWeight: FontWeight.w400,
+  letterSpacing: -0.41,
+  color: CupertinoColors.black,
+);
+
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+const TextStyle _kDefaultPickerDarkTextStyle = TextStyle(
+  inherit: false,
+  fontFamily: '.SF Pro Display',
+  fontSize: 25.0,
+  fontWeight: FontWeight.w400,
+  letterSpacing: -0.41,
+  color: CupertinoColors.white,
+);
+
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+const TextStyle _kDefaultDateTimePickerLightTextStyle = TextStyle(
+  inherit: false,
+  fontFamily: '.SF Pro Display',
+  fontSize: 21,
+  fontWeight: FontWeight.w300,
+  letterSpacing: -1.05,
+  color: CupertinoColors.black,
+);
+
+// Eyeballed value since it's not documented in https://developer.apple.com/design/resources/.
+const TextStyle _kDefaultDateTimePickerDarkTextStyle = TextStyle(
+  inherit: false,
+  fontFamily: '.SF Pro Display',
+  fontSize: 21,
+  fontWeight: FontWeight.w300,
+  letterSpacing: -1.05,
+  color: CupertinoColors.white,
+);
+
 /// Cupertino typography theme in a [CupertinoThemeData].
 @immutable
 class CupertinoTextThemeData extends Diagnosticable {
@@ -104,6 +144,8 @@ class CupertinoTextThemeData extends Diagnosticable {
     TextStyle navTitleTextStyle,
     TextStyle navLargeTitleTextStyle,
     TextStyle navActionTextStyle,
+    TextStyle pickerTextStyle,
+    TextStyle dateTimePickerTextStyle,
   }) : _primaryColor = primaryColor ?? CupertinoColors.activeBlue,
        _brightness = brightness,
        _textStyle = textStyle,
@@ -111,7 +153,9 @@ class CupertinoTextThemeData extends Diagnosticable {
        _tabLabelTextStyle = tabLabelTextStyle,
        _navTitleTextStyle = navTitleTextStyle,
        _navLargeTitleTextStyle = navLargeTitleTextStyle,
-       _navActionTextStyle = navActionTextStyle;
+       _navActionTextStyle = navActionTextStyle,
+       _pickerTextStyle = pickerTextStyle,
+       _dateTimePickerTextStyle = dateTimePickerTextStyle;
 
   final Color _primaryColor;
   final Brightness _brightness;
@@ -155,6 +199,20 @@ class CupertinoTextThemeData extends Diagnosticable {
     );
   }
 
+  final TextStyle _pickerTextStyle;
+  /// Typography of pickers.
+  TextStyle get pickerTextStyle {
+    return _pickerTextStyle ??
+        (_isLight ? _kDefaultPickerLightTextStyle : _kDefaultPickerDarkTextStyle);
+  }
+
+  final TextStyle _dateTimePickerTextStyle;
+  /// Typography of date time pickers.
+  TextStyle get dateTimePickerTextStyle {
+    return _dateTimePickerTextStyle ??
+        (_isLight ? _kDefaultDateTimePickerLightTextStyle : _kDefaultDateTimePickerDarkTextStyle);
+  }
+
   /// Returns a copy of the current [CupertinoTextThemeData] instance with
   /// specified overrides.
   CupertinoTextThemeData copyWith({
@@ -166,6 +224,8 @@ class CupertinoTextThemeData extends Diagnosticable {
     TextStyle navTitleTextStyle,
     TextStyle navLargeTitleTextStyle,
     TextStyle navActionTextStyle,
+    TextStyle pickerTextStyle,
+    TextStyle dateTimePickerTextStyle,
   }) {
     return CupertinoTextThemeData(
       primaryColor: primaryColor ?? _primaryColor,
@@ -176,6 +236,8 @@ class CupertinoTextThemeData extends Diagnosticable {
       navTitleTextStyle: navTitleTextStyle ?? _navTitleTextStyle,
       navLargeTitleTextStyle: navLargeTitleTextStyle ?? _navLargeTitleTextStyle,
       navActionTextStyle: navActionTextStyle ?? _navActionTextStyle,
+      pickerTextStyle: pickerTextStyle ?? _pickerTextStyle,
+      dateTimePickerTextStyle: dateTimePickerTextStyle ?? _dateTimePickerTextStyle,
     );
   }
 }

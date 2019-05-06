@@ -317,7 +317,7 @@ class Border extends BoxBorder {
   /// Creates a border whose sides are all the same.
   ///
   /// The `side` argument must not be null.
-  const Border.uniform(BorderSide side)
+  const Border.fromBorderSide(BorderSide side)
       : assert(side != null),
         top = side,
         right = side,
@@ -333,7 +333,7 @@ class Border extends BoxBorder {
     BorderStyle style = BorderStyle.solid,
   }) {
     final BorderSide side = BorderSide(color: color, width: width, style: style);
-    return Border.uniform(side);
+    return Border.fromBorderSide(side);
   }
 
   /// Creates a [Border] that represents the addition of the two given

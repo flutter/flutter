@@ -40,6 +40,8 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
 };
 
 /// Maps macOS-specific key code values representing [PhysicalKeyboardKey].
+///
+/// MacOS doesn't provide a scan code, but a virtual keycode to represent a physical key.
 const Map<int, PhysicalKeyboardKey> kMacOsToPhysicalKey = <int, PhysicalKeyboardKey>{
 @@@MACOS_SCAN_CODE_MAP@@@
 };

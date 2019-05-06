@@ -50,7 +50,7 @@ testWidgets('Opaque bar pushes contents down', (WidgetTester tester) async {
     // The top of the [Container] is 44 px from the top of the screen because
     // it's pushed down by the opaque navigation bar whose height is 44 px,
     // and the 20 px [MediaQuery] top padding is fully absorbed by the navigation bar.
-    expect(tester.getRect(find.byType(Container)), Rect.fromLTRB(0, 44, 800, 600));
+    expect(tester.getRect(find.byType(Container)), const Rect.fromLTRB(0, 44, 800, 600));
   });
 
   testWidgets('Contents padding from viewInsets', (WidgetTester tester) async {

@@ -501,7 +501,7 @@ void main() {
         await tester.pumpWidget(MaterialApp(theme: theme, home: BottomAppBarDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
         handle.dispose();
-      });
+      }, skip: theme == ThemeData.light());
 
       testWidgets('bottom_navigation_demo $themeName', (WidgetTester tester) async {
         tester.binding.addTime(const Duration(seconds: 3));

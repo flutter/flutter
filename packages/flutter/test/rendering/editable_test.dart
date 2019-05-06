@@ -93,7 +93,7 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
+      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
     );
   });
 
@@ -134,7 +134,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: Rect.fromLTWH(40, 2, 1, 6),
+      rect: const Rect.fromLTWH(40, 0, 1, 10),
     ));
 
     // Now change to a rounded caret.
@@ -146,7 +146,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(40, 2, 4, 6),
+        const Rect.fromLTWH(40, 0, 4, 10),
         const Radius.circular(3),
       ),
     ));
@@ -158,7 +158,80 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(80, 2, 4, 16),
+        const Rect.fromLTWH(80, 0, 4, 20),
+        const Radius.circular(3),
+      ),
+    ));
+
+    // Can turn off caret.
+    showCursor.value = false;
+    pumpFrame();
+
+    expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
+  });
+
+  test('Cursor with ideographic script', () {
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final ValueNotifier<bool> showCursor = ValueNotifier<bool>(true);
+    EditableText.debugDeterministicCursor = true;
+
+    final RenderEditable editable = RenderEditable(
+      backgroundCursorColor: Colors.grey,
+      textDirection: TextDirection.ltr,
+      cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      offset: ViewportOffset.zero(),
+      textSelectionDelegate: delegate,
+      text: const TextSpan(
+        text: '中文测试文本是否正确',
+        style: TextStyle(
+          height: 1.0, fontSize: 10.0, fontFamily: 'Ahem',
+        ),
+      ),
+      selection: const TextSelection.collapsed(
+        offset: 4,
+        affinity: TextAffinity.upstream,
+      ),
+    );
+
+    layout(editable);
+
+    editable.layout(BoxConstraints.loose(const Size(100, 100)));
+    expect(
+      editable,
+      // Draw no cursor by default.
+      paintsExactlyCountTimes(#drawRect, 0),
+    );
+
+    editable.showCursor = showCursor;
+    pumpFrame();
+
+    expect(editable, paints..rect(
+      color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
+      rect: const Rect.fromLTWH(40, 0, 1, 10),
+    ));
+
+    // Now change to a rounded caret.
+    editable.cursorColor = const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF);
+    editable.cursorWidth = 4;
+    editable.cursorRadius = const Radius.circular(3);
+    pumpFrame();
+
+    expect(editable, paints..rrect(
+      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(40, 0, 4, 10),
+        const Radius.circular(3),
+      ),
+    ));
+
+    editable.textScaleFactor = 2;
+    pumpFrame();
+
+    // Now the caret height is much bigger due to the bigger font scale.
+    expect(editable, paints..rrect(
+      color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
+      rrect: RRect.fromRectAndRadius(
+        const Rect.fromLTWH(80, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));

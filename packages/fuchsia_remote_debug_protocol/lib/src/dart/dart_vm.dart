@@ -31,6 +31,11 @@ typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
 /// custom connection function is needed.
 RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
+
+void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  _log.fine('Error in internalimplementation of JSON RPC.\n$error\n$stack');
+}
+
 /// Attempts to connect to a Dart VM service.
 ///
 /// Gives up after `timeout` has elapsed.
@@ -45,7 +50,7 @@ Future<json_rpc.Peer> _waitAndConnect(
     json_rpc.Peer peer;
     try {
       socket = await WebSocket.connect(uri.toString()).timeout(timeout);
-      peer = json_rpc.Peer(IOWebSocketChannel(socket).cast())..listen();
+      peer = json_rpc.Peer(IOWebSocketChannel(socket).cast(), onUnhandledError: _unhandledJsonRpcError)..listen();
       return peer;
     } on HttpException catch (e) {
       // This is a fine warning as this most likely means the port is stale.

@@ -20,10 +20,12 @@ import 'globals.dart';
 
 const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
 
+const String defaultManifestPath = 'pubspec.yaml';
+
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
-  static AssetBundleFactory get instance => context[AssetBundleFactory];
+  static AssetBundleFactory get instance => context.get<AssetBundleFactory>();
 
   static AssetBundleFactory get defaultInstance => _kManifestFactory;
 
@@ -36,11 +38,11 @@ abstract class AssetBundle {
 
   bool wasBuiltOnce();
 
-  bool needsBuild({ String manifestPath = _ManifestAssetBundle.defaultManifestPath });
+  bool needsBuild({ String manifestPath = defaultManifestPath });
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
-    String manifestPath = _ManifestAssetBundle.defaultManifestPath,
+    String manifestPath = defaultManifestPath,
     String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts = true,
@@ -69,7 +71,6 @@ class _ManifestAssetBundle implements AssetBundle {
 
   DateTime _lastBuildTimestamp;
 
-  static const String defaultManifestPath = 'pubspec.yaml';
   static const String _assetManifestJson = 'AssetManifest.json';
   static const String _fontManifestJson = 'FontManifest.json';
   static const String _fontSetMaterial = 'material';
@@ -112,7 +113,7 @@ class _ManifestAssetBundle implements AssetBundle {
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
     FlutterManifest flutterManifest;
     try {
-      flutterManifest = await FlutterManifest.createFromPath(manifestPath);
+      flutterManifest = FlutterManifest.createFromPath(manifestPath);
     } catch (e) {
       printStatus('Error detected in pubspec.yaml:', emphasis: true);
       printError('$e');
@@ -162,7 +163,7 @@ class _ManifestAssetBundle implements AssetBundle {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = fs.path.fromUri(package.resolve('../pubspec.yaml'));
-        final FlutterManifest packageFlutterManifest = await FlutterManifest.createFromPath(packageManifestPath);
+        final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(packageManifestPath);
         if (packageFlutterManifest == null)
           continue;
         // Skip the app itself

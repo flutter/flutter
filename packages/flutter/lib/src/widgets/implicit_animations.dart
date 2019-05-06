@@ -280,7 +280,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     super.initState();
     _controller = AnimationController(
       duration: widget.duration,
-      debugLabel: '${widget.toStringShort()}',
+      debugLabel: kDebugMode ? '${widget.toStringShort()}' : null,
       vsync: this,
     );
     _updateCurve();

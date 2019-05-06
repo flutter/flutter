@@ -40,7 +40,7 @@ class HotRunnerConfig {
   }
 }
 
-HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
+HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 const bool kHotReloadDefault = true;
 
@@ -586,8 +586,6 @@ class HotRunner extends ResidentRunner {
           printStatus('${result.message}.');
         }
       }
-      if (result.hintMessage != null)
-        printStatus('\n${result.hintMessage}');
       return result;
     }
   }

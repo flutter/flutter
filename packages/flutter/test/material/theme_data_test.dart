@@ -56,16 +56,6 @@ void main() {
     expect(darkTheme.accentTextTheme.title.color, typography.white.title.color);
   });
 
-  test('Default slider indicator style gets a default body2 if accentTextTheme.body2 is null', () {
-    const TextTheme noBody2TextTheme = TextTheme(body2: null);
-    final ThemeData lightTheme = ThemeData(brightness: Brightness.light, accentTextTheme: noBody2TextTheme);
-    final ThemeData darkTheme = ThemeData(brightness: Brightness.dark, accentTextTheme: noBody2TextTheme);
-    final Typography typography = Typography(platform: lightTheme.platform);
-
-    expect(lightTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.white.body2));
-    expect(darkTheme.sliderTheme.valueIndicatorTextStyle, equals(typography.black.body2));
-  });
-
   test('Default chip label style gets a default body2 if textTheme.body2 is null', () {
     const TextTheme noBody2TextTheme = TextTheme(body2: null);
     final ThemeData lightTheme = ThemeData(brightness: Brightness.light, textTheme: noBody2TextTheme);

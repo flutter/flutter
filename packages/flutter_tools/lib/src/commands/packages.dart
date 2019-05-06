@@ -93,14 +93,14 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     await _runPubGet(target);
-    final FlutterProject rootProject = await FlutterProject.fromPath(target);
-    await rootProject.ensureReadyForPlatformSpecificTooling();
+    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
       final FlutterProject exampleProject = rootProject.example;
       await _runPubGet(exampleProject.directory.path);
-      await exampleProject.ensureReadyForPlatformSpecificTooling();
+      await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 
     return null;

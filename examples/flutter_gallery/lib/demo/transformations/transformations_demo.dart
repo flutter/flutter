@@ -35,7 +35,21 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     // The scene is drawn by a CustomPaint, but user interaction is handled by
     // the GestureTransformable parent widget.
     return Scaffold(
-      appBar: AppBar(),
+      appBar: AppBar(
+        title: const Text('2D Tranformations'),
+        actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.help),
+            tooltip: 'Help',
+            onPressed: () {
+              showDialog<Column>(
+                context: context,
+                builder: (BuildContext context) => instructionDialog,
+              );
+            },
+          ),
+        ],
+      ),
       body: LayoutBuilder(
         builder: (BuildContext context, BoxConstraints constraints) {
           // Draw the scene as big as is available, but allow the user to
@@ -68,6 +82,31 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         },
       ),
       floatingActionButton: _board.selected == null ? resetButton : editButton,
+    );
+  }
+
+  Widget get instructionDialog {
+    return AlertDialog(
+      title: const Text('2D Transformations'),
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: const <Widget>[
+          Text('Tap to edit hex tiles, and use gestures to move around the scene:\n'),
+          Text('- Drag to pan.'),
+          Text('- Pinch to zoom.'),
+          Text('- Rotate with two fingers.'),
+          Text('\nYou can always press the home button to return to the starting orientation!'),
+        ],
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: const Text('OK'),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+      ],
     );
   }
 

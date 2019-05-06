@@ -7104,6 +7104,210 @@ class MaterialLocalizationJa extends GlobalMaterialLocalizations {
   String get viewLicensesButtonLabel => r'ライセンスを表示';
 }
 
+/// The translations for Kazakh (`kk`).
+class MaterialLocalizationKk extends GlobalMaterialLocalizations {
+  /// Create an instance of the translation bundle for Kazakh.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalMaterialLocalizations].
+  const MaterialLocalizationKk({
+    String localeName = 'kk',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat longDateFormat,
+    @required intl.DateFormat yearMonthFormat,
+    @required intl.NumberFormat decimalFormat,
+    @required intl.NumberFormat twoDigitZeroPaddedFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    mediumDateFormat: mediumDateFormat,
+    longDateFormat: longDateFormat,
+    yearMonthFormat: yearMonthFormat,
+    decimalFormat: decimalFormat,
+    twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat,
+  );
+
+  @override
+  String get aboutListTileTitleRaw => r'$applicationName тұралы';
+
+  @override
+  String get alertDialogLabel => r'Ескерту';
+
+  @override
+  String get anteMeridiemAbbreviation => r'AM';
+
+  @override
+  String get backButtonTooltip => r'Артқа';
+
+  @override
+  String get cancelButtonLabel => r'ЖОЮ';
+
+  @override
+  String get closeButtonLabel => r'ЖАБУ';
+
+  @override
+  String get closeButtonTooltip => r'Жабу';
+
+  @override
+  String get collapsedIconTapHint => r'Жазу';
+
+  @override
+  String get continueButtonLabel => r'ЖАЛҒАСТЫРУ';
+
+  @override
+  String get copyButtonLabel => r'КӨШІРУ';
+
+  @override
+  String get cutButtonLabel => r'ҚИЫП АЛУ';
+
+  @override
+  String get deleteButtonTooltip => r'Өшіру';
+
+  @override
+  String get dialogLabel => r'Диалогтік терезесі';
+
+  @override
+  String get drawerLabel => r'Навигациялық мәзір';
+
+  @override
+  String get expandedIconTapHint => r'Орау';
+
+  @override
+  String get hideAccountsLabel => r'Тіркеулік жасбасыны жасыру';
+
+  @override
+  String get licensesPageTitle => r'Лицензиялар';
+
+  @override
+  String get modalBarrierDismissLabel => r'Болдырмау';
+
+  @override
+  String get nextMonthTooltip => r'Келесі ай';
+
+  @override
+  String get nextPageTooltip => r'Келесі бет';
+
+  @override
+  String get okButtonLabel => r'ЖАҚСЫ';
+
+  @override
+  String get openAppDrawerTooltip => r'Навигация мәзірді ашу';
+
+  @override
+  String get pageRowsInfoTitleRaw => r'$firstRow–$lastRow $rowCount ішінде';
+
+  @override
+  String get pageRowsInfoTitleApproximateRaw => r'$firstRow–$lastRow $rowCount шамасының ішінде';
+
+  @override
+  String get pasteButtonLabel => r'ҚОНДЫРУ';
+
+  @override
+  String get popupMenuLabel => r'Ашылмалы мәзір';
+
+  @override
+  String get postMeridiemAbbreviation => r'PM';
+
+  @override
+  String get previousMonthTooltip => r'Өткен ай';
+
+  @override
+  String get previousPageTooltip => r'Алдынғы бет';
+
+  @override
+  String get refreshIndicatorSemanticLabel => r'Жаңарту';
+
+  @override
+  String get remainingTextFieldCharacterCountFew => null;
+
+  @override
+  String get remainingTextFieldCharacterCountMany => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOne => null;
+
+  @override
+  String get remainingTextFieldCharacterCountOther => r'$remainingCount таңба қалды';
+
+  @override
+  String get remainingTextFieldCharacterCountTwo => null;
+
+  @override
+  String get remainingTextFieldCharacterCountZero => r'Таңбалар қалмады';
+
+  @override
+  String get reorderItemDown => r'Төменге орналастыру';
+
+  @override
+  String get reorderItemLeft => r'Солға орналастыру';
+
+  @override
+  String get reorderItemRight => r'Оңға орналастыру';
+
+  @override
+  String get reorderItemToEnd => r'Аяққа орналастыру';
+
+  @override
+  String get reorderItemToStart => r'Басына орналастыру';
+
+  @override
+  String get reorderItemUp => r'Жоғарға орналастыру';
+
+  @override
+  String get rowsPerPageTitle => r'Бір бетіне жазбалар:';
+
+  @override
+  ScriptCategory get scriptCategory => ScriptCategory.englishLike;
+
+  @override
+  String get searchFieldLabel => r'Іздеу';
+
+  @override
+  String get selectAllButtonLabel => r'БӘРІН ТАҢДАУ';
+
+  @override
+  String get selectedRowCountTitleFew => null;
+
+  @override
+  String get selectedRowCountTitleMany => null;
+
+  @override
+  String get selectedRowCountTitleOne => null;
+
+  @override
+  String get selectedRowCountTitleOther => r'$selectedRowCount тармақ таңдалған';
+
+  @override
+  String get selectedRowCountTitleTwo => null;
+
+  @override
+  String get selectedRowCountTitleZero => r'Тармақ таңдалмаған';
+
+  @override
+  String get showAccountsLabel => r'Тіркеулік жасбасыны көрсету';
+
+  @override
+  String get showMenuTooltip => r'Мәзірді көрсету';
+
+  @override
+  String get signedInLabel => r'Жүйеге кірді';
+
+  @override
+  String get tabLabelRaw => r'$tabCount қосымша парақтардың $tabIndex парақ';
+
+  @override
+  TimeOfDayFormat get timeOfDayFormatRaw => TimeOfDayFormat.H_colon_mm;
+
+  @override
+  String get timePickerHourModeAnnouncement => r'Сағатты таңдау';
+
+  @override
+  String get timePickerMinuteModeAnnouncement => r'Минутты таңдау';
+
+  @override
+  String get viewLicensesButtonLabel => r'ЛИЦЕНЗИЯЛАРДЫ КӨРУ';
+}
+
 /// The translations for Khmer Central Khmer (`km`).
 class MaterialLocalizationKm extends GlobalMaterialLocalizations {
   /// Create an instance of the translation bundle for Khmer Central Khmer.
@@ -13145,7 +13349,7 @@ class MaterialLocalizationZhHantTw extends MaterialLocalizationZhHant {
 /// See also:
 ///
 ///  * [getMaterialTranslation], whose documentation describes these values.
-final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
+final Set<String> kMaterialSupportedLanguages = HashSet<String>.from(const <String>[
   'ar', // Arabic
   'bg', // Bulgarian
   'bs', // Bosnian
@@ -13171,6 +13375,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
   'id', // Indonesian
   'it', // Italian
   'ja', // Japanese
+  'kk', // Kazakh
   'km', // Khmer Central Khmer
   'ko', // Korean
   'lt', // Lithuanian
@@ -13209,7 +13414,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///
 /// The following locales are supported by this package:
 ///
-/// {@template flutter.localizations.languages}
+/// {@template flutter.localizations.material.languages}
 ///  * `ar` - Arabic
 ///  * `bg` - Bulgarian
 ///  * `bs` - Bosnian
@@ -13235,6 +13440,7 @@ final Set<String> kSupportedLanguages = HashSet<String>.from(const <String>[
 ///  * `id` - Indonesian
 ///  * `it` - Italian
 ///  * `ja` - Japanese
+///  * `kk` - Kazakh
 ///  * `km` - Khmer Central Khmer
 ///  * `ko` - Korean
 ///  * `lt` - Lithuanian
@@ -13396,6 +13602,8 @@ GlobalMaterialLocalizations getMaterialTranslation(
       return MaterialLocalizationIt(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ja':
       return MaterialLocalizationJa(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
+    case 'kk':
+      return MaterialLocalizationKk(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'km':
       return MaterialLocalizationKm(fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat);
     case 'ko':
