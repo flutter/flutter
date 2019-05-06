@@ -1514,39 +1514,4 @@ void main() {
 
     expect(getMaterialWidget().shape, roundedRectangleBorder);
   });
-
-  testWidgets('SliverAppBar with shape', (WidgetTester tester) async {
-    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(15.0)),
-    );
-    await tester.pumpWidget(
-      MaterialApp(
-        home: CustomScrollView(
-          slivers: const <Widget>[
-            SliverAppBar(
-              leading: Text('L'),
-              title: Text('No Scaffold'),
-              shape: roundedRectangleBorder,
-              actions: <Widget>[Text('A1'), Text('A2')],
-            ),
-          ],
-        ),
-      ),
-    );
-
-    final Finder sliverAppBarFinder = find.byType(SliverAppBar);
-
-    SliverAppBar getAppBarWidget() {
-      return tester.widget<SliverAppBar>(sliverAppBarFinder);
-    }
-
-    expect(getAppBarWidget().shape, roundedRectangleBorder);
-
-    final Finder materialFinder = find.byType(Material);
-    Material getMaterialWidget() {
-      return tester.widget<Material>(materialFinder);
-    }
-
-    expect(getMaterialWidget().shape, roundedRectangleBorder);
-  });
 }
