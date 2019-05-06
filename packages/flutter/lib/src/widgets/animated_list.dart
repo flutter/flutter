@@ -10,7 +10,6 @@ import 'framework.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scroll_view.dart';
-import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Signature for the builder callback used by [AnimatedList].
@@ -76,13 +75,11 @@ class AnimatedList extends StatefulWidget {
   /// [AnimatedListState.removeItem] removes an item immediately.
   final AnimatedListItemBuilder itemBuilder;
 
-  /// {@template flutter.widgets.animatedList.initialItemCount}
   /// The number of items the list will start with.
   ///
   /// The appearance of the initial items is not animated. They
   /// are created, as needed, by [itemBuilder] with an animation parameter
   /// of [kAlwaysCompleteAnimation].
-  /// {@endtemplate}
   final int initialItemCount;
 
   /// The axis along which the scroll view scrolls.
@@ -210,150 +207,6 @@ class AnimatedList extends StatefulWidget {
 /// [AnimatedList] item input handlers can also refer to their [AnimatedListState]
 /// with the static [AnimatedList.of] method.
 class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixin<AnimatedList> {
-  final GlobalKey<SliverAnimatedListState> _sliverAnimatedListKey = GlobalKey();
-
-  /// Insert an item at [index] and start an animation that will be passed
-  /// to [AnimatedList.itemBuilder] when the item is visible.
-  ///
-  /// This method's semantics are the same as Dart's [List.insert] method:
-  /// it increases the length of the list by one and shifts all items at or
-  /// after [index] towards the end of the list.
-  void insertItem(int index, { Duration duration = _kDuration }) {
-    _sliverAnimatedListKey.currentState.insertItem(index, duration: duration);
-  }
-
-  /// Remove the item at [index] and start an animation that will be passed
-  /// to [builder] when the item is visible.
-  ///
-  /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
-  /// item will still appear in the list for [duration] and during that time
-  /// [builder] must construct its widget as needed.
-  ///
-  /// This method's semantics are the same as Dart's [List.remove] method:
-  /// it decreases the length of the list by one and shifts all items at or
-  /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
-    _sliverAnimatedListKey.currentState.removeItem(index, builder, duration: duration);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomScrollView(
-      scrollDirection: widget.scrollDirection,
-      reverse: widget.reverse,
-      controller: widget.controller,
-      primary: widget.primary,
-      physics: widget.physics,
-      shrinkWrap: widget.shrinkWrap,
-      slivers: <Widget>[
-        SliverPadding(
-          padding: widget.padding ?? const EdgeInsets.all(0),
-          sliver: SliverAnimatedList(
-            key: _sliverAnimatedListKey,
-            itemBuilder: widget.itemBuilder,
-            initialItemCount: widget.initialItemCount,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// A sliver that animates items when they are inserted or removed.
-///
-/// This widget's [SliverAnimatedListState] can be used to dynamically insert or
-/// remove items. To refer to the [SliverAnimatedListState] either provide a
-/// [GlobalKey] or use the static [SliverAnimatedList.of] method from an item's
-/// input callback.
-///
-/// See also:
-///
-/// * [SliverList], which does not animate items when they are inserted or removed.
-class SliverAnimatedList extends StatefulWidget {
-  /// Creates a sliver that animates items when they are inserted or removed.
-  const SliverAnimatedList({
-    Key key,
-    @required this.itemBuilder,
-    this.initialItemCount = 0,
-  }) : assert(itemBuilder != null),
-       assert(initialItemCount != null && initialItemCount >= 0),
-       super(key: key);
-
-  /// Called, as needed, to build list item widgets.
-  ///
-  /// List items are only built when they're scrolled into view.
-  ///
-  /// The [AnimatedListItemBuilder] index parameter indicates the item's
-  /// position in the list. The value of the index parameter will be between 0
-  /// and [initialItemCount] plus the total number of items that have been
-  /// inserted with [SliverAnimatedListState.insertItem] and less the total
-  /// number of items that have been removed with
-  /// [SliverAnimatedListState.removeItem].
-  ///
-  /// Implementations of this callback should assume that
-  /// [SliverAnimatedListState.removeItem] removes an item immediately.
-  final AnimatedListItemBuilder itemBuilder;
-
-  /// {@macro flutter.widgets.animatedList.initialItemCount}
-  final int initialItemCount;
-
-  @override
-  SliverAnimatedListState createState() => SliverAnimatedListState();
-
-  /// The state from the closest instance of this class that encloses the given context.
-  ///
-  /// This method is typically used by [SliverAnimatedList] item widgets that
-  /// insert or remove items in response to user input.
-  ///
-  /// ```dart
-  /// SliverAnimatedListState animatedList = SliverAnimatedList.of(context);
-  /// ```
-  static SliverAnimatedListState of(BuildContext context, {bool nullOk = false}) {
-    assert(context != null);
-    assert(nullOk != null);
-    final SliverAnimatedListState result = context.ancestorStateOfType(const TypeMatcher<SliverAnimatedListState>());
-    if (nullOk || result != null)
-      return result;
-    throw FlutterError(
-        'SliverAnimatedList.of() called with a context that does not contain a SliverAnimatedList.\n'
-        'No SliverAnimatedListState ancestor could be found starting from the '
-        'context that was passed to SliverAnimatedListState.of(). '
-        'This can happen when the context provided is from the same StatefulWidget that '
-        'built the AnimatedList. Please see the SliverAnimatedList documentation '
-        'for examples of how to refer to an AnimatedListState object: '
-        '  https://docs.flutter.io/flutter/widgets/SliverAnimatedListState-class.html \n'
-        'The context used was:\n'
-        '  $context');
-  }
-}
-
-/// The state for a sliver that animates items when they are
-/// inserted or removed.
-///
-/// When an item is inserted with [insertItem] an animation begins running. The
-/// animation is passed to [SliverAnimatedList.itemBuilder] whenever the item's
-/// widget is needed.
-///
-/// When an item is removed with [removeItem] its animation is reversed.
-/// The removed item's animation is passed to the [removeItem] builder
-/// parameter.
-///
-/// An app that needs to insert or remove items in response to an event
-/// can refer to the [SliverAnimatedList]'s state with a global key:
-///
-/// ```dart
-/// GlobalKey<SliverAnimatedListState> listKey = GlobalKey<SliverAnimatedListState>();
-/// ...
-/// SliverAnimatedList(key: listKey, ...);
-/// ...
-/// listKey.currentState.insert(123);
-/// ```
-///
-/// [SliverAnimatedList] item input handlers can also refer to their
-/// [SliverAnimatedListState] with the static [SliverAnimatedList.of] method.
-class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProviderStateMixin {
-
   final List<_ActiveItem> _incomingItems = <_ActiveItem>[];
   final List<_ActiveItem> _outgoingItems = <_ActiveItem>[];
   int _itemsCount = 0;
@@ -366,9 +219,10 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   @override
   void dispose() {
-    for (_ActiveItem item in _incomingItems.followedBy(_outgoingItems)) {
+    for (_ActiveItem item in _incomingItems)
       item.controller.dispose();
-    }
+    for (_ActiveItem item in _outgoingItems)
+      item.controller.dispose();
     super.dispose();
   }
 
@@ -411,12 +265,8 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
     return index;
   }
 
-  SliverChildDelegate _createDelegate() {
-    return SliverChildBuilderDelegate(_itemBuilder, childCount: _itemsCount);
-  }
-
-  /// Insert an item at [index] and start an animation that will be passed to
-  /// [SliverAnimatedList.itemBuilder] when the item is visible.
+  /// Insert an item at [index] and start an animation that will be passed
+  /// to [AnimatedList.itemBuilder] when the item is visible.
   ///
   /// This method's semantics are the same as Dart's [List.insert] method:
   /// it increases the length of the list by one and shifts all items at or
@@ -457,8 +307,8 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
   /// to [builder] when the item is visible.
   ///
   /// Items are removed immediately. After an item has been removed, its index
-  /// will no longer be passed to the [SliverAnimatedList.itemBuilder]. However
-  /// the item will still appear in the list for [duration] and during that time
+  /// will no longer be passed to the [AnimatedList.itemBuilder]. However the
+  /// item will still appear in the list for [duration] and during that time
   /// [builder] must construct its widget as needed.
   ///
   /// This method's semantics are the same as Dart's [List.remove] method:
@@ -515,8 +365,16 @@ class SliverAnimatedListState extends State<SliverAnimatedList> with TickerProvi
 
   @override
   Widget build(BuildContext context) {
-    return SliverList(
-      delegate: _createDelegate(),
+    return ListView.builder(
+      itemBuilder: _itemBuilder,
+      itemCount: _itemsCount,
+      scrollDirection: widget.scrollDirection,
+      reverse: widget.reverse,
+      controller: widget.controller,
+      primary: widget.primary,
+      physics: widget.physics,
+      shrinkWrap: widget.shrinkWrap,
+      padding: widget.padding,
     );
   }
 }
