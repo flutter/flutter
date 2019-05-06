@@ -3,6 +3,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+set -e
+
 RunCommand() {
   if [[ -n "$VERBOSE_SCRIPT_LOGGING" ]]; then
     echo "♦ $*"
@@ -14,7 +16,6 @@ RunCommand() {
 EchoError() {
   echo "$@" 1>&2
 }
-
 
 # Set the working directory to the project root
 RunCommand pushd "${PROJECT_DIR}" > /dev/null
@@ -42,7 +43,7 @@ if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
 
-artifacts_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/${artifact_variant}"
+artifacts_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/linux-x64"
 if [[ -n "$LOCAL_ENGINE" ]]; then
   if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
     EchoError "========================================================================"
@@ -60,14 +61,14 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
   artifacts_path="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/"
 fi
 
-
-flutter_artifact_copy_dir = "linux/flutter/cache"
+flutter_artifact_copy_dir="linux/flutter/cache"
 RunCommand rm -rf "${flutter_artifact_copy_dir}"
 RunCommand mkdir -p -- "${flutter_artifact_copy_dir}"
-RunCommand cp "${FLUTTER_ARTIFACT_DIR}/*.h" "${flutter_artifact_copy_dir}"/
-RunCommand cp "${FLUTTER_ARTIFACT_DIR}/*.so" "${flutter_artifact_copy_dir}"/
-RunCommand cp -r $(FLUTTER_ARTIFACT_DIR)/cpp_client_wrapper \
-    "${flutter_artifact_copy_dir}"/
+RunCommand cp "${artifacts_path}"/*.h "${flutter_artifact_copy_dir}"/
+RunCommand cp "${artifacts_path}"/*.so "${flutter_artifact_copy_dir}"/
+RunCommand cp "${artifacts_path}"/icudtl.dat "${flutter_artifact_copy_dir}"/
+RunCommand cp -r "${artifacts_path}/cpp_client_wrapper" \
+    "${flutter_artifact_copy_dir}/"
 
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
