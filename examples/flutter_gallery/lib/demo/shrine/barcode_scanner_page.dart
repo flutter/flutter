@@ -263,7 +263,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       (BuildContext context) {
         return Container(
           width: double.infinity,
-          height: 368,
+          height: 416,
           child: Column(
             children: <Widget>[
               Container(
@@ -278,7 +278,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 ),
               ),
               Container(
-                margin: const EdgeInsets.all(20),
+                margin: const EdgeInsets.all(24),
+                height: 312,
                 child: Column(
                   children: <Widget>[
                     Row(
@@ -329,37 +330,46 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       ],
                     ),
                     Container(
-                      margin: const EdgeInsets.only(top: 22, bottom: 25),
+                      margin: const EdgeInsets.only(top: 35, bottom: 25),
                       child: const Text('A Japanese & English accompaniment to '
                           'the 2016 SPAN conference.'),
                     ),
-                    RaisedButton(
-                      onPressed: () {},
-                      color: kShrinePink100,
+                    Expanded(
                       child: Container(
-                        width: 312,
-                        height: 48,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: <Widget>[
-                            Container(
-                              margin: const EdgeInsets.only(right: 16),
-                              child: const Icon(Icons.add_shopping_cart),
+                        padding: const EdgeInsets.only(bottom: 4),
+                        alignment: Alignment.bottomCenter,
+                        child: RaisedButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          color: kShrinePink100,
+                          child: Container(
+                            width: 312,
+                            height: 48,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: <Widget>[
+                                Container(
+                                  margin: const EdgeInsets.only(right: 16),
+                                  child: const Icon(Icons.add_shopping_cart),
+                                ),
+                                Text('ADD TO CART - \$12.99',
+                                    style: Theme.of(context)
+                                        .primaryTextTheme
+                                        .button),
+                              ],
                             ),
-                            Text('ADD TO CART - \$12.99',
-                                style:
-                                    Theme.of(context).primaryTextTheme.button),
-                          ],
+                          ),
+                          elevation: 8.0,
+                          shape: const BeveledRectangleBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(7.0),
+                            ),
+                          ),
                         ),
-                      ),
-                      elevation: 8.0,
-                      shape: const BeveledRectangleBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(7.0)),
                       ),
                     ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         );
