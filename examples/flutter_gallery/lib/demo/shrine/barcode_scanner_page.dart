@@ -28,7 +28,7 @@ import 'colors.dart';
 
 class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage(
-      {this.validSquareWidth = 256, this.frameColor = Colors.white54});
+      {this.validSquareWidth = 256, this.frameColor = Colors.black38});
 
   final double validSquareWidth;
   final Color frameColor;
@@ -293,7 +293,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                             children: <Widget>[
                               Container(
                                 child: Text(
-                                  'Medium Red Notepad',
+                                  'SPAN Reader',
                                   style: Theme.of(context)
                                       .textTheme
                                       .body1
@@ -301,7 +301,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                 ),
                               ),
                               Text(
-                                '(2 pack)',
+                                'Vol. 2',
                                 style: Theme.of(context)
                                     .textTheme
                                     .body1
@@ -311,8 +311,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   children: const <Widget>[
-                                    Text('A5, ruled'),
-                                    Text('100 pages'),
+                                    Text('Material Design'),
+                                    Text('120 pages'),
                                   ],
                                 ),
                               ),
@@ -323,10 +323,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 22, bottom: 25),
-                      child: const Text(
-                        'Lightweight yet durable notepad with red leather'
-                        'cover for everyday notes. Available in packs of 2.',
-                      ),
+                      child: const Text('A Japanese & English accompaniment to'
+                          'the 2016 SPAN conference.'),
                     ),
                     RaisedButton(
                       onPressed: () {},
@@ -341,7 +339,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                               margin: const EdgeInsets.only(right: 16),
                               child: const Icon(Icons.add_shopping_cart),
                             ),
-                            Text('ADD TO CART - \$39.99',
+                            Text('ADD TO CART - \$12.99',
                                 style:
                                     Theme.of(context).primaryTextTheme.button),
                           ],
@@ -498,8 +496,8 @@ class WindowPainter extends CustomPainter {
   WindowPainter({
     @required this.windowSize,
     this.outerFrameColor = Colors.white54,
-    this.innerFrameColor = kShrineBrown600,
-    this.innerFrameStrokeWidth = 2,
+    this.innerFrameColor = const Color(0xFF442C2E),
+    this.innerFrameStrokeWidth = 3,
     this.closeWindow = false,
   });
 
@@ -625,7 +623,7 @@ class SquareTracePainter extends CustomPainter {
   SquareTracePainter({
     @required this.animation,
     @required this.square,
-    this.strokeWidth = 2,
+    this.strokeWidth = 3,
   }) : super(repaint: animation);
 
   final Animation<double> animation;
