@@ -717,7 +717,9 @@ FILE: ../../../flutter/shell/platform/embedder/vsync_waiter_embedder.cc
 FILE: ../../../flutter/shell/platform/embedder/vsync_waiter_embedder.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/flutter_window_controller.cc
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/flutter_window_controller_unittests.cc
+FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutter_window.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutter_window_controller.h
+FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/plugin_registrar_glfw.h
 FILE: ../../../flutter/shell/platform/glfw/flutter_glfw.cc
 FILE: ../../../flutter/shell/platform/glfw/key_event_handler.cc
 FILE: ../../../flutter/shell/platform/glfw/key_event_handler.h

@@ -16,6 +16,9 @@ FlutterWindowController::FlutterWindowController(
 }
 
 FlutterWindowController::~FlutterWindowController() {
+  if (controller_) {
+    FlutterDesktopDestroyWindow(controller_);
+  }
   if (init_succeeded_) {
     FlutterDesktopTerminate();
   }
@@ -33,7 +36,7 @@ bool FlutterWindowController::CreateWindow(
     return false;
   }
 
-  if (window_) {
+  if (controller_) {
     std::cerr << "Only one Flutter window can exist at a time." << std::endl;
     return false;
   }
@@ -44,45 +47,35 @@ bool FlutterWindowController::CreateWindow(
       [](const std::string& arg) -> const char* { return arg.c_str(); });
   size_t arg_count = engine_arguments.size();
 
-  window_ = FlutterDesktopCreateWindow(
+  controller_ = FlutterDesktopCreateWindow(
       width, height, title.c_str(), assets_path.c_str(), icu_data_path_.c_str(),
       arg_count > 0 ? &engine_arguments[0] : nullptr, arg_count);
-  if (!window_) {
+  if (!controller_) {
     std::cerr << "Failed to create window." << std::endl;
     return false;
   }
+  window_ =
+      std::make_unique<FlutterWindow>(FlutterDesktopGetWindow(controller_));
   return true;
 }
 
 FlutterDesktopPluginRegistrarRef FlutterWindowController::GetRegistrarForPlugin(
     const std::string& plugin_name) {
-  if (!window_) {
+  if (!controller_) {
     std::cerr << "Cannot get plugin registrar without a window; call "
                  "CreateWindow first."
               << std::endl;
     return nullptr;
   }
-  return FlutterDesktopGetPluginRegistrar(window_, plugin_name.c_str());
-}
-
-void FlutterWindowController::SetHoverEnabled(bool enabled) {
-  FlutterDesktopSetHoverEnabled(window_, enabled);
-}
-
-void FlutterWindowController::SetTitle(const std::string& title) {
-  FlutterDesktopSetWindowTitle(window_, title.c_str());
-}
-
-void FlutterWindowController::SetIcon(uint8_t* pixel_data,
-                                      int width,
-                                      int height) {
-  FlutterDesktopSetWindowIcon(window_, pixel_data, width, height);
+  return FlutterDesktopGetPluginRegistrar(controller_, plugin_name.c_str());
 }
 
 void FlutterWindowController::RunEventLoop() {
-  if (window_) {
-    FlutterDesktopRunWindowLoop(window_);
+  if (controller_) {
+    FlutterDesktopRunWindowLoop(controller_);
   }
+  window_ = nullptr;
+  controller_ = nullptr;
 }
 
 }  // namespace flutter

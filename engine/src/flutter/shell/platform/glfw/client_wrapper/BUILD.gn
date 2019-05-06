@@ -4,7 +4,11 @@
 
 import("$flutter_root/shell/platform/common/cpp/client_wrapper/publish.gni")
 
-_wrapper_includes = [ "include/flutter/flutter_window_controller.h" ]
+_wrapper_includes = [
+  "include/flutter/flutter_window.h",
+  "include/flutter/flutter_window_controller.h",
+  "include/flutter/plugin_registrar_glfw.h",
+]
 
 _wrapper_sources = [ "flutter_window_controller.cc" ]
 

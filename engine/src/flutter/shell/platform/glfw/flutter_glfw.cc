@@ -39,12 +39,15 @@ static_assert(FLUTTER_ENGINE_VERSION == 1, "");
 static constexpr double kDpPerInch = 160.0;
 
 // Struct for storing state within an instance of the GLFW Window.
-struct FlutterDesktopWindowState {
+struct FlutterDesktopWindowControllerState {
   // The GLFW window that owns this state object.
   GLFWwindow* window;
 
   // The handle to the Flutter engine instance.
   FlutterEngine engine;
+
+  // The window handle given to API clients.
+  std::unique_ptr<FlutterDesktopWindow> window_wrapper;
 
   // The plugin registrar handle given to API clients.
   std::unique_ptr<FlutterDesktopPluginRegistrar> plugin_registrar;
@@ -59,9 +62,6 @@ struct FlutterDesktopWindowState {
   std::vector<std::unique_ptr<flutter::KeyboardHookHandler>>
       keyboard_hook_handlers;
 
-  // Whether or not to track mouse movements to send kHover events.
-  bool hover_tracking_enabled = false;
-
   // Whether or not the pointer has been added (or if tracking is enabled, has
   // been added since it was last removed).
   bool pointer_currently_added = false;
@@ -71,6 +71,17 @@ struct FlutterDesktopWindowState {
   double monitor_screen_coordinates_per_inch = kDpPerInch;
   // The ratio of pixels per screen coordinate for the window.
   double window_pixels_per_screen_coordinate = 1.0;
+};
+
+// Opaque reference for the GLFW window itself. This is separate from the
+// controller so that it can be provided to plugins without giving them access
+// to all of the controller-based functionality.
+struct FlutterDesktopWindow {
+  // The GLFW window that (indirectly) owns this state object.
+  GLFWwindow* window;
+
+  // Whether or not to track mouse movements to send kHover events.
+  bool hover_tracking_enabled = false;
 };
 
 // Struct for storing state of a Flutter engine instance.
@@ -83,6 +94,9 @@ struct FlutterDesktopEngineState {
 struct FlutterDesktopPluginRegistrar {
   // The plugin messenger handle given to API clients.
   std::unique_ptr<FlutterDesktopMessenger> messenger;
+
+  // The handle for the window associated with this registrar.
+  FlutterDesktopWindow* window;
 };
 
 // State associated with the messenger used to communicate with the engine.
@@ -95,8 +109,9 @@ struct FlutterDesktopMessenger {
 };
 
 // Retrieves state bag for the window in question from the GLFWWindow.
-static FlutterDesktopWindowState* GetSavedWindowState(GLFWwindow* window) {
-  return reinterpret_cast<FlutterDesktopWindowState*>(
+static FlutterDesktopWindowControllerState* GetSavedWindowState(
+    GLFWwindow* window) {
+  return reinterpret_cast<FlutterDesktopWindowControllerState*>(
       glfwGetWindowUserPointer(window));
 }
 
@@ -254,7 +269,8 @@ static void GLFWMouseButtonCallback(GLFWwindow* window,
 
   // If mouse tracking isn't already enabled, turn it on for the duration of
   // the drag to generate kMove events.
-  bool hover_enabled = GetSavedWindowState(window)->hover_tracking_enabled;
+  bool hover_enabled =
+      GetSavedWindowState(window)->window_wrapper->hover_tracking_enabled;
   if (!hover_enabled) {
     glfwSetCursorPosCallback(
         window, (action == GLFW_PRESS) ? GLFWCursorPositionCallback : nullptr);
@@ -319,7 +335,7 @@ static void GLFWAssignEventCallbacks(GLFWwindow* window) {
   glfwSetCharCallback(window, GLFWCharCallback);
   glfwSetMouseButtonCallback(window, GLFWMouseButtonCallback);
   glfwSetScrollCallback(window, GLFWScrollCallback);
-  if (GetSavedWindowState(window)->hover_tracking_enabled) {
+  if (GetSavedWindowState(window)->window_wrapper->hover_tracking_enabled) {
     SetHoverCallbacksEnabled(window, true);
   }
 }
@@ -469,18 +485,19 @@ void FlutterDesktopTerminate() {
   glfwTerminate();
 }
 
-FlutterDesktopWindowRef FlutterDesktopCreateWindow(int initial_width,
-                                                   int initial_height,
-                                                   const char* title,
-                                                   const char* assets_path,
-                                                   const char* icu_data_path,
-                                                   const char** arguments,
-                                                   size_t argument_count) {
+FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
+    int initial_width,
+    int initial_height,
+    const char* title,
+    const char* assets_path,
+    const char* icu_data_path,
+    const char** arguments,
+    size_t argument_count) {
 #ifdef __linux__
   gtk_init(0, nullptr);
 #endif
   // Create the window.
-  auto window =
+  auto* window =
       glfwCreateWindow(initial_width, initial_height, title, NULL, NULL);
   if (window == nullptr) {
     return nullptr;
@@ -496,7 +513,7 @@ FlutterDesktopWindowRef FlutterDesktopCreateWindow(int initial_width,
   }
 
   // Create a state object attached to the window.
-  FlutterDesktopWindowState* state = new FlutterDesktopWindowState();
+  auto* state = new FlutterDesktopWindowControllerState();
   state->window = window;
   glfwSetWindowUserPointer(window, state);
   state->engine = engine;
@@ -509,8 +526,12 @@ FlutterDesktopWindowRef FlutterDesktopCreateWindow(int initial_width,
   messenger->engine = engine;
   messenger->dispatcher = state->message_dispatcher.get();
 
+  state->window_wrapper = std::make_unique<FlutterDesktopWindow>();
+  state->window_wrapper->window = window;
+
   state->plugin_registrar = std::make_unique<FlutterDesktopPluginRegistrar>();
   state->plugin_registrar->messenger = std::move(messenger);
+  state->plugin_registrar->window = state->window_wrapper.get();
 
   state->internal_plugin_registrar =
       std::make_unique<flutter::PluginRegistrar>(state->plugin_registrar.get());
@@ -536,19 +557,25 @@ FlutterDesktopWindowRef FlutterDesktopCreateWindow(int initial_width,
   return state;
 }
 
-void FlutterDesktopSetHoverEnabled(FlutterDesktopWindowRef flutter_window,
-                                   bool enabled) {
+void FlutterDesktopDestroyWindow(FlutterDesktopWindowControllerRef controller) {
+  FlutterEngineShutdown(controller->engine);
+  glfwDestroyWindow(controller->window);
+  delete controller;
+}
+
+void FlutterDesktopWindowSetHoverEnabled(FlutterDesktopWindowRef flutter_window,
+                                         bool enabled) {
   flutter_window->hover_tracking_enabled = enabled;
   SetHoverCallbacksEnabled(flutter_window->window, enabled);
 }
 
-void FlutterDesktopSetWindowTitle(FlutterDesktopWindowRef flutter_window,
+void FlutterDesktopWindowSetTitle(FlutterDesktopWindowRef flutter_window,
                                   const char* title) {
   GLFWwindow* window = flutter_window->window;
   glfwSetWindowTitle(window, title);
 }
 
-void FlutterDesktopSetWindowIcon(FlutterDesktopWindowRef flutter_window,
+void FlutterDesktopWindowSetIcon(FlutterDesktopWindowRef flutter_window,
                                  uint8_t* pixel_data,
                                  int width,
                                  int height) {
@@ -557,8 +584,8 @@ void FlutterDesktopSetWindowIcon(FlutterDesktopWindowRef flutter_window,
   glfwSetWindowIcon(window, pixel_data ? 1 : 0, &image);
 }
 
-void FlutterDesktopRunWindowLoop(FlutterDesktopWindowRef flutter_window) {
-  GLFWwindow* window = flutter_window->window;
+void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {
+  GLFWwindow* window = controller->window;
 #ifdef __linux__
   // Necessary for GTK thread safety.
   XInitThreads();
@@ -573,9 +600,24 @@ void FlutterDesktopRunWindowLoop(FlutterDesktopWindowRef flutter_window) {
     // TODO(awdavies): This will be deprecated soon.
     __FlutterEngineFlushPendingTasksNow();
   }
-  FlutterEngineShutdown(flutter_window->engine);
-  delete flutter_window;
-  glfwDestroyWindow(window);
+  FlutterDesktopDestroyWindow(controller);
+}
+
+FlutterDesktopWindowRef FlutterDesktopGetWindow(
+    FlutterDesktopWindowControllerRef controller) {
+  // Currently, one registrar acts as the registrar for all plugins, so the
+  // name is ignored. It is part of the API to reduce churn in the future when
+  // aligning more closely with the Flutter registrar system.
+  return controller->window_wrapper.get();
+}
+
+FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
+    FlutterDesktopWindowControllerRef controller,
+    const char* plugin_name) {
+  // Currently, one registrar acts as the registrar for all plugins, so the
+  // name is ignored. It is part of the API to reduce churn in the future when
+  // aligning more closely with the Flutter registrar system.
+  return controller->plugin_registrar.get();
 }
 
 FlutterDesktopEngineRef FlutterDesktopRunEngine(const char* assets_path,
@@ -599,15 +641,6 @@ bool FlutterDesktopShutDownEngine(FlutterDesktopEngineRef engine_ref) {
   return (result == kSuccess);
 }
 
-FlutterDesktopPluginRegistrarRef FlutterDesktopGetPluginRegistrar(
-    FlutterDesktopWindowRef flutter_window,
-    const char* plugin_name) {
-  // Currently, one registrar acts as the registrar for all plugins, so the
-  // name is ignored. It is part of the API to reduce churn in the future when
-  // aligning more closely with the Flutter registrar system.
-  return flutter_window->plugin_registrar.get();
-}
-
 void FlutterDesktopRegistrarEnableInputBlocking(
     FlutterDesktopPluginRegistrarRef registrar,
     const char* channel) {
@@ -617,6 +650,11 @@ void FlutterDesktopRegistrarEnableInputBlocking(
 FlutterDesktopMessengerRef FlutterDesktopRegistrarGetMessenger(
     FlutterDesktopPluginRegistrarRef registrar) {
   return registrar->messenger.get();
+}
+
+FlutterDesktopWindowRef FlutterDesktopRegistrarGetWindow(
+    FlutterDesktopPluginRegistrarRef registrar) {
+  return registrar->window;
 }
 
 void FlutterDesktopMessengerSend(FlutterDesktopMessengerRef messenger,
