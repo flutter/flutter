@@ -316,7 +316,7 @@ class TextPainter {
 
   ui.Paragraph _layoutTemplate;
 
-  /// A ordered list of [TextBox]es that bound the positions of the placeholders
+  /// An ordered list of [TextBox]es that bound the positions of the placeholders
   /// in the paragraph.
   ///
   /// Each box corresponds to a [PlaceholderSpan] in the order they were defined
