@@ -171,8 +171,8 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
       if (onDown != null)
         invokeCallback<void>('onDown', () {
           onDown(DragDownDetails(
-            globalPosition: _initialPosition.local,
-            localPosition: _initialPosition.global,
+            globalPosition: _initialPosition.global,
+            localPosition: _initialPosition.local,
           ));
         });
     } else if (_state == _DragState.accepted) {
