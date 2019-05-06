@@ -778,6 +778,9 @@ class SliverGeometry extends Diagnosticable {
 typedef SliverHitTest = bool Function(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition });
 
 /// The result of performing a hit test on [RenderSliver]s.
+///
+/// An instance of this class is provided to [RenderSliver.hitTest] to record
+/// the result of the hit test.
 class SliverHitTestResult extends HitTestResult {
   /// Creates an empty hit test result for hit testing on [RenderSliver].
   SliverHitTestResult() : super();
@@ -790,9 +793,9 @@ class SliverHitTestResult extends HitTestResult {
   /// (subtype of) [HitTestResult] to a [SliverHitTestResult] for hit testing on
   /// [RenderSliver]s.
   ///
-  /// The [HitTestEntry]s added to the returned [SliverHitTestResult] are also
-  /// added to the wrapped `result` (both share the same underlying data
-  /// structure to store [HitTestEntry]s).
+  /// The [HitTestEntry] instances added to the returned [SliverHitTestResult]
+  /// are also added to the wrapped `result` (both share the same underlying
+  /// data structure to store [HitTestEntry] instances).
   ///
   /// See also:
   ///
@@ -803,7 +806,11 @@ class SliverHitTestResult extends HitTestResult {
   SliverHitTestResult.wrap(HitTestResult result) : super.wrap(result);
 
   /// Transforms `mainAxisPosition` and `crossAxisPosition` to the local
-  /// coordinate system of a child before hit-testing the child.
+  /// coordinate system of a child for hit-testing the child.
+  ///
+  /// The actual hit testing of the child needs to be implemented in the
+  /// provided `hitTest` callback, which is invoked with the transformed
+  /// `position` as argument.
   ///
   /// For the transform `mainAxisOffset` is subtracted from `mainAxisPosition`
   /// and `crossAxisOffset` is subtracted from `crossAxisPosition`.

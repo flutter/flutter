@@ -77,6 +77,18 @@ class SectorParentData extends ParentData {
   double theta = 0.0;
 }
 
+/// Base class for [RenderObject]s that live in a polar coordinate space.
+///
+/// In a polar coordinate system each point on a plane is determined by a
+/// distance from a reference point ("radius") and an angle from a reference
+/// direction ("theta").
+///
+/// See also:
+///
+///  * <https://en.wikipedia.org/wiki/Polar_coordinate_system>, which defines
+///    the polar coordinate space.
+///  * [RenderBox], which is the base class for [RenderObject]s that live in a
+///    cartesian coordinate space.
 abstract class RenderSector extends RenderObject {
 
   @override
@@ -608,6 +620,10 @@ class SectorHitTestResult extends HitTestResult {
   ///  * [HitTestResult.wrap], which turns a [SectorHitTestResult] back into a
   ///    generic [HitTestResult].
   SectorHitTestResult.wrap(HitTestResult result) : super.wrap(result);
+
+  // TODO(goderbauer): Add convenience methods to transform hit test positions
+  //    once we have RenderSector implementations that move the origin of their
+  //    children (e.g. RenderSectorTransform analogues to RenderTransform).
 }
 
 /// A hit test entry used by [RenderSector].

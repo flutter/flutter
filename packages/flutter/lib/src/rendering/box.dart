@@ -617,24 +617,27 @@ class BoxConstraints extends Constraints {
 /// See also:
 ///
 ///  * [RenderBox.hitTest], which documents more details around hit testing
-///    [RenderBox]s.
+///    [RenderBox]es.
 typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset position);
 
-/// The result of performing a hit test on [RenderBox]s.
+/// The result of performing a hit test on [RenderBox]es.
+///
+/// An instance of this class is provided to [RenderBox.hitTest] to record the
+/// result of the hit test.
 class BoxHitTestResult extends HitTestResult {
   /// Creates an empty hit test result for hit testing on [RenderBox].
   BoxHitTestResult() : super();
 
   /// Wraps `result` to create a [HitTestResult] that implements the
-  /// [BoxHitTestResult] protocol for hit testing on [RenderBox]s.
+  /// [BoxHitTestResult] protocol for hit testing on [RenderBox]es.
   ///
   /// This method is used by [RenderObject]s that adapt between the
   /// [RenderBox]-world and the non-[RenderBox]-world to convert a (subtype of)
-  /// [HitTestResult] to a [BoxHitTestResult] for hit testing on [RenderBox]s.
+  /// [HitTestResult] to a [BoxHitTestResult] for hit testing on [RenderBox]es.
   ///
-  /// The [HitTestEntry]s added to the returned [BoxHitTestResult] are also
-  /// added to the wrapped `result` (both share the same underlying data
-  /// structure to store [HitTestEntry]s).
+  /// The [HitTestEntry] instances added to the returned [BoxHitTestResult] are
+  /// also added to the wrapped `result` (both share the same underlying data
+  /// structure to store [HitTestEntry] instances).
   ///
   /// See also:
   ///
@@ -644,8 +647,12 @@ class BoxHitTestResult extends HitTestResult {
   ///    [SliverHitTestResult] for hit testing on [RenderSliver] children.
   BoxHitTestResult.wrap(HitTestResult result) : super.wrap(result);
 
-  /// Transforms `position` to the local coordinate system of a child before
+  /// Transforms `position` to the local coordinate system of a child for
   /// hit-testing the child.
+  ///
+  /// The actual hit testing of the child needs to be implemented in the
+  /// provided `hitTest` callback, which is invoked with the transformed
+  /// `position` as argument.
   ///
   /// Since the provided paint `transform` describes the transform from the
   /// child to the parent, the matrix is inverted before it is used to transform
@@ -719,6 +726,10 @@ class BoxHitTestResult extends HitTestResult {
   /// Convenience method for hit testing children, that are translated by
   /// an [Offset].
   ///
+  /// The actual hit testing of the child needs to be implemented in the
+  /// provided `hitTest` callback, which is invoked with the transformed
+  /// `position` as argument.
+  ///
   /// This method can be used as a convenience over [addWithPaintTransform] if
   /// a parent paints a child at an `offset`.
   ///
@@ -741,8 +752,12 @@ class BoxHitTestResult extends HitTestResult {
     );
   }
 
-  /// Transforms `position` to the local coordinate system of a child before
+  /// Transforms `position` to the local coordinate system of a child for
   /// hit-testing the child.
+  ///
+  /// The actual hit testing of the child needs to be implemented in the
+  /// provided `hitTest` callback, which is invoked with the transformed
+  /// `position` as argument.
   ///
   /// Unlike [addWithPaintTransform], the provided `transform` matrix is used
   /// directly to transform `position` without any pre-processing.
