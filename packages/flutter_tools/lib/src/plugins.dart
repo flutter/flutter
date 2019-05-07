@@ -319,8 +319,8 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
     }
     /// The user may have a custom maintained Podfile that they're running `pod install`
     /// on themselves.
-    else if (iosProject.podfile.existsSync() && iosProject.podfileLock.existsSync()) {
-      final String content = iosProject.podfile.readAsStringSync();
+    else if (project.ios.podfile.existsSync() && project.ios.podfileLock.existsSync()) {
+      final String content = project.ios.podfile.readAsStringSync();
       if (!content.contains("target 'Runner' do")) {
         /// Don't do anything if the Runner target has no dependencies.
         return;
