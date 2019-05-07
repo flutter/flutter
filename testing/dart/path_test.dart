@@ -9,37 +9,31 @@ import 'package:test/test.dart';
 
 void main() {
   test('path getBounds', () {
-    final Rect r = new Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
-    final Path p = new Path()..addRect(r);
+    const Rect r = Rect.fromLTRB(1.0, 3.0, 5.0, 7.0);
+    final Path p = Path()..addRect(r);
     expect(p.getBounds(), equals(r));
     p.lineTo(20.0, 15.0);
-    expect(p.getBounds(), equals(new Rect.fromLTRB(1.0, 3.0, 20.0, 15.0)));
+    expect(p.getBounds(), equals(const Rect.fromLTRB(1.0, 3.0, 20.0, 15.0)));
   });
 
   test('path combine rect', () {
-    final Rect c1 =
-        new Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
-    final Rect c2 =
-        new Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
+    final Rect c1 = Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
+    final Rect c2 = Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
     final Rect c1UnionC2 = c1.expandToInclude(c2);
     final Rect c1IntersectC2 = c1.intersect(c2);
-    final Path pathCircle1 = new Path()..addRect(c1);
-    final Path pathCircle2 = new Path()..addRect(c2);
+    final Path pathCircle1 = Path()..addRect(c1);
+    final Path pathCircle2 = Path()..addRect(c2);
 
-    final Path difference =
-        Path.combine(PathOperation.difference, pathCircle1, pathCircle2);
+    final Path difference = Path.combine(PathOperation.difference, pathCircle1, pathCircle2);
     expect(difference.getBounds(), equals(c1));
 
-    final Path reverseDifference =
-        Path.combine(PathOperation.reverseDifference, pathCircle1, pathCircle2);
+    final Path reverseDifference = Path.combine(PathOperation.reverseDifference, pathCircle1, pathCircle2);
     expect(reverseDifference.getBounds(), equals(c2));
 
-    final Path union =
-        Path.combine(PathOperation.union, pathCircle1, pathCircle2);
+    final Path union = Path.combine(PathOperation.union, pathCircle1, pathCircle2);
     expect(union.getBounds(), equals(c1UnionC2));
 
-    final Path intersect =
-        Path.combine(PathOperation.intersect, pathCircle1, pathCircle2);
+    final Path intersect = Path.combine(PathOperation.intersect, pathCircle1, pathCircle2);
     expect(intersect.getBounds(), equals(c1IntersectC2));
 
     // the bounds on this will be the same as union - but would draw a missing inside piece.
@@ -48,31 +42,24 @@ void main() {
   });
 
   test('path combine oval', () {
-    final Rect c1 =
-        new Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
-    final Rect c2 =
-        new Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
+    final Rect c1 = Rect.fromCircle(center: const Offset(10.0, 10.0), radius: 10.0);
+    final Rect c2 = Rect.fromCircle(center: const Offset(5.0, 5.0), radius: 10.0);
     final Rect c1UnionC2 = c1.expandToInclude(c2);
     final Rect c1IntersectC2 = c1.intersect(c2);
-    final Path pathCircle1 = new Path()..addOval(c1);
-    final Path pathCircle2 = new Path()..addOval(c2);
+    final Path pathCircle1 = Path()..addOval(c1);
+    final Path pathCircle2 = Path()..addOval(c2);
 
-    final Path difference =
-        Path.combine(PathOperation.difference, pathCircle1, pathCircle2);
+    final Path difference = Path.combine(PathOperation.difference, pathCircle1, pathCircle2);
 
     expect(difference.getBounds().top, closeTo(0.88, 0.01));
 
-    final Path reverseDifference =
-        Path.combine(PathOperation.reverseDifference, pathCircle1, pathCircle2);
-    expect(reverseDifference.getBounds().right,
-        closeTo(14.11, 0.01));
+    final Path reverseDifference = Path.combine(PathOperation.reverseDifference, pathCircle1, pathCircle2);
+    expect(reverseDifference.getBounds().right, closeTo(14.11, 0.01));
 
-    final Path union =
-        Path.combine(PathOperation.union, pathCircle1, pathCircle2);
+    final Path union = Path.combine(PathOperation.union, pathCircle1, pathCircle2);
     expect(union.getBounds(), equals(c1UnionC2));
 
-    final Path intersect =
-        Path.combine(PathOperation.intersect, pathCircle1, pathCircle2);
+    final Path intersect = Path.combine(PathOperation.intersect, pathCircle1, pathCircle2);
     expect(intersect.getBounds(), equals(c1IntersectC2));
 
     // the bounds on this will be the same as union - but would draw a missing inside piece.
@@ -81,8 +68,8 @@ void main() {
   });
 
   test('path clone', () {
-    final Path p1 = new Path()..lineTo(20.0, 20.0);
-    final Path p2 = new Path.from(p1);
+    final Path p1 = Path()..lineTo(20.0, 20.0);
+    final Path p2 = Path.from(p1);
 
     expect(p1.getBounds(), equals(p2.getBounds()));
 
@@ -91,8 +78,8 @@ void main() {
   });
 
   test('transformation tests', () {
-    final Rect bounds = new Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
-    final Path p = new Path()..addRect(bounds);
+    const Rect bounds = Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+    final Path p = Path()..addRect(bounds);
     final Float64List scaleMatrix = Float64List.fromList(<double>[
       2.5, 0.0, 0.0, 0.0, // first col
       0.0, 0.5, 0.0, 0.0, // second col
@@ -104,41 +91,37 @@ void main() {
     final Path pTransformed = p.transform(scaleMatrix);
 
     expect(pTransformed.getBounds(),
-        equals(new Rect.fromLTRB(0.0, 0.0, 10 * 2.5, 10 * 0.5)));
+        equals(const Rect.fromLTRB(0.0, 0.0, 10 * 2.5, 10 * 0.5)));
 
-    final Path p2 = new Path()..lineTo(10.0, 10.0);
+    final Path p2 = Path()..lineTo(10.0, 10.0);
 
     p.addPath(p2, const Offset(10.0, 10.0));
-    expect(p.getBounds(), equals(new Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)));
+    expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)));
 
     p.addPath(p2, const Offset(20.0, 20.0), matrix4: scaleMatrix);
     expect(p.getBounds(),
-        equals(new Rect.fromLTRB(0.0, 0.0, 20 + (10 * 2.5), 20 + (10 * .5))));
+        equals(const Rect.fromLTRB(0.0, 0.0, 20 + (10 * 2.5), 20 + (10 * .5))));
 
     p.extendWithPath(p2, const Offset(0.0, 0.0));
-    expect(p.getBounds(), equals(new Rect.fromLTRB(0.0, 0.0, 45.0, 25.0)));
+    expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 45.0, 25.0)));
 
     p.extendWithPath(p2, const Offset(45.0, 25.0), matrix4: scaleMatrix);
-    expect(p.getBounds(), equals(new Rect.fromLTRB(0.0, 0.0, 70.0, 30.0)));
+    expect(p.getBounds(), equals(const Rect.fromLTRB(0.0, 0.0, 70.0, 30.0)));
   });
 
   test('path metrics tests', () {
-    final Path simpleHorizontalLine = new Path()..lineTo(10.0, 0.0);
+    final Path simpleHorizontalLine = Path()..lineTo(10.0, 0.0);
 
     // basic tests on horizontal line
-    final PathMetrics simpleHorizontalMetrics =
-        simpleHorizontalLine.computeMetrics();
+    final PathMetrics simpleHorizontalMetrics = simpleHorizontalLine.computeMetrics();
     expect(simpleHorizontalMetrics.iterator.current, isNull);
     expect(simpleHorizontalMetrics.iterator.moveNext(), isTrue);
     expect(simpleHorizontalMetrics.iterator.current, isNotNull);
     expect(simpleHorizontalMetrics.iterator.current.length, equals(10.0));
     expect(simpleHorizontalMetrics.iterator.current.isClosed, isFalse);
-    final Path simpleExtract =
-        simpleHorizontalMetrics.iterator.current.extractPath(1.0, 9.0);
-    expect(simpleExtract.getBounds(),
-        equals(new Rect.fromLTRB(1.0, 0.0, 9.0, 0.0)));
-    final Tangent posTan =
-        simpleHorizontalMetrics.iterator.current.getTangentForOffset(1.0);
+    final Path simpleExtract = simpleHorizontalMetrics.iterator.current.extractPath(1.0, 9.0);
+    expect(simpleExtract.getBounds(), equals(const Rect.fromLTRB(1.0, 0.0, 9.0, 0.0)));
+    final Tangent posTan = simpleHorizontalMetrics.iterator.current.getTangentForOffset(1.0);
     expect(posTan, isNotNull);
     expect(posTan.position, equals(const Offset(1.0, 0.0)));
     expect(posTan.angle, equals(0.0));
@@ -147,43 +130,33 @@ void main() {
     expect(simpleHorizontalMetrics.iterator.current, isNull);
 
     // test with forceClosed
-    final PathMetrics simpleMetricsClosed =
-        simpleHorizontalLine.computeMetrics(forceClosed: true);
+    final PathMetrics simpleMetricsClosed = simpleHorizontalLine.computeMetrics(forceClosed: true);
     expect(simpleMetricsClosed.iterator.current, isNull);
     expect(simpleMetricsClosed.iterator.moveNext(), isTrue);
     expect(simpleMetricsClosed.iterator.current, isNotNull);
-    expect(simpleMetricsClosed.iterator.current.length,
-        equals(20.0)); // because we forced close
+    expect(simpleMetricsClosed.iterator.current.length, equals(20.0)); // because we forced close
     expect(simpleMetricsClosed.iterator.current.isClosed, isTrue);
-    final Path simpleExtract2 =
-        simpleMetricsClosed.iterator.current.extractPath(1.0, 9.0);
-    expect(simpleExtract2.getBounds(),
-        equals(new Rect.fromLTRB(1.0, 0.0, 9.0, 0.0)));
+    final Path simpleExtract2 = simpleMetricsClosed.iterator.current.extractPath(1.0, 9.0);
+    expect(simpleExtract2.getBounds(), equals(const Rect.fromLTRB(1.0, 0.0, 9.0, 0.0)));
     expect(simpleMetricsClosed.iterator.moveNext(), isFalse);
 
     // test getTangentForOffset with vertical line
-    final Path simpleVerticalLine = new Path()..lineTo(0.0, 10.0);
-    final PathMetrics simpleMetricsVertical =
-        simpleVerticalLine.computeMetrics()..iterator.moveNext();
-    final Tangent posTanVertical =
-        simpleMetricsVertical.iterator.current.getTangentForOffset(5.0);
+    final Path simpleVerticalLine = Path()..lineTo(0.0, 10.0);
+    final PathMetrics simpleMetricsVertical = simpleVerticalLine.computeMetrics()..iterator.moveNext();
+    final Tangent posTanVertical = simpleMetricsVertical.iterator.current.getTangentForOffset(5.0);
     expect(posTanVertical.position, equals(const Offset(0.0, 5.0)));
-    expect(posTanVertical.angle,
-        closeTo(-1.5708, .0001)); // 90 degrees
+    expect(posTanVertical.angle, closeTo(-1.5708, .0001)); // 90 degrees
 
     // test getTangentForOffset with diagonal line
-    final Path simpleDiagonalLine = new Path()..lineTo(10.0, 10.0);
-    final PathMetrics simpleMetricsDiagonal =
-        simpleDiagonalLine.computeMetrics()..iterator.moveNext();
+    final Path simpleDiagonalLine = Path()..lineTo(10.0, 10.0);
+    final PathMetrics simpleMetricsDiagonal = simpleDiagonalLine.computeMetrics()..iterator.moveNext();
     final double midPoint = simpleMetricsDiagonal.iterator.current.length / 2;
-    final Tangent posTanDiagonal =
-        simpleMetricsDiagonal.iterator.current.getTangentForOffset(midPoint);
+    final Tangent posTanDiagonal = simpleMetricsDiagonal.iterator.current.getTangentForOffset(midPoint);
     expect(posTanDiagonal.position, equals(const Offset(5.0, 5.0)));
-    expect(posTanDiagonal.angle,
-        closeTo(-0.7853981633974483, .00001)); // ~45 degrees
+    expect(posTanDiagonal.angle, closeTo(-0.7853981633974483, .00001)); // ~45 degrees
 
     // test a multi-contour path
-    final Path multiContour = new Path()
+    final Path multiContour = Path()
       ..lineTo(0.0, 10.0)
       ..moveTo(10.0, 10.0)
       ..lineTo(10.0, 15.0);

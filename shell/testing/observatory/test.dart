@@ -48,8 +48,8 @@ class Expect {
 }
 
 Future<String> readResponse(HttpClientResponse response) {
-  final Completer<String> completer = new Completer<String>();
-  final StringBuffer contents = new StringBuffer();
+  final Completer<String> completer = Completer<String>();
+  final StringBuffer contents = StringBuffer();
   response.transform(utf8.decoder).listen((String data) {
     contents.write(data);
   }, onDone: () => completer.complete(contents.toString()));
@@ -59,7 +59,7 @@ Future<String> readResponse(HttpClientResponse response) {
 // Test accessing the service protocol over http.
 Future<Null> testHttpProtocolRequest(Uri uri) async {
   uri = uri.replace(path: 'getVM');
-  final HttpClient client = new HttpClient();
+  final HttpClient client = HttpClient();
   final HttpClientRequest request = await client.getUrl(uri);
   final HttpClientResponse response = await request.close();
   Expect.equals(response.statusCode, 200);
@@ -72,7 +72,7 @@ Future<Null> testHttpProtocolRequest(Uri uri) async {
 Future<Null> testWebSocketProtocolRequest(Uri uri) async {
   uri = uri.replace(scheme: 'ws', path: 'ws');
   final WebSocket webSocketClient = await WebSocket.connect(uri.toString());
-  final ServiceClient serviceClient = new ServiceClient(webSocketClient);
+  final ServiceClient serviceClient = ServiceClient(webSocketClient);
   final Map<String, dynamic> response = await serviceClient.invokeRPC('getVM');
   Expect.equals(response['type'], 'VM');
   try {
@@ -87,7 +87,7 @@ Future<Null> testWebSocketProtocolRequest(Uri uri) async {
 // Test accessing an Observatory UI asset.
 Future<Null> testHttpAssetRequest(Uri uri) async {
   uri = uri.replace(path: 'third_party/trace_viewer_full.html');
-  final HttpClient client = new HttpClient();
+  final HttpClient client = HttpClient();
   final HttpClientRequest request = await client.getUrl(uri);
   final HttpClientResponse response = await request.close();
   Expect.equals(response.statusCode, 200);
@@ -98,10 +98,10 @@ Future<Null> testHttpAssetRequest(Uri uri) async {
 Future<Null> testStartPaused(Uri uri) async {
   uri = uri.replace(scheme: 'ws', path: 'ws');
   final WebSocket webSocketClient = await WebSocket.connect(uri.toString());
-  final Completer<dynamic> isolateStartedId = new Completer<dynamic>();
-  final Completer<dynamic> isolatePausedId = new Completer<dynamic>();
-  final Completer<dynamic> isolateResumeId = new Completer<dynamic>();
-  final ServiceClient serviceClient = new ServiceClient(webSocketClient,
+  final Completer<dynamic> isolateStartedId = Completer<dynamic>();
+  final Completer<dynamic> isolatePausedId = Completer<dynamic>();
+  final Completer<dynamic> isolateResumeId = Completer<dynamic>();
+  final ServiceClient serviceClient = ServiceClient(webSocketClient,
       isolateStartedId: isolateStartedId,
       isolatePausedId: isolatePausedId,
       isolateResumeId: isolateResumeId);
@@ -187,13 +187,13 @@ Future<Null> main(List<String> args) async {
   final List<String> extraArgs = args.length <= 2 ? <String>[] : args.sublist(2);
 
   final ShellLauncher launcher =
-      new ShellLauncher(shellExecutablePath,
+      ShellLauncher(shellExecutablePath,
                         mainDartPath,
                         false,
                         extraArgs);
 
   final ShellLauncher startPausedlauncher =
-      new ShellLauncher(shellExecutablePath,
+      ShellLauncher(shellExecutablePath,
                         mainDartPath,
                         true,
                         extraArgs);

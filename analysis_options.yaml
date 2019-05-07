@@ -100,7 +100,7 @@ linter:
     - prefer_const_literals_to_create_immutables
     # - prefer_constructors_over_static_methods # not yet tested
     - prefer_contains
-    # - prefer_equal_for_default_values # not yet tested
+    - prefer_equal_for_default_values
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     # - prefer_final_fields # DIFFERENT FROM FLUTTER/FLUTTER
     - prefer_final_locals
@@ -118,15 +118,16 @@ linter:
     - slash_for_doc_comments
     # - sort_constructors_first # DIFFERENT FROM FLUTTER/FLUTTER
     - sort_unnamed_constructors_first
-    - super_goes_last
     - test_types_in_equals
     - throw_in_finally
     # - type_annotate_public_apis # subset of always_specify_types
     - type_init_formals
     # - unawaited_futures # https://github.com/flutter/flutter/issues/5793
     - unnecessary_brace_in_string_interps
+    - unnecessary_const
     - unnecessary_getters_setters
     # - unnecessary_lambdas # https://github.com/dart-lang/linter/issues/498
+    - unnecessary_new
     - unnecessary_null_aware_assignments
     - unnecessary_null_in_if_null_operators
     - unnecessary_overrides

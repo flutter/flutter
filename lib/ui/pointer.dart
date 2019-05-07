@@ -70,30 +70,30 @@ enum PointerSignalKind {
 class PointerData {
   /// Creates an object that represents the state of a pointer.
   const PointerData({
-    this.timeStamp: Duration.zero,
-    this.change: PointerChange.cancel,
-    this.kind: PointerDeviceKind.touch,
+    this.timeStamp = Duration.zero,
+    this.change = PointerChange.cancel,
+    this.kind = PointerDeviceKind.touch,
     this.signalKind,
-    this.device: 0,
-    this.physicalX: 0.0,
-    this.physicalY: 0.0,
-    this.buttons: 0,
-    this.obscured: false,
-    this.pressure: 0.0,
-    this.pressureMin: 0.0,
-    this.pressureMax: 0.0,
-    this.distance: 0.0,
-    this.distanceMax: 0.0,
-    this.size: 0.0,
-    this.radiusMajor: 0.0,
-    this.radiusMinor: 0.0,
-    this.radiusMin: 0.0,
-    this.radiusMax: 0.0,
-    this.orientation: 0.0,
-    this.tilt: 0.0,
-    this.platformData: 0,
-    this.scrollDeltaX: 0.0,
-    this.scrollDeltaY: 0.0,
+    this.device = 0,
+    this.physicalX = 0.0,
+    this.physicalY = 0.0,
+    this.buttons = 0,
+    this.obscured = false,
+    this.pressure = 0.0,
+    this.pressureMin = 0.0,
+    this.pressureMax = 0.0,
+    this.distance = 0.0,
+    this.distanceMax = 0.0,
+    this.size = 0.0,
+    this.radiusMajor = 0.0,
+    this.radiusMinor = 0.0,
+    this.radiusMin = 0.0,
+    this.radiusMax = 0.0,
+    this.orientation = 0.0,
+    this.tilt = 0.0,
+    this.platformData = 0,
+    this.scrollDeltaX = 0.0,
+    this.scrollDeltaY = 0.0,
   });
 
   /// Time of event dispatch, relative to an arbitrary timeline.
@@ -267,7 +267,7 @@ class PointerData {
 /// A sequence of reports about the state of pointers.
 class PointerDataPacket {
   /// Creates a packet of pointer data reports.
-  const PointerDataPacket({ this.data: const <PointerData>[] });
+  const PointerDataPacket({ this.data = const <PointerData>[] });
 
   /// Data about the individual pointers in this packet.
   ///

@@ -9,7 +9,7 @@ import 'package:test/test.dart';
 void main() {
   test('Gradient.radial with no focal point', () {
     expect(
-      new Gradient.radial(
+      Gradient.radial(
           Offset.zero,
           null,
           <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
@@ -23,7 +23,7 @@ void main() {
   test('radial center and focal == Offset.zero and focalRadius == 0.0 is ok',
       () {
     expect(
-        () => new Gradient.radial(
+        () => Gradient.radial(
               Offset.zero,
               0.0,
               <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
@@ -38,7 +38,7 @@ void main() {
 
   test('radial center != focal and focalRadius == 0.0 is ok', () {
     expect(
-        () => new Gradient.radial(
+        () => Gradient.radial(
               Offset.zero,
               0.0,
               <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],
@@ -55,7 +55,7 @@ void main() {
   test('radial center and focal == Offset.zero and focalRadius != 0.0 assert',
       () {
     expect(
-      () => new Gradient.radial(
+      () => Gradient.radial(
             Offset.zero,
             0.0,
             <Color>[const Color(0xFFFFFFFF), const Color(0xFFFFFFFF)],

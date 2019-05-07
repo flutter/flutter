@@ -32,12 +32,12 @@ void main(List<String> arguments) {
   } else if (Platform.isMacOS) {
     platform = 'mac-x64';
   } else {
-    throw new UnimplementedError('Script only support running on Linux or MacOS.');
+    throw UnimplementedError('Script only support running on Linux or MacOS.');
   }
   final String nmPath = p.join(buildToolsPath, platform, 'clang', 'bin', 'llvm-nm');
   assert(new Directory(outPath).existsSync());
 
-  final Iterable<String> releaseBuilds = new Directory(outPath).listSync()
+  final Iterable<String> releaseBuilds = Directory(outPath).listSync()
       .where((FileSystemEntity entity) => entity is Directory)
       .map<String>((FileSystemEntity dir) => p.basename(dir.path))
       .where((String s) => s.contains('_release'));
@@ -101,16 +101,16 @@ int _checkAndroid(String outPath, String nmPath, Iterable<String> builds) {
       continue;
     }
     final Iterable<NmEntry> entries = NmEntry.parse(nmResult.stdout);
-    final Map<String, String> entryMap = Map.fromIterable(
+    final Map<String, String> entryMap = Map<String, String>.fromIterable(
         entries,
-        key: (entry) => entry.name,
-        value: (entry) => entry.type);
-    final Map<String, String> expectedSymbols = {
+        key: (dynamic entry) => entry.name,
+        value: (dynamic entry) => entry.type);
+    final Map<String, String> expectedSymbols = <String, String>{
       'JNI_OnLoad': 'T',
       '_binary_icudtl_dat_size': 'A',
       '_binary_icudtl_dat_start': 'D',
     };
-    if (!MapEquality<String, String>().equals(entryMap, expectedSymbols)) {
+    if (!const MapEquality<String, String>().equals(entryMap, expectedSymbols)) {
       print('ERROR: $libFlutter exports the wrong symbols');
       print(' Expected $expectedSymbols');
       print(' Library has $entryMap.');
@@ -132,7 +132,7 @@ class NmEntry {
   static Iterable<NmEntry> parse(String stdout) {
     return LineSplitter.split(stdout).map((String line) {
       final List<String> parts = line.split(' ');
-      return new NmEntry._(parts[0], parts[1], parts.last);
+      return NmEntry._(parts[0], parts[1], parts.last);
     });
   }
 }

@@ -4,24 +4,24 @@
 
 import 'dart:isolate';
 
-main() {}
+void main() {}
 
 @pragma('vm:entry-point')
-fixturesAreFunctionalMain() {
-  SayHiFromFixturesAreFunctionalMain();
+void fixturesAreFunctionalMain() {
+  sayHiFromFixturesAreFunctionalMain();
 }
 
-void SayHiFromFixturesAreFunctionalMain() native "SayHiFromFixturesAreFunctionalMain";
+void sayHiFromFixturesAreFunctionalMain() native 'SayHiFromFixturesAreFunctionalMain';
 
-void NotifyNative() native "NotifyNative";
+void notifyNative() native 'NotifyNative';
 
 void secondaryIsolateMain(String message) {
-  print("Secondary isolate got message: " + message);
-  NotifyNative();
+  print('Secondary isolate got message: ' + message);
+  notifyNative();
 }
 
 @pragma('vm:entry-point')
 void testCanLaunchSecondaryIsolate() {
-  Isolate.spawn(secondaryIsolateMain, "Hello from root isolate.");
-  NotifyNative();
+  Isolate.spawn(secondaryIsolateMain, 'Hello from root isolate.');
+  notifyNative();
 }
