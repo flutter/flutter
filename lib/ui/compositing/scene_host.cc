@@ -4,7 +4,6 @@
 
 #include "flutter/lib/ui/compositing/scene_host.h"
 
-#include <lib/fsl/handles/object_info.h>
 #include <lib/ui/scenic/cpp/view_token_pair.h>
 #include <lib/zx/eventpair.h>
 #include <third_party/tonic/dart_args.h>
@@ -75,6 +74,13 @@ void InvokeDartFunction(tonic::DartPersistentValue* function, T& arg) {
   }
 }
 
+zx_koid_t GetKoid(zx_handle_t handle) {
+  zx_info_handle_basic_t info;
+  zx_status_t status = zx_object_get_info(handle, ZX_INFO_HANDLE_BASIC, &info,
+                                          sizeof(info), nullptr, nullptr);
+  return status == ZX_OK ? info.koid : ZX_KOID_INVALID;
+}
+
 }  // namespace
 
 namespace flutter {
@@ -113,7 +119,7 @@ fml::RefPtr<SceneHost> SceneHost::CreateViewHolder(
 SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> exportTokenHandle)
     : gpu_task_runner_(
           UIDartState::Current()->GetTaskRunners().GetGPUTaskRunner()),
-      id_(fsl::GetKoid(exportTokenHandle->handle())),
+      id_(GetKoid(exportTokenHandle->handle())),
       use_view_holder_(false) {
   gpu_task_runner_->PostTask(
       [id = id_, handle = std::move(exportTokenHandle)]() {
@@ -128,7 +134,7 @@ SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
                      Dart_Handle viewStateChangedCallback)
     : gpu_task_runner_(
           UIDartState::Current()->GetTaskRunners().GetGPUTaskRunner()),
-      id_(fsl::GetKoid(viewHolderTokenHandle->handle())),
+      id_(GetKoid(viewHolderTokenHandle->handle())),
       use_view_holder_(true) {
   if (Dart_IsClosure(viewConnectedCallback)) {
     view_connected_callback_ = std::make_unique<tonic::DartPersistentValue>(

@@ -5,12 +5,12 @@
 #ifndef FLUTTER_LIB_UI_COMPOSITING_SCENE_HOST_H_
 #define FLUTTER_LIB_UI_COMPOSITING_SCENE_HOST_H_
 
-#include <dart-pkg/zircon/sdk_ext/handle.h>
 #include <lib/ui/scenic/cpp/id.h>
 #include <stdint.h>
 #include <third_party/tonic/dart_library_natives.h>
 #include <third_party/tonic/dart_persistent_value.h>
 #include <zircon/types.h>
+#include "dart-pkg/zircon/sdk_ext/handle.h"
 
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/task_runner.h"

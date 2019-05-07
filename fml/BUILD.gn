@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/fuchsia/sdk.gni")
+
 source_set("fml") {
   sources = [
     "arraysize.h",
@@ -83,7 +85,10 @@ source_set("fml") {
 
   configs += [ "//third_party/icu:icu_config" ]
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [
+    "$flutter_root:config",
+    "$flutter_root/common:flutter_config",
+  ]
 
   libs = []
 
@@ -153,7 +158,9 @@ source_set("fml") {
   if (is_fuchsia) {
     sources += [ "platform/fuchsia/paths_fuchsia.cc" ]
 
-    public_deps += [ "//zircon/public/lib/trace" ]
+    if (!using_fuchsia_sdk) {
+      public_deps += [ "//zircon/public/lib/trace" ]
+    }
   }
 
   if (is_win) {

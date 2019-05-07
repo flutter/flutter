@@ -2,12 +2,20 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/fuchsia/sdk.gni")
+
 config("vulkan_config") {
-  if (is_fuchsia) {
+  if (using_fuchsia_sdk) {
+    include_dirs = [ "$fuchsia_sdk_root/vulkan/include" ]
+  } else if (is_fuchsia) {
     include_dirs =
         [ "//third_party/vulkan_loader_and_validation_layers/include" ]
   } else {
     include_dirs = [ "//third_party/vulkan/src" ]
+  }
+
+  if (is_fuchsia) {
+    defines = [ "VK_USE_PLATFORM_FUCHSIA=1" ]
   }
 }
 

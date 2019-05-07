@@ -2,6 +2,10 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+if (is_fuchsia) {
+  import("//build/fuchsia/sdk.gni")
+}
+
 source_set("flow") {
   sources = [
     "compositor_context.cc",
@@ -80,13 +84,19 @@ source_set("flow") {
       "view_holder.h",
     ]
 
-    public_deps += [
-      "//sdk/fidl/fuchsia.ui.scenic",
-      "//sdk/fidl/fuchsia.ui.views",
-      "//sdk/lib/ui/scenic/cpp",
-      "//topaz/public/dart-pkg/zircon",
-      "//zircon/public/lib/zx",
-    ]
+    if (using_fuchsia_sdk) {
+      public_deps += [
+        "$fuchsia_sdk_root/fidl:fuchsia.ui.gfx",
+        "$fuchsia_sdk_root/pkg:scenic_cpp",
+      ]
+    } else {
+      public_deps += [
+        "//garnet/public/lib/ui/scenic/cpp",
+        "//sdk/fidl/fuchsia.ui.scenic",
+        "//topaz/public/dart-pkg/zircon",
+        "//zircon/public/lib/zx",
+      ]
+    }
   }
 }
 
@@ -98,7 +108,6 @@ executable("flow_unittests") {
     "flow_test_utils.cc",
     "flow_test_utils.h",
     "layers/performance_overlay_layer_unittests.cc",
-    "layers/physical_shape_layer_unittests.cc",
     "matrix_decomposition_unittests.cc",
     "raster_cache_unittests.cc",
   ]

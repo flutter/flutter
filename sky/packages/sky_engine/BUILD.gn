@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/fuchsia/sdk.gni")
 import("//third_party/dart/sdk/lib/_http/http_sources.gni")
 import("//third_party/dart/sdk/lib/async/async_sources.gni")
 import("//third_party/dart/sdk/lib/collection/collection_sources.gni")
@@ -13,7 +14,6 @@ import("//third_party/dart/sdk/lib/io/io_sources.gni")
 import("//third_party/dart/sdk/lib/isolate/isolate_sources.gni")
 import("//third_party/dart/sdk/lib/math/math_sources.gni")
 import("//third_party/dart/sdk/lib/typed_data/typed_data_sources.gni")
-
 import("$flutter_root/build/dart/rules.gni")
 import("$flutter_root/lib/ui/dart_ui.gni")
 
@@ -170,7 +170,7 @@ dart_pkg("sky_engine") {
   ]
 }
 
-if (is_fuchsia) {
+if (is_fuchsia && !using_fuchsia_sdk) {
   import("//build/dart/dart_library.gni")
 
   dart_library("sky_engine_dart") {

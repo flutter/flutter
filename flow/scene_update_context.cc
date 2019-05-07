@@ -7,7 +7,6 @@
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/matrix_decomposition.h"
 #include "flutter/fml/trace_event.h"
-#include "flutter/lib/ui/window/viewport_metrics.h"
 
 namespace flutter {
 
@@ -301,7 +300,7 @@ SceneUpdateContext::Frame::Frame(SceneUpdateContext& context,
       paint_bounds_(SkRect::MakeEmpty()),
       layer_(layer) {
   if (local_elevation != 0.0) {
-    if (depth > flutter::kUnsetDepth && world_elevation >= depth) {
+    if (depth > -1 && world_elevation >= depth) {
       // TODO(mklim): Deal with bounds overflow correctly.
       FML_LOG(ERROR) << "Elevation " << world_elevation << " is outside of "
                      << depth;
