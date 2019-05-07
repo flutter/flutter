@@ -11,14 +11,14 @@ typedef CanvasCallback = void Function(Canvas canvas);
 
 void testCanvas(CanvasCallback callback) {
   try {
-    callback(Canvas(PictureRecorder(), Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)));
+    callback(Canvas(PictureRecorder(), const Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)));
   } catch (error) { } // ignore: empty_catches
 }
 
 void main() {
   test('canvas APIs should not crash', () async {
     final Paint paint = Paint();
-    final Rect rect = Rect.fromLTRB(double.nan, double.nan, double.nan, double.nan);
+    const Rect rect = Rect.fromLTRB(double.nan, double.nan, double.nan, double.nan);
     final RRect rrect = RRect.fromRectAndCorners(rect);
     const Offset offset = Offset(double.nan, double.nan);
     final Path path = Path();

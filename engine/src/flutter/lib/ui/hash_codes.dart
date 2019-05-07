@@ -5,7 +5,7 @@
 part of dart.ui;
 
 class _HashEnd { const _HashEnd(); }
-const _HashEnd _hashEnd = const _HashEnd();
+const _HashEnd _hashEnd = _HashEnd();
 
 /// Jenkins hash function, optimized for small integers.
 //

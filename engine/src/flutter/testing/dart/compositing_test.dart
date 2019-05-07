@@ -47,7 +47,7 @@ void main() {
       0, 0, 0, double.infinity,
     ]);
     expect(
-      () => builder.pushTransform(matrix4NaN),
+      () => builder.pushTransform(matrix4Infinity),
       throwsA(const TypeMatcher<AssertionError>()),
     );
   });

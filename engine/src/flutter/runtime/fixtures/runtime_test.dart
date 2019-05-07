@@ -10,53 +10,53 @@ void main() {
 
 @pragma('vm:entry-point')
 void sayHi() {
-  print("Hi");
+  print('Hi');
 }
 
 @pragma('vm:entry-point')
 void throwExceptionNow() {
-  throw("Hello");
+  throw 'Hello';
 }
 
 @pragma('vm:entry-point')
 void canRegisterNativeCallback() async {
-  print("In function canRegisterNativeCallback");
-  NotifyNative();
-  print("Called native method from canRegisterNativeCallback");
+  print('In function canRegisterNativeCallback');
+  notifyNative();
+  print('Called native method from canRegisterNativeCallback');
 }
 
-void NotifyNative() native "NotifyNative";
+void notifyNative() native 'NotifyNative';
 
 @pragma('vm:entry-point')
 void testIsolateShutdown() {  }
 
 @pragma('vm:entry-point')
 void testCanSaveCompilationTrace() {
-  List<int> trace = null;
+  List<int> trace;
   try {
     trace = saveCompilationTrace();
   } catch (exception) {
-    print("Could not save compilation trace: " + exception);
+    print('Could not save compilation trace: ' + exception);
   }
-  NotifyResult(trace != null && trace.length > 0);
+  notifyResult(trace != null && trace.isNotEmpty);
 }
 
-void NotifyResult(bool success) native "NotifyNative";
-void PassMessage(String message) native "PassMessage";
+void notifyResult(bool success) native 'NotifyNative';
+void passMessage(String message) native 'PassMessage';
 
 void secondaryIsolateMain(String message) {
-  print("Secondary isolate got message: " + message);
-  PassMessage("Hello from code is secondary isolate.");
-  NotifyNative();
+  print('Secondary isolate got message: ' + message);
+  passMessage('Hello from code is secondary isolate.');
+  notifyNative();
 }
 
 @pragma('vm:entry-point')
 void testCanLaunchSecondaryIsolate() {
-  Isolate.spawn(secondaryIsolateMain, "Hello from root isolate.");
-  NotifyNative();
+  Isolate.spawn(secondaryIsolateMain, 'Hello from root isolate.');
+  notifyNative();
 }
 
 @pragma('vm:entry-point')
 void testCanRecieveArguments(List<String> args) {
-  NotifyResult(args != null && args.length == 1 && args[0] == "arg1");
+  notifyResult(args != null && args.length == 1 && args[0] == 'arg1');
 }

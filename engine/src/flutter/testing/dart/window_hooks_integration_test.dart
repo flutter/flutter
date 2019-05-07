@@ -159,7 +159,7 @@ void main() {
         };
       });
 
-      final ByteData testData = new ByteData.view(new Uint8List(0).buffer);
+      final ByteData testData = ByteData.view(Uint8List(0).buffer);
       _dispatchPointerDataPacket(testData);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));

@@ -59,6 +59,8 @@ pushd "$BUILDROOT_DIR/flutter/testing/dart"
 "$HOST_DIR/dart-sdk/bin/pub" get
 popd
 
+"$HOST_DIR/dart" --version
+
 run_test () {
   "$HOST_DIR/dart" $HOST_DIR/gen/frontend_server.dart.snapshot \
       --sdk-root $HOST_DIR/flutter_patched_sdk \

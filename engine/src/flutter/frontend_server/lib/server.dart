@@ -21,9 +21,9 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
   final frontend.CompilerInterface _compiler;
 
   _FlutterFrontendCompiler(StringSink output,
-      {bool trackWidgetCreation: false, bool unsafePackageSerialization}) :
-          _compiler = new frontend.FrontendCompiler(output,
-          transformer: trackWidgetCreation ? new WidgetCreatorTracker() : null,
+      {bool trackWidgetCreation = false, bool unsafePackageSerialization}) :
+          _compiler = frontend.FrontendCompiler(output,
+          transformer: trackWidgetCreation ? WidgetCreatorTracker() : null,
           unsafePackageSerialization: unsafePackageSerialization);
 
   @override
@@ -108,7 +108,7 @@ Future<int> starter(
         '--sdk-root=$sdkRoot',
         '--output-dill=$outputTrainingDill',
         '--target=flutter']);
-      compiler ??= new _FlutterFrontendCompiler(output, trackWidgetCreation: true);
+      compiler ??= _FlutterFrontendCompiler(output, trackWidgetCreation: true);
 
       await compiler.compile(Platform.script.toFilePath(), options);
       compiler.acceptLastDelta();
@@ -125,7 +125,7 @@ Future<int> starter(
     }
   }
 
-  compiler ??= new _FlutterFrontendCompiler(output,
+  compiler ??= _FlutterFrontendCompiler(output,
       trackWidgetCreation: options['track-widget-creation'],
       unsafePackageSerialization: options['unsafe-package-serialization']);
 
@@ -133,7 +133,7 @@ Future<int> starter(
     return await compiler.compile(options.rest[0], options) ? 0 : 254;
   }
 
-  final Completer<int> completer = new Completer<int>();
+  final Completer<int> completer = Completer<int>();
   frontend.listenAndCompile(compiler, input ?? stdin, options, completer);
   return completer.future;
 }

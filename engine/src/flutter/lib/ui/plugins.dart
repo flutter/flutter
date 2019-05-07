@@ -62,7 +62,7 @@ class PluginUtilities {
     assert(callback != null, "'callback' must not be null.");
     return _forwardCache.putIfAbsent(callback, () {
       final int handle = _getCallbackHandle(callback);
-      return handle != null ? new CallbackHandle.fromRawHandle(handle) : null;
+      return handle != null ? CallbackHandle.fromRawHandle(handle) : null;
     });
   }
 

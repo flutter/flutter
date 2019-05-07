@@ -9,7 +9,7 @@ class _MockedCompiler extends Mock implements frontend.CompilerInterface {}
 
 Future<int> main() async {
   group('basic', () {
-    final frontend.CompilerInterface compiler = new _MockedCompiler();
+    final frontend.CompilerInterface compiler = _MockedCompiler();
 
     test('train with mocked compiler completes', () async {
       expect(await starter(<String>['--train'], compiler: compiler), equals(0));

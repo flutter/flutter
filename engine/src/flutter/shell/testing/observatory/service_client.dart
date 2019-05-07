@@ -30,7 +30,7 @@ class ServiceClient {
       'id': key,
     });
     client.add(request);
-    final Completer<Map<String, dynamic>> completer = new Completer<Map<String, dynamic>>();
+    final Completer<Map<String, dynamic>> completer = Completer<Map<String, dynamic>>();
     _outstandingRequests[key] = completer;
     print('-> $key ($method)');
     return completer.future;

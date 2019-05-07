@@ -12,7 +12,7 @@ void main() {
   test('window.sendPlatformMessage preserves callback zone', () {
     runZoned(() {
       final Zone innerZone = Zone.current;
-      window.sendPlatformMessage('test', new ByteData.view(new Uint8List(0).buffer), expectAsync1((ByteData data) {
+      window.sendPlatformMessage('test', ByteData.view(Uint8List(0).buffer), expectAsync1((ByteData data) {
         final Zone runZone = Zone.current;
         expect(runZone, isNotNull);
         expect(runZone, same(innerZone));

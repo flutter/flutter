@@ -9,7 +9,7 @@ void customEntrypoint() {
   sayHiFromCustomEntrypoint();
 }
 
-void sayHiFromCustomEntrypoint() native "SayHiFromCustomEntrypoint";
+void sayHiFromCustomEntrypoint() native 'SayHiFromCustomEntrypoint';
 
 
 @pragma('vm:entry-point')
@@ -19,9 +19,9 @@ void customEntrypoint1() {
   sayHiFromCustomEntrypoint3();
 }
 
-void sayHiFromCustomEntrypoint1() native "SayHiFromCustomEntrypoint1";
-void sayHiFromCustomEntrypoint2() native "SayHiFromCustomEntrypoint2";
-void sayHiFromCustomEntrypoint3() native "SayHiFromCustomEntrypoint3";
+void sayHiFromCustomEntrypoint1() native 'SayHiFromCustomEntrypoint1';
+void sayHiFromCustomEntrypoint2() native 'SayHiFromCustomEntrypoint2';
+void sayHiFromCustomEntrypoint3() native 'SayHiFromCustomEntrypoint3';
 
 
 @pragma('vm:entry-point')
@@ -51,16 +51,16 @@ void notifySemanticsAction(int nodeId, int action, List<int> data) native 'Notif
 
 /// Returns a future that completes when `window.onSemanticsEnabledChanged`
 /// fires.
-Future get semanticsChanged {
-  final Completer semanticsChanged = Completer();
+Future<void> get semanticsChanged {
+  final Completer<void> semanticsChanged = Completer<void>();
   window.onSemanticsEnabledChanged = semanticsChanged.complete;
   return semanticsChanged.future;
 }
 
 /// Returns a future that completes when `window.onAccessibilityFeaturesChanged`
 /// fires.
-Future get accessibilityFeaturesChanged {
-  final Completer featuresChanged = Completer();
+Future<void> get accessibilityFeaturesChanged {
+  final Completer<void> featuresChanged = Completer<void>();
   window.onAccessibilityFeaturesChanged = featuresChanged.complete;
   return featuresChanged.future;
 }
@@ -73,7 +73,7 @@ class SemanticsActionData {
 }
 
 Future<SemanticsActionData> get semanticsAction {
-  final Completer actionReceived = Completer<SemanticsActionData>();
+  final Completer<SemanticsActionData> actionReceived = Completer<SemanticsActionData>();
   window.onSemanticsAction = (int id, SemanticsAction action, ByteData args) {
     actionReceived.complete(SemanticsActionData(id, action, args));
   };
@@ -81,7 +81,7 @@ Future<SemanticsActionData> get semanticsAction {
 }
 
 @pragma('vm:entry-point')
-void a11y_main() async {
+void a11y_main() async { // ignore: non_constant_identifier_names
   // Return initial state (semantics disabled).
   notifySemanticsEnabled(window.semanticsEnabled);
 
