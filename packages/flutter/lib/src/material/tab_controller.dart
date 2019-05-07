@@ -23,7 +23,7 @@ import 'constants.dart';
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
-/// ![A screen containing a TabBar and TabBarView combination](https://flutter.github.io/assets-for-api-docs/assets/widgets/tabs.mp4)
+/// ![A screen containing a TabBar and TabBarView combination](https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4)
 ///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
@@ -229,7 +229,7 @@ class _TabControllerScope extends InheritedWidget {
 /// widgets are created by a stateless parent widget or by different parent
 /// widgets.
 ///
-/// ![A screen containing a TabBar and TabBarView combination](https://flutter.github.io/assets-for-api-docs/assets/widgets/tabs.mp4)
+/// ![A screen containing a TabBar and TabBarView combination](https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4)
 ///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
