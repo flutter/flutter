@@ -1,4 +1,4 @@
-Signature: f90ee4007bb55a57aeadcfb6cfc2fc49
+Signature: ef9c4d11985f3b90eeb3f88069ec41c3
 
 UNUSED LICENSES:
 
@@ -2200,7 +2200,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-De
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/Test-Debian9-EMCC-GCE-CPU-AVX2-wasm-Debug-All-PathKit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_pathkit.expected/pathkit_trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_skqp_emulator.expected/Test-Debian9-Clang-GCE-CPU-Emulator-x86-devrel-All-Android_SKQP.json
-FILE: ../../../third_party/skia/infra/bots/recipes/update_go_deps.expected/Housekeeper-Nightly-UpdateGoDEPS.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_buildstats_results.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/upload_calmbench_results.expected/normal_bot.json
