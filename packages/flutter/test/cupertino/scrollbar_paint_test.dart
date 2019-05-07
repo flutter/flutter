@@ -88,7 +88,8 @@ void main() {
             800.0 - 3 - 2.5, // Screen width - margin - thickness.
             44 + 20 + 3.0, // nav bar height + top margin
             2.5, // Thickness.
-            // Fraction visible * scrollbar height
+            // Fraction visible * (viewport size - padding - margin)
+            // where Fraction visible = (viewport size - padding) / content size
             (600.0 - 34 - 44 - 20) / 4000.0 * (600.0 - 2 * 3 - 34 - 44 - 20),
           ),
           const Radius.circular(1.25),
