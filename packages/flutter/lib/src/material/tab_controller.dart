@@ -34,8 +34,8 @@ import 'constants.dart';
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
-///     Tab(text: 'left'),
-///     Tab(text: 'right'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   TabController _tabController;
@@ -64,9 +64,10 @@ import 'constants.dart';
 ///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
+///           final String label = tab.text.toLowerCase();
 ///           return Center(
 ///             child: Text(
-///               'This is the ${tab.text} tab',
+///               'This is the $label tab',
 ///               style: const TextStyle(fontSize: 36),
 ///             ),
 ///           );
@@ -250,9 +251,10 @@ class _TabControllerScope extends InheritedWidget {
 ///         ),
 ///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
+///             final String label = tab.text.toLowerCase();
 ///             return Center(
 ///               child: Text(
-///                 'This is the ${tab.text} tab',
+///                 'This is the $label tab',
 ///                 style: const TextStyle(fontSize: 36),
 ///               ),
 ///             );
