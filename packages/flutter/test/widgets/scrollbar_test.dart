@@ -215,8 +215,8 @@ void main() {
               expect(
                 margin,
                 textDirection == TextDirection.ltr
-                ? size.width - rect.right
-                : rect.left
+                  ? size.width - rect.right
+                  : rect.left
               );
               break;
             case AxisDirection.left:

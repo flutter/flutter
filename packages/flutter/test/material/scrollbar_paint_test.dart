@@ -45,19 +45,19 @@ void main() {
 
   testWidgets('workds with MaterialApp and Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-        home: MediaQuery(
-          data: const MediaQueryData(
-            padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
-          ),
-          child: Scaffold(
-            appBar: AppBar(title: const Text('Title')),
-            body: Scrollbar(
-              child: ListView(
-                children: const <Widget>[SizedBox(width: 4000, height: 4000)]
-              )
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
+        ),
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Title')),
+          body: Scrollbar(
+            child: ListView(
+              children: const <Widget>[SizedBox(width: 4000, height: 4000)]
             )
           )
         )
+      )
     ));
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
@@ -67,14 +67,14 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
-    expect(find.byType(Scrollbar), paints..rect(rect:
-        const Rect.fromLTWH(
-          800.0 - 6, // screen width - thickness
-          0,         // the paint area starts from the bottom of the app bar
-          6,         // thickness
-          // 56 being the height of the app bar
-          (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)
-        )
+    expect(find.byType(Scrollbar), paints..rect(
+      rect: const Rect.fromLTWH(
+        800.0 - 6, // screen width - thickness
+        0,         // the paint area starts from the bottom of the app bar
+        6,         // thickness
+        // 56 being the height of the app bar
+        (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)
+      )
     ));
   });
 }
