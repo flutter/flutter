@@ -4,7 +4,7 @@
   "datePickerHourSemanticsLabelOther": "$hour null-null",
   "datePickerMinuteSemanticsLabelOne": "1 minutt",
   "datePickerMinuteSemanticsLabelOther": "$minute minutter",
-  "datePickerDateOrder": "mdå",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",

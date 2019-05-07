@@ -4,7 +4,7 @@
   "datePickerHourSemanticsLabelOther": "ساعت $hour",
   "datePickerMinuteSemanticsLabelOne": "۱ دقیقه",
   "datePickerMinuteSemanticsLabelOther": "$minute دقیقه",
-  "datePickerDateOrder": "سال‌روز‌ماه",
+  "datePickerDateOrder": "ymd",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "ق.ظ.",
   "postMeridiemAbbreviation": "ب.ظ.",

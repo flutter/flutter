@@ -24,7 +24,7 @@
   "datePickerHourSemanticsLabelOther": "$hour بالضبط",
   "datePickerMinuteSemanticsLabelOne": "دقيقة واحدة",
   "datePickerMinuteSemanticsLabelOther": "$minute دقيقة​",
-  "datePickerDateOrder": "يوم/شهر/سنة",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "ص",
   "postMeridiemAbbreviation": "م",

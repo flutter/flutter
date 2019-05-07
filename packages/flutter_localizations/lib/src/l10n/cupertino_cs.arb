@@ -14,7 +14,7 @@
   "datePickerHourSemanticsLabelOther": "$hour hodin",
   "datePickerMinuteSemanticsLabelOne": "1 minuta",
   "datePickerMinuteSemanticsLabelOther": "$minute minut",
-  "datePickerDateOrder": "mdr",
+  "datePickerDateOrder": "mdy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",

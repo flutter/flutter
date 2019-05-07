@@ -4,7 +4,7 @@
   "datePickerHourSemanticsLabelOther": "$hour in punto",
   "datePickerMinuteSemanticsLabelOne": "1 minuto",
   "datePickerMinuteSemanticsLabelOther": "$minute minuti",
-  "datePickerDateOrder": "mga",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",

@@ -4,7 +4,7 @@
   "datePickerHourSemanticsLabelOther": "$hour giờ",
   "datePickerMinuteSemanticsLabelOne": "1 phút",
   "datePickerMinuteSemanticsLabelOther": "$minute phút",
-  "datePickerDateOrder": "ngày/tháng/năm",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "SÁNG",
   "postMeridiemAbbreviation": "CHIỀU",

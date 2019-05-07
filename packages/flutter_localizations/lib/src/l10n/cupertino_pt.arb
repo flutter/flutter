@@ -15,8 +15,8 @@
   "timerPickerMinuteLabelOther": "min",
   "timerPickerSecondLabelOne": "s",
   "timerPickerSecondLabelOther": "s",
-  "cutButtonLabel": "Recortar",
+  "cutButtonLabel": "Cortar",
   "copyButtonLabel": "Copiar",
   "pasteButtonLabel": "Colar",
-  "selectAllButtonLabel": "Selecionar tudo"
+  "selectAllButtonLabel": "Selecionar Tudo"
 }
