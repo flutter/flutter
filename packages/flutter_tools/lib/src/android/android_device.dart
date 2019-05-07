@@ -360,7 +360,7 @@ class AndroidDevice extends Device {
 
     BuildInfo buildInfo = debuggingOptions.buildInfo;
     if (buildInfo.targetPlatform == null) {
-      buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
+      buildInfo = buildInfo.withTargetPlatform(await targetPlatform);
     }
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
