@@ -81,7 +81,12 @@ class FuchsiaSdk {
 /// Fuchsia-specific artifacts used to interact with a device.
 class FuchsiaArtifacts {
   /// Creates a new [FuchsiaArtifacts].
-  FuchsiaArtifacts({this.sshConfig, this.devFinder});
+  FuchsiaArtifacts({
+    this.sshConfig,
+    this.devFinder,
+    this.platformKernelDill,
+    this.flutterPatchedSdk,
+  });
 
   /// Creates a new [FuchsiaArtifacts] using the cached Fuchsia SDK.
   ///
@@ -92,6 +97,7 @@ class FuchsiaArtifacts {
   factory FuchsiaArtifacts.find() {
     final String fuchsia = Cache.instance.getArtifactDirectory('fuchsia').path;
     final String tools = fs.path.join(fuchsia, 'tools');
+    final String dartPrebuilts = fs.path.join(tools, 'dart_prebuilts');
 
     // If FUCHSIA_BUILD_DIR is defined, then look for the ssh_config dir
     // relative to it. Next, if FUCHSIA_SSH_CONFIG is defined, then use it.
@@ -99,13 +105,17 @@ class FuchsiaArtifacts {
     File sshConfig;
     if (platform.environment.containsKey(_kFuchsiaBuildDir)) {
       sshConfig = fs.file(fs.path.join(
-          platform.environment[_kFuchsiaSshConfig], 'ssh-keys', 'ssh_config'));
+          platform.environment[_kFuchsiaBuildDir], 'ssh-keys', 'ssh_config'));
     } else if (platform.environment.containsKey(_kFuchsiaSshConfig)) {
       sshConfig = fs.file(platform.environment[_kFuchsiaSshConfig]);
     }
     return FuchsiaArtifacts(
       sshConfig: sshConfig,
       devFinder: fs.file(fs.path.join(tools, 'dev_finder')),
+      platformKernelDill: fs.file(fs.path.join(
+          dartPrebuilts, 'flutter_runner', 'platform_strong.dill')),
+      flutterPatchedSdk: fs.file(fs.path.join(
+          dartPrebuilts, 'flutter_runner')),
     );
   }
 
@@ -119,4 +129,10 @@ class FuchsiaArtifacts {
   /// The location of the dev finder tool used to locate connected
   /// Fuchsia devices.
   final File devFinder;
+
+  /// The location of the Fuchsia-specific platform dill.
+  final File platformKernelDill;
+
+  /// The directory containing [platformKernelDill].
+  final File flutterPatchedSdk;
 }

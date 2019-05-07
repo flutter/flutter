@@ -344,21 +344,21 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
     final double availableHeight
-        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
+      = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
     final _ArrowDirection direction = (availableHeight > _kToolbarHeight)
-        ? _ArrowDirection.down
-        : _ArrowDirection.up;
+      ? _ArrowDirection.down
+      : _ArrowDirection.up;
 
     final TextSelectionPoint startTextSelectionPoint = endpoints[0];
     final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
-        ? endpoints[1]
-        : null;
+      ? endpoints[1]
+      : null;
     final double x = (endTextSelectionPoint == null)
-        ? startTextSelectionPoint.point.dx
-        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
+      ? startTextSelectionPoint.point.dx
+      : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
     final double y = (direction == _ArrowDirection.up)
-        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight
-        : startTextSelectionPoint.point.dy - globalEditableRegion.height;
+      ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight
+      : startTextSelectionPoint.point.dy - globalEditableRegion.height;
     final Offset preciseMidpoint = Offset(x, y);
 
     return ConstrainedBox(

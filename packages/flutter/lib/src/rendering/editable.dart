@@ -1503,7 +1503,7 @@ class RenderEditable extends RenderBox {
       case TargetPlatform.iOS:
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       default:
-        return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
   }
   @override
@@ -1569,7 +1569,7 @@ class RenderEditable extends RenderBox {
           // TODO(garyq): See the TODO for _getCaretPrototype.
           caretRect = Rect.fromLTWH(
             caretRect.left,
-            caretRect.top,
+            caretRect.top - _kCaretHeightOffset,
             caretRect.width,
             _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
           );
