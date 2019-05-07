@@ -46,7 +46,6 @@ void main() {
 
   tearDown(() => painter = null);
 
-
   final ScrollMetrics defaultMetrics = FixedScrollMetrics(
     minScrollExtent: 0,
     maxScrollExtent: 0,

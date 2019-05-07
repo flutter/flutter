@@ -100,15 +100,15 @@ abstract class ScrollMetrics {
   ///
   /// The value is typically the height of the viewport when [outOfRange] is false.
   /// It could be less if there is less content visible than the size of the
-  /// viewport.
+  /// viewport, such as when overscrolling.
   ///
   /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
     return viewportDimension
-    // "above" overscroll value
-    - (minScrollExtent - pixels).clamp(0, viewportDimension)
-    // "below" overscroll value
-    - (pixels - maxScrollExtent).clamp(0, viewportDimension);
+      // "above" overscroll value
+      - (minScrollExtent - pixels).clamp(0, viewportDimension)
+      // "below" overscroll value
+      - (pixels - maxScrollExtent).clamp(0, viewportDimension);
   }
 
   /// The quantity of content conceptually "below" the viewport in the scrollable.

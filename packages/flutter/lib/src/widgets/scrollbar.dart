@@ -84,7 +84,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final Animation<double> fadeoutOpacityAnimation;
 
   /// Distance from the scrollbar's start and end to the edge of the viewport
-  /// in pixels. It affects the quantity of available scrolling area.
+  /// in pixels. It affects the amount of available paint area.
   ///
   /// Mustn't be null and defaults to 0.
   final double mainAxisMargin;
@@ -112,10 +112,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final EdgeInsets padding;
 
   /// The preferred smallest size the scrollbar can shrink to when the total
-  /// scrollable extent is large and the current visible viewport is small, and the
+  /// scrollable extent is large, the current visible viewport is small, and the
   /// viewport is not overscrolled.
   ///
-  /// When the size of the scrollbar track in the view port is smaller than
+  /// When the size of the scrollbar paint area in the viewport is smaller than
   /// [minLength], the size of the scrollbar may shrink to a smaller size than
   /// [minLength] to fit in the scrollable area. E.g., when [minLength] is set to
   /// `double.infinite`, it will not be respected if the size of the scrollbar
