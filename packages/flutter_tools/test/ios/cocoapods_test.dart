@@ -271,7 +271,7 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('Existing release config');
 
-      final FlutterProject project = await FlutterProject.fromPath('project');
+      final FlutterProject project = FlutterProject.fromPath('project');
       cocoaPodsUnderTest.setupPodfile(project.ios);
 
       final String debugContents = projectUnderTest.ios.xcodeConfigFor('Debug').readAsStringSync();
