@@ -43,7 +43,6 @@ if [[ -n "$FLUTTER_ENGINE" ]]; then
   flutter_engine_flag="--local-engine-src-path=${FLUTTER_ENGINE}"
 fi
 
-artifacts_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/linux-x64"
 if [[ -n "$LOCAL_ENGINE" ]]; then
   if [[ $(echo "$LOCAL_ENGINE" | tr "[:upper:]" "[:lower:]") != *"$build_mode"* ]]; then
     EchoError "========================================================================"
@@ -58,17 +57,15 @@ if [[ -n "$LOCAL_ENGINE" ]]; then
     exit -1
   fi
   local_engine_flag="--local-engine=${LOCAL_ENGINE}"
-  artifacts_path="${FLUTTER_ENGINE}/out/${LOCAL_ENGINE}/"
 fi
 
-flutter_artifact_copy_dir="linux/flutter/cache"
-RunCommand rm -rf "${flutter_artifact_copy_dir}"
-RunCommand mkdir -p -- "${flutter_artifact_copy_dir}"
-RunCommand cp "${artifacts_path}"/*.h "${flutter_artifact_copy_dir}"/
-RunCommand cp "${artifacts_path}"/*.so "${flutter_artifact_copy_dir}"/
-RunCommand cp "${artifacts_path}"/icudtl.dat "${flutter_artifact_copy_dir}"/
-RunCommand cp -r "${artifacts_path}/cpp_client_wrapper" \
-    "${flutter_artifact_copy_dir}/"
+RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
+   ${verbose_flag}                                                          \
+   unpack                                                                   \
+   --target-platform=linux-x64                                              \
+   --cache-dir="linux/${FLUTTER_APP_CACHE_DIR}"                             \
+   ${local_engine_flag}                                                     \
+   ${flutter_engine_flag}                                                   \
 
 RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics               \
     ${verbose_flag}                                                         \
