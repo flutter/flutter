@@ -23,6 +23,8 @@ import 'constants.dart';
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
+/// ![A screen containing a TabBar and TabBarView combination](https://flutter.github.io/assets-for-api-docs/assets/widgets/tabs.mp4)
+///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
 ///   const MyTabbedPage({ Key key }) : super(key: key);
@@ -32,8 +34,8 @@ import 'constants.dart';
 ///
 /// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
 ///   final List<Tab> myTabs = <Tab>[
-///     Tab(text: 'LEFT'),
-///     Tab(text: 'RIGHT'),
+///     Tab(text: 'left'),
+///     Tab(text: 'right'),
 ///   ];
 ///
 ///   TabController _tabController;
@@ -62,7 +64,12 @@ import 'constants.dart';
 ///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           return Center(child: Text(tab.text));
+///           return Center(
+///             child: Text(
+///               'This is the ${tab.text} tab',
+///               style: const TextStyle(fontSize: 36),
+///             ),
+///           );
 ///         }).toList(),
 ///       ),
 ///     );
@@ -222,11 +229,13 @@ class _TabControllerScope extends InheritedWidget {
 /// widgets are created by a stateless parent widget or by different parent
 /// widgets.
 ///
+/// ![A screen containing a TabBar and TabBarView combination](https://flutter.github.io/assets-for-api-docs/assets/widgets/tabs.mp4)
+///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
-///     Tab(text: 'LEFT'),
-///     Tab(text: 'RIGHT'),
+///     Tab(text: 'left'),
+///     Tab(text: 'right'),
 ///   ];
 ///
 ///   @override
@@ -241,7 +250,12 @@ class _TabControllerScope extends InheritedWidget {
 ///         ),
 ///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             return Center(child: Text(tab.text));
+///             return Center(
+///               child: Text(
+///                 'This is the ${tab.text} tab',
+///                 style: const TextStyle(fontSize: 36),
+///               ),
+///             );
 ///           }).toList(),
 ///         ),
 ///       ),
