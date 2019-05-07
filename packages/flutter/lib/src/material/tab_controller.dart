@@ -235,8 +235,8 @@ class _TabControllerScope extends InheritedWidget {
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
-///     Tab(text: 'left'),
-///     Tab(text: 'right'),
+///     Tab(text: 'LEFT'),
+///     Tab(text: 'RIGHT'),
 ///   ];
 ///
 ///   @override
