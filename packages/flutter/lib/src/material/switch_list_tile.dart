@@ -9,10 +9,6 @@ import 'switch.dart';
 import 'theme.dart';
 import 'theme_data.dart';
 
-// Examples can assume:
-// void setState(VoidCallback fn) { }
-// bool _lights;
-
 enum _SwitchListTileType { material, adaptive }
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
@@ -160,13 +156,13 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// ```dart
   /// SwitchListTile(
-  ///   value: _isSelected,
+  ///   value: _lights,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
-  ///       _isSelected = newValue;
+  ///       _lights = newValue;
   ///     });
   ///   },
-  ///   title: Text('Selection'),
+  ///   title: Text('Lights'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
