@@ -113,8 +113,10 @@ class TabController extends ChangeNotifier {
   Animation<double> get animation => _animationController?.view ?? kAlwaysCompleteAnimation;
   final AnimationController _animationController;
 
-  /// The total number of tabs. Typically greater than one. Must match
-  /// [TabBar.tabs]'s and [TabBarView.children]'s length.
+  /// The total number of tabs.
+  ///
+  /// Typically greater than one. Must match [TabBar.tabs]'s and
+  /// [TabBarView.children]'s length.
   final int length;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
