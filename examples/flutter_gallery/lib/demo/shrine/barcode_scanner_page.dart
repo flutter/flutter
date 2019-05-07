@@ -26,6 +26,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:flutter_gallery/demo/shrine/supplemental/barcode_scanner_utils.dart';
 import 'colors.dart';
 
+enum AnimationState { search, barcodeNear, barcodeFound, endSearch }
+
 class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage({
     this.validRectangle = const Rectangle(width: 320, height: 144),
@@ -49,8 +51,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   bool _closeWindow = false;
   String _barcodePictureFilePath;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  bool _barcodeFound = false;
   Size _previewSize;
+  AnimationState _currentState = AnimationState.search;
+  CustomPainter _animationPainter;
+  int _animationStart = DateTime.now().millisecondsSinceEpoch;
 
   @override
   void initState() {
@@ -61,7 +65,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       <DeviceOrientation>[DeviceOrientation.portraitUp],
     );
     _initCameraAndScanner();
-    _initAnimation();
+    _switchState(AnimationState.search);
   }
 
   void _initCameraAndScanner() {
@@ -73,33 +77,78 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     );
   }
 
-  void _initAnimation() {
-    _animationController = AnimationController(
-      duration: const Duration(milliseconds: 750),
-      vsync: this,
-    );
+  void _initAnimation(Duration duration) {
+    _animationController?.dispose();
+    _animationController = AnimationController(duration: duration, vsync: this);
+  }
 
-    _animationController.addStatusListener((AnimationStatus status) {
-      if (status == AnimationStatus.completed) {
-        if (_barcodeFound) {
-          _showBottomSheet();
-        } else {
+  void _switchState(AnimationState newState) {
+    if (newState == AnimationState.search) {
+      _initAnimation(const Duration(milliseconds: 750));
+
+      _animationPainter = RectangleOutlinePainter(
+        animation: RectangleTween(
+          Rectangle(
+            width: widget.validRectangle.width,
+            height: widget.validRectangle.height,
+            color: Colors.white,
+          ),
+          Rectangle(
+            width: widget.validRectangle.width * widget.maxOutlinePercent,
+            height: widget.validRectangle.height * widget.maxOutlinePercent,
+            color: Colors.transparent,
+          ),
+        ).animate(_animationController),
+      );
+
+      _animationController.addStatusListener((AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
           Future<void>.delayed(const Duration(milliseconds: 1600), () {
             _animationController.forward(from: 0);
           });
         }
+      });
+    } else if (newState == AnimationState.barcodeNear ||
+        newState == AnimationState.barcodeFound ||
+        newState == AnimationState.endSearch) {
+      double begin;
+      if (_currentState == AnimationState.barcodeNear) {
+        begin = lerpDouble(0.0, 0.5, _animationController.value);
+      } else if (_currentState == AnimationState.search) {
+        _initAnimation(const Duration(milliseconds: 500));
+        begin = 0.0;
       }
-    });
 
-    _animationController.forward();
-  }
+      _animationPainter = RectangleTracePainter(
+        rectangle: Rectangle(
+          width: widget.validRectangle.width,
+          height: widget.validRectangle.height,
+          color: newState == AnimationState.endSearch
+              ? Colors.transparent
+              : Colors.white,
+        ),
+        animation: Tween<double>(
+          begin: begin,
+          end: newState == AnimationState.barcodeNear ? 0.5 : 1.0,
+        ).animate(_animationController),
+      );
 
-  void _handleBarcodeFound() {
-    setState(() {
-      _barcodeFound = true;
-      _scannerHint = 'Loading information...';
-      _closeWindow = true;
-    });
+      if (newState == AnimationState.barcodeFound) {
+        _animationController.addStatusListener((AnimationStatus status) {
+          if (status == AnimationStatus.completed) {
+            _switchState(AnimationState.endSearch);
+            setState(() {});
+            _showBottomSheet();
+          }
+        });
+      }
+    }
+
+    _currentState = newState;
+    if (newState != AnimationState.endSearch) {
+      _animationController.forward(from: 0);
+      _animationStart = DateTime.now().millisecondsSinceEpoch;
+    }
   }
 
   Future<void> _openCamera(CameraDescription camera) async {
@@ -135,10 +184,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           _handleResult(
             barcodes: result,
             data: data,
-            imageSize: Size(
-              image.width.toDouble(),
-              image.height.toDouble(),
-            ),
+            imageSize: Size(image.width.toDouble(), image.height.toDouble()),
           );
         },
       ).whenComplete(() => isDetecting = false);
@@ -150,7 +196,20 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     @required MediaQueryData data,
     @required Size imageSize,
   }) {
-    if (!_cameraController.value.isStreamingImages || barcodes.isEmpty) {
+    if (!_cameraController.value.isStreamingImages) {
+      return;
+    } else if (barcodes.isEmpty) {
+      if (_currentState == AnimationState.barcodeNear) {
+        if (DateTime.now().millisecondsSinceEpoch - _animationStart < 2500) {
+          return;
+        }
+      }
+
+      if (_currentState != AnimationState.search) {
+        _scannerHint = null;
+        _switchState(AnimationState.search);
+        setState(() {});
+      }
       return;
     }
 
@@ -176,24 +235,22 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       final bool doesContain = intersection == barcode.boundingBox;
 
       if (doesContain) {
-        _cameraController.stopImageStream().then((_) {
-          _takePicture();
-        });
+        _cameraController.stopImageStream().then((_) => _takePicture());
 
-        _animationController.duration = const Duration(milliseconds: 2000);
-        _handleBarcodeFound();
+        if (_currentState != AnimationState.barcodeFound) {
+          _closeWindow = true;
+          _switchState(AnimationState.barcodeFound);
+          setState(() {});
+        }
         return;
-      } else if (validRect.overlaps(barcode.boundingBox)) {
-        setState(() {
+      } else {
+        if (_currentState != AnimationState.barcodeNear) {
           _scannerHint = 'Move closer to the barcode';
-        });
-        return;
+          _switchState(AnimationState.barcodeNear);
+          setState(() {});
+        }
       }
     }
-
-    setState(() {
-      _scannerHint = null;
-    });
   }
 
   @override
@@ -420,8 +477,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       widget.validRectangle.height),
                   outerFrameColor: widget.frameColor,
                   closeWindow: _closeWindow,
-                  innerFrameColor:
-                      _barcodeFound ? Colors.transparent : kShrineFrameBrown,
+                  innerFrameColor: _currentState == AnimationState.endSearch
+                      ? Colors.transparent
+                      : kShrineFrameBrown,
                 ),
               ),
             ),
@@ -461,36 +519,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
             Container(
               constraints: const BoxConstraints.expand(),
               child: CustomPaint(
-                painter: _barcodeFound
-                    ? RectangleTracePainter(
-                        animation: Tween<double>(
-                          begin: 0,
-                          end: 1.0,
-                        ).animate(
-                          _animationController,
-                        ),
-                        rectangle: Rectangle(
-                          width: widget.validRectangle.width,
-                          height: widget.validRectangle.height,
-                          color: Colors.white,
-                        ),
-                      )
-                    : RectangleOutlinePainter(
-                        animation: RectangleTween(
-                          Rectangle(
-                            width: widget.validRectangle.width,
-                            height: widget.validRectangle.height,
-                            color: Colors.white,
-                          ),
-                          Rectangle(
-                            width: widget.validRectangle.width *
-                                widget.maxOutlinePercent,
-                            height: widget.validRectangle.height *
-                                widget.maxOutlinePercent,
-                            color: Colors.transparent,
-                          ),
-                        ).animate(_animationController),
-                      ),
+                painter: _animationPainter,
               ),
             ),
             AppBar(
