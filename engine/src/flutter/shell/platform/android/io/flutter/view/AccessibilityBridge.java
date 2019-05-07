@@ -596,12 +596,12 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         if (semanticsNode.parent != null) {
             if (BuildConfig.DEBUG && semanticsNode.id <= ROOT_NODE_ID) {
-                throw new AssertionError("Semantics node id is not > ROOT_NODE_ID.");
+                Log.e(TAG, "Semantics node id is not > ROOT_NODE_ID.");
             }
             result.setParent(rootAccessibilityView, semanticsNode.parent.id);
         } else {
             if (BuildConfig.DEBUG && semanticsNode.id != ROOT_NODE_ID) {
-                throw new AssertionError("Semantics node id does not equal ROOT_NODE_ID.");
+                Log.e(TAG, "Semantics node id does not equal ROOT_NODE_ID.");
             }
             result.setParent(rootAccessibilityView);
         }
@@ -712,7 +712,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         boolean hasCheckedState = semanticsNode.hasFlag(Flag.HAS_CHECKED_STATE);
         boolean hasToggledState = semanticsNode.hasFlag(Flag.HAS_TOGGLED_STATE);
         if (BuildConfig.DEBUG && (hasCheckedState && hasToggledState)) {
-            throw new AssertionError("Expected semanticsNode to have checked state and toggled state.");
+            Log.e(TAG, "Expected semanticsNode to have checked state and toggled state.");
         }
         result.setCheckable(hasCheckedState || hasToggledState);
         if (hasCheckedState) {
@@ -1063,7 +1063,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      */
     private SemanticsNode getRootSemanticsNode() {
         if (BuildConfig.DEBUG && !flutterSemanticsTree.containsKey(0)) {
-            throw new AssertionError("Attempted to getRootSemanticsNode without a root sematnics node.");
+            Log.e(TAG, "Attempted to getRootSemanticsNode without a root sematnics node.");
         }
         return flutterSemanticsTree.get(0);
     }
@@ -1328,10 +1328,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                     }
                     if (BuildConfig.DEBUG) {
                         if (object.scrollIndex + visibleChildren > object.scrollChildren) {
-                            throw new AssertionError("Scroll index is out of bounds.");
+                            Log.e(TAG, "Scroll index is out of bounds.");
                         }
                         if (object.childrenInHitTestOrder.get(object.scrollIndex).hasFlag(Flag.IS_HIDDEN)) {
-                            throw new AssertionError("Attempted to move Accessibility Focus to hidden child.");
+                            Log.e(TAG, "Attempted to move Accessibility Focus to hidden child.");
                         }
                     }
                     // The setToIndex should be the index of the last visible child. Because we counted all
@@ -1486,7 +1486,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      */
     private AccessibilityEvent obtainAccessibilityEvent(int virtualViewId, int eventType) {
         if (BuildConfig.DEBUG && virtualViewId == ROOT_NODE_ID) {
-            throw new AssertionError("VirtualView node must not be the root node.");
+            Log.e(TAG, "VirtualView node must not be the root node.");
         }
         AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
         event.setPackageName(rootAccessibilityView.getContext().getPackageName());
@@ -1501,10 +1501,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     private void willRemoveSemanticsNode(SemanticsNode semanticsNodeToBeRemoved) {
         if (BuildConfig.DEBUG) {
             if (!flutterSemanticsTree.containsKey(semanticsNodeToBeRemoved.id)) {
-                throw new AssertionError("Attempted to remove a node that is not in the tree.");
+                Log.e(TAG, "Attempted to remove a node that is not in the tree.");
             }
             if (flutterSemanticsTree.get(semanticsNodeToBeRemoved.id) != semanticsNodeToBeRemoved) {
-                throw new AssertionError("Flutter semantics tree failed to get expected node when searching by id.");
+                Log.e(TAG, "Flutter semantics tree failed to get expected node when searching by id.");
             }
         }
         // TODO(mattcarroll): should parent be set to "null" here? Changing the parent seems like the
@@ -1803,7 +1803,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         private boolean hadFlag(@NonNull Flag flag) {
             if (BuildConfig.DEBUG && !hadPreviousConfig) {
-                throw new AssertionError("Attempted to check hadFlag but had no previous config.");
+                Log.e(TAG, "Attempted to check hadFlag but had no previous config.");
             }
             return (previousFlags & flag.value) != 0;
         }
@@ -1937,7 +1937,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                         // If we receive a different overrideId it means that we were passed
                         // a standard action to override that we don't yet support.
                         if (BuildConfig.DEBUG && action.overrideId != -1) {
-                            throw new AssertionError("Expected action.overrideId to be -1.");
+                            Log.e(TAG, "Expected action.overrideId to be -1.");
                         }
                         customAccessibilityActions.add(action);
                     }
@@ -1961,7 +1961,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         private Rect getGlobalRect() {
             if (BuildConfig.DEBUG && globalGeometryDirty) {
-                throw new AssertionError("Attempted to getGlobalRect with a dirty geometry.");
+                Log.e(TAG, "Attempted to getGlobalRect with a dirty geometry.");
             }
             return globalRect;
         }
@@ -2085,10 +2085,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
             if (BuildConfig.DEBUG) {
                 if (globalTransform == null) {
-                    throw new AssertionError("Expected globalTransform to not be null.");
+                    Log.e(TAG, "Expected globalTransform to not be null.");
                 }
                 if (globalRect == null) {
-                    throw new AssertionError("Expected globalRect to not be null.");
+                    Log.e(TAG, "Expected globalRect to not be null.");
                 }
             }
 
