@@ -1,0 +1,44 @@
+# Copyright 2018 The Fuchsia Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+import("//build/fuchsia/sdk.gni")
+
+config("utils_config") {
+  include_dirs = [ "../../.." ]
+}
+
+source_set("utils") {
+  sources = [
+    "files.cc",
+    "files.h",
+    "handle_exception.cc",
+    "handle_exception.h",
+    "inlines.h",
+    "logging.h",
+    "tempfs.cc",
+    "tempfs.h",
+    "vmo.cc",
+    "vmo.h",
+    "vmservice_object.cc",
+    "vmservice_object.h",
+  ]
+
+  deps = [
+    "$fuchsia_sdk_root/fidl:fuchsia.crash",
+    "$fuchsia_sdk_root/fidl:fuchsia.mem",
+    "$fuchsia_sdk_root/pkg:async-loop",
+    "$fuchsia_sdk_root/pkg:async-loop-cpp",
+    "$fuchsia_sdk_root/pkg:fdio",
+    "$fuchsia_sdk_root/pkg:memfs",
+    "$fuchsia_sdk_root/pkg:syslog",
+    "$fuchsia_sdk_root/pkg:zx",
+    "$fuchsia_sdk_root/pkg/lib/sys/cpp",
+    "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
+    "//third_party/tonic",
+  ]
+
+  public_configs = [ ":utils_config" ]
+}
