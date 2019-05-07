@@ -81,17 +81,16 @@ void main() {
   testWidgets('ScrollbarPainter does not divide by zero', (WidgetTester tester) async {
     await tester.pumpWidget(
       _buildBoilerplate(child: Container(
-          height: 200.0,
-          width: 300.0,
-          child: Scrollbar(
-            child: ListView(
-              children: <Widget>[
-                Container(height: 40.0, child: const Text('0')),
-              ],
-            ),
+        height: 200.0,
+        width: 300.0,
+        child: Scrollbar(
+          child: ListView(
+            children: <Widget>[
+              Container(height: 40.0, child: const Text('0')),
+            ],
           ),
         ),
-      )
+      ))
     );
 
     final CustomPaint custom = tester.widget(find.descendant(
