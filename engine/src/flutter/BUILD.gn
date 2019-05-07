@@ -4,6 +4,10 @@
 
 import("$flutter_root/common/config.gni")
 
+if (is_fuchsia) {
+  import("//build/fuchsia/sdk.gni")
+}
+
 # Whether to build the dartdevc sdk, libraries, and source files
 # required for the flutter web sdk.
 declare_args() {
@@ -22,6 +26,10 @@ group("flutter") {
 
   if (current_toolchain == host_toolchain) {
     public_deps += [ "$flutter_root/shell/testing" ]
+  }
+
+  if (is_fuchsia && using_fuchsia_sdk) {
+    public_deps += [ "$flutter_root/shell/platform/fuchsia" ]
   }
 
   if (!is_fuchsia && !is_fuchsia_host) {
