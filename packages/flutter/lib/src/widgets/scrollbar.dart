@@ -103,9 +103,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// well as its side to the nearest edge, in pixels.
   ///
   /// This is typically set to the current [MediaQueryData.padding] to avoid
-  /// partial obstructions such as display notches. Contents that overlap
-  /// [padding] will be considered not visible during scrollbar size calculation.
-  /// If you only want additonal margins around the scrollbar, see [mainAxisMargin].
+  /// partial obstructions such as display notches. If you only want additional
+  /// margins around the scrollbar, see [mainAxisMargin].
   ///
   /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
   /// directions must be greater than or equal to zero.

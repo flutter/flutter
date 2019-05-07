@@ -43,7 +43,7 @@ void main() {
     expect(find.byType(Scrollbar), paints..rect(rect: const Rect.fromLTRB(0.0, 1.5, 6.0, 91.5)));
   });
 
-  testWidgets('Handles MediaQuery well', (WidgetTester tester) async {
+  testWidgets('workds with MaterialApp and Scaffold', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
         home: MediaQuery(
           data: const MediaQueryData(
@@ -61,15 +61,16 @@ void main() {
     ));
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
-    await gesture.moveBy(const Offset(0, 100));
     // On Android it should not overscroll.
+    await gesture.moveBy(const Offset(0, 100));
+    // Trigger fade in animation.
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
     expect(find.byType(Scrollbar), paints..rect(rect:
         const Rect.fromLTWH(
           800.0 - 6, // screen width - thickness
-          0,
+          0,         // the paint area starts from the bottom of the app bar
           6,         // thickness
           // 56 being the height of the app bar
           (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)
