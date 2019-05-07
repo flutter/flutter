@@ -3,7 +3,7 @@
 The `.arb` files in this directory contain localized values (primarily
 strings) used by the Material and Cupertino libraries.  The
 `generated_material_localizations.dart` and
-`generated_cupertino_localizations.dart` files combines all of the
+`generated_cupertino_localizations.dart` files combine all of the
 localizations into a single Map that is linked with the rest of
 flutter_localizations package.
 
@@ -14,7 +14,7 @@ apps in general, see the
 
 ### Translations for one locale: .arb files
 
-The Material and Cupertino libraries uses
+The Material and Cupertino libraries use
 [Application Resource Bundle](https://code.google.com/p/arb/wiki/ApplicationResourceBundleSpecification)
 files, which have a `.arb` extension, to store localized translations
 of messages, format strings, and other values. This format is also
@@ -22,7 +22,7 @@ used by the Dart [intl](https://pub.dartlang.org/packages/intl)
 package and it is supported by the
 [Google Translators Toolkit](https://translate.google.com/toolkit).
 
-The Material and Cupertino libraries only depends on a small subset
+The Material and Cupertino libraries only depend on a small subset
 of the ARB format. Each .arb file contains a single JSON table that
 maps from resource IDs to localized values.
 
@@ -61,7 +61,7 @@ generated `localizations.dart` file. The Map is used by the
 MaterialLocalizations class.
 
 
-### material_en.arb and cupertino_en.arb Defines all of the resource IDs
+### material_en.arb and cupertino_en.arb Define all of the resource IDs
 
 All of the `material_*.arb` files whose names do not include a regional
 suffix contain translations for the same set of resource IDs as
@@ -89,7 +89,7 @@ to write.
 ### Values with Parameters, Plurals
 
 A few of material translations contain `$variable` tokens. The
-Material and Cupertino libraries replaces these tokens with values at
+Material and Cupertino libraries replace these tokens with values at
 run-time. For example:
 
 ```dart
@@ -129,7 +129,7 @@ the "Other" suffix. For example the English translations
 "selectedRowCountTitleOther": "$selectedRowCount items selected",
 ```
 
-When defining new resources that handles pluralizations, the "One" and
+When defining new resources that handle pluralizations, the "One" and
 the "Other" forms must, at minimum, always be defined in the source
 English ARB files.
 
@@ -157,7 +157,7 @@ section in the Material spec. The Material theme uses the
 
 ### 'generated_*_localizations.dart': all of the localizations as a Map
 
-If you look at the comment at the top of `generated_material_localizations.dart`
+If you look at the comment at the top of the `generated_material_localizations.dart`
 and `generated_cupertino_localizations.dart` files, you'll
 see that it was manually generated using a `dev/tools/localizations`
 app called `gen_localizations`.
@@ -171,7 +171,7 @@ dart dev/tools/localizations/gen_localizations.dart packages/flutter_localizatio
 The gen_localizations app just combines the contents of all of the
 .arb files into a single `Map` per library that has entries for each .arb
 file's locale. The `MaterialLocalizations` and `CupertinoLocalizations`
-classese implementation uses these Maps to implement the methods that lookup localized resource values.
+class implementations use these Maps to implement the methods that lookup localized resource values.
 
 The gen_localizations app must be run by hand after .arb files have
 been updated. The app's first parameter is the path to this directory,
