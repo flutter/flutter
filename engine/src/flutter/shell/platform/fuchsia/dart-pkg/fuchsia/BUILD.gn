@@ -1,0 +1,32 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+
+config("sdk_ext_config") {
+  include_dirs = [ "../.." ]
+}
+
+group("fuchsia") {
+  public_deps = [
+    ":sdk_ext",
+  ]
+}
+
+source_set("sdk_ext") {
+  sources = [
+    "sdk_ext/fuchsia.cc",
+    "sdk_ext/fuchsia.h",
+  ]
+
+  deps = [
+    "$flutter_root/fml",
+    "$fuchsia_sdk_root/fidl:fuchsia.sys",
+    "$fuchsia_sdk_root/pkg:async-cpp",
+    "../zircon",
+    "//third_party/tonic",
+  ]
+
+  public_configs = [ ":sdk_ext_config" ]
+}

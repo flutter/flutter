@@ -1,0 +1,33 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/fuchsia/sdk.gni")
+
+config("zircon_config") {
+  include_dirs = [ "." ]
+}
+
+source_set("zircon") {
+  public_configs = [ ":zircon_config" ]
+
+  sources = [
+    "sdk_ext/handle.cc",
+    "sdk_ext/handle.h",
+    "sdk_ext/handle_waiter.cc",
+    "sdk_ext/handle_waiter.h",
+    "sdk_ext/natives.cc",
+    "sdk_ext/natives.h",
+    "sdk_ext/system.cc",
+    "sdk_ext/system.h",
+  ]
+
+  deps = [
+    "$fuchsia_sdk_root/pkg:async-cpp",
+    "$fuchsia_sdk_root/pkg:async-loop-cpp",
+    "$fuchsia_sdk_root/pkg:fdio",
+    "$fuchsia_sdk_root/pkg:zx",
+    "//flutter/fml",
+    "//third_party/tonic",
+  ]
+}
