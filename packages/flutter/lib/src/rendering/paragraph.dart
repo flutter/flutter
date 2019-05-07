@@ -530,7 +530,7 @@ class RenderParagraph extends RenderBox
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();
-    
+
 
     _needsLayout = false;
 
@@ -645,7 +645,7 @@ class RenderParagraph extends RenderBox
     int childIndex = 0;
     while (child != null) {
       assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
-      final TextParentData textParentData = child.parentData as TextParentData;
+      final TextParentData textParentData = child.parentData;
 
       final double scale = _textPainter.inlinePlaceholderScales[childIndex];
       context.pushTransform(
@@ -745,7 +745,7 @@ class RenderParagraph extends RenderBox
     super.describeSemanticsConfiguration(config);
     _inlineSemanticsOffsets.clear();
     _inlineSemanticsElements.clear();
-    Accumulator offset = Accumulator();
+    final Accumulator offset = Accumulator();
     text.visitChildren((InlineSpan span) {
       span.describeSemantics(offset, _inlineSemanticsOffsets, _inlineSemanticsElements);
       return true;
