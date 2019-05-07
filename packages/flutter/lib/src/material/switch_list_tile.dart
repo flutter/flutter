@@ -160,13 +160,13 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// ```dart
   /// SwitchListTile(
-  ///   value: _lights,
+  ///   value: _isSelected,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
-  ///       _lights = newValue;
+  ///       _isSelected = newValue;
   ///     });
   ///   },
-  ///   title: Text('Lights'),
+  ///   title: Text('Selection'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
