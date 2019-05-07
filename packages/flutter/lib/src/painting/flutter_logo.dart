@@ -373,7 +373,7 @@ class _FlutterLogoPainter extends BoxPainter {
       0.0, 0.0, 1.0, 0.0,
       -77.697, 98.057, 0.0, 1.0,
     ]));
-    canvas.drawRect(Rect.fromLTWH(59.8, 123.1, 39.4, 39.4), mediumPaint);
+    canvas.drawRect(const Rect.fromLTWH(59.8, 123.1, 39.4, 39.4), mediumPaint);
     canvas.restore();
 
     // The two gradients.

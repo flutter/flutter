@@ -10,6 +10,8 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -153,6 +155,86 @@ Use the 'android' tool to install them:
       final AndroidDevice device = AndroidDevice('test');
       expect(await device.isLocalEmulator, true);
       expect(await device.supportsHardwareRendering, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  testUsingContext('isSupportedForProject is true on module project', () async {
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  module: {}
+''');
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('android').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('isSupportedForProject is false with no host app and no module', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  group('portForwarder', () {
+    final ProcessManager mockProcessManager = MockProcessManager();
+    final AndroidDevice device = AndroidDevice('1234');
+    final DevicePortForwarder forwarder = device.portForwarder;
+
+    testUsingContext('returns the generated host port from stdout', () async {
+      when(mockProcessManager.run(argThat(contains('forward'))))
+      .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
+
+      expect(await forwarder.forward(123), equals(456));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('returns the supplied host port when stdout is empty', () async {
+      when(mockProcessManager.run(argThat(contains('forward'))))
+      .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
+
+      expect(await forwarder.forward(123, hostPort: 456), equals(456));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('returns the supplied host port when stdout is the host port', () async {
+      when(mockProcessManager.run(argThat(contains('forward'))))
+      .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
+
+      expect(await forwarder.forward(123, hostPort: 456), equals(456));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('throws an error when stdout is not blank nor the host port', () async {
+      when(mockProcessManager.run(argThat(contains('forward'))))
+      .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
+
+      expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

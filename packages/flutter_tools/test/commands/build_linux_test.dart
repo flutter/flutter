@@ -100,7 +100,7 @@ BINARY_NAME=fizz_bar
 ''');
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
   }, overrides: <Type, Generator>{FileSystem: () => MemoryFileSystem()});

@@ -6,11 +6,15 @@ import 'dart:async';
 import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -24,6 +28,8 @@ class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
+class MockSimControl extends Mock implements SimControl {}
+class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 
 void main() {
   FakePlatform osx;
@@ -413,5 +419,70 @@ void main() {
       ProcessManager: () => mockProcessManager,
       SimControl: () => simControl,
     });
+  });
+
+  group('startApp', () {
+    SimControl simControl;
+
+    setUp(() {
+      simControl = MockSimControl();
+    });
+
+    testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
+        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+        when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
+
+        final Directory mockDir = fs.currentDirectory;
+        final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+
+        const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+
+        verify(simControl.launch(any, 'correct', any));
+      },
+      overrides: <Type, Generator>{
+        SimControl: () => simControl,
+        IOSWorkflow: () => MockIOSWorkflow()
+      },
+    );
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  module: {}
+''');
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('ios').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
   });
 }

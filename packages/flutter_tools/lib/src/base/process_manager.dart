@@ -16,7 +16,7 @@ const String _kRecordingType = 'process';
 const ProcessManager _kLocalProcessManager = LocalProcessManager();
 
 /// The active process manager.
-ProcessManager get processManager => context[ProcessManager] ?? _kLocalProcessManager;
+ProcessManager get processManager => context.get<ProcessManager>() ?? _kLocalProcessManager;
 
 /// Gets a [ProcessManager] that will record process invocation activity to the
 /// specified base recording [location].

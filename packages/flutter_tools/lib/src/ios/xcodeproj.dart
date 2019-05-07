@@ -127,7 +127,7 @@ Future<void> updateGeneratedXcodeProperties({
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
 
-XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInterpreter];
+XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {

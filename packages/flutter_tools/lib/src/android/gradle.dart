@@ -112,7 +112,7 @@ Future<GradleProject> _gradleProject() async {
 /// potentially downloaded.
 Future<void> checkGradleDependencies() async {
   final Status progress = logger.startProgress('Ensuring gradle dependencies are up to date...', timeout: timeoutConfiguration.slowOperation);
-  final FlutterProject flutterProject = await FlutterProject.current();
+  final FlutterProject flutterProject = FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   await runCheckedAsync(
     <String>[gradle, 'dependencies'],
@@ -126,7 +126,7 @@ Future<void> checkGradleDependencies() async {
 // Note: Dependencies are resolved and possibly downloaded as a side-effect
 // of calculating the app properties using Gradle. This may take minutes.
 Future<GradleProject> _readGradleProject() async {
-  final FlutterProject flutterProject = await FlutterProject.current();
+  final FlutterProject flutterProject = FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
   final Status status = logger.startProgress('Resolving dependencies...', timeout: timeoutConfiguration.slowOperation);

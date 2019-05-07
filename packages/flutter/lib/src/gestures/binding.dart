@@ -183,12 +183,11 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           exception: exception,
           stack: stack,
           library: 'gesture library',
-          context: 'while dispatching a non-hit-tested pointer event',
+          context: ErrorDescription('while dispatching a non-hit-tested pointer event'),
           event: event,
           hitTestEntry: null,
-          informationCollector: (StringBuffer information) {
-            information.writeln('Event:');
-            information.writeln('  $event');
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
           },
         ));
       }
@@ -202,14 +201,12 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
           exception: exception,
           stack: stack,
           library: 'gesture library',
-          context: 'while dispatching a pointer event',
+          context: ErrorDescription('while dispatching a pointer event'),
           event: event,
           hitTestEntry: entry,
-          informationCollector: (StringBuffer information) {
-            information.writeln('Event:');
-            information.writeln('  $event');
-            information.writeln('Target:');
-            information.write('  ${entry.target}');
+          informationCollector: () sync* {
+            yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+            yield DiagnosticsProperty<HitTestTarget>('Target', entry.target, style: DiagnosticsTreeStyle.errorProperty);
           },
         ));
       }
@@ -244,7 +241,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     dynamic exception,
     StackTrace stack,
     String library,
-    String context,
+    DiagnosticsNode context,
     this.event,
     this.hitTestEntry,
     InformationCollector informationCollector,
