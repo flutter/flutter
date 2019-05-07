@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest a new idea for Flutter
+about: Suggest a new idea for Flutter.
 title: ''
 labels: ''
 assignees: ''
