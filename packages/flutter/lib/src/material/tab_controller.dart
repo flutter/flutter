@@ -82,7 +82,7 @@ class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a
   /// [TabBarView].
   ///
-  /// The [length] must not be null or negative. Typically its a value greater
+  /// The [length] must not be null or negative. Typically it's a value greater
   /// than one, i.e. typically there are two or more tabs. The [length] must
   /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
