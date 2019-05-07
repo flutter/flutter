@@ -10,6 +10,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
 import 'debug.dart';
@@ -529,6 +530,7 @@ class RenderParagraph extends RenderBox
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();
+    
 
     _needsLayout = false;
 
@@ -644,9 +646,18 @@ class RenderParagraph extends RenderBox
     while (child != null) {
       assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
       final TextParentData textParentData = child.parentData as TextParentData;
-      context.paintChild(
-        child,
-        offset + textParentData.offset
+
+      final double scale = _textPainter.inlinePlaceholderScales[childIndex];
+      context.pushTransform(
+        needsCompositing,
+        offset + textParentData.offset,
+        Matrix4.diagonal3Values(scale, scale, scale),
+        (PaintingContext context, Offset offset) {
+          context.paintChild(
+            child,
+            offset,
+          );
+        },
       );
       child = childAfter(child);
       childIndex += 1;

@@ -324,6 +324,13 @@ class TextPainter {
   List<TextBox> get inlinePlaceholderBoxes => _inlinePlaceholderBoxes;
   List<TextBox> _inlinePlaceholderBoxes;
 
+  /// An ordered list of scales for each placeholder in the paragraph.
+  ///
+  /// Each scale corresponds to a [PlaceholderSpan] in the order they were defined
+  /// in the [InlineSpan] tree.
+  List<double> get inlinePlaceholderScales => _inlinePlaceholderScales;
+  List<double> _inlinePlaceholderScales;
+
   /// Sets the dimensions of each placeholder in [text].
   /// 
   /// The number of [PlaceholderDimensions] provided should be the same as the
@@ -493,6 +500,7 @@ class TextPainter {
     if (_paragraph == null) {
       final ui.ParagraphBuilder builder = ui.ParagraphBuilder(_createParagraphStyle());
       _text.build(builder, textScaleFactor: textScaleFactor, dimensions: _placeholderDimensions);
+      _inlinePlaceholderScales = builder.placeholderScales;
       _paragraph = builder.build();
     }
     _lastMinWidth = minWidth;

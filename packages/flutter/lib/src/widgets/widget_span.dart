@@ -106,9 +106,10 @@ class WidgetSpan extends PlaceholderSpan {
     assert(builder.placeholderCount < dimensions.length);
     final PlaceholderDimensions currentDimensions = dimensions[builder.placeholderCount];
     builder.addPlaceholder(
-      currentDimensions.size.width * textScaleFactor,
-      currentDimensions.size.height * textScaleFactor,
+      currentDimensions.size.width,
+      currentDimensions.size.height,
       alignment,
+      scale: textScaleFactor,
       baseline: currentDimensions.baseline,
       baselineOffset: currentDimensions.baselineOffset,
     );
