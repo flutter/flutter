@@ -28,8 +28,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo) as
 
   final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
   final Process process = await processManager.start(<String>[
-    '$vcvarsScript', '&&', 'msbuild',
-    windowsProject.vcprojFile.absolute.path,
+    vcvarsScript, '&&', 'msbuild',
+    windowsProject.vcprojFile.path,
     '/p:Configuration=$configuration',
   ], runInShell: true);
   final Status status = logger.startProgress(
