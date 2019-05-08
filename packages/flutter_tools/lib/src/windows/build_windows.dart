@@ -15,13 +15,13 @@ import 'msbuild_utils.dart';
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo) async {
-  final Map<String, String> environment = {
+  final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     'EXTRA_BUNDLE_FLAGS': buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '',
   };
   await writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
-  String vcvarsScript = await findVcvars();
+  final String vcvarsScript = await findVcvars();
   if (vcvarsScript == null) {
     throwToolExit('Unable to build: could not find vcvars64.bat');
   }
