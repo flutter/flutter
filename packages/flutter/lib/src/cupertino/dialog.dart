@@ -1046,12 +1046,13 @@ class CupertinoDialogAction extends StatelessWidget {
 
   /// Set to true if button is the default choice in the dialog.
   ///
-  /// Default buttons are bold.
+  /// Default buttons are bold. Defaults to false and cannot be null.
   final bool isDefaultAction;
 
   /// Whether this action destroys an object.
   ///
-  /// For example, an action that deletes an email is destructive.
+  /// For example, an action that deletes an email is destructive. Defaults to 
+  /// false and cannot be null
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.
