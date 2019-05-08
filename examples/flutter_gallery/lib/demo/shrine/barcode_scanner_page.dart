@@ -32,12 +32,12 @@ class BarcodeScannerPage extends StatefulWidget {
   const BarcodeScannerPage({
     this.validRectangle = const Rectangle(width: 320, height: 144),
     this.frameColor = kShrineScrim,
-    this.maxOutlinePercent = 1.2,
+    this.traceMultiplier = 1.2,
   });
 
   final Rectangle validRectangle;
   final Color frameColor;
-  final double maxOutlinePercent;
+  final double traceMultiplier;
 
   @override
   _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
@@ -50,7 +50,6 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   String _scannerHint;
   bool _closeWindow = false;
   String _barcodePictureFilePath;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   Size _previewSize;
   AnimationState _currentState = AnimationState.search;
   CustomPainter _animationPainter;
@@ -65,7 +64,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       <DeviceOrientation>[DeviceOrientation.portraitUp],
     );
     _initCameraAndScanner();
-    _switchState(AnimationState.search);
+    _switchAnimationState(AnimationState.search);
   }
 
   void _initCameraAndScanner() {
@@ -82,7 +81,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     _animationController = AnimationController(duration: duration, vsync: this);
   }
 
-  void _switchState(AnimationState newState) {
+  void _switchAnimationState(AnimationState newState) {
     if (newState == AnimationState.search) {
       _initAnimation(const Duration(milliseconds: 750));
 
@@ -94,8 +93,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
             color: Colors.white,
           ),
           Rectangle(
-            width: widget.validRectangle.width * widget.maxOutlinePercent,
-            height: widget.validRectangle.height * widget.maxOutlinePercent,
+            width: widget.validRectangle.width * widget.traceMultiplier,
+            height: widget.validRectangle.height * widget.traceMultiplier,
             color: Colors.transparent,
           ),
         ).animate(_animationController),
@@ -136,7 +135,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       if (newState == AnimationState.barcodeFound) {
         _animationController.addStatusListener((AnimationStatus status) {
           if (status == AnimationStatus.completed) {
-            _switchState(AnimationState.endSearch);
+            _switchAnimationState(AnimationState.endSearch);
             setState(() {});
             _showBottomSheet();
           }
@@ -207,7 +206,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
       if (_currentState != AnimationState.search) {
         _scannerHint = null;
-        _switchState(AnimationState.search);
+        _switchAnimationState(AnimationState.search);
         setState(() {});
       }
       return;
@@ -239,14 +238,14 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
         if (_currentState != AnimationState.barcodeFound) {
           _closeWindow = true;
-          _switchState(AnimationState.barcodeFound);
+          _switchAnimationState(AnimationState.barcodeFound);
           setState(() {});
         }
         return;
       } else {
         if (_currentState != AnimationState.barcodeNear) {
           _scannerHint = 'Move closer to the barcode';
-          _switchState(AnimationState.barcodeNear);
+          _switchAnimationState(AnimationState.barcodeNear);
           setState(() {});
         }
       }
@@ -465,7 +464,6 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
     return SafeArea(
       child: Scaffold(
-        key: _scaffoldKey,
         body: Stack(
           children: <Widget>[
             background,
