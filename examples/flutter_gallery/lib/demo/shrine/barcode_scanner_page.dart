@@ -86,6 +86,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     setState(() {
       _animationPainter = null;
     });
+
     _animationController?.dispose();
     _animationController = AnimationController(duration: duration, vsync: this);
   }
@@ -112,7 +113,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       _animationController.addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           Future<void>.delayed(const Duration(milliseconds: 1600), () {
-            _animationController.forward(from: 0);
+            if (_currentState != AnimationState.endSearch) {
+              _animationController.forward(from: 0);
+            }
           });
         }
       });
@@ -144,9 +147,13 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       if (newState == AnimationState.barcodeFound) {
         _animationController.addStatusListener((AnimationStatus status) {
           if (status == AnimationStatus.completed) {
-            _switchAnimationState(AnimationState.endSearch);
-            setState(() {});
-            _showBottomSheet();
+            Future<void>.delayed(const Duration(milliseconds: 300), () {
+              if (_currentState != AnimationState.endSearch) {
+                _switchAnimationState(AnimationState.endSearch);
+                setState(() {});
+                _showBottomSheet();
+              }
+            });
           }
         });
       }
@@ -247,6 +254,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
         if (_currentState != AnimationState.barcodeFound) {
           _closeWindow = true;
+          _scannerHint = 'Loading Information...';
           _switchAnimationState(AnimationState.barcodeFound);
           setState(() {});
         }
@@ -263,6 +271,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
 
   @override
   void dispose() {
+    _currentState = AnimationState.endSearch;
     _cameraController?.stopImageStream();
     _cameraController?.dispose();
     _animationController?.dispose();
