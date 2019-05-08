@@ -131,12 +131,17 @@ class MouseTracker extends ChangeNotifier {
     _trackedAnnotations.remove(annotation);
   }
 
+  bool _postFrameCheckScheduled = false;
   void _scheduleMousePositionCheck() {
     // If we're not tracking anything, then there is no point in registering a
     // frame callback or scheduling a frame. By definition there are no active
     // annotations that need exiting, either.
-    if (_trackedAnnotations.isNotEmpty) {
-      SchedulerBinding.instance.addPostFrameCallback((Duration _) => collectMousePositions());
+    if (_trackedAnnotations.isNotEmpty && !_postFrameCheckScheduled) {
+      _postFrameCheckScheduled = true;
+      SchedulerBinding.instance.addPostFrameCallback((Duration _) {
+        _postFrameCheckScheduled = false;
+        collectMousePositions();
+      });
       SchedulerBinding.instance.scheduleFrame();
     }
   }

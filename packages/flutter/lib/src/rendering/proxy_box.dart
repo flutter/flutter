@@ -2571,8 +2571,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
       changed = true;
     }
-    if (RendererBinding.instance.mouseTracker.mouseIsConnected &&
-        (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null)) {
+    if (_onPointerEnter != null || _onPointerHover != null || _onPointerExit != null) {
       _hoverAnnotation = MouseTrackerAnnotation(
         onEnter: _onPointerEnter,
         onHover: _onPointerHover,
@@ -2594,31 +2593,64 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
+  void _handleMouseTrackerChanged() {
+    if (attached)
+      markNeedsPaint();
+  }
+
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
     // Add a listener to listen for changes in mouseIsConnected.
-    RendererBinding.instance.mouseTracker.addListener(_updateAnnotations);
+    RendererBinding.instance.mouseTracker.addListener(_handleMouseTrackerChanged);
+    postActivate();
+  }
+
+  /// Attaches the annotation for this render object, if any.
+  ///
+  /// This is called by [attach] to attach and new annotations.
+  ///
+  /// This is also called by the [Listener]'s [Element] to tell this
+  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
+  /// the widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void postActivate() {
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
     }
   }
 
-  @override
-  void detach() {
+  /// Detaches the annotation for this render object, if any.
+  ///
+  /// This is called by the [Listener]'s [Element] to tell this
+  /// [RenderPointerListener] that it will shortly be attached. That way,
+  /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
+  /// widget that provided the callback, and [State.setState] can safely be
+  /// called within that callback.
+  void preDeactivate() {
     if (_hoverAnnotation != null) {
       RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
     }
-    RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
-    super.detach();
   }
 
   @override
-  bool get needsCompositing => _hoverAnnotation != null;
+  void detach() {
+    RendererBinding.instance.mouseTracker.removeListener(_handleMouseTrackerChanged);
+    super.detach();
+  }
+
+  bool get _hasActiveAnnotation {
+    return _hoverAnnotation != null
+      && RendererBinding.instance.mouseTracker.mouseIsConnected;
+  }
+
+  @override
+  bool get needsCompositing => _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (_hoverAnnotation != null) {
+    if (_hasActiveAnnotation) {
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,
         size: size,
