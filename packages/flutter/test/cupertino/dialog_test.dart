@@ -166,6 +166,17 @@ void main() {
     expect(widget.style.color.opacity, lessThanOrEqualTo(128 / 255));
   });
 
+  testWidgets('Dialog enabled action style', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(CupertinoDialogAction(
+      child: const Text('Ok'),
+      onPressed: () {},
+    )));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color.opacity, equals(1.0));
+  });
+
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
     await tester.pumpWidget(
