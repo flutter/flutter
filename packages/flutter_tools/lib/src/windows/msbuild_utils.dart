@@ -2,14 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file
 
-import 'dart:core';
-
 import 'package:xml/xml.dart' as xml;
 
-/// Returns the string to write as a property sheet (.props) file to expose
-/// all of the key/value pairs in [variables] as enivornment variables for
-/// targets that use it.
-String propertiesForEnvironmentVariables(Map<String, String> variables) {
+import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/platform.dart';
+import '../base/process_manager.dart';
+
+/// Returns the path to an installed vcvars64.bat script if found, or null.
+Future<String> findVcvars() async {
+  final String programDir = platform.environment['PROGRAMFILES(X86)'];
+  final String pathPrefix = fs.path.join(programDir, 'Microsoft Visual Studio');
+  const String vcvarsScriptName = 'vcvars64.bat';
+  final String pathSuffix =
+      fs.path.join('VC', 'Auxiliary', 'Build', vcvarsScriptName);
+  final List<String> years = <String>['2017', '2019'];
+  final List<String> flavors = <String>[
+    'Community',
+    'Professional',
+    'Enterprise',
+    'Preview'
+  ];
+  for (final String year in years) {
+    for (final String flavor in flavors) {
+      final String testPath =
+          fs.path.join(pathPrefix, year, flavor, pathSuffix);
+      if (fs.file(testPath).existsSync()) {
+        return testPath;
+      }
+    }
+  }
+
+  // If it can't be found manually, check the path.
+  final ProcessResult whereResult = await processManager.run(<String>[
+    'where.exe',
+    vcvarsScriptName,
+  ]);
+  if (whereResult.exitCode == 0) {
+    return whereResult.stdout.trim();
+  }
+
+  return null;
+}
+
+/// Writes a property sheet (.props) file to expose all of the key/value
+/// pairs in [variables] as enivornment variables.
+Future<void> writePropertySheet(
+    File propertySheetFile, Map<String, String> variables) async {
   final xml.XmlBuilder builder = xml.XmlBuilder();
   builder.processing('xml', 'version="1.0" encoding="utf-8"');
   builder.element('Project', nest: () {
@@ -24,7 +63,10 @@ String propertiesForEnvironmentVariables(Map<String, String> variables) {
     builder.element('ItemDefinitionGroup');
     _addItemGroup(builder, variables);
   });
-  return builder.build().toString();
+
+  await propertySheetFile.create(recursive: true);
+  await propertySheetFile
+      .writeAsString(builder.build().toXmlString(pretty: true, indent: '  '));
 }
 
 /// Adds the UserMacros PropertyGroup that defines [variables] to [builder].

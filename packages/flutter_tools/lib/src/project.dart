@@ -588,10 +588,10 @@ class WindowsProject {
 
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
-  File get generatedPropertySheetFile => _editableDirectory.childDirectory('Flutter').childFile('Generated.props');
+  File get generatedPropertySheetFile => _editableDirectory.childDirectory('flutter').childFile('Generated.props');
 
-  // Note: The build script file exists as a temporary shim.
-  File get buildScript => _editableDirectory.childFile('build.bat');
+  // The MSBuild project file.
+  File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 
   // Note: The name script file exists as a temporary shim.
   File get nameScript => _editableDirectory.childFile('name_output.bat');
