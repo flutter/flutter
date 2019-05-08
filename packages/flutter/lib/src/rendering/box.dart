@@ -1469,6 +1469,7 @@ abstract class RenderBox extends RenderObject {
   }
 
   /// Whether this render object has undergone layout and has a [size].
+  // ignore: diagnostic_describe_all_properties
   bool get hasSize => _size != null;
 
   /// The size of this render box computed during layout.
@@ -1481,6 +1482,7 @@ abstract class RenderBox extends RenderObject {
   /// [performResize] functions. If you wish to change the size of a box outside
   /// of those functions, call [markNeedsLayout] instead to schedule a layout of
   /// the box.
+  // ignore: diagnostic_describe_all_properties
   Size get size {
     assert(hasSize, 'RenderBox was not laid out: ${toString()}');
     assert(() {
