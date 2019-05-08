@@ -709,6 +709,10 @@ class TextSelectionGestureDetector extends StatefulWidget {
     this.onSingleLongTapMoveUpdate,
     this.onSingleLongTapEnd,
     this.onDoubleTapDown,
+    this.onDoubleTapUp,
+    this.onDoubleLongTapStart,
+    this.onDoubleLongTapMoveUpdate,
+    this.onDoubleLongTapEnd,
     this.onDragSelectionStart,
     this.onDragSelectionUpdate,
     this.onDragSelectionEnd,
@@ -755,9 +759,14 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDownCallback onDoubleTapDown;
+  final GestureTapUpCallback onDoubleTapUp;
 
   /// Called when a mouse starts dragging to select text.
   final GestureDragStartCallback onDragSelectionStart;
+
+  final GestureLongPressStartCallback onDoubleLongTapStart;
+  final GestureLongPressMoveUpdateCallback onDoubleLongTapMoveUpdate;
+  final GestureLongPressEndCallback onDoubleLongTapEnd;
 
   /// Called repeatedly as a mouse moves while dragging.
   ///
@@ -826,7 +835,10 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       }
       _lastTapOffset = details.globalPosition;
       _doubleTapTimer = Timer(kDoubleTapTimeout, _doubleTapTimeout);
+    } else if (widget.onDoubleTapUp != null) {
+      widget.onDoubleTapUp(details);
     }
+
     _isDoubleTap = false;
   }
 
@@ -901,19 +913,26 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   void _handleLongPressStart(LongPressStartDetails details) {
     if (!_isDoubleTap && widget.onSingleLongTapStart != null) {
       widget.onSingleLongTapStart(details);
+    } else if (_isDoubleTap && widget.onDoubleLongTapStart != null) {
+      widget.onDoubleLongTapStart(details);
     }
   }
 
   void _handleLongPressMoveUpdate(LongPressMoveUpdateDetails details) {
     if (!_isDoubleTap && widget.onSingleLongTapMoveUpdate != null) {
       widget.onSingleLongTapMoveUpdate(details);
+    } else if(_isDoubleTap && widget.onDoubleLongTapMoveUpdate != null) {
+      widget.onDoubleLongTapMoveUpdate(details);
     }
   }
 
   void _handleLongPressEnd(LongPressEndDetails details) {
     if (!_isDoubleTap && widget.onSingleLongTapEnd != null) {
       widget.onSingleLongTapEnd(details);
+    } else if(_isDoubleTap && widget.onDoubleLongTapEnd != null) {
+      widget.onDoubleLongTapEnd(details);
     }
+
     _isDoubleTap = false;
   }
 

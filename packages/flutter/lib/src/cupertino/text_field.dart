@@ -549,8 +549,24 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     _editableTextKey.currentState.showToolbar();
   }
 
-  void _handleDoubleTapDown(TapDownDetails details) {
-    _renderEditable.selectWord(cause: SelectionChangedCause.tap);
+  void _handleDoubleTapUp(TapUpDetails details) {
+    _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
+    _editableTextKey.currentState.showToolbar();
+  }
+
+  void _handleDoubleLongTapStart(LongPressStartDetails details) {
+    _renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+  }
+
+  void _handleDoubleLongTapMoveUpdate(LongPressMoveUpdateDetails details) {
+    _renderEditable.selectWordsInRange(
+      from: details.globalPosition - details.offsetFromOrigin,
+      to: details.globalPosition,
+      cause: SelectionChangedCause.longPress
+    );
+  }
+
+  void _handleDoubleLongTapEnd(LongPressEndDetails details) {
     _editableTextKey.currentState.showToolbar();
   }
 
@@ -787,7 +803,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
               onSingleLongTapStart: _handleSingleLongTapStart,
               onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
               onSingleLongTapEnd: _handleSingleLongTapEnd,
-              onDoubleTapDown: _handleDoubleTapDown,
+              onDoubleTapUp: _handleDoubleTapUp,
+              onDoubleLongTapStart: _handleDoubleLongTapStart,
+              onDoubleLongTapMoveUpdate: _handleDoubleLongTapMoveUpdate,
+              onDoubleLongTapEnd: _handleDoubleLongTapEnd,
               onDragSelectionStart: _handleMouseDragSelectionStart,
               onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
               onDragSelectionEnd: _handleMouseDragSelectionEnd,

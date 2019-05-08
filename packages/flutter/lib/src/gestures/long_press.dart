@@ -151,7 +151,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [onLongPress], which has the same timing but without the location data.
   GestureLongPressStartCallback onLongPressStart;
 
-  /// Callback for moving the gesture after the lang press is recognized.
+  /// Callback for moving the gesture after the long press is recognized.
   GestureLongPressMoveUpdateCallback onLongPressMoveUpdate;
 
   /// Called when the pointer stops contacting the screen after the long-press.
