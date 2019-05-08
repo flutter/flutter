@@ -42,7 +42,7 @@ class GetOffset extends CommandWithTarget {
   Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'offsetType': _offsetTypeIndex.toSimpleName(offsetType),
   });
-  
+
   /// The type of the requested offset.
   final OffsetType offsetType;
 
