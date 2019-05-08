@@ -59,36 +59,36 @@ void main() {
       move.clear();
     }
 
-//    setUp(() {
-//      clear();
-//      isInHitRegionOne = true;
-//      isInHitRegionTwo = false;
-//      tracker = MouseTracker(
-//        GestureBinding.instance.pointerRouter,
-//            (Offset _) sync* {
-//          if (isInHitRegionOne)
-//            yield annotation;
-//          else if (isInHitRegionTwo)
-//            yield partialAnnotation;
-//        },
-//      );
-//    });
-
     setUp(() {
       clear();
       isInHitRegionOne = true;
       isInHitRegionTwo = false;
       tracker = MouseTracker(
         GestureBinding.instance.pointerRouter,
-        (Offset _) {
+            (Offset _) sync* {
           if (isInHitRegionOne)
-            return annotation;
+            yield annotation;
           else if (isInHitRegionTwo)
-            return partialAnnotation;
-          return null;
+            yield partialAnnotation;
         },
       );
     });
+
+//    setUp(() {
+//      clear();
+//      isInHitRegionOne = true;
+//      isInHitRegionTwo = false;
+//      tracker = MouseTracker(
+//        GestureBinding.instance.pointerRouter,
+//        (Offset _) {
+//          if (isInHitRegionOne)
+//            return annotation;
+//          else if (isInHitRegionTwo)
+//            return partialAnnotation;
+//          return null;
+//        },
+//      );
+//    });
 
     test('receives and processes mouse hover events', () {
       final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[

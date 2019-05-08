@@ -891,6 +891,11 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    return super.findAll<S>(regionOffset - offset);
+  }
+
+  @override
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
@@ -1040,6 +1045,13 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    if (!clipRect.contains(regionOffset))
+      return null;
+    return super.findAll<S>(regionOffset);
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
@@ -1112,6 +1124,13 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    if (!clipRRect.contains(regionOffset))
+      return null;
+    return super.findAll<S>(regionOffset);
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
@@ -1181,6 +1200,13 @@ class ClipPathLayer extends ContainerLayer {
     if (!clipPath.contains(regionOffset))
       return null;
     return super.find<S>(regionOffset);
+  }
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    if (!clipPath.contains(regionOffset))
+      return null;
+    return super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1260,6 +1286,19 @@ class TransformLayer extends OffsetLayer {
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return super.find<S>(Offset(result[0], result[1]));
+  }
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    if (_inverseDirty) {
+      _invertedTransform = Matrix4.tryInvert(transform);
+      _inverseDirty = false;
+    }
+    if (_invertedTransform == null)
+      return null;
+    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 result = _invertedTransform.transform(vector);
+    return super.findAll<S>(Offset(result[0], result[1]));
   }
 
   @override
@@ -1571,6 +1610,13 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    if (!clipPath.contains(regionOffset))
+      return null;
+    return super.findAll<S>(regionOffset);
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     ui.EngineLayer engineLayer;
     bool enabled = true;
@@ -1681,9 +1727,10 @@ class LeaderLayer extends ContainerLayer {
   Offset _lastOffset;
 
   @override
-  S find<S>(Offset regionOffset) {
-    return super.find<S>(regionOffset - offset);
-  }
+  S find<S>(Offset regionOffset) => super.find<S>(regionOffset - offset);
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => super.findAll<S>(regionOffset - offset);
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
@@ -1797,11 +1844,7 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 _invertedTransform;
   bool _inverseDirty = true;
 
-  @override
-  S find<S>(Offset regionOffset) {
-    if (link.leader == null) {
-      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
-    }
+  Offset _transformOffset<S>(Offset regionOffset) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(getLastTransform());
       _inverseDirty = false;
@@ -1810,7 +1853,23 @@ class FollowerLayer extends ContainerLayer {
       return null;
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.find<S>(Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
+    return Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy);
+  }
+
+  @override
+  S find<S>(Offset regionOffset) {
+    if (link.leader == null) {
+      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
+    }
+    return super.find<S>(_transformOffset<S>(regionOffset));
+  }
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    if (link.leader == null) {
+      return showWhenUnlinked ? super.findAll<S>(regionOffset - unlinkedOffset) : <S>[];
+    }
+    return super.findAll<S>(_transformOffset<S>(regionOffset));
   }
 
   /// The transform that was used during the last composition phase.

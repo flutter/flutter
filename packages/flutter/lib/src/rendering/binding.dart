@@ -248,9 +248,9 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       // here.
       debugDumpLayerTree();
       final Iterable<MouseTrackerAnnotation> annotations = renderView.layer
-          .findAll<MouseTrackerAnnotation>(offset);
+          .findAll<MouseTrackerAnnotation>(offset * window.devicePixelRatio);
       print('Annotations: $annotations');
-      return annotations.isEmpty ? null : annotations.first;
+      return annotations;
     });
   }
 
