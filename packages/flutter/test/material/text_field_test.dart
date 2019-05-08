@@ -2973,6 +2973,23 @@ void main() {
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
 
+    testWidgets('Shift test 2', (WidgetTester tester) async {
+      await setupWidget(tester);
+
+      const String testValue = 'abcdefghi';
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue,
+        selection: TextSelection.collapsed(offset: 3),
+        composing: TextRange(start: 0, end: testValue.length)
+      ));
+      await tester.pump();
+
+      sendKeyEventWithCode(22, true, true, false);
+      await tester.pumpAndSettle();
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+    });
+
     testWidgets('Control Shift test', (WidgetTester tester) async {
       await setupWidget(tester);
       const String testValue = 'their big house';
