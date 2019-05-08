@@ -74,22 +74,6 @@ void main() {
       );
     });
 
-//    setUp(() {
-//      clear();
-//      isInHitRegionOne = true;
-//      isInHitRegionTwo = false;
-//      tracker = MouseTracker(
-//        GestureBinding.instance.pointerRouter,
-//        (Offset _) {
-//          if (isInHitRegionOne)
-//            return annotation;
-//          else if (isInHitRegionTwo)
-//            return partialAnnotation;
-//          return null;
-//        },
-//      );
-//    });
-
     test('receives and processes mouse hover events', () {
       final ui.PointerDataPacket packet1 = ui.PointerDataPacket(data: <ui.PointerData>[
         ui.PointerData(

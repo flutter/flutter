@@ -228,14 +228,16 @@ void main() {
               onPointerHover: (PointerHoverEvent details) => move1.add(details),
               onPointerExit: (PointerExitEvent details) => exit1.add(details),
               key: key1,
-              child: Listener(
-                key: key2,
-                onPointerEnter: (PointerEnterEvent details) => enter2.add(details),
-                onPointerHover: (PointerHoverEvent details) => move2.add(details),
-                onPointerExit: (PointerExitEvent details) => exit2.add(details),
-                child: Container(
-                  width: 100.0,
-                  height: 100.0,
+              child: Container(
+                width: 200,
+                height: 200,
+                padding: const EdgeInsets.all(50.0),
+                child: Listener(
+                  key: key2,
+                  onPointerEnter: (PointerEnterEvent details) => enter2.add(details),
+                  onPointerHover: (PointerHoverEvent details) => move2.add(details),
+                  onPointerExit: (PointerExitEvent details) => exit2.add(details),
+                  child: Container(),
                 ),
               ),
             ),
@@ -244,7 +246,7 @@ void main() {
       );
       final RenderPointerListener renderListener1 = tester.renderObject(find.byKey(key1));
       final RenderPointerListener renderListener2 = tester.renderObject(find.byKey(key2));
-      final Offset center = tester.getCenter(find.byKey(key2));
+      Offset center = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center);
       await tester.pump();
       expect(move2, isNotEmpty);
@@ -254,6 +256,22 @@ void main() {
       expect(move1.last.position, equals(center));
       expect(enter1, isNotEmpty);
       expect(enter1.last.position, equals(center));
+      expect(exit1, isEmpty);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      clearLists();
+
+      // Now make sure that exiting the child only triggers the child exit, not
+      // the parent too.
+      center = center - const Offset(75.0, 0.0);
+      await gesture.moveTo(center);
+      await tester.pumpAndSettle();
+      expect(move2, isEmpty);
+      expect(enter2, isEmpty);
+      expect(exit2, isNotEmpty);
+      expect(move1, isNotEmpty);
+      expect(move1.last.position, equals(center));
+      expect(enter1, isEmpty);
       expect(exit1, isEmpty);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);

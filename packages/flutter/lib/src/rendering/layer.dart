@@ -634,36 +634,24 @@ class ContainerLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) {
-    Layer current = lastChild;
-    while (current != null) {
-      final Object value = current.find<S>(regionOffset);
-      if (value != null) {
-        return value;
-      }
-      current = current.previousSibling;
+    final Iterable<S> all = findAll<S>(regionOffset);
+    if (all.isEmpty) {
+      return null;
     }
-    return null;
+    return all.first;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    print('RegionOffset: $regionOffset');
-    final List<S> children = <S>[];
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (firstChild == null)
-      return children;
-    Layer child = firstChild;
+      return;
+    Layer child = lastChild;
     while (true) {
-      children.addAll(child.findAll<S>(regionOffset));
-      if (child == lastChild)
+      yield* child.findAll<S>(regionOffset);
+      if (child == firstChild)
         break;
-      child = child.nextSibling;
+      child = child.previousSibling;
     }
-    return children;
-//    Layer current = firstChild;
-//    while (current != null) {
-//      yield* current.findAll<S>(regionOffset);
-//      current = current.nextSibling;
-//    }
   }
 
   @override
@@ -1045,10 +1033,10 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (!clipRect.contains(regionOffset))
-      return null;
-    return super.findAll<S>(regionOffset);
+      return;
+    yield* super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1124,10 +1112,10 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (!clipRRect.contains(regionOffset))
-      return null;
-    return super.findAll<S>(regionOffset);
+      return;
+    yield* super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1203,10 +1191,10 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (!clipPath.contains(regionOffset))
-      return null;
-    return super.findAll<S>(regionOffset);
+      return;
+    yield* super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1277,28 +1265,24 @@ class TransformLayer extends OffsetLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    if (_inverseDirty) {
-      _invertedTransform = Matrix4.tryInvert(transform);
-      _inverseDirty = false;
-    }
-    if (_invertedTransform == null)
+    final Iterable<S> all = findAll<S>(regionOffset);
+    if (all.isEmpty) {
       return null;
-    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
-    final Vector4 result = _invertedTransform.transform(vector);
-    return super.find<S>(Offset(result[0], result[1]));
+    }
+    return all.first;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(transform);
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
-      return null;
+      return;
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return super.findAll<S>(Offset(result[0], result[1]));
+    yield* super.findAll<S>(Offset(result[0], result[1]));
   }
 
   @override
@@ -1604,16 +1588,18 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    if (!clipPath.contains(regionOffset))
+    final Iterable<S> all = findAll<S>(regionOffset);
+    if (all.isEmpty) {
       return null;
-    return super.find<S>(regionOffset);
+    }
+    return all.first;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (!clipPath.contains(regionOffset))
-      return null;
-    return super.findAll<S>(regionOffset);
+      return;
+    yield* super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1858,10 +1844,11 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    if (link.leader == null) {
-      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
+    final Iterable<S> all = findAll<S>(regionOffset);
+    if (all.isEmpty) {
+      return null;
     }
-    return super.find<S>(_transformOffset<S>(regionOffset));
+    return all.first;
   }
 
   @override
@@ -2044,51 +2031,25 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final S result = super.find<S>(regionOffset);
-    if (result != null)
-      return result;
-    if (size != null && !(offset & size).contains(regionOffset))
+    final Iterable<S> all = findAll<S>(regionOffset);
+    if (all.isEmpty) {
       return null;
-    if (T == S) {
-      final Object untypedResult = value;
-      final S typedResult = untypedResult;
-      return typedResult;
     }
-    return null;
+    return all.first;
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    final List<S> children = <S>[];
-    final Rect region = size != null ? offset & size : null;
-    if (T == S && region != null && region.contains(regionOffset)) {
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+    yield* super.findAll<S>(regionOffset);
+    if (size != null && !(offset & size).contains(regionOffset)) {
+      return;
+    }
+    if (T == S) {
       final Object untypedResult = value;
       final S typedResult = untypedResult;
-      children.add(typedResult);
+      yield typedResult;
     }
-    if (firstChild == null)
-      return children;
-    Layer child = firstChild;
-    while (true) {
-      children.addAll(child.findAll<S>(regionOffset));
-      if (child == lastChild)
-        break;
-      child = child.nextSibling;
-    }
-    return children;
-//    final Iterable<S> result = super.findAll<S>(regionOffset);
-//    print('Found results: ${result.toList()}');
-//    yield* result;
-//    if (T == S && size != null && (offset & size).contains(regionOffset)) {
-//      final Object untypedResult = value;
-//      final S typedResult = untypedResult;
-//      print('Found annotation, returning $typedResult');
-//      yield typedResult;
-//      return;
-//    }
   }
-
-
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -231,7 +231,7 @@ class MouseTracker extends ChangeNotifier {
       final PointerEvent lastEvent = _lastMouseEvent[deviceId];
       final Iterable<MouseTrackerAnnotation> hits = annotationFinder(lastEvent.position);
 
-      // No annotation was found at this position for this deviceId, so send an
+      // No annotations were found at this position for this deviceId, so send an
       // exit to all active tracked annotations, since none of them were hit.
       if (hits.isEmpty) {
         // Send an exit to all tracked animations tracking this deviceId.
