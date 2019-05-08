@@ -1,0 +1,21 @@
+{
+    "program": {
+        "data": "data"
+    },
+    "sandbox": {
+        "features": [
+            "root-ssl-certificates",
+            "vulkan"
+        ],
+        "services": [
+            "fuchsia.crash.Analyzer",
+            "fuchsia.device.manager.Administrator",
+            "fuchsia.fonts.Provider",
+            "fuchsia.net.SocketProvider",
+            "fuchsia.sysmem.Allocator",
+            "fuchsia.timezone.Timezone",
+            "fuchsia.tracelink.Registry",
+            "fuchsia.vulkan.loader.Loader"
+        ]
+    }
+}

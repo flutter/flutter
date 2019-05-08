@@ -1,0 +1,10 @@
+The compilation trace lists functions that will be compiled in the core
+snapshot. It is derived by unioning the output of Dart_SaveCompilationTrace
+after startup from a few apps.
+
+To update this trace.
+  - In //topaz/runtime/flutter_runner/engine.cc, change kCompilationTraceDelayInSeconds to a non-zero value.
+  - Re-build.
+  - Run `fx syslog | dart topaz/runtime/flutter_runner/collect_traces.dart topaz/runtime/flutter_runner/compilation_trace.txt`
+  - Boot and run a few apps, making sure to exercise the interesting paths before the timer set above expires.
+  - Send SIGINT (Ctrl-C) to collect_traces.dart.
