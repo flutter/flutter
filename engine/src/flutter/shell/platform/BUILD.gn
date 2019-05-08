@@ -26,7 +26,9 @@ group("platform") {
     ]
   } else if (is_fuchsia) {
     # Fuchsia has its own runner implementation.
-    deps = []
+    deps = [
+      "fuchsia",
+    ]
   } else {
     assert(false, "Unknown/Unsupported platform.")
   }

@@ -1,0 +1,10 @@
+{
+    "program": {
+        "binary": "test/flutter_runner_tests"
+    },
+    "sandbox": {
+        "services": [
+            "fuchsia.sys.Launcher"
+        ]
+    }
+}
