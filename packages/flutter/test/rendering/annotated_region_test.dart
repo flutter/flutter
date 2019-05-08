@@ -223,6 +223,23 @@ void main() {
       expect(transformLayer.findAll<int>(const Offset(0.0, 530.0)), equals(<int>[2]));
     });
 
+    test('finds multiple nested, overlapping regions', () {
+      final ContainerLayer parent = ContainerLayer();
+
+      int index = 0;
+      final List<AnnotatedRegionLayer<int>> layers = <AnnotatedRegionLayer<int>>[
+        AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
+        AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
+      ];
+      for (ContainerLayer layer in layers) {
+        final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0));
+        layer.append(annotatedRegionLayer);
+        parent.append(layer);
+      }
+
+      expect(parent.findAll<int>(const Offset(0.0, 0.0)), equals(<int>[3, 1, 2, 0,]));
+    });
+
     test('looks for child AnnotatedRegions before parents', () {
       final AnnotatedRegionLayer<int> parent = AnnotatedRegionLayer<int>(1);
       final AnnotatedRegionLayer<int> child1 = AnnotatedRegionLayer<int>(2);
