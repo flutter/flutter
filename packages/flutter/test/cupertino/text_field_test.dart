@@ -1355,6 +1355,78 @@ void main() {
   );
 
   testWidgets(
+    'double long press drag moves the cursor under the drag and shows toolbar on lift',
+    (WidgetTester tester) async {
+      const String text = 'abc def ghi';
+      final TextEditingController controller = TextEditingController(
+        text: text,
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      final Offset ePos = textOffsetToPosition(tester, text.indexOf('e'));
+
+      // First tap.
+      await tester.tapAt(ePos);
+      await tester.pump();
+
+      final TestGesture gesture =
+          await tester.startGesture(ePos);
+      await tester.pump(const Duration(seconds: 2));
+
+      // Toolbar only shows up on long press up.
+      expect(find.byType(CupertinoButton), findsNothing);
+
+      // 'def' is selected.
+      expect(controller.selection.baseOffset, text.indexOf('d'));
+      expect(controller.selection.extentOffset, text.indexOf('f') + 1);
+
+      // Move to 'h'
+      await gesture.moveTo(textOffsetToPosition(tester, text.indexOf('h')));
+      await tester.pump();
+
+      // 'def ghi' is selected.
+      expect(controller.selection.baseOffset, text.indexOf('d'));
+      expect(controller.selection.extentOffset, text.indexOf('i') + 1);
+
+     /*
+      TODO(LongCatIsLooong): uncomment after fixing
+      https://github.com/flutter/flutter/issues/32339
+
+      expect(controller.selection.extentOffset, text.indexOf('h') + 1);
+
+      // Now move backwards from 'h' to 'b'
+      await gesture.moveTo(textOffsetToPosition(tester, text.indexOf('b')));
+      await tester.pump();
+
+      // 'bc def' is selected.
+      expect(controller.selection.baseOffset, text.indexOf('b'));
+      expect(controller.selection.extentOffset, text.indexOf('f') + 1);
+
+      // Now move backwards from 'b' to 'd'
+      await gesture.moveTo(textOffsetToPosition(tester, text.indexOf('d')));
+      await tester.pump();
+
+      // 'def' is selected. Note it's not 'de'.
+      expect(controller.selection.baseOffset, text.indexOf('d'));
+      expect(controller.selection.extentOffset, text.indexOf('f') + 1);
+      */
+      await gesture.up();
+      await tester.pump();
+
+      // The toolbar now shows up.
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
+    },
+  );
+
+  testWidgets(
     'tap after a double tap select is not affected',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(

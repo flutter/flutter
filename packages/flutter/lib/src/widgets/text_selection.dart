@@ -470,7 +470,7 @@ class TextSelectionOverlay {
         textPosition = newSelection.base;
         break;
       case _TextSelectionHandlePosition.end:
-        textPosition =newSelection.extent;
+        textPosition = newSelection.extent;
         break;
     }
     selectionDelegate.textEditingValue = _value.copyWith(selection: newSelection, composing: TextRange.empty);
