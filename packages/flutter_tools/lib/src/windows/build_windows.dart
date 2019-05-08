@@ -13,7 +13,7 @@ import '../globals.dart';
 import '../project.dart';
 import 'msbuild_utils.dart';
 
-/// Builds the Windows project through the project bat script.
+/// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo) async {
   final Map<String, String> environment = {
     'FLUTTER_ROOT': Cache.flutterRoot,
