@@ -163,13 +163,26 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns null if no matching region is found.
   ///
-  /// The main way for a value to be assigned here is by pushing an
+  /// The main way for a value to be found here is by pushing an
   /// [AnnotatedRegionLayer] into the layer tree.
   ///
   /// See also:
   ///
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S find<S>(Offset regionOffset);
+
+  /// Returns an iterable of [S] values that corresponds to the point described
+  /// by [regionOffset] on all layers under the point.
+  ///
+  /// Returns an empty list if no matching region is found.
+  ///
+  /// The main way for a value to be found here is by pushing an
+  /// [AnnotatedRegionLayer] into the layer tree.
+  ///
+  /// See also:
+  ///
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
+  Iterable<S> findAll<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -290,6 +303,9 @@ class PictureLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -359,6 +375,9 @@ class TextureLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
@@ -395,6 +414,9 @@ class PlatformViewLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -468,6 +490,9 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A composited layer that has a list of children.
@@ -618,6 +643,27 @@ class ContainerLayer extends Layer {
       current = current.previousSibling;
     }
     return null;
+  }
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    print('RegionOffset: $regionOffset');
+    final List<S> children = <S>[];
+    if (firstChild == null)
+      return children;
+    Layer child = firstChild;
+    while (true) {
+      children.addAll(child.findAll<S>(regionOffset));
+      if (child == lastChild)
+        break;
+      child = child.nextSibling;
+    }
+    return children;
+//    Layer current = firstChild;
+//    while (current != null) {
+//      yield* current.findAll<S>(regionOffset);
+//      current = current.nextSibling;
+//    }
   }
 
   @override
@@ -1949,8 +1995,41 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
       final S typedResult = untypedResult;
       return typedResult;
     }
-    return super.find<S>(regionOffset);
+    return null;
   }
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) {
+    final List<S> children = <S>[];
+    final Rect region = size != null ? offset & size : null;
+    if (T == S && region != null && region.contains(regionOffset)) {
+      final Object untypedResult = value;
+      final S typedResult = untypedResult;
+      children.add(typedResult);
+    }
+    if (firstChild == null)
+      return children;
+    Layer child = firstChild;
+    while (true) {
+      children.addAll(child.findAll<S>(regionOffset));
+      if (child == lastChild)
+        break;
+      child = child.nextSibling;
+    }
+    return children;
+//    final Iterable<S> result = super.findAll<S>(regionOffset);
+//    print('Found results: ${result.toList()}');
+//    yield* result;
+//    if (T == S && size != null && (offset & size).contains(regionOffset)) {
+//      final Object untypedResult = value;
+//      final S typedResult = untypedResult;
+//      print('Found annotation, returning $typedResult');
+//      yield typedResult;
+//      return;
+//    }
+  }
+
+
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

@@ -59,6 +59,21 @@ void main() {
       move.clear();
     }
 
+//    setUp(() {
+//      clear();
+//      isInHitRegionOne = true;
+//      isInHitRegionTwo = false;
+//      tracker = MouseTracker(
+//        GestureBinding.instance.pointerRouter,
+//            (Offset _) sync* {
+//          if (isInHitRegionOne)
+//            yield annotation;
+//          else if (isInHitRegionTwo)
+//            yield partialAnnotation;
+//        },
+//      );
+//    });
+
     setUp(() {
       clear();
       isInHitRegionOne = true;

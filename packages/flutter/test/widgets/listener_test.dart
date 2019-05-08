@@ -135,7 +135,7 @@ void main() {
       expect(enter.position, equals(const Offset(400.0, 300.0)));
       expect(exit, isNull);
     });
-    testWidgets('detects pointer exit', (WidgetTester tester) async {
+    testWidgets('detects pointer exiting', (WidgetTester tester) async {
       PointerEnterEvent enter;
       PointerHoverEvent move;
       PointerExitEvent exit;
@@ -195,6 +195,69 @@ void main() {
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(400.0, 300.0)));
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
+    });
+    testWidgets('Hover works with nested listeners', (WidgetTester tester) async {
+      final UniqueKey key1 = UniqueKey();
+      final UniqueKey key2 = UniqueKey();
+      final List<PointerEnterEvent> enter1 = <PointerEnterEvent>[];
+      final List<PointerHoverEvent> move1 = <PointerHoverEvent>[];
+      final List<PointerExitEvent> exit1 = <PointerExitEvent>[];
+      final List<PointerEnterEvent> enter2 = <PointerEnterEvent>[];
+      final List<PointerHoverEvent> move2 = <PointerHoverEvent>[];
+      final List<PointerExitEvent> exit2 = <PointerExitEvent>[];
+      void clearLists() {
+        enter1.clear();
+        move1.clear();
+        exit1.clear();
+        enter2.clear();
+        move2.clear();
+        exit2.clear();
+      }
+
+      await tester.pumpWidget(Container());
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(const Offset(400.0, 0.0));
+      await tester.pump();
+      await tester.pumpWidget(
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            Listener(
+              onPointerEnter: (PointerEnterEvent details) => enter1.add(details),
+              onPointerHover: (PointerHoverEvent details) => move1.add(details),
+              onPointerExit: (PointerExitEvent details) => exit1.add(details),
+              key: key1,
+              child: Listener(
+                key: key2,
+                onPointerEnter: (PointerEnterEvent details) => enter2.add(details),
+                onPointerHover: (PointerHoverEvent details) => move2.add(details),
+                onPointerExit: (PointerExitEvent details) => exit2.add(details),
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      final RenderPointerListener renderListener1 = tester.renderObject(find.byKey(key1));
+      final RenderPointerListener renderListener2 = tester.renderObject(find.byKey(key2));
+      final Offset center = tester.getCenter(find.byKey(key2));
+      await gesture.moveTo(center);
+      await tester.pump();
+      expect(move2, isNotEmpty);
+      expect(enter2, isNotEmpty);
+      expect(exit2, isEmpty);
+      expect(move1, isNotEmpty);
+      expect(move1.last.position, equals(center));
+      expect(enter1, isNotEmpty);
+      expect(enter1.last.position, equals(center));
+      expect(exit1, isEmpty);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
+      expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
+      clearLists();
     });
     testWidgets('Hover transfers between two listeners', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
@@ -341,6 +404,7 @@ void main() {
       final Offset bottomLeft = tester.getBottomLeft(find.byKey(key));
       expect(topRight.dx - topLeft.dx, scaleFactor * localWidth);
       expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
+      print('Rect: ${tester.getRect(find.byKey(key))}');
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.moveTo(topLeft - const Offset(1, 1));
