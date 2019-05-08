@@ -77,6 +77,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }
 
   void _initAnimation(Duration duration) {
+    setState(() {
+      _animationPainter = null;
+    });
     _animationController?.dispose();
     _animationController = AnimationController(duration: duration, vsync: this);
   }
