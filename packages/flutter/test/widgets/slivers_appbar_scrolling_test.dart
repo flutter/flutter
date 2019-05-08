@@ -71,7 +71,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 1000));
     final RenderBox box = tester.renderObject<RenderBox>(find.byType(Container));
     final Rect rect = Rect.fromPoints(box.localToGlobal(Offset.zero), box.localToGlobal(box.size.bottomRight(Offset.zero)));
-    expect(rect, equals(Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));
+    expect(rect, equals(const Rect.fromLTWH(0.0, -195.0, 800.0, 200.0)));
   });
 
   testWidgets('Sliver appbars - scrolling - overscroll gap is below header', (WidgetTester tester) async {

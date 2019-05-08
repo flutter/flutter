@@ -8,7 +8,7 @@ import '../desktop.dart';
 import '../doctor.dart';
 
 /// The [MacOSWorkflow] instance.
-MacOSWorkflow get macOSWorkflow => context[MacOSWorkflow];
+MacOSWorkflow get macOSWorkflow => context.get<MacOSWorkflow>();
 
 /// The macOS-specific implementation of a [Workflow].
 ///

@@ -351,6 +351,10 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('route'), findsOneWidget);
     expect(find.text('push'), findsNothing);
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      false,
+    );
   });
 
   testWidgets('Fullscreen route animates correct transform values over time', (WidgetTester tester) async {
@@ -536,6 +540,10 @@ void main() {
     await tester.pump();
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-233, epsilon: 1));
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(100));
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      true,
+    );
 
     await swipeGesture.moveBy(const Offset(100, 0));
     await tester.pump();
@@ -576,6 +584,10 @@ void main() {
     await tester.pump();
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-100));
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(500));
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      true,
+    );
 
     await tester.pump(const Duration(milliseconds: 50));
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-19, epsilon: 1));
@@ -585,6 +597,12 @@ void main() {
     // Rate of change is slowing down.
     expect(tester.getTopLeft(find.text('1')).dx, moreOrLessEquals(-4, epsilon: 1));
     expect(tester.getTopLeft(find.text('2')).dx, moreOrLessEquals(787, epsilon: 1));
+
+    await tester.pumpAndSettle();
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      false,
+    );
   });
 
   testWidgets('Snapped drags forwards and backwards should signal didStart/StopUserGesture', (WidgetTester tester) async {
@@ -667,12 +685,63 @@ void main() {
     final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
     // The width of the page.
     await gesture.moveBy(const Offset(800, 0));
+    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
     await gesture.up();
     await tester.pump();
 
     expect(find.text('Page 1'), isOnstage);
     expect(find.text('Page 2'), findsNothing);
     verify(navigatorObserver.didPop(any, any)).called(1);
+    verify(navigatorObserver.didStopUserGesture()).called(1);
+  });
+
+  testWidgets('test edge swipe then drop back at starting point works', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorObservers: <NavigatorObserver>[navigatorObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return CupertinoPageRoute<void>(
+            settings: settings,
+            builder: (BuildContext context) {
+              final String pageNumber = settings.name == '/' ? '1' : '2';
+              return Center(child: Text('Page $pageNumber'));
+            },
+          );
+        },
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).pushNamed('/next');
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+
+    final TestGesture gesture = await tester.startGesture(const Offset(5, 200));
+    // Move right a bit
+    await gesture.moveBy(const Offset(300, 0));
+    verify(navigatorObserver.didStartUserGesture(any, any)).called(1);
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      true,
+    );
+    await tester.pump();
+
+    // Move back to where we started.
+    await gesture.moveBy(const Offset(-300, 0));
+    await gesture.up();
+    await tester.pump();
+
+    expect(find.text('Page 1'), findsNothing);
+    expect(find.text('Page 2'), isOnstage);
+    verifyNever(navigatorObserver.didPop(any, any));
+    verify(navigatorObserver.didStopUserGesture()).called(1);
+    expect(
+      tester.state<NavigatorState>(find.byType(Navigator)).userGestureInProgress,
+      false,
+    );
   });
 }
 

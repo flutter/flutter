@@ -532,7 +532,7 @@ void main() {
 
     String tmpProjectDir = fs.path.join(tempDir.path, 'hello_flutter');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'com.example', tmpProjectDir]);
-    FlutterProject project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    FlutterProject project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
         'com.example.helloFlutter',
@@ -544,7 +544,7 @@ void main() {
 
     tmpProjectDir = fs.path.join(tempDir.path, 'test_abc');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', 'abc^*.1#@', tmpProjectDir]);
-    project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
         'abc.1.testAbc',
@@ -556,7 +556,7 @@ void main() {
 
     tmpProjectDir = fs.path.join(tempDir.path, 'flutter_project');
     await runner.run(<String>['create', '--template=app', '--no-pub', '--org', '#+^%', tmpProjectDir]);
-    project = await FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
         project.ios.productBundleIdentifier,
         'flutterProject.untitled',
@@ -681,7 +681,7 @@ void main() {
     );
     projectDir.childDirectory('.ios').deleteSync(recursive: true);
     await _createProject(projectDir, <String>[], <String>[]);
-    final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
       project.ios.productBundleIdentifier,
       'com.bar.foo.flutterProject',
@@ -715,7 +715,7 @@ void main() {
     );
     projectDir.childDirectory('ios').deleteSync(recursive: true);
     await _createProject(projectDir, <String>['--no-pub'], <String>[]);
-    final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
       project.ios.productBundleIdentifier,
       'com.bar.foo.flutterProject',
@@ -742,7 +742,7 @@ void main() {
         'android/src/main/java/com/example/flutter_project/FlutterProjectPlugin.java',
       ],
     );
-    final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
     expect(
       project.example.ios.productBundleIdentifier,
       'com.bar.foo.flutterProjectExample',

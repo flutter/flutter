@@ -12,13 +12,22 @@ import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 
-/// Builds the Linux project through the project shell script.
+/// Builds the Linux project through the Makefile.
 Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo) async {
+  /// Cache flutter root in linux directory.
+  linuxProject.editableHostAppDirectory.childFile('.generated_flutter_root')
+    ..createSync(recursive: true)
+    ..writeAsStringSync(Cache.flutterRoot);
+
+  final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
+  final String bundleFlags = buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '';
   final Process process = await processManager.start(<String>[
-    linuxProject.buildScript.path,
-    Cache.flutterRoot,
-    buildInfo?.isDebug == true ? 'debug' : 'release',
-    buildInfo?.trackWidgetCreation == true ? 'track-widget-creation' : 'no-track-widget-creation',
+    'make',
+    '-C',
+    linuxProject.editableHostAppDirectory.path,
+    'BUILD=$buildFlag',
+    'FLUTTER_ROOT=${Cache.flutterRoot}',
+    'FLUTTER_BUNDLE_FLAGS=$bundleFlags',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Linux application...',

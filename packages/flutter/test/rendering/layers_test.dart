@@ -190,7 +190,7 @@ void main() {
     });
   });
 
-  final Rect unitRect = Rect.fromLTRB(0, 0, 1, 1);
+  const Rect unitRect = Rect.fromLTRB(0, 0, 1, 1);
 
   test('mutating PerformanceOverlayLayer fields triggers needsAddToScene', () {
     final PerformanceOverlayLayer layer = PerformanceOverlayLayer(
@@ -328,13 +328,13 @@ void main() {
     // ───────────────────────────
     test('Overlapping layers at wrong elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
         color: const Color(0),
         shadowColor: const Color(0),
       );
       final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(10, 10, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
         elevation: 2.0,
         color: const Color(0),
         shadowColor: const Color(0),
@@ -352,13 +352,13 @@ void main() {
     // Causes no error if check is disabled.
     test('Overlapping layers at wrong elevation, check disabled', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
         color: const Color(0),
         shadowColor: const Color(0),
       );
       final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(10, 10, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(10, 10, 20, 20)),
         elevation: 2.0,
         color: const Color(0),
         shadowColor: const Color(0),
@@ -374,13 +374,13 @@ void main() {
     // ────────────────────────────
     test('Non-overlapping layers at wrong elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
         color: const Color(0),
         shadowColor: const Color(0),
       );
       final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(20, 20, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 2.0,
         color: const Color(0),
         shadowColor: const Color(0),
@@ -398,21 +398,21 @@ void main() {
     // ────────────────────────────
     test('Non-overlapping layers at wrong elevation, child at lower elevation', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
         color: const Color(0),
         shadowColor: const Color(0),
       );
 
       layerA.append(PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(2, 2, 10, 10)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(2, 2, 10, 10)),
         elevation: 1.0,
         color: const Color(0),
         shadowColor: const Color(0),
       ));
 
       final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(20, 20, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 2.0,
         color: const Color(0),
         shadowColor: const Color(0),
@@ -433,21 +433,21 @@ void main() {
     // after it at a lower elevation.
     test('Child overflows parent and overlaps another physical layer', () {
       final PhysicalModelLayer layerA = PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(0, 0, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(0, 0, 20, 20)),
         elevation: 3.0,
         color: const Color(0),
         shadowColor: const Color(0),
       );
 
       layerA.append(PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(15, 15, 25, 25)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(15, 15, 25, 25)),
         elevation: 2.0,
         color: const Color(0),
         shadowColor: const Color(0),
       ));
 
       final PhysicalModelLayer layerB =PhysicalModelLayer(
-        clipPath: Path()..addRect(Rect.fromLTWH(20, 20, 20, 20)),
+        clipPath: Path()..addRect(const Rect.fromLTWH(20, 20, 20, 20)),
         elevation: 4.0,
         color: const Color(0),
         shadowColor: const Color(0),

@@ -2,10 +2,72 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/gestures.dart';
+
+
+class HoverClient extends StatefulWidget {
+  const HoverClient({Key key, this.onHover, this.child}) : super(key: key);
+
+  final ValueChanged<bool> onHover;
+  final Widget child;
+
+  @override
+  HoverClientState createState() => HoverClientState();
+}
+
+class HoverClientState extends State<HoverClient> {
+  static int numEntries = 0;
+  static int numExits = 0;
+
+  void _onExit(PointerExitEvent details) {
+    numExits++;
+    if (widget.onHover != null) {
+      widget.onHover(false);
+    }
+  }
+
+  void _onEnter(PointerEnterEvent details) {
+    numEntries++;
+    if (widget.onHover != null) {
+      widget.onHover(true);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerEnter: _onEnter,
+      onPointerExit: _onExit,
+      child: widget.child,
+    );
+  }
+}
+
+class HoverFeedback extends StatefulWidget {
+  HoverFeedback({Key key}) : super(key: key);
+
+  @override
+  _HoverFeedbackState createState() => _HoverFeedbackState();
+}
+
+class _HoverFeedbackState extends State<HoverFeedback> {
+  bool _hovering = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: HoverClient(
+        onHover: (bool hovering) => setState(() => _hovering = hovering),
+        child: Text(_hovering ? 'HOVERING' : 'not hovering'),
+      ),
+    );
+  }
+}
 
 void main() {
   testWidgets('Events bubble up the tree', (WidgetTester tester) async {
@@ -43,6 +105,11 @@ void main() {
   });
 
   group('Listener hover detection', () {
+    setUp((){
+      HoverClientState.numExits = 0;
+      HoverClientState.numEntries = 0;
+    });
+
     testWidgets('detects pointer enter', (WidgetTester tester) async {
       PointerEnterEvent enter;
       PointerHoverEvent move;
@@ -231,6 +298,179 @@ void main() {
       expect(exit2, isEmpty);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isFalse);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isFalse);
+    });
+
+    testWidgets('works with transform', (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/31986.
+      final Key key = UniqueKey();
+      const double scaleFactor = 2.0;
+      const double localWidth = 150.0;
+      const double localHeight = 100.0;
+      final List<PointerEvent> events = <PointerEvent>[];
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Transform.scale(
+              scale: scaleFactor,
+              child: Listener(
+                onPointerEnter: (PointerEnterEvent event) {
+                  events.add(event);
+                },
+                onPointerHover: (PointerHoverEvent event) {
+                  events.add(event);
+                },
+                onPointerExit: (PointerExitEvent event) {
+                  events.add(event);
+                },
+                child: Container(
+                  key: key,
+                  color: Colors.blue,
+                  height: localHeight,
+                  width: localWidth,
+                  child: const Text('Hi'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final Offset topLeft = tester.getTopLeft(find.byKey(key));
+      final Offset topRight = tester.getTopRight(find.byKey(key));
+      final Offset bottomLeft = tester.getBottomLeft(find.byKey(key));
+      expect(topRight.dx - topLeft.dx, scaleFactor * localWidth);
+      expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
+
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.moveTo(topLeft - const Offset(1, 1));
+      await tester.pump();
+      expect(events, isEmpty);
+
+      await gesture.moveTo(topLeft + const Offset(1, 1));
+      await tester.pump();
+      expect(events, hasLength(2));
+      expect(events.first, isA<PointerEnterEvent>());
+      expect(events.last, isA<PointerHoverEvent>());
+      events.clear();
+
+      await gesture.moveTo(bottomLeft + const Offset(1, -1));
+      await tester.pump();
+      expect(events.single, isA<PointerHoverEvent>());
+      expect(events.single.delta, const Offset(0.0, scaleFactor * localHeight - 2));
+      events.clear();
+
+      await gesture.moveTo(bottomLeft + const Offset(1, 1));
+      await tester.pump();
+      expect(events.single, isA<PointerExitEvent>());
+      events.clear();
+    });
+
+    testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
+      // Pretend that we have a mouse connected.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+
+      await tester.pumpWidget(
+        Transform.scale(
+          scale: 2.0,
+          child: Listener(
+            onPointerDown: (PointerDownEvent _) { },
+          ),
+        ),
+      );
+      final RenderPointerListener listener = tester.renderObject(find.byType(Listener));
+      expect(listener.needsCompositing, isFalse);
+      // No TransformLayer for `Transform.scale` is added because composting is
+      // not required and therefore the transform is executed on the canvas
+      // directly. (One TransformLayer is always present for the root
+      // transform.)
+      expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
+
+      await tester.pumpWidget(
+        Transform.scale(
+          scale: 2.0,
+          child: Listener(
+            onPointerDown: (PointerDownEvent _) { },
+            onPointerHover: (PointerHoverEvent _) { },
+          ),
+        ),
+      );
+      expect(listener.needsCompositing, isTrue);
+      // Composting is required, therefore a dedicated TransformLayer for
+      // `Transform.scale` is added.
+      expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
+
+      await tester.pumpWidget(
+        Transform.scale(
+          scale: 2.0,
+          child: Listener(
+            onPointerDown: (PointerDownEvent _) { },
+          ),
+        ),
+      );
+      expect(listener.needsCompositing, isFalse);
+      // TransformLayer for `Transform.scale` is removed again as transform is
+      // executed directly on the canvas.
+      expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
+    });
+
+    testWidgets("Callbacks aren't called during build", (WidgetTester tester) async {
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+
+      await tester.pumpWidget(
+        Center(child: HoverFeedback()),
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(Text)));
+      await tester.pumpAndSettle();
+      expect(HoverClientState.numEntries, equals(1));
+      expect(HoverClientState.numExits, equals(0));
+      expect(find.text('HOVERING'), findsOneWidget);
+
+      await tester.pumpWidget(
+        Container(),
+      );
+      await tester.pump();
+      expect(HoverClientState.numEntries, equals(1));
+      expect(HoverClientState.numExits, equals(1));
+
+      await tester.pumpWidget(
+        Center(child: HoverFeedback()),
+      );
+      await tester.pump();
+      expect(HoverClientState.numEntries, equals(2));
+      expect(HoverClientState.numExits, equals(1));
+    });
+
+    testWidgets("Listener activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
+      final GlobalKey feedbackKey = GlobalKey();
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+
+      await tester.pumpWidget(
+        Center(child: HoverFeedback(key: feedbackKey)),
+      );
+
+      await gesture.moveTo(tester.getCenter(find.byType(Text)));
+      await tester.pumpAndSettle();
+      expect(HoverClientState.numEntries, equals(1));
+      expect(HoverClientState.numExits, equals(0));
+      expect(find.text('HOVERING'), findsOneWidget);
+
+      await tester.pumpWidget(
+        Center(child: Container(child: HoverFeedback(key: feedbackKey))),
+      );
+      await tester.pump();
+      expect(HoverClientState.numEntries, equals(2));
+      expect(HoverClientState.numExits, equals(1));
+      await tester.pumpWidget(
+        Container(),
+      );
+      await tester.pump();
+      expect(HoverClientState.numEntries, equals(2));
+      expect(HoverClientState.numExits, equals(2));
     });
   });
 }

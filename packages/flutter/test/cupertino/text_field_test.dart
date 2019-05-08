@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -349,6 +350,61 @@ void main() {
 
     debugDefaultTargetPlatformOverride = null;
   });
+
+  testWidgets('cursor android golden', (WidgetTester tester) async {
+    final Widget widget = CupertinoApp(
+      home: Center(
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(400, 400)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.0.1.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final Widget widget = CupertinoApp(
+      home: Center(
+        child: RepaintBoundary(
+          key: const ValueKey<int>(1),
+          child: ConstrainedBox(
+            constraints: BoxConstraints.loose(const Size(400, 400)),
+            child: const CupertinoTextField(),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(CupertinoTextField), testValue);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    debugDefaultTargetPlatformOverride = null;
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.1.1.png'),
+    );
+  }, skip: !Platform.isLinux);
 
   testWidgets(
     'can control text content via controller',
@@ -1986,6 +2042,76 @@ void main() {
     },
   );
 
+  testWidgets(
+    'Check the toolbar appears below the TextField when there is not enough space above the TextField to show it',
+    (WidgetTester tester) async {
+      // This is a regression test for
+      // https://github.com/flutter/flutter/issues/29808
+      const String testValue = 'abc def ghi';
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Container(
+            padding: const EdgeInsets.all(30),
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      RenderEditable renderEditable = findRenderEditable(tester);
+      List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+      // Verify the selection toolbar position
+      Offset toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
+      Offset textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(textFieldTopLeft.dy, lessThan(toolbarTopLeft.dy));
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Container(
+            padding: const EdgeInsets.all(150),
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(CupertinoTextField), testValue);
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      renderEditable = findRenderEditable(tester);
+      endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+      // Verify the selection toolbar position
+      toolbarTopLeft = tester.getTopLeft(find.text('Paste'));
+      textFieldTopLeft = tester.getTopLeft(find.byType(CupertinoTextField));
+      expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
+    }
+  );
+
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
     SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
@@ -2090,5 +2216,40 @@ void main() {
 
     final EditableText editableText = tester.firstWidget(find.byType(EditableText));
     expect(editableText.cursorColor, const Color(0xFFF44336));
+  });
+
+  testWidgets('iOS shows selection handles', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const String testText = 'lorem ipsum';
+    final TextEditingController controller = TextEditingController(text: testText);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(),
+        home: Center(
+          child: CupertinoTextField(
+            controller: controller,
+          ),
+        ),
+      ),
+    );
+
+    final RenderEditable renderEditable =
+      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+
+    await tester.tapAt(textOffsetToPosition(tester, 5));
+    renderEditable.selectWord(cause: SelectionChangedCause.longPress);
+    await tester.pumpAndSettle();
+
+    final List<Widget> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    expect(transitions.length, 2);
+    final FadeTransition left = transitions[0];
+    final FadeTransition right = transitions[1];
+
+    expect(left.opacity.value, equals(1.0));
+    expect(right.opacity.value, equals(1.0));
+
+    debugDefaultTargetPlatformOverride = null;
   });
 }

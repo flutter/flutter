@@ -113,10 +113,11 @@ class MinimumTapTargetGuideline extends AccessibilityGuideline {
         return result;
       // shrink by device pixel ratio.
       final Size candidateSize = paintBounds.size / tester.binding.window.devicePixelRatio;
-      if (candidateSize.width < size.width || candidateSize.height < size.height)
+      if (candidateSize.width < size.width - delta || candidateSize.height < size.height - delta) {
         result += Evaluation.fail(
           '$node: expected tap target size of at least $size, but found $candidateSize\n'
           'See also: $link');
+      }
       return result;
     }
     return traverse(root);
@@ -276,13 +277,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       } else {
         targetContrastRatio = kMinimumRatioNormalText;
       }
-      if (contrastRatio - targetContrastRatio >= delta)
+      if (contrastRatio - targetContrastRatio >= delta) {
         return result + const Evaluation.pass();
+      }
       return result + Evaluation.fail(
         '$node:\nExpected contrast ratio of at least '
         '$targetContrastRatio but found ${contrastRatio.toStringAsFixed(2)} for a font size of $fontSize. '
-        'The computed foreground color was: ${report.lightColor}, '
-        'The computed background color was: ${report.darkColor}\n'
+        'The computed light color was: ${report.lightColor}, '
+        'The computed dark color was: ${report.darkColor}\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html'
       );
     }

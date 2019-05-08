@@ -37,7 +37,7 @@ const String cocoaPodsUpgradeInstructions = '''
   brew upgrade cocoapods
   pod setup''';
 
-CocoaPods get cocoaPods => context[CocoaPods];
+CocoaPods get cocoaPods => context.get<CocoaPods>();
 
 /// Result of evaluating the CocoaPods installation.
 enum CocoaPodsStatus {

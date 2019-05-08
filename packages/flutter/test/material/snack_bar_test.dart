@@ -372,18 +372,14 @@ void main() {
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
-    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-
-    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
-    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
-    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
-    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
-    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
-    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0 + 40.0); // margin + bottom padding
@@ -429,24 +425,221 @@ void main() {
     ));
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750));
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final RenderBox textBox = tester.firstRenderObject(find.text('I am a snack bar.'));
-    final RenderBox actionTextBox = tester.firstRenderObject(find.text('ACTION'));
-    final RenderBox snackBarBox = tester.firstRenderObject(find.byType(SnackBar));
-
-    final Offset textBottomLeft = textBox.localToGlobal(textBox.size.bottomLeft(Offset.zero));
-    final Offset textBottomRight = textBox.localToGlobal(textBox.size.bottomRight(Offset.zero));
-    final Offset actionTextBottomLeft = actionTextBox.localToGlobal(actionTextBox.size.bottomLeft(Offset.zero));
-    final Offset actionTextBottomRight = actionTextBox.localToGlobal(actionTextBox.size.bottomRight(Offset.zero));
-    final Offset snackBarBottomLeft = snackBarBox.localToGlobal(snackBarBox.size.bottomLeft(Offset.zero));
-    final Offset snackBarBottomRight = snackBarBox.localToGlobal(snackBarBox.size.bottomRight(Offset.zero));
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
 
     expect(textBottomLeft.dx - snackBarBottomLeft.dx, 24.0 + 10.0); // margin + left padding
     expect(snackBarBottomLeft.dy - textBottomLeft.dy, 17.0); // margin (with no bottom padding)
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
+  });
+
+  testWidgets('SnackBar should push FloatingActionButton above', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            child: const Icon(Icons.send),
+            onPressed: () {}
+          ),
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+
+    final Offset floatingActionButtonOriginBottomCenter = tester.getCenter(find.byType(FloatingActionButton));
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
+
+    final Offset snackBarTopCenter = tester.getCenter(find.byType(SnackBar));
+    final Offset floatingActionButtonBottomCenter = tester.getCenter(find.byType(FloatingActionButton));
+
+    expect(floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy, true);
+    expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
+  });
+
+  testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
+      ),
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: Scaffold(
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
+
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
+  });
+
+  testWidgets('Floating SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
+      ),
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(icon: Icon(Icons.favorite), title: Text('Animutation')),
+              BottomNavigationBarItem(icon: Icon(Icons.block), title: Text('Zombo.com')),
+            ],
+          ),
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
+
+    final Offset textBottomLeft = tester.getBottomLeft(find.text('I am a snack bar.'));
+    final Offset textBottomRight = tester.getBottomRight(find.text('I am a snack bar.'));
+    final Offset actionTextBottomLeft = tester.getBottomLeft(find.text('ACTION'));
+    final Offset actionTextBottomRight = tester.getBottomRight(find.text('ACTION'));
+    final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+
+    expect(textBottomLeft.dx - snackBarBottomLeft.dx, 31.0 + 10.0); // margin + left padding
+    expect(snackBarBottomLeft.dy - textBottomLeft.dy, 27.0); // margin (with no bottom padding)
+    expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
+    expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
+    expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
+  });
+
+  testWidgets('Floating SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(
+        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
+      ),
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.only(
+            left: 10.0,
+            top: 20.0,
+            right: 30.0,
+            bottom: 40.0,
+          ),
+        ),
+        child: Scaffold(
+          floatingActionButton: FloatingActionButton(
+              child: const Icon(Icons.send),
+              onPressed: () {}
+          ),
+          body: Builder(
+            builder: (BuildContext context) {
+              return GestureDetector(
+                onTap: () {
+                  Scaffold.of(context).showSnackBar(SnackBar(
+                    content: const Text('I am a snack bar.'),
+                    duration: const Duration(seconds: 2),
+                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                  ));
+                },
+                child: const Text('X'),
+              );
+            }
+          ),
+        ),
+      ),
+    ));
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
+
+    final Offset snackBarBottomCenter = tester.getBottomLeft(find.byType(SnackBar));
+    final Offset floatingActionButtonTopCenter = tester.getTopLeft(find.byType(FloatingActionButton));
+
+    // Since padding and margin is handled inside snackBarBox,
+    // the bottom offset of snackbar should equal with top offset of FAB
+    expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
   });
 
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {

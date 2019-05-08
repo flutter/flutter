@@ -326,7 +326,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
   });
 
   testWidgets('End-top floating action button location RTL', (WidgetTester tester) async {
@@ -342,7 +342,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(16.0, 28.0, 56.0, 56.0)));
   });
 
   testWidgets('Start-top floating action button location RTL', (WidgetTester tester) async {
@@ -358,7 +358,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
   });
 
   testWidgets('End-top floating action button location LTR', (WidgetTester tester) async {
@@ -371,7 +371,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
+    expect(tester.getRect(find.byType(FloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTWH(800.0 - 56.0 - 16.0, 28.0, 56.0, 56.0)));
   });
 }
 

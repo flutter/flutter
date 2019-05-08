@@ -1440,8 +1440,7 @@ Widget _createErrorWidget(dynamic exception, StackTrace stackTrace) {
     exception: exception,
     stack: stackTrace,
     library: 'widgets library',
-    context: 'building',
-    informationCollector: null,
+    context: ErrorDescription('building'),
   );
   FlutterError.reportError(details);
   return ErrorWidget.builder(details);

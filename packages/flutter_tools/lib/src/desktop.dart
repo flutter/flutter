@@ -2,9 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
+import 'convert.dart';
+import 'device.dart';
 import 'version.dart';
 
 // Only launch or display desktop embedding devices if
@@ -46,4 +50,26 @@ Future<bool> killProcess(String executable) async {
     succeeded = false;
   }
   return succeeded;
+}
+
+class DesktopLogReader extends DeviceLogReader {
+  final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
+
+  void initializeProcess(Process process) {
+    process.stdout.listen(_inputController.add);
+    process.stderr.listen(_inputController.add);
+    process.exitCode.then((int result) {
+      _inputController.close();
+    });
+  }
+
+  @override
+  Stream<String> get logLines {
+    return _inputController.stream
+      .transform(utf8.decoder)
+      .transform(const LineSplitter());
+  }
+
+  @override
+  String get name => 'desktop';
 }

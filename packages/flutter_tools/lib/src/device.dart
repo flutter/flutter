@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
@@ -19,11 +20,12 @@ import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
 import 'macos/macos_device.dart';
+import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
 import 'windows/windows_device.dart';
 
-DeviceManager get deviceManager => context[DeviceManager];
+DeviceManager get deviceManager => context.get<DeviceManager>();
 
 /// A class to get all available devices.
 class DeviceManager {
@@ -235,6 +237,9 @@ abstract class Device {
     }
   }
 
+  /// Whether the device is supported for the current project directory.
+  bool isSupportedForProject(FlutterProject flutterProject);
+
   /// Check if a version of the given app is already installed
   Future<bool> isAppInstalled(ApplicationPackage app);
 
@@ -269,6 +274,9 @@ abstract class Device {
 
   /// Clear the device's logs.
   void clearLogs();
+
+  /// Optional device-specific artifact overrides.
+  OverrideArtifacts get artifactOverrides => null;
 
   /// Start an app package on the current device.
   ///

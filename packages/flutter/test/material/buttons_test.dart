@@ -345,7 +345,7 @@ void main() {
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
@@ -385,7 +385,7 @@ void main() {
               SemanticsAction.tap,
             ],
             label: 'ABC',
-            rect: Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
+            rect: const Rect.fromLTRB(0.0, 0.0, 88.0, 48.0),
             transform: Matrix4.translationValues(356.0, 276.0, 0.0),
             flags: <SemanticsFlag>[
               SemanticsFlag.isButton,
@@ -506,7 +506,7 @@ void main() {
     await tester.pump(); // start gesture
     await tester.pump(const Duration(milliseconds: 200)); // wait for splash to be well under way
 
-    final Rect expectedClipRect = Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
+    const Rect expectedClipRect = Rect.fromLTRB(356.0, 282.0, 444.0, 318.0);
     final Path expectedClipPath = Path()
      ..addRRect(RRect.fromRectAndRadius(
          expectedClipRect,
@@ -639,7 +639,7 @@ void main() {
   testWidgets('Disabled MaterialButton has same semantic size as enabled and exposes disabled semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
-    final Rect expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
+    const Rect expectedButtonSize = Rect.fromLTRB(0.0, 0.0, 116.0, 48.0);
     // Button is in center of screen
     final Matrix4 expectedButtonTransform = Matrix4.identity()
       ..translate(

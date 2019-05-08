@@ -525,7 +525,7 @@ void main() {
 
       expect(genSnapshotExitCode, 0);
       expect(genSnapshot.callCount, 1);
-      expect(bufferLogger.statusText, matches(RegExp(r'gen_snapshot\(RunTime\): \d+ ms.')));
+      expect(bufferLogger.statusText, matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
     }, overrides: contextOverrides);
   });
 

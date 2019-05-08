@@ -644,35 +644,35 @@ void main() {
         ),
       ),
     );
-    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-    expect(tester.getRect(find.byKey(key2)), Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
     final TestGesture gesture = await tester.startGesture(const Offset(10.0, 10.0));
     await gesture.moveBy(const Offset(0.0, -10.0)); // scroll up
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, -10.0, 800.0, 100.0));
-    expect(tester.getRect(find.byKey(key2)), Rect.fromLTWH(0.0, 90.0, 800.0, 1000.0));
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -10.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 90.0, 800.0, 1000.0));
     await gesture.moveBy(const Offset(0.0, 10.0)); // scroll back to origin
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-    expect(tester.getRect(find.byKey(key2)), Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
     expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
     expect(tester.getRect(find.byKey(key2)).top, lessThan(130.0));
     await gesture.moveBy(const Offset(0.0, -1.0)); // scroll back a little
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, -1.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -1.0, 800.0, 100.0));
     expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
     expect(tester.getRect(find.byKey(key2)).top, lessThan(129.0));
     await gesture.moveBy(const Offset(0.0, -10.0)); // scroll back a lot
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, -11.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -11.0, 800.0, 100.0));
     await gesture.moveBy(const Offset(0.0, 20.0)); // overscroll again
     await tester.pump();
-    expect(tester.getRect(find.byKey(key1)), Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
     await gesture.up();
     debugDefaultTargetPlatformOverride = null;
   });

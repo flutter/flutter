@@ -260,14 +260,24 @@ class FlexibleSpaceBarSettings extends InheritedWidget {
   ///
   /// Used by [Scaffold] and [SliverAppBar]. [child] must have a
   /// [FlexibleSpaceBar] widget in its tree for the settings to take affect.
+  ///
+  /// The required [toolbarOpacity], [minExtent], [maxExtent], [currentExtent],
+  /// and [child] parameters must not be null.
   const FlexibleSpaceBarSettings({
     Key key,
-    this.toolbarOpacity,
-    this.minExtent,
-    this.maxExtent,
+    @required this.toolbarOpacity,
+    @required this.minExtent,
+    @required this.maxExtent,
     @required this.currentExtent,
     @required Widget child,
-  }) : assert(currentExtent != null),
+  }) : assert(toolbarOpacity != null),
+       assert(minExtent != null && minExtent >= 0),
+       assert(maxExtent != null && maxExtent >= 0),
+       assert(currentExtent != null && currentExtent >= 0),
+       assert(toolbarOpacity >= 0.0),
+       assert(minExtent <= maxExtent),
+       assert(minExtent <= currentExtent),
+       assert(currentExtent <= maxExtent),
        super(key: key, child: child);
 
   /// Affects how transparent the text within the toolbar appears.

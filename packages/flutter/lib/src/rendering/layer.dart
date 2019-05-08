@@ -529,13 +529,11 @@ class ContainerLayer extends Layer {
                               'See https://api.flutter.dev/flutter/rendering/debugCheckElevations.html '
                               'for more details.'),
       library: 'rendering library',
-      context: 'during compositing',
-      informationCollector: (StringBuffer buffer) {
-        buffer.writeln('Attempted to composite layer:');
-        buffer.writeln(child);
-        buffer.writeln('after layer:');
-        buffer.writeln(predecessor);
-        buffer.writeln('which occupies the same area at a higher elevation.');
+      context: ErrorDescription('during compositing'),
+      informationCollector: () sync* {
+        yield child.toDiagnosticsNode(name: 'Attempted to composite layer', style: DiagnosticsTreeStyle.errorProperty);
+        yield predecessor.toDiagnosticsNode(name: 'after layer', style: DiagnosticsTreeStyle.errorProperty);
+        yield ErrorDescription('which occupies the same area at a higher elevation.');
       }
     ));
     return <PictureLayer>[
@@ -1242,6 +1240,9 @@ class TransformLayer extends OffsetLayer {
 /// When debugging, setting [debugDisableOpacityLayers] to true will cause this
 /// layer to be skipped (directly replaced by its children). This can be helpful
 /// to track down the cause of performance problems.
+///
+/// Try to avoid an [OpacityLayer] with no children. Remove that layer if
+/// possible to save some tree walks.
 class OpacityLayer extends ContainerLayer {
   /// Creates an opacity layer.
   ///
@@ -1280,10 +1281,17 @@ class OpacityLayer extends ContainerLayer {
   }
 
   @override
+  void applyTransform(Layer child, Matrix4 transform) {
+    assert(child != null);
+    assert(transform != null);
+    transform.translate(offset.dx, offset.dy);
+  }
+
+  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    bool enabled = true;
+    bool enabled = firstChild != null;  // don't add this layer if there's no child
     assert(() {
-      enabled = !debugDisableOpacityLayers;
+      enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
     if (enabled)
@@ -1460,6 +1468,7 @@ class PhysicalModelLayer extends ContainerLayer {
   Clip get clipBehavior => _clipBehavior;
   Clip _clipBehavior;
   set clipBehavior(Clip value) {
+    assert(value != null);
     if (value != _clipBehavior) {
       _clipBehavior = value;
       markNeedsAddToScene();
