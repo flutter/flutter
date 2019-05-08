@@ -1023,6 +1023,14 @@ enum Clip {
 // constant and can't propagate into the set/get calls.
 const Endian _kFakeHostEndian = Endian.little;
 
+// Indicates that the image should not be resized in this dimension.
+//
+// Used by [instantiateImageCodec] as a magical value to disable resizing
+// in the given dimension.
+//
+// This needs to be kept in sync with "kDoNotResizeDimension" in codec.cc
+const int _kDoNotResizeDimension = -1;
+
 /// A description of the style to use when drawing on a [Canvas].
 ///
 /// Most APIs on [Canvas] take a [Paint] object to describe the style
@@ -1629,10 +1637,19 @@ class Codec {
 /// unlikely that a factor that low will be sufficient to cache all decoded
 /// frames. The default value is `25.0`.
 ///
+/// The [targetWidth] and [targetHeight] arguments specify the size of the output
+/// image, in image pixels. If they are not equal to the intrinsic dimensions of the
+/// image, then the image will be scaled after being decoded. If exactly one of
+/// these two arguments is specified, then the aspect ratio will be maintained
+/// while forcing the image to match the specified dimension. If neither is
+/// specified, then the image maintains its real size.
+///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
 Future<Codec> instantiateImageCodec(Uint8List list, {
   double decodedCacheRatioCap = 0,
+  int targetWidth,
+  int targetHeight,
 }) {
   throw UnimplementedError();
 }
