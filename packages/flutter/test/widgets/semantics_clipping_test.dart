@@ -39,7 +39,10 @@ void main() {
       ),
     ));
 
-    expect(tester.takeException(), contains('overflowed'));
+    final dynamic exception = tester.takeException();
+    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
     expect(semantics, hasSemantics(
       TestSemantics.root(
@@ -98,7 +101,10 @@ void main() {
       ),
     ));
 
-    expect(tester.takeException(), contains('overflowed'));
+    final dynamic exception = tester.takeException();
+    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), contains('overflowed'));
 
     expect(semantics, hasSemantics(
       TestSemantics.root(

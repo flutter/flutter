@@ -398,10 +398,10 @@ void _validateFonts(YamlList fonts, List<String> errors) {
     if (fontMap['family'] != null && fontMap['family'] is! String) {
       errors.add('Font family must either be null or a String.');
     }
-    if (fontMap['fonts'] != null && fontMap['fonts'] is! YamlList) {
-      errors.add('Expected "fonts" to either be null or a list.');
-    }
     if (fontMap['fonts'] == null) {
+      continue;
+    } else if (fontMap['fonts'] is! YamlList) {
+      errors.add('Expected "fonts" to either be null or a list.');
       continue;
     }
     for (final YamlMap fontListItem in fontMap['fonts']) {

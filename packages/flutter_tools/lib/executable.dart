@@ -35,9 +35,7 @@ import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
-import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
-import 'src/commands/trace.dart';
 import 'src/commands/train.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
@@ -82,9 +80,7 @@ Future<void> main(List<String> args) async {
     RunCommand(verboseHelp: verboseHelp),
     ScreenshotCommand(),
     ShellCompletionCommand(),
-    StopCommand(),
     TestCommand(verboseHelp: verboseHelp),
-    TraceCommand(),
     TrainingCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),

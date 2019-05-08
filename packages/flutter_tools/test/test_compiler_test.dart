@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -10,20 +9,31 @@ import 'package:flutter_tools/src/test/test_compiler.dart';
 import 'package:mockito/mockito.dart';
 
 import 'src/common.dart';
-import 'src/context.dart';
+import 'src/testbed.dart';
 
 void main() {
-  group('TestCompiler', () {
-    testUsingContext('compiles test file with no errors', () async {
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
-      fs.file('test/foo.dart').createSync(recursive: true);
-      final MockResidentCompiler residentCompiler = MockResidentCompiler();
-      final TestCompiler testCompiler = FakeTestCompiler(
-        false,
-        FlutterProject.current(),
-        residentCompiler,
+  group(TestCompiler, () {
+    Testbed testbed;
+    FakeTestCompiler testCompiler;
+    MockResidentCompiler residentCompiler;
+
+    setUp(() {
+      testbed = Testbed(
+        setup: () {
+          fs.file('pubspec.yaml').createSync();
+          fs.file('.packages').createSync();
+          fs.file('test/foo.dart').createSync(recursive: true);
+          residentCompiler = MockResidentCompiler();
+          testCompiler = FakeTestCompiler(
+            false,
+            FlutterProject.current(),
+            residentCompiler,
+          );
+        },
       );
+    });
+
+    test('Reports a dill file when compile is successful', () => testbed.run(() async {
       when(residentCompiler.recompile(
         'test/foo.dart',
         <Uri>[Uri.parse('test/foo.dart')],
@@ -35,20 +45,9 @@ void main() {
 
       expect(await testCompiler.compile('test/foo.dart'), 'test/foo.dart.dill');
       expect(fs.file('test/foo.dart.dill').existsSync(), true);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-    });
+    }));
 
-    testUsingContext('does not compile test file with errors', () async {
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
-      fs.file('test/foo.dart').createSync(recursive: true);
-      final MockResidentCompiler residentCompiler = MockResidentCompiler();
-      final TestCompiler testCompiler = FakeTestCompiler(
-        false,
-        FlutterProject.current(),
-        residentCompiler,
-      );
+    test('Reports null when a compile fails', () => testbed.run(() async {
       when(residentCompiler.recompile(
         'test/foo.dart',
         <Uri>[Uri.parse('test/foo.dart')],
@@ -60,9 +59,7 @@ void main() {
 
       expect(await testCompiler.compile('test/foo.dart'), null);
       expect(fs.file('test/foo.dart.dill').existsSync(), false);
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-    });
+    }));
   });
 }
 

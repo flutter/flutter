@@ -594,7 +594,9 @@ class ClipRect extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipRect renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -661,6 +663,7 @@ class ClipRRect extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderClipRRect renderObject) {
     renderObject
       ..borderRadius = borderRadius
+      ..clipBehavior = clipBehavior
       ..clipper = clipper;
   }
 
@@ -710,7 +713,9 @@ class ClipOval extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipOval renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -796,7 +801,9 @@ class ClipPath extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderClipPath renderObject) {
-    renderObject.clipper = clipper;
+    renderObject
+      ..clipper = clipper
+      ..clipBehavior = clipBehavior;
   }
 
   @override
@@ -886,6 +893,7 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPhysicalModel renderObject) {
     renderObject
       ..shape = shape
+      ..clipBehavior = clipBehavior
       ..borderRadius = borderRadius
       ..elevation = elevation
       ..color = color
@@ -974,6 +982,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
   void updateRenderObject(BuildContext context, RenderPhysicalShape renderObject) {
     renderObject
       ..clipper = clipper
+      ..clipBehavior = clipBehavior
       ..elevation = elevation
       ..color = color
       ..shadowColor = shadowColor;
@@ -4802,12 +4811,14 @@ class RichText extends LeafRenderObjectWidget {
     this.maxLines,
     this.locale,
     this.strutStyle,
+    this.textWidthBasis = TextWidthBasis.parent,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
+       assert(textWidthBasis != null),
        super(key: key);
 
   /// The text to display in this widget.
@@ -4866,6 +4877,9 @@ class RichText extends LeafRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
+  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  final TextWidthBasis textWidthBasis;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -4877,6 +4891,7 @@ class RichText extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
       strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -4893,6 +4908,7 @@ class RichText extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
       ..strutStyle = strutStyle
+      ..textWidthBasis = textWidthBasis
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
@@ -4905,6 +4921,7 @@ class RichText extends LeafRenderObjectWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
   }
 }

@@ -1125,6 +1125,7 @@ class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
   PageController _pageController;
   List<Widget> _children;
+  List<Widget> _childrenWithKey;
   int _currentIndex;
   int _warpUnderwayCount = 0;
 
@@ -1156,7 +1157,7 @@ class _TabBarViewState extends State<TabBarView> {
   @override
   void initState() {
     super.initState();
-    _children = widget.children;
+    _updateChildren();
   }
 
   @override
@@ -1173,7 +1174,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (widget.controller != oldWidget.controller)
       _updateTabController();
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
-      _children = widget.children;
+      _updateChildren();
   }
 
   @override
@@ -1182,6 +1183,11 @@ class _TabBarViewState extends State<TabBarView> {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
+  }
+
+  void _updateChildren() {
+    _children = widget.children;
+    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
   }
 
   void _handleTabControllerAnimationTick() {
@@ -1206,28 +1212,30 @@ class _TabBarViewState extends State<TabBarView> {
       return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
 
     assert((_currentIndex - previousIndex).abs() > 1);
-    int initialPage;
+    final int initialPage = _currentIndex > previousIndex
+        ? _currentIndex - 1
+        : _currentIndex + 1;
+    final List<Widget> originalChildren = _childrenWithKey;
     setState(() {
       _warpUnderwayCount += 1;
-      _children = List<Widget>.from(widget.children, growable: false);
-      if (_currentIndex > previousIndex) {
-        _children[_currentIndex - 1] = _children[previousIndex];
-        initialPage = _currentIndex - 1;
-      } else {
-        _children[_currentIndex + 1] = _children[previousIndex];
-        initialPage = _currentIndex + 1;
-      }
-    });
 
+      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      final Widget temp = _childrenWithKey[initialPage];
+      _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
+      _childrenWithKey[previousIndex] = temp;
+    });
     _pageController.jumpToPage(initialPage);
 
     await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
       return Future<void>.value();
-
     setState(() {
       _warpUnderwayCount -= 1;
-      _children = widget.children;
+      if (widget.children != _children) {
+        _updateChildren();
+      } else {
+        _childrenWithKey = originalChildren;
+      }
     });
   }
 
@@ -1272,7 +1280,7 @@ class _TabBarViewState extends State<TabBarView> {
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
-        children: _children,
+        children: _childrenWithKey,
       ),
     );
   }

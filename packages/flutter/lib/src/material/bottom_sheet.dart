@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
+import 'bottom_sheet_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'material.dart';
@@ -56,14 +57,15 @@ class BottomSheet extends StatefulWidget {
     Key key,
     this.animationController,
     this.enableDrag = true,
-    this.elevation = 0.0,
     this.backgroundColor,
+    this.elevation,
+    this.shape,
     @required this.onClosing,
     @required this.builder,
   }) : assert(enableDrag != null),
        assert(onClosing != null),
        assert(builder != null),
-       assert(elevation != null && elevation >= 0.0),
+       assert(elevation == null || elevation >= 0.0),
        super(key: key);
 
   /// The animation controller that controls the bottom sheet's entrance and
@@ -92,6 +94,13 @@ class BottomSheet extends StatefulWidget {
   /// Default is true.
   final bool enableDrag;
 
+  /// The bottom sheet's background color.
+  ///
+  /// Defines the bottom sheet's [Material.color].
+  ///
+  /// Defaults to null and falls back to [Material]'s default.
+  final Color backgroundColor;
+
   /// The z-coordinate at which to place this material relative to its parent.
   ///
   /// This controls the size of the shadow below the material.
@@ -99,10 +108,12 @@ class BottomSheet extends StatefulWidget {
   /// Defaults to 0. The value is non-negative.
   final double elevation;
 
-  /// The color for the [Material] of the bottom sheet.
+  /// The shape of the bottom sheet.
   ///
-  /// Defaults to [Colors.white]. The value must not be null.
-  final Color backgroundColor;
+  /// Defines the bottom sheet's [Material.shape].
+  ///
+  /// Defaults to null and falls back to [Material]'s default.
+  final ShapeBorder shape;
 
   @override
   _BottomSheetState createState() => _BottomSheetState();
@@ -170,10 +181,16 @@ class _BottomSheetState extends State<BottomSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final BottomSheetThemeData bottomSheetTheme = Theme.of(context).bottomSheetTheme;
+    final Color color = widget.backgroundColor ?? bottomSheetTheme.backgroundColor;
+    final double elevation = widget.elevation ?? bottomSheetTheme.elevation ?? 0;
+    final ShapeBorder shape = widget.shape ?? bottomSheetTheme.shape;
+
     final Widget bottomSheet = Material(
       key: _childKey,
-      color: widget.backgroundColor,
-      elevation: widget.elevation,
+      color: color,
+      elevation: elevation,
+      shape: shape,
       child: NotificationListener<DraggableScrollableNotification>(
         onNotification: extentChanged,
         child: widget.builder(context),
@@ -227,12 +244,18 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   const _ModalBottomSheet({
     Key key,
     this.route,
+    this.backgroundColor,
+    this.elevation,
+    this.shape,
     this.isScrollControlled = false,
   }) : assert(isScrollControlled != null),
        super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
   final bool isScrollControlled;
+  final Color backgroundColor;
+  final double elevation;
+  final ShapeBorder shape;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -279,7 +302,6 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
               child: CustomSingleChildLayout(
                 delegate: _ModalBottomSheetLayout(animationValue, widget.isScrollControlled),
                 child: BottomSheet(
-                  backgroundColor: widget.route.backgroundColor,
                   animationController: widget.route._animationController,
                   onClosing: () {
                     if (widget.route.isCurrent) {
@@ -287,6 +309,9 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                     }
                   },
                   builder: widget.route.builder,
+                  backgroundColor: widget.backgroundColor,
+                  elevation: widget.elevation,
+                  shape: widget.shape,
                 ),
               ),
             ),
@@ -302,8 +327,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.builder,
     this.theme,
     this.barrierLabel,
-    @required this.isScrollControlled,
     this.backgroundColor,
+    this.elevation,
+    this.shape,
+    @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
        super(settings: settings);
@@ -312,6 +339,8 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final ThemeData theme;
   final bool isScrollControlled;
   final Color backgroundColor;
+  final double elevation;
+  final ShapeBorder shape;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
@@ -327,6 +356,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 
   AnimationController _animationController;
 
+
   @override
   AnimationController createAnimationController() {
     assert(_animationController == null);
@@ -341,7 +371,13 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     Widget bottomSheet = MediaQuery.removePadding(
       context: context,
       removeTop: true,
-      child: _ModalBottomSheet<T>(route: this, isScrollControlled: isScrollControlled),
+      child: _ModalBottomSheet<T>(
+        route: this,
+        backgroundColor: backgroundColor,
+        elevation: elevation,
+        shape: shape,
+        isScrollControlled: isScrollControlled
+      ),
     );
     if (theme != null)
       bottomSheet = Theme(data: theme, child: bottomSheet);
@@ -384,8 +420,10 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 Future<T> showModalBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
-  bool isScrollControlled = false,
   Color backgroundColor,
+  double elevation,
+  ShapeBorder shape,
+  bool isScrollControlled = false,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -397,8 +435,10 @@ Future<T> showModalBottomSheet<T>({
     builder: builder,
     theme: Theme.of(context, shadowThemeOnly: true),
     isScrollControlled: isScrollControlled,
-    backgroundColor: backgroundColor,
     barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    backgroundColor: backgroundColor,
+    elevation: elevation,
+    shape: shape,
   ));
 }
 
@@ -440,6 +480,8 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   @required BuildContext context,
   @required WidgetBuilder builder,
   Color backgroundColor,
+  double elevation,
+  ShapeBorder shape,
 }) {
   assert(context != null);
   assert(builder != null);
@@ -448,5 +490,7 @@ PersistentBottomSheetController<T> showBottomSheet<T>({
   return Scaffold.of(context).showBottomSheet<T>(
     builder,
     backgroundColor: backgroundColor,
+    elevation: elevation,
+    shape: shape,
   );
 }

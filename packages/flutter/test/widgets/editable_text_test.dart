@@ -1588,7 +1588,7 @@ void main() {
 
       controls = MockTextSelectionControls();
       when(controls.buildHandle(any, any, any)).thenReturn(Container());
-      when(controls.buildToolbar(any, any, any, any))
+      when(controls.buildToolbar(any, any, any, any, any))
           .thenReturn(Container());
     });
 

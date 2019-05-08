@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:file/memory.dart';
@@ -20,6 +21,7 @@ import 'package:flutter_tools/src/macos/macos_device.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group(MacOSDevice, () {
@@ -69,20 +71,20 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       final MockFileSystem mockFileSystem = MockFileSystem();
       final MockProcessManager mockProcessManager = MockProcessManager();
       final MockFile mockFile = MockFile();
-      final MockProcess mockProcess = MockProcess();
       when(macOSApp.executable(any)).thenReturn('test');
       when(mockFileSystem.file('test')).thenReturn(mockFile);
       when(mockFile.existsSync()).thenReturn(true);
       when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
-        return mockProcess;
+        return FakeProcess(
+          exitCode: Completer<int>().future,
+          stdout: Stream<List<int>>.fromIterable(<List<int>>[
+            utf8.encode('Observatory listening on http://127.0.0.1/0\n'),
+          ]),
+          stderr: const Stream<List<int>>.empty(),
+        );
       });
       when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
         return ProcessResult(0, 1, '', '');
-      });
-      when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-        return Stream<List<int>>.fromIterable(<List<int>>[
-          utf8.encode('Observatory listening on http://127.0.0.1/0'),
-        ]);
       });
 
       testUsingContext('Can run from prebuilt application', () async {

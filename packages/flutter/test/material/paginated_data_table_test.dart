@@ -153,7 +153,10 @@ void main() {
     ));
 
     // the column overflows because we're forcing it to 600 pixels high
-    expect(tester.takeException(), contains('A RenderFlex overflowed by'));
+    final dynamic exception = tester.takeException();
+    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
 
     expect(find.text('Gingerbread (0)'), findsOneWidget);
     expect(find.text('Gingerbread (1)'), findsNothing);
@@ -238,7 +241,11 @@ void main() {
       ),
     ));
     // the column overflows because we're forcing it to 600 pixels high
-    expect(tester.takeException(), contains('A RenderFlex overflowed by'));
+    final dynamic exception = tester.takeException();
+    expect(exception, isInstanceOf<FlutterError>());
+    expect(exception.diagnostics.first.level, DiagnosticLevel.summary);
+    expect(exception.diagnostics.first.toString(), contains('A RenderFlex overflowed by'));
+
     expect(find.text('Rows per page:'), findsOneWidget);
     // Test that we will show some options in the drop down even if the lowest option is bigger than the source:
     assert(501 > source.rowCount);

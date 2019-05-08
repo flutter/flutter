@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
@@ -378,6 +379,113 @@ void main() {
     final TextField textField = tester.firstWidget(find.byType(TextField));
     expect(textField.cursorWidth, 2.0);
     expect(textField.cursorRadius, const Radius.circular(3.0));
+  });
+
+  testWidgets('cursor android golden', (WidgetTester tester) async {
+    final Widget widget = overlay(
+      child: const RepaintBoundary(
+        key: ValueKey<int>(1),
+        child: TextField(
+          cursorColor: Colors.blue,
+          cursorWidth: 15,
+          cursorRadius: Radius.circular(3.0),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.0.0.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+    final Widget widget = overlay(
+      child: const RepaintBoundary(
+        key: ValueKey<int>(1),
+        child: TextField(
+          cursorColor: Colors.blue,
+          cursorWidth: 15,
+          cursorRadius: Radius.circular(3.0),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    const String testValue = 'A short phrase';
+    await tester.enterText(find.byType(TextField), testValue);
+    await skipPastScrollingAnimation(tester);
+
+    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
+    await tester.pump();
+
+    debugDefaultTargetPlatformOverride = null;
+    await expectLater(
+      find.byKey(const ValueKey<int>(1)),
+      matchesGoldenFile('text_field_cursor_test.1.0.png'),
+    );
+  }, skip: !Platform.isLinux);
+
+  testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              child: const Opacity(
+                opacity: 0.5,
+                child: TextField(
+                  decoration: InputDecoration(hintText: 'Placeholder'),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField));
+
+    const String testValue = 'A B C';
+    tester.testTextInput.updateEditingValue(
+        const TextEditingValue(
+          text: testValue
+        )
+    );
+    await tester.pump();
+
+    // The selectWordsInRange with SelectionChangedCause.tap seems to be needed to show the toolbar.
+    // (This is true even if we provide selection parameter to the TextEditingValue above.)
+    final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
+    state.renderEditable.selectWordsInRange(from: const Offset(0, 0), cause: SelectionChangedCause.tap);
+
+    expect(state.showToolbar(), true);
+
+    // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Sanity check that the toolbar widget exists.
+    expect(find.text('PASTE'), findsOneWidget);
+
+    await expectLater(
+      // The toolbar exists in the Overlay above the MaterialApp.
+      find.byType(Overlay),
+      matchesGoldenFile('text_field_opacity_test.0.1.png'),
+      skip: !Platform.isLinux,
+    );
   });
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
@@ -1017,6 +1125,82 @@ void main() {
     await tester.pump();
     expect(controller.text, 'abc d${testValue}ef ghi');
   });
+
+  testWidgets(
+    'Check the toolbar appears below the TextField when there is not enough space above the TextField to show it',
+    (WidgetTester tester) async {
+      // This is a regression test for
+      // https://github.com/flutter/flutter/issues/29808
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(30.0),
+            child: TextField(
+              controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      const String testValue = 'abc def ghi';
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      RenderEditable renderEditable = findRenderEditable(tester);
+      List<TextSelectionPoint> endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+      // Verify the selection toolbar position
+      Offset toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
+      Offset textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(textFieldTopLeft.dy, lessThan(toolbarTopLeft.dy));
+
+      await tester.pumpWidget(MaterialApp(
+        home: Scaffold(
+          body: Padding(
+            padding: const EdgeInsets.all(150.0),
+            child: TextField(
+              controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.enterText(find.byType(TextField), testValue);
+      await skipPastScrollingAnimation(tester);
+
+      // Tap the selection handle to bring up the "paste / select all" menu.
+      await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+      renderEditable = findRenderEditable(tester);
+      endpoints = globalize(
+        renderEditable.getEndpointsForSelection(controller.selection),
+        renderEditable,
+      );
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+
+      // Verify the selection toolbar position
+      toolbarTopLeft = tester.getTopLeft(find.text('SELECT ALL'));
+      textFieldTopLeft = tester.getTopLeft(find.byType(TextField));
+      expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
+    }
+  );
 
   testWidgets('Selection toolbar fades in', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
@@ -2786,6 +2970,23 @@ void main() {
       await tester.pumpAndSettle();
 
       sendKeyEventWithCode(22, true, true, false);     // RIGHT_ARROW keydown, SHIFT_ON
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+    });
+
+    testWidgets('Shift test 2', (WidgetTester tester) async {
+      await setupWidget(tester);
+
+      const String testValue = 'abcdefghi';
+      await tester.showKeyboard(find.byType(TextField));
+      tester.testTextInput.updateEditingValue(const TextEditingValue(
+        text: testValue,
+        selection: TextSelection.collapsed(offset: 3),
+        composing: TextRange(start: 0, end: testValue.length)
+      ));
+      await tester.pump();
+
+      sendKeyEventWithCode(22, true, true, false);
+      await tester.pumpAndSettle();
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
 

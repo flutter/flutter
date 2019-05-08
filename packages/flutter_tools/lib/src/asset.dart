@@ -20,6 +20,8 @@ import 'globals.dart';
 
 const AssetBundleFactory _kManifestFactory = _ManifestAssetBundleFactory();
 
+const String defaultManifestPath = 'pubspec.yaml';
+
 /// Injected factory class for spawning [AssetBundle] instances.
 abstract class AssetBundleFactory {
   /// The singleton instance, pulled from the [AppContext].
@@ -36,11 +38,11 @@ abstract class AssetBundle {
 
   bool wasBuiltOnce();
 
-  bool needsBuild({ String manifestPath = _ManifestAssetBundle.defaultManifestPath });
+  bool needsBuild({ String manifestPath = defaultManifestPath });
 
   /// Returns 0 for success; non-zero for failure.
   Future<int> build({
-    String manifestPath = _ManifestAssetBundle.defaultManifestPath,
+    String manifestPath = defaultManifestPath,
     String assetDirPath,
     String packagesPath,
     bool includeDefaultFonts = true,
@@ -69,7 +71,6 @@ class _ManifestAssetBundle implements AssetBundle {
 
   DateTime _lastBuildTimestamp;
 
-  static const String defaultManifestPath = 'pubspec.yaml';
   static const String _assetManifestJson = 'AssetManifest.json';
   static const String _fontManifestJson = 'FontManifest.json';
   static const String _fontSetMaterial = 'material';

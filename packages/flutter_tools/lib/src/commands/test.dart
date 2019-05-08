@@ -127,12 +127,13 @@ class TestCommand extends FastFlutterCommand {
       await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
-    if (buildTestAssets) {
-      await _buildTestAsset();
-    }
     final List<String> names = argResults['name'];
     final List<String> plainNames = argResults['plain-name'];
     final FlutterProject flutterProject = FlutterProject.current();
+
+    if (buildTestAssets && flutterProject.manifest.assets.isNotEmpty) {
+      await _buildTestAsset();
+    }
 
     Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
