@@ -42,13 +42,13 @@ public final class BasicMessageChannel<T> {
     public BasicMessageChannel(BinaryMessenger messenger, String name, MessageCodec<T> codec) {
         if (BuildConfig.DEBUG) {
             if (messenger == null) {
-                throw new AssertionError("Parameter messenger must not be null.");
+                Log.e(TAG, "Parameter messenger must not be null.");
             }
             if (name == null) {
-                throw new AssertionError("Parameter name must not be null.");
+                Log.e(TAG, "Parameter name must not be null.");
             }
             if (codec == null) {
-                throw new AssertionError("Parameter codec must not be null.");
+                Log.e(TAG, "Parameter codec must not be null.");
             }
         }
         this.messenger = messenger;

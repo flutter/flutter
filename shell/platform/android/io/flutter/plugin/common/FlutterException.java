@@ -4,19 +4,23 @@
 
 package io.flutter.plugin.common;
 
+import android.util.Log;
+
 import io.flutter.BuildConfig;
 
 /**
  * Thrown to indicate that a Flutter method invocation failed on the Flutter side.
  */
 public class FlutterException extends RuntimeException {
+  private static final String TAG = "FlutterException#";
+
   public final String code;
   public final Object details;
 
   FlutterException(String code, String message, Object details) {
     super(message);
     if (BuildConfig.DEBUG && code == null) {
-      throw new AssertionError("Parameter code must not be null.");
+      Log.e(TAG, "Parameter code must not be null.");
     }
     this.code = code;
     this.details = details;
