@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
+import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -112,6 +113,7 @@ class FlutterDriverExtension {
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
       'get_semantics_id': _getSemanticsId,
+      'get_offset': _getOffset,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -130,6 +132,7 @@ class FlutterDriverExtension {
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
+      'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -356,6 +359,33 @@ class FlutterDriverExtension {
     if (node == null)
       throw StateError('No semantics data found');
     return GetSemanticsIdResult(node.id);
+  }
+
+  Future<GetOffsetResult> _getOffset(Command command) async {
+    final GetOffset getOffsetCommand = command;
+    final Finder finder = await _waitForElement(_createFinder(getOffsetCommand.finder));
+    final Element element = finder.evaluate().single;
+    final RenderBox box = element.renderObject;
+    Offset localPoint;
+    switch (getOffsetCommand.offsetType) {
+      case OffsetType.topLeft:
+        localPoint = Offset.zero;
+        break;
+      case OffsetType.topRight:
+        localPoint = box.size.topRight(Offset.zero);
+        break;
+      case OffsetType.bottomLeft:
+        localPoint = box.size.bottomLeft(Offset.zero);
+        break;
+      case OffsetType.bottomRight:
+        localPoint = box.size.bottomRight(Offset.zero);
+        break;
+      case OffsetType.center:
+        localPoint = box.size.center(Offset.zero);
+        break;
+    }
+    final Offset globalPoint = box.localToGlobal(localPoint);
+    return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);
   }
 
   Future<ScrollResult> _scroll(Command command) async {

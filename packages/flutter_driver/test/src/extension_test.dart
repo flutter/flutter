@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/src/common/find.dart';
+import 'package:flutter_driver/src/common/geometry.dart';
 import 'package:flutter_driver/src/common/request_data.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -119,5 +120,35 @@ void main() {
       expect(response['response'], contains('Bad state: Too many elements'));
       semantics.dispose();
     });
+  });
+
+  testWidgets('getOffset', (WidgetTester tester) async {
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<Offset> getOffset(OffsetType offset) async {
+      final Map<String, Object> arguments = GetOffset(ByValueKey(1), offset).serialize();
+      final GetOffsetResult result = GetOffsetResult.fromJson((await extension.call(arguments))['response']);
+      return Offset(result.dx, result.dy);
+    }
+
+    await tester.pumpWidget(
+      Align(
+        alignment: Alignment.topLeft,
+        child: Transform.translate(
+          offset: const Offset(40, 30),
+          child: Container(
+            key: const ValueKey<int>(1),
+            width: 100,
+            height: 120,
+          ),
+        ),
+      ),
+    );
+
+    expect(await getOffset(OffsetType.topLeft), const Offset(40, 30));
+    expect(await getOffset(OffsetType.topRight), const Offset(40 + 100.0, 30));
+    expect(await getOffset(OffsetType.bottomLeft), const Offset(40, 30 + 120.0));
+    expect(await getOffset(OffsetType.bottomRight), const Offset(40 + 100.0, 30 + 120.0));
+    expect(await getOffset(OffsetType.center), const Offset(40 + (100 / 2), 30 + (120 / 2)));
   });
 }
