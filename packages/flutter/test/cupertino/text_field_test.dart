@@ -1334,13 +1334,13 @@ void main() {
       // Hold the press.
       await tester.pump(const Duration(milliseconds: 500));
 
+      // Selected text shows nothing.
+      expect(find.byType(CupertinoButton), findsNothing);
+
       expect(
         controller.selection,
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
-
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(CupertinoButton), findsNWidgets(3));
 
       await gesture.up();
       await tester.pump();
