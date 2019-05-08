@@ -33,11 +33,17 @@ class BarcodeScannerPage extends StatefulWidget {
     this.validRectangle = const Rectangle(width: 320, height: 144),
     this.frameColor = kShrineScrim,
     this.traceMultiplier = 1.2,
+    this.textStyle = const TextStyle(
+      fontFamily: 'Rubik',
+      fontWeight: FontWeight.w500,
+      fontSize: 15,
+    ),
   });
 
   final Rectangle validRectangle;
   final Color frameColor;
   final double traceMultiplier;
+  final TextStyle textStyle;
 
   @override
   _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
@@ -335,15 +341,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 decoration: BoxDecoration(
                   border: Border(bottom: const BorderSide(color: Colors.grey)),
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Text(
-                    '1 result found',
-                    style: TextStyle(
-                      fontFamily: 'Rubik',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text('1 result found', style: widget.textStyle),
                 ),
               ),
               Container(
@@ -368,33 +368,39 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Container(
-                                child: const Text(
+                                margin: const EdgeInsets.only(bottom: 4),
+                                child: Text(
                                   'SPAN Reader',
-                                  style: TextStyle(
-                                    fontFamily: 'Rubik',
-                                    fontWeight: FontWeight.w500,
+                                  style: widget.textStyle.copyWith(
+                                    fontSize: 17,
                                   ),
                                 ),
                               ),
-                              const Text(
+                              Text(
                                 'Vol. 2',
-                                style: TextStyle(
-                                  fontFamily: 'Rubik',
-                                  fontWeight: FontWeight.w500,
+                                style: widget.textStyle.copyWith(
+                                  fontSize: 17,
                                 ),
                               ),
                               Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: const <Widget>[
-                                    Text(
-                                      'Material Design',
-                                      style: TextStyle(fontFamily: 'Rubik'),
+                                  children: <Widget>[
+                                    Container(
+                                      margin: const EdgeInsets.only(bottom: 3),
+                                      child: Text(
+                                        'Material Design',
+                                        style: widget.textStyle.copyWith(
+                                          fontWeight: FontWeight.normal,
+                                        ),
+                                      ),
                                     ),
                                     Text(
                                       '120 pages',
-                                      style: TextStyle(fontFamily: 'Rubik'),
+                                      style: widget.textStyle.copyWith(
+                                        fontWeight: FontWeight.normal,
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -406,9 +412,12 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 35, bottom: 25),
-                      child: const Text(
+                      child: Text(
                         'A Japanese & English accompaniment to the 2016 SPAN '
                         'conference.',
+                        style: widget.textStyle.copyWith(
+                          fontWeight: FontWeight.normal,
+                        ),
                       ),
                     ),
                     Expanded(
@@ -428,12 +437,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                   margin: const EdgeInsets.only(right: 16),
                                   child: const Icon(Icons.add_shopping_cart),
                                 ),
-                                const Text(
+                                Text(
                                   'ADD TO CART - \$12.99',
-                                  style: TextStyle(
-                                    fontFamily: 'Rubik',
-                                    fontWeight: FontWeight.w500,
-                                  ),
+                                  style: widget.textStyle,
                                 )
                               ],
                             ),
@@ -526,10 +532,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 child: Center(
                   child: Text(
                     _scannerHint ?? 'Point your camera at a barcode',
-                    style: const TextStyle(
-                      fontFamily: 'Rubik',
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: widget.textStyle,
                   ),
                 ),
               ),
