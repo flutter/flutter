@@ -113,7 +113,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       _animationController.addStatusListener((AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           Future<void>.delayed(const Duration(milliseconds: 1600), () {
-            if (_currentState != AnimationState.endSearch) {
+            if (_currentState == AnimationState.search) {
               _animationController.forward(from: 0);
             }
           });
@@ -206,6 +206,11 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     });
   }
 
+  bool get _barcodeNearAnimationInProgress {
+    return _currentState == AnimationState.barcodeNear &&
+        DateTime.now().millisecondsSinceEpoch - _animationStart < 2500;
+  }
+
   void _handleResult({
     @required List<Barcode> barcodes,
     @required MediaQueryData data,
@@ -214,10 +219,8 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     if (!_cameraController.value.isStreamingImages) {
       return;
     } else if (barcodes.isEmpty) {
-      if (_currentState == AnimationState.barcodeNear) {
-        if (DateTime.now().millisecondsSinceEpoch - _animationStart < 2500) {
-          return;
-        }
+      if (_barcodeNearAnimationInProgress) {
+        return;
       }
 
       if (_currentState != AnimationState.search) {
