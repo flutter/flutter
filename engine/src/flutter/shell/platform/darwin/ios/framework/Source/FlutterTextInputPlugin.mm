@@ -668,6 +668,8 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 
 @implementation FlutterTextInputPlugin {
   FlutterTextInputView* _view;
+  FlutterTextInputView* _secureView;
+  FlutterTextInputView* _activeView;
   FlutterTextInputViewAccessibilityHider* _inputHider;
 }
 
@@ -678,6 +680,11 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 
   if (self) {
     _view = [[FlutterTextInputView alloc] init];
+    _view.secureTextEntry = NO;
+    _secureView = [[FlutterTextInputView alloc] init];
+    _secureView.secureTextEntry = YES;
+
+    _activeView = _view;
     _inputHider = [[FlutterTextInputViewAccessibilityHider alloc] init];
   }
 
@@ -687,13 +694,14 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
 - (void)dealloc {
   [self hideTextInput];
   [_view release];
+  [_secureView release];
   [_inputHider release];
 
   [super dealloc];
 }
 
 - (UIView<UITextInput>*)textInputView {
-  return _view;
+  return _activeView;
 }
 
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
@@ -723,46 +731,51 @@ static UIReturnKeyType ToUIReturnKeyType(NSString* inputType) {
   NSAssert([UIApplication sharedApplication].keyWindow != nullptr,
            @"The application must have a key window since the keyboard client "
            @"must be part of the responder chain to function");
-  _view.textInputDelegate = _textInputDelegate;
-  [_inputHider addSubview:_view];
+  _activeView.textInputDelegate = _textInputDelegate;
+  [_inputHider addSubview:_activeView];
   [[UIApplication sharedApplication].keyWindow addSubview:_inputHider];
-  [_view becomeFirstResponder];
+  [_activeView becomeFirstResponder];
 }
 
 - (void)hideTextInput {
-  [_view resignFirstResponder];
-  [_view removeFromSuperview];
+  [_activeView resignFirstResponder];
+  [_activeView removeFromSuperview];
   [_inputHider removeFromSuperview];
 }
 
 - (void)setTextInputClient:(int)client withConfiguration:(NSDictionary*)configuration {
   NSDictionary* inputType = configuration[@"inputType"];
   NSString* keyboardAppearance = configuration[@"keyboardAppearance"];
-  _view.keyboardType = ToUIKeyboardType(inputType);
-  _view.returnKeyType = ToUIReturnKeyType(configuration[@"inputAction"]);
-  _view.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
-  if ([keyboardAppearance isEqualToString:@"Brightness.dark"]) {
-    _view.keyboardAppearance = UIKeyboardAppearanceDark;
-  } else if ([keyboardAppearance isEqualToString:@"Brightness.light"]) {
-    _view.keyboardAppearance = UIKeyboardAppearanceLight;
+  if ([configuration[@"obscureText"] boolValue]) {
+    _activeView = _secureView;
   } else {
-    _view.keyboardAppearance = UIKeyboardAppearanceDefault;
+    _activeView = _view;
   }
-  _view.secureTextEntry = [configuration[@"obscureText"] boolValue];
+
+  _activeView.keyboardType = ToUIKeyboardType(inputType);
+  _activeView.returnKeyType = ToUIReturnKeyType(configuration[@"inputAction"]);
+  _activeView.autocapitalizationType = ToUITextAutoCapitalizationType(configuration);
+  if ([keyboardAppearance isEqualToString:@"Brightness.dark"]) {
+    _activeView.keyboardAppearance = UIKeyboardAppearanceDark;
+  } else if ([keyboardAppearance isEqualToString:@"Brightness.light"]) {
+    _activeView.keyboardAppearance = UIKeyboardAppearanceLight;
+  } else {
+    _activeView.keyboardAppearance = UIKeyboardAppearanceDefault;
+  }
   NSString* autocorrect = configuration[@"autocorrect"];
-  _view.autocorrectionType = autocorrect && ![autocorrect boolValue]
-                                 ? UITextAutocorrectionTypeNo
-                                 : UITextAutocorrectionTypeDefault;
-  [_view setTextInputClient:client];
-  [_view reloadInputViews];
+  _activeView.autocorrectionType = autocorrect && ![autocorrect boolValue]
+                                       ? UITextAutocorrectionTypeNo
+                                       : UITextAutocorrectionTypeDefault;
+  [_activeView setTextInputClient:client];
+  [_activeView reloadInputViews];
 }
 
 - (void)setTextInputEditingState:(NSDictionary*)state {
-  [_view setTextInputState:state];
+  [_activeView setTextInputState:state];
 }
 
 - (void)clearTextInputClient {
-  [_view setTextInputClient:0];
+  [_activeView setTextInputClient:0];
 }
 
 @end
