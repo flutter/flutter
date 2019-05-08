@@ -12,6 +12,10 @@ void main() {
   int singleTapCancelCount;
   int singleLongTapStartCount;
   int doubleTapDownCount;
+  int doubleTapUpCount;
+  int doubleLongTapStartCount;
+  int doubleLongTapMoveUpdateCount;
+  int doubleLongTapEndCount;
   int forcePressStartCount;
   int forcePressEndCount;
   int dragStartCount;
@@ -36,6 +40,10 @@ void main() {
     singleTapCancelCount = 0;
     singleLongTapStartCount = 0;
     doubleTapDownCount = 0;
+    doubleTapUpCount = 0;
+    doubleLongTapStartCount = 0;
+    doubleLongTapMoveUpdateCount = 0;
+    doubleLongTapEndCount = 0;
     forcePressStartCount = 0;
     forcePressEndCount = 0;
     dragStartCount = 0;
@@ -52,6 +60,10 @@ void main() {
         onSingleTapCancel: _handleSingleTapCancel,
         onSingleLongTapStart: _handleSingleLongTapStart,
         onDoubleTapDown: _handleDoubleTapDown,
+        onDoubleTapUp:             (_) => ++doubleTapUpCount,
+        onDoubleLongTapStart:      (_) => ++doubleLongTapStartCount,
+        onDoubleLongTapMoveUpdate: (_) => ++doubleLongTapMoveUpdateCount,
+        onDoubleLongTapEnd:        (_) => ++doubleLongTapEndCount,
         onForcePressStart: _handleForcePressStart,
         onForcePressEnd: _handleForcePressEnd,
         onDragSelectionStart: _handleDragSelectionStart,
@@ -371,5 +383,160 @@ void main() {
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
+  });
+
+  group('onDoubleTapUp', () {
+    testWidgets('called after onDoubleTapDown, if the second tap is lifted right away', (WidgetTester tester) async {
+      await pumpGestureDetector(tester);
+
+      for(int testIdx = 0; testIdx++ < 10;) {
+        await tester.tapAt(const Offset(200, 200));
+
+        expect(doubleTapUpCount, testIdx ~/ 2);
+        await tester.pump(const Duration(milliseconds: 50));
+
+        expect(tapCount, testIdx);
+        expect(doubleTapDownCount, testIdx ~/ 2);
+      }
+    });
+
+    testWidgets('should not be called after onDoubleTapDown if the second touch down is followed by a drag', (WidgetTester tester) async {
+      await pumpGestureDetector(tester);
+      await tester.tapAt(const Offset(200, 200));
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(doubleTapDownCount, 1);
+
+      // drag
+      await gesture.moveBy(const Offset(210.0, 200.0));
+      await tester.pump();
+
+      await gesture.moveBy(const Offset(100, 100));
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      expect(tapCount, 2);
+      expect(doubleTapUpCount, 0);
+      expect(doubleTapDownCount, 1);
+    });
+
+    testWidgets('should not be called after onDoubleTapDown if the second touch down ended up being a long press', (WidgetTester tester) async {
+      await pumpGestureDetector(tester);
+      await tester.tapAt(const Offset(200, 200));
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+      // Must be longer than kPressTimeout to be recognized as a tap down.
+      await tester.pump(const Duration(milliseconds: 120));
+      expect(doubleTapDownCount, 1);
+
+      // Long touch.
+      await tester.pump(const Duration(seconds: 2));
+      await gesture.up();
+      await tester.pump();
+
+      expect(tapCount, 2);
+      expect(doubleTapUpCount, 0);
+      expect(doubleTapDownCount, 1);
+    });
+  });
+
+  group('double long tap', () {
+    testWidgets('triggered after onDoubleTapDown, if the second tap is a long press',
+      (WidgetTester tester) async {
+        await pumpGestureDetector(tester);
+        await tester.tapAt(const Offset(200, 200));
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+        await tester.pump(const Duration(milliseconds: 120));
+        expect(doubleLongTapStartCount, 0);
+
+        // Long touch.
+        await tester.pump(const Duration(seconds: 2));
+        expect(doubleLongTapStartCount, 1);
+        expect(doubleLongTapEndCount, 0);
+        await gesture.up();
+        await tester.pump();
+
+        expect(tapCount, 2);
+        expect(doubleLongTapMoveUpdateCount, 0);
+        expect(doubleLongTapEndCount, 1);
+    });
+
+    testWidgets('should not trigger after onDoubleTapDown, if the second tap is not a long press',
+      (WidgetTester tester) async {
+        await pumpGestureDetector(tester);
+        await tester.tapAt(const Offset(200, 200));
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+        await tester.pump(const Duration(milliseconds: 120));
+
+        // Long touch.
+        await gesture.up();
+        await tester.pump();
+
+        expect(tapCount, 2);
+        expect(doubleLongTapStartCount, 0);
+        expect(doubleLongTapMoveUpdateCount, 0);
+        expect(doubleLongTapEndCount, 0);
+    });
+
+    testWidgets('should not trigger after onDoubleTapDown, if the second '
+      'touch down pointer starts dragging before turning into a long press',
+      (WidgetTester tester) async {
+        await pumpGestureDetector(tester);
+        await tester.tapAt(const Offset(200, 200));
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+        await tester.pump(const Duration(milliseconds: 120));
+
+        // Long touch.
+        await gesture.moveBy(const Offset(100, 100));
+        await tester.pump();
+
+        await gesture.up();
+        await tester.pump();
+
+        // The second tap will be cancelled.
+        expect(tapCount, 2);
+        expect(singleTapCancelCount, 1);
+        expect(doubleLongTapStartCount, 0);
+        expect(doubleLongTapMoveUpdateCount, 0);
+        expect(doubleLongTapEndCount, 0);
+    });
+
+    testWidgets('drag after the long press is a long press drag',
+      (WidgetTester tester) async {
+        await pumpGestureDetector(tester);
+        await tester.tapAt(const Offset(200, 200));
+        await tester.pump();
+
+        final TestGesture gesture = await tester.startGesture(const Offset(200, 200));
+        await tester.pump(const Duration(seconds: 2));
+
+        expect(doubleLongTapStartCount, 1);
+        expect(doubleLongTapMoveUpdateCount, 0);
+
+        // Long touch.
+        await gesture.moveBy(const Offset(100, 100));
+        await tester.pump();
+
+        expect(doubleLongTapMoveUpdateCount, 1);
+        expect(doubleLongTapEndCount, 0);
+
+        await gesture.up();
+        await tester.pump();
+
+        expect(tapCount, 2);
+        expect(doubleLongTapStartCount, 1);
+        expect(doubleLongTapMoveUpdateCount, 1);
+        expect(doubleLongTapEndCount, 1);
+    });
   });
 }

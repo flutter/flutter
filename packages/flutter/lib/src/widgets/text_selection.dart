@@ -747,7 +747,8 @@ class TextSelectionGestureDetector extends StatefulWidget {
 
   /// Called for a single long tap that's sustained for longer than
   /// [kLongPressTimeout] but not necessarily lifted. Not called for a
-  /// double-tap-hold, which calls [onDoubleTapDown] instead.
+  /// double-tap-hold, which calls [onDoubleTapDown] and [onDoubleLongTapStart]
+  /// instead.
   final GestureLongPressStartCallback onSingleLongTapStart;
 
   /// Called after [onSingleLongTapStart] when the pointer is dragged.
@@ -759,13 +760,23 @@ class TextSelectionGestureDetector extends StatefulWidget {
   /// Called after a momentary hold or a short tap that is close in space and
   /// time (within [kDoubleTapTimeout]) to a previous short tap.
   final GestureTapDownCallback onDoubleTapDown;
+
+  /// Called after [onDoubleTapDown] when the pointer is lifted, unless
+  /// [onDoubleLongTapStart] is triggered.
   final GestureTapUpCallback onDoubleTapUp;
 
   /// Called when a mouse starts dragging to select text.
   final GestureDragStartCallback onDragSelectionStart;
 
+  /// Called after [onDoubleTapDown], when the second tap is sustained for longer
+  /// than [kLongPressTimeout], but not necessarily lifted.
   final GestureLongPressStartCallback onDoubleLongTapStart;
+
+  /// Called after [onDoubleLongTapStart], when the pointer is dragged.
   final GestureLongPressMoveUpdateCallback onDoubleLongTapMoveUpdate;
+
+  /// Called after [onDoubleLongTapStart] and potentially
+  /// [onDoubleLongTapMoveUpdate], when the pointer is lifted.
   final GestureLongPressEndCallback onDoubleLongTapEnd;
 
   /// Called repeatedly as a mouse moves while dragging.
