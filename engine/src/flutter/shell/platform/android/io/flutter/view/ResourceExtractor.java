@@ -172,7 +172,7 @@ class ResourceExtractor {
 
     ResourceExtractor start() {
         if (BuildConfig.DEBUG && mExtractTask != null) {
-            throw new AssertionError("Attempted to start resource extraction while another extraction was in progress.");
+            Log.e(TAG, "Attempted to start resource extraction while another extraction was in progress.");
         }
         mExtractTask = new ExtractTask(mDataDirPath, mResources, mPackageName, mPackageManager, mAssetManager);
         mExtractTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
