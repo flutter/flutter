@@ -52,8 +52,7 @@ class GetOffset extends CommandWithTarget {
 
 /// The result of the [GetRect] command.
 class GetOffsetResult extends Result {
-  /// Creates a result with the given [Rect] defined by [top], [left], [right],
-  /// and [bottom].
+  /// Creates a result with the offset defined by [dx] and [dy].
   GetOffsetResult({ this.dx = 0.0, this.dy = 0.0});
 
   /// The x component of the offset.
