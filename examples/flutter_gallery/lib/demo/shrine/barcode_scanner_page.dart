@@ -337,7 +337,13 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(16),
-                  child: Text('1 result found'),
+                  child: Text(
+                    '1 result found',
+                    style: TextStyle(
+                      fontFamily: 'Rubik',
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
               ),
               Container(
@@ -349,7 +355,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Image.asset(
-                          '18-0.jpg',
+                          'span_book.jpg',
                           package: 'shrine_images',
                           fit: BoxFit.cover,
                           width: 96,
@@ -362,28 +368,34 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: <Widget>[
                               Container(
-                                child: Text(
+                                child: const Text(
                                   'SPAN Reader',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .body1
-                                      .copyWith(fontWeight: FontWeight.bold),
+                                  style: TextStyle(
+                                    fontFamily: 'Rubik',
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ),
-                              Text(
+                              const Text(
                                 'Vol. 2',
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .body1
-                                    .copyWith(fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                  fontFamily: 'Rubik',
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                               Expanded(
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.end,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: const <Widget>[
-                                    Text('Material Design'),
-                                    Text('120 pages'),
+                                    Text(
+                                      'Material Design',
+                                      style: TextStyle(fontFamily: 'Rubik'),
+                                    ),
+                                    Text(
+                                      '120 pages',
+                                      style: TextStyle(fontFamily: 'Rubik'),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -394,8 +406,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 35, bottom: 25),
-                      child: const Text('A Japanese & English accompaniment to '
-                          'the 2016 SPAN conference.'),
+                      child: const Text(
+                        'A Japanese & English accompaniment to the 2016 SPAN '
+                        'conference.',
+                      ),
                     ),
                     Expanded(
                       child: Container(
@@ -414,10 +428,13 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                   margin: const EdgeInsets.only(right: 16),
                                   child: const Icon(Icons.add_shopping_cart),
                                 ),
-                                Text('ADD TO CART - \$12.99',
-                                    style: Theme.of(context)
-                                        .primaryTextTheme
-                                        .button),
+                                const Text(
+                                  'ADD TO CART - \$12.99',
+                                  style: TextStyle(
+                                    fontFamily: 'Rubik',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                )
                               ],
                             ),
                           ),
@@ -509,10 +526,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 child: Center(
                   child: Text(
                     _scannerHint ?? 'Point your camera at a barcode',
-                    style: Theme.of(context)
-                        .textTheme
-                        .body1
-                        .copyWith(fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontFamily: 'Rubik',
+                      fontWeight: FontWeight.w500,
+                    ),
                   ),
                 ),
               ),
