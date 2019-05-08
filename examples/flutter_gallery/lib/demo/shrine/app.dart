@@ -115,7 +115,7 @@ TextTheme _buildShrineTextTheme(TextTheme base) {
     body2: base.body2.copyWith(fontWeight: FontWeight.w500, fontSize: 16.0),
     button: base.button.copyWith(fontWeight: FontWeight.w500, fontSize: 14.0),
   ).apply(
-    fontFamily: 'Raleway',
+    fontFamily: 'Rubik',
     displayColor: kShrineBrown900,
     bodyColor: kShrineBrown900,
   );

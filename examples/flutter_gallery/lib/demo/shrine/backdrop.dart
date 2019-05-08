@@ -307,18 +307,21 @@ class _BackdropState extends State<Backdrop>
       ),
       actions: <Widget>[
         IconButton(
-          icon: const Icon(Icons.search, semanticLabel: 'login'),
+          icon: const Icon(
+            IconData(0xe900, fontFamily: 'BarcodeIcon'),
+            semanticLabel: 'scan barcode',
+          ),
           onPressed: () {
             Navigator.push<void>(
               context,
               MaterialPageRoute<void>(
-                builder: (BuildContext context) => BarcodeScannerPage(),
+                builder: (BuildContext context) => const BarcodeScannerPage(),
               ),
             );
           },
         ),
         IconButton(
-          icon: const Icon(Icons.tune, semanticLabel: 'login'),
+          icon: const Icon(Icons.search, semanticLabel: 'search'),
           onPressed: () {
             Navigator.push<void>(
               context,
