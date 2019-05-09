@@ -1,4 +1,4 @@
-Signature: 496df67ad5e7d7134f4a569784252e81
+Signature: e016b846e14fcaf6098cbcad3bab9e8e
 
 UNUSED LICENSES:
 
@@ -1525,8 +1525,8 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieProperty.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieShapeLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieTextLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/text/TextLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.cpp
 FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
@@ -5595,8 +5595,12 @@ FILE: ../../../third_party/skia/include/private/GrContext_Base.h
 FILE: ../../../third_party/skia/include/private/GrImageContext.h
 FILE: ../../../third_party/skia/include/private/GrRecordingContext.h
 FILE: ../../../third_party/skia/include/private/SkVx.h
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieShaper.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieShaper.h
+FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.h
+FILE: ../../../third_party/skia/modules/skottie/src/text/TextAdapter.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/text/TextAdapter.h
+FILE: ../../../third_party/skia/modules/skottie/src/text/TextValue.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/text/TextValue.h
 FILE: ../../../third_party/skia/modules/sksg/include/SkSGRenderEffect.h
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGRenderEffect.cpp
 FILE: ../../../third_party/skia/modules/sksg/src/SkSGTransformPriv.h
