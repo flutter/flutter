@@ -12,10 +12,11 @@ import 'scroll_metrics.dart';
 
 const double _kMinThumbExtent = 18.0;
 
-/// A [CustomPainter] for painting scrollbars. The size of the scrollbar along
-/// its scroll direction is typically proportional to the percentage of content
-/// completely visible on screen, as long as its size isn't less than [minLength]
-/// and it isn't overscrolling.
+/// A [CustomPainter] for painting scrollbars.
+///
+/// The size of the scrollbar along its scroll direction is typically
+/// proportional to the percentage of content completely visible on screen,
+/// as long as its size isn't less than [minLength] and it isn't overscrolling.
 ///
 /// Unlike [CustomPainter]s that subclasses [CustomPainter] and only repaint
 /// when [shouldRepaint] returns true (which requires this [CustomPainter] to
