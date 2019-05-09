@@ -151,6 +151,10 @@ class WidgetSpan extends PlaceholderSpan {
       return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
+    WidgetSpan typedOther = other;
+    if (child != typedOther.child || alignment != typedOther.alignment) {
+      return RenderComparison.layout;
+    }
     RenderComparison result = RenderComparison.identical;
     if (style != null) {
       final RenderComparison candidate = style.compareTo(other.style);
