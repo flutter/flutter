@@ -8,10 +8,10 @@ import 'package:flutter/rendering.dart';
 
 void main() {
   testWidgets('Sliver with keep alive without key - should dispose after reodering', (WidgetTester tester) async {
-    List<Widget> childList= <Widget>[
-      const WidgetTest0(text: 'child 0', keepAlive: true),
-      const WidgetTest1(text: 'child 1', keepAlive: true),
-      const WidgetTest2(text: 'child 2', keepAlive: true),
+    List<Widget> childList= const <Widget>[
+      WidgetTest0(text: 'child 0', keepAlive: true),
+      WidgetTest1(text: 'child 1', keepAlive: true),
+      WidgetTest2(text: 'child 2', keepAlive: true),
     ];
     await tester.pumpWidget(SwitchingChildListTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
@@ -31,10 +31,10 @@ void main() {
   });
 
   testWidgets('Sliver without keep alive without key - should dispose after reodering', (WidgetTester tester) async {
-    List<Widget> childList= <Widget>[
-      const WidgetTest0(text: 'child 0'),
-      const WidgetTest1(text: 'child 1'),
-      const WidgetTest2(text: 'child 2'),
+    List<Widget> childList= const <Widget>[
+      WidgetTest0(text: 'child 0'),
+      WidgetTest1(text: 'child 1'),
+      WidgetTest2(text: 'child 2'),
     ];
     await tester.pumpWidget(SwitchingChildListTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
