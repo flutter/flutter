@@ -229,7 +229,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     final double maxLogicalHeight =
         data.size.height - padding.top - padding.bottom;
 
-    // Width & Height are flipped from CameraController.previewSize on iOS
+    // Width & height are flipped from CameraController.previewSize on iOS
     final double imageHeight = defaultTargetPlatform == TargetPlatform.iOS
         ? imageSize.height
         : imageSize.width;
@@ -343,7 +343,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
       builder: (BuildContext context) {
         return Container(
           width: double.infinity,
-          height: 416,
+          height: 368,
           child: Column(
             children: <Widget>[
               Container(
@@ -360,69 +360,67 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                   ),
                 ),
               ),
-              Container(
-                margin: const EdgeInsets.all(24),
-                height: 312,
-                child: Column(
-                  children: <Widget>[
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Image.asset(
-                          'span_book.jpg',
-                          package: 'shrine_images',
-                          fit: BoxFit.cover,
-                          width: 96,
-                          height: 96,
-                        ),
-                        Container(
-                          height: 96,
-                          margin: const EdgeInsets.only(left: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 4),
-                                child: Text(
-                                  'SPAN Reader',
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: <Widget>[
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Image.asset(
+                            'span_book.jpg',
+                            package: 'shrine_images',
+                            fit: BoxFit.cover,
+                            width: 96,
+                            height: 96,
+                          ),
+                          Container(
+                            height: 96,
+                            margin: const EdgeInsets.only(left: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: <Widget>[
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 4),
+                                  child: Text(
+                                    'SPAN Reader',
+                                    style: Theme.of(context).textTheme.body2,
+                                  ),
+                                ),
+                                Text(
+                                  'Vol. 2',
                                   style: Theme.of(context).textTheme.body2,
                                 ),
-                              ),
-                              Text(
-                                'Vol. 2',
-                                style: Theme.of(context).textTheme.body2,
-                              ),
-                              Expanded(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.end,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: <Widget>[
-                                    Container(
-                                      margin: const EdgeInsets.only(bottom: 3),
-                                      child: const Text('Material Design'),
-                                    ),
-                                    const Text('120 pages'),
-                                  ],
+                                Expanded(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      Container(
+                                        margin:
+                                            const EdgeInsets.only(bottom: 3),
+                                        child: const Text('Material Design'),
+                                      ),
+                                      const Text('120 pages'),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        )
-                      ],
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 35, bottom: 25),
-                      child: Text(
-                        'A Japanese & English accompaniment to the 2016 SPAN '
-                        'conference.',
-                        style: Theme.of(context)
-                            .textTheme
-                            .caption
-                            .copyWith(fontSize: 15),
+                              ],
+                            ),
+                          )
+                        ],
                       ),
-                    ),
-                    Expanded(
-                      child: Container(
+                      Container(
+                        margin: const EdgeInsets.only(top: 30),
+                        child: const Text(
+                          'A Japanese & English accompaniment to the 2016 SPAN '
+                          'conference.',
+                        ),
+                      ),
+                      Expanded(
+                        child: Container(
                           padding: const EdgeInsets.only(bottom: 4),
                           alignment: Alignment.bottomCenter,
                           child: ButtonTheme(
@@ -440,9 +438,11 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                 ),
                               ),
                             ),
-                          )),
-                    ),
-                  ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],
