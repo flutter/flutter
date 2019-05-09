@@ -33,17 +33,11 @@ class BarcodeScannerPage extends StatefulWidget {
     this.validRectangle = const Rectangle(width: 320, height: 144),
     this.frameColor = kShrineScrim,
     this.traceMultiplier = 1.2,
-    this.textStyle = const TextStyle(
-      fontFamily: 'Rubik',
-      fontWeight: FontWeight.w500,
-      fontSize: 15,
-    ),
   });
 
   final Rectangle validRectangle;
   final Color frameColor;
   final double traceMultiplier;
-  final TextStyle textStyle;
 
   @override
   _BarcodeScannerPageState createState() => _BarcodeScannerPageState();
@@ -355,7 +349,10 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text('1 result found', style: widget.textStyle),
+                  child: Text(
+                    '1 result found',
+                    style: Theme.of(context).textTheme.body2,
+                  ),
                 ),
               ),
               Container(
@@ -383,16 +380,12 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                 margin: const EdgeInsets.only(bottom: 4),
                                 child: Text(
                                   'SPAN Reader',
-                                  style: widget.textStyle.copyWith(
-                                    fontSize: 17,
-                                  ),
+                                  style: Theme.of(context).textTheme.body2,
                                 ),
                               ),
                               Text(
                                 'Vol. 2',
-                                style: widget.textStyle.copyWith(
-                                  fontSize: 17,
-                                ),
+                                style: Theme.of(context).textTheme.body2,
                               ),
                               Expanded(
                                 child: Column(
@@ -401,19 +394,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                   children: <Widget>[
                                     Container(
                                       margin: const EdgeInsets.only(bottom: 3),
-                                      child: Text(
-                                        'Material Design',
-                                        style: widget.textStyle.copyWith(
-                                          fontWeight: FontWeight.normal,
-                                        ),
-                                      ),
+                                      child: const Text('Material Design'),
                                     ),
-                                    Text(
-                                      '120 pages',
-                                      style: widget.textStyle.copyWith(
-                                        fontWeight: FontWeight.normal,
-                                      ),
-                                    ),
+                                    const Text('120 pages'),
                                   ],
                                 ),
                               ),
@@ -424,12 +407,9 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 35, bottom: 25),
-                      child: Text(
+                      child: const Text(
                         'A Japanese & English accompaniment to the 2016 SPAN '
                         'conference.',
-                        style: widget.textStyle.copyWith(
-                          fontWeight: FontWeight.normal,
-                        ),
                       ),
                     ),
                     Expanded(
@@ -449,10 +429,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                                   margin: const EdgeInsets.only(right: 16),
                                   child: const Icon(Icons.add_shopping_cart),
                                 ),
-                                Text(
-                                  'ADD TO CART - \$12.99',
-                                  style: widget.textStyle,
-                                )
+                                const Text('ADD TO CART - \$12.99')
                               ],
                             ),
                           ),
@@ -544,7 +521,7 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                 child: Center(
                   child: Text(
                     _scannerHint ?? 'Point your camera at a barcode',
-                    style: widget.textStyle,
+                    style: Theme.of(context).textTheme.button,
                   ),
                 ),
               ),
