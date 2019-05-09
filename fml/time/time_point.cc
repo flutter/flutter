@@ -12,7 +12,7 @@
 #elif defined(OS_FUCHSIA)
 #include <zircon/syscalls.h>
 #elif defined(OS_WIN)
-#include <windows.h>
+#include <chrono>
 #else
 #include <time.h>
 #endif  // defined(OS_MACOSX) || defined(OS_IOS)
@@ -53,11 +53,11 @@ TimePoint TimePoint::Now() {
 #elif defined(OS_WIN)
 
 TimePoint TimePoint::Now() {
-  uint64_t freq = 0;
-  uint64_t count = 0;
-  QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-  QueryPerformanceCounter((LARGE_INTEGER*)&count);
-  return TimePoint((count * 1000000000) / freq);
+  // The base time is arbitrary; use the clock epoch for convenience.
+  const auto elapsed_time = std::chrono::steady_clock::now().time_since_epoch();
+  return TimePoint(
+      std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed_time)
+          .count());
 }
 
 #else
