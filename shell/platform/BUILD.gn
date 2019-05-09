@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//build/fuchsia/sdk.gni")
+
 group("platform") {
   if (is_mac || is_ios) {
     deps = [
@@ -26,9 +28,11 @@ group("platform") {
     ]
   } else if (is_fuchsia) {
     # Fuchsia has its own runner implementation.
-    deps = [
-      "fuchsia",
-    ]
+    if (using_fuchsia_sdk) {
+      deps = [
+        "fuchsia",
+      ]
+    }
   } else {
     assert(false, "Unknown/Unsupported platform.")
   }
