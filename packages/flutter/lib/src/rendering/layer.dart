@@ -634,11 +634,15 @@ class ContainerLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
+    Layer current = lastChild;
+    while (current != null) {
+      final Object value = current.find<S>(regionOffset);
+      if (value != null) {
+        return value;
+      }
+      current = current.previousSibling;
     }
-    return all.first;
+    return null;
   }
 
   @override
@@ -1263,26 +1267,31 @@ class TransformLayer extends OffsetLayer {
     return null; // this does not return an engine layer yet.
   }
 
-  @override
-  S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
-    }
-    return all.first;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Offset _transformOffset(Offset regionOffset) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(transform);
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
-      return;
+      return null;
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    yield* super.findAll<S>(Offset(result[0], result[1]));
+    return Offset(result[0], result[1]);
+  }
+
+  @override
+  S find<S>(Offset regionOffset) {
+    final Offset transformedOffset = _transformOffset(regionOffset);
+    return transformedOffset == null ? null : super.find<S>(transformedOffset);
+  }
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+    final Offset transformedOffset = _transformOffset(regionOffset);
+    if (transformedOffset == null) {
+      return;
+    }
+    yield* super.findAll<S>(transformedOffset);
   }
 
   @override
@@ -1588,11 +1597,9 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
+    if (!clipPath.contains(regionOffset))
       return null;
-    }
-    return all.first;
+    return super.find<S>(regionOffset);
   }
 
   @override
@@ -1844,11 +1851,11 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
+    if (link.leader == null) {
+      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
     }
-    return all.first;
+    final Offset transformedOffset = _transformOffset<S>(regionOffset);
+    return transformedOffset == null ? null : super.find<S>(transformedOffset);
   }
 
   @override
@@ -1856,7 +1863,11 @@ class FollowerLayer extends ContainerLayer {
     if (link.leader == null) {
       return showWhenUnlinked ? super.findAll<S>(regionOffset - unlinkedOffset) : <S>[];
     }
-    return super.findAll<S>(_transformOffset<S>(regionOffset));
+    final Offset transformedOffset = _transformOffset<S>(regionOffset);
+    if (transformedOffset == null) {
+      return <S>[];
+    }
+    return super.findAll<S>(transformedOffset);
   }
 
   /// The transform that was used during the last composition phase.
@@ -2031,11 +2042,17 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
+    final S result = super.find<S>(regionOffset);
+    if (result != null)
+      return result;
+    if (size != null && !(offset & size).contains(regionOffset))
       return null;
+    if (T == S) {
+      final Object untypedResult = value;
+      final S typedResult = untypedResult;
+      return typedResult;
     }
-    return all.first;
+    return super.find<S>(regionOffset);
   }
 
   @override
