@@ -19,6 +19,7 @@ import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
 import '../common/fuchsia_compat.dart';
+import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -464,6 +465,37 @@ class FlutterDriver {
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
+  }
+
+  Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
+    final GetOffset command = GetOffset(finder, type, timeout: timeout);
+    final GetOffsetResult result = GetOffsetResult.fromJson(await _sendCommand(command));
+    return DriverOffset(result.dx, result.dy);
+  }
+
+  /// Returns the point at the top left of the widget identified by `finder`.
+  Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.topLeft, timeout: timeout);
+  }
+
+  /// Returns the point at the top right of the widget identified by `finder`.
+  Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.topRight, timeout: timeout);
+  }
+
+  /// Returns the point at the bottom left of the widget identified by `finder`.
+  Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.bottomLeft, timeout: timeout);
+  }
+
+  /// Returns the point at the bottom right of the widget identified by `finder`.
+  Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.bottomRight, timeout: timeout);
+  }
+
+  /// Returns the point at the center of the widget identified by `finder`.
+  Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.center, timeout: timeout);
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -985,4 +1017,30 @@ class CommonFinders {
 
   /// Finds the back button on a Material or Cupertino page's scaffold.
   SerializableFinder pageBack() => PageBack();
+}
+
+/// An immutable 2D floating-point offset used by Flutter Driver.
+class DriverOffset {
+  /// Creates an offset.
+  const DriverOffset(this.dx, this.dy);
+
+  /// The x component of the offset.
+  final double dx;
+
+  /// The y component of the offset.
+  final double dy;
+
+  @override
+  String toString() => '$runtimeType($dx, $dy)';
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! DriverOffset)
+      return false;
+    final DriverOffset typedOther = other;
+    return dx == typedOther.dx && dy == typedOther.dy;
+  }
+
+  @override
+  int get hashCode => dx.hashCode + dy.hashCode;
 }
