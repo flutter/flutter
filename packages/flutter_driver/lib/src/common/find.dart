@@ -326,7 +326,7 @@ class PageBack extends SerializableFinder {
 /// be considered for a match. The argument defaults to false.
 class Descendant extends SerializableFinder {
   /// Creates a descendant finder.
-  Descendant({
+  const Descendant({
     @required this.of,
     @required this.matching,
     this.matchRoot = false,
@@ -383,7 +383,7 @@ class Descendant extends SerializableFinder {
 /// be considered for a match. The argument defaults to false.
 class Ancestor extends SerializableFinder {
   /// Creates an ancestor finder.
-  Ancestor({
+  const Ancestor({
     @required this.of,
     @required this.matching,
     this.matchRoot = false,
