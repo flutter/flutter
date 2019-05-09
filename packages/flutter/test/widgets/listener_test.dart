@@ -502,7 +502,7 @@ void main() {
       await gesture.addPointer();
 
       await tester.pumpWidget(
-        Center(child: const HoverFeedback()),
+        const Center(child: HoverFeedback()),
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(Text)));
@@ -519,7 +519,7 @@ void main() {
       expect(HoverClientState.numExits, equals(1));
 
       await tester.pumpWidget(
-        Center(child: const HoverFeedback()),
+        const Center(child: HoverFeedback()),
       );
       await tester.pump();
       expect(HoverClientState.numEntries, equals(2));
