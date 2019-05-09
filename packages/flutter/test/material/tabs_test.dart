@@ -2299,4 +2299,55 @@ void main() {
     final IconThemeData iconTheme = IconTheme.of(tester.element(find.text('A')));
     expect(iconTheme.color, equals(selectedTabColor));
   });
+
+  testWidgets('Replacing the tabController after disposing the old one', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/32428
+
+    TabController controller = TabController(vsync: const TestVSync(), length: 2);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StatefulBuilder(
+          builder: (BuildContext context, StateSetter setState) {
+            return Scaffold(
+              appBar: AppBar(
+                bottom: TabBar(
+                  controller: controller,
+                  tabs: List<Widget>.generate(controller.length, (int index) => Tab(text: 'Tab$index')),
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                    child: const Text('Change TabController length'),
+                    onPressed: () {
+                      setState(() {
+                        controller.dispose();
+                        controller = TabController(vsync: const TestVSync(), length: 3);
+                      });
+                    },
+                  ),
+                ],
+              ),
+              body: TabBarView(
+                controller: controller,
+                children: List<Widget>.generate(controller.length, (int index) => Center(child: Text('Tab $index'))),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+
+    expect(controller.index, 0);
+    expect(controller.length, 2);
+    expect(find.text('Tab0'), findsOneWidget);
+    expect(find.text('Tab1'), findsOneWidget);
+    expect(find.text('Tab2'), findsNothing);
+
+    await tester.tap(find.text('Change TabController length'));
+    await tester.pumpAndSettle();
+    expect(controller.index, 0);
+    expect(controller.length, 3);
+    expect(find.text('Tab0'), findsOneWidget);
+    expect(find.text('Tab1'), findsOneWidget);
+    expect(find.text('Tab2'), findsOneWidget);
+  });
 }
