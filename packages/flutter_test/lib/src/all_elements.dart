@@ -20,6 +20,15 @@ Iterable<Element> collectAllElementsFrom(
   Element rootElement, {
   @required bool skipOffstage,
 }) {
+  assert(() {
+    if (rootElement == null) {
+      throw FlutterError(
+        'A root widget has not been attached to the render tree. '
+        'Have you remembered to call runApp()?'
+      );
+    }
+    return true;
+  }());
   return CachingIterable<Element>(_DepthFirstChildIterator(rootElement, skipOffstage));
 }
 
