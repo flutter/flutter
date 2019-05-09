@@ -126,9 +126,16 @@ class AccessibilityBridge;
  * * `SemanticsObject` for the other type of semantics objects.
  * * `FlutterSemanticsObject` for default implementation of `SemanticsObject`.
  */
-@interface FlutterPlatformViewSemanticsContainer : UIAccessibilityElement
+@interface FlutterPlatformViewSemanticsContainer : NSObject
+
+/**
+ * The position inside an accessibility container.
+ */
+@property(nonatomic) NSInteger index;
 
 - (instancetype)init __attribute__((unavailable("Use initWithAccessibilityContainer: instead")));
+
+- (instancetype)initWithSemanticsObject:(SemanticsObject*)object;
 
 @end
 
