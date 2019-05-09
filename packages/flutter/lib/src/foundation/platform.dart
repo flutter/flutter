@@ -5,6 +5,7 @@
 import 'dart:io' show Platform;
 
 import 'assertions.dart';
+import 'constants.dart';
 
 /// The platform that user interaction should adapt to target.
 ///
@@ -50,15 +51,19 @@ enum TargetPlatform {
 // (since doing so would be a big breaking change).
 TargetPlatform get defaultTargetPlatform {
   TargetPlatform result;
-  if (Platform.isIOS) {
-    result = TargetPlatform.iOS;
-  } else if (Platform.isAndroid) {
+  if (kIsWeb) {
     result = TargetPlatform.android;
-  } else if (Platform.isFuchsia) {
-    result = TargetPlatform.fuchsia;
+  } else {
+    if (Platform.isIOS) {
+      result = TargetPlatform.iOS;
+    } else if (Platform.isAndroid) {
+      result = TargetPlatform.android;
+    } else if (Platform.isFuchsia) {
+      result = TargetPlatform.fuchsia;
+    }
   }
   assert(() {
-    if (Platform.environment.containsKey('FLUTTER_TEST'))
+    if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'))
       result = TargetPlatform.android;
     return true;
   }());

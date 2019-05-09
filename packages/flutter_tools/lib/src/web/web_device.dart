@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/asset.dart';
+import 'package:flutter_tools/src/base/common.dart';
+
 import '../application_package.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
@@ -10,6 +13,7 @@ import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../bundle.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -111,6 +115,13 @@ class WebDevice extends Device {
       printError('Failed to compile ${package.name} to JavaScript');
       return LaunchResult.failed();
     }
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    final int build = await assetBundle.build();
+    if (build != 0) {
+      throwToolExit('Error: Failed to build asset bundle');
+    }
+    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+
     _package = package;
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     _server.listen(_basicAssetServer);
@@ -141,7 +152,7 @@ class WebDevice extends Device {
       await request.response.close();
       return;
     }
-    // Resolve all get requests to the build/web/asset directory.
+    // Resolve all get requests to the build/web/ or build/flutter_assets directory.
     final Uri uri = request.uri;
     File file;
     String contentType;
@@ -152,8 +163,9 @@ class WebDevice extends Device {
       file = fs.file(fs.path.join(getWebBuildDirectory(), 'main.dart.js'));
       contentType = 'text/javascript';
     } else {
-      file = fs.file(fs.path.join(getAssetBuildDirectory(), uri.path));
+      file = fs.file(fs.path.join(getAssetBuildDirectory(), uri.path.replaceFirst('/assets/', '')));
     }
+
     if (!file.existsSync()) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();
@@ -201,7 +213,7 @@ class ChromeLauncher {
 
   Future<void> launch(String host) async {
     if (platform.isMacOS) {
-      await processManager.start(<String>[
+      return processManager.start(<String>[
         _kMacosLocation,
         host,
       ]);
