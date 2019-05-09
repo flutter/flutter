@@ -51,6 +51,9 @@
       "ui": {
         "uri": "lib/ui/ui.dart"
       },
+      "_engine": {
+        "uri": "lib/_engine/engine.dart"
+      },
       "js": {
         "uri": "../dart-sdk/lib/js/dart2js/js_dart2js.dart"
       },

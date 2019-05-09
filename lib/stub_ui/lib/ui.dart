@@ -2,37 +2,44 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Built-in types and core primitives for a Flutter application.
+/// This library defines the web equivalent of the native dart:ui.
 ///
-/// To use, import `dart:ui`.
-///
-/// This library exposes the lowest-level services that Flutter frameworks use
-/// to bootstrap applications, such as classes for driving the input, graphics
-/// text, layout, and rendering subsystems.
+/// All types in this library are public.
 library ui;
 
-//import 'dart:_internal' hide Symbol; // ignore: import_internal_library, unused_import
 import 'dart:async';
-import 'dart:collection' as collection;
-import 'dart:convert';
-import 'dart:developer' as developer;
-import 'dart:html'; // ignore: unused_import
-import 'dart:io'; // ignore: unused_import
-import 'dart:isolate' show SendPort;
+import 'dart:convert' hide Codec;
+import 'dart:collection';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:html' as html;
+import 'dart:js_util' as js_util;
+import 'dart:isolate' show SendPort;
 
-part 'compositing.dart';
-part 'geometry.dart';
-part 'hash_codes.dart';
-part 'hooks.dart';
-part 'isolate_name_server.dart';
-part 'lerp.dart';
-part 'natives.dart';
-part 'painting.dart';
-part 'plugins.dart';
-part 'pointer.dart';
-part 'semantics.dart';
-part 'text.dart';
-part 'versions.dart';
-part 'window.dart';
+import 'src/engine.dart' as engine;
+
+import 'package:meta/meta.dart';
+
+part 'src/ui/canvas.dart';
+part 'src/ui/compositing.dart';
+part 'src/ui/debug_canvas_reuse_overlay.dart';
+part 'src/ui/geometry.dart';
+part 'src/ui/hash_codes.dart';
+part 'src/ui/initialization.dart';
+part 'src/ui/lerp.dart';
+part 'src/ui/natives.dart';
+part 'src/ui/painting.dart';
+part 'src/ui/pointer.dart';
+part 'src/ui/semantics.dart';
+part 'src/ui/browser_location.dart';
+part 'src/ui/text.dart';
+part 'src/ui/tile_mode.dart';
+part 'src/ui/window.dart';
+
+/// Provides a compile time constant to customize flutter framework and other
+/// users of ui engine for web runtime.
+const bool isWeb = true;
+
+/// Web specific SMI. Used by bitfield. The 0x3FFFFFFFFFFFFFFF used on VM
+/// is not supported on Web platform.
+const int kMaxUnsignedSMI = -1;

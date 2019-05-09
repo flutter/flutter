@@ -130,6 +130,9 @@ dart2js:
     ui:
       uri: "lib/ui/ui.dart"
 
+    _engine:
+      uri: "lib/_engine/engine.dart"
+
     async:
       uri: "../dart-sdk/lib/async/async.dart"
       patches: "../dart-sdk/lib/_internal/js_runtime/lib/async_patch.dart"
