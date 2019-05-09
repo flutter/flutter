@@ -9,32 +9,66 @@ import 'package:path/path.dart' as path;
 
 final ArgParser argParser = ArgParser()
   ..addOption('output-dir')
+  ..addOption('input-dir')
+  ..addFlag('ui', defaultsTo: false)
+  ..addFlag('engine', defaultsTo: false)
   ..addMultiOption('input');
 
-const Pattern packageLibraryName = 'library ui;';
-const Pattern packagePartName = 'part of ui;';
-const Pattern coreLibraryName = 'library dart.ui;';
-const Pattern corePartName = 'part of dart.ui;';
+const List<List<String>> uiPatterns = <List<String>>[
+  <String>['library ui;', 'library dart.ui;'],
+  <String>['part of ui;', 'part of dart.ui;'],
+  <String>[
+r'''
+import 'src/engine.dart' as engine;
+''',
+r'''
+import 'dart:_engine' as engine;
+'''
+  ]
+];
+
+const List<List<String>> enginePatterns = <List<String>>[
+  <String>['library engine;', 'library dart._engine;'],
+  <String>['part of engine;', 'part of dart._engine;'],
+  <String>[
+r'''
+import '../ui.dart' as ui;
+''',
+r'''
+import 'dart:ui' as ui;
+'''
+  ]
+];
+
+const List<List<String>> sharedPatterns = <List<String>>[
+  <String>["import 'package:meta/meta.dart';" ,''],
+  <String>['@required', ''],
+  <String>['@protected', ''],
+  <String>['@mustCallSuper', ''],
+  <String>['@immutable', ''],
+  <String>['@visibleForTesting', '']
+];
 
 // Rewrites the "package"-style web ui library into a dart:ui implementation.
 // So far this only requires a replace of the library declarations.
 void main(List<String> arguments) {
   final ArgResults results = argParser.parse(arguments);
   final Directory directory = Directory(results['output-dir']);
-  if (!directory.existsSync()) {
-    directory.createSync(recursive: true);
-  }
+  final String inputDirectoryPath = results['input-dir'];
   for (String inputFilePath in results['input']) {
     final File inputFile = File(inputFilePath);
-    final String fileName = path.split(inputFilePath).last;
-    final File outputFile = File(path.join(directory.path, fileName))
-      ..createSync();
-    String source;
-    if (fileName == 'ui.dart') {
-      source = inputFile.readAsStringSync().replaceFirst(packageLibraryName, coreLibraryName);
-      outputFile.writeAsStringSync(source);
-    } else {
-      source = inputFile.readAsStringSync().replaceFirst(packagePartName, corePartName);
+    final File outputFile = File(path.join(directory.path, inputFile.path.substring(inputDirectoryPath.length)))
+      ..createSync(recursive: true);
+    String source = inputFile.readAsStringSync();
+    final List<List<String>> replacementPatterns = <List<String>>[];
+    replacementPatterns.addAll(sharedPatterns);
+    if (results['ui']) {
+      replacementPatterns.addAll(uiPatterns);
+    } else if (results['engine']) {
+      replacementPatterns.addAll(enginePatterns);
+    }
+    for (List<String> patterns in replacementPatterns) {
+      source = source.replaceAll(patterns.first, patterns.last);
     }
     outputFile.writeAsStringSync(source);
   }

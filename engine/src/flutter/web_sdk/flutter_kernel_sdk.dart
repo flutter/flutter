@@ -105,5 +105,6 @@ class FlutterDevCompilerTarget extends DevCompilerTarget {
         'dart:web_gl',
         'dart:web_sql',
         'dart:ui',
+        'dart:_engine',
       ];
 }
