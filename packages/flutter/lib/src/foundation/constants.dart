@@ -38,6 +38,3 @@ const bool kDebugMode = !kReleaseMode && !kProfileMode;
 /// precision loss in calculations. Differences below this threshold are safe to
 /// disregard.
 const double precisionErrorTolerance = 1e-10;
-
-/// A constant that is true if the application was compiled to JavaScript.
-const bool kIsWeb = identical(1, 1.0);
