@@ -403,7 +403,10 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 @end
 
-@implementation FlutterPlatformViewSemanticsContainer
+@implementation FlutterPlatformViewSemanticsContainer {
+  SemanticsObject* _semanticsObject;
+  UIView* _platformView;
+}
 
 // Method declared as unavailable in the interface
 - (instancetype)init {
@@ -412,12 +415,34 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   return nil;
 }
 
-- (instancetype)initWithAccessibilityContainer:(id)container {
-  FML_CHECK(container);
-  if (self = [super initWithAccessibilityContainer:container]) {
-    self.isAccessibilityElement = NO;
+- (instancetype)initWithSemanticsObject:(SemanticsObject*)object {
+  FML_CHECK(object);
+  if (self = [super init]) {
+    _semanticsObject = object;
+    flutter::FlutterPlatformViewsController* controller =
+        object.bridge->GetPlatformViewsController();
+    if (controller) {
+      _platformView = [controller->GetPlatformViewByID(object.node.platformViewId) view];
+    }
+    self.accessibilityElements = @[ _semanticsObject, _platformView ];
   }
   return self;
+}
+
+- (CGRect)accessibilityFrame {
+  return _semanticsObject.accessibilityFrame;
+}
+
+- (BOOL)isAccessibilityElement {
+  return NO;
+}
+
+- (id)accessibilityContainer {
+  return [_semanticsObject accessibilityContainer];
+}
+
+- (BOOL)accessibilityScroll:(UIAccessibilityScrollDirection)direction {
+  return [_platformView accessibilityScroll:direction];
 }
 
 @end
@@ -453,10 +478,6 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
 - (NSInteger)accessibilityElementCount {
   NSInteger count = [[_semanticsObject children] count] + 1;
-  // Need to create an additional child that acts as accessibility container for the platform view.
-  if (_semanticsObject.node.IsPlatformViewNode()) {
-    count++;
-  }
   return count;
 }
 
@@ -467,14 +488,13 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
     return _semanticsObject;
   }
 
-  // Return the additional child acts as a container of platform view. The
-  // platformViewSemanticsContainer was created and cached in the updateSemantics path.
-  if (_semanticsObject.node.IsPlatformViewNode() && index == [self accessibilityElementCount] - 1) {
-    FML_CHECK(_semanticsObject.platformViewSemanticsContainer != nil);
-    return _semanticsObject.platformViewSemanticsContainer;
-  }
-
   SemanticsObject* child = [_semanticsObject children][index - 1];
+
+  // Swap the original `SemanticsObject` to a `PlatformViewSemanticsContainer`
+  if (child.node.IsPlatformViewNode()) {
+    child.platformViewSemanticsContainer.index = index;
+    return child.platformViewSemanticsContainer;
+  }
 
   if ([child hasChildren])
     return [child accessibilityContainer];
@@ -487,7 +507,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
 
   // FlutterPlatformViewSemanticsContainer is always the last element of its parent.
   if ([element isKindOfClass:[FlutterPlatformViewSemanticsContainer class]]) {
-    return [self accessibilityElementCount] - 1;
+    return ((FlutterPlatformViewSemanticsContainer*)element).index;
   }
 
   NSMutableArray<SemanticsObject*>* children = [_semanticsObject children];
@@ -608,12 +628,8 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
     if (object.node.IsPlatformViewNode()) {
       FlutterPlatformViewsController* controller = GetPlatformViewsController();
       if (controller) {
-        object.platformViewSemanticsContainer = [[FlutterPlatformViewSemanticsContainer alloc]
-            initWithAccessibilityContainer:[object accessibilityContainer]];
-        UIView* platformView = [controller->GetPlatformViewByID(object.node.platformViewId) view];
-        if (platformView) {
-          object.platformViewSemanticsContainer.accessibilityElements = @[ platformView ];
-        }
+        object.platformViewSemanticsContainer =
+            [[FlutterPlatformViewSemanticsContainer alloc] initWithSemanticsObject:object];
       }
     } else if (object.platformViewSemanticsContainer) {
       [object.platformViewSemanticsContainer release];
@@ -659,7 +675,6 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
   [objects_ removeObjectsForKeys:doomed_uids];
 
   layoutChanged = layoutChanged || [doomed_uids count] > 0;
-
   if (routeChanged) {
     NSString* routeName = [lastAdded routeName];
     UIAccessibilityPostNotification(UIAccessibilityScreenChangedNotification, routeName);
