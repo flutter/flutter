@@ -49,16 +49,22 @@ enum TargetPlatform {
 // and we'd never be able to introduce dedicated behavior for that platform
 // (since doing so would be a big breaking change).
 TargetPlatform get defaultTargetPlatform {
+  // TODO(jonahwilliams): consider where this constant should live.
+  const bool kIsWeb = identical(1, 1.0);
   TargetPlatform result;
-  if (Platform.isIOS) {
-    result = TargetPlatform.iOS;
-  } else if (Platform.isAndroid) {
+  if (kIsWeb) {
     result = TargetPlatform.android;
-  } else if (Platform.isFuchsia) {
-    result = TargetPlatform.fuchsia;
+  } else {
+    if (Platform.isIOS) {
+      result = TargetPlatform.iOS;
+    } else if (Platform.isAndroid) {
+      result = TargetPlatform.android;
+    } else if (Platform.isFuchsia) {
+      result = TargetPlatform.fuchsia;
+    }
   }
   assert(() {
-    if (Platform.environment.containsKey('FLUTTER_TEST'))
+    if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'))
       result = TargetPlatform.android;
     return true;
   }());
