@@ -1051,8 +1051,8 @@ class CupertinoDialogAction extends StatelessWidget {
 
   /// Whether this action destroys an object.
   ///
-  /// false and cannot be null
   /// For example, an action that deletes an email is destructive. Defaults to
+  /// false and cannot be null.
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.
