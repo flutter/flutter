@@ -163,26 +163,13 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   ///
   /// Returns null if no matching region is found.
   ///
-  /// The main way for a value to be found here is by pushing an
+  /// The main way for a value to be assigned here is by pushing an
   /// [AnnotatedRegionLayer] into the layer tree.
   ///
   /// See also:
   ///
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
   S find<S>(Offset regionOffset);
-
-  /// Returns an iterable of [S] values that corresponds to the point described
-  /// by [regionOffset] on all layers under the point.
-  ///
-  /// Returns an empty list if no matching region is found.
-  ///
-  /// The main way for a value to be found here is by pushing an
-  /// [AnnotatedRegionLayer] into the layer tree.
-  ///
-  /// See also:
-  ///
-  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  Iterable<S> findAll<S>(Offset regionOffset);
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -303,9 +290,6 @@ class PictureLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -375,9 +359,6 @@ class TextureLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
@@ -414,9 +395,6 @@ class PlatformViewLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -490,9 +468,6 @@ class PerformanceOverlayLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A composited layer that has a list of children.
@@ -634,24 +609,15 @@ class ContainerLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
+    Layer current = lastChild;
+    while (current != null) {
+      final Object value = current.find<S>(regionOffset);
+      if (value != null) {
+        return value;
+      }
+      current = current.previousSibling;
     }
-    return all.first;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    if (firstChild == null)
-      return;
-    Layer child = lastChild;
-    while (true) {
-      yield* child.findAll<S>(regionOffset);
-      if (child == firstChild)
-        break;
-      child = child.previousSibling;
-    }
+    return null;
   }
 
   @override
@@ -879,11 +845,6 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    return super.findAll<S>(regionOffset - offset);
-  }
-
-  @override
   void applyTransform(Layer child, Matrix4 transform) {
     assert(child != null);
     assert(transform != null);
@@ -1033,13 +994,6 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    if (!clipRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
-  }
-
-  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
@@ -1109,13 +1063,6 @@ class ClipRRectLayer extends ContainerLayer {
     if (!clipRRect.contains(regionOffset))
       return null;
     return super.find<S>(regionOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    if (!clipRRect.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
   }
 
   @override
@@ -1191,13 +1138,6 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
-  }
-
-  @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
@@ -1265,24 +1205,15 @@ class TransformLayer extends OffsetLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
-    }
-    return all.first;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(transform);
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
-      return;
+      return null;
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    yield* super.findAll<S>(Offset(result[0], result[1]));
+    return super.find<S>(Offset(result[0], result[1]));
   }
 
   @override
@@ -1588,18 +1519,9 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
-    }
-    return all.first;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
     if (!clipPath.contains(regionOffset))
-      return;
-    yield* super.findAll<S>(regionOffset);
+      return null;
+    return super.find<S>(regionOffset);
   }
 
   @override
@@ -1713,10 +1635,9 @@ class LeaderLayer extends ContainerLayer {
   Offset _lastOffset;
 
   @override
-  S find<S>(Offset regionOffset) => super.find<S>(regionOffset - offset);
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => super.findAll<S>(regionOffset - offset);
+  S find<S>(Offset regionOffset) {
+    return super.find<S>(regionOffset - offset);
+  }
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
@@ -1830,7 +1751,11 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 _invertedTransform;
   bool _inverseDirty = true;
 
-  Offset _transformOffset<S>(Offset regionOffset) {
+  @override
+  S find<S>(Offset regionOffset) {
+    if (link.leader == null) {
+      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
+    }
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(getLastTransform());
       _inverseDirty = false;
@@ -1839,24 +1764,7 @@ class FollowerLayer extends ContainerLayer {
       return null;
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    return Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy);
-  }
-
-  @override
-  S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
-    }
-    return all.first;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    if (link.leader == null) {
-      return showWhenUnlinked ? super.findAll<S>(regionOffset - unlinkedOffset) : <S>[];
-    }
-    return super.findAll<S>(_transformOffset<S>(regionOffset));
+    return super.find<S>(Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy));
   }
 
   /// The transform that was used during the last composition phase.
@@ -2031,24 +1939,17 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
+    final S result = super.find<S>(regionOffset);
+    if (result != null)
+      return result;
+    if (size != null && !(offset & size).contains(regionOffset))
       return null;
-    }
-    return all.first;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
-    yield* super.findAll<S>(regionOffset);
-    if (size != null && !(offset & size).contains(regionOffset)) {
-      return;
-    }
     if (T == S) {
       final Object untypedResult = value;
       final S typedResult = untypedResult;
-      yield typedResult;
+      return typedResult;
     }
+    return super.find<S>(regionOffset);
   }
 
   @override

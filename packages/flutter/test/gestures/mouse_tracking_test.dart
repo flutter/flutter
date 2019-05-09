@@ -65,11 +65,12 @@ void main() {
       isInHitRegionTwo = false;
       tracker = MouseTracker(
         GestureBinding.instance.pointerRouter,
-            (Offset _) sync* {
+        (Offset _) {
           if (isInHitRegionOne)
-            yield annotation;
+            return annotation;
           else if (isInHitRegionTwo)
-            yield partialAnnotation;
+            return partialAnnotation;
+          return null;
         },
       );
     });
