@@ -1819,8 +1819,8 @@ void main() {
     expect(fourthPos.dx, 0);
     expect(firstPos.dx, fourthPos.dx);
     expect(firstPos.dy, lessThan(fourthPos.dy));
-    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
-    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(firstPos)), isTrue);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(fourthPos)), isFalse);
 
     TestGesture gesture = await tester.startGesture(firstPos, pointer: 7);
     await tester.pump();
@@ -1839,8 +1839,8 @@ void main() {
     Offset newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
 
     expect(newFirstPos.dy, lessThan(firstPos.dy));
-    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
-    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isFalse);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isTrue);
 
     // Now try scrolling by dragging the selection handle.
     // Long press the middle of the word "won't" in the fourth line.
@@ -1885,8 +1885,8 @@ void main() {
     newFirstPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('First'));
     newFourthPos = textOffsetToPosition(tester, kMoreThanFourLines.indexOf('Fourth'));
     expect(newFirstPos.dy, firstPos.dy);
-    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
-    expect(inputBox.hitTest(HitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFirstPos)), isTrue);
+    expect(inputBox.hitTest(BoxHitTestResult(), position: inputBox.globalToLocal(newFourthPos)), isFalse);
   });
 
   testWidgets('TextField smoke test', (WidgetTester tester) async {
