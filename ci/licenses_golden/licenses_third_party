@@ -1,4 +1,4 @@
-Signature: caaa59fbed3763bce6b9d60c6ec90a43
+Signature: 4657e6155b72d88ebfbd369624c10ad4
 
 UNUSED LICENSES:
 
@@ -5181,6 +5181,7 @@ FILE: ../../../third_party/dart/runtime/vm/constants_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_ia32.cc
+FILE: ../../../third_party/dart/runtime/vm/constants_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
 FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
