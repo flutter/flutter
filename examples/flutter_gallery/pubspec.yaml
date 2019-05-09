@@ -154,6 +154,7 @@ flutter:
     - packages/flutter_gallery_assets/people/square/trevor.png
     - packages/shrine_images/diamond.png
     - packages/shrine_images/slanted_menu.png
+    - packages/shrine_images/span_book.jpg
     - packages/shrine_images/0-0.jpg
     - packages/shrine_images/1-0.jpg
     - packages/shrine_images/2-0.jpg
