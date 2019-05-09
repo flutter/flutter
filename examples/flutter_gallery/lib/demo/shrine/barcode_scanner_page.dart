@@ -407,40 +407,35 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
                     ),
                     Container(
                       margin: const EdgeInsets.only(top: 35, bottom: 25),
-                      child: const Text(
+                      child: Text(
                         'A Japanese & English accompaniment to the 2016 SPAN '
                         'conference.',
+                        style: Theme.of(context)
+                            .textTheme
+                            .caption
+                            .copyWith(fontSize: 15),
                       ),
                     ),
                     Expanded(
                       child: Container(
-                        padding: const EdgeInsets.only(bottom: 4),
-                        alignment: Alignment.bottomCenter,
-                        child: RaisedButton(
-                          onPressed: () => Navigator.of(context).pop(),
-                          color: kShrinePink100,
-                          child: Container(
-                            width: 312,
+                          padding: const EdgeInsets.only(bottom: 4),
+                          alignment: Alignment.bottomCenter,
+                          child: ButtonTheme(
+                            minWidth: 312,
                             height: 48,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: <Widget>[
-                                Container(
-                                  margin: const EdgeInsets.only(right: 16),
-                                  child: const Icon(Icons.add_shopping_cart),
+                            child: RaisedButton.icon(
+                              onPressed: () => Navigator.of(context).pop(),
+                              color: kShrinePink100,
+                              label: const Text('ADD TO CART - \$12.99'),
+                              icon: const Icon(Icons.add_shopping_cart),
+                              elevation: 8.0,
+                              shape: const BeveledRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(7.0),
                                 ),
-                                const Text('ADD TO CART - \$12.99')
-                              ],
+                              ),
                             ),
-                          ),
-                          elevation: 8.0,
-                          shape: const BeveledRectangleBorder(
-                            borderRadius: BorderRadius.all(
-                              Radius.circular(7.0),
-                            ),
-                          ),
-                        ),
-                      ),
+                          )),
                     ),
                   ],
                 ),
