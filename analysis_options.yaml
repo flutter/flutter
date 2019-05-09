@@ -122,8 +122,7 @@ linter:
     - prefer_asserts_in_initializer_lists
     - prefer_collection_literals
     - prefer_conditional_assignment
-    # TODO(dnfield) - re-enable this when custom embedders catch up with the Rect/RRect constness.
-    # - prefer_const_constructors
+    - prefer_const_constructors
     - prefer_const_constructors_in_immutables
     - prefer_const_declarations
     - prefer_const_literals_to_create_immutables

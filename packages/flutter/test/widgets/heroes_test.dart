@@ -1172,6 +1172,128 @@ void main() {
     expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0, 50.0));
   });
 
+  testWidgets('Hero createRectTween for Navigator that is not full screen', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/25272
+
+    RectTween createRectTween(Rect begin, Rect end) {
+      return RectTween(begin: begin, end: end);
+    }
+
+    final Map<String, WidgetBuilder> createRectTweenHeroRoutes = <String, WidgetBuilder>{
+      '/': (BuildContext context) => Material(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: Container(height: 100.0, width: 100.0, key: firstKey),
+            ),
+            FlatButton(
+              child: const Text('two'),
+              onPressed: () { Navigator.pushNamed(context, '/two'); },
+            ),
+          ],
+        ),
+      ),
+      '/two': (BuildContext context) => Material(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            SizedBox(
+              height: 200.0,
+              child: FlatButton(
+                child: const Text('pop'),
+                onPressed: () { Navigator.pop(context); },
+              ),
+            ),
+            Hero(
+              tag: 'a',
+              createRectTween: createRectTween,
+              child: Container(height: 200.0, width: 100.0, key: secondKey),
+            ),
+          ],
+        ),
+      ),
+    };
+
+    const double leftPadding = 10.0;
+
+    // MaterialApp and its Navigator are offset from the left
+    await tester.pumpWidget(Padding(
+      padding: const EdgeInsets.only(left: leftPadding),
+      child: MaterialApp(routes: createRectTweenHeroRoutes),
+    ));
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(leftPadding + 50.0, 50.0));
+
+    const double epsilon = 0.001;
+    const Duration duration = Duration(milliseconds: 300);
+    const Curve curve = Curves.fastOutSlowIn;
+    final RectTween pushRectTween = RectTween(
+      begin: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
+      end: const Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
+    );
+
+    await tester.tap(find.text('two'));
+    await tester.pump(); // begin navigation
+
+    // Verify that the rect of the secondKey Hero transforms as the
+    // pushRectTween rect for the push /two flight.
+
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(50.0 + leftPadding, 50.0));
+
+    await tester.pump(duration * 0.25);
+    Rect actualHeroRect = tester.getRect(find.byKey(secondKey));
+    Rect predictedHeroRect = pushRectTween.lerp(curve.transform(0.25));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(secondKey));
+    predictedHeroRect = pushRectTween.lerp(curve.transform(0.5));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(secondKey));
+    predictedHeroRect = pushRectTween.lerp(curve.transform(0.75));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(secondKey)), const Offset(400.0 + leftPadding / 2, 300.0));
+
+    // Verify that the rect of the firstKey Hero transforms as the
+    // pushRectTween rect for the pop /two flight.
+
+    await tester.tap(find.text('pop'));
+    await tester.pump(); // begin navigation
+
+    final RectTween popRectTween = RectTween(
+      begin: const Rect.fromLTWH(350.0 + leftPadding / 2, 200.0, 100.0, 200.0),
+      end: const Rect.fromLTWH(leftPadding, 0.0, 100.0, 100.0),
+    );
+    await tester.pump();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(400.0 + leftPadding / 2, 300.0));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(firstKey));
+    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.25));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(firstKey));
+    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.5));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pump(duration * 0.25);
+    actualHeroRect = tester.getRect(find.byKey(firstKey));
+    predictedHeroRect = popRectTween.lerp(curve.flipped.transform(0.75));
+    expect(actualHeroRect, within<Rect>(distance: epsilon, from: predictedHeroRect));
+
+    await tester.pumpAndSettle();
+    expect(tester.getCenter(find.byKey(firstKey)), const Offset(50.0 + leftPadding, 50.0));
+  });
+
+
   testWidgets('Pop interrupts push, reverses flight', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(routes: routes));
     await tester.tap(find.text('twoInset'));

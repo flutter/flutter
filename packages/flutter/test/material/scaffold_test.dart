@@ -335,7 +335,6 @@ void main() {
         ),
       ),
     );
-
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(seconds: 1));
@@ -760,18 +759,18 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(tester.getRect(find.byKey(appBar)), Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
-    expect(tester.getRect(find.byKey(body)), Rect.fromLTRB(0.0, 43.0, 800.0, 348.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), Rect.fromLTRB(28.0, 357.0, 128.0, 447.0)); // Note: has 8px each top/bottom padding.
-    expect(tester.getRect(find.byKey(drawer)), Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
-    expect(tester.getRect(find.byKey(bottomNavigationBar)), Rect.fromLTRB(0.0, 515.0, 800.0, 600.0));
-    expect(tester.getRect(find.byKey(insideAppBar)), Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
-    expect(tester.getRect(find.byKey(insideBody)), Rect.fromLTRB(20.0, 43.0, 750.0, 348.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
-    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), Rect.fromLTRB(28.0, 357.0, 128.0, 447.0));
-    expect(tester.getRect(find.byKey(insideDrawer)), Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
-    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
+    expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
+    expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 348.0));
+    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
+    expect(tester.getRect(find.byKey(persistentFooterButton)),const  Rect.fromLTRB(28.0, 357.0, 128.0, 447.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
+    expect(tester.getRect(find.byKey(bottomNavigationBar)), const Rect.fromLTRB(0.0, 515.0, 800.0, 600.0));
+    expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
+    expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 348.0));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 255.0, 113.0, 332.0)));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 357.0, 128.0, 447.0));
+    expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
+    expect(tester.getRect(find.byKey(insideBottomNavigationBar)), const Rect.fromLTRB(20.0, 515.0, 750.0, 540.0));
   });
 
   testWidgets('Scaffold and extreme window padding - persistent footer buttons only', (WidgetTester tester) async {
@@ -855,16 +854,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
 
-    expect(tester.getRect(find.byKey(appBar)), Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
-    expect(tester.getRect(find.byKey(body)), Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
-    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
-    expect(tester.getRect(find.byKey(persistentFooterButton)), Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
-    expect(tester.getRect(find.byKey(drawer)), Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
-    expect(tester.getRect(find.byKey(insideAppBar)), Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
-    expect(tester.getRect(find.byKey(insideBody)), Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
-    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
-    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), Rect.fromLTRB(28.0, 442.0, 128.0, 532.0));
-    expect(tester.getRect(find.byKey(insideDrawer)), Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
+    expect(tester.getRect(find.byKey(appBar)), const Rect.fromLTRB(0.0, 0.0, 800.0, 43.0));
+    expect(tester.getRect(find.byKey(body)), const Rect.fromLTRB(0.0, 43.0, 800.0, 400.0));
+    expect(tester.getRect(find.byKey(floatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(persistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0)); // Note: has 8px each top/bottom padding.
+    expect(tester.getRect(find.byKey(drawer)), const Rect.fromLTRB(596.0, 0.0, 800.0, 600.0));
+    expect(tester.getRect(find.byKey(insideAppBar)), const Rect.fromLTRB(20.0, 30.0, 750.0, 43.0));
+    expect(tester.getRect(find.byKey(insideBody)), const Rect.fromLTRB(20.0, 43.0, 750.0, 400.0));
+    expect(tester.getRect(find.byKey(insideFloatingActionButton)), rectMoreOrLessEquals(const Rect.fromLTRB(36.0, 307.0, 113.0, 384.0)));
+    expect(tester.getRect(find.byKey(insidePersistentFooterButton)), const Rect.fromLTRB(28.0, 442.0, 128.0, 532.0));
+    expect(tester.getRect(find.byKey(insideDrawer)), const Rect.fromLTRB(596.0, 30.0, 750.0, 540.0));
   });
 
 

@@ -373,7 +373,7 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
-      final FlutterProject project = await FlutterProject.current();
+      final FlutterProject project = FlutterProject.current();
       await buildApk(
           project: project,
           target: mainPath,
@@ -885,7 +885,20 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
         process.throwException('adb did not report forwarded port');
       hostPort = int.tryParse(process.stdout) ?? (throw 'adb returned invalid port number:\n${process.stdout}');
     } else {
-      if (process.stdout.isNotEmpty)
+      // stdout may be empty or the port we asked it to forward, though it's
+      // not documented (or obvious) what triggers each case.
+      //
+      // Observations are:
+      //   - On MacOS it's always empty when Flutter spawns the process, but
+      //   - On MacOS it prints the port number when run from the terminal, unless
+      //     the port is already forwarded, when it also prints nothing.
+      //   - On ChromeOS, the port appears to be printed even when Flutter spawns
+      //     the process
+      //
+      // To cover all cases, we accept the output being either empty or exactly
+      // the port number, but treat any other output as probably being an error
+      // message.
+      if (process.stdout.isNotEmpty && process.stdout.trim() != '$hostPort')
         process.throwException('adb returned error:\n${process.stdout}');
     }
 

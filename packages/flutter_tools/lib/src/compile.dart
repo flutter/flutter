@@ -230,7 +230,7 @@ class KernelCompiler {
     );
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = await FlutterProject.current();
+      flutterProject = FlutterProject.current();
     }
 
     // TODO(cbracken): eliminate pathFilter.
@@ -281,8 +281,12 @@ class KernelCompiler {
       command.add('--aot');
       command.add('--tfa');
     }
+    // If we're not targeting product (release) mode and we're still aot, then
+    // target profile mode.
     if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
+    } else if (aot) {
+      command.add('-Ddart.vm.profile=true');
     }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
