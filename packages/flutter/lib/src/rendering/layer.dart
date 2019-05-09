@@ -551,7 +551,7 @@ class ContainerLayer extends Layer {
   List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: FlutterError('Painting order is out of order with respect to elevation.\n'
-                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevations.html '
+                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
                               'for more details.'),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
