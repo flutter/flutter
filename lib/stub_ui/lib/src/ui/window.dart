@@ -538,7 +538,12 @@ class Window {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  double get devicePixelRatio => 1.0;
+  double get devicePixelRatio => _devicePixelRatio;
+  double _devicePixelRatio = 1.0;
+  // TODO(yjbanov): Remove setter usage from engine.
+  set devicePixelRatio(double value) {
+    _devicePixelRatio = value;
+  }
 
   /// The dimensions of the rectangle into which the application will be drawn,
   /// in physical pixels.
