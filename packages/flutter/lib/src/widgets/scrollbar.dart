@@ -114,11 +114,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// scrollable extent is large, the current visible viewport is small, and the
   /// viewport is not overscrolled.
   ///
-  /// When the size of the scrollbar paint area in the viewport is smaller than
-  /// [minLength], the size of the scrollbar may shrink to a smaller size than
-  /// [minLength] to fit in the scrollable area. E.g., when [minLength] is set to
-  /// `double.infinite`, it will not be respected if the size of the scrollbar
-  /// track is finite.
+  /// The size of the scrollbar may shrink to a smaller size than [minLength]
+  /// to fit in the available paint area. E.g., when [minLength] is
+  /// `double.infinite`, it will not be respected if [viewportDimension] and
+  /// [mainAxisMargin] are finite.
   ///
   /// Mustn't be null and the value has to be within the range of 0 to
   /// [minOverscrollLength], inclusive. Defaults to 18.0.
@@ -127,9 +126,10 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// The preferred smallest size the scrollbar can shrink to when viewport is
   /// overscrolled.
   ///
-  /// When overscrolling, if the size of the scrollbar track in the view port
-  /// is smaller than [minOverscrollLength], the size of the scrollbar may become
-  /// smaller than [minOverscrollLength] in order to fit in the scrollable area.
+  /// When overscrolling, the size of the scrollbar may shrink to a smaller size
+  /// than [minOverscrollLength] to fit in the available paint area. E.g., when
+  /// [minOverscrollLength] is `double.infinite`, it will not be respected if
+  /// the [viewportDimension] and [mainAxisMargin] are finite.
   ///
   /// The value is less than or equal to [minLength] and greater than or equal to 0.
   /// If unspecified or set to null, it will defaults to the value of [minLength].
