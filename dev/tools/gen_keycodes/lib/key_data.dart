@@ -162,6 +162,7 @@ class KeyData {
       final String androidName = match.group(2);
       result[androidName] ??= <int>[];
       result[androidName].add(int.parse(match.group(1)));
+      return null;
     });
 
     return result;
@@ -178,9 +179,9 @@ class KeyData {
     headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1));
     final RegExp enumEntry = RegExp(r'''AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?''');
     final Map<String, int> result = <String, int>{};
-    headerFile.replaceAllMapped(enumEntry, (Match match) {
+    for (Match match in enumEntry.allMatches(headerFile)) {
       result[match.group(1)] = int.parse(match.group(2));
-    });
+    }
     return result;
   }
 
@@ -193,9 +194,9 @@ class KeyData {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
     final RegExp enumEntry = RegExp(r'''define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?''');
     final Map<String, dynamic> replaced = <String, dynamic>{};
-    headerFile.replaceAllMapped(enumEntry, (Match match) {
+    for (Match match in enumEntry.allMatches(headerFile)) {
       replaced[match.group(1)] = int.tryParse(match.group(2)) ?? match.group(2).replaceAll('GLFW_KEY_', '');
-    });
+    }
     final Map<String, int> result = <String, int>{};
     replaced.forEach((String key, dynamic value) {
       // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
