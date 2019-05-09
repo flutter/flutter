@@ -5,7 +5,6 @@
 import 'dart:io' show Platform;
 
 import 'assertions.dart';
-import 'constants.dart';
 
 /// The platform that user interaction should adapt to target.
 ///
