@@ -229,7 +229,12 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
     final double maxLogicalHeight =
         data.size.height - padding.top - padding.bottom;
 
-    final double imageScale = imageSize.height / maxLogicalHeight;
+    // Width & Height are flipped from CameraController.previewSize on iOS
+    final double imageHeight = defaultTargetPlatform == TargetPlatform.iOS
+        ? imageSize.height
+        : imageSize.width;
+
+    final double imageScale = imageHeight / maxLogicalHeight;
     final double halfWidth = imageScale * widget.validRectangle.width / 2;
     final double halfHeight = imageScale * widget.validRectangle.height / 2;
 
