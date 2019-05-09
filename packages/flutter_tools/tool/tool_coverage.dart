@@ -44,7 +44,7 @@ Future<void> main(List<String> arguments) async {
   final ArgResults argResults = argParser.parse(arguments);
   await runInContext(() async {
     final CoverageCollector coverageCollector = CoverageCollector(
-      flutterProject: await FlutterProject.current(),
+      flutterProject: FlutterProject.current(),
     );
     /// A temp directory to create synthetic test files in.
     final Directory tempDirectory = Directory.systemTemp.createTempSync('_flutter_coverage')

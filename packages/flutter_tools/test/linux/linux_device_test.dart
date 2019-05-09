@@ -66,7 +66,7 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('linux').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(LinuxDevice().isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
@@ -76,7 +76,7 @@ void main() {
   testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
 
     expect(LinuxDevice().isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{

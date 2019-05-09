@@ -46,9 +46,9 @@ void _defineTests() {
 
     await tester.pumpWidget(CustomPaint(
       foregroundPainter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
+        semantics: const CustomPainterSemantics(
           rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             label: 'foreground',
             textDirection: TextDirection.rtl,
           ),
@@ -66,7 +66,7 @@ void _defineTests() {
               TestSemantics(
                 id: 2,
                 label: 'foreground',
-                rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
             ],
           ),
@@ -82,9 +82,9 @@ void _defineTests() {
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
+        semantics: const CustomPainterSemantics(
           rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             label: 'background',
             textDirection: TextDirection.rtl,
           ),
@@ -102,7 +102,7 @@ void _defineTests() {
               TestSemantics(
                 id: 2,
                 label: 'background',
-                rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
             ],
           ),
@@ -118,9 +118,9 @@ void _defineTests() {
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
+        semantics: const CustomPainterSemantics(
           rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             label: 'background',
             textDirection: TextDirection.rtl,
           ),
@@ -131,9 +131,9 @@ void _defineTests() {
         child: const Text('Hello', textDirection: TextDirection.ltr),
       ),
       foregroundPainter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
+        semantics: const CustomPainterSemantics(
           rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             label: 'foreground',
             textDirection: TextDirection.rtl,
           ),
@@ -151,17 +151,17 @@ void _defineTests() {
               TestSemantics(
                 id: 3,
                 label: 'background',
-                rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
               TestSemantics(
                 id: 2,
                 label: 'Hello',
-                rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+                rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
               ),
               TestSemantics(
                 id: 4,
                 label: 'foreground',
-                rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+                rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
               ),
             ],
           ),
@@ -177,10 +177,10 @@ void _defineTests() {
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
-          key: const ValueKey<int>(1),
+        semantics: const CustomPainterSemantics(
+          key: ValueKey<int>(1),
           rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             checked: false,
             selected: false,
             button: false,
@@ -203,7 +203,7 @@ void _defineTests() {
             rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
               TestSemantics(
-                rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+                rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
                 id: 2,
                 flags: 1,
                 label: 'label-before',
@@ -223,7 +223,7 @@ void _defineTests() {
       painter: _PainterWithSemantics(
         semantics: CustomPainterSemantics(
           key: const ValueKey<int>(1),
-          rect: Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
+          rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
           properties: SemanticsProperties(
             checked: true,
             selected: true,
@@ -255,7 +255,7 @@ void _defineTests() {
             rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
               TestSemantics(
-                rect: Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
+                rect: const Rect.fromLTRB(5.0, 6.0, 7.0, 8.0),
                 actions: 255,
                 id: 2,
                 flags: 15,
@@ -278,10 +278,10 @@ void _defineTests() {
   testWidgets('Can toggle semantics on, off, on without crash', (WidgetTester tester) async {
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
-          key: const ValueKey<int>(1),
+        semantics: const CustomPainterSemantics(
+          key: ValueKey<int>(1),
           rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             checked: false,
             selected: false,
             button: false,
@@ -325,7 +325,7 @@ void _defineTests() {
       painter: _PainterWithSemantics(
         semantics: CustomPainterSemantics(
           key: const ValueKey<int>(1),
-          rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
+          rect: const Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
           properties: SemanticsProperties(
             onDismiss: () => performedActions.add(SemanticsAction.dismiss),
             onTap: () => performedActions.add(SemanticsAction.tap),
@@ -402,10 +402,10 @@ void _defineTests() {
     // checked state and toggled state are mutually exclusive.
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
-          key: const ValueKey<int>(1),
+        semantics: const CustomPainterSemantics(
+          key: ValueKey<int>(1),
           rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             enabled: true,
             checked: true,
             selected: true,
@@ -448,10 +448,10 @@ void _defineTests() {
 
     await tester.pumpWidget(CustomPaint(
       painter: _PainterWithSemantics(
-        semantics: CustomPainterSemantics(
-          key: const ValueKey<int>(1),
+        semantics: const CustomPainterSemantics(
+          key: ValueKey<int>(1),
           rect: Rect.fromLTRB(1.0, 2.0, 3.0, 4.0),
-          properties: const SemanticsProperties(
+          properties: SemanticsProperties(
             enabled: true,
             toggled: true,
             selected: true,
@@ -597,9 +597,9 @@ void _defineTests() {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
     final _PainterWithSemantics painter = _PainterWithSemantics(
-      semantics: CustomPainterSemantics(
+      semantics: const CustomPainterSemantics(
         rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-        properties: const SemanticsProperties(
+        properties: SemanticsProperties(
           label: 'background',
           textDirection: TextDirection.rtl,
         ),
@@ -641,9 +641,9 @@ void _defineTests() {
   testWidgets('does not rebuild when shouldRebuildSemantics is false', (WidgetTester tester) async {
     final SemanticsTester semanticsTester = SemanticsTester(tester);
 
-    final CustomPainterSemantics testSemantics = CustomPainterSemantics(
+    const CustomPainterSemantics testSemantics = CustomPainterSemantics(
       rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-      properties: const SemanticsProperties(
+      properties: SemanticsProperties(
         label: 'background',
         textDirection: TextDirection.rtl,
       ),
@@ -663,9 +663,9 @@ void _defineTests() {
     expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
     expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
-    final CustomPainterSemantics testSemantics2 = CustomPainterSemantics(
+    const CustomPainterSemantics testSemantics2 = CustomPainterSemantics(
       rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
-      properties: const SemanticsProperties(
+      properties: SemanticsProperties(
         label: 'background',
         textDirection: TextDirection.rtl,
       ),
@@ -675,8 +675,8 @@ void _defineTests() {
       semantics: testSemantics2,
     )));
     expect(_PainterWithSemantics.shouldRebuildSemanticsCallCount, 2);
-    expect(_PainterWithSemantics.buildSemanticsCallCount, 2);
-    expect(_PainterWithSemantics.semanticsBuilderCallCount, 5);
+    expect(_PainterWithSemantics.buildSemanticsCallCount, 1);
+    expect(_PainterWithSemantics.semanticsBuilderCallCount, 4);
 
     semanticsTester.dispose();
   });
@@ -708,7 +708,7 @@ class _DiffTester {
       for (String label in labels) {
         children.add(
           TestSemantics(
-            rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+            rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
             label: label,
           ),
         );
@@ -787,7 +787,7 @@ class _SemanticsDiffTest extends CustomPainter {
       }
       semantics.add(
         CustomPainterSemantics(
-          rect: Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
+          rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
           key: key,
           properties: SemanticsProperties(
             label: label,

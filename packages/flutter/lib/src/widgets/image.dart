@@ -93,7 +93,7 @@ Future<void> precacheImage(
       onError(exception, stackTrace);
     } else {
       FlutterError.reportError(FlutterErrorDetails(
-        context: 'image failed to precache',
+        context: ErrorDescription('image failed to precache'),
         library: 'image resource service',
         exception: exception,
         stack: stackTrace,
@@ -263,6 +263,16 @@ class Image extends StatefulWidget {
        assert(matchTextDirection != null),
        super(key: key);
 
+
+  // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
+  //
+  // * If [width] and [height] are both specified, and [scale] is not, then
+  //   size-aware asset resolution will be attempted also, with the given
+  //   dimensions interpreted as logical pixels.
+  //
+  // * If the images have platform, locale, or directionality variants, the
+  //   current platform, locale, and directionality are taken into account
+  //   during asset resolution as well.
   /// Creates a widget that displays an [ImageStream] obtained from an asset
   /// bundle. The key for the image is given by the `name` argument.
   ///
@@ -281,16 +291,6 @@ class Image extends StatefulWidget {
   /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
-  //
-  // TODO(ianh): Implement the following (see ../services/image_resolution.dart):
-  // ///
-  // /// * If [width] and [height] are both specified, and [scale] is not, then
-  // ///   size-aware asset resolution will be attempted also, with the given
-  // ///   dimensions interpreted as logical pixels.
-  // ///
-  // /// * If the images have platform, locale, or directionality variants, the
-  // ///   current platform, locale, and directionality are taken into account
-  // ///   during asset resolution as well.
   ///
   /// The [name] and [repeat] arguments must not be null.
   ///
