@@ -48,7 +48,7 @@ class HoverClientState extends State<HoverClient> {
 }
 
 class HoverFeedback extends StatefulWidget {
-  HoverFeedback({Key key}) : super(key: key);
+  const HoverFeedback({Key key}) : super(key: key);
 
   @override
   _HoverFeedbackState createState() => _HoverFeedbackState();
@@ -502,7 +502,7 @@ void main() {
       await gesture.addPointer();
 
       await tester.pumpWidget(
-        Center(child: HoverFeedback()),
+        const Center(child: HoverFeedback()),
       );
 
       await gesture.moveTo(tester.getCenter(find.byType(Text)));
@@ -519,7 +519,7 @@ void main() {
       expect(HoverClientState.numExits, equals(1));
 
       await tester.pumpWidget(
-        Center(child: HoverFeedback()),
+        const Center(child: HoverFeedback()),
       );
       await tester.pump();
       expect(HoverClientState.numEntries, equals(2));
