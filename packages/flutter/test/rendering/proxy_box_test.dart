@@ -15,12 +15,11 @@ import '../flutter_test_alternative.dart';
 import 'rendering_tester.dart';
 
 void main() {
-  test('RenderFittedBox does not paint with empty sizes', () {
+  test('RenderFittedBox paint', () {
     bool painted;
-    RenderFittedBox makeFittedBox(Size size) {
+    RenderFittedBox makeFittedBox() {
       return RenderFittedBox(
         child: RenderCustomPaint(
-          preferredSize: size,
           painter: TestCallbackPainter(onPaint: () {
             painted = true;
           }),
@@ -28,19 +27,13 @@ void main() {
       );
     }
 
-    // The RenderFittedBox paints if both its size and its child's size are nonempty.
     painted = false;
-    layout(makeFittedBox(Size(1, 1)), phase: EnginePhase.paint);
+    layout(makeFittedBox(), phase: EnginePhase.paint);
     expect(painted, equals(true));
-
-    // The RenderFittedBox should not paint if its child is empty-sized.
-    painted = false;
-    layout(makeFittedBox(Size.zero), phase: EnginePhase.paint);
-    expect(painted, equals(false));
 
     // The RenderFittedBox should not paint if it is empty.
     painted = false;
-    layout(makeFittedBox(Size(1, 1)), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+    layout(makeFittedBox(), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
     expect(painted, equals(false));
   });
 
