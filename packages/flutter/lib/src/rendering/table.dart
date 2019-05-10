@@ -918,7 +918,7 @@ class RenderTable extends RenderBox {
       int availableColumns = columns;
       // Handle double precision errors which causes this loop to become
       // stuck in certain configurations.
-      const double minimumDeficit = 0.00000001;
+      const double minimumDeficit = precisionErrorTolerance;
       while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
