@@ -27,7 +27,7 @@ class BuildApkCommand extends BuildSubCommand {
       )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64']);
+        allowed: <String>['android-arm-all', 'android-arm', 'android-arm64', 'android-x86', 'android-x64']);
   }
 
   @override

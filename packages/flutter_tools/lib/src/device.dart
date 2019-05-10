@@ -224,6 +224,7 @@ abstract class Device {
     switch (await targetPlatform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
+      case TargetPlatform.android_arm_all:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         return true;

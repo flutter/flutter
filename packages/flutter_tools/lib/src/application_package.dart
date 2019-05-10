@@ -37,6 +37,7 @@ class ApplicationPackageFactory {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
+      case TargetPlatform.android_arm_all:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         if (androidSdk?.licensesAvailable == true  && androidSdk.latestVersion == null) {
@@ -393,6 +394,7 @@ class ApplicationPackageStore {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
+      case TargetPlatform.android_arm_all:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);

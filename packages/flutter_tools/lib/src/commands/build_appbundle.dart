@@ -26,7 +26,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
       )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64']);
+        allowed: <String>['android-arm-all', 'android-arm', 'android-arm64']);
   }
 
   @override

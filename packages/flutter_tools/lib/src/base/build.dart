@@ -344,6 +344,7 @@ class AOTSnapshotter {
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
+      TargetPlatform.android_arm_all,
       TargetPlatform.ios,
     ].contains(platform);
   }
@@ -498,6 +499,7 @@ class JITSnapshotter {
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
+      TargetPlatform.android_arm_all,
       TargetPlatform.android_x86,
       TargetPlatform.android_x64,
     ].contains(platform);

@@ -143,6 +143,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
   }
   if (targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
+      targetPlatform == TargetPlatform.android_arm_all ||
       targetPlatform == TargetPlatform.android_x64 ||
       targetPlatform == TargetPlatform.android_x86) {
     // See versionCode at https://developer.android.com/studio/publish/versioning
@@ -187,6 +188,7 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
   }
   if (targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
+      targetPlatform == TargetPlatform.android_arm_all ||
       targetPlatform == TargetPlatform.android_x64 ||
       targetPlatform == TargetPlatform.android_x86) {
     // See versionName at https://developer.android.com/studio/publish/versioning
@@ -233,6 +235,7 @@ String getNameForHostPlatform(HostPlatform platform) {
 }
 
 enum TargetPlatform {
+  android_arm_all,
   android_arm,
   android_arm64,
   android_x64,
@@ -287,6 +290,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'android-arm';
     case TargetPlatform.android_arm64:
       return 'android-arm64';
+    case TargetPlatform.android_arm_all:
+      return 'android-arm-all';
     case TargetPlatform.android_x64:
       return 'android-x64';
     case TargetPlatform.android_x86:
@@ -316,6 +321,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.android_arm;
     case 'android-arm64':
       return TargetPlatform.android_arm64;
+    case 'android-arm-all':
+      return TargetPlatform.android_arm_all;
     case 'android-x64':
       return TargetPlatform.android_x64;
     case 'android-x86':
