@@ -47,13 +47,13 @@ class GetOffset extends CommandWithTarget {
   final OffsetType offsetType;
 
   @override
-  final String kind = 'get_offset';
+  String get kind => 'get_offset';
 }
 
 /// The result of the [GetRect] command.
 class GetOffsetResult extends Result {
   /// Creates a result with the offset defined by [dx] and [dy].
-  GetOffsetResult({ this.dx = 0.0, this.dy = 0.0});
+  const GetOffsetResult({ this.dx = 0.0, this.dy = 0.0});
 
   /// The x component of the offset.
   final double dx;

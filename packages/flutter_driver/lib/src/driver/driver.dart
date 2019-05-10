@@ -1016,7 +1016,7 @@ class CommonFinders {
   SerializableFinder byType(String type) => ByType(type);
 
   /// Finds the back button on a Material or Cupertino page's scaffold.
-  SerializableFinder pageBack() => PageBack();
+  SerializableFinder pageBack() => const PageBack();
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.

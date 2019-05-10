@@ -24,7 +24,7 @@ void main() {
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
-      extension.call(WaitUntilNoTransientCallbacks().serialize())
+      extension.call(const WaitUntilNoTransientCallbacks().serialize())
         .then<void>(expectAsync1((Map<String, dynamic> r) {
           result = r;
         }));
@@ -44,7 +44,7 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      extension.call(WaitUntilNoTransientCallbacks().serialize())
+      extension.call(const WaitUntilNoTransientCallbacks().serialize())
         .then<void>(expectAsync1((Map<String, dynamic> r) {
           result = r;
         }));
@@ -66,7 +66,7 @@ void main() {
 
     testWidgets('handler', (WidgetTester tester) async {
       expect(log, isEmpty);
-      final dynamic result = RequestDataResult.fromJson((await extension.call(RequestData('hello').serialize()))['response']);
+      final dynamic result = RequestDataResult.fromJson((await extension.call(const RequestData('hello').serialize()))['response']);
       expect(log, <String>['hello']);
       expect(result.message, '1');
     });
@@ -83,7 +83,7 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(ByText('hello')).serialize();
+      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
       final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson((await extension.call(arguments))['response']);
 
       expect(result.id, 1);
@@ -94,7 +94,7 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(ByText('hello')).serialize();
+      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
       final Map<String, Object> response = await extension.call(arguments);
 
       expect(response['isError'], true);
@@ -113,7 +113,7 @@ void main() {
         ),
       );
 
-      final Map<String, Object> arguments = GetSemanticsId(ByText('hello')).serialize();
+      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
       final Map<String, Object> response = await extension.call(arguments);
 
       expect(response['isError'], true);
