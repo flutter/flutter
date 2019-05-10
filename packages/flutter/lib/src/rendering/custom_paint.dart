@@ -502,7 +502,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);

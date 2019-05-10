@@ -16,7 +16,7 @@ class PaintingBindingSpy extends BindingBase with ServicesBinding, PaintingBindi
   @override
   Future<ui.Codec> instantiateImageCodec(Uint8List list) {
     counter++;
-    return ui.instantiateImageCodec(list, decodedCacheRatioCap: decodedCacheRatioCap); // ignore: deprecated_member_use_from_same_package
+    return ui.instantiateImageCodec(list);
   }
 
   @override

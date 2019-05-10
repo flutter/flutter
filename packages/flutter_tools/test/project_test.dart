@@ -20,6 +20,7 @@ import 'package:mockito/mockito.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/testbed.dart';
 
 void main() {
   group('Project', () {
@@ -341,6 +342,37 @@ void main() {
         );
       });
     });
+  });
+
+  group('Regression test for invalid pubspec', () {
+    Testbed testbed;
+
+    setUp(() {
+      testbed = Testbed();
+    });
+
+    test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+# Hello, World
+''');
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      expect(flutterProject.builders, null);
+    }));
+
+    test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+# Hello, World
+name: foo_bar
+''');
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      expect(flutterProject.builders, null);
+    }));
   });
 }
 
