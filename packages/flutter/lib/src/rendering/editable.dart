@@ -66,6 +66,8 @@ enum SelectionChangedCause {
 /// Used by [RenderEditable.onCaretChanged].
 typedef CaretChangedHandler = void Function(Rect caretRect);
 
+typedef ContextTapHandler = void Function(ContextTapDetails details);
+
 /// Represents the coordinates of the point in a selection, and the text
 /// direction at that point, relative to top left of the [RenderEditable] that
 /// holds the selection.
@@ -97,23 +99,17 @@ class TextSelectionPoint {
 }
 
 @immutable
-class ContextMenuDetails {
-  ContextMenuDetails({
-    @required this.withinSelection,
-    @required this.location,
-  }) : assert(withinSelection != null);
+class ContextTapDetails {
+  ContextTapDetails({
+    @required this.textPosition,
+    @required this.globalPosition,
+  }) : assert(textPosition != null),
+       assert(globalPosition != null);
 
-  final bool withinSelection;
+  final TextPosition textPosition;
 
-  final Offset location;
-
-  @override
-  String toString() {
-    return 'ContextDetails(location: ${location.toString()} withinSelection: $withinSelection)';
-  }
+  final Offset globalPosition;
 }
-
-typedef ContextMenuHandler = void Function(ContextMenuDetails details);
 
 /// Displays some text in a scrollable container with a potentially blinking
 /// cursor and with gesture recognizers.
@@ -172,7 +168,7 @@ class RenderEditable extends RenderBox {
     @required ViewportOffset offset,
     this.onSelectionChanged,
     this.onCaretChanged,
-    this.onContextMenu,
+    this.onContextTap,
     this.ignorePointer = false,
     bool obscureText = false,
     Locale locale,
@@ -1332,13 +1328,6 @@ class RenderEditable extends RenderBox {
 
   Offset _lastTapDownPosition;
 
-  void _handleContextMenu(ContextMenuDetails details) {
-    print('CONTEXT ${details.location}');
-    if (onContextMenu != null) {
-      onContextMenu(details);
-    }
-  }
-
   /// If [ignorePointer] is false (the default) then this method is called by
   /// the internal gesture recognizer's [TapGestureRecognizer.onTapDown]
   /// callback.
@@ -1360,7 +1349,10 @@ class RenderEditable extends RenderBox {
       globalToLocal(details.globalPosition - _paintOffset)
     );
     if (onContextTap != null)
-      onContextTap(tapPosition);
+      onContextTap(ContextTapDetails(
+        textPosition: tapPosition,
+        globalPosition: details.globalPosition,
+      ));
   }
 
   void _handleSecondaryTapDown(TapDownDetails details) {
