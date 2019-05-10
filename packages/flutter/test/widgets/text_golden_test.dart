@@ -29,7 +29,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Centered.png'),
+      matchesGoldenFile('text_golden.Centered.png'),
     );
 
     await tester.pumpWidget(
@@ -53,7 +53,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Centered.wrap.png'),
+      matchesGoldenFile('text_golden.Centered.wrap.png'),
     );
   });
 
@@ -84,7 +84,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('text_golden.Foreground.gradient.png'),
+      matchesGoldenFile('text_golden.Foreground.gradient.png'),
     );
 
     await tester.pumpWidget(
@@ -106,7 +106,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('text_golden.Foreground.stroke.png'),
+      matchesGoldenFile('text_golden.Foreground.stroke.png'),
     );
 
     await tester.pumpWidget(
@@ -129,7 +129,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('text_golden.Foreground.stroke_and_gradient.png'),
+      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
     );
   });
 
@@ -179,7 +179,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('text_golden.Background.png'),
+      matchesGoldenFile('text_golden.Background.png'),
     );
   });
 
@@ -215,7 +215,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesSkiaGoldFile('text_golden.Fade.1.png'),
+      matchesGoldenFile('text_golden.Fade.1.png'),
     );
   });
 
@@ -240,7 +240,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.StrutDefault.png'),
+      matchesGoldenFile('text_golden.StrutDefault.png'),
     );
   });
 
@@ -267,7 +267,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Strut.1.png'),
+      matchesGoldenFile('text_golden.Strut.1.png'),
     );
   });
 
@@ -295,7 +295,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Strut.2.png'),
+      matchesGoldenFile('text_golden.Strut.2.png'),
     );
   });
 
@@ -346,7 +346,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Strut.3.png'),
+      matchesGoldenFile('text_golden.Strut.3.png'),
     );
   });
 
@@ -381,7 +381,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Strut.4.png'),
+      matchesGoldenFile('text_golden.Strut.4.png'),
     );
   });
 
@@ -432,7 +432,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.StrutForce.1.png'),
+      matchesGoldenFile('text_golden.StrutForce.1.png'),
     );
   });
 
@@ -470,7 +470,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.Decoration.1.png'),
+      matchesGoldenFile('text_golden.Decoration.1.png'),
     );
   });
 
@@ -509,7 +509,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('text_golden.DecorationThickness.1.png'),
+      matchesGoldenFile('text_golden.DecorationThickness.1.png'),
     );
   });
 }

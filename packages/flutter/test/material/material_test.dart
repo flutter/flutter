@@ -616,7 +616,7 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesSkiaGoldFile('material.border_paint_above.png'),
+        matchesGoldenFile('material.border_paint_above.png'),
       );
     });
 
@@ -656,7 +656,7 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesSkiaGoldFile('material.border_paint_below.png'),
+        matchesGoldenFile('material.border_paint_below.png'),
       );
     });
   });

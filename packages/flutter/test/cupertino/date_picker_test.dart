@@ -796,31 +796,7 @@ void main() {
 
       expect(date, DateTime(2018, 1, 1, 15, 59));
     });
-
-    testWidgets('date picker given too narrow space horizontally shows message', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        CupertinoApp(
-          home: Center(
-            child: SizedBox(
-              // This is too small to draw the picker out fully.
-              width: 100,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.dateAndTime,
-                initialDateTime: DateTime(2019, 1, 1, 4),
-                onDateTimeChanged: (_) {},
-              )
-            ),
-          )
-        )
-      );
-
-      final dynamic exception = tester.takeException();
-      expect(exception, isAssertionError);
-      expect(
-        exception.toString(),
-        contains('Insufficient horizontal space to render the CupertinoDatePicker'),
-      );
-    });
+  });
 
   testWidgets('scrollController can be removed or added', (WidgetTester tester) async {
     final SemanticsHandle handle = tester.ensureSemantics();
@@ -896,33 +872,63 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('DatePicker golden tests', (WidgetTester tester) async {
+    testWidgets('date picker given too narrow space horizontally shows message', (WidgetTester tester) async {
       await tester.pumpWidget(
         CupertinoApp(
-          home: SizedBox(
-            width: 200,
+          home: Center(
+            child: SizedBox(
+            // This is too small to draw the picker out fully.
+            width: 100,
             child: CupertinoDatePicker(
               mode: CupertinoDatePickerMode.dateAndTime,
               initialDateTime: DateTime(2019, 1, 1, 4),
               onDateTimeChanged: (_) {},
             )
-          )
+          ),
         )
-      );
+      )
+    );
 
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesSkiaGoldFile('date_picker_test.datetime.initial.png'),
-      );
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(
+      exception.toString(),
+      contains('Insufficient horizontal space to render the CupertinoDatePicker'),
+    );
+  });
 
-      // Slightly drag the hour component to make the current hour off-center.
-      await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
-      await tester.pump();
+  testWidgets('DatePicker golden tests', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: SizedBox(
+            width: 400,
+            height: 400,
+            child: RepaintBoundary(
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.dateAndTime,
+                initialDateTime: DateTime(2019, 1, 1, 4),
+                onDateTimeChanged: (_) {},
+              ),
+            )
+          ),
+        )
+      )
+    );
 
-      await expectLater(
-        find.byType(CupertinoDatePicker),
-        matchesSkiaGoldFile('date_picker_test.datetime.drag.png'),
-      );
+    await expectLater(
+      find.byType(CupertinoDatePicker),
+      matchesGoldenFile('date_picker_test.datetime.initial.1.png'),
+    );
+
+    // Slightly drag the hour component to make the current hour off-center.
+    await tester.drag(find.text('4'), Offset(0, _kRowOffset.dy / 2));
+    await tester.pump();
+
+    await expectLater(
+      find.byType(CupertinoDatePicker),
+      matchesGoldenFile('date_picker_test.datetime.drag.1.png'),
+    );
   });
 }
 

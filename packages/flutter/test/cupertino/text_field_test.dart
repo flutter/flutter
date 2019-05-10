@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -373,9 +372,9 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.1.png'),
+      matchesGoldenFile('text_field_cursor_test.0.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -402,9 +401,9 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.1.png'),
+      matchesGoldenFile('text_field_cursor_test.1.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets(
     'can control text content via controller',

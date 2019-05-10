@@ -137,7 +137,7 @@ void main() {
 
     await expectLater(
       find.byKey(painterKey),
-      matchesSkiaGoldFile('card_theme.custom_shape.png'),
+      matchesGoldenFile('card_theme.custom_shape.png'),
     );
   });
 }

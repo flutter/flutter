@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
 
@@ -403,9 +402,9 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.0.png'),
+      matchesGoldenFile('text_field_cursor_test.0.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -432,9 +431,9 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.0.png'),
+      matchesGoldenFile('text_field_cursor_test.1.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -483,13 +482,10 @@ void main() {
     await expectLater(
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
-      matchesGoldenFile('text_field_opacity_test.0.1.png'),
-      skip: !Platform.isLinux,
+      matchesGoldenFile('text_field_opacity_test.0.png'),
     );
   });
 
-  // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
-  /*
   testWidgets('cursor layout has correct width', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
     await tester.pumpWidget(
@@ -506,10 +502,10 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_test.0.0.png'),
+      matchesGoldenFile('text_field_test.0.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     EditableText.debugDeterministicCursor = true;
@@ -528,11 +524,11 @@ void main() {
 
     await expectLater(
       find.byType(TextField),
-      matchesGoldenFile('text_field_test.1.0.png'),
+      matchesGoldenFile('text_field_test.1.png'),
     );
     EditableText.debugDeterministicCursor = false;
-  }, skip: !Platform.isLinux);
-  */
+  });
+
 
   testWidgets('Overflowing a line with spaces stops the cursor at the end', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
