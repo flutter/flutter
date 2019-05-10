@@ -1228,7 +1228,8 @@ class TransformLayer extends OffsetLayer {
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
   TransformLayer({ Matrix4 transform, Offset offset = Offset.zero })
-    : _transform = transform,
+    : assert(transform.storage.every((double value) => value.isFinite)),
+      _transform = transform,
       super(offset: offset);
 
   /// The matrix to apply.
