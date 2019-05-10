@@ -4710,8 +4710,8 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// {@tool snippet --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
-/// as it is interacted with. The [FlowDelegate] uses the [AnimationController]
-/// to paint the children of the [Flow].
+/// as it is interacted with. The icons in the menu change to indicate which one
+/// has been selected.
 ///
 /// ![A menu created using the Flow widget opens and closes.](https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4)
 ///
@@ -4740,54 +4740,54 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// }
 ///
 /// class _FlowMenuState extends State<FlowMenu>
-///   with SingleTickerProviderStateMixin {
+///     with SingleTickerProviderStateMixin {
 ///   AnimationController menuAnimation;
-///   int active = 1;
-///   final Map<int, IconData> menuItems = <IconData>[
+///   IconData lastTapped = Icons.notifications;
+///   final List<IconData> menuItems = <IconData>[
 ///     Icons.home,
 ///     Icons.new_releases,
 ///     Icons.notifications,
 ///     Icons.settings,
 ///     Icons.menu,
-///   ].asMap();
+///   ];
+///
+///   void _updateMenu(IconData icon) {
+///     setState(() {
+///       if (icon != Icons.menu)
+///         lastTapped = icon;
+///     });
+///   }
 ///
 ///   @override
 ///   void initState() {
 ///     super.initState();
 ///     menuAnimation = AnimationController(
-///       lowerBound: 1,
-///       upperBound: 1000,
+///       lowerBound: 0,
+///       upperBound: 1,
 ///       duration: const Duration(milliseconds: 250),
 ///       vsync: this,
 ///     );
 ///   }
 ///
-///   Widget buildItem(int k, IconData v) {
-///     return GestureDetector(
-///       onTap: () {
-///         if (k != 4) active = k;
-///         menuAnimation.value == 1000
-///           ? menuAnimation.reverse()
-///           : menuAnimation.forward();
-///         setState(() {});
-///       },
-///       child: Container(
-///         width: MediaQuery.of(context).size.width / 5,
-///         decoration: BoxDecoration(
-///           shape: BoxShape.circle,
-///           color: active == k ? Colors.amber[700] : Colors.blue,
-///           boxShadow: const <BoxShadow>[
-///             BoxShadow(
-///               color: Colors.black12,
-///               blurRadius: 10,
-///             )
-///           ]),
-///         child: Center(
-///           child: Icon(
-///             v,
-///             color: Colors.white,
-///             size: 50,
-///           ),
+///   Widget flowMenuItem(IconData icon) {
+///     final double buttonDiameter = MediaQuery.of(context).size.width / menuItems.length;
+///     return Padding(
+///       padding: const EdgeInsets.symmetric(vertical: 8.0),
+///       child: RawMaterialButton(
+///         fillColor: lastTapped == icon ? Colors.amber[700] : Colors.blue,
+///         splashColor: Colors.amber[100],
+///         shape: CircleBorder(),
+///         constraints: BoxConstraints.tight(Size(buttonDiameter, buttonDiameter)),
+///         onPressed: () {
+///           _updateMenu(icon);
+///           menuAnimation.status == AnimationStatus.completed
+///             ? menuAnimation.reverse()
+///             : menuAnimation.forward();
+///         },
+///         child: Icon(
+///           icon,
+///           color: Colors.white,
+///           size: 45.0,
 ///         ),
 ///       ),
 ///     );
@@ -4795,13 +4795,11 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return Flow(
-///       delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
-///       children: menuItems
-///         .map<int, Widget>(
-///           (int k, IconData v) => MapEntry<int, Widget>(k, buildItem(k, v)))
-///         .values
-///         .toList(),
+///     return Container(
+///       child: Flow(
+///         delegate: FlowMenuDelegate(menuAnimation: menuAnimation),
+///         children: menuItems.map<Widget>((IconData icon) => flowMenuItem(icon)).toList(),
+///       ),
 ///     );
 ///   }
 /// }
@@ -4824,7 +4822,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///       context.paintChild(
 ///         i,
 ///         transform: Matrix4.translationValues(
-///           dx * 0.001 * menuAnimation.value,
+///           dx * menuAnimation.value,
 ///           0,
 ///           0,
 ///         ),
