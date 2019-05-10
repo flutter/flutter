@@ -64,7 +64,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// by providing the optional [kind] argument. If [kind] is null,
   /// the recognizer will accept pointer events from all device kinds.
   /// {@endtemplate}
-  GestureRecognizer({ this.debugOwner, PointerDeviceKind kind }) : _filterByKind = kind;
+  GestureRecognizer({ this.debugOwner, PointerDeviceKind kind }) : _kindFilter = kind;
 
   /// The recognizer's owner.
   ///
@@ -74,7 +74,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 
   /// The kind of device that's allowed to be recognized. If null, events from
   /// all device kinds will be tracked and recognized.
-  final PointerDeviceKind _filterByKind;
+  final PointerDeviceKind _kindFilter;
 
   /// Holds a mapping between pointer IDs and the kind of devices they are
   /// coming from.
@@ -128,7 +128,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   bool isPointerAllowed(PointerDownEvent event) {
     // Currently, it only checks for device kind. But in the future we could check
     // for other things e.g. mouse button.
-    return _filterByKind == null || _filterByKind == event.kind;
+    return _kindFilter == null || _kindFilter == event.kind;
   }
 
   /// For a given pointer ID, returns the device kind associated with it.

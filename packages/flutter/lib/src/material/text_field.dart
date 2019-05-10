@@ -513,7 +513,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
-  bool _shouldShowSelectionOverlay = true;
+  bool _shouldShowSelectionToolbar = true;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -613,10 +613,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     _editableText?.requestKeyboard();
   }
 
-  bool _shouldShowHandles(SelectionChangedCause cause) {
+  bool _shouldShowSelectionHandles(SelectionChangedCause cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_shouldShowSelectionOverlay)
+    if (!_shouldShowSelectionToolbar)
       return false;
 
     if (cause == SelectionChangedCause.keyboard)
@@ -645,7 +645,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         // Do nothing.
     }
 
-    if (_shouldShowHandles(cause)) {
+    if (_shouldShowSelectionHandles(cause)) {
       _editableText?.showHandles();
     }
   }
@@ -702,7 +702,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     // trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind kind = details.kind;
-    _shouldShowSelectionOverlay =
+    _shouldShowSelectionToolbar =
         kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
@@ -714,7 +714,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         from: details.globalPosition,
         cause: SelectionChangedCause.forcePress,
       );
-      if (_shouldShowSelectionOverlay)
+      if (_shouldShowSelectionToolbar)
         _editableTextKey.currentState.showToolbar();
     }
   }
@@ -782,14 +782,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    if (_shouldShowSelectionOverlay)
+    print('long tap end');
+    if (_shouldShowSelectionToolbar)
       _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      if (_shouldShowSelectionOverlay)
+      if (_shouldShowSelectionToolbar)
         _editableTextKey.currentState.showToolbar();
     }
   }

@@ -473,7 +473,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   // through a touch screen (via either a finger or a stylus). A mouse shouldn't
   // trigger the selection overlay.
   // For backwards-compatibility, we treat a null kind the same as touch.
-  bool _shouldShowSelectionOverlay = true;
+  bool _shouldShowSelectionToolbar = true;
 
   @override
   void initState() {
@@ -523,7 +523,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     // trigger the selection overlay.
     // For backwards-compatibility, we treat a null kind the same as touch.
     final PointerDeviceKind kind = details.kind;
-    _shouldShowSelectionOverlay =
+    _shouldShowSelectionToolbar =
         kind == null ||
         kind == PointerDeviceKind.touch ||
         kind == PointerDeviceKind.stylus;
@@ -541,7 +541,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       from: details.globalPosition,
       cause: SelectionChangedCause.forcePress,
     );
-    if (_shouldShowSelectionOverlay)
+    if (_shouldShowSelectionToolbar)
       _editableText.showToolbar();
   }
 
@@ -565,20 +565,20 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    if (_shouldShowSelectionOverlay)
+    if (_shouldShowSelectionToolbar)
       _editableText.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     _renderEditable.selectWord(cause: SelectionChangedCause.tap);
-    if (_shouldShowSelectionOverlay)
+    if (_shouldShowSelectionToolbar)
       _editableText.showToolbar();
   }
 
-  bool _shouldShowHandles(SelectionChangedCause cause) {
+  bool _shouldShowSelectionHandles(SelectionChangedCause cause) {
     // When the text field is activated by something that doesn't trigger the
     // selection overlay, we shouldn't show the handles either.
-    if (!_shouldShowSelectionOverlay)
+    if (!_shouldShowSelectionToolbar)
       return false;
 
     // On iOS, we don't show handles when the selection is collapsed.
@@ -620,7 +620,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     if (cause == SelectionChangedCause.longPress) {
       _editableText?.bringIntoView(selection.base);
     }
-    if (_shouldShowHandles(cause)) {
+    if (_shouldShowSelectionHandles(cause)) {
       _editableText?.showHandles();
     }
   }
