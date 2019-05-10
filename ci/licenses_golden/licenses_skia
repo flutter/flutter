@@ -1,4 +1,4 @@
-Signature: c1b24ba3a7f3ce62d19b363c23120c45
+Signature: 73ffdb7e5d52ec56becc3e26794480f9
 
 UNUSED LICENSES:
 
@@ -5628,6 +5628,8 @@ FILE: ../../../third_party/skia/src/gpu/GrRecordingContextPriv.h
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.cpp
 FILE: ../../../third_party/skia/src/gpu/GrSamplePatternDictionary.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrGSCoverageProcessor.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrOctoBounds.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrVSCoverageProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrMixerEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrOverrideInputFragmentProcessor.fp
