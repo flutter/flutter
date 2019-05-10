@@ -14,6 +14,9 @@ import 'package:meta/meta.dart';
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
+import 'core_stub.dart'
+  if (dart.library.html) 'core_web.dart'
+  if (dart.library.io) 'core_io.dart';
 import 'debug.dart';
 import 'platform.dart';
 import 'print.dart';

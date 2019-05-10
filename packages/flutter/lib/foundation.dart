@@ -39,9 +39,11 @@ export 'src/foundation/change_notifier.dart';
 export 'src/foundation/collections.dart';
 export 'src/foundation/consolidate_response.dart';
 export 'src/foundation/constants.dart';
+export 'src/foundation/core_stub.dart'
+  if (dart.library.html) 'src/foundation/core_web.dart'
+  if (dart.library.io) 'src/foundation/core_io.dart';
 export 'src/foundation/debug.dart';
 export 'src/foundation/diagnostics.dart';
-export 'src/foundation/isolates.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';
 export 'src/foundation/node.dart';

@@ -1,49 +1,101 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:developer' show Timeline, Flow;
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 
+import 'assertions.dart';
 import 'constants.dart';
+import 'core_stub.dart' as core;
+import 'platform.dart';
 
-/// Signature for the callback passed to [compute].
+/// The io implementation of defaultTargetPlatform.
+TargetPlatform get defaultTargetPlatform {
+  TargetPlatform result;
+  if (Platform.isIOS) {
+    result = TargetPlatform.iOS;
+  } else if (Platform.isAndroid) {
+    result = TargetPlatform.android;
+  } else if (Platform.isFuchsia) {
+    result = TargetPlatform.fuchsia;
+  }
+  assert(() {
+    if (Platform.environment.containsKey('FLUTTER_TEST'))
+      result = TargetPlatform.android;
+    return true;
+  }());
+  if (debugDefaultTargetPlatformOverride != null)
+    result = debugDefaultTargetPlatformOverride;
+  if (result == null) {
+    throw FlutterError(
+      'Unknown platform.\n'
+      '${Platform.operatingSystem} was not recognized as a target platform. '
+      'Consider updating the list of TargetPlatforms to include this platform.'
+    );
+  }
+  return result;
+}
+
+/// The largest SMI value.
 ///
-/// {@macro flutter.foundation.compute.types}
+/// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
 ///
-/// Instances of [ComputeCallback] must be top-level functions or static methods
-/// of classes, not closures or instance methods of objects.
+/// When compiling to JavaScript, this value is not supported since it is
+/// larger than the maximum safe 32bit integer.
+const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
+
+/// A BitField over an enum (or other class whose values implement "index").
+/// Only the first 62 values of the enum can be used as indices.
 ///
-/// {@macro flutter.foundation.compute.limitations}
+/// When compiling to JavaScript, this class is not supported.
+class BitField<T extends dynamic> implements core.BitField<T> {
+  ///
+  BitField(this._length)
+    : assert(_length <= _smiBits),
+      _bits = _allZeros;
+
+  ///
+  BitField.filled(this._length, bool value)
+    : assert(_length <= _smiBits),
+      _bits = value ? _allOnes : _allZeros;
+
+  final int _length;
+  int _bits;
+
+  static const int _smiBits = 62; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
+  static const int _allZeros = 0;
+  static const int _allOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
+
+  @override
+  bool operator [](T index) {
+    assert(index.index < _length);
+    return (_bits & 1 << index.index) > 0;
+  }
+
+  @override
+  void operator []=(T index, bool value) {
+    assert(index.index < _length);
+    if (value)
+      _bits = _bits | (1 << index.index);
+    else
+      _bits = _bits & ~(1 << index.index);
+  }
+
+  @override
+  void reset([ bool value = false ]) {
+    _bits = value ? _allOnes : _allZeros;
+  }
+}
+
+///
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
-/// Spawn an isolate, run `callback` on that isolate, passing it `message`, and
-/// (eventually) return the value returned by `callback`.
 ///
-/// This is useful for operations that take longer than a few milliseconds, and
-/// which would therefore risk skipping frames. For tasks that will only take a
-/// few milliseconds, consider [scheduleTask] instead.
-///
-/// {@template flutter.foundation.compute.types}
-/// `Q` is the type of the message that kicks off the computation.
-///
-/// `R` is the type of the value returned.
-/// {@endtemplate}
-///
-/// The `callback` argument must be a top-level function, not a closure or an
-/// instance or static method of a class.
-///
-/// {@template flutter.foundation.compute.limitations}
-/// There are limitations on the values that can be sent and received to and
-/// from isolates. These limitations constrain the values of `Q` and `R` that
-/// are possible. See the discussion at [SendPort.send].
-/// {@endtemplate}
-///
-/// The `debugLabel` argument can be specified to provide a name to add to the
-/// [Timeline]. This is useful when profiling an application.
 Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
   if (!kReleaseMode) {
     debugLabel ??= callback.toString();
