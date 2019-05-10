@@ -1043,7 +1043,9 @@ class CupertinoDialogAction extends StatelessWidget {
     this.isDestructiveAction = false,
     this.textStyle,
     @required this.child,
-  }) : assert(child != null);
+  }) : assert(child != null),
+       assert(isDefaultAction != null),
+       assert(isDestructiveAction != null);
 
   /// The callback that is called when the button is tapped or otherwise
   /// activated.
@@ -1054,11 +1056,15 @@ class CupertinoDialogAction extends StatelessWidget {
   /// Set to true if button is the default choice in the dialog.
   ///
   /// Default buttons are bold.
+  ///
+  /// This parameters defaults to false and cannot be null.
   final bool isDefaultAction;
 
   /// Whether this action destroys an object.
   ///
   /// For example, an action that deletes an email is destructive.
+  ///
+  /// Defaults to false and cannot be null.
   final bool isDestructiveAction;
 
   /// [TextStyle] to apply to any text that appears in this button.
@@ -1148,6 +1154,10 @@ class CupertinoDialogAction extends StatelessWidget {
   Widget build(BuildContext context) {
     TextStyle style = _kCupertinoDialogActionStyle;
     style = style.merge(textStyle);
+
+    if (isDefaultAction) {
+      style = style.copyWith(fontWeight: FontWeight.w600);
+    }
 
     if (isDestructiveAction) {
       style = style.copyWith(color: CupertinoColors.destructiveRed);
