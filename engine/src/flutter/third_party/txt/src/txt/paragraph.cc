@@ -477,13 +477,15 @@ void Paragraph::ComputeStrut(StrutMetrics* strut, SkFont& font) {
 }
 
 void Paragraph::Layout(double width, bool force) {
+  double rounded_width = floor(width);
   // Do not allow calling layout multiple times without changing anything.
-  if (!needs_layout_ && width == width_ && !force) {
+  if (!needs_layout_ && rounded_width == width_ && !force) {
     return;
   }
-  needs_layout_ = false;
 
-  width_ = floor(width);
+  width_ = rounded_width;
+
+  needs_layout_ = false;
 
   if (!ComputeLineBreaks())
     return;
