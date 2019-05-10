@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:io'; // ignore: dart_io_import.
-import 'package:path/path.dart' as path; // ignore: package_path_import. 
+import 'package:path/path.dart' as path; // ignore: package_path_import.
 
 /// Executes the required flutter tasks for a linux build.
 Future<void> main(List<String> arguments) async {
