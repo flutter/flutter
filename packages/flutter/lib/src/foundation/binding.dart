@@ -300,16 +300,18 @@ abstract class BindingBase {
   Future<void> performReassemble() {
     FlutterError.resetErrorCount();
     assert(() {
+      final bool onBeginWasNull = window.onBeginFrame == null;
       if (_debugLastOnBeginFrame != null) {
         assert(window.onBeginFrame == null);
         window.onBeginFrame = _debugLastOnBeginFrame;
       }
-      assert(window.onBeginFrame != null);
+      assert( onBeginWasNull || window.onBeginFrame != null);
+      final bool onDrawWasNull = window.onDrawFrame == null;
       if (_debugLastOnDrawFrame != null) {
         assert(window.onDrawFrame == null);
         window.onDrawFrame = _debugLastOnDrawFrame;
       }
-      assert(window.onDrawFrame != null);
+      assert(onDrawWasNull || window.onDrawFrame != null);
       _debugLastOnBeginFrame = null;
       _debugLastOnDrawFrame = null;
       return true;
