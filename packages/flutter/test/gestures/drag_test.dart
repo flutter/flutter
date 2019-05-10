@@ -771,6 +771,7 @@ void main() {
       final TestPointer pointer = TestPointer(
         1,
         PointerDeviceKind.touch,
+        0,
         kSecondaryButton,
       );
       final PointerDownEvent down = pointer.down(const Offset(10, 10));
@@ -825,6 +826,7 @@ void main() {
     final TestPointer pointer = TestPointer(
       5,
       PointerDeviceKind.touch,
+      0,
       kSecondaryButton,
     );
 

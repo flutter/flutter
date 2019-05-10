@@ -40,7 +40,7 @@ if [[ -n "$TRACK_WIDGET_CREATION" ]]; then
 fi
 
 # Copy the framework and handle local engine builds.
-framework_name = "FlutterMacOS.framework"
+framework_name="FlutterMacOS.framework"
 derived_dir="${SOURCE_ROOT}/../build/macos/Build/Products/flutter_framework"
 framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64"
 flutter_framework="${framework_path}/${framework_name}"
