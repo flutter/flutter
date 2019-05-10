@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -537,8 +535,7 @@ void main() {
 
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
-        matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('list_wheel_scroll_view.center_child.magnified.png'),
       );
     });
 
@@ -592,8 +589,7 @@ void main() {
 
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
-        matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('list_wheel_scroll_view.curved_wheel.left.png'),
       );
     });
 
