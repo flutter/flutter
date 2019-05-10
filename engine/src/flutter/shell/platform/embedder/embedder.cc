@@ -712,6 +712,35 @@ inline flutter::PointerData::SignalKind ToPointerDataSignalKind(
   return flutter::PointerData::SignalKind::kNone;
 }
 
+// Returns the buttons for PointerData for the given buttons and change from a
+// FlutterPointerEvent.
+inline int64_t ToPointerDataButtons(int64_t buttons,
+                                    flutter::PointerData::Change change) {
+  switch (change) {
+    case flutter::PointerData::Change::kDown:
+    case flutter::PointerData::Change::kMove:
+      // These kinds of change must have a non-zero `buttons`, otherwise gesture
+      // recognizers will ignore these events. To avoid breaking legacy
+      // embedders, it synthesizes a primary button when seeing `button = 0` and
+      // logs a warning to inform them to update.
+      if (buttons == 0) {
+        // TODO: Log a warning to inform the embedder to send the
+        // correct buttons. See
+        // https://github.com/flutter/flutter/issues/32052#issuecomment-489278965
+        return flutter::kPointerButtonMousePrimary;
+      }
+      return buttons;
+
+    case flutter::PointerData::Change::kCancel:
+    case flutter::PointerData::Change::kAdd:
+    case flutter::PointerData::Change::kRemove:
+    case flutter::PointerData::Change::kHover:
+    case flutter::PointerData::Change::kUp:
+      return buttons;
+  }
+  return buttons;
+}
+
 FlutterEngineResult FlutterEngineSendPointerEvent(
     FlutterEngine engine,
     const FlutterPointerEvent* pointers,
@@ -738,6 +767,10 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
         SAFE_ACCESS(current, signal_kind, kFlutterPointerSignalKindNone));
     pointer_data.scroll_delta_x = SAFE_ACCESS(current, scroll_delta_x, 0.0);
     pointer_data.scroll_delta_y = SAFE_ACCESS(current, scroll_delta_y, 0.0);
+    // TODO: Change 0 to a SAFE_ACCESS to current.buttons once this
+    // field is added. See
+    // https://github.com/flutter/flutter/issues/32052#issuecomment-489278965
+    pointer_data.buttons = ToPointerDataButtons(0, pointer_data.change);
     packet->SetPointerData(i, pointer_data);
     current = reinterpret_cast<const FlutterPointerEvent*>(
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
