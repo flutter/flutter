@@ -164,7 +164,7 @@ void main() {
         of: ByValueKey(of),
         matching: ByValueKey('text2'),
         matchRoot: matchRoot,
-      ), timeout: Duration(seconds: 1)).serialize();
+      ), timeout: const Duration(seconds: 1)).serialize();
       final Map<String, dynamic> result = await extension.call(arguments);
       if (result['isError']) {
         return null;
@@ -191,11 +191,11 @@ void main() {
 
     // Find nothing
     Future<String> result = getDescendantText(of: 'text1', matchRoot: true);
-    await tester.pump(Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
     expect(await result, null);
 
     result = getDescendantText(of: 'text2');
-    await tester.pump(Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
     expect(await result, null);
   });
 
@@ -208,7 +208,7 @@ void main() {
         of: ByValueKey(of),
         matching: ByValueKey(matching),
         matchRoot: matchRoot,
-      ), OffsetType.topLeft, timeout: Duration(seconds: 1)).serialize();
+      ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
       final Map<String, dynamic> response = await extension.call(arguments);
       if (response['isError']) {
         return null;
@@ -260,11 +260,11 @@ void main() {
 
     // Find nothing
     Future<Offset> result = getAncestorTopLeft(of: 'leftchild', matching: 'leftchild');
-    await tester.pump(Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
     expect(await result, null);
 
     result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
-    await tester.pump(Duration(seconds: 2));
+    await tester.pump(const Duration(seconds: 2));
     expect(await result, null);
   });
 }
