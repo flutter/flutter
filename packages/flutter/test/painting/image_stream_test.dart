@@ -127,6 +127,9 @@ void main() {
     expect(mockCodec.numFramesAsked, 1);
   });
 
+  testWidgets('Chunk events are not buffered before listener registration', (WidgetTester tester) async {
+  });
+
   testWidgets('getNextFrame future fails', (WidgetTester tester) async {
     final MockCodec mockCodec = MockCodec();
     mockCodec.frameCount = 1;

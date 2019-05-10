@@ -68,14 +68,49 @@ class ImageInfo {
 /// same stack frame as the call to [ImageStream.addListener]).
 typedef ImageListener = void Function(ImageInfo image, bool synchronousCall);
 
+/// Signature for listening to [ImageChunkEvent] events.
+///
+/// Used by [ImageStream].
+typedef ImageChunkListener = void Function(ImageChunkEvent event);
+
 /// Signature for reporting errors when resolving images.
 ///
 /// Used by [ImageStream] and [precacheImage] to report errors.
 typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
 
-class _ImageListenerPair {
-  _ImageListenerPair(this.listener, this.errorListener);
+/// An immutable notification of image bytes having been incrementally loaded.
+///
+/// Chunk events represent progress notifications while an image is being
+/// loaded (e.g. from disk or over the network).
+///
+/// See also:
+///
+///  * [ImageChunkListener], the means by which callers get notified of
+///    these events.
+class ImageChunkEvent {
+  /// Creates a new chunk event.
+  const ImageChunkEvent(this.cumulativeBytesLoaded, this.expectedTotalBytes);
+
+  /// The number of bytes that have been loaded thus far.
+  final int cumulativeBytesLoaded;
+
+  /// The expected size of the image in bytes once it has completed loading.
+  ///
+  /// This value will be -1 if the size of the image is not known in advance.
+  /// When this is the case, the chunk event may still be useful as an
+  /// indication that data is still loading (and how much), but it cannot
+  /// represent a loading completion percentage.
+  ///
+  /// Even when this value purports to know the size of the image in advance,
+  /// it may not always be trustworthy (e.g. when the estimated size was
+  /// provided prior to GZIP compression).
+  final int expectedTotalBytes;
+}
+
+class _ImageListeners {
+  _ImageListeners(this.listener, this.chunkListener, this.errorListener);
   final ImageListener listener;
+  final ImageChunkListener chunkListener;
   final ImageErrorListener errorListener;
 }
 
@@ -107,7 +142,7 @@ class ImageStream extends Diagnosticable {
   ImageStreamCompleter get completer => _completer;
   ImageStreamCompleter _completer;
 
-  List<_ImageListenerPair> _listeners;
+  List<_ImageListeners> _listeners;
 
   /// Assigns a particular [ImageStreamCompleter] to this [ImageStream].
   ///
@@ -121,12 +156,13 @@ class ImageStream extends Diagnosticable {
     assert(_completer == null);
     _completer = value;
     if (_listeners != null) {
-      final List<_ImageListenerPair> initialListeners = _listeners;
+      final List<_ImageListeners> initialListeners = _listeners;
       _listeners = null;
-      for (_ImageListenerPair listenerPair in initialListeners) {
+      for (_ImageListeners listeners in initialListeners) {
         _completer.addListener(
-          listenerPair.listener,
-          onError: listenerPair.errorListener,
+          listeners.listener,
+          chunkListener: listeners.chunkListener,
+          onError: listeners.errorListener,
         );
       }
     }
@@ -144,6 +180,14 @@ class ImageStream extends Diagnosticable {
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
   ///
+  /// An [ImageChunkListener] can also optionally be added along with the
+  /// `listener`. If the stream produces images that are loaded in chunks
+  /// (e.g. over a file system or a network), then the specified listener will
+  /// be notified for every chunk of data that is loaded. The events that are
+  /// delivered to the listener are _not_ buffered, so it'd possible that the
+  /// listener will have missed delivery of some [ImageChunkEvent]s by the time
+  /// they add themselves as a listener.
+  ///
   /// An [ImageErrorListener] can also optionally be added along with the
   /// `listener`. If an error occurred, `onError` will be called instead of
   /// `listener`.
@@ -155,11 +199,15 @@ class ImageStream extends Diagnosticable {
   /// discouraged because [removeListener] will remove the first instance that
   /// was added, even if it was added with a different `onError` than the
   /// intended paired `addListener` call.
-  void addListener(ImageListener listener, { ImageErrorListener onError }) {
+  void addListener(
+    ImageListener listener, {
+    ImageChunkListener chunkListener,
+    ImageErrorListener onError,
+  }) {
     if (_completer != null)
-      return _completer.addListener(listener, onError: onError);
-    _listeners ??= <_ImageListenerPair>[];
-    _listeners.add(_ImageListenerPair(listener, onError));
+      return _completer.addListener(listener, chunkListener: chunkListener, onError: onError);
+    _listeners ??= <_ImageListeners>[];
+    _listeners.add(_ImageListeners(listener, chunkListener, onError));
   }
 
   /// Stop listening for new concrete [ImageInfo] objects and errors from
@@ -213,7 +261,7 @@ class ImageStream extends Diagnosticable {
       ifPresent: _completer?.toStringShort(),
       ifNull: 'unresolved',
     ));
-    properties.add(ObjectFlagProperty<List<_ImageListenerPair>>(
+    properties.add(ObjectFlagProperty<List<_ImageListeners>>(
       'listeners',
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
@@ -231,7 +279,7 @@ class ImageStream extends Diagnosticable {
 /// [ImageProvider] subclass will return an [ImageStream] and automatically
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter extends Diagnosticable {
-  final List<_ImageListenerPair> _listeners = <_ImageListenerPair>[];
+  final List<_ImageListeners> _listeners = <_ImageListeners>[];
   ImageInfo _currentImage;
   FlutterErrorDetails _currentError;
 
@@ -266,6 +314,14 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
   ///
+  /// An [ImageChunkListener] can also optionally be added along with the
+  /// `listener`. If the stream produces images that are loaded in chunks
+  /// (e.g. over a file system or a network), then the specified listener will
+  /// be notified for every chunk of data that is loaded. The events that are
+  /// delivered to the listener are _not_ buffered, so it'd possible that the
+  /// listener will have missed delivery of some [ImageChunkEvent]s by the time
+  /// they add themselves as a listener.
+  ///
   /// An [ImageErrorListener] can also optionally be added along with the
   /// `listener`. If an error occurred, `onError` will be called instead of
   /// `listener`.
@@ -277,8 +333,12 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// discouraged because [removeListener] will remove the first instance that
   /// was added, even if it was added with a different `onError` than the
   /// intended paired `addListener` call.
-  void addListener(ImageListener listener, { ImageErrorListener onError }) {
-    _listeners.add(_ImageListenerPair(listener, onError));
+  void addListener(
+    ImageListener listener, {
+    ImageChunkListener chunkListener,
+    ImageErrorListener onError,
+  }) {
+    _listeners.add(_ImageListeners(listener, chunkListener, onError));
     if (_currentImage != null) {
       try {
         listener(_currentImage, true);
@@ -329,7 +389,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     if (_listeners.isEmpty)
       return;
     final List<ImageListener> localListeners = _listeners.map<ImageListener>(
-      (_ImageListenerPair listenerPair) => listenerPair.listener
+      (_ImageListeners listeners) => listeners.listener
     ).toList();
     for (ImageListener listener in localListeners) {
       try {
@@ -391,7 +451,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
 
     final List<ImageErrorListener> localErrorListeners =
       _listeners.map<ImageErrorListener>(
-        (_ImageListenerPair listenerPair) => listenerPair.errorListener
+        (_ImageListeners listeners) => listeners.errorListener
       ).where(
         (ImageErrorListener errorListener) => errorListener != null
       ).toList();
@@ -422,7 +482,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
-    description.add(ObjectFlagProperty<List<_ImageListenerPair>>(
+    description.add(ObjectFlagProperty<List<_ImageListeners>>(
       'listeners',
       _listeners,
       ifPresent: '${_listeners?.length} listener${_listeners?.length == 1 ? "" : "s" }',
@@ -505,6 +565,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
+    Stream<ImageChunkEvent> chunkEvents,
     InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
@@ -518,6 +579,31 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         silent: true,
       );
     });
+    if (chunkEvents != null) {
+      chunkEvents.listen(
+        (ImageChunkEvent event) {
+          if (hasListeners) {
+            final List<ImageChunkListener> localListeners =
+              _listeners.map<ImageChunkListener>(
+                (_ImageListeners listeners) => listeners.chunkListener
+              ).where(
+                (ImageChunkListener chunkListener) => chunkListener != null
+              ).toList();
+            for (ImageChunkListener listener in localListeners) {
+              listener(event);
+            }
+          }
+        }, onError: (dynamic error, StackTrace stack) {
+          reportError(
+            context: ErrorDescription('loading an image'),
+            exception: error,
+            stack: stack,
+            informationCollector: informationCollector,
+            silent: true,
+          );
+        },
+      );
+    }
   }
 
   ui.Codec _codec;
@@ -610,10 +696,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   }
 
   @override
-  void addListener(ImageListener listener, { ImageErrorListener onError }) {
+  void addListener(
+    ImageListener listener, {
+    ImageChunkListener chunkListener,
+    ImageErrorListener onError,
+  }) {
     if (!hasListeners && _codec != null)
       _decodeNextFrameAndSchedule();
-    super.addListener(listener, onError: onError);
+    super.addListener(listener, chunkListener: chunkListener, onError: onError);
   }
 
   @override

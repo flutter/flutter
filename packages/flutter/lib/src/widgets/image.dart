@@ -29,6 +29,34 @@ export 'package:flutter/painting.dart' show
   MemoryImage,
   NetworkImage;
 
+/// Signature used by [Image] to build a representation of the image's loading
+/// progress.
+///
+/// This is useful for images that are incrementally loaded (e.g. over a local
+/// file system or a network) and you want to give the user an indication of
+/// when the image will be displayed.
+///
+/// For single-frame images, once the image loads, the image chunk events will
+/// stop firing, the image provider's stream will yield a completed [ImageInfo]
+/// object, and this builder will no longer be consulted.  In these cases, the
+/// `currentRawImage` parameter will be `null`.
+///
+/// For multi-frame images, it's possible that image chunk events will continue
+/// to fire after the first image frame has loaded.  In that case, the
+/// `currentRawImage` parameter will be set to the widget representing the
+/// current fully-loaded image frame that is about to be replaced. This allows
+/// callers the ability to overlay a loading progress indicator over the
+/// current frame, for instance.
+///
+/// See also:
+///
+///  * [ImageChunkListener]
+typedef ImageLoadingBuilder = Widget Function(
+  BuildContext context,
+  ImageChunkEvent imageChunkEvent,
+  RawImage currentRawImage,
+);
+
 /// Creates an [ImageConfiguration] based on the given [BuildContext] (and
 /// optionally size).
 ///
@@ -169,6 +197,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.imageLoadingBuilder,
     this.filterQuality = FilterQuality.low,
   }) : assert(image != null),
        assert(alignment != null),
@@ -213,6 +242,7 @@ class Image extends StatefulWidget {
     this.centerSlice,
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
+    this.imageLoadingBuilder,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
   }) : image = NetworkImage(src, scale: scale, headers: headers),
@@ -261,6 +291,7 @@ class Image extends StatefulWidget {
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       imageLoadingBuilder = null,
        super(key: key);
 
 
@@ -413,6 +444,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       imageLoadingBuilder = null,
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
@@ -451,6 +483,7 @@ class Image extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       imageLoadingBuilder = null,
        super(key: key);
 
   /// The image to display.
@@ -566,6 +599,43 @@ class Image extends StatefulWidget {
   /// (false), when the image provider changes.
   final bool gaplessPlayback;
 
+  /// A builder that specifies the widget to display to the user while the
+  /// image provider's stream is still loading its image.
+  ///
+  /// The widget returned from this builder will be sized to match the size of
+  /// the image.
+  ///
+  /// If this is `null`, and the image is loaded incrementally (e.g. over a
+  /// network), the user will receive no indication of the progress as the
+  /// bytes are loaded.
+  ///
+  /// Once an image has fully loaded, this builder will no longer be consulted.
+  ///
+  /// {@tool sample}
+  ///
+  /// The following sample uses [imageLoadingBuilder] to show a [CircularProgressIndicator]
+  /// while an image loads over the network.
+  ///
+  /// ```dart
+  /// Image.network(
+  ///   'https://example.com/very-large-image.jpg',
+  ///   imageLoadingBuilder: (BuildContext context, ImageChunkEvent event, Widget currentRawImage) {
+  ///     return Center(
+  ///       child: CircularProgressIndicator(
+  ///         value: event.cumulativeBytesLoaded / event.expectedTotalBytes,
+  ///       ),
+  ///     );
+  ///   },
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Run against a real-world image, the previous sample looks like this in an
+  /// application:
+  ///
+  /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/image_loadingProgress.mp4}
+  final ImageLoadingBuilder imageLoadingBuilder;
+
   /// A Semantic description of the image.
   ///
   /// Used to provide a description of the image to TalkBack on Android, and
@@ -603,6 +673,7 @@ class Image extends StatefulWidget {
 class _ImageState extends State<Image> {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
+  ImageChunkEvent _chunkEvent;
   bool _isListeningToStream = false;
   bool _invertColors;
 
@@ -645,7 +716,14 @@ class _ImageState extends State<Image> {
 
   void _handleImageChanged(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
+      _chunkEvent = null;
       _imageInfo = imageInfo;
+    });
+  }
+
+  void _handleImageChunkLoaded(ImageChunkEvent event) {
+    setState(() {
+      _chunkEvent = event;
     });
   }
 
@@ -660,17 +738,20 @@ class _ImageState extends State<Image> {
       _imageStream.removeListener(_handleImageChanged);
 
     if (!widget.gaplessPlayback)
-      setState(() { _imageInfo = null; });
+      setState(() {
+        _chunkEvent = null;
+        _imageInfo = null;
+      });
 
     _imageStream = newStream;
     if (_isListeningToStream)
-      _imageStream.addListener(_handleImageChanged);
+      _imageStream.addListener(_handleImageChanged, chunkListener: _handleImageChunkLoaded);
   }
 
   void _listenToStream() {
     if (_isListeningToStream)
       return;
-    _imageStream.addListener(_handleImageChanged);
+    _imageStream.addListener(_handleImageChanged, chunkListener: _handleImageChunkLoaded);
     _isListeningToStream = true;
   }
 
@@ -690,7 +771,7 @@ class _ImageState extends State<Image> {
 
   @override
   Widget build(BuildContext context) {
-    final RawImage image = RawImage(
+    Widget result = RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,
@@ -705,13 +786,16 @@ class _ImageState extends State<Image> {
       invertColors: _invertColors,
       filterQuality: widget.filterQuality,
     );
+    if (widget.imageLoadingBuilder != null && _chunkEvent != null)
+      result = widget.imageLoadingBuilder(context, _chunkEvent, _imageInfo == null ? null : result);
+
     if (widget.excludeFromSemantics)
-      return image;
+      return result;
     return Semantics(
       container: widget.semanticLabel != null,
       image: true,
       label: widget.semanticLabel == null ? '' : widget.semanticLabel,
-      child: image,
+      child: result,
     );
   }
 

@@ -905,7 +905,11 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
   final Map<ImageListener, ImageErrorListener> listeners = <ImageListener, ImageErrorListener>{};
 
   @override
-  void addListener(ImageListener listener, { ImageErrorListener onError }) {
+  void addListener(
+    ImageListener listener, {
+    ImageChunkListener chunkListener,
+    ImageErrorListener onError,
+  }) {
     listeners[listener] = onError;
   }
 

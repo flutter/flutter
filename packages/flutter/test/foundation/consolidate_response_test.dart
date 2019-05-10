@@ -64,6 +64,25 @@ void main() {
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
 
+    test('Notifies onBytesReceived for every chunk of bytes', () async {
+      final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
+      when(response.contentLength).thenReturn(syntheticTotal);
+      final List<int> records = <int>[];
+      await consolidateHttpClientResponseBytes(
+        response,
+        onBytesReceived: (int cumulative, int total) {
+          records.addAll(<int>[cumulative, total]);
+        },
+      );
+
+      expect(records, <int>[
+        chunkOne.length,
+        syntheticTotal,
+        chunkOne.length + chunkTwo.length,
+        syntheticTotal,
+      ]);
+    });
+
     test('forwards errors from HttpClientResponse', () async {
       when(response.listen(
         any,

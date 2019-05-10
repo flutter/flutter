@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -15,17 +16,21 @@ import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
+/// A valid encoding of a 1x1 GIF.
+final Uint8List _smallGif = Uint8List.fromList(<int>[
+  0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00,
+  0x01, 0x00, 0x80, 0x00, 0x00, 0xff, 0xff, 0xff,
+  0x00, 0x00, 0x00, 0x21, 0xf9, 0x04, 0x00, 0x00,
+  0x00, 0x00, 0x00, 0x2c, 0x00, 0x00, 0x00, 0x00,
+  0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x02, 0x44,
+  0x01, 0x00, 0x3b,
+]);
+
 void main() {
   TestRenderingFlutterBinding(); // initializes the imageCache
   group(ImageProvider, () {
     tearDown(() {
       imageCache.clear();
-    });
-
-    test('NetworkImage non-null url test', () {
-      expect(() {
-        NetworkImage(nonconst(null));
-      }, throwsAssertionError);
     });
 
     test('ImageProvider can evict images', () async {
@@ -112,7 +117,7 @@ void main() {
     expect(uncaught, false);
   });
 
-   test('ImageProvider.resolve errors in the completer will be caught', () async {
+  test('ImageProvider.resolve errors in the completer will be caught', () async {
     bool uncaught = false;
     final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
@@ -135,30 +140,114 @@ void main() {
     expect(uncaught, false);
   });
 
-  test('ImageProvider.resolve errors in the http client will be caught', () async {
-    bool uncaught = false;
-    final HttpClientMock httpClientMock = HttpClientMock();
-    when(httpClientMock.getUrl(any)).thenThrow(Error());
+  group(NetworkImage, () {
+    MockHttpClient httpClient;
 
-    await HttpOverrides.runZoned(() async {
-      const ImageProvider imageProvider = NetworkImage('asdasdasdas');
-      final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        throw Error();
-      };
-      final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
-        caughtError.complete(true);
-      });
-      expect(await caughtError.future, true);
-    }, createHttpClient: (SecurityContext context) => httpClientMock, zoneSpecification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
-        uncaught = true;
+    setUp(() {
+      debugNetworkImageUseFreshHttpClient = true;
+      httpClient = MockHttpClient();
+    });
+
+    tearDown(() {
+      debugNetworkImageUseFreshHttpClient = false;
+    });
+
+    R runWithHttpClientMock<R>(R runnable(), {ZoneSpecification zoneSpecification}) {
+      return HttpOverrides.runZoned<R>(
+        runnable,
+        createHttpClient: (SecurityContext context) => httpClient,
+        zoneSpecification: zoneSpecification,
+      );
+    }
+
+    test('Disallows null urls', () {
+      expect(() {
+        NetworkImage(nonconst(null));
+      }, throwsAssertionError);
+    });
+
+    test('Propagates http client errors during resolve()', () async {
+      when(httpClient.getUrl(any)).thenThrow(Error());
+      bool uncaught = false;
+
+      await runWithHttpClientMock(() async {
+        const ImageProvider imageProvider = NetworkImage('asdasdasdas');
+        final Completer<bool> caughtError = Completer<bool>();
+        FlutterError.onError = (FlutterErrorDetails details) {
+          throw Error();
+        };
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        result.addListener((ImageInfo info, bool syncCall) {
+        }, onError: (dynamic error, StackTrace stackTrace) {
+          caughtError.complete(true);
+        });
+        expect(await caughtError.future, true);
+      }, zoneSpecification: ZoneSpecification(
+          handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
+            uncaught = true;
+          },
+        ),
+      );
+      expect(uncaught, false);
+    });
+
+    test('Notifies listeners of chunk events', () async {
+      final List<List<int>> chunks = <List<int>>[];
+      const int chunkSize = 8;
+      for (int offset = 0; offset < _smallGif.length; offset += chunkSize) {
+        chunks.add(_smallGif.skip(offset).take(chunkSize).toList());
       }
-    ));
-    expect(uncaught, false);
+      final Completer<void> imageAvailable = Completer<void>();
+      final MockHttpClientRequest request = MockHttpClientRequest();
+      final MockHttpClientResponse response = MockHttpClientResponse();
+      when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+      when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+      when(response.statusCode).thenReturn(HttpStatus.ok);
+      when(response.contentLength).thenReturn(_smallGif.length);
+      when(response.listen(
+        any,
+        onDone: anyNamed('onDone'),
+        onError: anyNamed('onError'),
+        cancelOnError: anyNamed('cancelOnError'),
+      )).thenAnswer((Invocation invocation) {
+        final void Function(List<int>) onData = invocation.positionalArguments[0];
+        final void Function(Object) onError = invocation.namedArguments[#onError];
+        final void Function() onDone = invocation.namedArguments[#onDone];
+        final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+
+        return Stream<List<int>>.fromIterable(chunks).listen(
+          onData,
+          onDone: onDone,
+          onError: onError,
+          cancelOnError: cancelOnError,
+        );
+      });
+      await runWithHttpClientMock(() async {
+        const ImageProvider imageProvider = NetworkImage('keymustbeuniqueinthisfile');
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        final List<ImageChunkEvent> events = <ImageChunkEvent>[];
+        result.addListener(
+          (ImageInfo image, bool synchronousCall) {
+            imageAvailable.complete();
+          },
+          chunkListener: (ImageChunkEvent event) {
+            events.add(event);
+          },
+          onError: (dynamic error, StackTrace stackTrace) {
+            imageAvailable.completeError(error, stackTrace);
+          },
+        );
+        await imageAvailable.future;
+        expect(events.length, chunks.length);
+        for (int i = 0; i < events.length; i++) {
+          expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, _smallGif.length));
+          expect(events[i].expectedTotalBytes, _smallGif.length);
+        }
+      });
+    });
   });
 }
 
-class HttpClientMock extends Mock implements HttpClient {}
+class MockHttpClient extends Mock implements HttpClient {}
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+class MockHttpClientResponse extends Mock implements HttpClientResponse {}
