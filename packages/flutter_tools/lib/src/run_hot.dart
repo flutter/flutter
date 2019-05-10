@@ -610,6 +610,7 @@ class HotRunner extends ResidentRunner {
     final List<FlutterView> reassembleViews = <FlutterView>[];
     int pausedIsolatesFound = 0;
     final List<Future<void>> reassembleFutures = <Future<void>>[];
+    bool skipReassemble = false;
 
     // Since we'll be calling ext.flutter.waitForReassemble, we want to make
     // sure we end up calling ext.flutter.reassemble in a finally block here.
@@ -756,29 +757,32 @@ class HotRunner extends ResidentRunner {
           }
         }
       }
-      if (pausedIsolatesFound > 0) {
-        if (onSlow != null)
-          onSlow('${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
-        if (reassembleViews.isEmpty) {
-          printTrace('Skipping reassemble because all isolates are paused.');
-          return OperationResult(OperationResult.ok.code, reloadMessage);
+      if (pausedIsolatesFound > 0 && onSlow != null) {
+        onSlow('${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
+      }
+      if (pausedIsolatesFound > 0 && reassembleViews.isEmpty) {
+        printTrace('Skipping reassemble because all isolates are paused.');
+        skipReassemble = true;
+      } else {
+        printTrace('Evicting dirty assets');
+        await _evictDirtyAssets();
+        assert(reassembleViews.isNotEmpty);
+        printTrace('Reassembling application');
+        for (FlutterView view in reassembleViews) {
+          reassembleFutures.add(() async {
+            try {
+              await view.uiIsolate.flutterReassemble();
+            } catch (error) {
+              failedReassemble = true;
+              printError('Reassembling ${view.uiIsolate.name} failed: $error');
+              return;
+            }
+          }());
         }
       }
-      printTrace('Evicting dirty assets');
-      await _evictDirtyAssets();
-      assert(reassembleViews.isNotEmpty);
-      printTrace('Reassembling application');
-      for (FlutterView view in reassembleViews) {
-        reassembleFutures.add(() async {
-          try {
-            await view.uiIsolate.flutterReassemble();
-          } catch (error) {
-            failedReassemble = true;
-            printError('Reassembling ${view.uiIsolate.name} failed: $error');
-            return;
-          }
-        }());
-      }
+    }
+    if (skipReassemble) {
+      return OperationResult(OperationResult.ok.code, reloadMessage);
     }
     final Future<void> reassembleFuture = Future.wait<void>(reassembleFutures).then<void>((List<void> values) { });
     await reassembleFuture.timeout(

@@ -200,9 +200,6 @@ abstract class BindingBase {
   bool get locked => _lockCount > 0;
   int _lockCount = 0;
 
-  FrameCallback _lastOnBeginFrame;
-  VoidCallback _lastOnDrawFrame;
-
   /// Locks the dispatching of asynchronous events and callbacks until the
   /// callback's future completes.
   ///
@@ -239,6 +236,9 @@ abstract class BindingBase {
     assert(!locked);
   }
 
+  FrameCallback _debugLastOnBeginFrame;
+  VoidCallback _debugLastOnDrawFrame;
+
   /// Cause the entire application to stop drawing, e.g. in preparation for hot
   /// reload.
   ///
@@ -254,10 +254,13 @@ abstract class BindingBase {
   @mustCallSuper
   @visibleForTesting
   Future<void> waitForReassemble() async {
-    _lastOnBeginFrame ??= window.onBeginFrame;
-    _lastOnDrawFrame ??= window.onDrawFrame;
-    window.onDrawFrame = null;
-    window.onBeginFrame = null;
+    assert(() {
+      _debugLastOnBeginFrame ??= window.onBeginFrame;
+      _debugLastOnDrawFrame ??= window.onDrawFrame;
+      window.onDrawFrame = null;
+      window.onBeginFrame = null;
+      return true;
+    }());
   }
 
   /// Cause the entire application to redraw, e.g. after a hot reload.
@@ -296,18 +299,21 @@ abstract class BindingBase {
   @protected
   Future<void> performReassemble() {
     FlutterError.resetErrorCount();
-    if (_lastOnBeginFrame != null) {
-      assert(window.onBeginFrame == null);
-      window.onBeginFrame = _lastOnBeginFrame;
-    }
-    assert(window.onBeginFrame != null);
-    if (_lastOnDrawFrame != null) {
-      assert(window.onDrawFrame == null);
-      window.onDrawFrame = _lastOnDrawFrame;
-    }
-    assert(window.onDrawFrame != null);
-    _lastOnBeginFrame = null;
-    _lastOnDrawFrame = null;
+    assert(() {
+      if (_debugLastOnBeginFrame != null) {
+        assert(window.onBeginFrame == null);
+        window.onBeginFrame = _debugLastOnBeginFrame;
+      }
+      assert(window.onBeginFrame != null);
+      if (_debugLastOnDrawFrame != null) {
+        assert(window.onDrawFrame == null);
+        window.onDrawFrame = _debugLastOnDrawFrame;
+      }
+      assert(window.onDrawFrame != null);
+      _debugLastOnBeginFrame = null;
+      _debugLastOnDrawFrame = null;
+      return true;
+    }());
     return Future<void>.value();
   }
 
