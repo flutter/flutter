@@ -1026,7 +1026,7 @@ class CommonFinders {
   SerializableFinder ancestor({
     @required SerializableFinder of,
     @required SerializableFinder matching,
-    bool matchRoot = false
+    bool matchRoot = false,
   }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
 
   /// Finds the widget that is an descendant of the `of` parameter and that
@@ -1037,7 +1037,7 @@ class CommonFinders {
   SerializableFinder descendant({
     @required SerializableFinder of,
     @required SerializableFinder matching,
-    bool matchRoot = false
+    bool matchRoot = false,
   }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
 }
 

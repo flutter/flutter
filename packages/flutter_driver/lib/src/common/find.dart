@@ -322,7 +322,7 @@ class PageBack extends SerializableFinder {
 /// A Flutter Driver finder that finds a descendant of [of] that matches
 /// [matching].
 ///
-/// If the `matchRoot` argument is true then the widget specified by [of] will
+/// If the `matchRoot` argument is true, then the widget specified by [of] will
 /// be considered for a match. The argument defaults to false.
 class Descendant extends SerializableFinder {
   /// Creates a descendant finder.
@@ -379,7 +379,7 @@ class Descendant extends SerializableFinder {
 /// A Flutter Driver finder that finds an ancestor of [of] that matches
 /// [matching].
 ///
-/// If the `matchRoot` argument is true then the widget specified by [of] will
+/// If the `matchRoot` argument is true, then the widget specified by [of] will
 /// be considered for a match. The argument defaults to false.
 class Ancestor extends SerializableFinder {
   /// Creates an ancestor finder.
@@ -389,10 +389,10 @@ class Ancestor extends SerializableFinder {
     this.matchRoot = false,
   });
 
-  /// The finder specifying the widget of which the descendant is to be found.
+  /// The finder specifying the widget of which the ancestor is to be found.
   final SerializableFinder of;
 
-  /// Only a descendant of [of] matching this finder will be found.
+  /// Only an ancestor of [of] matching this finder will be found.
   final SerializableFinder matching;
 
   /// Whether the widget matching [of] will be considered for a match.
