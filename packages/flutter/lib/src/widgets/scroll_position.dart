@@ -75,9 +75,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   }) : assert(physics != null),
        assert(context != null),
        assert(context.vsync != null),
-       assert(keepScrollOffset != null),
-       _minScrollExtent = double.negativeInfinity,
-       _maxScrollExtent = double.infinity {
+       assert(keepScrollOffset != null) {
     if (oldPosition != null)
       absorb(oldPosition);
     if (keepScrollOffset)

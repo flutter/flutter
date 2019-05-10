@@ -734,6 +734,7 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
       debugShortDescription: '[root]',
       child: rootWidget,
     ).attachToRenderTree(buildOwner, renderViewElement);
+    pipelineOwner.flushLayout();
   }
 
   @override
