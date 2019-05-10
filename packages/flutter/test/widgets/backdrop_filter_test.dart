@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/widgets.dart';
@@ -42,7 +43,8 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesSkiaGoldFile('backdrop_filter_test.cull_rect.png'),
+      matchesGoldenFile('backdrop_filter_test.cull_rect.1.png'),
+      skip: !Platform.isLinux,
     );
   });
 }
