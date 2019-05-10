@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_driver/flutter_driver.dart';
 import 'package:flutter_driver/src/common/find.dart';
 import 'package:flutter_driver/src/common/geometry.dart';
 import 'package:flutter_driver/src/common/request_data.dart';
+import 'package:flutter_driver/src/common/text.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -150,5 +153,118 @@ void main() {
     expect(await getOffset(OffsetType.bottomLeft), const Offset(40, 30 + 120.0));
     expect(await getOffset(OffsetType.bottomRight), const Offset(40 + 100.0, 30 + 120.0));
     expect(await getOffset(OffsetType.center), const Offset(40 + (100 / 2), 30 + (120 / 2)));
+  });
+
+  testWidgets('descendant finder', (WidgetTester tester) async {
+    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<String> getDescendantText({ String of, bool matchRoot = false}) async {
+      final Map<String, Object> arguments = GetText(Descendant(
+        of: ByValueKey(of),
+        matching: ByValueKey('text2'),
+        matchRoot: matchRoot,
+      ), timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> result = await extension.call(arguments);
+      if (result['isError']) {
+        return null;
+      }
+      return GetTextResult.fromJson(result['response']).text;
+    }
+
+    await tester.pumpWidget(
+        MaterialApp(
+            home: Column(
+              key: const ValueKey<String>('column'),
+              children: const <Widget>[
+                Text('Hello1', key: ValueKey<String>('text1')),
+                Text('Hello2', key: ValueKey<String>('text2')),
+                Text('Hello3', key: ValueKey<String>('text3')),
+              ],
+            )
+        )
+    );
+
+    expect(await getDescendantText(of: 'column'), 'Hello2');
+    expect(await getDescendantText(of: 'column', matchRoot: true), 'Hello2');
+    expect(await getDescendantText(of: 'text2', matchRoot: true), 'Hello2');
+
+    // Find nothing
+    Future<String> result = getDescendantText(of: 'text1', matchRoot: true);
+    await tester.pump(const Duration(seconds: 2));
+    expect(await result, null);
+
+    result = getDescendantText(of: 'text2');
+    await tester.pump(const Duration(seconds: 2));
+    expect(await result, null);
+  });
+
+  testWidgets('ancestor finder', (WidgetTester tester) async {
+    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<Offset> getAncestorTopLeft({ String of, String matching, bool matchRoot = false}) async {
+      final Map<String, Object> arguments = GetOffset(Ancestor(
+        of: ByValueKey(of),
+        matching: ByValueKey(matching),
+        matchRoot: matchRoot,
+      ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      if (response['isError']) {
+        return null;
+      }
+      final GetOffsetResult result = GetOffsetResult.fromJson(response['response']);
+      return Offset(result.dx, result.dy);
+    }
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+              child: Container(
+                key: const ValueKey<String>('parent'),
+                height: 100,
+                width: 100,
+                child: Center(
+                  child: Row(
+                    children: <Widget>[
+                      Container(
+                        key: const ValueKey<String>('leftchild'),
+                        width: 25,
+                        height: 25,
+                      ),
+                      Container(
+                        key: const ValueKey<String>('righttchild'),
+                        width: 25,
+                        height: 25,
+                      ),
+                    ],
+                  ),
+                ),
+              )
+          ),
+        )
+    );
+
+    expect(
+      await getAncestorTopLeft(of: 'leftchild', matching: 'parent'),
+      const Offset((800 - 100) / 2, (600 - 100) / 2),
+    );
+    expect(
+      await getAncestorTopLeft(of: 'leftchild', matching: 'parent', matchRoot: true),
+      const Offset((800 - 100) / 2, (600 - 100) / 2),
+    );
+    expect(
+      await getAncestorTopLeft(of: 'parent', matching: 'parent', matchRoot: true),
+      const Offset((800 - 100) / 2, (600 - 100) / 2),
+    );
+
+    // Find nothing
+    Future<Offset> result = getAncestorTopLeft(of: 'leftchild', matching: 'leftchild');
+    await tester.pump(const Duration(seconds: 2));
+    expect(await result, null);
+
+    result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
+    await tester.pump(const Duration(seconds: 2));
+    expect(await result, null);
   });
 }

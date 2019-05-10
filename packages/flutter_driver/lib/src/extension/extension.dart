@@ -142,6 +142,8 @@ class FlutterDriverExtension {
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
       'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
+      'Ancestor': (SerializableFinder finder) => _createAncestorFinder(finder),
+      'Descendant': (SerializableFinder finder) => _createDescendantFinder(finder),
     });
   }
 
@@ -308,6 +310,22 @@ class FlutterDriverExtension {
         return true;
       return false;
     }, description: 'Material or Cupertino back button');
+  }
+
+  Finder _createAncestorFinder(Ancestor arguments) {
+    return find.ancestor(
+      of: _createFinder(arguments.of),
+      matching: _createFinder(arguments.matching),
+      matchRoot: arguments.matchRoot,
+    );
+  }
+
+  Finder _createDescendantFinder(Descendant arguments) {
+    return find.descendant(
+      of: _createFinder(arguments.of),
+      matching: _createFinder(arguments.matching),
+      matchRoot: arguments.matchRoot,
+    );
   }
 
   Finder _createFinder(SerializableFinder finder) {

@@ -1017,6 +1017,28 @@ class CommonFinders {
 
   /// Finds the back button on a Material or Cupertino page's scaffold.
   SerializableFinder pageBack() => const PageBack();
+
+  /// Finds the widget that is an ancestor of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder ancestor({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
+
+  /// Finds the widget that is an descendant of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder descendant({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.
