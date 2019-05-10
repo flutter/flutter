@@ -19,7 +19,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo) as
     'FLUTTER_ROOT': Cache.flutterRoot,
     'EXTRA_BUNDLE_FLAGS': buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '',
   };
-  await writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
+  writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
   final String vcvarsScript = await findVcvars();
   if (vcvarsScript == null) {
