@@ -923,6 +923,43 @@ void main() {
     await tester.tap(find.byType(CupertinoNavigationBarBackButton));
 
     expect(backPressed, true);
+
+  });
+  testWidgets('Manually inserted CupertinoNavigationBarBackButton still automatically show previous page title when possible', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        title: 'An iPod',
+        builder: (BuildContext context) {
+          return const CupertinoPageScaffold(
+            navigationBar: CupertinoNavigationBar(),
+            child: Placeholder(),
+          );
+        },
+      )
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+      CupertinoPageRoute<void>(
+        title: 'A Phone',
+        builder: (BuildContext context) {
+          return const CupertinoNavigationBarBackButton();
+        },
+      )
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
   });
 }
 
