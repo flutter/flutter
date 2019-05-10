@@ -85,6 +85,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    update(golden, imageBytes); // Always updating for Skia Gold testing
     final File goldenFile = _getGoldenFile(golden);
     if(!goldenFile.existsSync()) {
       throw test_package.TestFailure('Could not be compared against non-existent file: "$golden"');
