@@ -596,13 +596,8 @@ class HotRunner extends ResidentRunner {
     if (reason != null) {
       analyticsParameters[kEventReloadReasonParameterName] = reason;
     }
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
-        if (view.uiIsolate == null)
-          throw 'Application isolate not found';
-      }
-    }
-
+    bool failedReassemble = false;
+    String reloadMessage;
     // The initial launch is from a script snapshot. When we reload from source
     // on top of a script snapshot, the first reload will be a worst case reload
     // because all of the sources will end up being dirty (library paths will
@@ -610,165 +605,182 @@ class HotRunner extends ResidentRunner {
     // not be affected, so we resume reporting reload times on the second
     // reload.
     bool shouldReportReloadTime = !_runningFromSnapshot;
-    final Stopwatch reloadTimer = Stopwatch()..start();
-
-    if (!_isPaused()) {
-      printTrace('Refreshing active FlutterViews before reloading.');
-      await refreshViews();
-    }
-
-    final Stopwatch devFSTimer = Stopwatch()..start();
-    final UpdateFSReport updatedDevFS = await _updateDevFS();
-    // Record time it took to synchronize to DevFS.
-    _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
-    if (!updatedDevFS.success)
-      return OperationResult(1, 'DevFS synchronization failed');
-    String reloadMessage;
-    final Stopwatch vmReloadTimer = Stopwatch()..start();
-    try {
-      final String entryPath = fs.path.relative(
-        getReloadPath(fullRestart: false),
-        from: projectRootPath,
-      );
-      final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
-      for (FlutterDevice device in flutterDevices) {
-        if (_runningFromSnapshot) {
-          // Asset directory has to be set only once when we switch from
-          // running from snapshot to running from uploaded files.
-          await device.resetAssetDirectory();
-        }
-        final Completer<DeviceReloadReport> completer = Completer<DeviceReloadReport>();
-        allReportsFutures.add(completer.future);
-        final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
-          entryPath, pause: pause,
-        );
-        unawaited(Future.wait(reportFutures).then(
-          (List<Map<String, dynamic>> reports) async {
-            // TODO(aam): Investigate why we are validating only first reload report,
-            // which seems to be current behavior
-            final Map<String, dynamic> firstReport = reports.first;
-            // Don't print errors because they will be printed further down when
-            // `validateReloadReport` is called again.
-            await device.updateReloadStatus(
-              validateReloadReport(firstReport, printErrors: false),
-            );
-            completer.complete(DeviceReloadReport(device, reports));
-          },
-        ));
-      }
-      final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
-      for (DeviceReloadReport report in reports) {
-        final Map<String, dynamic> reloadReport = report.reports[0];
-        if (!validateReloadReport(reloadReport)) {
-          // Reload failed.
-          flutterUsage.sendEvent('hot', 'reload-reject');
-          return OperationResult(1, 'Reload rejected');
-        } else {
-          // Collect stats that help understand scale of update for this hot reload request.
-          // For example, [syncedLibraryCount]/[finalLibraryCount] indicates how
-          // many libraries were affected by the hot reload request.
-          // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
-          // understand sync/transfer "overhead" of updating this number of source files.
-          final Map<String, dynamic> details = reloadReport['details'];
-          analyticsParameters[kEventReloadFinalLibraryCount] = "${details['finalLibraryCount']}";
-          analyticsParameters[kEventReloadSyncedLibraryCount] = "${details['receivedLibraryCount']}";
-          analyticsParameters[kEventReloadSyncedClassesCount] = "${details['receivedClassesCount']}";
-          analyticsParameters[kEventReloadSyncedProceduresCount] = "${details['receivedProceduresCount']}";
-          analyticsParameters[kEventReloadSyncedBytes] = '${updatedDevFS.syncedBytes}';
-          analyticsParameters[kEventReloadInvalidatedSourcesCount] = '${updatedDevFS.invalidatedSourcesCount}';
-          analyticsParameters[kEventReloadTransferTimeInMs] = '${devFSTimer.elapsed.inMilliseconds}';
-          final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
-          final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
-          printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
-          reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
-        }
-      }
-    } on Map<String, dynamic> catch (error, stackTrace) {
-      printTrace('Hot reload failed: $error\n$stackTrace');
-      final int errorCode = error['code'];
-      String errorMessage = error['message'];
-      if (errorCode == Isolate.kIsolateReloadBarred) {
-        errorMessage = 'Unable to hot reload application due to an unrecoverable error in '
-                       'the source code. Please address the error and then use "R" to '
-                       'restart the app.\n'
-                       '$errorMessage (error code: $errorCode)';
-        flutterUsage.sendEvent('hot', 'reload-barred');
-        return OperationResult(errorCode, errorMessage);
-      }
-      return OperationResult(errorCode, '$errorMessage (error code: $errorCode)');
-    } catch (error, stackTrace) {
-      printTrace('Hot reload failed: $error\n$stackTrace');
-      return OperationResult(1, '$error');
-    }
-    // Record time it took for the VM to reload the sources.
-    _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
-
-    final Stopwatch reassembleTimer = Stopwatch()..start();
-    // Reload the isolate.
-    final List<Future<void>> allDevices = <Future<void>>[];
-    for (FlutterDevice device in flutterDevices) {
-      printTrace('Sending reload events to ${device.device.name}');
-      final List<Future<ServiceObject>> futuresViews = <Future<ServiceObject>>[];
-      for (FlutterView view in device.views) {
-        printTrace('Sending reload event to "${view.uiIsolate.name}"');
-        futuresViews.add(view.uiIsolate.reload());
-      }
-      final Completer<void> deviceCompleter = Completer<void>();
-      unawaited(Future.wait(futuresViews).whenComplete(() {
-        deviceCompleter.complete(device.refreshViews());
-      }));
-      allDevices.add(deviceCompleter.future);
-    }
-    await Future.wait(allDevices);
-    // We are now running from source.
-    _runningFromSnapshot = false;
-    // Check if any isolates are paused.
+    final Stopwatch reloadTimer = Stopwatch();
+    final Stopwatch reassembleTimer = Stopwatch();
     final List<FlutterView> reassembleViews = <FlutterView>[];
-    String serviceEventKind;
     int pausedIsolatesFound = 0;
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
-        // Check if the isolate is paused, and if so, don't reassemble. Ignore the
-        // PostPauseEvent event - the client requesting the pause will resume the app.
-        final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
-        if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
-          pausedIsolatesFound += 1;
-          if (serviceEventKind == null) {
-            serviceEventKind = pauseEvent.kind;
-          } else if (serviceEventKind != pauseEvent.kind) {
-            serviceEventKind = ''; // many kinds
+    final List<Future<void>> reassembleFutures = <Future<void>>[];
+
+    // Since we'll be calling ext.flutter.waitForReassemble, we want to make
+    // sure we end up calling ext.flutter.reassemble in a finally block here.
+    // This is to ensure we restart rendering after we pause it - which we
+    // have to do to make sure we call reassemble before animations can trigger
+    // another build.
+    try {
+      for (FlutterDevice device in flutterDevices) {
+        for (FlutterView view in device.views) {
+          if (view.uiIsolate == null)
+            throw 'Application isolate not found';
+          await view.uiIsolate.flutterWaitForReassemble();
+        }
+      }
+
+      reloadTimer.start();
+
+      if (!_isPaused()) {
+        printTrace('Refreshing active FlutterViews before reloading.');
+        await refreshViews();
+      }
+
+      final Stopwatch devFSTimer = Stopwatch()..start();
+      final UpdateFSReport updatedDevFS = await _updateDevFS();
+      // Record time it took to synchronize to DevFS.
+      _addBenchmarkData('hotReloadDevFSSyncMilliseconds', devFSTimer.elapsed.inMilliseconds);
+      if (!updatedDevFS.success)
+        return OperationResult(1, 'DevFS synchronization failed');
+      final Stopwatch vmReloadTimer = Stopwatch()..start();
+      try {
+        final String entryPath = fs.path.relative(
+          getReloadPath(fullRestart: false),
+          from: projectRootPath,
+        );
+        final List<Future<DeviceReloadReport>> allReportsFutures = <Future<DeviceReloadReport>>[];
+        for (FlutterDevice device in flutterDevices) {
+          if (_runningFromSnapshot) {
+            // Asset directory has to be set only once when we switch from
+            // running from snapshot to running from uploaded files.
+            await device.resetAssetDirectory();
           }
-        } else {
-          reassembleViews.add(view);
+          final Completer<DeviceReloadReport> completer = Completer<DeviceReloadReport>();
+          allReportsFutures.add(completer.future);
+          final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
+            entryPath, pause: pause,
+          );
+          unawaited(Future.wait(reportFutures).then(
+            (List<Map<String, dynamic>> reports) async {
+              // TODO(aam): Investigate why we are validating only first reload report,
+              // which seems to be current behavior
+              final Map<String, dynamic> firstReport = reports.first;
+              // Don't print errors because they will be printed further down when
+              // `validateReloadReport` is called again.
+              await device.updateReloadStatus(
+                validateReloadReport(firstReport, printErrors: false),
+              );
+              completer.complete(DeviceReloadReport(device, reports));
+            },
+          ));
+        }
+        final List<DeviceReloadReport> reports = await Future.wait(allReportsFutures);
+        for (DeviceReloadReport report in reports) {
+          final Map<String, dynamic> reloadReport = report.reports[0];
+          if (!validateReloadReport(reloadReport)) {
+            // Reload failed.
+            flutterUsage.sendEvent('hot', 'reload-reject');
+            return OperationResult(1, 'Reload rejected');
+          } else {
+            // Collect stats that help understand scale of update for this hot reload request.
+            // For example, [syncedLibraryCount]/[finalLibraryCount] indicates how
+            // many libraries were affected by the hot reload request.
+            // Relation of [invalidatedSourcesCount] to [syncedLibraryCount] should help
+            // understand sync/transfer "overhead" of updating this number of source files.
+            final Map<String, dynamic> details = reloadReport['details'];
+            analyticsParameters[kEventReloadFinalLibraryCount] = "${details['finalLibraryCount']}";
+            analyticsParameters[kEventReloadSyncedLibraryCount] = "${details['receivedLibraryCount']}";
+            analyticsParameters[kEventReloadSyncedClassesCount] = "${details['receivedClassesCount']}";
+            analyticsParameters[kEventReloadSyncedProceduresCount] = "${details['receivedProceduresCount']}";
+            analyticsParameters[kEventReloadSyncedBytes] = '${updatedDevFS.syncedBytes}';
+            analyticsParameters[kEventReloadInvalidatedSourcesCount] = '${updatedDevFS.invalidatedSourcesCount}';
+            analyticsParameters[kEventReloadTransferTimeInMs] = '${devFSTimer.elapsed.inMilliseconds}';
+            final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
+            final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
+            printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
+            reloadMessage = 'Reloaded $loadedLibraryCount of $finalLibraryCount libraries';
+          }
+        }
+      } on Map<String, dynamic> catch (error, stackTrace) {
+        printTrace('Hot reload failed: $error\n$stackTrace');
+        final int errorCode = error['code'];
+        String errorMessage = error['message'];
+        if (errorCode == Isolate.kIsolateReloadBarred) {
+          errorMessage = 'Unable to hot reload application due to an unrecoverable error in '
+                        'the source code. Please address the error and then use "R" to '
+                        'restart the app.\n'
+                        '$errorMessage (error code: $errorCode)';
+          flutterUsage.sendEvent('hot', 'reload-barred');
+          return OperationResult(errorCode, errorMessage);
+        }
+        return OperationResult(errorCode, '$errorMessage (error code: $errorCode)');
+      } catch (error, stackTrace) {
+        printTrace('Hot reload failed: $error\n$stackTrace');
+        return OperationResult(1, '$error');
+      }
+      // Record time it took for the VM to reload the sources.
+      _addBenchmarkData('hotReloadVMReloadMilliseconds', vmReloadTimer.elapsed.inMilliseconds);
+
+      reassembleTimer.start();
+      // Reload the isolate.
+      final List<Future<void>> allDevices = <Future<void>>[];
+      for (FlutterDevice device in flutterDevices) {
+        printTrace('Sending reload events to ${device.device.name}');
+        final List<Future<ServiceObject>> futuresViews = <Future<ServiceObject>>[];
+        for (FlutterView view in device.views) {
+          printTrace('Sending reload event to "${view.uiIsolate.name}"');
+          futuresViews.add(view.uiIsolate.reload());
+        }
+        final Completer<void> deviceCompleter = Completer<void>();
+        unawaited(Future.wait(futuresViews).whenComplete(() {
+          deviceCompleter.complete(device.refreshViews());
+        }));
+        allDevices.add(deviceCompleter.future);
+      }
+      await Future.wait(allDevices);
+      // We are now running from source.
+      _runningFromSnapshot = false;
+    } finally {
+      // Check if any isolates are paused.
+      String serviceEventKind;
+      for (FlutterDevice device in flutterDevices) {
+        for (FlutterView view in device.views) {
+          // Check if the isolate is paused, and if so, don't reassemble. Ignore the
+          // PostPauseEvent event - the client requesting the pause will resume the app.
+          final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
+          if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
+            pausedIsolatesFound += 1;
+            if (serviceEventKind == null) {
+              serviceEventKind = pauseEvent.kind;
+            } else if (serviceEventKind != pauseEvent.kind) {
+              serviceEventKind = ''; // many kinds
+            }
+          } else {
+            reassembleViews.add(view);
+          }
         }
       }
-    }
-    if (pausedIsolatesFound > 0) {
-      if (onSlow != null)
-        onSlow('${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
-      if (reassembleViews.isEmpty) {
-        printTrace('Skipping reassemble because all isolates are paused.');
-        return OperationResult(OperationResult.ok.code, reloadMessage);
+      if (pausedIsolatesFound > 0) {
+        if (onSlow != null)
+          onSlow('${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
+        if (reassembleViews.isEmpty) {
+          printTrace('Skipping reassemble because all isolates are paused.');
+          return OperationResult(OperationResult.ok.code, reloadMessage);
+        }
+      }
+      printTrace('Evicting dirty assets');
+      await _evictDirtyAssets();
+      assert(reassembleViews.isNotEmpty);
+      printTrace('Reassembling application');
+      for (FlutterView view in reassembleViews) {
+        reassembleFutures.add(() async {
+          try {
+            await view.uiIsolate.flutterReassemble();
+          } catch (error) {
+            failedReassemble = true;
+            printError('Reassembling ${view.uiIsolate.name} failed: $error');
+            return;
+          }
+        }());
       }
     }
-    printTrace('Evicting dirty assets');
-    await _evictDirtyAssets();
-    assert(reassembleViews.isNotEmpty);
-    printTrace('Reassembling application');
-    bool failedReassemble = false;
-    final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterView view in reassembleViews) {
-      futures.add(() async {
-        try {
-          await view.uiIsolate.flutterReassemble();
-        } catch (error) {
-          failedReassemble = true;
-          printError('Reassembling ${view.uiIsolate.name} failed: $error');
-          return;
-        }
-      }());
-    }
-    final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) { });
+    final Future<void> reassembleFuture = Future.wait<void>(reassembleFutures).then<void>((List<void> values) { });
     await reassembleFuture.timeout(
       const Duration(seconds: 2),
       onTimeout: () async {

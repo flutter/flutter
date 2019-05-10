@@ -145,7 +145,7 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 16;
+    int widgetInspectorExtensionCount = 17;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
@@ -659,5 +659,41 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
+  });
+
+  test('Service extensions - waitForReassemble', () async {
+    Map<String, dynamic> result;
+    Future<Map<String, dynamic>> pendingResult;
+    bool completed;
+
+    completed = false;
+    expect(binding.reassembled, 0);
+    pendingResult = binding.testExtension('waitForReassemble', <String, String>{});
+    pendingResult.whenComplete(() { completed = true; });
+    await binding.flushMicrotasks();
+    expect(completed, true);
+    await binding.flushMicrotasks();
+    await binding.doFrame();
+    await binding.flushMicrotasks();
+    expect(completed, true);
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
+    expect(result, <String, String>{});
+    expect(binding.reassembled, 0);
+
+    completed = false;
+    pendingResult = binding.testExtension('reassemble', <String, String>{});
+    pendingResult.whenComplete(() { completed = true; });
+    await binding.flushMicrotasks();
+    expect(binding.frameScheduled, isTrue);
+    expect(completed, false);
+    await binding.flushMicrotasks();
+    await binding.doFrame();
+    await binding.flushMicrotasks();
+    expect(completed, true);
+    expect(binding.frameScheduled, isFalse);
+    result = await pendingResult;
+    expect(result, <String, String>{});
+    expect(binding.reassembled, 1);
   });
 }

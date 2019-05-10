@@ -8,6 +8,7 @@ import 'dart:developer' as developer;
 import 'dart:io' show exit;
 // Before adding any more dart:ui imports, pleaes read the README.
 import 'dart:ui' as ui show saveCompilationTrace, Window, window;
+import 'dart:ui';
 
 import 'package:meta/meta.dart';
 
@@ -126,6 +127,10 @@ abstract class BindingBase {
 
     assert(() {
       registerSignalServiceExtension(
+        name: 'waitForReassemble',
+        callback: waitForReassemble,
+      );
+      registerSignalServiceExtension(
         name: 'reassemble',
         callback: reassembleApplication,
       );
@@ -195,6 +200,9 @@ abstract class BindingBase {
   bool get locked => _lockCount > 0;
   int _lockCount = 0;
 
+  FrameCallback _lastOnBeginFrame;
+  VoidCallback _lastOnDrawFrame;
+
   /// Locks the dispatching of asynchronous events and callbacks until the
   /// callback's future completes.
   ///
@@ -229,6 +237,27 @@ abstract class BindingBase {
   @mustCallSuper
   void unlocked() {
     assert(!locked);
+  }
+
+  /// Cause the entire application to stop drawing, e.g. in preparation for hot
+  /// reload.
+  ///
+  /// This is used by development tools when the application code is being
+  /// changed, to ensure that animations will not continue to allow builds to
+  /// fire before `ext.flutter.reassemble` is sent. It can be triggered
+  /// manually by sending the `ext.flutter.waitForReassemble` service extension
+  /// signal.
+  ///
+  /// This method must never be used in production code, as it will prevent all
+  /// drawing until [reassembleApplication] is called, which is also not meant
+  /// for production code. It is only meant for use in hot reload.
+  @mustCallSuper
+  @visibleForTesting
+  Future<void> waitForReassemble() async {
+    _lastOnBeginFrame ??= window.onBeginFrame;
+    _lastOnDrawFrame ??= window.onDrawFrame;
+    window.onDrawFrame = null;
+    window.onBeginFrame = null;
   }
 
   /// Cause the entire application to redraw, e.g. after a hot reload.
@@ -267,6 +296,18 @@ abstract class BindingBase {
   @protected
   Future<void> performReassemble() {
     FlutterError.resetErrorCount();
+    if (_lastOnBeginFrame != null) {
+      assert(window.onBeginFrame == null);
+      window.onBeginFrame = _lastOnBeginFrame;
+    }
+    assert(window.onBeginFrame != null);
+    if (_lastOnDrawFrame != null) {
+      assert(window.onDrawFrame == null);
+      window.onDrawFrame = _lastOnDrawFrame;
+    }
+    assert(window.onDrawFrame != null);
+    _lastOnBeginFrame = null;
+    _lastOnDrawFrame = null;
     return Future<void>.value();
   }
 

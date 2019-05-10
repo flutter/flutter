@@ -1304,6 +1304,10 @@ class Isolate extends ServiceObjectOwner {
     );
   }
 
+  Future<Map<String, dynamic>> flutterWaitForReassemble() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.waitForReassemble');
+  }
+
   Future<Map<String, dynamic>> flutterReassemble() {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble');
   }
