@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -2020,19 +2019,15 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('input_decorator.outline_icon_label.ltr.png'),
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-        skip: !Platform.isLinux,
+        matchesSkiaGoldFile('input_decorator.outline_icon_label.rtl.png'),
       );
-    },
-    skip: !Platform.isLinux,
-  );
+    });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305

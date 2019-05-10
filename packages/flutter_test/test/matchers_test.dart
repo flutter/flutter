@@ -402,6 +402,88 @@ void main() {
     });
   });
 
+  group('matchesSkiaGoldFile', () {
+    _FakeComparator comparator;
+
+    Widget boilerplate(Widget child) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: child,
+      );
+    }
+
+    setUp(() {
+      comparator = _FakeComparator();
+      goldenFileComparator = comparator;
+    });
+
+    group('matches', () {
+      testWidgets('if comparator succeeds', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        await expectLater(finder, matchesSkiaGoldFile('foo.png'));
+        expect(comparator.invocation, _ComparatorInvocation.compare);
+        expect(comparator.imageBytes, null);
+        expect(comparator.golden, Uri.parse('foo.png'));
+      });
+    });
+
+    group('does not match', () {
+      testWidgets('if comparator returns false', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.returnFalse;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('does not match'));
+        }
+      });
+
+      testWidgets('if comparator throws', (WidgetTester tester) async {
+        comparator.behavior = _ComparatorBehavior.throwTestFailure;
+        await tester.pumpWidget(boilerplate(const Text('hello')));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, _ComparatorInvocation.compare);
+          expect(error.message, contains('fake message'));
+        }
+      });
+
+      testWidgets('if finder finds no widgets', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(Container()));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, isNull);
+          expect(error.message, contains('no widget was found'));
+        }
+      });
+
+      testWidgets(
+        'if finder finds multiple widgets', (WidgetTester tester) async {
+        await tester.pumpWidget(boilerplate(Column(
+          children: const <Widget>[Text('hello'), Text('world')],
+        )));
+        final Finder finder = find.byType(Text);
+        try {
+          await expectLater(finder, matchesSkiaGoldFile('foo.png'));
+          fail('TestFailure expected but not thrown');
+        } on TestFailure catch (error) {
+          expect(comparator.invocation, isNull);
+          expect(error.message, contains('too many widgets'));
+        }
+      });
+    });
+  });
+
   group('matchesSemanticsData', () {
     testWidgets('matches SemanticsData', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
