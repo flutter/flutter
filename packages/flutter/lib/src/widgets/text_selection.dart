@@ -97,7 +97,20 @@ abstract class TextSelectionControls {
   /// Builds a toolbar near a text selection.
   ///
   /// Typically displays buttons for copying and pasting text.
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate);
+  ///
+  /// [globalEditableRegion] is the TextField size of the global coordinate system
+  /// in logical pixels.
+  ///
+  /// The [position] is a general calculation midpoint parameter of the toolbar.
+  /// If you want more detailed position information, can use [endpoints]
+  /// to calculate it.
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  );
 
   /// Returns the size of the selection handle.
   Size get handleSize;
@@ -439,7 +452,13 @@ class TextSelectionOverlay {
         link: layerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
-        child: selectionControls.buildToolbar(context, editingRegion, midpoint, selectionDelegate),
+        child: selectionControls.buildToolbar(
+          context,
+          editingRegion,
+          midpoint,
+          endpoints,
+          selectionDelegate,
+        ),
       ),
     );
   }

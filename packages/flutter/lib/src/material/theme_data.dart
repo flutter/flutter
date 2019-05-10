@@ -476,6 +476,11 @@ class ThemeData extends Diagnosticable {
   final Brightness brightness;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
+  ///
+  /// The theme's [colorScheme] property contains [ColorScheme.primary], as
+  /// well as a color that contrasts well with the primary color called
+  /// [ColorScheme.onPrimary]. It might be simpler to just configure an app's
+  /// visuals in terms of the theme's [colorScheme].
   final Color primaryColor;
 
   /// The brightness of the [primaryColor]. Used to determine the color of text and

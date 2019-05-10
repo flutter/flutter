@@ -10,19 +10,19 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _UpdateCountedPhysicalModel extends PhysicalModel {
-  _UpdateCountedPhysicalModel({Clip clipBehavior = Clip.none})
+  const _UpdateCountedPhysicalModel({Clip clipBehavior = Clip.none})
     : super(clipBehavior: clipBehavior, color: Colors.red);
 }
 
 class _UpdateCountedPhysicalShape extends PhysicalShape {
-  _UpdateCountedPhysicalShape({Clip clipBehavior = Clip.none})
+  const _UpdateCountedPhysicalShape({Clip clipBehavior = Clip.none})
       : super(clipBehavior: clipBehavior, color: Colors.red, clipper: const ShapeBorderClipper(shape: CircleBorder()));
 }
 
 void main() {
   testWidgets('PhysicalModel updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: _UpdateCountedPhysicalModel()),
+      const MaterialApp(home: _UpdateCountedPhysicalModel()),
     );
 
     final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
@@ -30,7 +30,7 @@ void main() {
     expect(renderPhysicalModel.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      MaterialApp(home: _UpdateCountedPhysicalModel(clipBehavior: Clip.antiAlias)),
+      const MaterialApp(home: _UpdateCountedPhysicalModel(clipBehavior: Clip.antiAlias)),
     );
 
     expect(renderPhysicalModel.clipBehavior, equals(Clip.antiAlias));
@@ -38,7 +38,7 @@ void main() {
 
   testWidgets('PhysicalShape updates clipBehavior in updateRenderObject', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(home: _UpdateCountedPhysicalShape()),
+      const MaterialApp(home: _UpdateCountedPhysicalShape()),
     );
 
     final RenderPhysicalShape renderPhysicalShape = tester.allRenderObjects.whereType<RenderPhysicalShape>().first;
@@ -46,7 +46,7 @@ void main() {
     expect(renderPhysicalShape.clipBehavior, equals(Clip.none));
 
     await tester.pumpWidget(
-      MaterialApp(home: _UpdateCountedPhysicalShape(clipBehavior: Clip.antiAlias)),
+      const MaterialApp(home: _UpdateCountedPhysicalShape(clipBehavior: Clip.antiAlias)),
     );
 
     expect(renderPhysicalShape.clipBehavior, equals(Clip.antiAlias));

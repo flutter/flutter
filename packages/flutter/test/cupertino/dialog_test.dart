@@ -52,7 +52,7 @@ void main() {
     expect(find.text('Delete'), findsNothing);
   });
 
-  testWidgets('Dialog destructive action styles', (WidgetTester tester) async {
+  testWidgets('Dialog destructive action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDestructiveAction: true,
       child: Text('Ok'),
@@ -60,8 +60,7 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.color.red, greaterThan(widget.style.color.blue));
-    expect(widget.style.color.alpha, lessThan(255));
+    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
   });
 
   testWidgets('Has semantic annotations', (WidgetTester tester) async {
@@ -132,7 +131,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('Dialog default action styles', (WidgetTester tester) async {
+  testWidgets('Dialog default action style', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       child: Text('Ok'),
@@ -140,10 +139,10 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w400));
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
   });
 
-  testWidgets('Default and destructive style', (WidgetTester tester) async {
+  testWidgets('Dialog default and destructive action styles', (WidgetTester tester) async {
     await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
       isDefaultAction: true,
       isDestructiveAction: true,
@@ -152,8 +151,30 @@ void main() {
 
     final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
 
-    expect(widget.style.fontWeight, equals(FontWeight.w400));
-    expect(widget.style.color.red, greaterThan(widget.style.color.blue));
+    expect(widget.style.color.withAlpha(255), CupertinoColors.destructiveRed);
+    expect(widget.style.fontWeight, equals(FontWeight.w600));
+  });
+
+  testWidgets('Dialog disabled action style', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(const CupertinoDialogAction(
+      child: Text('Ok'),
+    )));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color.opacity, greaterThanOrEqualTo(127 / 255));
+    expect(widget.style.color.opacity, lessThanOrEqualTo(128 / 255));
+  });
+
+  testWidgets('Dialog enabled action style', (WidgetTester tester) async {
+    await tester.pumpWidget(boilerplate(CupertinoDialogAction(
+      child: const Text('Ok'),
+      onPressed: () {},
+    )));
+
+    final DefaultTextStyle widget = tester.widget(find.byType(DefaultTextStyle));
+
+    expect(widget.style.color.opacity, equals(1.0));
   });
 
   testWidgets('Message is scrollable, has correct padding with large text sizes', (WidgetTester tester) async {
@@ -633,13 +654,10 @@ void main() {
     expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
 
     // Expected Height = button 1 + divider + 1/2 button 2 = 67.83333333333334
-    // Technically the following number is off by 0.00000000000003 but I think it's a
-    // Dart precision issue. I ran the subtraction directly in dartpad and still
-    // got 67.83333333333337.
-    const double expectedHeight = 67.83333333333337;
+    const double expectedHeight = 67.83333333333334;
     expect(
       actionsSectionBox.size.height,
-      expectedHeight,
+      moreOrLessEquals(expectedHeight),
     );
   });
 

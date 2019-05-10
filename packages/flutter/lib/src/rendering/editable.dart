@@ -428,7 +428,7 @@ class RenderEditable extends RenderBox {
   int _handleHorizontalArrows(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
     // Set the new offset to be +/- 1 depending on which arrow is pressed
     // If shift is down, we also want to update the previous cursor location
-    if (rightArrow && _extentOffset < text.text.length) {
+    if (rightArrow && _extentOffset < text.toPlainText().length) {
       newOffset += 1;
       if (shift)
         _previousCursorLocation += 1;
@@ -1503,7 +1503,7 @@ class RenderEditable extends RenderBox {
       case TargetPlatform.iOS:
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       default:
-        return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
+        return Rect.fromLTWH(0.0, _kCaretHeightOffset, cursorWidth, preferredLineHeight - 2.0 * _kCaretHeightOffset);
     }
   }
   @override
@@ -1569,7 +1569,7 @@ class RenderEditable extends RenderBox {
           // TODO(garyq): See the TODO for _getCaretPrototype.
           caretRect = Rect.fromLTWH(
             caretRect.left,
-            caretRect.top,
+            caretRect.top - _kCaretHeightOffset,
             caretRect.width,
             _textPainter.getFullHeightForCaret(textPosition, _caretPrototype),
           );

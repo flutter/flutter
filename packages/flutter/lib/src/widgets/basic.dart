@@ -4811,12 +4811,14 @@ class RichText extends LeafRenderObjectWidget {
     this.maxLines,
     this.locale,
     this.strutStyle,
+    this.textWidthBasis = TextWidthBasis.parent,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
        assert(overflow != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
+       assert(textWidthBasis != null),
        super(key: key);
 
   /// The text to display in this widget.
@@ -4875,6 +4877,9 @@ class RichText extends LeafRenderObjectWidget {
   /// {@macro flutter.painting.textPainter.strutStyle}
   final StrutStyle strutStyle;
 
+  /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
+  final TextWidthBasis textWidthBasis;
+
   @override
   RenderParagraph createRenderObject(BuildContext context) {
     assert(textDirection != null || debugCheckHasDirectionality(context));
@@ -4886,6 +4891,7 @@ class RichText extends LeafRenderObjectWidget {
       textScaleFactor: textScaleFactor,
       maxLines: maxLines,
       strutStyle: strutStyle,
+      textWidthBasis: textWidthBasis,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -4902,6 +4908,7 @@ class RichText extends LeafRenderObjectWidget {
       ..textScaleFactor = textScaleFactor
       ..maxLines = maxLines
       ..strutStyle = strutStyle
+      ..textWidthBasis = textWidthBasis
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 
@@ -4914,6 +4921,7 @@ class RichText extends LeafRenderObjectWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: TextOverflow.clip));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: 1.0));
     properties.add(IntProperty('maxLines', maxLines, ifNull: 'unlimited'));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
     properties.add(StringProperty('text', text.toPlainText()));
   }
 }
@@ -5394,6 +5402,9 @@ class Listener extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
+  _ListenerElement createElement() => _ListenerElement(this);
+
+  @override
   RenderPointerListener createRenderObject(BuildContext context) {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
@@ -5444,6 +5455,24 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('signal');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
+  }
+}
+
+class _ListenerElement extends SingleChildRenderObjectElement {
+  _ListenerElement(SingleChildRenderObjectWidget widget) : super(widget);
+
+  @override
+  void activate() {
+    super.activate();
+    final RenderPointerListener renderPointerListener = renderObject;
+    renderPointerListener.postActivate();
+  }
+
+  @override
+  void deactivate() {
+    final RenderPointerListener renderPointerListener = renderObject;
+    renderPointerListener.preDeactivate();
+    super.deactivate();
   }
 }
 

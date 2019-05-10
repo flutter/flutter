@@ -132,7 +132,7 @@ class Stepper extends StatefulWidget {
   /// new one.
   ///
   /// The [steps], [type], and [currentStep] arguments must not be null.
-  Stepper({
+  const Stepper({
     Key key,
     @required this.steps,
     this.physics,

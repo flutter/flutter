@@ -223,6 +223,67 @@ void main() {
 
     await tester.tap(find.text('ANNULER'));
   });
+
+  group('locale fonts don\'t overflow layout', () {
+    // Test screen layouts in various locales to ensure the fonts used
+    // don't overflow the layout
+
+    // Common screen size roughly based on a Pixel 1
+    const Size kCommonScreenSizePortrait = Size(1070, 1770);
+    const Size kCommonScreenSizeLandscape = Size(1770, 1070);
+
+    Future<void> _showPicker(WidgetTester tester, Locale locale, Size size) async {
+      tester.binding.window.physicalSizeTestValue = size;
+      tester.binding.window.devicePixelRatioTestValue = 1.0;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (BuildContext context) {
+              return Localizations(
+                locale: locale,
+                delegates: GlobalMaterialLocalizations.delegates,
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    showDatePicker(
+                      context: context,
+                      initialDate: initialDate,
+                      firstDate: firstDate,
+                      lastDate: lastDate,
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        )
+      );
+      await tester.tap(find.text('X'));
+      await tester.pumpAndSettle();
+    }
+
+    // Regression test for https://github.com/flutter/flutter/issues/20171
+    testWidgets('common screen size - portrait - Chinese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizePortrait);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('common screen size - landscape - Chinese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('zh', 'CN'), kCommonScreenSizeLandscape);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('common screen size - portrait - Japanese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizePortrait);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('common screen size - landscape - Japanese', (WidgetTester tester) async {
+      await _showPicker(tester, const Locale('ja', 'JA'), kCommonScreenSizeLandscape);
+      expect(tester.takeException(), isNull);
+    });
+  });
+
 }
 
 Future<void> _pumpBoilerplate(
