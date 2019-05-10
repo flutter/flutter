@@ -20,7 +20,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('invert_colors_test.0.png'),
+      matchesGoldenFile('invert_colors_test.0.png'),
     );
   });
 
@@ -38,7 +38,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('invert_colors_test.1.png'),
+      matchesGoldenFile('invert_colors_test.1.png'),
     );
   });
 }

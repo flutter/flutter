@@ -110,7 +110,7 @@ void main() {
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
-      matchesSkiaGoldFile('physical_model_overflow.png'),
+      matchesGoldenFile('physical_model_overflow.png'),
     );
   });
 

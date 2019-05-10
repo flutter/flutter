@@ -276,7 +276,7 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(painterKey),
-      matchesSkiaGoldFile('radio.ink_ripple.png'),
+      matchesGoldenFile('radio.ink_ripple.png'),
     );
   });
 }

@@ -1325,7 +1325,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('segmented_control_test.0.png'),
+      matchesGoldenFile('segmented_control_test.0.png'),
     );
   });
 
@@ -1363,7 +1363,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('segmented_control_test.1.png'),
+      matchesGoldenFile('segmented_control_test.1.png'),
     );
   });
 }

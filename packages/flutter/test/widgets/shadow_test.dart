@@ -23,14 +23,14 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('shadow.BoxDecoration.disabled.png'),
+      matchesGoldenFile('shadow.BoxDecoration.disabled.png'),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('shadow.BoxDecoration.enabled.png'),
+      matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
     );
     debugDisableShadows = true;
   });
@@ -56,7 +56,7 @@ void main() {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
-        matchesSkiaGoldFile('shadow.ShapeDecoration.$elevation.png'),
+        matchesGoldenFile('shadow.ShapeDecoration.$elevation.png'),
       );
     }
     debugDisableShadows = true;
@@ -83,14 +83,14 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('shadow.PhysicalModel.disabled.0.png'),
+      matchesGoldenFile('shadow.PhysicalModel.disabled.0.png'),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('shadow.PhysicalModel.enabled.png'),
+      matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
     );
     debugDisableShadows = true;
   });
@@ -120,7 +120,7 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesSkiaGoldFile('shadow.PhysicalModel.disabled.1.$elevation.png'),
+        matchesGoldenFile('shadow.PhysicalModel.disabled.1.$elevation.png'),
       );
     }
     debugDisableShadows = true;

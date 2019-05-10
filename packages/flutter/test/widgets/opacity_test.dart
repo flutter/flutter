@@ -177,7 +177,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesSkiaGoldFile('opacity_test.offset.png'),
+      matchesGoldenFile('opacity_test.offset.png'),
     );
   });
 

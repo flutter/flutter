@@ -71,7 +71,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('continuous_rectangle_border.golden_test_even_radii.png'),
+      matchesGoldenFile('continuous_rectangle_border.golden_test_even_radii.png'),
     );
   });
 
@@ -92,7 +92,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('continuous_rectangle_border.golden_test_varying_radii.png'),
+      matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
     );
   });
 
@@ -110,7 +110,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesSkiaGoldFile('continuous_rectangle_border.golden_test_large_radii.png'),
+      matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
     );
   });
 

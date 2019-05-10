@@ -42,7 +42,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesSkiaGoldFile('backdrop_filter_test.cull_rect.png'),
+      matchesGoldenFile('backdrop_filter_test.cull_rect.png'),
     );
   });
 }

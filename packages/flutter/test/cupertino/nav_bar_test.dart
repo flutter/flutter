@@ -799,7 +799,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesSkiaGoldFile('nav_bar_test.standard_title.png'),
+        matchesGoldenFile('nav_bar_test.standard_title.png'),
       );
     },
   );
@@ -830,7 +830,7 @@ void main() {
 
       await expectLater(
         find.byType(RepaintBoundary).last,
-        matchesSkiaGoldFile('nav_bar_test.large_title.png'),
+        matchesGoldenFile('nav_bar_test.large_title.png'),
       );
     },
   );

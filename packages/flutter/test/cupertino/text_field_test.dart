@@ -372,7 +372,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesSkiaGoldFile('text_field_cursor_test.0.png'),
+      matchesGoldenFile('text_field_cursor_test.0.png'),
     );
   });
 
@@ -401,7 +401,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesSkiaGoldFile('text_field_cursor_test.1.png'),
+      matchesGoldenFile('text_field_cursor_test.1.png'),
     );
   });
 

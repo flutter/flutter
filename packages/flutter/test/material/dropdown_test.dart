@@ -140,7 +140,7 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesSkiaGoldFile('dropdown_test.default.png'),
+      matchesGoldenFile('dropdown_test.default.png'),
     );
   });
 
@@ -152,7 +152,7 @@ void main() {
     assert(tester.renderObject(buttonFinder).attached);
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
-      matchesSkiaGoldFile('dropdown_test.expanded.png'),
+      matchesGoldenFile('dropdown_test.expanded.png'),
     );
   });
 

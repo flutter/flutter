@@ -1147,7 +1147,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesSkiaGoldFile('bottom_navigation_bar.shifting_transition.$pump.png'),
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
       );
     }
   });
