@@ -12,7 +12,7 @@ import '../cache.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-/// The diretory in the Flutter cache for each platform's artifacts.
+/// The directory in the Flutter cache for each platform's artifacts.
 const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
     <TargetPlatform, String>{
   TargetPlatform.linux_x64: 'linux-x64',
@@ -22,8 +22,7 @@ const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
 
 // TODO(jonahwilliams): this should come from a configuration in each build
 // directory.
-const Map<TargetPlatform, List<String>> artifactFilesByPlatform =
-    <TargetPlatform, List<String>>{
+const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatform, List<String>>{
   TargetPlatform.linux_x64: <String>[
     'libflutter_linux.so',
     'flutter_export.h',
@@ -81,8 +80,7 @@ class UnpackCommand extends FlutterCommand {
       fs.directory(targetDirectory).createSync(recursive: true);
     }
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetName);
-    final FlutterArtifactFetcher flutterArtifactFetcher =
-        FlutterArtifactFetcher(targetPlatform);
+    final ArtifactUnpacker flutterArtifactFetcher = ArtifactUnpacker(targetPlatform);
     bool success = true;
     if (artifacts is LocalEngineArtifacts) {
       final LocalEngineArtifacts localEngineArtifacts = artifacts;
@@ -103,10 +101,10 @@ class UnpackCommand extends FlutterCommand {
 }
 
 /// Manages the copying of cached or locally built Flutter artifacts, including
-/// tracking the last-coied versions and updating only if necessary.
-class FlutterArtifactFetcher {
+/// tracking the last-copied versions and updating only if necessary.
+class ArtifactUnpacker {
   /// Creates a new fetcher for the given configuration.
-  const FlutterArtifactFetcher(this.platform);
+  const ArtifactUnpacker(this.platform);
 
   /// The platform to copy artifacts for.
   final TargetPlatform platform;
@@ -203,17 +201,17 @@ class FlutterArtifactFetcher {
         _copyMacOSFramework(
             fs.path.join(sourceDirectory, artifactFiles[0]), targetDirectory);
       } else {
-        for (final String filename in artifactFiles) {
-          final String sourcePath = fs.path.join(sourceDirectory, filename);
-          final String targetPath = fs.path.join(targetDirectory, filename);
-          if (filename.endsWith('/')) {
+        for (final String entityName in artifactFiles) {
+          final String sourcePath = fs.path.join(sourceDirectory, entityName);
+          final String targetPath = fs.path.join(targetDirectory, entityName);
+          if (entityName.endsWith('/')) {
             copyDirectorySync(
               fs.directory(sourcePath),
               fs.directory(targetPath),
             );
           } else {
             fs.file(sourcePath)
-              .copySync(fs.path.join(targetDirectory, filename));
+              .copySync(fs.path.join(targetDirectory, entityName));
           }
         }
       }
