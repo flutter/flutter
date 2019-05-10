@@ -37,7 +37,7 @@ or
   String cacheDirectory;
   switch (targetPlatform) {
     case 'linux-x64':
-      cacheDirectory = 'linux/flutter/cache';
+      cacheDirectory = 'linux/flutter';
       break;
     default:
       stderr.write('Unsupported target platform $targetPlatform');
@@ -56,9 +56,7 @@ or
       '--cache-dir=$cacheDirectory',
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
-    ],
-    runInShell: true,
-  );
+    ]);
   if (unpackResult.exitCode != 0) {
     stderr.write(unpackResult.stderr);
     exit(1);
@@ -75,9 +73,7 @@ or
       if (trackWidgetCreation) '--track-widget-creation',
       if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
       if (localEngine != null) '--local-engine=$localEngine',
-    ],
-    runInShell: true,
-  );
+    ]);
   if (buildResult.exitCode != 0) {
     stderr.write(buildResult.stderr);
     exit(1);
