@@ -314,26 +314,46 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
+  void removeItem({AnimatedListRemovedItemBuilder builder, Duration duration = _kDuration, @required int index}) {
     assert(index != null && index >= 0);
-    assert(builder != null);
-    assert(duration != null);
 
     final int itemIndex = _indexToItemIndex(index);
+
     assert(itemIndex >= 0 && itemIndex < _itemsCount);
     assert(_activeItemAt(_outgoingItems, itemIndex) == null);
 
     final _ActiveItem incomingItem = _removeActiveItemAt(_incomingItems, itemIndex);
-    final AnimationController controller = incomingItem?.controller
-      ?? AnimationController(duration: duration, value: 1.0, vsync: this);
+    final AnimationController controller = incomingItem?.controller ?? AnimationController(duration: duration, value: 1.0, vsync: this);
     final _ActiveItem outgoingItem = _ActiveItem.outgoing(controller, itemIndex, builder);
+
     setState(() {
       _outgoingItems
         ..add(outgoingItem)
         ..sort();
     });
 
-    controller.reverse().then<void>((void value) {
+    if (builder != null) {
+      controller.reverse().then<void>((void value) {
+        _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
+
+        // Decrement the incoming and outgoing item indices to account
+        // for the removal.
+        for (_ActiveItem item in _incomingItems) {
+          if (item.itemIndex > outgoingItem.itemIndex)
+            item.itemIndex -= 1;
+        }
+        for (_ActiveItem item in _outgoingItems) {
+          if (item.itemIndex > outgoingItem.itemIndex)
+            item.itemIndex -= 1;
+        }
+
+        setState(() {
+          _itemsCount -= 1;
+        });
+      });
+    }
+    /// Experimental
+    else {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
       // Decrement the incoming and outgoing item indices to account
@@ -350,7 +370,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
       setState(() {
         _itemsCount -= 1;
       });
-    });
+    }
   }
 
   Widget _itemBuilder(BuildContext context, int itemIndex) {
