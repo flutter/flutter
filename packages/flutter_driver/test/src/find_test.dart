@@ -8,7 +8,7 @@ import '../common.dart';
 
 void main() {
   test('Ancestor finder serialize', () {
-    final SerializableFinder of = ByType('Text');
+    const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
     final Ancestor a = Ancestor(
@@ -45,7 +45,7 @@ void main() {
   });
 
   test('Descendant finder serialize', () {
-    final SerializableFinder of = ByType('Text');
+    const SerializableFinder of = ByType('Text');
     final SerializableFinder matching = ByValueKey('hello');
 
     final Descendant a = Descendant(
