@@ -47,6 +47,9 @@ abstract class Command {
 /// An object sent from a Flutter application back to the Flutter Driver in
 /// response to a command.
 abstract class Result {
+  /// A const constructor to allow subclasses to be const.
+  const Result();
+
   /// Serializes this message to a JSON map.
   Map<String, dynamic> toJson();
 }

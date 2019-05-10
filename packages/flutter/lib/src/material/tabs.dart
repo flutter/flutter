@@ -458,6 +458,18 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   Animation<double> get parent => controller.animation;
 
   @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    if (controller.animation != null)
+      super.removeStatusListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    if (controller.animation != null)
+      super.removeListener(listener);
+  }
+
+  @override
   double get value {
     assert(!controller.indexIsChanging);
     return (controller.animation.value - index.toDouble()).abs().clamp(0.0, 1.0);
@@ -768,6 +780,11 @@ class _TabBarState extends State<TabBar> {
     );
   }
 
+  // If the TabBar is rebuilt with a new tab controller, the caller should
+  // dispose the old one. In that case the old controller's animation will be
+  // null and should not be accessed.
+  bool get _controllerIsValid => _controller?.animation != null;
+
   void _updateTabController() {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
@@ -786,7 +803,7 @@ class _TabBarState extends State<TabBar> {
     if (newController == _controller)
       return;
 
-    if (_controller != null) {
+    if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
     }
@@ -799,7 +816,7 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _initIndicatorPainter() {
-    _indicatorPainter = _controller == null ? null : _IndicatorPainter(
+    _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
       indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
@@ -840,10 +857,11 @@ class _TabBarState extends State<TabBar> {
   @override
   void dispose() {
     _indicatorPainter.dispose();
-    if (_controller != null) {
+    if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
     }
+    _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1129,6 +1147,11 @@ class _TabBarViewState extends State<TabBarView> {
   int _currentIndex;
   int _warpUnderwayCount = 0;
 
+  // If the TabBarView is rebuilt with a new tab controller, the caller should
+  // dispose the old one. In that case the old controller's animation will be
+  // null and should not be accessed.
+  bool get _controllerIsValid => _controller?.animation != null;
+
   void _updateTabController() {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
@@ -1147,7 +1170,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (newController == _controller)
       return;
 
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
     _controller = newController;
     if (_controller != null)
@@ -1179,8 +1202,9 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   void dispose() {
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+    _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }

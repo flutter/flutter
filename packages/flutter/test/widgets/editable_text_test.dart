@@ -744,6 +744,7 @@ void main() {
     TextEditingController currentController = controller1;
     StateSetter setState;
 
+    final FocusNode focusNode = FocusNode(debugLabel: 'EditableText Focus Node');
     Widget builder() {
       return StatefulBuilder(
         builder: (BuildContext context, StateSetter setter) {
@@ -757,7 +758,7 @@ void main() {
                   child: EditableText(
                     backgroundCursorColor: Colors.grey,
                     controller: currentController,
-                    focusNode: FocusNode(),
+                    focusNode: focusNode,
                     style: Typography(platform: TargetPlatform.android)
                         .black
                         .subhead,
@@ -775,6 +776,8 @@ void main() {
     }
 
     await tester.pumpWidget(builder());
+    await tester.pump(); // An extra pump to allow focus request to go through.
+
     await tester.showKeyboard(find.byType(EditableText));
 
     // Verify TextInput.setEditingState is fired with updated text when controller is replaced.

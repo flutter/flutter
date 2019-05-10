@@ -20,6 +20,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
+import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -112,6 +113,7 @@ class FlutterDriverExtension {
       'waitForAbsent': _waitForAbsent,
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
       'get_semantics_id': _getSemanticsId,
+      'get_offset': _getOffset,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -130,6 +132,7 @@ class FlutterDriverExtension {
       'waitForAbsent': (Map<String, String> params) => WaitForAbsent.deserialize(params),
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
+      'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -202,7 +205,7 @@ class FlutterDriverExtension {
     };
   }
 
-  Future<Health> _getHealth(Command command) async => Health(HealthStatus.ok);
+  Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
 
   Future<RenderTree> _getRenderTree(Command command) async {
     return RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
@@ -322,19 +325,19 @@ class FlutterDriverExtension {
       _createFinder(tapCommand.finder).hitTestable()
     );
     await _prober.tap(computedFinder);
-    return TapResult();
+    return const TapResult();
   }
 
   Future<WaitForResult> _waitFor(Command command) async {
     final WaitFor waitForCommand = command;
     await _waitForElement(_createFinder(waitForCommand.finder));
-    return WaitForResult();
+    return const WaitForResult();
   }
 
   Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
     final WaitForAbsent waitForAbsentCommand = command;
     await _waitForAbsentElement(_createFinder(waitForAbsentCommand.finder));
-    return WaitForAbsentResult();
+    return const WaitForAbsentResult();
   }
 
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
@@ -358,6 +361,33 @@ class FlutterDriverExtension {
     return GetSemanticsIdResult(node.id);
   }
 
+  Future<GetOffsetResult> _getOffset(Command command) async {
+    final GetOffset getOffsetCommand = command;
+    final Finder finder = await _waitForElement(_createFinder(getOffsetCommand.finder));
+    final Element element = finder.evaluate().single;
+    final RenderBox box = element.renderObject;
+    Offset localPoint;
+    switch (getOffsetCommand.offsetType) {
+      case OffsetType.topLeft:
+        localPoint = Offset.zero;
+        break;
+      case OffsetType.topRight:
+        localPoint = box.size.topRight(Offset.zero);
+        break;
+      case OffsetType.bottomLeft:
+        localPoint = box.size.bottomLeft(Offset.zero);
+        break;
+      case OffsetType.bottomRight:
+        localPoint = box.size.bottomRight(Offset.zero);
+        break;
+      case OffsetType.center:
+        localPoint = box.size.center(Offset.zero);
+        break;
+    }
+    final Offset globalPoint = box.localToGlobal(localPoint);
+    return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);
+  }
+
   Future<ScrollResult> _scroll(Command command) async {
     final Scroll scrollCommand = command;
     final Finder target = await _waitForElement(_createFinder(scrollCommand.finder));
@@ -379,14 +409,14 @@ class FlutterDriverExtension {
     }
     _prober.binding.dispatchEvent(pointer.up(), hitTest);
 
-    return ScrollResult();
+    return const ScrollResult();
   }
 
   Future<ScrollResult> _scrollIntoView(Command command) async {
     final ScrollIntoView scrollIntoViewCommand = command;
     final Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment ?? 0.0);
-    return ScrollResult();
+    return const ScrollResult();
   }
 
   Future<GetTextResult> _getText(Command command) async {
@@ -404,7 +434,7 @@ class FlutterDriverExtension {
     } else {
       _testTextInput.unregister();
     }
-    return SetTextEntryEmulationResult();
+    return const SetTextEntryEmulationResult();
   }
 
   Future<EnterTextResult> _enterText(Command command) async {
@@ -414,7 +444,7 @@ class FlutterDriverExtension {
     }
     final EnterText enterTextCommand = command;
     _testTextInput.enterText(enterTextCommand.text);
-    return EnterTextResult();
+    return const EnterTextResult();
   }
 
   Future<RequestDataResult> _requestData(Command command) async {
@@ -425,7 +455,7 @@ class FlutterDriverExtension {
   Future<SetFrameSyncResult> _setFrameSync(Command command) async {
     final SetFrameSync setFrameSyncCommand = command;
     _frameSync = setFrameSyncCommand.enabled;
-    return SetFrameSyncResult();
+    return const SetFrameSyncResult();
   }
 
   SemanticsHandle _semantics;

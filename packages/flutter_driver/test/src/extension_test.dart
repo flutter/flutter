@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_driver/src/common/find.dart';
+import 'package:flutter_driver/src/common/geometry.dart';
 import 'package:flutter_driver/src/common/request_data.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,7 +24,7 @@ void main() {
     });
 
     testWidgets('returns immediately when transient callback queue is empty', (WidgetTester tester) async {
-      extension.call(WaitUntilNoTransientCallbacks().serialize())
+      extension.call(const WaitUntilNoTransientCallbacks().serialize())
         .then<void>(expectAsync1((Map<String, dynamic> r) {
           result = r;
         }));
@@ -43,7 +44,7 @@ void main() {
         // Intentionally blank. We only care about existence of a callback.
       });
 
-      extension.call(WaitUntilNoTransientCallbacks().serialize())
+      extension.call(const WaitUntilNoTransientCallbacks().serialize())
         .then<void>(expectAsync1((Map<String, dynamic> r) {
           result = r;
         }));
@@ -65,7 +66,7 @@ void main() {
 
     testWidgets('handler', (WidgetTester tester) async {
       expect(log, isEmpty);
-      final dynamic result = RequestDataResult.fromJson((await extension.call(RequestData('hello').serialize()))['response']);
+      final dynamic result = RequestDataResult.fromJson((await extension.call(const RequestData('hello').serialize()))['response']);
       expect(log, <String>['hello']);
       expect(result.message, '1');
     });
@@ -82,7 +83,7 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(ByText('hello')).serialize();
+      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
       final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson((await extension.call(arguments))['response']);
 
       expect(result.id, 1);
@@ -93,7 +94,7 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(ByText('hello')).serialize();
+      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
       final Map<String, Object> response = await extension.call(arguments);
 
       expect(response['isError'], true);
@@ -112,12 +113,42 @@ void main() {
         ),
       );
 
-      final Map<String, Object> arguments = GetSemanticsId(ByText('hello')).serialize();
+      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
       final Map<String, Object> response = await extension.call(arguments);
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: Too many elements'));
       semantics.dispose();
     });
+  });
+
+  testWidgets('getOffset', (WidgetTester tester) async {
+    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+
+    Future<Offset> getOffset(OffsetType offset) async {
+      final Map<String, Object> arguments = GetOffset(ByValueKey(1), offset).serialize();
+      final GetOffsetResult result = GetOffsetResult.fromJson((await extension.call(arguments))['response']);
+      return Offset(result.dx, result.dy);
+    }
+
+    await tester.pumpWidget(
+      Align(
+        alignment: Alignment.topLeft,
+        child: Transform.translate(
+          offset: const Offset(40, 30),
+          child: Container(
+            key: const ValueKey<int>(1),
+            width: 100,
+            height: 120,
+          ),
+        ),
+      ),
+    );
+
+    expect(await getOffset(OffsetType.topLeft), const Offset(40, 30));
+    expect(await getOffset(OffsetType.topRight), const Offset(40 + 100.0, 30));
+    expect(await getOffset(OffsetType.bottomLeft), const Offset(40, 30 + 120.0));
+    expect(await getOffset(OffsetType.bottomRight), const Offset(40 + 100.0, 30 + 120.0));
+    expect(await getOffset(OffsetType.center), const Offset(40 + (100 / 2), 30 + (120 / 2)));
   });
 }
