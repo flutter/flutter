@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
@@ -276,7 +277,8 @@ void main() {
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(painterKey),
-      matchesSkiaGoldFile('radio.ink_ripple.png'),
+      matchesGoldenFile('radio.ink_ripple.png'),
+      skip: !Platform.isLinux,
     );
   });
 }

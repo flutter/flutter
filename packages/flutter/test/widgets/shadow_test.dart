@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -23,15 +25,18 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('shadow.BoxDecoration.disabled.png'),
+      matchesGoldenFile('shadow.BoxDecoration.disabled.png'),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
-    await expectLater(
-      find.byType(Container),
-      matchesSkiaGoldFile('shadow.BoxDecoration.enabled.png'),
-    );
+    if (Platform.isLinux) {
+      // TODO(ianh): use the skip argument instead once that doesn't hang, https://github.com/dart-lang/test/issues/830
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
+      ); // shadows render differently on different platforms
+    }
     debugDisableShadows = true;
   });
 
@@ -56,11 +61,11 @@ void main() {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
-        matchesSkiaGoldFile('shadow.ShapeDecoration.$elevation.png'),
+        matchesGoldenFile('shadow.ShapeDecoration.$elevation.png'),
       );
     }
     debugDisableShadows = true;
-  });
+  }, skip: !Platform.isLinux); // shadows render differently on different platforms
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -83,15 +88,18 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesSkiaGoldFile('shadow.PhysicalModel.disabled.0.png'),
+      matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
-    await expectLater(
-      find.byType(Container),
-      matchesSkiaGoldFile('shadow.PhysicalModel.enabled.png'),
-    );
+    if (Platform.isLinux) {
+      // TODO(ianh): use the skip argument instead once that doesn't hang, https://github.com/dart-lang/test/issues/830
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
+      ); // shadows render differently on different platforms
+    }
     debugDisableShadows = true;
   });
 
@@ -120,9 +128,9 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesSkiaGoldFile('shadow.PhysicalModel.disabled.1.$elevation.png'),
+        matchesGoldenFile('shadow.PhysicalShape.$elevation.1.png'),
       );
     }
     debugDisableShadows = true;
-  });
+  }, skip: !Platform.isLinux); // shadows render differently on different platforms
 }
