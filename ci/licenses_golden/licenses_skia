@@ -1,4 +1,4 @@
-Signature: 73ffdb7e5d52ec56becc3e26794480f9
+Signature: 2321b377c39dc4cc3903296fec004d32
 
 UNUSED LICENSES:
 
@@ -5594,6 +5594,7 @@ FILE: ../../../third_party/skia/include/gpu/GrContextThreadSafeProxy.h
 FILE: ../../../third_party/skia/include/private/GrContext_Base.h
 FILE: ../../../third_party/skia/include/private/GrImageContext.h
 FILE: ../../../third_party/skia/include/private/GrRecordingContext.h
+FILE: ../../../third_party/skia/include/private/SkThreadAnnotations.h
 FILE: ../../../third_party/skia/include/private/SkVx.h
 FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.h
