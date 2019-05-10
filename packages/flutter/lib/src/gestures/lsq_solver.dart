@@ -5,6 +5,8 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+
 // TODO(abarth): Consider using vector_math.
 class _Vector {
   _Vector(int size)
@@ -128,7 +130,7 @@ class LeastSquaresSolver {
       }
 
       final double norm = q.getRow(j).norm();
-      if (norm < 0.000001) {
+      if (norm < precisionErrorTolerance) {
         // Vectors are linearly dependent or zero so no solution.
         return null;
       }
@@ -176,7 +178,7 @@ class LeastSquaresSolver {
       sumSquaredTotal += w[h] * w[h] * v * v;
     }
 
-    result.confidence = sumSquaredTotal <= 0.000001 ? 1.0 :
+    result.confidence = sumSquaredTotal <= precisionErrorTolerance ? 1.0 :
                           1.0 - (sumSquaredError / sumSquaredTotal);
 
     return result;

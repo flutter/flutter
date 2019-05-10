@@ -654,13 +654,10 @@ void main() {
     expect(option1ButtonBox.size.width, actionsSectionBox.size.width);
 
     // Expected Height = button 1 + divider + 1/2 button 2 = 67.83333333333334
-    // Technically the following number is off by 0.00000000000003 but I think it's a
-    // Dart precision issue. I ran the subtraction directly in dartpad and still
-    // got 67.83333333333337.
-    const double expectedHeight = 67.83333333333337;
+    const double expectedHeight = 67.83333333333334;
     expect(
       actionsSectionBox.size.height,
-      expectedHeight,
+      moreOrLessEquals(expectedHeight),
     );
   });
 
