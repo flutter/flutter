@@ -1,9 +1,8 @@
 {
-  "timerPickerSecondLabelOne": "s",
-  "datePickerHourSemanticsLabelOne": "$hour heure",
+  "datePickerHourSemanticsLabelOne": "une heure",
   "datePickerHourSemanticsLabelOther": "$hour heures",
-  "datePickerMinuteSemanticsLabelOne": "1 minute",
-  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
+  "datePickerMinuteSemanticsLabelOne": "une minute",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutes",
   "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
