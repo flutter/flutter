@@ -10,9 +10,8 @@ import 'framework.dart';
 
 /// An immutable widget that is embedded inline within text.
 ///
-/// The [child] property is the widget that will be embedded. It is the
-/// widget's responsibility to size itself appropriately, the text will
-/// not enforce any constraints.
+/// The [child] property is the widget that will be embedded. Children are
+/// constrained by the width of the paragraph.
 ///
 /// The [child] property may contain its own [Widget] children (if applicable),
 /// including [Text] and [RichText] widgets which may include additional
@@ -46,15 +45,12 @@ import 'framework.dart';
 /// ```
 /// {@end-tool}
 ///
-/// The [semanticsLabel] argument may be provided to supply a description of
-/// this [WidgetSpan] within the [toPlainText]. The semantics label of the
-/// overall [InlineSpan] tree will not mention [WidgetSpan]s unless
-/// [semanticsLabel] is provided. Semantics for the widget itself will still
-/// function independently from the [InlineSpan] semantics label.
+/// [WidgetSpan] contributes the semantics of the [WidgetSpan.child] to the
+/// semantics tree.
 ///
 /// See also:
 ///
-///  * [TextSpan], a node that represents text in a [InlineSpan] tree.
+///  * [TextSpan], a node that represents text in an [InlineSpan] tree.
 ///  * [Text], a widget for showing uniformly-styled text.
 ///  * [RichText], a widget for finer control of text rendering.
 ///  * [TextPainter], a class for painting [InlineSpan] objects on a [Canvas].
@@ -62,7 +58,7 @@ import 'framework.dart';
 class WidgetSpan extends PlaceholderSpan {
   /// Creates a [WidgetSpan] with the given values.
   ///
-  /// The [child] property should be non-null. [WidgetSpan] is a leaf node in
+  /// The [child] property must be non-null. [WidgetSpan] is a leaf node in
   /// the [InlineSpan] tree. Child widgets are constrained by the width of the
   /// paragraph they occupy.
   ///
@@ -89,11 +85,11 @@ class WidgetSpan extends PlaceholderSpan {
   /// Adds a placeholder box to the paragraph builder if a size has been
   /// calculated for the widget.
   ///
-  /// Sizes are provided through [dimensions], which should contain a 1:1
+  /// Sizes are provided through 'dimensions', which should contain a 1:1
   /// in-order mapping of widget to laid-out dimensions. If no such dimension
   /// is provided, the widget will be skipped.
   ///
-  /// The [textScaleFactor] will be applied to the laid-out size of the widget.
+  /// The 'textScaleFactor' will be applied to the laid-out size of the widget.
   @override
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
@@ -118,7 +114,7 @@ class WidgetSpan extends PlaceholderSpan {
     }
   }
 
-  /// Calls visitor on this [WidgetSpan]. There are no children spans to walk.
+  /// Calls 'visitor' on this [WidgetSpan]. There are no children spans to walk.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     return visitor(this);

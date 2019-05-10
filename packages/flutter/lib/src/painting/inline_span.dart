@@ -5,7 +5,6 @@
 import 'dart:ui' as ui show ParagraphBuilder;
 
 import 'package:flutter/foundation.dart';
-import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
@@ -42,8 +41,7 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 ///    [ui.PlaceholderAlignemnt] and a [TextBaseline]. To be useful,
 ///    [PlaceholderSpan] should be extended to define content. An instance of
 ///    this is the [WidgetSpan] class in the widgets library.
-///  * The subclass [WidgetSpan] specifies embedded inline widgets. Specify an
-///    inline widget by wrapping the widget with a [WidgetSpan].
+///  * The subclass [WidgetSpan] specifies embedded inline widgets.
 ///
 /// {@tool sample}
 ///
@@ -80,7 +78,7 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 ///  * [TextPainter], a class for painting [InlineSpan] objects on a [Canvas].
 @immutable
 abstract class InlineSpan extends DiagnosticableTree {
-  /// Creates a [InlineSpan] with the given values.
+  /// Creates an [InlineSpan] with the given values.
   const InlineSpan({
     this.style,
   });
@@ -92,14 +90,15 @@ abstract class InlineSpan extends DiagnosticableTree {
   final TextStyle style;
 
   /// Apply the properties of this object to the given [ParagraphBuilder], from
-  /// which a [Paragraph] can be obtained. [Paragraph] objects can be drawn on
-  /// [Canvas] objects.
+  /// which a [Paragraph] can be obtained.
+  ///
+  /// [Paragraph] objects can be drawn on [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
 
-  /// Walks this [InlineSpan] and any descendants in pre-order and calls [visitor]
+  /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
   ///
-  /// When [visitor] returns true, the walk will continue. When [visitor] returns
+  /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
   bool visitChildren(InlineSpanVisitor visitor);
 

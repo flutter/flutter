@@ -46,6 +46,11 @@ import 'text_style.dart';
 /// _There is some more detailed sample code in the documentation for the
 /// [recognizer] property._
 ///
+/// The [TextSpan.text] will be used as the semantics label unless overriden
+/// by the [TextSpan.semanticsLabel] property. Any [PlaceholderSpan]s in the
+/// [TextSpan.children] list will separate the text before and after it into
+/// two semantics nodes.
+///
 /// See also:
 ///
 ///  * [WidgetSpan], a leaf node that represents an embedded inline widget
