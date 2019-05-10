@@ -54,7 +54,7 @@ import 'text_style.dart';
 /// See also:
 ///
 ///  * [WidgetSpan], a leaf node that represents an embedded inline widget
-///    in a [InlineSpan] tree. Specify a widget within the [children]
+///    in an [InlineSpan] tree. Specify a widget within the [children]
 ///    list by wrapping the widget with a [WidgetSpan]. The widget will be
 ///    laid out inline within the paragraph.
 ///  * [Text], a widget for showing uniformly-styled text.
@@ -108,7 +108,7 @@ class TextSpan extends InlineSpan {
   /// {@tool sample}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
-  /// provided to a [InlineSpan] object. It defines a `BuzzingText` widget which
+  /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget which
   /// uses the [HapticFeedback] class to vibrate the device when the user
   /// long-presses the "find the" span, which is underlined in wavy green. The
   /// hit-testing is handled by the [RichText] widget.

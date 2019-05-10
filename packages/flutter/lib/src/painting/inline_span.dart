@@ -21,7 +21,7 @@ class Accumulator {
   int get value => _value;
   int _value;
 
-  /// Increases the [value] by the [addend].
+  /// Increases the [value] by the 'addend'.
   void increment(int addend) {
     assert(addend >= 0);
     _value += addend;
