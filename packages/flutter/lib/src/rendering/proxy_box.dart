@@ -2280,9 +2280,11 @@ class RenderFittedBox extends RenderProxyBox {
       final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
       final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
+      assert(scaleX.isFinite && scaleY.isFinite);
       _transform = Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
         ..translate(-sourceRect.left, -sourceRect.top);
+      assert(_transform.storage.every((double value) => value.isFinite));
     }
   }
 
@@ -2296,7 +2298,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size.isEmpty)
+    if (size.isEmpty || child.size.isEmpty)
       return;
     _updatePaintData();
     if (child != null) {
