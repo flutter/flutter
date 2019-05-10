@@ -422,7 +422,6 @@ void main() {
       final Offset bottomLeft = tester.getBottomLeft(find.byKey(key));
       expect(topRight.dx - topLeft.dx, scaleFactor * localWidth);
       expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
-      print('Rect: ${tester.getRect(find.byKey(key))}');
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
       await gesture.moveTo(topLeft - const Offset(1, 1));
