@@ -34,6 +34,25 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
 
+@immutable
+class ContextMenuDetails {
+  ContextMenuDetails({
+    @required this.withinSelection,
+    @required this.location,
+  }) : assert(withinSelection != null);
+
+  final bool withinSelection;
+
+  final Offset location;
+
+  @override
+  String toString() {
+    return 'ContextDetails(location: ${location.toString()} withinSelection: $withinSelection)';
+  }
+}
+
+typedef ContextMenuHandler = void Function(ContextMenuDetails details);
+
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
 // to transparent, is twice this duration.
@@ -1160,19 +1179,23 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _handleContextTap(TextPosition tapPosition) {
+  void _handleContextTap(ContextTapDetails details) {
+    // Callback is only assigned when onContextMenu is not null
+    assert(widget.onContextMenu != null);
     final TextSelection selection = _value.selection;
-    final bool withinSelection = selection.start <= tapPosition.offset
-      && selection.end > tapPosition.offset;
+    final bool withinSelection = selection.start <= details.textPosition.offset
+      && selection.end > details.textPosition.offset;
     if (withinSelection) {
-      _handleContextMenu(ContextMenuDetails(
+      widget.onContextMenu(ContextMenuDetails(
         location: details.globalPosition,
         withinSelection: true,
       ));
     } else {
-      _lastTapDownPosition = details.globalPosition;
-      selectPosition(cause: SelectionChangedCause.tap);
-      _handleContextMenu(ContextMenuDetails(
+      renderEditable.selectPositionAt(
+        from: details.globalPosition,
+        cause: SelectionChangedCause.tap,
+      );
+      widget.onContextMenu(ContextMenuDetails(
         location: details.globalPosition,
         withinSelection: false,
       ));
@@ -1501,7 +1524,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
-              onContextMenu: _handleContextMenu,
+              onContextTap: widget.onContextMenu != null ? _handleContextTap : null,
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,
@@ -1574,7 +1597,7 @@ class _Editable extends LeafRenderObjectWidget {
     this.offset,
     this.onSelectionChanged,
     this.onCaretChanged,
-    this.onContextMenu,
+    this.onContextTap,
     this.rendererIgnoresPointer = false,
     this.cursorWidth,
     this.cursorRadius,
