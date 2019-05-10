@@ -30,7 +30,7 @@ void main() {
 
     // The RenderFittedBox paints if both its size and its child's size are nonempty.
     painted = false;
-    layout(makeFittedBox(Size(1, 1)), phase: EnginePhase.paint);
+    layout(makeFittedBox(const Size(1, 1)), phase: EnginePhase.paint);
     expect(painted, equals(true));
 
     // The RenderFittedBox should not paint if its child is empty-sized.
@@ -40,7 +40,7 @@ void main() {
 
     // The RenderFittedBox should not paint if it is empty.
     painted = false;
-    layout(makeFittedBox(Size(1, 1)), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
+    layout(makeFittedBox(const Size(1, 1)), constraints: BoxConstraints.tight(Size.zero), phase: EnginePhase.paint);
     expect(painted, equals(false));
   });
 
