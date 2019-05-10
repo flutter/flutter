@@ -1,0 +1,22 @@
+{
+  "todayLabel": "Днес",
+  "datePickerHourSemanticsLabelOne": "$hour часа",
+  "datePickerHourSemanticsLabelOther": "$hour часа",
+  "datePickerMinuteSemanticsLabelOne": "1 минута",
+  "datePickerMinuteSemanticsLabelOther": "$minute минути",
+  "datePickerDateOrder": "мдг",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
+  "alertDialogLabel": "Сигнал",
+  "timerPickerHourLabelOne": "час",
+  "timerPickerHourLabelOther": "часа",
+  "timerPickerMinuteLabelOne": "мин",
+  "timerPickerMinuteLabelOther": "мин",
+  "timerPickerSecondLabelOne": "сек",
+  "timerPickerSecondLabelOther": "сек",
+  "cutButtonLabel": "Изрязване",
+  "copyButtonLabel": "Копиране",
+  "pasteButtonLabel": "Поставяне",
+  "selectAllButtonLabel": "Избиране на всички"
+}

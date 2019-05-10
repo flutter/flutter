@@ -1,0 +1,22 @@
+{
+  "todayLabel": "Hoje",
+  "datePickerHourSemanticsLabelOne": "$hour",
+  "datePickerHourSemanticsLabelOther": "$hour",
+  "datePickerMinuteSemanticsLabelOne": "1 minuto",
+  "datePickerMinuteSemanticsLabelOther": "$minute minutos",
+  "datePickerDateOrder": "dmy",
+  "datePickerDateTimeOrder": "date_time_dayPeriod",
+  "anteMeridiemAbbreviation": "AM",
+  "postMeridiemAbbreviation": "PM",
+  "alertDialogLabel": "Alerta",
+  "timerPickerHourLabelOne": "hora",
+  "timerPickerHourLabelOther": "horas",
+  "timerPickerMinuteLabelOne": "min",
+  "timerPickerMinuteLabelOther": "min",
+  "timerPickerSecondLabelOne": "seg",
+  "timerPickerSecondLabelOther": "seg",
+  "cutButtonLabel": "Cortar",
+  "copyButtonLabel": "Copiar",
+  "pasteButtonLabel": "Colar",
+  "selectAllButtonLabel": "Selecionar tudo"
+}
