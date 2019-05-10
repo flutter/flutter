@@ -382,10 +382,12 @@ NSNotificationName const FlutterSemanticsUpdateNotification = @"FlutterSemantics
   if (appeared) {
     [self installSplashScreenViewCallback];
     [_engine.get() platformViewsController] -> SetFlutterView(_flutterView.get());
+    [_engine.get() platformViewsController] -> SetFlutterViewController(self);
     [_engine.get() platformView] -> NotifyCreated();
   } else {
     [_engine.get() platformView] -> NotifyDestroyed();
     [_engine.get() platformViewsController] -> SetFlutterView(nullptr);
+    [_engine.get() platformViewsController] -> SetFlutterViewController(nullptr);
   }
 }
 
