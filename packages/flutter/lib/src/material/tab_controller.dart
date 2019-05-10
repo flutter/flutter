@@ -130,10 +130,9 @@ class TabController extends ChangeNotifier {
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
   ///
-  /// If length is zero or one, [index] animations don't happen and the value
-  /// of this property is [kAlwaysCompleteAnimation].
-  Animation<double> get animation => _animationController?.view ?? kAlwaysCompleteAnimation;
-  final AnimationController _animationController;
+  /// If the TabController was disposed then return null.
+  Animation<double> get animation => _animationController?.view;
+  AnimationController _animationController;
 
   /// The total number of tabs. Typically greater than one. Must match
   /// [TabBar.tabs]'s and [TabBarView.children]'s length.
@@ -221,6 +220,7 @@ class TabController extends ChangeNotifier {
   @override
   void dispose() {
     _animationController?.dispose();
+    _animationController = null;
     super.dispose();
   }
 }
