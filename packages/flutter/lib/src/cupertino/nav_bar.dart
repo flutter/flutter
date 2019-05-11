@@ -1287,7 +1287,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
       ),
       padding: EdgeInsets.zero,
       onPressed: () {
-        if (onPressed != null ){
+        if (onPressed != null) {
           onPressed();
         } else {
           Navigator.maybePop(context);
