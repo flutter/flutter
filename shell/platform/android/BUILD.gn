@@ -11,6 +11,7 @@ shell_gpu_configuration("android_gpu_configuration") {
   enable_software = true
   enable_vulkan = shell_enable_vulkan
   enable_gl = true
+  enable_metal = false
 }
 
 shared_library("flutter_shell_native") {

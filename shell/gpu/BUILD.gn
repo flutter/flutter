@@ -45,3 +45,12 @@ source_set("gpu_surface_vulkan") {
            "$flutter_root/vulkan",
          ]
 }
+
+source_set("gpu_surface_metal") {
+  sources = [
+    "$gpu_dir/gpu_surface_metal.h",
+    "$gpu_dir/gpu_surface_metal.mm",
+  ]
+
+  deps = gpu_common_deps + [ "//third_party/skia" ]
+}

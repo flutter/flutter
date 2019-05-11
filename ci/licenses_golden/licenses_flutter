@@ -498,6 +498,8 @@ FILE: ../../../flutter/shell/gpu/gpu_surface_gl.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl_delegate.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl_delegate.h
+FILE: ../../../flutter/shell/gpu/gpu_surface_metal.h
+FILE: ../../../flutter/shell/gpu/gpu_surface_metal.mm
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_software.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_vulkan.cc
@@ -719,6 +721,8 @@ FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_gl.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_gl.mm
+FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_metal.h
+FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_metal.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_software.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_software.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.h

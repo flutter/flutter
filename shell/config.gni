@@ -4,4 +4,5 @@
 
 declare_args() {
   shell_enable_vulkan = false
+  shell_enable_metal = false
 }
