@@ -16,9 +16,9 @@
 
 namespace flutter {
 
-class IOSSurfaceGL : public IOSSurface,
-                     public GPUSurfaceGLDelegate,
-                     public flutter::ExternalViewEmbedder {
+class IOSSurfaceGL final : public IOSSurface,
+                           public GPUSurfaceGLDelegate,
+                           public flutter::ExternalViewEmbedder {
  public:
   IOSSurfaceGL(std::shared_ptr<IOSGLContext> context,
                fml::scoped_nsobject<CAEAGLLayer> layer,

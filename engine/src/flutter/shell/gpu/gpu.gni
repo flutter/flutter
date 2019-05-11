@@ -11,6 +11,8 @@ template("shell_gpu_configuration") {
          "Caller must declare if the Vulkan backend must be enabled.")
   assert(defined(invoker.enable_gl),
          "Caller must declare if the Open GL backend must be enabled.")
+  assert(defined(invoker.enable_metal),
+         "Caller must declare if the Metal backend must be enabled.")
 
   group(target_name) {
     public_deps = []
@@ -25,6 +27,10 @@ template("shell_gpu_configuration") {
 
     if (invoker.enable_vulkan) {
       public_deps += [ "$flutter_root/shell/gpu:gpu_surface_vulkan" ]
+    }
+
+    if (invoker.enable_metal) {
+      public_deps += [ "$flutter_root/shell/gpu:gpu_surface_metal" ]
     }
   }
 }

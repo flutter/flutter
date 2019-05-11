@@ -11,6 +11,7 @@ shell_gpu_configuration("embedder_gpu_configuration") {
   enable_software = true
   enable_vulkan = false
   enable_gl = true
+  enable_metal = false
 }
 
 source_set("embedder") {
