@@ -2645,7 +2645,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 
   @override
-  bool get needsCompositing => _hasActiveAnnotation;
+  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {
