@@ -484,7 +484,7 @@ public class FlutterFragment extends Fragment {
 
         // TODO(mattcarroll): the following call should exist here, but the plugin system needs to be revamped.
         //                    The existing attach() method does not know how to handle this kind of FlutterView.
-        //flutterEngine.getPluginRegistry().attach(this, getActivity());
+        //flutterEngine.getPlugins().attach(this, getActivity());
 
         doInitialFlutterViewRun();
       }
@@ -587,11 +587,6 @@ public class FlutterFragment extends Fragment {
    * @param grantResults permission grants or denials
    */
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-    if (flutterEngine != null) {
-      flutterEngine.getPluginRegistry().onRequestPermissionsResult(requestCode, permissions, grantResults);
-    } else {
-      Log.w(TAG, "onRequestPermissionResult() invoked before FlutterFragment was attached to an Activity.");
-    }
   }
 
   /**
@@ -603,11 +598,6 @@ public class FlutterFragment extends Fragment {
    * @param intent new Intent
    */
   public void onNewIntent(@NonNull Intent intent) {
-    if (flutterEngine != null) {
-      flutterEngine.getPluginRegistry().onNewIntent(intent);
-    } else {
-      Log.w(TAG, "onNewIntent() invoked before FlutterFragment was attached to an Activity.");
-    }
   }
 
   /**
@@ -619,11 +609,6 @@ public class FlutterFragment extends Fragment {
    */
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (flutterEngine != null) {
-      flutterEngine.getPluginRegistry().onActivityResult(requestCode, resultCode, data);
-    } else {
-      Log.w(TAG, "onActivityResult() invoked before FlutterFragment was attached to an Activity.");
-    }
   }
 
   /**
@@ -633,11 +618,6 @@ public class FlutterFragment extends Fragment {
    * See {@link android.app.Activity#onUserLeaveHint()}
    */
   public void onUserLeaveHint() {
-    if (flutterEngine != null) {
-      flutterEngine.getPluginRegistry().onUserLeaveHint();
-    } else {
-      Log.w(TAG, "onUserLeaveHint() invoked before FlutterFragment was attached to an Activity.");
-    }
   }
 
   /**

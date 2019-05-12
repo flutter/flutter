@@ -4,11 +4,17 @@
 
 package io.flutter.embedding.engine;
 
+import android.arch.lifecycle.Lifecycle;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
-import io.flutter.app.FlutterPluginRegistry;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import io.flutter.embedding.engine.dart.DartExecutor;
+import io.flutter.embedding.engine.plugins.FlutterPlugin;
+import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.systemchannels.AccessibilityChannel;
 import io.flutter.embedding.engine.systemchannels.KeyEventChannel;
@@ -54,7 +60,7 @@ public class FlutterEngine {
   @NonNull
   private final DartExecutor dartExecutor;
   @NonNull
-  private final FlutterPluginRegistry pluginRegistry;
+  private final PluginRegistry pluginRegistry;
 
   // System channels.
   @NonNull
@@ -79,7 +85,8 @@ public class FlutterEngine {
   private final EngineLifecycleListener engineLifecycleListener = new EngineLifecycleListener() {
     @SuppressWarnings("unused")
     public void onPreEngineRestart() {
-      pluginRegistry.onPreEngineRestart();
+      // TODO(mattcarroll): work into plugin API. should probably loop through each plugin.
+//      pluginRegistry.onPreEngineRestart();
     }
   };
 
@@ -95,7 +102,7 @@ public class FlutterEngine {
    * {@link #getRenderer()} and {@link FlutterRenderer#attachToRenderSurface(FlutterRenderer.RenderSurface)}.
    *
    * A new {@code FlutterEngine} does not come with any Flutter plugins attached. To attach plugins,
-   * see {@link #getPluginRegistry()}.
+   * see {@link #getPlugins()}.
    *
    * A new {@code FlutterEngine} does come with all default system channels attached.
    */
@@ -120,7 +127,12 @@ public class FlutterEngine {
     systemChannel = new SystemChannel(dartExecutor);
     textInputChannel = new TextInputChannel(dartExecutor);
 
-    this.pluginRegistry = new FlutterPluginRegistry(this, context);
+    // TODO(mattcarroll): bring in Lifecycle.
+    this.pluginRegistry = new FlutterEnginePluginRegistry(
+      context.getApplicationContext(),
+      this,
+      null
+    );
   }
 
   private void attachToJni() {
@@ -138,25 +150,13 @@ public class FlutterEngine {
   }
 
   /**
-   * Detaches this {@code FlutterEngine} from Flutter's native implementation, but allows
-   * reattachment later.
-   *
-   * // TODO(mattcarroll): document use-cases for this behavior.
-   */
-  public void detachFromJni() {
-    pluginRegistry.detach();
-    dartExecutor.onDetachedFromJNI();
-    flutterJNI.removeEngineLifecycleListener(engineLifecycleListener);
-  }
-
-  /**
    * Cleans up all components within this {@code FlutterEngine} and then detaches from Flutter's
    * native implementation.
    *
    * This {@code FlutterEngine} instance should be discarded after invoking this method.
    */
   public void destroy() {
-    pluginRegistry.destroy();
+    pluginRegistry.removeAll();
     dartExecutor.onDetachedFromJNI();
     flutterJNI.removeEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.detachFromNativeAndReleaseResources();
@@ -262,10 +262,69 @@ public class FlutterEngine {
     return textInputChannel;
   }
 
-  // TODO(mattcarroll): propose a robust story for plugin backward compability and future facing API.
+  /**
+   * Plugin registry, which registers plugins that want to be applied to this {@code FlutterEngine}.
+   */
   @NonNull
-  public FlutterPluginRegistry getPluginRegistry() {
+  public PluginRegistry getPlugins() {
     return pluginRegistry;
+  }
+
+  private static class FlutterEnginePluginRegistry implements PluginRegistry {
+    private final Map<Class<? extends FlutterPlugin>, FlutterPlugin> plugins = new HashMap<>();
+    private final FlutterPlugin.FlutterPluginBinding pluginBinding;
+
+    FlutterEnginePluginRegistry(
+      @NonNull Context appContext,
+      @NonNull FlutterEngine flutterEngine,
+      @NonNull Lifecycle lifecycle
+    ) {
+      pluginBinding = new FlutterPlugin.FlutterPluginBinding(
+        appContext,
+        flutterEngine,
+        lifecycle
+      );
+    }
+
+    public void add(@NonNull FlutterPlugin plugin) {
+      plugins.put(plugin.getClass(), plugin);
+      plugin.onAttachedToEngine(pluginBinding);
+    }
+
+    public void add(@NonNull Set<FlutterPlugin> plugins) {
+      for (FlutterPlugin plugin : plugins) {
+        add(plugin);
+      }
+    }
+
+    public boolean has(@NonNull Class<? extends FlutterPlugin> pluginClass) {
+      return plugins.containsKey(pluginClass);
+    }
+
+    public FlutterPlugin get(@NonNull Class<? extends FlutterPlugin> pluginClass) {
+      return plugins.get(pluginClass);
+    }
+
+    public void remove(@NonNull Class<? extends FlutterPlugin> pluginClass) {
+      FlutterPlugin plugin = plugins.get(pluginClass);
+      if (plugin != null) {
+        plugin.onDetachedFromEngine(pluginBinding);
+        plugins.remove(pluginClass);
+      }
+    }
+
+    public void remove(@NonNull Set<Class<? extends FlutterPlugin>> pluginClasses) {
+      for (Class<? extends FlutterPlugin> pluginClass : pluginClasses) {
+        remove(pluginClass);
+      }
+    }
+
+    public void removeAll() {
+      for (FlutterPlugin plugin : plugins.values()) {
+        plugin.onDetachedFromEngine(pluginBinding);
+      }
+      plugins.clear();
+    }
   }
 
   /**

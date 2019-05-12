@@ -133,6 +133,8 @@ action("flutter_shell_java") {
     "io/flutter/embedding/engine/dart/DartExecutor.java",
     "io/flutter/embedding/engine/dart/DartMessenger.java",
     "io/flutter/embedding/engine/dart/PlatformMessageHandler.java",
+    "io/flutter/embedding/engine/plugins/FlutterPlugin.java",
+    "io/flutter/embedding/engine/plugins/PluginRegistry.java",
     "io/flutter/embedding/engine/renderer/FlutterRenderer.java",
     "io/flutter/embedding/engine/renderer/OnFirstFrameRenderedListener.java",
     "io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java",
