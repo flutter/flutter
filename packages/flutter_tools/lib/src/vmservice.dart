@@ -237,7 +237,7 @@ class VMService {
   }
 
   static void _unhandledError(dynamic error, dynamic stack) {
-    logger.printTrace('Error in internalimplementation of JSON RPC.\n$error\n$stack');
+    logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
     assert(false);
   }
 

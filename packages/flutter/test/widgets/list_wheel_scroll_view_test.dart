@@ -1241,37 +1241,37 @@ void main() {
     RenderObject target = tester.renderObject(find.byWidget(outerChildren[5]));
     RevealedOffset revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(0.0, 200.0, 300.0, 100.0));
+    expect(revealed.rect, const Rect.fromLTWH(0.0, 200.0, 300.0, 100.0));
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(0.0, 200.0, 300.0, 100.0));
+    expect(revealed.rect, const Rect.fromLTWH(0.0, 200.0, 300.0, 100.0));
 
-    revealed = viewport.getOffsetToReveal(target, 0.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(40.0, 240.0, 10.0, 10.0));
+    expect(revealed.rect, const Rect.fromLTWH(40.0, 240.0, 10.0, 10.0));
 
-    revealed = viewport.getOffsetToReveal(target, 1.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(40.0, 240.0, 10.0, 10.0));
+    expect(revealed.rect, const Rect.fromLTWH(40.0, 240.0, 10.0, 10.0));
 
     // descendant of viewport, not direct child
     target = tester.renderObject(find.byWidget(innerChildren[5]));
     revealed = viewport.getOffsetToReveal(target, 0.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(125.0, 225.0, 50.0, 50.0));
+    expect(revealed.rect, const Rect.fromLTWH(125.0, 225.0, 50.0, 50.0));
 
     revealed = viewport.getOffsetToReveal(target, 1.0);
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(125.0, 225.0, 50.0, 50.0));
+    expect(revealed.rect, const Rect.fromLTWH(125.0, 225.0, 50.0, 50.0));
 
-    revealed = viewport.getOffsetToReveal(target, 0.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 0.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
+    expect(revealed.rect, const Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
 
-    revealed = viewport.getOffsetToReveal(target, 1.0, rect: Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
+    revealed = viewport.getOffsetToReveal(target, 1.0, rect: const Rect.fromLTWH(40.0, 40.0, 10.0, 10.0));
     expect(revealed.offset, 500.0);
-    expect(revealed.rect, Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
+    expect(revealed.rect, const Rect.fromLTWH(165.0, 265.0, 10.0, 10.0));
   });
 
   testWidgets('ListWheelScrollView showOnScreen', (WidgetTester tester) async {

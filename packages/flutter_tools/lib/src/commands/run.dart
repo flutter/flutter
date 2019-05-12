@@ -365,7 +365,7 @@ class RunCommand extends RunCommandBase {
       expFlags = argResults[FlutterOptions.kEnableExperiment];
     }
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[];
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     for (Device device in devices) {
       final FlutterDevice flutterDevice = await FlutterDevice.create(
         device,

@@ -39,12 +39,12 @@ class FlutterProject {
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> fromDirectory(Directory directory) async {
+  static FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    final FlutterManifest manifest = await _readManifest(
+    final FlutterManifest manifest = _readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
     );
-    final FlutterManifest exampleManifest = await _readManifest(
+    final FlutterManifest exampleManifest = _readManifest(
       _exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
     );
     return FlutterProject(directory, manifest, exampleManifest);
@@ -52,11 +52,11 @@ class FlutterProject {
 
   /// Returns a future that completes with a [FlutterProject] view of the current directory.
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> current() => fromDirectory(fs.currentDirectory);
+  static FlutterProject current() => fromDirectory(fs.currentDirectory);
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory.
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> fromPath(String path) => fromDirectory(fs.directory(path));
+  static FlutterProject fromPath(String path) => fromDirectory(fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
@@ -149,8 +149,8 @@ class FlutterProject {
   ///
   /// Completes with an empty [FlutterManifest], if the file does not exist.
   /// Completes with a ToolExit on validation error.
-  static Future<FlutterManifest> _readManifest(String path) async {
-    final FlutterManifest manifest = await FlutterManifest.createFromPath(path);
+  static FlutterManifest _readManifest(String path) {
+    final FlutterManifest manifest = FlutterManifest.createFromPath(path);
     if (manifest == null)
       throwToolExit('Please correct the pubspec.yaml file at $path');
     return manifest;
@@ -181,6 +181,10 @@ class FlutterProject {
       return null;
     }
     final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    // If the pubspec file is empty, this will be null.
+    if (pubspec == null) {
+      return null;
+    }
     return pubspec['builders'];
   }
 
@@ -594,6 +598,8 @@ class LinuxProject {
   final FlutterProject project;
 
   Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
+
+  Directory get cacheDirectory => editableHostAppDirectory.childDirectory('flutter');
 
   bool existsSync() => editableHostAppDirectory.existsSync();
 

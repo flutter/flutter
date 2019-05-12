@@ -458,6 +458,18 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
   Animation<double> get parent => controller.animation;
 
   @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    if (controller.animation != null)
+      super.removeStatusListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    if (controller.animation != null)
+      super.removeListener(listener);
+  }
+
+  @override
   double get value {
     assert(!controller.indexIsChanging);
     return (controller.animation.value - index.toDouble()).abs().clamp(0.0, 1.0);
@@ -768,6 +780,11 @@ class _TabBarState extends State<TabBar> {
     );
   }
 
+  // If the TabBar is rebuilt with a new tab controller, the caller should
+  // dispose the old one. In that case the old controller's animation will be
+  // null and should not be accessed.
+  bool get _controllerIsValid => _controller?.animation != null;
+
   void _updateTabController() {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
@@ -783,20 +800,10 @@ class _TabBarState extends State<TabBar> {
       return true;
     }());
 
-    assert(() {
-      if (newController.length != widget.tabs.length) {
-        throw FlutterError(
-          'Controller\'s length property (${newController.length}) does not match the \n'
-          'number of tab elements (${widget.tabs.length}) present in TabBar\'s tabs property.'
-        );
-      }
-      return true;
-    }());
-
     if (newController == _controller)
       return;
 
-    if (_controller != null) {
+    if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
     }
@@ -809,7 +816,7 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _initIndicatorPainter() {
-    _indicatorPainter = _controller == null ? null : _IndicatorPainter(
+    _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
       indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
@@ -850,10 +857,11 @@ class _TabBarState extends State<TabBar> {
   @override
   void dispose() {
     _indicatorPainter.dispose();
-    if (_controller != null) {
+    if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
     }
+    _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -960,6 +968,15 @@ class _TabBarState extends State<TabBar> {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
+    assert(() {
+      if (_controller.length != widget.tabs.length) {
+        throw FlutterError(
+          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'number of tabs (${widget.tabs.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     if (_controller.length == 0) {
       return Container(
@@ -1126,8 +1143,14 @@ class _TabBarViewState extends State<TabBarView> {
   TabController _controller;
   PageController _pageController;
   List<Widget> _children;
+  List<Widget> _childrenWithKey;
   int _currentIndex;
   int _warpUnderwayCount = 0;
+
+  // If the TabBarView is rebuilt with a new tab controller, the caller should
+  // dispose the old one. In that case the old controller's animation will be
+  // null and should not be accessed.
+  bool get _controllerIsValid => _controller?.animation != null;
 
   void _updateTabController() {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
@@ -1144,20 +1167,10 @@ class _TabBarViewState extends State<TabBarView> {
       return true;
     }());
 
-    assert(() {
-      if (newController.length != widget.children.length) {
-        throw FlutterError(
-          'Controller\'s length property (${newController.length}) does not match the \n'
-          'number of elements (${widget.children.length}) present in TabBarView\'s children property.'
-        );
-      }
-      return true;
-    }());
-
     if (newController == _controller)
       return;
 
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
     _controller = newController;
     if (_controller != null)
@@ -1167,7 +1180,7 @@ class _TabBarViewState extends State<TabBarView> {
   @override
   void initState() {
     super.initState();
-    _children = widget.children;
+    _updateChildren();
   }
 
   @override
@@ -1184,15 +1197,21 @@ class _TabBarViewState extends State<TabBarView> {
     if (widget.controller != oldWidget.controller)
       _updateTabController();
     if (widget.children != oldWidget.children && _warpUnderwayCount == 0)
-      _children = widget.children;
+      _updateChildren();
   }
 
   @override
   void dispose() {
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+    _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
+  }
+
+  void _updateChildren() {
+    _children = widget.children;
+    _childrenWithKey = KeyedSubtree.ensureUniqueKeysForList(widget.children);
   }
 
   void _handleTabControllerAnimationTick() {
@@ -1217,28 +1236,30 @@ class _TabBarViewState extends State<TabBarView> {
       return _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
 
     assert((_currentIndex - previousIndex).abs() > 1);
-    int initialPage;
+    final int initialPage = _currentIndex > previousIndex
+        ? _currentIndex - 1
+        : _currentIndex + 1;
+    final List<Widget> originalChildren = _childrenWithKey;
     setState(() {
       _warpUnderwayCount += 1;
-      _children = List<Widget>.from(widget.children, growable: false);
-      if (_currentIndex > previousIndex) {
-        _children[_currentIndex - 1] = _children[previousIndex];
-        initialPage = _currentIndex - 1;
-      } else {
-        _children[_currentIndex + 1] = _children[previousIndex];
-        initialPage = _currentIndex + 1;
-      }
-    });
 
+      _childrenWithKey = List<Widget>.from(_childrenWithKey, growable: false);
+      final Widget temp = _childrenWithKey[initialPage];
+      _childrenWithKey[initialPage] = _childrenWithKey[previousIndex];
+      _childrenWithKey[previousIndex] = temp;
+    });
     _pageController.jumpToPage(initialPage);
 
     await _pageController.animateToPage(_currentIndex, duration: kTabScrollDuration, curve: Curves.ease);
     if (!mounted)
       return Future<void>.value();
-
     setState(() {
       _warpUnderwayCount -= 1;
-      _children = widget.children;
+      if (widget.children != _children) {
+        _updateChildren();
+      } else {
+        _childrenWithKey = originalChildren;
+      }
     });
   }
 
@@ -1268,13 +1289,22 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   Widget build(BuildContext context) {
+    assert(() {
+      if (_controller.length != widget.children.length) {
+        throw FlutterError(
+          'Controller\'s length property (${_controller.length}) does not match the \n'
+          'number of tabs (${widget.children.length}) present in TabBar\'s tabs property.'
+        );
+      }
+      return true;
+    }());
     return NotificationListener<ScrollNotification>(
       onNotification: _handleScrollNotification,
       child: PageView(
         dragStartBehavior: widget.dragStartBehavior,
         controller: _pageController,
         physics: widget.physics == null ? _kTabBarViewPhysics : _kTabBarViewPhysics.applyTo(widget.physics),
-        children: _children,
+        children: _childrenWithKey,
       ),
     );
   }

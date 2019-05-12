@@ -88,7 +88,7 @@ class AOTSnapshotter {
   }) async {
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
-      flutterProject = await FlutterProject.current();
+      flutterProject = FlutterProject.current();
     }
     if (!_isValidAotPlatform(platform, buildMode)) {
       printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
@@ -203,7 +203,7 @@ class AOTSnapshotter {
     // }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
-    final int genSnapshotExitCode = await _timedStep('gen_snapshot', () => genSnapshot.run(
+    final int genSnapshotExitCode = await _timedStep('snapshot(CompileTime)', () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
@@ -304,7 +304,7 @@ class AOTSnapshotter {
     @required bool trackWidgetCreation,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
@@ -315,7 +315,7 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
-    final CompilerOutput compilerOutput = await _timedStep('frontend', () => kernelCompiler.compile(
+    final CompilerOutput compilerOutput = await _timedStep('frontend(CompileTime)', () => kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       mainPath: mainPath,
       packagesPath: packagesPath,
@@ -361,7 +361,7 @@ class AOTSnapshotter {
     final Stopwatch sw = Stopwatch()..start();
     final T value = await action();
     if (reportTimings) {
-      printStatus('$marker(RunTime): ${sw.elapsedMilliseconds} ms.');
+      printStatus('$marker: ${sw.elapsedMilliseconds} ms.');
     }
     return value;
   }
