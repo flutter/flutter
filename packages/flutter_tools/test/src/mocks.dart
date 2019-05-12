@@ -51,6 +51,7 @@ class MockApplicationPackageFactory extends Mock implements ApplicationPackageFa
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
     File applicationBinary,
+    String flavor
   }) async {
     return _store.getPackageForPlatform(platform);
   }

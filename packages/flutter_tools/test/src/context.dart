@@ -342,6 +342,11 @@ class FakeXcodeProjectInterpreter implements XcodeProjectInterpreter {
   }
 
   @override
+  Map<String, String> getBuildSettingsForScheme(String projectPath, String scheme) {
+    return <String, String>{};
+  }
+
+  @override
   void cleanWorkspace(String workspacePath, String scheme) {
   }
 

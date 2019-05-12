@@ -24,7 +24,6 @@ import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
-import 'plist_parser.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 const String iosSimulatorId = 'apple_ios_simulator';
@@ -388,8 +387,7 @@ class IOSSimulator extends Device {
       // which should always yield the correct value and does not require
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
-      final String plistPath = fs.path.join(package.simulatorBundlePath, 'Info.plist');
-      final String bundleIdentifier = PlistParser.instance.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
+      final String bundleIdentifier = package.id;
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
@@ -438,7 +436,7 @@ class IOSSimulator extends Device {
     }
 
     // Step 2: Assert that the Xcode project was successfully built.
-    final Directory bundle = fs.directory(app.simulatorBundlePath);
+    final Directory bundle = fs.directory(buildResult.output);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
@@ -559,7 +557,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       onListen: _start,
       onCancel: _stop,
     );
-    _appName = app == null ? null : app.name.replaceAll('.app', '');
+    _appName = app == null ? null : (app.targetName ?? app.name.replaceAll('.app', ''));
   }
 
   final IOSSimulator device;

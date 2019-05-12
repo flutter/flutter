@@ -319,6 +319,47 @@ class XcodeProjectInterpreter {
     }
   }
 
+  Future<Map<String, String>> getBuildSettingsForScheme(
+      String projectPath, String scheme, {
+        Duration timeout = const Duration(minutes: 1),
+      }) async {
+    final Status status = Status.withSpinner(
+      timeout: timeoutConfiguration.fastOperation,
+    );
+    final List<String> showBuildSettingsCommand = <String>[
+      _executable,
+      '-project',
+      fs.path.absolute(projectPath),
+      '-scheme',
+      scheme,
+      '-showBuildSettings',
+    ];
+    try {
+      // showBuildSettings is reported to ocassionally timeout. Here, we give it
+      // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
+      // When there is a timeout, we retry once.
+      final RunResult result = await processUtils.run(
+        showBuildSettingsCommand,
+        throwOnError: true,
+        workingDirectory: projectPath,
+        timeout: timeout,
+        timeoutRetries: 1,
+      );
+      final String out = result.stdout.trim();
+      return parseXcodeBuildSettings(out);
+    } catch(error) {
+      if (error is ProcessException && error.toString().contains('timed out')) {
+        BuildEvent('xcode-show-build-settings-timeout',
+          command: showBuildSettingsCommand.join(' '),
+        ).send();
+      }
+      printTrace('Unexpected failure to get the build settings: $error.');
+      return const <String, String>{};
+    } finally {
+      status.stop();
+    }
+  }
+
   void cleanWorkspace(String workspacePath, String scheme) {
     processUtils.runSync(<String>[
       _executable,

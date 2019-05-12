@@ -76,6 +76,14 @@ class FlutterProject {
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   static FlutterProject fromPath(String path) => fromDirectory(fs.directory(path));
 
+  /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
+  /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
+  static FlutterProject currentForFlavor(String flavor) {
+    final FlutterProject flutterProject = fromDirectory(fs.currentDirectory);
+    flutterProject.flavor = flavor;
+    return flutterProject;
+  }
+
   /// The location of this project.
   final Directory directory;
 
@@ -84,6 +92,8 @@ class FlutterProject {
 
   /// The manifest of the example sub-project of this project.
   final FlutterManifest _exampleManifest;
+
+  String flavor;
 
   /// The set of organization names found in this project as
   /// part of iOS product bundle identifier, Android application ID, or
@@ -373,29 +383,38 @@ class IosProject implements XcodeBasedProject {
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
   Future<String> get productBundleIdentifier async {
-    String fromPlist;
-    try {
-      fromPlist = PlistParser.instance.getValueFromFile(
-        hostInfoPlist.path,
-        PlistParser.kCFBundleIdentifierKey,
-      );
-    } on FileNotFoundException {
-      // iOS tooling not found; likely not running OSX; let [fromPlist] be null
+    if (parent.flavor != null) {
+      return xcode.substituteXcodeVariables(
+          r'$(PRODUCT_BUNDLE_IDENTIFIER)', buildSettings);
+    } else {
+      String fromPlist;
+      try {
+        fromPlist = PlistParser.instance.getValueFromFile(
+          hostInfoPlist.path,
+          PlistParser.kCFBundleIdentifierKey,
+        );
+      } on FileNotFoundException {
+        // iOS tooling not found; likely not running OSX; let [fromPlist] be null
+      }
+      if (fromPlist != null && !fromPlist.contains('\$')) {
+        // Info.plist has no build variables in product bundle ID.
+        return fromPlist;
+      }
+      final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
+      if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
+        // Common case. Avoids parsing build settings.
+        return fromPbxproj;
+      }
+      if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
+        // General case: perform variable substitution using build settings.
+        return xcode.substituteXcodeVariables(fromPlist, await buildSettings);
+      }
+      return null;
     }
-    if (fromPlist != null && !fromPlist.contains('\$')) {
-      // Info.plist has no build variables in product bundle ID.
-      return fromPlist;
-    }
-    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
-    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
-      // Common case. Avoids parsing build settings.
-      return fromPbxproj;
-    }
-    if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
-      // General case: perform variable substitution using build settings.
-      return xcode.substituteXcodeVariables(fromPlist, await buildSettings);
-    }
-    return null;
+  }
+
+  String get targetName {
+    return xcode.substituteXcodeVariables(r'$(TARGET_NAME)', buildSettings);
   }
 
   @override
@@ -409,10 +428,18 @@ class IosProject implements XcodeBasedProject {
     if (!xcode.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    _buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
-      xcodeProject.path,
-      _hostAppBundleName,
-    );
+
+    if (parent.flavor == null) {
+      _buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
+        xcodeProject.path,
+        _hostAppBundleName,
+      );
+    } else {
+      _buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettingsForScheme(
+        xcodeProject.path,
+        parent.flavor,
+      );
+    }
     return _buildSettings;
   }
 
