@@ -547,6 +547,8 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/Flutte
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartExecutor.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartMessenger.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/PlatformMessageHandler.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/FlutterPlugin.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/PluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/OnFirstFrameRenderedListener.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java
