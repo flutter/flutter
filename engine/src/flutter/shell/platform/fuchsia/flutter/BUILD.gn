@@ -7,7 +7,7 @@ assert(is_fuchsia)
 import("//build/fuchsia/sdk.gni")
 
 if (using_fuchsia_sdk) {
-  executable("fuchsia") {
+  executable("flutter") {
     output_name = "four_gate"
 
     sources = [
@@ -66,6 +66,9 @@ if (using_fuchsia_sdk) {
       "$flutter_root/runtime",
       "$flutter_root/runtime:libdart",
       "$flutter_root/shell/common",
+      "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
+      "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
+      "$flutter_root/shell/platform/fuchsia/runtime/dart/utils",
       "$flutter_root/vulkan",
       "$fuchsia_sdk_root/fidl:fuchsia.fonts",
       "$fuchsia_sdk_root/fidl:fuchsia.images",
@@ -84,9 +87,6 @@ if (using_fuchsia_sdk) {
       "$fuchsia_sdk_root/pkg:zx",
       "$fuchsia_sdk_root/pkg/lib/sys/cpp",
       "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
-      "dart-pkg/fuchsia",
-      "dart-pkg/zircon",
-      "runtime/dart/utils",
       "//third_party/tonic",
     ]
   }

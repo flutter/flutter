@@ -30,7 +30,7 @@ group("platform") {
     # Fuchsia has its own runner implementation.
     if (using_fuchsia_sdk) {
       deps = [
-        "fuchsia",
+        "fuchsia/flutter",
       ]
     }
   } else {
