@@ -1361,14 +1361,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _handleFocusChanged() {
-    print('_handleFocusChanged $this');
     _openOrCloseInputConnectionIfNeeded();
     _startOrStopCursorTimerIfNeeded();
     _updateOrDisposeSelectionOverlayIfNeeded();
     if (_hasFocus) {
-      final FocusScopeNode scopeNode = FocusScope.of(context);
-      assert(scopeNode != null);
-      scopeNode.removeListener(_handleScopeFocusChanged);
       // Listen for changing viewInsets, which indicates keyboard showing up.
       WidgetsBinding.instance.addObserver(this);
       _lastBottomViewInset = WidgetsBinding.instance.window.viewInsets.bottom;
@@ -1379,41 +1375,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
-      // Changes upon losing focus:
-      //  - Text: always keep
-      //  - Composing: always clear
-      //  - Selection: clear if the new focus is within the same scope
-      final FocusScopeNode scopeNode = FocusScope.of(context);
-      assert(scopeNode != null);
-      final bool keepSelection = !scopeNode.hasFocus;
-      print('$scopeNode $keepSelection');
-      _value = TextEditingValue(
-        text: _value.text,
-        selection: keepSelection ?
-          _value.selection :
-          const TextSelection.collapsed(offset: -1),
-      );
-      print(_value);
-      // If selection is not cleared, clear it when the focus goes out of the
-      // scope
-      if (keepSelection) {
-        scopeNode.addListener(_handleScopeFocusChanged);
-      }
+      // Clear the selection and composition state if this widget lost focus.
+      _value = TextEditingValue(text: _value.text);
     }
     updateKeepAlive();
-  }
-
-  void _handleScopeFocusChanged() {
-    // This callback is only registered when EditableText loses focus with an
-    // uncollapsed selection, and the new focus is within the same scope.
-    // It clears selection when focus goes out of the scope.
-    final FocusScopeNode scopeNode = FocusScope.of(context);
-    assert(scopeNode != null);
-    assert(scopeNode.hasFocus);
-    scopeNode.removeListener(_handleScopeFocusChanged);
-    _value = TextEditingValue(
-      text: _value.text,
-    );
   }
 
   TextDirection get _textDirection {
@@ -1486,6 +1451,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
+    // TODO
     final Color selectionColor = _hasFocus ? widget.selectionColor : const Color.fromARGB(255, 170, 170, 170);
     return Scrollable(
       excludeFromSemantics: true,
