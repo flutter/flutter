@@ -693,8 +693,8 @@ class _TextSelectionHandleOverlayState
           alignment: Alignment.topLeft,
           width: interactiveRect.width,
           height: interactiveRect.height,
-          // This is a RawGestureDetector instead of a GestureDetector so that
-          // it doesn't steal events from the TextField.
+          // This is a Listener instead of a GestureDetector so that it doesn't
+          // steal events from the TextField.
           child: Listener(
             behavior: HitTestBehavior.translucent,
             onPointerDown: (PointerDownEvent event) {
