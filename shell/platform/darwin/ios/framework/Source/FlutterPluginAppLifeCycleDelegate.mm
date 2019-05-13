@@ -94,6 +94,7 @@ static BOOL isPowerOfTwo(NSUInteger x) {
   _debugBackgroundTask = [application
       beginBackgroundTaskWithName:@"Flutter debug task"
                 expirationHandler:^{
+                  [application endBackgroundTask:_debugBackgroundTask];
                   FML_LOG(WARNING)
                       << "\nThe OS has terminated the Flutter debug connection for being "
                          "inactive in the background for too long.\n\n"
