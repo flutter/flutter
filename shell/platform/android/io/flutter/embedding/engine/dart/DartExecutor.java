@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.dart;
 import android.content.res.AssetManager;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.annotation.UiThread;
 import android.util.Log;
 
 import java.nio.ByteBuffer;
@@ -145,6 +146,7 @@ public class DartExecutor implements BinaryMessenger {
    * @param message the message payload, a direct-allocated {@link ByteBuffer} with the message bytes
    */
   @Override
+  @UiThread
   public void send(@NonNull String channel, @Nullable ByteBuffer message) {
     messenger.send(channel, message, null);
   }
@@ -159,6 +161,7 @@ public class DartExecutor implements BinaryMessenger {
    * @param callback a callback invoked when the Dart application responds to the message
    */
   @Override
+  @UiThread
   public void send(@NonNull String channel, @Nullable ByteBuffer message, @Nullable BinaryMessenger.BinaryReply callback) {
     messenger.send(channel, message, callback);
   }
@@ -172,6 +175,7 @@ public class DartExecutor implements BinaryMessenger {
    * @param handler a {@link BinaryMessageHandler} to be invoked on incoming messages, or null.
    */
   @Override
+  @UiThread
   public void setMessageHandler(@NonNull String channel, @Nullable BinaryMessenger.BinaryMessageHandler handler) {
     messenger.setMessageHandler(channel, handler);
   }

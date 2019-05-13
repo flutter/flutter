@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.common;
 
+import android.support.annotation.UiThread;
 import android.util.Log;
 
 import io.flutter.BuildConfig;
@@ -83,6 +84,7 @@ public final class EventChannel {
      *
      * @param handler a {@link StreamHandler}, or null to deregister.
      */
+    @UiThread
     public void setStreamHandler(final StreamHandler handler) {
         messenger.setMessageHandler(name, handler == null ? null : new IncomingStreamRequestHandler(handler));
     }
@@ -216,6 +218,7 @@ public final class EventChannel {
              final AtomicBoolean hasEnded = new AtomicBoolean(false);
 
              @Override
+             @UiThread
              public void success(Object event) {
                  if (hasEnded.get() || activeSink.get() != this) {
                      return;
@@ -224,6 +227,7 @@ public final class EventChannel {
              }
 
              @Override
+             @UiThread
              public void error(String errorCode, String errorMessage, Object errorDetails) {
                  if (hasEnded.get() || activeSink.get() != this) {
                      return;
@@ -234,6 +238,7 @@ public final class EventChannel {
              }
 
              @Override
+             @UiThread
              public void endOfStream() {
                  if (hasEnded.getAndSet(true) || activeSink.get() != this) {
                      return;

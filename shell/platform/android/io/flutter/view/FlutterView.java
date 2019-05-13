@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.LocaleList;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.UiThread;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -725,11 +726,13 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
     }
 
     @Override
+    @UiThread
     public void send(String channel, ByteBuffer message) {
         send(channel, message, null);
     }
 
     @Override
+    @UiThread
     public void send(String channel, ByteBuffer message, BinaryReply callback) {
         if (!isAttached()) {
             Log.d(TAG, "FlutterView.send called on a detached view, channel=" + channel);
@@ -739,6 +742,7 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
     }
 
     @Override
+    @UiThread
     public void setMessageHandler(String channel, BinaryMessageHandler handler) {
         mNativeView.setMessageHandler(channel, handler);
     }

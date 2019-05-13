@@ -10,6 +10,7 @@ import static android.view.MotionEvent.PointerProperties;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.UiThread;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -92,6 +93,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
      * After calling this the platform views controller will no longer listen to it's previous messenger, and will
      * not maintain references to the texture registry, context, and messenger passed to the previous attach call.
      */
+    @UiThread
     public void detach() {
         mMessenger.setMessageHandler(CHANNEL_NAME, null);
         mMessenger = null;
