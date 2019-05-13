@@ -251,6 +251,40 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Verify that visual properties are passed through', (WidgetTester tester) async {
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    const Color color = Colors.pink;
+    const double elevation = 9.0;
+    final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
+
+    await tester.pumpWidget(MaterialApp(
+      home: Scaffold(
+        key: scaffoldKey,
+        body: const Center(child: Text('body')),
+      ),
+    ));
+
+    showModalBottomSheet<void>(
+      context: scaffoldKey.currentContext,
+      backgroundColor: color,
+      elevation: elevation,
+      shape: shape,
+      builder: (BuildContext context) {
+        return Container(
+          child: const Text('BottomSheet'),
+        );
+      },
+    );
+
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    final BottomSheet bottomSheet = tester.widget(find.byType(BottomSheet));
+    expect(bottomSheet.backgroundColor, color);
+    expect(bottomSheet.elevation, elevation);
+    expect(bottomSheet.shape, shape);
+  });
+
   testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();

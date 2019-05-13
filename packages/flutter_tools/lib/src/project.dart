@@ -181,6 +181,10 @@ class FlutterProject {
       return null;
     }
     final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    // If the pubspec file is empty, this will be null.
+    if (pubspec == null) {
+      return null;
+    }
     return pubspec['builders'];
   }
 
@@ -594,6 +598,8 @@ class LinuxProject {
   final FlutterProject project;
 
   Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
+
+  Directory get cacheDirectory => editableHostAppDirectory.childDirectory('flutter');
 
   bool existsSync() => editableHostAppDirectory.existsSync();
 

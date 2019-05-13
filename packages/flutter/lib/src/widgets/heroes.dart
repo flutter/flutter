@@ -21,7 +21,7 @@ import 'transitions.dart';
 /// [MaterialRectArcTween].
 typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 
-/// A function that lets [Hero]s self supply a [Widget] that is shown during the
+/// A function that lets [Hero]es self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
 typedef HeroFlightShuttleBuilder = Widget Function(
@@ -122,10 +122,10 @@ Rect _boundingBoxFor(BuildContext context, [BuildContext ancestorContext]) {
 ///
 /// ### Nested Navigators
 ///
-/// If either or both routes contain nested [Navigator]s, only [Hero]s
+/// If either or both routes contain nested [Navigator]s, only [Hero]es
 /// contained in the top-most routes (as defined by [Route.isCurrent]) *of those
 /// nested [Navigator]s* are considered for animation. Just like in the
-/// non-nested case the top-most routes containing these [Hero]s in the nested
+/// non-nested case the top-most routes containing these [Hero]es in the nested
 /// [Navigator]s have to be [PageRoute]s.
 ///
 /// ## Parts of a Hero Transition
@@ -135,7 +135,7 @@ class Hero extends StatefulWidget {
   /// Create a hero.
   ///
   /// The [tag] and [child] parameters must not be null.
-  /// The [child] parameter and all of the its descendants must not be [Hero]s.
+  /// The [child] parameter and all of the its descendants must not be [Hero]es.
   const Hero({
     Key key,
     @required this.tag,
@@ -184,7 +184,7 @@ class Hero extends StatefulWidget {
   /// well as the incoming and outgoing routes' [Hero] descendants' widgets and
   /// layout.
   ///
-  /// When both the source and destination [Hero]s provide a [flightShuttleBuilder],
+  /// When both the source and destination [Hero]es provide a [flightShuttleBuilder],
   /// the destination's [flightShuttleBuilder] takes precedence.
   ///
   /// If none is provided, the destination route's Hero child is shown in-flight
@@ -200,7 +200,7 @@ class Hero extends StatefulWidget {
   /// Whether to perform the hero transition if the [PageRoute] transition was
   /// triggered by a user gesture, such as a back swipe on iOS.
   ///
-  /// If [Hero]s with the same [tag] on both the from and the to routes have
+  /// If [Hero]es with the same [tag] on both the from and the to routes have
   /// [transitionOnUserGestures] set to true, a back swipe gesture will
   /// trigger the same hero animation as a programmatically triggered push or
   /// pop.

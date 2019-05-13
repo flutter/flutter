@@ -984,7 +984,7 @@ class RenderListWheelViewport
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return false;
   }
 

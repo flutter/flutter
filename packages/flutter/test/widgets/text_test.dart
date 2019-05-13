@@ -6,6 +6,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
@@ -362,6 +363,43 @@ void main() {
     );
 
     expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('textWidthBasis affects the width of a Text widget', (WidgetTester tester) async {
+    Future<void> createText(TextWidthBasis textWidthBasis) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Container(
+                // Each word takes up more than a half of a line. Together they
+                // wrap onto two lines, but leave a lot of extra space.
+                child: Text('twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                  textDirection: TextDirection.ltr,
+                  textWidthBasis: textWidthBasis,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    const double fontHeight = 14.0;
+    const double screenWidth = 800.0;
+
+    // When textWidthBasis is parent, takes up full screen width.
+    await createText(TextWidthBasis.parent);
+    final Size textSizeParent = tester.getSize(find.byType(Text));
+    expect(textSizeParent.width, equals(screenWidth));
+    expect(textSizeParent.height, equals(fontHeight * 2));
+
+    // When textWidthBasis is longestLine, sets the width to as small as
+    // possible for the two lines.
+    await createText(TextWidthBasis.longestLine);
+    final Size textSizeLongestLine = tester.getSize(find.byType(Text));
+    expect(textSizeLongestLine.width, equals(630.0));
+    expect(textSizeLongestLine.height, equals(fontHeight * 2));
   });
 }
 

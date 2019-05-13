@@ -592,10 +592,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
-                    () {
-                      return VerticalDragGestureRecognizer()
-                        ..onStart = (_) {}; // Add callback to enable recognizer
-                    },
+                        () => VerticalDragGestureRecognizer(),
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -1266,10 +1263,7 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
-                    () {
-                      return VerticalDragGestureRecognizer()
-                        ..onStart = (_) {}; // Add callback to enable recognizer
-                    },
+                        () => VerticalDragGestureRecognizer(),
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
