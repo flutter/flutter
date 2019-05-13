@@ -96,16 +96,16 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///
 /// ```dart preamble
 /// final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-/// final SnackBar snackBar = SnackBar(content: const Text('Showing Snackbar'));
+/// final SnackBar snackBar = const SnackBar(content: Text('Showing Snackbar'));
 ///
 /// void openPage(BuildContext context) {
 ///   Navigator.push(context, MaterialPageRoute(
 ///     builder: (BuildContext context) {
 ///       return Scaffold(
 ///         appBar: AppBar(
-///           title: Text('Next page'),
+///           title: const Text('Next page'),
 ///         ),
-///         body: Center(
+///         body: const Center(
 ///           child: Text(
 ///             'This is the next page',
 ///             style: TextStyle(fontSize: 24),
@@ -122,17 +122,17 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///   return Scaffold(
 ///     key: scaffoldKey,
 ///     appBar: AppBar(
-///       title: Text('AppBar Demo'),
+///       title: const Text('AppBar Demo'),
 ///       actions: <Widget>[
 ///         IconButton(
-///           icon: Icon(Icons.add_alert),
+///           icon: const Icon(Icons.add_alert),
 ///           tooltip: 'Show Snackbar',
 ///           onPressed: () {
 ///             scaffoldKey.currentState.showSnackBar(snackBar);
 ///           },
 ///         ),
 ///         IconButton(
-///           icon: Icon(Icons.navigate_next),
+///           icon: const Icon(Icons.navigate_next),
 ///           tooltip: 'Next page',
 ///           onPressed: () {
 ///             openPage(context);
@@ -140,7 +140,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///         ),
 ///       ],
 ///     ),
-///     body: Center(
+///     body: const Center(
 ///       child: Text(
 ///         'This is the home page',
 ///         style: TextStyle(fontSize: 24),
