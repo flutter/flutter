@@ -96,7 +96,8 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///
 /// ```dart preamble
 /// final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-/// final SnackBar snackBar = SnackBar(content: Text('Showing Snackbar'));
+/// final SnackBar snackBar = SnackBar(content: const Text('Showing Snackbar'));
+///
 /// void openPage(BuildContext context) {
 ///   Navigator.push(context, MaterialPageRoute(
 ///     builder: (BuildContext context) {
