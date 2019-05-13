@@ -3225,9 +3225,9 @@ class Canvas extends NativeFieldWrapperClass2 {
   void rotate(double radians) native 'Canvas_rotate';
 
   /// Add an axis-aligned skew to the current transform, with the first argument
-  /// being the horizontal skew in radians clockwise around the origin, and the
-  /// second argument being the vertical skew in radians clockwise around the
-  /// origin.
+  /// being the horizontal skew in rise over run units clockwise around the
+  /// origin, and the second argument being the vertical skew in rise over run
+  /// units clockwise around the origin.
   void skew(double sx, double sy) native 'Canvas_skew';
 
   /// Multiply the current transform by the specified 4⨉4 transformation matrix

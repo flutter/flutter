@@ -355,9 +355,9 @@ class Canvas {
   }
 
   /// Add an axis-aligned skew to the current transform, with the first argument
-  /// being the horizontal skew in radians clockwise around the origin, and the
-  /// second argument being the vertical skew in radians clockwise around the
-  /// origin.
+  /// being the horizontal skew in rise over run units clockwise around the
+  /// origin, and the second argument being the vertical skew in rise over run
+  /// units clockwise around the origin.
   void skew(double sx, double sy) {
     _canvas.skew(sx, sy);
   }
