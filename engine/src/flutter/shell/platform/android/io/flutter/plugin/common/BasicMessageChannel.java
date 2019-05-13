@@ -4,6 +4,7 @@
 
 package io.flutter.plugin.common;
 
+import android.support.annotation.UiThread;
 import android.util.Log;
 import java.nio.ByteBuffer;
 
@@ -73,6 +74,7 @@ public final class BasicMessageChannel<T> {
      * @param message the message, possibly null.
      * @param callback a {@link Reply} callback, possibly null.
      */
+    @UiThread
     public void send(T message, final Reply<T> callback) {
         messenger.send(name, codec.encodeMessage(message),
             callback == null ? null : new IncomingReplyHandler(callback));
@@ -89,6 +91,7 @@ public final class BasicMessageChannel<T> {
      *
      * @param handler a {@link MessageHandler}, or null to deregister.
      */
+    @UiThread
     public void setMessageHandler(final MessageHandler<T> handler) {
         messenger.setMessageHandler(name,
             handler == null ? null : new IncomingMessageHandler(handler));

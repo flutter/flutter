@@ -7,6 +7,7 @@ package io.flutter.view;
 import android.app.Activity;
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.UiThread;
 import android.util.Log;
 import io.flutter.app.FlutterPluginRegistry;
 import io.flutter.embedding.engine.FlutterJNI;
@@ -138,11 +139,13 @@ public class FlutterNativeView implements BinaryMessenger {
     }
 
     @Override
+    @UiThread
     public void send(String channel, ByteBuffer message) {
         dartExecutor.send(channel, message);
     }
 
     @Override
+    @UiThread
     public void send(String channel, ByteBuffer message, BinaryReply callback) {
         if (!isAttached()) {
             Log.d(TAG, "FlutterView.send called on a detached view, channel=" + channel);
@@ -153,6 +156,7 @@ public class FlutterNativeView implements BinaryMessenger {
     }
 
     @Override
+    @UiThread
     public void setMessageHandler(String channel, BinaryMessageHandler handler) {
         dartExecutor.setMessageHandler(channel, handler);
     }
