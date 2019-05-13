@@ -884,14 +884,18 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// the button that was used to create it.
   final Offset offset;
 
-  /// Whether this popup menu button is interactive. Useful for disabling the
-  /// button in the case where the popup menu would be empty.
+  /// Whether this popup menu button is interactive.
   ///
-  /// If false, this button is styled with the disabled color from the
+  /// Must be non-null, defaults to `true`
+  ///
+  /// If `true` the button will respond to presses by displaying the menu.
+  ///
+  /// If `false`, the button is styled with the disabled color from the
   /// current [Theme] and will not respond to presses or show the popup
   /// menu and [onSelected], [onCanceled] and [itemBuilder] will not be called.
   ///
-  /// Must be non-null.
+  /// This can be useful in situations where the app needs to show the button,
+  /// but doesn't currently have anything to show in the menu.
   final bool enabled;
 
   @override
