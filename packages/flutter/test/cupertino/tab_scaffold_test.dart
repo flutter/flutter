@@ -10,6 +10,31 @@ import '../rendering/rendering_tester.dart';
 
 List<int> selectedTabs;
 
+class MockCupertinoTabController extends CupertinoTabController {
+  MockCupertinoTabController({ int initialIndex }): super(initialIndex: initialIndex);
+
+  bool isDisposed = false;
+  int numOfListeners = 0;
+
+  @override
+  void addListener(VoidCallback listener) {
+    numOfListeners++;
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    numOfListeners--;
+    super.removeListener(listener);
+  }
+
+  @override
+  void dispose() {
+    isDisposed = true;
+    super.dispose();
+  }
+}
+
 void main() {
   setUp(() {
     selectedTabs = <int>[];
@@ -563,6 +588,80 @@ void main() {
 
       // Changing [index] of the oldController should not work.
       expect(tabsPainted, <int> [0, 0, 1]);
+  });
+
+  testWidgets('Do not call dispose on a controller that we do not own'
+              "but do remove from its listeners when done listening to it",
+    (WidgetTester tester) async {
+      final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+            ),
+            controller: mockController,
+            tabBuilder: (BuildContext context, int index) => const Placeholder(),
+          ),
+        )
+      );
+
+      expect(mockController.numOfListeners, 1);
+      expect(mockController.isDisposed, isFalse);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTabScaffold(
+            tabBar: CupertinoTabBar(
+              items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+            ),
+            controller: null,
+            tabBuilder: (BuildContext context, int index) => const Placeholder(),
+          ),
+        )
+      );
+
+      expect(mockController.numOfListeners, 0);
+      expect(mockController.isDisposed, isFalse);
+  });
+
+  testWidgets('The owner can dispose the old controller', (WidgetTester tester) async {
+    CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) => const Placeholder()
+        ),
+      )
+    );
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+    expect(find.text('Tab 3'), findsOneWidget);
+
+    controller.dispose();
+    controller = CupertinoTabController(initialIndex: 0);
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) => const Placeholder()
+        ),
+      )
+    );
+
+    // Should not crash here.
+    expect(find.text('Tab 1'), findsOneWidget);
+    expect(find.text('Tab 2'), findsOneWidget);
+    expect(find.text('Tab 3'), findsNothing);
   });
 
   testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {

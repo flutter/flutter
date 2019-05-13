@@ -45,6 +45,12 @@ import 'theme.dart';
 ///       }
 ///     );
 ///   }
+///
+///   @override
+///   void dispose() {
+///     _controller.dispose();
+///     super.dispose();
+///   }
 /// }
 /// ```
 /// {@end-tool}
@@ -53,32 +59,47 @@ import 'theme.dart';
 ///
 /// * [CupertinoTabScaffold], a tabbed application root layout that can be
 ///   controlled by a [CupertinoTabController].
-class CupertinoTabController extends ChangeNotifier {
+class CupertinoTabController extends ValueNotifier<int> {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
   ///
   /// The [initialIndex] must not be null and defaults to 0. The value must be
   /// greater than or equal to 0, and less than the total number of tabs.
   CupertinoTabController({ int initialIndex = 0 })
-    : assert(initialIndex != null && initialIndex >= 0),
-      _index = initialIndex;
+    : assert(initialIndex != null),
+      assert(initialIndex >= 0),
+      super(initialIndex);
 
-  int _index;
-  /// The index of the currently selected tab. Changing the value of [index]
-  /// updates the actively displayed tab of the [CupertinoTabScaffold]
-  /// controlled by this [CupertinoTabController], as well as the currently
-  /// selected tab item of its [CupertinoTabScaffold.tabBar].
+  bool _isDisposed = false;
+
+  /// The index of the currently selected tab.
   ///
-  /// The value must be greater than or equal to 0,
-  /// and less than the total number of tabs.
-  int get index => _index;
-  set index(int value) {
-    if (value == _index) {
-      return;
-    }
-    assert(value != null && value >= 0);
-    _index = value;
-    notifyListeners();
+  /// Changing the value of [index] updates the actively displayed tab of the
+  /// [CupertinoTabScaffold] controlled by this [CupertinoTabController], as well
+  /// as the currently selected tab item of its [CupertinoTabScaffold.tabBar].
+  ///
+  /// The value must be greater than or equal to 0, and less than the total
+  /// number of tabs.
+  int get index => value;
+  @mustCallSuper
+  set index(int value) => this.value = value;
+
+  /// Equivalent to [index].
+  @override
+  int get value => super.value;
+  @mustCallSuper
+  @override
+  set value(int value) {
+    assert(value != null);
+    assert(value >= 0);
+    super.value = value;
+  }
+
+  @mustCallSuper
+  @override
+  void dispose() {
+    super.dispose();
+    _isDisposed = true;
   }
 }
 
@@ -93,7 +114,8 @@ class CupertinoTabController extends ChangeNotifier {
 ///
 /// A [controller] can be used to provide an initialy selected tab index and manage
 /// subsequent tab changes. If set to null, the scaffold will create its own
-/// [CupertinoTabController] and manage it internally.
+/// [CupertinoTabController] and manage it internally. Otherwise it's up to the
+/// owner of [controller] to call `dispose` on it after finish using it.
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
 /// tab index. The [tabBuilder] must be able to build the same number of
@@ -208,7 +230,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Must not be null.
   final CupertinoTabBar tabBar;
 
-  /// Controls the current selected tab index of the [tabBar], as well as the
+  /// Controls the currently selected tab index of the [tabBar], as well as the
   /// active tab index of the [tabBuilder]. Providing a different [controller]
   /// will also update the scaffold's current active index to the new controller's
   /// index value.
@@ -260,7 +282,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     _updateTabController();
   }
 
-  void _updateTabController() {
+  void _updateTabController({ bool shouldDisposeOldController = false }) {
     final CupertinoTabController newController =
       // User provided a new controller, update `_controller` with it.
       widget.controller
@@ -272,7 +294,12 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       return;
     }
 
-    _controller?.removeListener(_onCurrentIndexChange);
+    if (shouldDisposeOldController) {
+      _controller?.dispose();
+    } else if(_controller?._isDisposed == false) {
+      _controller.removeListener(_onCurrentIndexChange);
+    }
+
     newController.addListener(_onCurrentIndexChange);
     _controller = newController;
   }
@@ -293,7 +320,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.controller != oldWidget.controller) {
-      _updateTabController();
+      _updateTabController(shouldDisposeOldController: oldWidget.controller == null);
     } else if (_controller.index >= widget.tabBar.items.length) {
       // If a new [tabBar] with less than (_controller.index + 1) items is provided,
       // clamp the current index.
@@ -387,7 +414,13 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   @override
   void dispose() {
-    _controller?.dispose();
+    // Only dispose `_controller` when the state instance owns it.
+    if(widget.controller == null) {
+      _controller?.dispose();
+    } else if (_controller?._isDisposed == false){
+      _controller.removeListener(_onCurrentIndexChange);
+    }
+
     super.dispose();
   }
 }
