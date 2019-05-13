@@ -2598,7 +2598,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   bool _mouseIsConnected;
   void _handleMouseTrackerChanged() {
     final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
-    if (attached && newState != _mouseIsConnected) {
+    if (newState != _mouseIsConnected) {
       _mouseIsConnected = newState;
       if (_hoverAnnotation != null) {
         markNeedsCompositingBitsUpdate();
@@ -2617,7 +2617,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   /// Attaches the annotation for this render object, if any.
   ///
-  /// This is called by [attach] to attach and new annotations.
+  /// This is called by [attach] to attach any new annotations.
   ///
   /// This is also called by the [Listener]'s [Element] to tell this
   /// [RenderPointerListener] that it will shortly be attached. That way,
@@ -2652,7 +2652,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
 
   @override
-  bool get needsCompositing =>  _hasActiveAnnotation;
+  bool get needsCompositing => _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {
