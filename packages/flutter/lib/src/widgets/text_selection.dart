@@ -546,7 +546,7 @@ Rect getInteractiveRect(Rect rect) {
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
   Offset _dragPosition;
-  bool _tapDown = false;
+  Timer _tapDelayTimer;
 
   AnimationController _controller;
   Animation<double> get _opacity => _controller.view;
@@ -559,6 +559,14 @@ class _TextSelectionHandleOverlayState
 
     _handleVisibilityChanged();
     widget._visibility.addListener(_handleVisibilityChanged);
+
+    if (widget.selection.isCollapsed) {
+      _tapDelayTimer = Timer(kDoubleTapTimeout, () {
+        setState(() {
+          _tapDelayTimer = null;
+        });
+      });
+    }
   }
 
   void _handleVisibilityChanged() {
@@ -581,6 +589,10 @@ class _TextSelectionHandleOverlayState
   void dispose() {
     widget._visibility.removeListener(_handleVisibilityChanged);
     _controller.dispose();
+    if (_tapDelayTimer != null) {
+      _tapDelayTimer.cancel();
+      _tapDelayTimer = null;
+    }
     super.dispose();
   }
 
@@ -676,6 +688,15 @@ class _TextSelectionHandleOverlayState
       ? (interactiveRect.height - handleRect.height) / 2
       : 0;
 
+    // Selectively listen for tap events based on a timer in order to allow both
+    // listening for relevant taps on the caret, such as to show the selection
+    // menu, and listening for double taps on the text field, such as for
+    // selecting the double tapped word. When a tap listener is present here on
+    // the caret, it blocks tap events behind it in the tree. When a double tap
+    // happens, the first tap moves the caret to the position of the tap, and
+    // the second tap then happens on the caret.
+    bool listenForTap = type == TextSelectionHandleType.collapsed
+      && _tapDelayTimer == null;
 
     final PanGestureRecognizer recognizer = PanGestureRecognizer(debugOwner: this);
     recognizer
@@ -693,26 +714,13 @@ class _TextSelectionHandleOverlayState
           alignment: Alignment.topLeft,
           width: interactiveRect.width,
           height: interactiveRect.height,
-          // This is a Listener instead of a GestureDetector so that it doesn't
-          // steal events from the TextField.
-          child: Listener(
+          child: GestureDetector(
             behavior: HitTestBehavior.translucent,
-            onPointerDown: (PointerDownEvent event) {
-              setState(() {
-                _tapDown = true;
-              });
-              recognizer.addPointer(event);
-            },
-            onPointerUp: (PointerUpEvent event) {
-              if (!_tapDown) {
-                return;
-              }
-              _handleTap();
-              setState(() {
-                _tapDown = false;
-              });
-            },
-            // The above Listener handles all interaction, so interaction
+            onPanStart: _handleDragStart,
+            onPanUpdate: _handleDragUpdate,
+            onTap: listenForTap ? _handleTap : null,
+            dragStartBehavior: widget.dragStartBehavior,
+            // The above GestureDetector handles all interaction, so interaction
             // further down the tree can be ignored.
             child: IgnorePointer(
               child: Container(

@@ -1137,8 +1137,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         dragStartBehavior: widget.dragStartBehavior,
       );
       final bool longPress = cause == SelectionChangedCause.longPress;
-      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
+      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress)) {
         _selectionOverlay.showHandles();
+      }
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
