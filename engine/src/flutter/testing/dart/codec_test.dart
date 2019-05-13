@@ -54,29 +54,6 @@ void main() {
     ]));
   });
 
-  test('decodedCacheRatioCap', () async {
-    // No real way to test the native layer, but a smoke test here to at least
-    // verify that animation is still consistent with caching disabled.
-    final Uint8List data = await _getSkiaResource('test640x479.gif').readAsBytes();
-    final ui.Codec codec = await ui.instantiateImageCodec(data, decodedCacheRatioCap: 1.0);
-    final List<List<int>> decodedFrameInfos = <List<int>>[];
-    for (int i = 0; i < 5; i++) {
-      final ui.FrameInfo frameInfo = await codec.getNextFrame();
-      decodedFrameInfos.add(<int>[
-        frameInfo.duration.inMilliseconds,
-        frameInfo.image.width,
-        frameInfo.image.height,
-      ]);
-    }
-    expect(decodedFrameInfos, equals(<List<int>>[
-      <int>[200, 640, 479],
-      <int>[200, 640, 479],
-      <int>[200, 640, 479],
-      <int>[200, 640, 479],
-      <int>[200, 640, 479],
-    ]));
-  });
-
   test('non animated image', () async {
     final Uint8List data = await _getSkiaResource('baby_tux.png').readAsBytes();
     final ui.Codec codec = await ui.instantiateImageCodec(data);

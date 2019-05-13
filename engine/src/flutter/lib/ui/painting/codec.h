@@ -26,8 +26,8 @@ class Codec : public RefCountedDartWrappable<Codec> {
   DEFINE_WRAPPERTYPEINFO();
 
  public:
-  virtual int frameCount() = 0;
-  virtual int repetitionCount() = 0;
+  virtual int frameCount() const = 0;
+  virtual int repetitionCount() const = 0;
   virtual Dart_Handle getNextFrame(Dart_Handle callback_handle) = 0;
   void dispose();
 
@@ -36,13 +36,12 @@ class Codec : public RefCountedDartWrappable<Codec> {
 
 class MultiFrameCodec : public Codec {
  public:
-  int frameCount() override;
-  int repetitionCount() override;
+  int frameCount() const override;
+  int repetitionCount() const override;
   Dart_Handle getNextFrame(Dart_Handle args) override;
 
  private:
-  MultiFrameCodec(std::unique_ptr<SkCodec> codec,
-                  const float decodedCacheRatioCap);
+  MultiFrameCodec(std::unique_ptr<SkCodec> codec);
 
   ~MultiFrameCodec() override;
 
@@ -56,23 +55,12 @@ class MultiFrameCodec : public Codec {
       size_t trace_id);
 
   const std::unique_ptr<SkCodec> codec_;
-  int repetitionCount_;
+  const int frameCount_;
+  const int repetitionCount_;
   int nextFrameIndex_;
-  // The default max amount of memory to use for caching decoded animated image
-  // frames compared to total undecoded size.
-  const float decodedCacheRatioCap_;
-  size_t compressedSizeBytes_;
-  size_t decodedCacheSize_;
 
-  std::vector<SkCodec::FrameInfo> frameInfos_;
-  std::map<int, bool> requiredFrames_;
-
-  // A cache of previously loaded bitmaps, indexed by the frame they belong to.
-  // Caches all frames until [decodedCacheSize_] : [compressedSize_] exceeds
-  // [decodedCacheRatioCap_].
-  std::map<int, std::shared_ptr<SkBitmap>> frameBitmaps_;
   // The last decoded frame that's required to decode any subsequent frames.
-  std::shared_ptr<SkBitmap> lastRequiredFrame_;
+  std::unique_ptr<SkBitmap> lastRequiredFrame_;
   // The index of the last decoded required frame.
   int lastRequiredFrameIndex_ = -1;
 
@@ -82,8 +70,8 @@ class MultiFrameCodec : public Codec {
 
 class SingleFrameCodec : public Codec {
  public:
-  int frameCount() override;
-  int repetitionCount() override;
+  int frameCount() const override;
+  int repetitionCount() const override;
   Dart_Handle getNextFrame(Dart_Handle args) override;
 
  private:
