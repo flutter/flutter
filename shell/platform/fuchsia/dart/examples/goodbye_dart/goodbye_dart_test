@@ -1,0 +1,25 @@
+#!/boot/bin/sh
+
+run fuchsia-pkg://fuchsia.con/goodbye_dart_aot#meta/goodbye_dart_aot.cmx --now
+if [ $? -ne 23 ]; then
+    echo "goodbye_dart_aot --now failed"
+    exit 1
+fi
+
+# run goodbye_dart_jit --now
+# if [ $? -ne 23 ]; then
+#     echo "goodbye_dart_jit --now failed"
+#     exit 1
+# fi
+
+run fuchsia-pkg://fuchsia.con/goodbye_dart_aot#meta/goodbye_dart_aot.cmx
+if [ $? -ne 42 ]; then
+    echo "goodbye_dart_aot failed"
+    exit 1
+fi
+
+# run goodbye_dart_jit
+# if [ $? -ne 42 ]; then
+#     echo "goodbye_dart_jit failed"
+#     exit 1
+# fi

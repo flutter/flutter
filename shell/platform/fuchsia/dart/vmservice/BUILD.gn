@@ -1,0 +1,23 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//topaz/runtime/dart_runner/dart_app.gni")
+
+dart_aot_app("vmservice") {
+  main_dart = "empty.dart"
+
+  meta = [
+    {
+      path = rebase_path("meta/vmservice.cmx")
+      dest = "vmservice.cmx"
+    },
+  ]
+
+  source_dir = "."
+
+  product = false
+
+  sources = []
+  deps = []
+}

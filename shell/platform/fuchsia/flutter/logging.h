@@ -5,6 +5,8 @@
 #ifndef FLUTTER_SHELL_PLATFORM_FUCHSIA_LOGGING_H_
 #define FLUTTER_SHELL_PLATFORM_FUCHSIA_LOGGING_H_
 
+#include "flutter/fml/logging.h"
+
 namespace flutter_runner {
 
 // Use to mark logs published via the syslog API.

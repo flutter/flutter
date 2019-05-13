@@ -1,0 +1,61 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_fuchsia)
+
+import("//build/fuchsia/sdk.gni")
+
+if (using_fuchsia_sdk) {
+  import("//flutter/common/config.gni")
+
+  group("dart_io_api") {
+    visibility = [ ":*" ]
+    public_deps = []
+
+    if (flutter_runtime_mode == "debug") {
+      public_deps += [ "//third_party/dart/runtime/bin:dart_io_api" ]
+    } else {
+      public_deps += [ "//third_party/dart/runtime/bin:dart_io_api_product" ]
+    }
+  }
+
+  executable("dart") {
+    output_name = "dt_rush"
+
+    public = []
+
+    sources = [
+      "builtin_libraries.cc",
+      "builtin_libraries.h",
+      "dart_component_controller.cc",
+      "dart_component_controller.h",
+      "dart_runner.cc",
+      "dart_runner.h",
+      "logging.h",
+      "main.cc",
+      "mapped_resource.cc",
+      "mapped_resource.h",
+      "service_isolate.cc",
+      "service_isolate.h",
+    ]
+
+    deps = [
+      ":dart_io_api",
+      "$flutter_root/common",
+      "$flutter_root/fml",
+      "$flutter_root/runtime:libdart",
+      "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
+      "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
+      "$flutter_root/shell/platform/fuchsia/runtime/dart/utils",
+      "$fuchsia_sdk_root/pkg:async-cpp",
+      "$fuchsia_sdk_root/pkg:async-loop",
+      "$fuchsia_sdk_root/pkg:async-loop-cpp",
+      "$fuchsia_sdk_root/pkg:fidl_cpp",
+      "$fuchsia_sdk_root/pkg:syslog",
+      "$fuchsia_sdk_root/pkg/lib/sys/cpp",
+      "$fuchsia_sdk_root/pkg/lib/vfs/cpp",
+      "//third_party/tonic",
+    ]
+  }
+}

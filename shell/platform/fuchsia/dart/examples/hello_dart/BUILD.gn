@@ -1,0 +1,111 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//topaz/runtime/dart_runner/dart_app.gni")
+
+dart_jit_app("hello_dart_debug") {
+  main_dart = "bin/hello_dart.dart"
+
+  source_dir = "."
+
+  product = false
+  space_dart = false
+
+  sources = []
+  deps = [
+    "//topaz/public/dart/zircon",
+    "//topaz/runtime/dart_runner/examples/greeting",
+  ]
+
+  meta = [
+    {
+      path = "meta/hello_dart_debug.cmx"
+      dest = "hello_dart_debug.cmx"
+    },
+  ]
+}
+
+dart_jit_app("hello_dart_jit") {
+  main_dart = "bin/hello_dart.dart"
+
+  source_dir = "."
+
+  product = false
+
+  sources = []
+  deps = [
+    "//topaz/public/dart/zircon",
+    "//topaz/runtime/dart_runner/examples/greeting",
+  ]
+
+  meta = [
+    {
+      path = "meta/hello_dart_jit.cmx"
+      dest = "hello_dart_jit.cmx"
+    },
+  ]
+}
+
+dart_jit_app("hello_dart_jit_product") {
+  main_dart = "bin/hello_dart.dart"
+
+  source_dir = "."
+
+  product = true
+
+  sources = []
+  deps = [
+    "//topaz/public/dart/zircon",
+    "//topaz/runtime/dart_runner/examples/greeting",
+  ]
+
+  meta = [
+    {
+      path = "meta/hello_dart_jit_product.cmx"
+      dest = "hello_dart_jit_product.cmx"
+    },
+  ]
+}
+
+dart_aot_app("hello_dart_aot") {
+  main_dart = "bin/hello_dart.dart"
+
+  source_dir = "."
+
+  product = false
+
+  sources = []
+  deps = [
+    "//topaz/public/dart/zircon",
+    "//topaz/runtime/dart_runner/examples/greeting",
+  ]
+
+  meta = [
+    {
+      path = "meta/hello_dart_aot.cmx"
+      dest = "hello_dart_aot.cmx"
+    },
+  ]
+}
+
+dart_aot_app("hello_dart_aot_product") {
+  main_dart = "bin/hello_dart.dart"
+
+  source_dir = "."
+
+  product = true
+
+  sources = []
+  deps = [
+    "//topaz/public/dart/zircon",
+    "//topaz/runtime/dart_runner/examples/greeting",
+  ]
+
+  meta = [
+    {
+      path = "meta/hello_dart_aot_product.cmx"
+      dest = "hello_dart_aot_product.cmx"
+    },
+  ]
+}

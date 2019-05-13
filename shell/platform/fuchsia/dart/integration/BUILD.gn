@@ -1,0 +1,51 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//topaz/runtime/dart_runner/dart_app.gni")
+
+dart_jit_app("dart_jit_runner_test") {
+  testonly = true
+
+  main_dart = "main.dart"
+
+  source_dir = "."
+
+  meta = [
+    {
+      path = rebase_path("meta/dart_jit_runner_test.cmx")
+      dest = "dart_jit_runner_test.cmx"
+    },
+  ]
+
+  sources = []
+  deps = [
+    "//third_party/dart-pkg/pub/test",
+    "//topaz/public/dart/fuchsia_services",
+    "//topaz/runtime/dart_runner/examples/hello_app_dart/interfaces:interfaces",
+    "//zircon/public/fidl/fuchsia-io",
+  ]
+}
+
+dart_aot_app("dart_aot_runner_test") {
+  testonly = true
+
+  main_dart = "main.dart"
+
+  source_dir = "."
+
+  meta = [
+    {
+      path = rebase_path("meta/dart_aot_runner_test.cmx")
+      dest = "dart_aot_runner_test.cmx"
+    },
+  ]
+
+  sources = []
+  deps = [
+    "//third_party/dart-pkg/pub/test",
+    "//topaz/public/dart/fuchsia_services",
+    "//topaz/runtime/dart_runner/examples/hello_app_dart/interfaces:interfaces",
+    "//zircon/public/fidl/fuchsia-io",
+  ]
+}

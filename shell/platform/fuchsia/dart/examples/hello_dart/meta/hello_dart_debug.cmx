@@ -1,0 +1,11 @@
+{
+    "program": {
+        "data": "data/hello_dart_debug"
+    },
+    "sandbox": {
+        "features": [],
+        "services": [
+            "fuchsia.sys.Environment"
+        ]
+    }
+}

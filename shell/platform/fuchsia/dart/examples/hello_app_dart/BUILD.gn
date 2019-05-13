@@ -1,0 +1,44 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//topaz/runtime/dart_runner/dart_app.gni")
+
+dart_jit_app("hello_app_dart_jit") {
+  main_dart = "main.dart"
+
+  source_dir = "."
+
+  sources = []
+  deps = [
+    "//topaz/public/dart/fidl",
+    "//topaz/public/dart/fuchsia_services",
+    "//topaz/runtime/dart_runner/examples/hello_app_dart/interfaces:interfaces",
+  ]
+
+  meta = [
+    {
+      path = "meta/hello_app_dart_jit.cmx"
+      dest = "hello_app_dart_jit.cmx"
+    },
+  ]
+}
+
+dart_aot_app("hello_app_dart_aot") {
+  main_dart = "main.dart"
+
+  source_dir = "."
+
+  sources = []
+  deps = [
+    "//topaz/public/dart/fidl",
+    "//topaz/public/dart/fuchsia_services",
+    "//topaz/runtime/dart_runner/examples/hello_app_dart/interfaces:interfaces",
+  ]
+  meta = [
+    {
+      path = "meta/hello_app_dart_aot.cmx"
+      dest = "hello_app_dart_aot.cmx"
+    },
+  ]
+}
