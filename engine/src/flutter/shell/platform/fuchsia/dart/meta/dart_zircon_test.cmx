@@ -1,0 +1,13 @@
+{
+    "program": {
+        "data": "data/dart_zircon_test"
+    },
+    "sandbox": {
+        "features": [
+            "root-ssl-certificates"
+        ],
+        "services": [
+            "fuchsia.sys.Environment"
+        ]
+    }
+}

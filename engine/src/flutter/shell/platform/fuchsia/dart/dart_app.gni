@@ -1,0 +1,251 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/package.gni")
+import("//build/tools/json_merge/json_merge.gni")
+import("//third_party/dart/build/dart/dart_action.gni")
+import("//topaz/runtime/dart/config.gni")
+import("//topaz/runtime/dart/dart_component.gni")
+import("//topaz/runtime/dart/dart_kernel.gni")
+
+# Defines JIT runtime components to be further distributed in one package.
+#
+# Takes a set of dart components and puts them into one fuchsia package with
+# the dart_jit_runner as its runtime. Also supports legacy calls where the
+# components parameter isn't specified, in which we will create one default
+# component for the package.
+#
+# Parameters
+#
+#   components (required)
+#     [list of scopes] Defines the components in the package. Either main_dart
+#     or components must be defined, but not both.
+#
+#     Entries in a scope in the resources list:
+#
+#       component_name (required)
+#         Name of the component.
+#
+#       main_dart (required)
+#         File containing the main function of the component.
+#
+#       dart_package_name (optional)
+#         Name of the dart package for the component. If not provided, it will
+#         be inferred from the component name.
+#
+#       package_root (optional)
+#         Path to the dart package for the component. If not provided, it will
+#         be assumed as ".".
+#
+#       sources (optional)
+#         Relative path of source files to be included in the dart package for
+#         the component at $package_root/lib.
+#
+#   main_dart (required)
+#     File containing the main function of the application. Either main_dart or
+#     components must be defined, but not both.
+#
+#   package_name (optional)
+#     Name of the Dart package. This is used as an identifier in code that
+#     depends on the dart library that the *one and only* component generates.
+#     Only compatible when components is not specified (use
+#     components.dart_package_name).
+#
+template("_dart_jit_component") {
+  legacy_component = false
+  pkg_name = target_name
+  if (!defined(invoker.components)) {
+    # If components is not specified, we are fitting main_dart into a component
+    # scope, and using that for the package.
+    #
+    # TODO(CP-141): Remove support for legacy_component once all existing calls
+    # to dart_app() have a components parameter.
+    legacy_component = true
+    if (defined(invoker.fuchsia_package_name)) {
+      legacy_component_name = invoker.fuchsia_package_name
+    } else {
+      legacy_component_name = target_name
+    }
+    pkg_name = legacy_component_name
+    pkg_sources = []
+    if (defined(invoker.sources)) {
+      pkg_sources = invoker.sources
+    }
+    components = [
+      {
+        main_dart = invoker.main_dart
+        component_name = legacy_component_name
+        component_type = "dart"
+        package_root = "."
+        deps = invoker.deps
+        sources = pkg_sources
+      },
+    ]
+  }
+
+  flutter_dart_jit_component(target_name) {
+    forward_variables_from(invoker, "*")
+  }
+}
+
+# Defines AOT runtime components to be further distributed in one package.
+#
+# Takes a set of dart components and puts them into one fuchsia package with
+# the dart_aot_runner as its runtime. Also supports legacy calls where the
+# components parameter isn't specified, in which we will create one default
+# component for the package.
+#
+# Parameters
+#
+#   components (required)
+#     [list of scopes] Defines the components in the package. Either main_dart
+#     or components must be defined, but not both.
+#
+#     Entries in a scope in the resources list:
+#
+#       component_name (required)
+#         Name of the component.
+#
+#       main_dart (required)
+#         File containing the main function of the component.
+#
+#       dart_package_name (optional)
+#         Name of the dart package for the component. If not provided, it will
+#         be inferred from the component name.
+#
+#       package_root (optional)
+#         Path to the dart package for the component. If not provided, it will
+#         be assumed as ".".
+#
+#       sources (optional)
+#         Relative path of source files to be included in the dart package for
+#         the component at $package_root/lib.
+#
+#   main_dart (required)
+#     File containing the main function of the application. Either main_dart or
+#     components must be defined, but not both.
+#
+#   package_name (optional)
+#     Name of the Dart package. This is used as an identifier in code that
+#     depends on the dart library that the *one and only* component generates.
+#     Only compatible when components is not specified (use
+#     components.dart_package_name).
+#
+template("_dart_aot_component") {
+  legacy_component = false
+  pkg_name = target_name
+  if (!defined(invoker.components)) {
+    # If components is not specified, we are fitting main_dart into a component
+    # scope, and using that for the package.
+    #
+    # TODO(CP-141): Remove support for legacy_component once all existing calls
+    # to dart_app() have a components parameter.
+    legacy_component = true
+    if (defined(invoker.fuchsia_package_name)) {
+      legacy_component_name = invoker.fuchsia_package_name
+    } else {
+      legacy_component_name = target_name
+    }
+    pkg_name = legacy_component_name
+    pkg_sources = []
+    if (defined(invoker.sources)) {
+      pkg_sources = invoker.sources
+    }
+    components = [
+      {
+        main_dart = invoker.main_dart
+        component_name = legacy_component_name
+        component_type = "dart"
+        package_root = "."
+        deps = invoker.deps
+        sources = pkg_sources
+      },
+    ]
+  }
+
+  flutter_dart_aot_component(target_name) {
+    forward_variables_from(invoker, "*")
+  }
+}
+
+template("dart_jit_app") {
+  template_name = "_dart_jit_component"
+  if (dart_force_product) {
+    template_name = dart_product_app
+  }
+
+  target(template_name, target_name) {
+    forward_variables_from(invoker, "*")
+  }
+}
+
+template("dart_aot_app") {
+  template_name = "_dart_aot_component"
+  if (dart_force_product) {
+    template_name = dart_product_app
+  }
+
+  target(template_name, target_name) {
+    forward_variables_from(invoker, "*")
+  }
+}
+
+# Defines a Dart application that can be run in the Dart content handler
+#
+# Parameters
+#
+#   main_dart (required)
+#     Name of the Dart file containing the main function. Either main_dart or
+#     components must be defined, but not both.
+#
+#   package_name (optional)
+#     Name of the Dart package.
+#
+#   fuchsia_package_name (optional)
+#     Name of the Fuchsia package.
+#
+#   deps (optional)
+#     List of Dart packages the application depends on.
+#
+#   disable_analysis (optional)
+#     Prevents analysis from being run on this target.
+#
+#   product (optional)
+#     A boolean. Whether to build/run the app in a stripped-down Dart VM.
+#     Defaults to !is_debug.
+#
+#   resources (optional)
+#     Resources for the package (see //build/package.gni)
+#
+#   tests (optional)
+#     List of tests forwarded for the package. See the definition in //build/package.gni.
+#
+#   components (required)
+#     [list of scopes] Defines the components in the package. Either main_dart
+#     or components must be defined, but not both.
+#
+#     Entries in a scope in the resources list:
+#
+#       component_name (required)
+#         Name of the component.
+#
+#       main_dart (required)
+#         File containing the main function of the component.
+#
+#       package_root (optional)
+#         Path to the dart package for the component. If not provided, it will
+#         be assumed as ".".
+#
+#       sources (optional)
+#         Relative path of source files to be included in the dart package for
+#         the component at $package_root/lib.
+#
+template("dart_app") {
+  assert((defined(invoker.components) && !defined(invoker.main_dart)) ||
+             (!defined(invoker.components) && defined(invoker.main_dart)),
+         "Only one of components or main_dart should be defined")
+  target(dart_default_app, target_name) {
+    forward_variables_from(invoker, "*")
+  }
+}

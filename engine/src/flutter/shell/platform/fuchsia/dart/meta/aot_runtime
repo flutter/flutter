@@ -1,0 +1,3 @@
+{
+    "runner": "fuchsia-pkg://fuchsia.com/dart_aot_runner#meta/dart_aot_runner.cmx"
+}

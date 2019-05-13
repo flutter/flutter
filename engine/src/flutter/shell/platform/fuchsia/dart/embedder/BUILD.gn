@@ -1,0 +1,101 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/dart/toolchain.gni")
+import("//topaz/runtime/dart/dart_component.gni")
+import("//topaz/runtime/dart/dart_kernel.gni")
+
+dart_kernel("shim") {
+  platform_name = "dart_runner"
+  platform_deps = [ "//topaz/runtime/dart_runner/kernel:kernel_platform_files" ]
+  platform_path = "$root_out_dir/dart_runner_patched_sdk"
+
+  disable_analysis = true
+
+  main_dart = "shim.dart"
+
+  aot = true
+  product = false
+
+  visibility = [ ":*" ]
+}
+
+dart_kernel("shim_product") {
+  platform_name = "dart_runner"
+  platform_deps = [ "//topaz/runtime/dart_runner/kernel:kernel_platform_files" ]
+  platform_path = "$root_out_dir/dart_runner_patched_sdk"
+
+  disable_analysis = true
+
+  main_dart = "shim.dart"
+
+  aot = true
+  product = true
+
+  visibility = [ ":*" ]
+}
+
+template("create_aot_snapshot") {
+  assert(defined(invoker.product), "The parameter 'product' must be defined")
+  product_suffix = ""
+  if (invoker.product) {
+    product_suffix = "_product"
+  }
+  action("${target_name}_assembly") {
+    snapshot_assembly = "$target_gen_dir/aot${product_suffix}_vm_snapshot.S"
+
+    # gen_snapshot only needs this to go through the motions of setting up an isolate.
+    shim_target = ":shim${product_suffix}_kernel"
+    shim_kernel = get_label_info(shim_target, "target_gen_dir") +
+                  "/shim${product_suffix}_kernel.dil"
+
+    inputs = [
+      shim_kernel,
+    ]
+    outputs = [
+      snapshot_assembly,
+    ]
+
+    deps = gen_snapshot_deps + [ shim_target ]
+    if (invoker.product) {
+      script = gen_snapshot_product
+    } else {
+      script = gen_snapshot
+    }
+
+    args = [
+      "--no_causal_async_stacks",
+      "--deterministic",
+      "--snapshot_kind=vm-aot-assembly",
+      "--assembly=" + rebase_path(snapshot_assembly),
+    ]
+
+    # No asserts in debug or release product.
+    # No asserts in release with flutter_profile=true (non-product)
+    # Yes asserts in non-product debug.
+    if (!invoker.product && (!flutter_profile || is_debug)) {
+      args += [ "--enable_asserts" ]
+    }
+    args += [ rebase_path(shim_kernel) ]
+  }
+
+  source_set(target_name) {
+    deps = [
+      ":${target_name}_assembly",
+    ]
+
+    sources = [
+      "$target_gen_dir/aot${product_suffix}_vm_snapshot.S",
+      "snapshot.h",
+    ]
+  }
+}
+
+create_aot_snapshot("dart_aot_snapshot_cc") {
+  product = false
+}
+
+create_aot_snapshot("dart_aot_product_snapshot_cc") {
+  product = true
+}

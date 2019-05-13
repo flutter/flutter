@@ -1,0 +1,11 @@
+{
+    "program": {
+        "data": "data/hello_app_dart_jit"
+    },
+    "sandbox": {
+        "features": [],
+        "services": [
+            "fuchsia.sys.Environment"
+        ]
+    }
+}

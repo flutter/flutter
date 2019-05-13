@@ -1,0 +1,68 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/testing/environments.gni")
+import("//topaz/runtime/dart_runner/dart_app.gni")
+
+dart_jit_app("goodbye_dart_jit") {
+  sources = [
+    "goodbye_dart.dart",
+  ]
+  main_dart = "goodbye_dart.dart"
+
+  source_dir = "."
+  deps = [
+    "//topaz/public/dart/fidl",
+    "//topaz/public/dart/fuchsia",
+  ]
+
+  meta = [
+    {
+      path = "meta/goodbye_dart_jit.cmx"
+      dest = "goodbye_dart_jit.cmx"
+    },
+  ]
+}
+
+dart_aot_app("goodbye_dart_aot") {
+  sources = [
+    "goodbye_dart.dart",
+  ]
+  main_dart = "goodbye_dart.dart"
+
+  source_dir = "."
+  deps = [
+    "//topaz/public/dart/fidl",
+    "//topaz/public/dart/fuchsia",
+  ]
+
+  meta = [
+    {
+      path = "meta/goodbye_dart_aot.cmx"
+      dest = "goodbye_dart_aot.cmx"
+    },
+  ]
+}
+
+copy("copy_goodbye_dart_test") {
+  sources = [
+    "goodbye_dart_test",
+  ]
+  outputs = [
+    "${root_build_dir}/goodbye_dart_test",
+  ]
+}
+
+package("goodbye_dart_test") {
+  testonly = true
+  tests = [
+    {
+      name = "goodbye_dart_test"
+      environments = basic_envs
+    },
+  ]
+  deps = [
+    ":copy_goodbye_dart_test",
+  ]
+}

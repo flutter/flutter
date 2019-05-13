@@ -1,0 +1,22 @@
+{
+    "program": {
+        "data": "data/dart_aot_runner_test"
+    },
+    "sandbox": {
+        "services": [
+            "fuchsia.cobalt.LoggerFactory",
+            "fuchsia.fonts.Provider",
+            "fuchsia.logger.LogSink",
+            "fuchsia.modular.Clipboard",
+            "fuchsia.modular.ContextWriter",
+            "fuchsia.modular.ModuleContext",
+            "fuchsia.netstack.Netstack",
+            "fuchsia.sys.Environment",
+            "fuchsia.sys.Launcher",
+            "fuchsia.ui.input.ImeService",
+            "fuchsia.ui.policy.Presenter",
+            "fuchsia.ui.scenic.Scenic",
+            "fuchsia.wlan.service.Wlan"
+        ]
+    }
+}
