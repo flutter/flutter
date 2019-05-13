@@ -2495,6 +2495,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         onExit: _onPointerExit,
       );
     }
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
   }
 
   /// Called when a pointer comes into contact with the screen (for touch
@@ -2566,6 +2567,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
+    assert(_hoverAnnotation == null || _onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
+      "Shouldn't call _updateAnnotations if nothing has changed.");
     bool changed = false;
     final bool hadHoverAnnotation = _hoverAnnotation != null;
     if (_hoverAnnotation != null && attached) {
@@ -2594,9 +2597,16 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
+  bool _mouseIsConnected;
   void _handleMouseTrackerChanged() {
-    if (attached)
-      markNeedsPaint();
+    final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (newState != _mouseIsConnected) {
+      _mouseIsConnected = newState;
+      if (_hoverAnnotation != null) {
+        markNeedsCompositingBitsUpdate();
+        markNeedsPaint();
+      }
+    }
   }
 
   @override
@@ -2609,7 +2619,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   /// Attaches the annotation for this render object, if any.
   ///
-  /// This is called by [attach] to attach and new annotations.
+  /// This is called by [attach] to attach any new annotations.
   ///
   /// This is also called by the [Listener]'s [Element] to tell this
   /// [RenderPointerListener] that it will shortly be attached. That way,
@@ -2641,10 +2651,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     super.detach();
   }
 
-  bool get _hasActiveAnnotation {
-    return _hoverAnnotation != null
-      && RendererBinding.instance.mouseTracker.mouseIsConnected;
-  }
+  bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
 
   @override
   bool get needsCompositing => _hasActiveAnnotation;

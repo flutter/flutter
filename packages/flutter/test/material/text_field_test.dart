@@ -764,6 +764,8 @@ void main() {
     // The cursor is placed just like a regular tap.
     expect(controller.selection.baseOffset, eIndex);
     expect(controller.selection.extentOffset, eIndex);
+
+    await gesture.removePointer();
   });
 
   testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
@@ -827,6 +829,8 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
+
+    await gesture.removePointer();
   });
 
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
@@ -879,6 +883,8 @@ void main() {
     expect(selectionChangedCount, 1);
     expect(controller.selection.baseOffset, 2);
     expect(controller.selection.extentOffset, 9);
+
+    await gesture.removePointer();
   });
 
   testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
@@ -911,6 +917,8 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
+
+    await gesture.removePointer();
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
@@ -942,6 +950,8 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
+
+    await gesture.removePointer();
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
