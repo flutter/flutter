@@ -1115,7 +1115,9 @@ class TabBarView extends StatefulWidget {
   /// will be used.
   final TabController controller;
 
-  /// One widget per tab. Its length must match the length of the [TabBar.tabs]
+  /// One widget per tab.
+  ///
+  /// Its length must match the length of the [TabBar.tabs]
   /// list, as well as the [controller]'s [TabController.length].
   final List<Widget> children;
 

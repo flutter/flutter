@@ -599,6 +599,8 @@ class LinuxProject {
 
   Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
 
+  Directory get cacheDirectory => editableHostAppDirectory.childDirectory('flutter');
+
   bool existsSync() => editableHostAppDirectory.existsSync();
 
   /// The Linux project makefile.
