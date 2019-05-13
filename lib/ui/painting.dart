@@ -1650,15 +1650,6 @@ class Codec extends NativeFieldWrapperClass2 {
 /// The data can be for either static or animated images. The following image
 /// formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
-/// image size to cache when decoding animated image frames. For example,
-/// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
-/// 800KB of memory caching unessential decoded frames. Caching decoded frames
-/// saves CPU but can result in out-of-memory crashes when decoding large (or
-/// multiple) animated images. Note that GIFs are highly compressed, and it's
-/// unlikely that a factor that low will be sufficient to cache all decoded
-/// frames. The default value is `25.0`.
-///
 /// The [targetWidth] and [targetHeight] arguments specify the size of the output
 /// image, in image pixels. If they are not equal to the intrinsic dimensions of the
 /// image, then the image will be scaled after being decoded. If exactly one of
@@ -1669,12 +1660,11 @@ class Codec extends NativeFieldWrapperClass2 {
 /// The returned future can complete with an error if the image decoding has
 /// failed.
 Future<Codec> instantiateImageCodec(Uint8List list, {
-  double decodedCacheRatioCap = 0,
   int targetWidth,
   int targetHeight,
 }) {
   return _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, decodedCacheRatioCap, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
+    (_Callback<Codec> callback) => _instantiateImageCodec(list, callback, null, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
   );
 }
 
@@ -1689,7 +1679,7 @@ Future<Codec> instantiateImageCodec(Uint8List list, {
 /// If both are equal to [_kDoNotResizeDimension], then the image maintains its real size.
 ///
 /// Returns an error message if the instantiation has failed, null otherwise.
-String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo imageInfo, double decodedCacheRatioCap, int targetWidth, int targetHeight)
+String _instantiateImageCodec(Uint8List list, _Callback<Codec> callback, _ImageInfo imageInfo, int targetWidth, int targetHeight)
   native 'instantiateImageCodec';
 
 /// Loads a single image frame from a byte array into an [Image] object.
@@ -1715,15 +1705,6 @@ Future<Null> _decodeImageFromListAsync(Uint8List list,
 /// data buffer.  If unspecified, it defaults to [width] multiplied by the
 /// number of bytes per pixel in the provided [format].
 ///
-/// The [decodedCacheRatioCap] is the default maximum multiple of the compressed
-/// image size to cache when decoding animated image frames. For example,
-/// setting this to `2.0` means that a 400KB GIF would be allowed at most to use
-/// 800KB of memory caching unessential decoded frames. Caching decoded frames
-/// saves CPU but can result in out-of-memory crashes when decoding large (or
-/// multiple) animated images. Note that GIFs are highly compressed, and it's
-/// unlikely that a factor that low will be sufficient to cache all decoded
-/// frames. The default value is `25.0`.
-///
 /// The [targetWidth] and [targetHeight] arguments specify the size of the output
 /// image, in image pixels. If they are not equal to the intrinsic dimensions of the
 /// image, then the image will be scaled after being decoded. If exactly one of
@@ -1736,11 +1717,11 @@ void decodeImageFromPixels(
   int height,
   PixelFormat format,
   ImageDecoderCallback callback,
-  {int rowBytes, double decodedCacheRatioCap = 0, int targetWidth, int targetHeight}
+  {int rowBytes, int targetWidth, int targetHeight}
 ) {
   final _ImageInfo imageInfo = _ImageInfo(width, height, format.index, rowBytes);
   final Future<Codec> codecFuture = _futurize(
-    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, decodedCacheRatioCap, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
+    (_Callback<Codec> callback) => _instantiateImageCodec(pixels, callback, imageInfo, targetWidth ?? _kDoNotResizeDimension, targetHeight ?? _kDoNotResizeDimension)
   );
   codecFuture.then((Codec codec) => codec.getNextFrame())
       .then((FrameInfo frameInfo) => callback(frameInfo.image));
