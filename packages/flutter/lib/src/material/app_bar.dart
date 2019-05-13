@@ -95,8 +95,8 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// opens a [SnackBar], while the second action navigates to a new page.
 ///
 /// ```dart preamble
+/// final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
 /// final SnackBar snackBar = SnackBar(content: Text('Showing Snackbar'));
-///
 /// void openPage(BuildContext context) {
 ///   Navigator.push(context, MaterialPageRoute(
 ///     builder: (BuildContext context) {
@@ -119,18 +119,15 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
+///     key: scaffoldKey,
 ///     appBar: AppBar(
 ///       title: Text('AppBar Demo'),
 ///       actions: <Widget>[
-///         Builder(
-///           builder: (BuildContext context) {
-///             return IconButton(
-///               icon: Icon(Icons.add_alert),
-///               tooltip: 'Show Snackbar',
-///               onPressed: () {
-///                 Scaffold.of(context).showSnackBar(snackBar);
-///               },
-///             );
+///         IconButton(
+///           icon: Icon(Icons.add_alert),
+///           tooltip: 'Show Snackbar',
+///           onPressed: () {
+///             scaffoldKey.currentState.showSnackBar(snackBar);
 ///           },
 ///         ),
 ///         IconButton(
