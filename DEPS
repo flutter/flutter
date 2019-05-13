@@ -130,7 +130,7 @@ deps = {
    # and not have to specific specific hashes.
 
   'src/third_party/tonic':
-   Var('fuchsia_git') + '/tonic' + '@' + '2919ef4751621fabecb721c153ea9a3b72af995d',
+   Var('fuchsia_git') + '/tonic' + '@' + 'c78c7a8c3e99a1d1882533b5a6daa7926cdeeb68',
 
   'src/third_party/benchmark':
    Var('fuchsia_git') + '/third_party/benchmark' + '@' + '21f1eb3fe269ea43eba862bf6b699cde46587ade',
