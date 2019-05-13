@@ -99,43 +99,57 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 ///
 /// void openPage(BuildContext context) {
 ///   Navigator.push(context, MaterialPageRoute(
-///     builder: (BuildContext context) => Scaffold(
-///       appBar: AppBar(
-///         title: Text('Next page'),
-///       ),
-///       body: Center(child: Text(
-///         'This is the next page',
-///         style: TextStyle(fontSize: 24),
-///       )),
-///     ),
+///     builder: (BuildContext context) {
+///       return Scaffold(
+///         appBar: AppBar(
+///           title: Text('Next page'),
+///         ),
+///         body: Center(
+///           child: Text(
+///             'This is the next page',
+///             style: TextStyle(fontSize: 24),
+///           ),
+///         ),
+///       );
+///     },
 ///   ));
 /// }
 /// ```
 ///
 /// ```dart
-/// Widget build(BuildContext context) => Scaffold(
-///   appBar: AppBar(
-///     title: Text('AppBar Demo'),
-///     actions: <Widget>[
-///       Builder(builder: (BuildContext context) => IconButton(
-///         icon: Icon(Icons.add_alert),
-///         tooltip: 'Show Snackbar',
-///         onPressed: () => Scaffold.of(context).showSnackBar(snackBar),
-///       )),
-///       IconButton(
-///         icon: Icon(Icons.navigate_next),
-///         tooltip: 'Next page',
-///         onPressed: () => openPage(context),
-///       ),
-///     ],
-///   ),
-///   body: Center(
-///     child: Text(
-///       'This is the home page',
-///       style: TextStyle(fontSize: 24),
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('AppBar Demo'),
+///       actions: <Widget>[
+///         Builder(
+///           builder: (BuildContext context) {
+///             return IconButton(
+///               icon: Icon(Icons.add_alert),
+///               tooltip: 'Show Snackbar',
+///               onPressed: () {
+///                 Scaffold.of(context).showSnackBar(snackBar);
+///               },
+///             );
+///           },
+///         ),
+///         IconButton(
+///           icon: Icon(Icons.navigate_next),
+///           tooltip: 'Next page',
+///           onPressed: () {
+///             openPage(context);
+///           },
+///         ),
+///       ],
 ///     ),
-///   ),
-/// );
+///     body: Center(
+///       child: Text(
+///         'This is the home page',
+///         style: TextStyle(fontSize: 24),
+///       ),
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
