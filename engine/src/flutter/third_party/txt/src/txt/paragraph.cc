@@ -497,7 +497,7 @@ void Paragraph::Layout(double width, bool force) {
   SkFont font;
   font.setEdging(SkFont::Edging::kAntiAlias);
   font.setSubpixel(true);
-  font.setHinting(kSlight_SkFontHinting);
+  font.setHinting(SkFontHinting::kSlight);
 
   records_.clear();
   line_heights_.clear();
