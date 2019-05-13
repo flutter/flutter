@@ -5905,7 +5905,6 @@ void main() {
 
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pumpAndSettle();
 
     final List<Widget> transitions =
