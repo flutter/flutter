@@ -135,9 +135,7 @@ template("shell_host_executable") {
       "//third_party/tonic",
     ]
 
-    if (is_linux) {
-      ldflags += [ "-rdynamic" ]
-    }
+    public_configs = [ "$flutter_root:export_dynamic_symbols" ]
   }
 }
 

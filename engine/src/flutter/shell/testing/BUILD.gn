@@ -9,7 +9,10 @@ executable("testing") {
 
   output_name = "flutter_tester"
 
-  public_configs = [ "$flutter_root:config" ]
+  public_configs = [
+    "$flutter_root:config",
+    "$flutter_root:export_dynamic_symbols",
+  ]
 
   sources = [
     "tester_main.cc",
@@ -33,9 +36,5 @@ executable("testing") {
       "//zircon/public/lib/trace",
       "//zircon/public/lib/trace-provider",
     ]
-  }
-
-  if (is_linux) {
-    ldflags = [ "-rdynamic" ]
   }
 }

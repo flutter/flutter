@@ -126,6 +126,8 @@ source_set("runtime_unittests_common") {
 executable("runtime_unittests") {
   testonly = true
 
+  configs += [ "$flutter_root:export_dynamic_symbols" ]
+
   sources = [
     "dart_isolate_unittests.cc",
     "dart_lifecycle_unittests.cc",
@@ -136,8 +138,4 @@ executable("runtime_unittests") {
   deps = [
     ":runtime_unittests_common",
   ]
-
-  if (is_linux) {
-    ldflags = [ "-rdynamic" ]
-  }
 }
