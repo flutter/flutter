@@ -629,7 +629,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The color of the line that appears below the selected tab.
   ///
-  /// If this parameter is null then the value of the Theme's indicatorColor
+  /// If this parameter is null, then the value of the Theme's indicatorColor
   /// property is used.
   ///
   /// If [indicator] is specified, this property is ignored.
@@ -695,8 +695,8 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The color of unselected tab labels.
   ///
-  /// If this property is null, Unselected tab labels are rendered with the
-  /// [labelColor] rendered at 70% opacity.
+  /// If this property is null, unselected tab labels are rendered with the
+  /// [labelColor] with 70% opacity.
   final Color unselectedLabelColor;
 
   /// The text style of the selected tab labels.
@@ -704,18 +704,18 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// If [unselectedLabelStyle] is null then this text style will be used for
   /// both selected and unselected label styles.
   ///
-  /// If this property is null then the text style of the
+  /// If this property is null, then the text style of the
   /// [ThemeData.primaryTextTheme]'s body2 definition is used.
   final TextStyle labelStyle;
 
   /// The padding added to each of the tab labels.
   ///
-  /// If this property is null then kTabLabelPadding is used.
+  /// If this property is null, then kTabLabelPadding is used.
   final EdgeInsetsGeometry labelPadding;
 
   /// The text style of the unselected tab labels
   ///
-  /// If this property is null then the [labelStyle] value is used. If [labelStyle]
+  /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
   /// is null then the text style of the [ThemeData.primaryTextTheme]'s
   /// body2 definition is used.
   final TextStyle unselectedLabelStyle;

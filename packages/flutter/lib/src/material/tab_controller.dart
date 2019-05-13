@@ -112,14 +112,13 @@ class TabController extends ChangeNotifier {
        _animationController = animationController;
 
 
-  // Creates a new [TabController] with `index`, `previousIndex`, and `length`
-  // if they are non-null.
-  //
-  // This method will reuse the existing [_animationController].
-  //
-  // This is useful for [DefaultTabController], for example when
-  // [DefaultTabController.length] is updated, this method is called so that a
-  // new [TabController] is created without having to create a new [AnimationController].
+  /// Creates a new [TabController] with `index`, `previousIndex`, and `length`
+  /// if they are non-null.
+  ///
+  /// This method is used by [DefaultTabController].
+  ///
+  /// When [DefaultTabController.length] is updated, this method is called to
+  /// create a new [TabController] without creating a new [AnimationController].
   TabController _copyWith({ int index, int length, int previousIndex }) {
     return TabController._(
       index: index ?? _index,
@@ -138,7 +137,7 @@ class TabController extends ChangeNotifier {
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
   ///
-  /// If this [TabController] was disposed then return null.
+  /// If this [TabController] was disposed, then return null.
   Animation<double> get animation => _animationController?.view;
   AnimationController _animationController;
 
