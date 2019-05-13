@@ -134,6 +134,8 @@ void main() {
       expect(enter, isNotNull);
       expect(enter.position, equals(const Offset(400.0, 300.0)));
       expect(exit, isNull);
+
+      await gesture.removePointer();
     });
     testWidgets('detects pointer exiting', (WidgetTester tester) async {
       PointerEnterEvent enter;
@@ -161,6 +163,8 @@ void main() {
       expect(enter, isNull);
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(1.0, 1.0)));
+
+      await gesture.removePointer();
     });
     testWidgets('detects pointer exit when widget disappears', (WidgetTester tester) async {
       PointerEnterEvent enter;
@@ -195,6 +199,8 @@ void main() {
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(400.0, 300.0)));
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
+
+      await gesture.removePointer();
     });
     testWidgets('Hover works with nested listeners', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
@@ -276,6 +282,8 @@ void main() {
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isTrue);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isTrue);
       clearLists();
+
+      await gesture.removePointer();
     });
     testWidgets('Hover transfers between two listeners', (WidgetTester tester) async {
       final UniqueKey key1 = UniqueKey();
@@ -379,6 +387,8 @@ void main() {
       expect(exit2, isEmpty);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.hoverAnnotation), isFalse);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.hoverAnnotation), isFalse);
+
+      await gesture.removePointer();
     });
 
     testWidgets('works with transform', (WidgetTester tester) async {
@@ -422,9 +432,9 @@ void main() {
       final Offset bottomLeft = tester.getBottomLeft(find.byKey(key));
       expect(topRight.dx - topLeft.dx, scaleFactor * localWidth);
       expect(bottomLeft.dy - topLeft.dy, scaleFactor * localHeight);
-      print('Rect: ${tester.getRect(find.byKey(key))}');
 
       final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
       await gesture.moveTo(topLeft - const Offset(1, 1));
       await tester.pump();
       expect(events, isEmpty);
@@ -446,6 +456,8 @@ void main() {
       await tester.pump();
       expect(events.single, isA<PointerExitEvent>());
       events.clear();
+
+      await gesture.removePointer();
     });
 
     testWidgets('needsCompositing updates correctly and is respected', (WidgetTester tester) async {
@@ -479,7 +491,7 @@ void main() {
         ),
       );
       expect(listener.needsCompositing, isTrue);
-      // Composting is required, therefore a dedicated TransformLayer for
+      // Compositing is required, therefore a dedicated TransformLayer for
       // `Transform.scale` is added.
       expect(tester.layers.whereType<TransformLayer>(), hasLength(2));
 
@@ -495,6 +507,8 @@ void main() {
       // TransformLayer for `Transform.scale` is removed again as transform is
       // executed directly on the canvas.
       expect(tester.layers.whereType<TransformLayer>(), hasLength(1));
+
+      await gesture.removePointer();
     });
 
     testWidgets("Callbacks aren't called during build", (WidgetTester tester) async {
@@ -524,6 +538,8 @@ void main() {
       await tester.pump();
       expect(HoverClientState.numEntries, equals(2));
       expect(HoverClientState.numExits, equals(1));
+
+      await gesture.removePointer();
     });
 
     testWidgets("Listener activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
@@ -553,6 +569,8 @@ void main() {
       await tester.pump();
       expect(HoverClientState.numEntries, equals(2));
       expect(HoverClientState.numExits, equals(2));
+
+      await gesture.removePointer();
     });
   });
 }

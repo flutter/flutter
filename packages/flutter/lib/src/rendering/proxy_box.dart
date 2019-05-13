@@ -2493,6 +2493,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         onExit: _onPointerExit,
       );
     }
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
   }
 
   /// Called when a pointer comes into contact with the screen (for touch
@@ -2564,6 +2565,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
+    assert(_hoverAnnotation == null || _onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
+      "Shouldn't call _updateAnnotations if nothing has changed.");
     bool changed = false;
     final bool hadHoverAnnotation = _hoverAnnotation != null;
     if (_hoverAnnotation != null && attached) {
@@ -2592,9 +2595,16 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
+  bool _mouseIsConnected;
   void _handleMouseTrackerChanged() {
-    if (attached)
-      markNeedsPaint();
+    final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (attached && newState != _mouseIsConnected) {
+      _mouseIsConnected = newState;
+      if (_hoverAnnotation != null) {
+        markNeedsCompositingBitsUpdate();
+        markNeedsPaint();
+      }
+    }
   }
 
   @override
@@ -2639,13 +2649,10 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     super.detach();
   }
 
-  bool get _hasActiveAnnotation {
-    return _hoverAnnotation != null
-      && RendererBinding.instance.mouseTracker.mouseIsConnected;
-  }
+  bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
 
   @override
-  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
+  bool get needsCompositing =>  _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {
