@@ -21,6 +21,8 @@ import 'constants.dart';
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
 ///
+/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
+///
 /// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
@@ -64,7 +66,13 @@ import 'constants.dart';
 ///       body: TabBarView(
 ///         controller: _tabController,
 ///         children: myTabs.map((Tab tab) {
-///           return Center(child: Text(tab.text));
+///           final String label = tab.text.toLowerCase();
+///           return Center(
+///             child: Text(
+///               'This is the $label tab',
+///               style: const TextStyle(fontSize: 36),
+///             ),
+///           );
 ///         }).toList(),
 ///       ),
 ///     );
@@ -76,7 +84,7 @@ class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a
   /// [TabBarView].
   ///
-  /// The [length] must not be null or negative. Typically its a value greater
+  /// The [length] must not be null or negative. Typically it's a value greater
   /// than one, i.e. typically there are two or more tabs. The [length] must
   /// match [TabBar.tabs]'s and [TabBarView.children]'s length.
   ///
@@ -134,8 +142,10 @@ class TabController extends ChangeNotifier {
   Animation<double> get animation => _animationController?.view;
   AnimationController _animationController;
 
-  /// The total number of tabs. Typically greater than one. Must match
-  /// [TabBar.tabs]'s and [TabBarView.children]'s length.
+  /// The total number of tabs.
+  ///
+  /// Typically greater than one. Must match [TabBar.tabs]'s and
+  /// [TabBarView.children]'s length.
   final int length;
 
   void _changeIndex(int value, { Duration duration, Curve curve }) {
@@ -251,6 +261,8 @@ class _TabControllerScope extends InheritedWidget {
 /// widgets are created by a stateless parent widget or by different parent
 /// widgets.
 ///
+/// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
+///
 /// ```dart
 /// class MyDemo extends StatelessWidget {
 ///   final List<Tab> myTabs = <Tab>[
@@ -270,7 +282,13 @@ class _TabControllerScope extends InheritedWidget {
 ///         ),
 ///         body: TabBarView(
 ///           children: myTabs.map((Tab tab) {
-///             return Center(child: Text(tab.text));
+///             final String label = tab.text.toLowerCase();
+///             return Center(
+///               child: Text(
+///                 'This is the $label tab',
+///                 style: const TextStyle(fontSize: 36),
+///               ),
+///             );
 ///           }).toList(),
 ///         ),
 ///       ),
