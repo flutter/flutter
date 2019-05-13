@@ -63,6 +63,8 @@ test_fixtures("fixtures") {
 executable("embedder_unittests") {
   testonly = true
 
+  configs += [ "$flutter_root:export_dynamic_symbols" ]
+
   include_dirs = [ "." ]
 
   sources = [
@@ -85,10 +87,6 @@ executable("embedder_unittests") {
     "//third_party/skia",
     "//third_party/tonic",
   ]
-
-  if (is_linux) {
-    ldflags = [ "-rdynamic" ]
-  }
 }
 
 shared_library("flutter_engine_library") {

@@ -73,6 +73,15 @@ config("config") {
   include_dirs = [ ".." ]
 }
 
+config("export_dynamic_symbols") {
+  if (is_linux) {
+    inputs = [
+      "$flutter_root/common/exported_symbols.sym",
+    ]
+    ldflags = [ "-Wl,--dynamic-list=" + rebase_path(inputs[0], root_build_dir) ]
+  }
+}
+
 group("dist") {
   testonly = true
 
