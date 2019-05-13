@@ -794,7 +794,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   ScrollController _scrollController;
 
-  //ScrollController get _scrollController => widget.scrollController ?? ScrollController();
   AnimationController _cursorBlinkOpacityController;
 
   final LayerLink _layerLink = LayerLink();
