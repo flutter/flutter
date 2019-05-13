@@ -16,7 +16,7 @@ const Duration _kScrollbarFadeDuration = Duration(milliseconds: 250);
 
 // These values are measured using screenshots from an iPhone XR 12.1 simulator.
 const double _kScrollbarThickness = 2.5;
-// This is the amount of space from the top of a vertical scrollbar to the 
+// This is the amount of space from the top of a vertical scrollbar to the
 // top edge of the scrollable, measured when the vertical scrollbar overscrolls
 // to the top.
 // TODO(LongCatIsLooong): fix https://github.com/flutter/flutter/issues/32175
