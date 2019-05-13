@@ -792,7 +792,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
-  ScrollController get _scrollController => widget.scrollController ?? ScrollController();
+  ScrollController _scrollController;
+
+  //ScrollController get _scrollController => widget.scrollController ?? ScrollController();
   AnimationController _cursorBlinkOpacityController;
 
   final LayerLink _layerLink = LayerLink();
@@ -822,11 +824,13 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
+    _scrollController = widget.scrollController ?? ScrollController();
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
+
   }
 
   @override
