@@ -591,7 +591,7 @@ void main() {
   });
 
   testWidgets('Do not call dispose on a controller that we do not own'
-              "but do remove from its listeners when done listening to it",
+              'but do remove from its listeners when done listening to it',
     (WidgetTester tester) async {
       final MockCupertinoTabController mockController = MockCupertinoTabController(initialIndex: 0);
 
