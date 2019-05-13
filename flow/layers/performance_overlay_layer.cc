@@ -24,7 +24,7 @@ void DrawStatisticsText(SkCanvas& canvas,
   font.setSize(15);
   SkPaint paint;
   paint.setColor(SK_ColorGRAY);
-  canvas.drawSimpleText(string.c_str(), string.size(), kUTF8_SkTextEncoding, x,
+  canvas.drawSimpleText(string.c_str(), string.size(), SkTextEncoding::kUTF8, x,
                         y, font, paint);
 }
 
