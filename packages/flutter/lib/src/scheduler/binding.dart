@@ -763,6 +763,16 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     _warmUpFrame = true;
     Timeline.startSync('Warm-up frame');
     final bool hadScheduledFrame = _hasScheduledFrame;
+
+    final Completer<void> warmUpFrameCompleter = Completer<void>();
+
+    // Lock events so touch events etc don't insert themselves until the
+    // scheduled frame has finished.
+    lockEvents(() async {
+      await warmUpFrameCompleter.future;
+      Timeline.finishSync();
+    });
+
     // We use timers here to ensure that microtasks flush in between.
     Timer.run(() {
       assert(_warmUpFrame);
@@ -781,15 +791,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       // then skipping every frame and finishing in the new time.
       resetEpoch();
       _warmUpFrame = false;
+      warmUpFrameCompleter.complete();
       if (hadScheduledFrame)
         scheduleFrame();
-    });
-
-    // Lock events so touch events etc don't insert themselves until the
-    // scheduled frame has finished.
-    lockEvents(() async {
-      await endOfFrame;
-      Timeline.finishSync();
     });
   }
 
