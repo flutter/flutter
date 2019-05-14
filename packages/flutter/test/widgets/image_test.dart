@@ -308,12 +308,12 @@ void main() {
     final TestImageProvider imageProvider = TestImageProvider();
     await tester.pumpWidget(Image(image: imageProvider, excludeFromSemantics: true));
     final State<Image> image = tester.state/*State<Image>*/(find.byType(Image));
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, unresolved, 2 listeners), pixels: null, loadingProgress: null)'));
     imageProvider.complete();
     await tester.pump();
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 1 listener), pixels: [100×100] @ 1.0x)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 1 listener), pixels: [100×100] @ 1.0x, loadingProgress: null)'));
     await tester.pumpWidget(Container());
-    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 0 listeners), pixels: [100×100] @ 1.0x)'));
+    expect(image.toString(), equalsIgnoringHashCodes('_ImageState#00000(lifecycle state: defunct, not mounted, stream: ImageStream#00000(OneFrameImageStreamCompleter#00000, [100×100] @ 1.0x, 0 listeners), pixels: [100×100] @ 1.0x, loadingProgress: null)'));
   });
 
   testWidgets('Stream completer errors can be listened to by attaching before resolving', (WidgetTester tester) async {
@@ -863,6 +863,63 @@ void main() {
     )));
     semantics.dispose();
   });
+
+  testWidgets('Image invokes imageLoadingBuilder', (WidgetTester tester) async {
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
+    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
+    final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
+
+    await tester.pumpWidget(
+      Image(
+        image: imageProvider,
+        imageLoadingBuilder: (BuildContext context, ImageChunkEvent imageChunkEvent, RawImage currentRawImage) {
+          chunkEvents.add(imageChunkEvent);
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: Text('loading ${imageChunkEvent.cumulativeBytesLoaded} / ${imageChunkEvent.expectedTotalBytes}'),
+          );
+        },
+        excludeFromSemantics: true,
+      ),
+    );
+
+    expect(chunkEvents.length, 0);
+    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(10, 100));
+    await tester.pump();
+    expect(chunkEvents.length, 1);
+    expect(find.text('loading 10 / 100'), findsOneWidget);
+    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(30, 100));
+    await tester.pump();
+    expect(chunkEvents.length, 2);
+    expect(find.text('loading 30 / 100'), findsOneWidget);
+    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: TestImage()));
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
+    expect(chunkEvents.length, 2);
+    expect(find.text('loading 30 / 100'), findsNothing);
+    expect(find.byType(RawImage), findsOneWidget);
+  });
+
+  testWidgets('Image ignores chunk events if imageLoadingBuilder is null', (WidgetTester tester) async {
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
+    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
+
+    await tester.pumpWidget(
+      Image(
+        image: imageProvider,
+        excludeFromSemantics: true,
+      ),
+    );
+
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(10, 100));
+    expect(tester.binding.hasScheduledFrame, isFalse);
+    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: TestImage()));
+    expect(tester.binding.hasScheduledFrame, isTrue);
+    await tester.idle(); // resolve the future from the image provider
+    await tester.pump(null, EnginePhase.layout);
+    expect(find.byType(RawImage), findsOneWidget);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
@@ -901,8 +958,15 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   String toString() => '${describeIdentity(this)}()';
 }
 
+class TestImageListenerEntry {
+  const TestImageListenerEntry(this.chunkListener, this.errorListener);
+
+  final ImageChunkListener chunkListener;
+  final ImageErrorListener errorListener;
+}
+
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  final Map<ImageListener, ImageErrorListener> listeners = <ImageListener, ImageErrorListener>{};
+  final Map<ImageListener, TestImageListenerEntry> listeners = <ImageListener, TestImageListenerEntry>{};
 
   @override
   void addListener(
@@ -910,12 +974,28 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
     ImageChunkListener chunkListener,
     ImageErrorListener onError,
   }) {
-    listeners[listener] = onError;
+    listeners[listener] = TestImageListenerEntry(chunkListener, onError);
   }
 
   @override
   void removeListener(ImageListener listener) {
     listeners.remove(listener);
+  }
+
+  void notifyListeners({
+    ImageInfo imageInfo,
+    ImageChunkEvent chunkEvent,
+  }) {
+    final List<ImageListener> localListeners = listeners.keys.toList();
+    for (ImageListener listener in localListeners) {
+      final TestImageListenerEntry entry = listeners[listener];
+      if (imageInfo != null) {
+        listener(imageInfo, false);
+      }
+      if (chunkEvent != null && entry.chunkListener != null) {
+        entry.chunkListener(chunkEvent);
+      }
+    }
   }
 }
 

@@ -127,7 +127,83 @@ void main() {
     expect(mockCodec.numFramesAsked, 1);
   });
 
+  testWidgets('Chunk events are delivered', (WidgetTester tester) async {
+    final Completer<Codec> completer = Completer<Codec>();
+    final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      chunkEvents: streamController.stream,
+      scale: 1.0,
+    );
+
+    final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    final ImageChunkListener chunkListener = (ImageChunkEvent event) {
+      chunkEvents.add(event);
+    };
+
+    imageStream.addListener(listener, chunkListener: chunkListener);
+    streamController.add(const ImageChunkEvent(1, 3));
+    streamController.add(const ImageChunkEvent(2, 3));
+    await tester.idle();
+
+    expect(chunkEvents.length, 2);
+    expect(chunkEvents[0].cumulativeBytesLoaded, 1);
+    expect(chunkEvents[0].expectedTotalBytes, 3);
+    expect(chunkEvents[1].cumulativeBytesLoaded, 2);
+    expect(chunkEvents[1].expectedTotalBytes, 3);
+  });
+
   testWidgets('Chunk events are not buffered before listener registration', (WidgetTester tester) async {
+    final Completer<Codec> completer = Completer<Codec>();
+    final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      chunkEvents: streamController.stream,
+      scale: 1.0,
+    );
+
+    final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    final ImageChunkListener chunkListener = (ImageChunkEvent event) {
+      chunkEvents.add(event);
+    };
+
+    streamController.add(const ImageChunkEvent(1, 3));
+    await tester.idle();
+    imageStream.addListener(listener, chunkListener: chunkListener);
+    streamController.add(const ImageChunkEvent(2, 3));
+    await tester.idle();
+
+    expect(chunkEvents.length, 1);
+    expect(chunkEvents[0].cumulativeBytesLoaded, 2);
+    expect(chunkEvents[0].expectedTotalBytes, 3);
+  });
+
+  testWidgets('Chunk errors are reported', (WidgetTester tester) async {
+    final Completer<Codec> completer = Completer<Codec>();
+    final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      chunkEvents: streamController.stream,
+      scale: 1.0,
+    );
+
+    final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
+    final ImageListener listener = (ImageInfo image, bool synchronousCall) { };
+    final ImageChunkListener chunkListener = (ImageChunkEvent event) {
+      chunkEvents.add(event);
+    };
+
+    imageStream.addListener(listener, chunkListener: chunkListener);
+    streamController.addError(Error());
+    streamController.add(const ImageChunkEvent(2, 3));
+    await tester.idle();
+
+    expect(tester.takeException(), isNotNull);
+    expect(chunkEvents.length, 1);
+    expect(chunkEvents[0].cumulativeBytesLoaded, 2);
+    expect(chunkEvents[0].expectedTotalBytes, 3);
   });
 
   testWidgets('getNextFrame future fails', (WidgetTester tester) async {

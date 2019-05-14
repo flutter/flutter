@@ -87,7 +87,7 @@ typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTr
 ///
 ///  * [ImageChunkListener], the means by which callers get notified of
 ///    these events.
-class ImageChunkEvent {
+class ImageChunkEvent extends Diagnosticable {
   /// Creates a new chunk event.
   const ImageChunkEvent(this.cumulativeBytesLoaded, this.expectedTotalBytes);
 
@@ -105,6 +105,13 @@ class ImageChunkEvent {
   /// it may not always be trustworthy (e.g. when the estimated size was
   /// provided prior to GZIP compression).
   final int expectedTotalBytes;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('cumulativeBytesLoaded', cumulativeBytesLoaded));
+    properties.add(IntProperty('expectedTotalBytes', expectedTotalBytes));
+  }
 }
 
 class _ImageListeners {

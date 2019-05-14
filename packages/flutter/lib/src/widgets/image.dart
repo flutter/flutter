@@ -617,21 +617,28 @@ class Image extends StatefulWidget {
   /// while an image loads over the network.
   ///
   /// ```dart
-  /// Image.network(
-  ///   'https://example.com/very-large-image.jpg',
-  ///   imageLoadingBuilder: (BuildContext context, ImageChunkEvent event, Widget currentRawImage) {
-  ///     return Center(
-  ///       child: CircularProgressIndicator(
-  ///         value: event.cumulativeBytesLoaded / event.expectedTotalBytes,
-  ///       ),
-  ///     );
-  ///   },
+  /// DecoratedBox(
+  ///   decoration: BoxDecoration(
+  ///     border: Border.all(),
+  ///     borderRadius: BorderRadius.circular(20),
+  ///   ),
+  ///   child: Image.network(
+  ///     'https://example.com/image.jpg',
+  ///     imageLoadingBuilder: (BuildContext context, ImageChunkEvent event, Widget currentRawImage) {
+  ///       return Center(
+  ///         child: CircularProgressIndicator(
+  ///           value: event.cumulativeBytesLoaded / event.expectedTotalBytes,
+  ///         ),
+  ///       );
+  ///     },
+  ///   ),
   /// )
   /// ```
   /// {@end-tool}
   ///
-  /// Run against a real-world image, the previous sample looks like this in an
-  /// application:
+  /// Run against a real-world image, the previous sample renders the following
+  /// loading progress indicator while the image loads before rendering the
+  /// completed image.
   ///
   /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/image_loadingProgress.mp4}
   final ImageLoadingBuilder imageLoadingBuilder;
@@ -664,6 +671,7 @@ class Image extends StatefulWidget {
     properties.add(EnumProperty<ImageRepeat>('repeat', repeat, defaultValue: ImageRepeat.noRepeat));
     properties.add(DiagnosticsProperty<Rect>('centerSlice', centerSlice, defaultValue: null));
     properties.add(FlagProperty('matchTextDirection', value: matchTextDirection, ifTrue: 'match text direction'));
+    properties.add(DiagnosticsProperty<Function>('imageLoadingBuilder', imageLoadingBuilder));
     properties.add(StringProperty('semanticLabel', semanticLabel, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('this.excludeFromSemantics', excludeFromSemantics));
     properties.add(EnumProperty<FilterQuality>('filterQuality', filterQuality));
@@ -722,9 +730,11 @@ class _ImageState extends State<Image> {
   }
 
   void _handleImageChunkLoaded(ImageChunkEvent event) {
-    setState(() {
-      _chunkEvent = event;
-    });
+    if (widget.imageLoadingBuilder != null) {
+      setState(() {
+        _chunkEvent = event;
+      });
+    }
   }
 
   // Update _imageStream to newStream, and moves the stream listener
@@ -804,5 +814,6 @@ class _ImageState extends State<Image> {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ImageStream>('stream', _imageStream));
     description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
+    description.add(DiagnosticsProperty<ImageChunkEvent>('loadingProgress', _chunkEvent));
   }
 }
