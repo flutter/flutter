@@ -137,7 +137,6 @@ copy("copy_framework_module_map") {
 action("copy_framework_headers") {
   script = "$flutter_root/sky/tools/install_framework_headers.py"
   visibility = [ ":*" ]
-  set_sources_assignment_filter([])
   sources = get_path_info(_flutter_framework_headers, "abspath") +
             framework_shared_headers
   outputs = []
@@ -150,16 +149,13 @@ action("copy_framework_headers") {
            rebase_path("$_flutter_framework_headers_copy_dir"),
            "--headers",
          ] + rebase_path(sources, "", "//")
-  set_sources_assignment_filter(sources_assignment_filter)
 }
 
 copy("copy_framework_icu") {
   visibility = [ ":*" ]
-  set_sources_assignment_filter([])
   sources = [
     "//third_party/icu/flutter/icudtl.dat",
   ]
-  set_sources_assignment_filter(sources_assignment_filter)
   outputs = [
     "$_flutter_framework_dir/Versions/A/Resources/{{source_file_part}}",
   ]

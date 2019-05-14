@@ -117,9 +117,7 @@ source_set("txt") {
   ]
 
   if (is_mac || is_ios) {
-    set_sources_assignment_filter([])
     sources += [ "src/txt/platform_mac.mm" ]
-    set_sources_assignment_filter(sources_assignment_filter)
     deps += [ "$flutter_root/fml" ]
   } else if (is_android) {
     sources += [ "src/txt/platform_android.cc" ]

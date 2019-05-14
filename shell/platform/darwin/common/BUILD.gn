@@ -3,16 +3,12 @@
 # found in the LICENSE file.
 
 source_set("common") {
-  # Disable the assignment filter because the files will be used on iOS as well
-  # as Mac.
-  set_sources_assignment_filter([])
   sources = [
     "buffer_conversions.h",
     "buffer_conversions.mm",
     "command_line.h",
     "command_line.mm",
   ]
-  set_sources_assignment_filter(sources_assignment_filter)
 
   deps = [
     "$flutter_root/common",
