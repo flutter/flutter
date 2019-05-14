@@ -89,7 +89,7 @@ import 'theme_data.dart';
 ///       onTap: () {
 ///         onChanged(!value);
 ///       },
-///       child: Container(
+///       child: Padding(
 ///         padding: padding,
 ///         child: Row(
 ///           children: <Widget>[

@@ -101,7 +101,7 @@ enum _SwitchListTileType { material, adaptive }
 ///       onTap: () {
 ///         onChanged(!value);
 ///       },
-///       child: Container(
+///       child: Padding(
 ///         padding: padding,
 ///         child: Row(
 ///           children: <Widget>[

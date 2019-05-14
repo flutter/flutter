@@ -107,7 +107,7 @@ import 'theme_data.dart';
 ///         if (value == false)
 ///           onChanged(true);
 ///       },
-///       child: Container(
+///       child: Padding(
 ///         padding: padding,
 ///         child: Row(
 ///           children: <Widget>[
