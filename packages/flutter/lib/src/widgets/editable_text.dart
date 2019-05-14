@@ -1033,6 +1033,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   bool get _hasFocus => widget.focusNode.hasFocus;
+  bool get _hasInactiveFocus => widget.focusNode.hasInactiveFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
   // Calculate the new scroll offset so the cursor remains visible.

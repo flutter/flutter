@@ -441,6 +441,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _manager._currentFocus.ancestors.contains(this);
   }
 
+  bool get hasInactiveFocus {
+    if (_manager == null) {
+      return false;
+    }
+    final FocusScopeNode scope = enclosingScope;
+    assert(scope != null);
+    return scope._focusedChildren.first == this;
+  }
+
   /// Returns true if this node currently has the application-wide input focus.
   ///
   /// A [FocusNode] has the primary focus when the node is focused in its
@@ -530,6 +539,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       final FocusScopeNode scope = enclosingScope;
       assert(scope != null, 'Node has primary focus, but no enclosingScope.');
       scope._focusedChildren.remove(this);
+      print('removed $this, remains ${enclosingScope?._focusedChildren?.length}');
       _manager?._willUnfocusNode(this);
       return;
     }
@@ -588,6 +598,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(node._manager == _manager);
 
     node.enclosingScope?._focusedChildren?.remove(node);
+    print('removed $node, remains ${node.enclosingScope?._focusedChildren?.length}');
 
     node._parent = null;
     _children.remove(node);
