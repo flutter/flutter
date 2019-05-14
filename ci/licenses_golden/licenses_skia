@@ -1,4 +1,4 @@
-Signature: 160b4ac0b77efdf84284575c90bb5521
+Signature: 1502536d3c76bc2207d8007f1057f192
 
 UNUSED LICENSES:
 
@@ -1119,10 +1119,6 @@ FILE: ../../../third_party/skia/src/core/SkICCPriv.h
 FILE: ../../../third_party/skia/src/core/SkImageFilterCache.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterCache.h
 FILE: ../../../third_party/skia/src/core/SkLRUCache.h
-FILE: ../../../third_party/skia/src/core/SkLiteDL.cpp
-FILE: ../../../third_party/skia/src/core/SkLiteDL.h
-FILE: ../../../third_party/skia/src/core/SkLiteRecorder.cpp
-FILE: ../../../third_party/skia/src/core/SkLiteRecorder.h
 FILE: ../../../third_party/skia/src/core/SkMSAN.h
 FILE: ../../../third_party/skia/src/core/SkMakeUnique.h
 FILE: ../../../third_party/skia/src/core/SkMatrixPriv.h
@@ -3343,8 +3339,6 @@ FILE: ../../../third_party/skia/src/core/SkFontMgr.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.h
 FILE: ../../../third_party/skia/src/core/SkLocalMatrixImageFilter.cpp
-FILE: ../../../third_party/skia/src/core/SkMiniRecorder.cpp
-FILE: ../../../third_party/skia/src/core/SkMiniRecorder.h
 FILE: ../../../third_party/skia/src/core/SkNextID.h
 FILE: ../../../third_party/skia/src/core/SkOpts.cpp
 FILE: ../../../third_party/skia/src/core/SkOpts.h
