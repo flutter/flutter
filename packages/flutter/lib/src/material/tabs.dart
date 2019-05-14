@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+>// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -622,7 +622,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Whether this tab bar can be scrolled horizontally.
   ///
-  /// If [isScrollable] is true then each tab is as wide as needed for its label
+  /// If [isScrollable] is true, then each tab is as wide as needed for its label
   /// and the entire [TabBar] is scrollable. Otherwise each tab gets an equal
   /// share of the available space.
   final bool isScrollable;
@@ -668,7 +668,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The indicator's size is based on the tab's bounds. If [indicatorSize]
   /// is [TabBarIndicatorSize.tab] the tab's bounds are as wide as the space
   /// occupied by the tab in the tab bar. If [indicatorSize] is
-  /// [TabBarIndicatorSize.label] then the tab's bounds are only as wide as
+  /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
   final Decoration indicator;
 
@@ -689,7 +689,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Unselected tab labels are rendered with the same color rendered at 70%
   /// opacity unless [unselectedLabelColor] is non-null.
   ///
-  /// If this parameter is null then the color of the [ThemeData.primaryTextTheme]'s
+  /// If this parameter is null, then the color of the [ThemeData.primaryTextTheme]'s
   /// body2 text color is used.
   final Color labelColor;
 
@@ -701,7 +701,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// The text style of the selected tab labels.
   ///
-  /// If [unselectedLabelStyle] is null then this text style will be used for
+  /// If [unselectedLabelStyle] is null, then this text style will be used for
   /// both selected and unselected label styles.
   ///
   /// If this property is null, then the text style of the
@@ -716,7 +716,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The text style of the unselected tab labels
   ///
   /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
-  /// is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// is null, then the text style of the [ThemeData.primaryTextTheme]'s
   /// body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
@@ -1050,7 +1050,7 @@ class _TabBarState extends State<TabBar> {
       }
     }
 
-    // Add the tap handler to each tab. If the tab bar is not scrollable
+    // Add the tap handler to each tab. If the tab bar is not scrollable,
     // then give all of the tabs equal flexibility so that they each occupy
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
@@ -1403,13 +1403,13 @@ class TabPageSelector extends StatelessWidget {
 
   /// The indicator circle's fill color for unselected pages.
   ///
-  /// If this parameter is null then the indicator is filled with [Colors.transparent].
+  /// If this parameter is null, then the indicator is filled with [Colors.transparent].
   final Color color;
 
   /// The indicator circle's fill color for selected pages and border color
   /// for all indicator circles.
   ///
-  /// If this parameter is null then the indicator is filled with the theme's
+  /// If this parameter is null, then the indicator is filled with the theme's
   /// accent color, [ThemeData.accentColor].
   final Color selectedColor;
 
