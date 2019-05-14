@@ -66,12 +66,15 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LabeledCheckbox widget, but you can easily
-/// make your own configurable widget.
+/// Here is an example of a custom LabeledLinkedCheckbox widget, but you can
+/// easily make your own configurable widget.
 ///
+/// ```dart code-imports
+/// import 'package:flutter/gestures.dart';
+/// ```
 /// ```dart preamble
-/// class LabeledCheckbox extends StatelessWidget {
-///   const LabeledCheckbox({
+/// class LabeledLinkedCheckbox extends StatelessWidget {
+///   const LabeledLinkedCheckbox({
 ///     this.label,
 ///     this.padding,
 ///     this.value,
@@ -85,23 +88,30 @@ import 'theme_data.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return InkWell(
-///       onTap: () {
-///         onChanged(!value);
-///       },
-///       child: Padding(
-///         padding: padding,
-///         child: Row(
-///           children: <Widget>[
-///             Checkbox(
-///               value: value,
-///               onChanged: (bool newValue) {
-///                 onChanged(newValue);
+///     return Padding(
+///       padding: padding,
+///       child: Row(
+///         children: <Widget>[
+///           Checkbox(
+///             value: value,
+///             onChanged: (bool newValue) {
+///               onChanged(newValue);
+///             },
+///           ),
+///           RichText(
+///             text: TextSpan(
+///               text: label,
+///               style: TextStyle(
+///                 color: Colors.blueAccent,
+///                 decoration: TextDecoration.underline,
+///               ),
+///               recognizer: TapGestureRecognizer()
+///                 ..onTap = () {
+///                 print('Link has been tapped.');
 ///               },
 ///             ),
-///             Text(label),
-///           ],
-///         ),
+///           ),
+///         ],
 ///       ),
 ///     );
 ///   }
@@ -114,8 +124,8 @@ import 'theme_data.dart';
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
-///       child: LabeledCheckbox(
-///         label: 'This is the label text',
+///       child: LabeledLinkedCheckbox(
+///         label: 'Linked, tappable label text',
 ///         padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
