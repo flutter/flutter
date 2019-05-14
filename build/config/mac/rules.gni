@@ -50,7 +50,6 @@ template("resource_copy_mac") {
   _resources = invoker.resources
 
   copy(target_name) {
-    set_sources_assignment_filter([])
     sources = _resources
     outputs = [
       "$root_build_dir/$_app_name.app/$_bundle_directory/Contents/Resources/{{source_file_part}}",

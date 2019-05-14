@@ -115,7 +115,6 @@ template("_fuchsia_fidl_library") {
   source_set(target_name) {
     public_configs = [ ":$config_name" ]
 
-    set_sources_assignment_filter([])
     sources = get_target_outputs(":$fidl_gen_target_name")
 
     deps = [
@@ -169,7 +168,6 @@ template("_fuchsia_cc_source_library") {
   source_set(target_name) {
     output_name = _output_name
     public = _public_headers
-    set_sources_assignment_filter([])
     sources = _sources
     public_configs = [ ":$config_name" ]
     public_deps = _deps

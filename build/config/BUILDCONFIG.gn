@@ -275,119 +275,6 @@ if (current_os == "win") {
 default_library_type = "static_library"
 
 # =============================================================================
-# SOURCES FILTERS
-# =============================================================================
-#
-# These patterns filter out platform-specific files when assigning to the
-# sources variable. The magic variable |sources_assignment_filter| is applied
-# to each assignment or appending to the sources variable and matches are
-# automatcally removed.
-#
-# Note that the patterns are NOT regular expressions. Only "*" and "\b" (path
-# boundary = end of string or slash) are supported, and the entire string
-# muct match the pattern (so you need "*.cc" to match all .cc files, for
-# example).
-
-# DO NOT ADD MORE PATTERNS TO THIS LIST, see set_sources_assignment_filter call
-# below.
-sources_assignment_filter = []
-if (!is_posix) {
-  sources_assignment_filter += [
-    "*_posix.h",
-    "*_posix.cc",
-    "*_posix_unittest.h",
-    "*_posix_unittest.cc",
-    "*\bposix/*",
-  ]
-}
-if (!is_win) {
-  sources_assignment_filter += [
-    "*_win.cc",
-    "*_win.h",
-    "*_win_unittest.cc",
-    "*\bwin/*",
-    "*.def",
-    "*.rc",
-  ]
-}
-if (!is_mac) {
-  sources_assignment_filter += [
-    "*_mac.h",
-    "*_mac.cc",
-    "*_mac.mm",
-    "*_mac_unittest.h",
-    "*_mac_unittest.cc",
-    "*_mac_unittest.mm",
-    "*\bmac/*",
-    "*_cocoa.h",
-    "*_cocoa.cc",
-    "*_cocoa.mm",
-    "*_cocoa_unittest.h",
-    "*_cocoa_unittest.cc",
-    "*_cocoa_unittest.mm",
-    "*\bcocoa/*",
-  ]
-}
-if (!is_ios) {
-  sources_assignment_filter += [
-    "*_ios.h",
-    "*_ios.cc",
-    "*_ios.mm",
-    "*_ios_unittest.h",
-    "*_ios_unittest.cc",
-    "*_ios_unittest.mm",
-    "*\bios/*",
-  ]
-}
-if (!is_mac && !is_ios) {
-  sources_assignment_filter += [ "*.mm" ]
-}
-if (!is_linux) {
-  sources_assignment_filter += [
-    "*_linux.h",
-    "*_linux.cc",
-    "*_linux_unittest.h",
-    "*_linux_unittest.cc",
-    "*\blinux/*",
-  ]
-}
-if (!is_android) {
-  sources_assignment_filter += [
-    "*_android.h",
-    "*_android.cc",
-    "*_android_unittest.h",
-    "*_android_unittest.cc",
-    "*\bandroid/*",
-  ]
-}
-if (!is_chromeos) {
-  sources_assignment_filter += [
-    "*_chromeos.h",
-    "*_chromeos.cc",
-    "*_chromeos_unittest.h",
-    "*_chromeos_unittest.cc",
-    "*\bchromeos/*",
-  ]
-}
-
-# DO NOT ADD MORE PATTERNS TO THIS LIST, see set_sources_assignment_filter call
-# below.
-
-# Actually save this list.
-#
-# These patterns are executed for every file in the source tree of every run.
-# Therefore, adding more patterns slows down the build for everybody. We should
-# only add automatic patterns for configurations affecting hundreds of files
-# across many projects in the tree.
-#
-# Therefore, we only add rules to this list corresponding to platforms on the
-# Chromium waterfall.  This is not for non-officially-supported platforms
-# (FreeBSD, etc.) toolkits, (X11, GTK, etc.), or features. For these cases,
-# write a conditional in the target to remove the file(s) from the list when
-# your platform/toolkit/feature doesn't apply.
-set_sources_assignment_filter(sources_assignment_filter)
-
-# =============================================================================
 # BUILD OPTIONS
 # =============================================================================
 
@@ -678,11 +565,6 @@ template("component") {
       configs = []  # Prevent list overwriting warning.
       configs = invoker.configs
 
-      # The sources assignment filter will have already been applied when the
-      # code was originally executed. We don't want to apply it again, since
-      # the original target may have override it for some assignments.
-      set_sources_assignment_filter([])
-
       if (defined(invoker.all_dependent_configs)) {
         all_dependent_configs = invoker.all_dependent_configs
       }
@@ -777,9 +659,6 @@ template("component") {
       # See above.
       configs = []  # Prevent list overwriting warning.
       configs = invoker.configs
-
-      # See above call.
-      set_sources_assignment_filter([])
 
       if (defined(invoker.all_dependent_configs)) {
         all_dependent_configs = invoker.all_dependent_configs
