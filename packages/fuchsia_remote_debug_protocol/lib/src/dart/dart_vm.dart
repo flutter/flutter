@@ -42,6 +42,10 @@ RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 /// unhandled exception. That exception is safe for us to ignore - the client
 /// is signaling that it will try again later if it doesn't get what it wants
 /// here by sending a notification.
+// This may be ignoring too many exceptions. It would be best to rewrite
+// the client code to not use notifications so that it gets error replies back
+// and can decide what to do from there.
+// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
 bool _ignoreRpcError(dynamic error) {
   if (error is json_rpc.RpcException) {
     final json_rpc.RpcException exception = error;
