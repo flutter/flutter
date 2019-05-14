@@ -19,7 +19,7 @@
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/tonic/dart_persistent_value.h"
 #include "third_party/tonic/logging/dart_invoke.h"
-#include "third_party/tonic/typed_data/uint8_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 using tonic::DartInvoke;
 using tonic::DartPersistentValue;

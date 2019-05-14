@@ -9,8 +9,7 @@
 #include "flutter/lib/ui/painting/rrect.h"
 #include "third_party/skia/include/core/SkPath.h"
 #include "third_party/skia/include/pathops/SkPathOps.h"
-#include "third_party/tonic/typed_data/float32_list.h"
-#include "third_party/tonic/typed_data/float64_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace tonic {
 class DartLibraryNatives;

@@ -7,8 +7,7 @@
 
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/dart_wrappable.h"
-#include "third_party/tonic/typed_data/float64_list.h"
-#include "third_party/tonic/typed_data/int32_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 

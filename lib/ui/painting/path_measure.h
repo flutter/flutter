@@ -11,7 +11,7 @@
 #include "flutter/lib/ui/painting/path.h"
 #include "third_party/skia/include/core/SkContourMeasure.h"
 #include "third_party/skia/include/core/SkPath.h"
-#include "third_party/tonic/typed_data/float64_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace tonic {
 class DartLibraryNatives;

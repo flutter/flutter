@@ -32,7 +32,7 @@
 #include "third_party/tonic/file_loader/file_loader.h"
 #include "third_party/tonic/logging/dart_error.h"
 #include "third_party/tonic/scopes/dart_api_scope.h"
-#include "third_party/tonic/typed_data/uint8_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace dart {
 namespace observatory {

@@ -22,7 +22,7 @@
 #include "third_party/tonic/dart_library_natives.h"
 #include "third_party/tonic/dart_state.h"
 #include "third_party/tonic/logging/dart_invoke.h"
-#include "third_party/tonic/typed_data/uint8_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 using tonic::ToDart;
 

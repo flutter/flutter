@@ -18,7 +18,7 @@
 #include "flutter/lib/ui/painting/picture.h"
 #include "flutter/lib/ui/painting/rrect.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "third_party/tonic/typed_data/float64_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 #if defined(OS_FUCHSIA)
 #include "flutter/lib/ui/compositing/scene_host.h"

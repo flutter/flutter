@@ -6,7 +6,7 @@
 
 #include "flutter/fml/logging.h"
 #include "third_party/tonic/logging/dart_error.h"
-#include "third_party/tonic/typed_data/float32_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 using namespace flutter;
 

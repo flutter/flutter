@@ -9,7 +9,7 @@
 #include "flutter/lib/ui/painting/image.h"
 #include "flutter/lib/ui/painting/picture.h"
 #include "third_party/skia/include/core/SkImageFilter.h"
-#include "third_party/tonic/typed_data/float64_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 
