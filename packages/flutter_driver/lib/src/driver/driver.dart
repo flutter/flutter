@@ -959,6 +959,14 @@ void restoreVmServiceConnectFunction() {
 /// The JSON RPC 2 spec says that a notification from a client must not respond
 /// to the client. It's possible the client sent a notification as a "ping", but
 /// the service isn't set up yet to respond.
+///
+/// For example, if the client sends a notification message to the server for
+/// 'streamNotify', but the server has not finished loading, it will throw an
+/// exception. Since the message is a notification, the server follows the
+/// specification and does not send a response back, but is left with an
+/// unhandled exception. That exception is safe for us to ignore - the client
+/// is signaling that it will try again later if it doesn't get what it wants
+/// here by sending a notification.
 bool _ignoreRpcError(dynamic error) {
   if (error is rpc.RpcException) {
     final rpc.RpcException exception = error;
