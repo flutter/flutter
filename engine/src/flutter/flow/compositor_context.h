@@ -79,16 +79,16 @@ class CompositorContext {
 
   const Counter& frame_count() const { return frame_count_; }
 
-  const Stopwatch& frame_time() const { return frame_time_; }
+  const Stopwatch& raster_time() const { return raster_time_; }
 
-  Stopwatch& engine_time() { return engine_time_; }
+  Stopwatch& ui_time() { return ui_time_; }
 
  private:
   RasterCache raster_cache_;
   TextureRegistry texture_registry_;
   Counter frame_count_;
-  Stopwatch frame_time_;
-  Stopwatch engine_time_;
+  Stopwatch raster_time_;
+  Stopwatch ui_time_;
 
   void BeginFrame(ScopedFrame& frame, bool enable_instrumentation);
 
