@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:xml/xml.dart' as xml;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -101,7 +102,14 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'windows']
     );
-    expect(fs.file(r'C:\windows\flutter\Generated.props').existsSync(), true);
+
+    // Spot-check important elemenst from the properties file.
+    final File propsFile = fs.file(r'C:\windows\flutter\Generated.props');
+    expect(propsFile.existsSync(), true);
+    final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
+    expect(props.findAllElements('PropertyGroup').first.getAttribute('Label'), 'UserMacros');
+    expect(props.findAllElements('ItemGroup').length, 1);
+    expect(props.findAllElements('FLUTTER_ROOT').first.text, r'C:\');
   }, overrides: <Type, Generator>{
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,
