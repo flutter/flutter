@@ -663,6 +663,8 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
 
 /// Show a popup menu that contains the `items` at `position`.
 ///
+/// `items` should be non-null and not empty.
+///
 /// If `initialValue` is specified then the first item with a matching value
 /// will be highlighted and the value of `position` gives the rectangle whose
 /// vertical center will be aligned with the vertical center of the highlighted
@@ -829,8 +831,10 @@ class PopupMenuButton<T> extends StatefulWidget {
     this.child,
     this.icon,
     this.offset = Offset.zero,
+    this.enabled = true,
   }) : assert(itemBuilder != null),
        assert(offset != null),
+       assert(enabled != null),
        assert(!(child != null && icon != null)), // fails if passed both parameters
        super(key: key);
 
@@ -880,6 +884,20 @@ class PopupMenuButton<T> extends StatefulWidget {
   /// the button that was used to create it.
   final Offset offset;
 
+  /// Whether this popup menu button is interactive.
+  ///
+  /// Must be non-null, defaults to `true`
+  ///
+  /// If `true` the button will respond to presses by displaying the menu.
+  ///
+  /// If `false`, the button is styled with the disabled color from the
+  /// current [Theme] and will not respond to presses or show the popup
+  /// menu and [onSelected], [onCanceled] and [itemBuilder] will not be called.
+  ///
+  /// This can be useful in situations where the app needs to show the button,
+  /// but doesn't currently have anything to show in the menu.
+  final bool enabled;
+
   @override
   _PopupMenuButtonState<T> createState() => _PopupMenuButtonState<T>();
 }
@@ -895,24 +913,28 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       ),
       Offset.zero & overlay.size,
     );
-    showMenu<T>(
-      context: context,
-      elevation: widget.elevation,
-      items: widget.itemBuilder(context),
-      initialValue: widget.initialValue,
-      position: position,
-    )
-    .then<void>((T newValue) {
-      if (!mounted)
-        return null;
-      if (newValue == null) {
-        if (widget.onCanceled != null)
-          widget.onCanceled();
-        return null;
-      }
-      if (widget.onSelected != null)
-        widget.onSelected(newValue);
-    });
+    final List<PopupMenuEntry<T>> items = widget.itemBuilder(context);
+    // Only show the menu if there is something to show
+    if (items.isNotEmpty) {
+      showMenu<T>(
+        context: context,
+        elevation: widget.elevation,
+        items: items,
+        initialValue: widget.initialValue,
+        position: position,
+      )
+      .then<void>((T newValue) {
+        if (!mounted)
+          return null;
+        if (newValue == null) {
+          if (widget.onCanceled != null)
+            widget.onCanceled();
+          return null;
+        }
+        if (widget.onSelected != null)
+          widget.onSelected(newValue);
+      });
+    }
   }
 
   Icon _getIcon(TargetPlatform platform) {
@@ -932,14 +954,14 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
     assert(debugCheckHasMaterialLocalizations(context));
     return widget.child != null
       ? InkWell(
-          onTap: showButtonMenu,
+          onTap: widget.enabled ? showButtonMenu : null,
           child: widget.child,
         )
       : IconButton(
           icon: widget.icon ?? _getIcon(Theme.of(context).platform),
           padding: widget.padding,
           tooltip: widget.tooltip ?? MaterialLocalizations.of(context).showMenuTooltip,
-          onPressed: showButtonMenu,
+          onPressed: widget.enabled ? showButtonMenu : null,
         );
   }
 }
