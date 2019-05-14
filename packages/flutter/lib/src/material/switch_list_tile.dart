@@ -11,14 +11,19 @@ import 'theme_data.dart';
 
 // Examples can assume:
 // void setState(VoidCallback fn) { }
-// bool _lights;
+// bool _isSelected;
 
 enum _SwitchListTileType { material, adaptive }
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
-/// the switch.
+/// the switch. Tapping and dragging the [Switch] also triggers the [onChanged]
+/// callback.
+///
+/// To ensure that [onChanged] correctly triggers, the state passed
+/// into [value] must be properly managed. This is typically done by invoking
+/// [State.setState] in [onChanged] to toggle the state value.
 ///
 /// The [value], [onChanged], [activeColor], [activeThumbImage], and
 /// [inactiveThumbImage] properties of this widget are identical to the
@@ -41,18 +46,24 @@ enum _SwitchListTileType { material, adaptive }
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample}
+/// {@tool sample --template=stateful_widget_scaffold}
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
 ///
 /// ```dart
-/// SwitchListTile(
-///   title: const Text('Lights'),
-///   value: _lights,
-///   onChanged: (bool value) { setState(() { _lights = value; }); },
-///   secondary: const Icon(Icons.lightbulb_outline),
-/// )
+/// bool _lights = false;
+///
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: SwitchListTile(
+///       title: const Text('Lights'),
+///       value: _lights,
+///       onChanged: (bool value) { setState(() { _lights = value; }); },
+///       secondary: const Icon(Icons.lightbulb_outline),
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -149,13 +160,13 @@ class SwitchListTile extends StatelessWidget {
   ///
   /// ```dart
   /// SwitchListTile(
-  ///   value: _lights,
+  ///   value: _isSelected,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
-  ///       _lights = newValue;
+  ///       _isSelected = newValue;
   ///     });
   ///   },
-  ///   title: Text('Lights'),
+  ///   title: Text('Selection'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;

@@ -392,9 +392,14 @@ String getWebBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'web');
 }
 
-/// Returns the linux build output directory.
+/// Returns the Linux build output directory.
 String getLinuxBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'linux');
+}
+
+/// Returns the Fuchsia build output directory.
+String getFuchsiaBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'fuchsia');
 }
 
 /// Returns directory used by incremental compiler (IKG - incremental kernel
