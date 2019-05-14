@@ -11,7 +11,7 @@
 #include "third_party/skia/include/core/SkShader.h"
 #include "third_party/skia/include/core/SkString.h"
 #include "third_party/tonic/typed_data/dart_byte_data.h"
-#include "third_party/tonic/typed_data/float32_list.h"
+#include "third_party/tonic/typed_data/typed_list.h"
 
 namespace flutter {
 
