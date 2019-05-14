@@ -447,7 +447,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
     final FocusScopeNode scope = enclosingScope;
     assert(scope != null);
-    return scope._lastFocus == this;
+    return scope.focusedChild == this;
   }
 
   /// Returns true if this node currently has the application-wide input focus.
@@ -830,9 +830,6 @@ class FocusScopeNode extends FocusNode {
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
-  // The last focus within this scope. Used for inactive focus.
-  FocusNode _lastFocus;
-
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to
@@ -872,17 +869,11 @@ class FocusScopeNode extends FocusNode {
     }
   }
 
-  // Return: the previous focus if _lastFocus has changed. Null if not.
-  FocusNode _setLastFocus({FocusNode newFocus}) {
-    print('setLastFocus to $newFocus by $this');
-    assert(newFocus == this || newFocus.ancestors.contains(this));
-    if (_lastFocus != newFocus) {
-      final FocusNode previousValue = _lastFocus;
-      _lastFocus = newFocus;
-      return previousValue;
-    }
-    return null;
-  }
+  /// Request to move the focus to the previous focus node, by calling the
+  /// [FocusTraversalPolicy.previous] method.
+  ///
+  /// Returns true if it successfully found a node and requested focus.
+  void resumeScopeFocus() => focusedChild?.requestFocus();
 
   @override
   void _doRequestFocus() {
@@ -1045,12 +1036,6 @@ class FocusManager with DiagnosticableTreeMixin {
       _dirtyNodes.addAll(nextPath.difference(previousPath));
       // Notify nodes that are no longer focused
       _dirtyNodes.addAll(previousPath.difference(nextPath));
-
-      final FocusScopeNode enclosingScope = _nextFocus.enclosingScope ?? rootScope;
-      final FocusNode previousLastFocus = enclosingScope._setLastFocus(newFocus: _nextFocus);
-      if (previousLastFocus != null) {
-        _dirtyNodes.add(previousLastFocus);
-      }
 
       _nextFocus = null;
     }

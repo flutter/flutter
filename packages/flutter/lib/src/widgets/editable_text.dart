@@ -1186,6 +1186,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     final TextSelection selection = _value.selection;
     final bool withinSelection = selection.start <= details.textPosition.offset
       && selection.end > details.textPosition.offset;
+    widget.focusNode.requestFocus();
     if (withinSelection) {
       widget.onContextMenu(ContextMenuDetails(
         location: details.globalPosition,

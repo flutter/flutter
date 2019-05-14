@@ -1250,6 +1250,12 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     );
   }
 
+  @override
+  void didPopNext(Route<dynamic> nextRoute) {
+    super.didPopNext(nextRoute);
+    FocusScope.of(subtreeContext).resumeScopeFocus();
+  }
+
   // We cache the part of the modal scope that doesn't change from frame to
   // frame so that we minimize the amount of building that happens.
   Widget _modalScopeCache;
