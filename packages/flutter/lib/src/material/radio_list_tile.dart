@@ -105,7 +105,7 @@ import 'theme_data.dart';
 ///       onTap: () {
 ///         if (value == false)
 ///           onChanged(true);
-///       }
+///       },
 ///       child: Container(
 ///         padding: padding,
 ///         child: Row(
