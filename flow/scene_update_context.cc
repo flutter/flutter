@@ -202,8 +202,8 @@ SceneUpdateContext::ExecutePaintTasks(CompositorContext::ScopedFrame& frame) {
                                    canvas,
                                    frame.gr_context(),
                                    nullptr,
-                                   frame.context().frame_time(),
-                                   frame.context().engine_time(),
+                                   frame.context().raster_time(),
+                                   frame.context().ui_time(),
                                    frame.context().texture_registry(),
                                    &frame.context().raster_cache(),
                                    false};

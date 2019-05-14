@@ -178,7 +178,7 @@ bool Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time
   // for instrumentation.
-  compositor_context_->engine_time().SetLapTime(layer_tree.construction_time());
+  compositor_context_->ui_time().SetLapTime(layer_tree.construction_time());
 
   auto* canvas = frame->SkiaCanvas();
 

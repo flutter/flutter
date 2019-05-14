@@ -17,7 +17,7 @@ void CompositorContext::BeginFrame(ScopedFrame& frame,
                                    bool enable_instrumentation) {
   if (enable_instrumentation) {
     frame_count_.Increment();
-    frame_time_.Start();
+    raster_time_.Start();
   }
 }
 
@@ -25,7 +25,7 @@ void CompositorContext::EndFrame(ScopedFrame& frame,
                                  bool enable_instrumentation) {
   raster_cache_.SweepAfterFrame();
   if (enable_instrumentation) {
-    frame_time_.Stop();
+    raster_time_.Stop();
   }
 }
 
