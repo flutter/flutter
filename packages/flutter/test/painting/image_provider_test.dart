@@ -16,16 +16,6 @@ import '../rendering/rendering_tester.dart';
 import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
-/// A valid encoding of a 1x1 GIF.
-final Uint8List _smallGif = Uint8List.fromList(<int>[
-  0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 0x01, 0x00,
-  0x01, 0x00, 0x80, 0x00, 0x00, 0xff, 0xff, 0xff,
-  0x00, 0x00, 0x00, 0x21, 0xf9, 0x04, 0x00, 0x00,
-  0x00, 0x00, 0x00, 0x2c, 0x00, 0x00, 0x00, 0x00,
-  0x01, 0x00, 0x01, 0x00, 0x00, 0x02, 0x02, 0x44,
-  0x01, 0x00, 0x3b,
-]);
-
 void main() {
   TestRenderingFlutterBinding(); // initializes the imageCache
   group(ImageProvider, () {
@@ -194,8 +184,8 @@ void main() {
     test('Notifies listeners of chunk events', () async {
       final List<List<int>> chunks = <List<int>>[];
       const int chunkSize = 8;
-      for (int offset = 0; offset < _smallGif.length; offset += chunkSize) {
-        chunks.add(_smallGif.skip(offset).take(chunkSize).toList());
+      for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
+        chunks.add(kTransparentImage.skip(offset).take(chunkSize).toList());
       }
       final Completer<void> imageAvailable = Completer<void>();
       final MockHttpClientRequest request = MockHttpClientRequest();
@@ -203,7 +193,7 @@ void main() {
       when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
       when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
       when(response.statusCode).thenReturn(HttpStatus.ok);
-      when(response.contentLength).thenReturn(_smallGif.length);
+      when(response.contentLength).thenReturn(kTransparentImage.length);
       when(response.listen(
         any,
         onDone: anyNamed('onDone'),
@@ -240,8 +230,8 @@ void main() {
         await imageAvailable.future;
         expect(events.length, chunks.length);
         for (int i = 0; i < events.length; i++) {
-          expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, _smallGif.length));
-          expect(events[i].expectedTotalBytes, _smallGif.length);
+          expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
+          expect(events[i].expectedTotalBytes, kTransparentImage.length);
         }
       });
     });
