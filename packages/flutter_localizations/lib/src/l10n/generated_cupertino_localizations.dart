@@ -109,6 +109,94 @@ class CupertinoLocalizationEn extends GlobalCupertinoLocalizations {
   String get todayLabel => r'Today';
 }
 
+/// The translations for Finnish (`fi`).
+class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
+  /// Create an instance of the translation bundle for Finnish.
+  ///
+  /// For details on the meaning of the arguments, see [GlobalCupertinoLocalizations].
+  const CupertinoLocalizationFi({
+    String localeName = 'fi',
+    @required intl.DateFormat fullYearFormat,
+    @required intl.DateFormat dayFormat,
+    @required intl.DateFormat mediumDateFormat,
+    @required intl.DateFormat singleDigitHourFormat,
+    @required intl.DateFormat singleDigitMinuteFormat,
+    @required intl.DateFormat doubleDigitMinuteFormat,
+    @required intl.DateFormat singleDigitSecondFormat,
+    @required intl.NumberFormat decimalFormat,
+  }) : super(
+    localeName: localeName,
+    fullYearFormat: fullYearFormat,
+    dayFormat: dayFormat,
+    mediumDateFormat: mediumDateFormat,
+    singleDigitHourFormat: singleDigitHourFormat,
+    singleDigitMinuteFormat: singleDigitMinuteFormat,
+    doubleDigitMinuteFormat: doubleDigitMinuteFormat,
+    singleDigitSecondFormat: singleDigitSecondFormat,
+    decimalFormat: decimalFormat,
+  );
+
+  @override
+  String get alertDialogLabel => r'Ilmoitus';
+
+  @override
+  String get anteMeridiemAbbreviation => r'ap';
+
+  @override
+  String get copyButtonLabel => r'Kopioi';
+
+  @override
+  String get cutButtonLabel => r'Leikkaa';
+
+  @override
+  String get datePickerDateOrderString => r'dmy';
+
+  @override
+  String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
+
+  @override
+  String get datePickerHourSemanticsLabelOne => r'Kello $hour';
+
+  @override
+  String get datePickerHourSemanticsLabelOther => r'Kello $hour';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOne => r'1 minuutti';
+
+  @override
+  String get datePickerMinuteSemanticsLabelOther => r'$minute minuuttia';
+
+  @override
+  String get pasteButtonLabel => r'Sijoita';
+
+  @override
+  String get postMeridiemAbbreviation => r'ip';
+
+  @override
+  String get selectAllButtonLabel => r'Valitse kaikki';
+
+  @override
+  String get timerPickerHourLabelOne => r'tunti';
+
+  @override
+  String get timerPickerHourLabelOther => r'tuntia';
+
+  @override
+  String get timerPickerMinuteLabelOne => r'min';
+
+  @override
+  String get timerPickerMinuteLabelOther => r'min';
+
+  @override
+  String get timerPickerSecondLabelOne => r's';
+
+  @override
+  String get timerPickerSecondLabelOther => r's';
+
+  @override
+  String get todayLabel => r'Tänään';
+}
+
 /// The translations for French (`fr`).
 class CupertinoLocalizationFr extends GlobalCupertinoLocalizations {
   /// Create an instance of the translation bundle for French.
@@ -298,6 +386,7 @@ class CupertinoLocalizationTr extends GlobalCupertinoLocalizations {
 ///  * [getCupertinoTranslation], whose documentation describes these values.
 final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <String>[
   'en', // English
+  'fi', // Finnish
   'fr', // French
   'tr', // Turkish
 ]);
@@ -313,6 +402,7 @@ final Set<String> kCupertinoSupportedLanguages = HashSet<String>.from(const <Str
 ///
 /// {@template flutter.localizations.cupertino.languages}
 ///  * `en` - English
+///  * `fi` - Finnish
 ///  * `fr` - French
 ///  * `tr` - Turkish
 /// {@endtemplate}
@@ -333,6 +423,8 @@ GlobalCupertinoLocalizations getCupertinoTranslation(
   switch (locale.languageCode) {
     case 'en':
       return CupertinoLocalizationEn(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
+    case 'fi':
+      return CupertinoLocalizationFi(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'fr':
       return CupertinoLocalizationFr(fullYearFormat: fullYearFormat, dayFormat: dayFormat, mediumDateFormat: mediumDateFormat, singleDigitHourFormat: singleDigitHourFormat, singleDigitMinuteFormat: singleDigitMinuteFormat, doubleDigitMinuteFormat: doubleDigitMinuteFormat, singleDigitSecondFormat: singleDigitSecondFormat, decimalFormat: decimalFormat);
     case 'tr':
