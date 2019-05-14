@@ -69,9 +69,10 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// ## SwitchListTile isn't exactly what I want
 ///
-/// If the way ListTile pads and positions its elements isn't quite what you're
-/// looking for, you can create custom labeled radio widgets by combining it
-/// with other widgets, such as [Text], [Container] and [InkWell].
+/// If the way SwitchListTile pads and positions its elements isn't quite what
+/// you're looking for, you can create custom labeled switch widgets by
+/// combining [Switch] with other widgets, such as [Text], [Container] and
+/// [InkWell].
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
