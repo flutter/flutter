@@ -81,8 +81,8 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LabeledRadio widget, but you can easily
-/// make your own configurable widget.
+/// Here is an example of a custom LabeledLinked Radio widget, but you can
+/// easily make your own configurable widget.
 ///
 /// ```dart code-imports
 /// import 'package:flutter/gestures.dart';

@@ -102,16 +102,11 @@ enum _SwitchListTileType { material, adaptive }
 ///       padding: padding,
 ///       child: Row(
 ///         children: <Widget>[
-///           InkWell(
-///             onTap: () {
-///               onChanged(!value);
+///           Checkbox(
+///             value: value,
+///             onChanged: (bool newValue) {
+///               onChanged(newValue);
 ///             },
-///             child: Checkbox(
-///               value: value,
-///               onChanged: (bool newValue) {
-///                 onChanged(newValue);
-///               },
-///             )
 ///           ),
 ///           RichText(
 ///             text: TextSpan(
