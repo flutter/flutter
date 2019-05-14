@@ -61,8 +61,7 @@ import 'theme_data.dart';
 ///
 /// If the way CheckboxListTile pads and positions its elements isn't quite
 /// what you're looking for, you can create custom labeled checkbox widgets by
-/// combining [Checkbox] with other widgets, such as [Text], [Container] and
-/// [InkWell].
+/// combining [Checkbox] with other widgets, such as [RichText] and [Padding].
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
