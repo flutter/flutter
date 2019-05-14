@@ -4,6 +4,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+""" Generate C/C++ headers and source files from the set of FIDL files specified
+in the meta.json manifest.
+"""
+
+
 import argparse
 import collections
 import json

@@ -259,3 +259,113 @@ template("fuchsia_sdk") {
   group(target_name) {
   }
 }
+
+template("fuchsia_package") {
+  assert(defined(invoker.name), "The name of the package must be specified.")
+  assert(defined(invoker.version), "The package version must be specified.")
+
+  package_name = invoker.name
+  package_version = invoker.version
+
+  package_json = {
+    name = package_name
+    version = "$package_version"
+  }
+  package_json_path = rebase_path("$target_gen_dir/package.json")
+  write_file(package_json_path, package_json, "json")
+
+  manifest = [
+    # Required.
+    "meta/package=$package_json_path",
+  ]
+  manifest_path = rebase_path("$target_gen_dir/manifest_$target_name.txt")
+  write_file(manifest_path, manifest, "list lines")
+
+  gen_far_target_name = "gen_far_$target_name"
+  gen_far_name = "$target_gen_dir/$package_name-$package_version.far"
+
+  action(gen_far_target_name) {
+    script = "//build/fuchsia/gen_package.py"
+
+    pm_binary = rebase_path("$_fuchsia_sdk_path/tools/pm")
+
+    inputs = [
+      pm_binary,
+      package_json_path,
+      manifest_path,
+    ]
+
+    outputs = [
+      gen_far_name,
+    ]
+
+    args = [
+      "--pm-bin",
+      pm_binary,
+      "--package-dir",
+      rebase_path(target_gen_dir),
+      "--signing-key",
+      rebase_path("//build/fuchsia/development.key"),
+      "--manifest-file",
+      rebase_path(manifest_path),
+    ]
+  }
+
+  copy(target_name) {
+    sources = [
+      gen_far_name,
+    ]
+
+    outputs = [
+      "$root_out_dir/far/$package_name.far",
+    ]
+
+    deps = [
+      ":$gen_far_target_name",
+    ]
+  }
+}
+
+template("fuchsia_repo") {
+  assert(defined(invoker.archives),
+         "The list of archives to publish must be specified.")
+  assert(defined(invoker.repo), "The location of the repo should be specified.")
+
+  action(target_name) {
+    script = "//build/fuchsia/gen_repo.py"
+
+    pm_binary = rebase_path("$_fuchsia_sdk_path/tools/pm")
+    repo_directory = invoker.repo
+
+    inputs = [
+      pm_binary,
+    ]
+
+    archive_flags = []
+
+    foreach(archive, invoker.archives) {
+      assert(get_path_info(archive, "extension") == "far",
+             "Archive '$archive' does not have the .far extension.")
+      inputs += [ archive ]
+      archive_flags += [
+        "--archive",
+        rebase_path(archive),
+      ]
+    }
+
+    outputs = [
+      repo_directory,
+    ]
+
+    args = [
+             "--pm-bin",
+             pm_binary,
+             "--repo-dir",
+             rebase_path(repo_directory),
+           ] + archive_flags
+
+    if (defined(invoker.deps)) {
+      deps = invoker.deps
+    }
+  }
+}
