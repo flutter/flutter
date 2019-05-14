@@ -135,18 +135,6 @@ class UpdatePackagesCommand extends FlutterCommand {
       });
     }
 
-    // The dev/integration_tests/android_views integration test depends on an assets
-    // package that is in the goldens repository. We need to make sure that the goldens
-    // repository is cloned locally before we verify or update pubspecs.
-    // TODO(Piinks): Resolve dependency for android_views living in goldens repository
-//    printStatus('Cloning goldens repository...');
-//    try {
-//      final GoldensClient goldensClient = GoldensClient();
-//      await goldensClient.prepare();
-//    } on NonZeroExitCode catch (e) {
-//      throwToolExit(e.stderr, exitCode: e.exitCode);
-//    }
-
     if (isVerifyOnly) {
       bool needsUpdate = false;
       printStatus('Verifying pubspecs...');
