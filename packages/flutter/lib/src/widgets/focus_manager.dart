@@ -441,6 +441,15 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _manager._currentFocus.ancestors.contains(this);
   }
 
+  bool get hasInactiveFocus {
+    if (_manager == null) {
+      return false;
+    }
+    final FocusScopeNode scope = enclosingScope;
+    assert(scope != null);
+    return scope._lastFocus == this;
+  }
+
   /// Returns true if this node currently has the application-wide input focus.
   ///
   /// A [FocusNode] has the primary focus when the node is focused in its
@@ -530,6 +539,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       final FocusScopeNode scope = enclosingScope;
       assert(scope != null, 'Node has primary focus, but no enclosingScope.');
       scope._focusedChildren.remove(this);
+      print('removed $this, remains ${enclosingScope?._focusedChildren?.length}');
       _manager?._willUnfocusNode(this);
       return;
     }
@@ -820,6 +830,9 @@ class FocusScopeNode extends FocusNode {
   // last (which is the top of the stack).
   final List<FocusNode> _focusedChildren = <FocusNode>[];
 
+  // The last focus within this scope. Used for inactive focus.
+  FocusNode _lastFocus;
+
   /// Make the given [scope] the active child scope for this scope.
   ///
   /// If the given [scope] is not yet a part of the focus tree, then add it to
@@ -857,6 +870,18 @@ class FocusScopeNode extends FocusNode {
         'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
       node._doRequestFocus();
     }
+  }
+
+  // Return: the previous focus if _lastFocus has changed. Null if not.
+  FocusNode _setLastFocus({FocusNode newFocus}) {
+    print('setLastFocus to $newFocus by $this');
+    assert(newFocus == this || newFocus.ancestors.contains(this));
+    if (_lastFocus != newFocus) {
+      final FocusNode previousValue = _lastFocus;
+      _lastFocus = newFocus;
+      return previousValue;
+    }
+    return null;
   }
 
   @override
@@ -1020,6 +1045,13 @@ class FocusManager with DiagnosticableTreeMixin {
       _dirtyNodes.addAll(nextPath.difference(previousPath));
       // Notify nodes that are no longer focused
       _dirtyNodes.addAll(previousPath.difference(nextPath));
+
+      final FocusScopeNode enclosingScope = _nextFocus.enclosingScope ?? rootScope;
+      final FocusNode previousLastFocus = enclosingScope._setLastFocus(newFocus: _nextFocus);
+      if (previousLastFocus != null) {
+        _dirtyNodes.add(previousLastFocus);
+      }
+
       _nextFocus = null;
     }
     if (previousFocus != _currentFocus) {

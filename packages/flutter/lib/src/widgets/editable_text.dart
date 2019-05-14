@@ -1033,6 +1033,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   bool get _hasFocus => widget.focusNode.hasFocus;
+  bool get _hasInactiveFocus => widget.focusNode.hasInactiveFocus;
   bool get _isMultiline => widget.maxLines != 1;
 
   // Calculate the new scroll offset so the cursor remains visible.
@@ -1375,8 +1376,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       }
     } else {
       WidgetsBinding.instance.removeObserver(this);
-      // Clear the selection and composition state if this widget lost focus.
-      _value = TextEditingValue(text: _value.text);
+      // If this widget lost focus, composition state is always cleared.
+      // Clear the selection state unless it still has inactive focus.
+      final TextSelection newSelection = _hasInactiveFocus ?
+        _value.selection : const TextSelection.collapsed(offset: -1);
+      _value = TextEditingValue(text: _value.text, selection: newSelection);
     }
     updateKeepAlive();
   }
@@ -1451,7 +1455,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
-    // TODO
     final Color selectionColor = _hasFocus ? widget.selectionColor : const Color.fromARGB(255, 170, 170, 170);
     return Scrollable(
       excludeFromSemantics: true,
