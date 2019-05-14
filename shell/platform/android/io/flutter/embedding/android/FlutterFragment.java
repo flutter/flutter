@@ -302,6 +302,11 @@ public class FlutterFragment extends Fragment {
     //                    control of the entire window. This is unacceptable for non-fullscreen
     //                    use-cases.
     platformPlugin = new PlatformPlugin(getActivity(), flutterEngine.getPlatformChannel());
+
+    // Notify any plugins that are currently attached to our FlutterEngine that they
+    // are now attached to an Activity.
+    // TODO(mattcarroll): send in a real lifecycle.
+    flutterEngine.getActivityControlSurface().attachToActivity(getActivity(), null);
   }
 
   private void initializeFlutter(@NonNull Context context) {
@@ -538,6 +543,10 @@ public class FlutterFragment extends Fragment {
     super.onDetach();
     Log.d(TAG, "onDetach()");
 
+    // Notify plugins that they are no longer attached to an Activity.
+    // TODO(mattcarroll): differentiate between detaching for config changes and otherwise.
+    flutterEngine.getActivityControlSurface().detachFromActivity();
+
     // Null out the platformPlugin to avoid a possible retain cycle between the plugin, this Fragment,
     // and this Fragment's Activity.
     platformPlugin = null;
@@ -587,6 +596,11 @@ public class FlutterFragment extends Fragment {
    * @param grantResults permission grants or denials
    */
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    if (flutterEngine != null) {
+      flutterEngine.getActivityControlSurface().onRequestPermissionsResult(requestCode, permissions, grantResults);
+    } else {
+      Log.w(TAG, "onRequestPermissionResult() invoked before FlutterFragment was attached to an Activity.");
+    }
   }
 
   /**
@@ -598,6 +612,11 @@ public class FlutterFragment extends Fragment {
    * @param intent new Intent
    */
   public void onNewIntent(@NonNull Intent intent) {
+    if (flutterEngine != null) {
+      flutterEngine.getActivityControlSurface().onNewIntent(intent);
+    } else {
+      Log.w(TAG, "onNewIntent() invoked before FlutterFragment was attached to an Activity.");
+    }
   }
 
   /**
@@ -609,6 +628,11 @@ public class FlutterFragment extends Fragment {
    */
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    if (flutterEngine != null) {
+      flutterEngine.getActivityControlSurface().onActivityResult(requestCode, resultCode, data);
+    } else {
+      Log.w(TAG, "onActivityResult() invoked before FlutterFragment was attached to an Activity.");
+    }
   }
 
   /**
@@ -618,6 +642,11 @@ public class FlutterFragment extends Fragment {
    * See {@link android.app.Activity#onUserLeaveHint()}
    */
   public void onUserLeaveHint() {
+    if (flutterEngine != null) {
+      flutterEngine.getActivityControlSurface().onUserLeaveHint();
+    } else {
+      Log.w(TAG, "onUserLeaveHint() invoked before FlutterFragment was attached to an Activity.");
+    }
   }
 
   /**
