@@ -145,6 +145,8 @@ class IconButton extends StatelessWidget {
     this.highlightColor,
     this.splashColor,
     this.disabledColor,
+    this.containedInkWell = false,
+    this.highlightShape = BoxShape.circle,
     @required this.onPressed,
     this.tooltip,
   }) : assert(iconSize != null),
@@ -237,6 +239,12 @@ class IconButton extends StatelessWidget {
   /// See also [color].
   final Color disabledColor;
 
+  // TODO(shihaohong): Add comments here
+  final bool containedInkWell;
+
+  // TODO(shihaohong): Add comments here
+  final BoxShape highlightShape;
+
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.
@@ -293,6 +301,8 @@ class IconButton extends StatelessWidget {
       child: result,
       highlightColor: highlightColor ?? Theme.of(context).highlightColor,
       splashColor: splashColor ?? Theme.of(context).splashColor,
+      containedInkWell: containedInkWell,
+      highlightShape: highlightShape,
       radius: math.max(
         Material.defaultSplashRadius,
         (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
