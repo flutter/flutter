@@ -288,7 +288,7 @@ class IOSSimulator extends Device {
     if (isSupported())
       return 'Supported';
 
-    return _supportMessage != null ? _supportMessage : 'Unknown';
+    return _supportMessage ?? 'Unknown';
   }
 
   @override
@@ -518,7 +518,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
       onListen: _start,
       onCancel: _stop,
     );
-    _appName = app == null ? null : app.name.replaceAll('.app', '');
+    _appName = app?.name?.replaceAll('.app', '');
   }
 
   final IOSSimulator device;
