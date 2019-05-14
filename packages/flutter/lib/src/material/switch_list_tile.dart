@@ -67,6 +67,80 @@ enum _SwitchListTileType { material, adaptive }
 /// ```
 /// {@end-tool}
 ///
+/// ## SwitchListTile isn't exactly what I want
+///
+/// If the way ListTile pads and positions its elements isn't quite what you're
+/// looking for, you can create custom labeled radio widgets by combining it
+/// with other widgets, such as [Text], [Container] and [InkWell].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of a custom LabeledSwitch widget, but you can easily
+/// make your own configurable widget.
+///
+/// ```dart preamble
+/// class LabeledSwitch extends StatelessWidget {
+///   const LabeledSwitch({
+///     this.label,
+///     this.padding,
+///     this.groupValue,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool groupValue;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return InkWell(
+///       onTap: () {
+///         onChanged(!value);
+///       },
+///       child: Container(
+///         padding: padding,
+///         child: Row(
+///           children: <Widget>[
+///             Switch(
+///               value: value,
+///               onChanged: (bool newValue) {
+///                 onChanged(newValue);
+///               },
+///             ),
+///             Text(label),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LabeledSwitch(
+///         label: 'This is the label text',
+///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         value: isSelected,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             isSelected = newValue;
+///           });
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [ListTileTheme], which can be used to affect the style of list tiles,
