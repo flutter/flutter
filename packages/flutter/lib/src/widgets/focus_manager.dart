@@ -598,6 +598,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(node._manager == _manager);
 
     node.enclosingScope?._focusedChildren?.remove(node);
+    print('removed $node, remains ${node.enclosingScope?._focusedChildren?.length}');
 
     node._parent = null;
     _children.remove(node);
