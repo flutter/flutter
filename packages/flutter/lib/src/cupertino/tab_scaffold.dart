@@ -59,16 +59,16 @@ import 'theme.dart';
 ///
 /// * [CupertinoTabScaffold], a tabbed application root layout that can be
 ///   controlled by a [CupertinoTabController].
-class CupertinoTabController extends ValueNotifier<int> {
+class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
   ///
   /// The [initialIndex] must not be null and defaults to 0. The value must be
   /// greater than or equal to 0, and less than the total number of tabs.
   CupertinoTabController({ int initialIndex = 0 })
-    : assert(initialIndex != null),
-      assert(initialIndex >= 0),
-      super(initialIndex);
+    : _index = initialIndex,
+      assert(initialIndex != null),
+      assert(initialIndex >= 0);
 
   bool _isDisposed = false;
 
@@ -80,19 +80,13 @@ class CupertinoTabController extends ValueNotifier<int> {
   ///
   /// The value must be greater than or equal to 0, and less than the total
   /// number of tabs.
-  int get index => value;
-  @mustCallSuper
-  set index(int value) => this.value = value;
-
-  /// Equivalent to [index].
-  @override
-  int get value => super.value;
-  @mustCallSuper
-  @override
-  set value(int value) {
+  int get index => _index;
+  int _index;
+  set index(int value) {
     assert(value != null);
     assert(value >= 0);
-    super.value = value;
+    _index = value;
+    notifyListeners();
   }
 
   @mustCallSuper
@@ -112,7 +106,7 @@ class CupertinoTabController extends ValueNotifier<int> {
 /// will automatically listen to the provided [CupertinoTabBar]'s tap callbacks
 /// to change the active tab.
 ///
-/// A [controller] can be used to provide an initialy selected tab index and manage
+/// A [controller] can be used to provide an initially selected tab index and manage
 /// subsequent tab changes. If set to null, the scaffold will create its own
 /// [CupertinoTabController] and manage it internally. Otherwise it's up to the
 /// owner of [controller] to call `dispose` on it after finish using it.
@@ -213,10 +207,11 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// that lets the user switch between different tabs in the main content area
   /// when present.
   ///
-  /// The [CupertinoTabBar.currentIndex] is only used as the the initial active
-  /// tab index when no [controller] is provided. Subsequently providing a different
-  /// [CupertinoTabBar.currentIndex] does not affect the scaffold or the tab bar's
-  /// active tab index.
+  /// The [CupertinoTabBar.currentIndex] is only used to initialize a
+  /// [CupertinoTabController] when no [controller] is provided. Subsequently
+  /// providing a different [CupertinoTabBar.currentIndex] does not affect the
+  /// scaffold or the tab bar's active tab index. To programmatically change
+  /// the active tab index, use a [CupertinoTabController].
   ///
   /// If [CupertinoTabBar.onTap] is provided, it will still be called.
   /// [CupertinoTabScaffold] automatically also listen to the
@@ -312,7 +307,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     );
 
     // The value of `_controller.index` has already been updated at this point.
-    // Calling `setState` to rebuild using the new index.
+    // Calling `setState` to rebuild using `_controller.index`.
     setState(() {});
   }
 
@@ -415,9 +410,9 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   @override
   void dispose() {
     // Only dispose `_controller` when the state instance owns it.
-    if(widget.controller == null) {
+    if (widget.controller == null) {
       _controller?.dispose();
-    } else if (_controller?._isDisposed == false){
+    } else if (_controller?._isDisposed == false) {
       _controller.removeListener(_onCurrentIndexChange);
     }
 
