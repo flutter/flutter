@@ -76,44 +76,57 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LabeledSwitch widget, but you can easily
-/// make your own configurable widget.
+/// Here is an example of a custom LabeledLinkedCheckbox widget, but you can
+/// easily make your own configurable widget.
 ///
+/// ```dart code-imports
+/// import 'package:flutter/gestures.dart';
+/// ```
 /// ```dart preamble
-/// class LabeledSwitch extends StatelessWidget {
-///   const LabeledSwitch({
+/// class LabeledLinkedCheckbox extends StatelessWidget {
+///   const LabeledLinkedCheckbox({
 ///     this.label,
 ///     this.padding,
-///     this.groupValue,
 ///     this.value,
 ///     this.onChanged,
 ///   });
 ///
 ///   final String label;
 ///   final EdgeInsets padding;
-///   final bool groupValue;
 ///   final bool value;
 ///   final Function onChanged;
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return InkWell(
-///       onTap: () {
-///         onChanged(!value);
-///       },
-///       child: Padding(
-///         padding: padding,
-///         child: Row(
-///           children: <Widget>[
-///             Switch(
+///     return Padding(
+///       padding: padding,
+///       child: Row(
+///         children: <Widget>[
+///           InkWell(
+///             onTap: () {
+///               onChanged(!value);
+///             },
+///             child: Checkbox(
 ///               value: value,
 ///               onChanged: (bool newValue) {
 ///                 onChanged(newValue);
 ///               },
+///             )
+///           ),
+///           RichText(
+///             text: TextSpan(
+///               text: label,
+///               style: TextStyle(
+///                 color: Colors.blueAccent,
+///                 decoration: TextDecoration.underline,
+///               ),
+///               recognizer: TapGestureRecognizer()
+///                 ..onTap = () {
+///                 print('Link has been tapped.');
+///               },
 ///             ),
-///             Text(label),
-///           ],
-///         ),
+///           ),
+///         ],
 ///       ),
 ///     );
 ///   }
@@ -126,8 +139,8 @@ enum _SwitchListTileType { material, adaptive }
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
-///       child: LabeledSwitch(
-///         label: 'This is the label text',
+///       child: LabeledLinkedCheckbox(
+///         label: 'Linked, tappable label text',
 ///         padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
