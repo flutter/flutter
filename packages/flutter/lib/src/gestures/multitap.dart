@@ -397,12 +397,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
       longTapDelay: longTapDelay,
     );
     if (onTapDown != null)
-      invokeCallback<void>('onTapDown', () {
-        onTapDown(event.pointer, TapDownDetails(
-          globalPosition: event.position,
-          kind: event.kind,
-        ));
-      });
+      invokeCallback<void>('onTapDown', () => onTapDown(event.pointer, TapDownDetails(globalPosition: event.position)));
   }
 
   @override
@@ -437,15 +432,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   void _dispatchLongTap(int pointer, Offset lastPosition) {
     assert(_gestureMap.containsKey(pointer));
     if (onLongTapDown != null)
-      invokeCallback<void>('onLongTapDown', () {
-        onLongTapDown(
-          pointer,
-          TapDownDetails(
-            globalPosition: lastPosition,
-            kind: getKindForPointer(pointer),
-          ),
-        );
-      });
+      invokeCallback<void>('onLongTapDown', () => onLongTapDown(pointer, TapDownDetails(globalPosition: lastPosition)));
   }
 
   @override
