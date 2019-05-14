@@ -31,8 +31,24 @@ typedef RpcPeerConnectionFunction = Future<json_rpc.Peer> Function(
 /// custom connection function is needed.
 RpcPeerConnectionFunction fuchsiaVmServiceConnectionFunction = _waitAndConnect;
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+bool _ignoreRpcError(dynamic error) {
+  if (error is json_rpc.RpcException) {
+    final json_rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
 
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
   _log.fine('Error in internalimplementation of JSON RPC.\n$error\n$stack');
 }
 

@@ -956,7 +956,23 @@ void restoreVmServiceConnectFunction() {
   vmServiceConnectFunction = _waitAndConnect;
 }
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+bool _ignoreRpcError(dynamic error) {
+  if (error is rpc.RpcException) {
+    final rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
   _log.trace('Unhandled RPC error:\n$error\n$stack');
   // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
   // assert(false);
