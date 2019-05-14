@@ -71,8 +71,7 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// If the way SwitchListTile pads and positions its elements isn't quite what
 /// you're looking for, you can create custom labeled switch widgets by
-/// combining [Switch] with other widgets, such as [Text], [Container] and
-/// [InkWell].
+/// combining [Switch] with other widgets, such as [RichText] and [Padding].
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
@@ -83,8 +82,8 @@ enum _SwitchListTileType { material, adaptive }
 /// import 'package:flutter/gestures.dart';
 /// ```
 /// ```dart preamble
-/// class LabeledLinkedCheckbox extends StatelessWidget {
-///   const LabeledLinkedCheckbox({
+/// class LabeledLinkedSwitch extends StatelessWidget {
+///   const LabeledLinkedSwitch({
 ///     this.label,
 ///     this.padding,
 ///     this.value,
@@ -102,7 +101,7 @@ enum _SwitchListTileType { material, adaptive }
 ///       padding: padding,
 ///       child: Row(
 ///         children: <Widget>[
-///           Checkbox(
+///           Switch(
 ///             value: value,
 ///             onChanged: (bool newValue) {
 ///               onChanged(newValue);
@@ -134,7 +133,7 @@ enum _SwitchListTileType { material, adaptive }
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
-///       child: LabeledLinkedCheckbox(
+///       child: LabeledLinkedSwitch(
 ///         label: 'Linked, tappable label text',
 ///         padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///         value: isSelected,
