@@ -84,9 +84,12 @@ import 'theme_data.dart';
 /// Here is an example of a custom LabeledRadio widget, but you can easily
 /// make your own configurable widget.
 ///
+/// ```dart code-imports
+/// import 'package:flutter/gestures.dart';
+/// ```
 /// ```dart preamble
-/// class LabeledRadio extends StatelessWidget {
-///   const LabeledRadio({
+/// class LabeledLinkedRadio extends StatelessWidget {
+///   const LabeledLinkedRadio({
 ///     this.label,
 ///     this.padding,
 ///     this.groupValue,
@@ -102,23 +105,31 @@ import 'theme_data.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return InkWell(
-///       onTap: () {
-///         if (value == false)
-///           onChanged(true);
-///       },
-///       child: Padding(
-///         padding: padding,
-///         child: Row(
-///           children: <Widget>[
-///             Radio<bool>(
-///               groupValue: groupValue,
-///               value: value,
-///               onChanged: (bool newValue) => onChanged(newValue),
+///     return Padding(
+///       padding: padding,
+///       child: Row(
+///         children: <Widget>[
+///           Radio<bool>(
+///             groupValue: groupValue,
+///             value: value,
+///             onChanged: (bool newValue) {
+///               onChanged(newValue);
+///             }
+///           ),
+///           RichText(
+///             text: TextSpan(
+///               text: label,
+///               style: TextStyle(
+///                 color: Colors.blueAccent,
+///                 decoration: TextDecoration.underline,
+///               ),
+///               recognizer: TapGestureRecognizer()
+///                 ..onTap = () {
+///                 print('Link has been tapped.');
+///               },
 ///             ),
-///             Text(label),
-///           ],
-///         ),
+///           ),
+///         ],
 ///       ),
 ///     );
 ///   }
@@ -130,18 +141,32 @@ import 'theme_data.dart';
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     body: Center(
-///       child: LabeledRadio(
-///         label: 'This is the label text',
-///         padding: EdgeInsets.symmetric(horizontal: 5.0),
-///         value: isRadioSelected,
-///         groupValue: true,
-///         onChanged: (bool newValue) {
-///           setState(() {
-///             isRadioSelected = newValue;
-///           });
-///         },
-///       ),
+///     body: Column(
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <Widget>[
+///         LabeledLinkedRadio(
+///           label: 'First tappable label text',
+///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           value: true,
+///           groupValue: isRadioSelected,
+///           onChanged: (bool newValue) {
+///             setState(() {
+///               isRadioSelected = newValue;
+///             });
+///           },
+///         ),
+///         LabeledLinkedRadio(
+///           label: 'Second tappable label text',
+///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           value: false,
+///           groupValue: isRadioSelected,
+///           onChanged: (bool newValue) {
+///             setState(() {
+///               isRadioSelected = newValue;
+///             });
+///           },
+///         ),
+///       ],
 ///     ),
 ///   );
 /// }
