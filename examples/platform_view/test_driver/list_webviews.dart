@@ -46,7 +46,7 @@ class MyHomePage extends StatelessWidget {
       ),
       body: Center(
         child: ListView(
-          key: const ValueKey<String>('list_key'),
+          key: const ValueKey<String>('long_list'),
           children: list,
         ),
       ),
