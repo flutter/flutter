@@ -91,22 +91,32 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => IosProject.fromFlutter(this);
+  IosProject _ios;
+  IosProject get ios => _ios ??= IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  AndroidProject get android => AndroidProject._(this);
+  AndroidProject _android;
+  AndroidProject get android => _android ??= AndroidProject._(this);
 
   /// The web sub project of this project.
-  WebProject get web => WebProject._(this);
+  WebProject _web;
+  WebProject get web => _web ??= WebProject._(this);
 
-  /// The macos sub project of this project.
-  MacOSProject get macos => MacOSProject._(this);
+  /// The MacOS sub project of this project.
+  MacOSProject _macos;
+  MacOSProject get macos => _macos ??= MacOSProject._(this);
 
-  /// The linux sub project of this project.
-  LinuxProject get linux => LinuxProject._(this);
+  /// The Linux sub project of this project.
+  LinuxProject _linux;
+  LinuxProject get linux => _linux ??= LinuxProject._(this);
 
-  /// The windows sub project of this project.
-  WindowsProject get windows => WindowsProject._(this);
+  /// The Windows sub project of this project.
+  WindowsProject _windows;
+  WindowsProject get windows => _windows ??= WindowsProject._(this);
+
+  /// The Fuchsia sub project of this project.
+  FuchsiaProject _fuchsia;
+  FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -605,4 +615,21 @@ class LinuxProject {
 
   /// The Linux project makefile.
   File get makeFile => editableHostAppDirectory.childFile('Makefile');
+}
+
+/// The Fuchisa sub project
+class FuchsiaProject {
+  FuchsiaProject._(this.project);
+
+  final FlutterProject project;
+
+  Directory _editableHostAppDirectory;
+  Directory get editableHostAppDirectory =>
+      _editableHostAppDirectory ??= project.directory.childDirectory('fuchsia');
+
+  bool existsSync() => editableHostAppDirectory.existsSync();
+
+  Directory _meta;
+  Directory get meta =>
+      _meta ??= editableHostAppDirectory.childDirectory('meta');
 }
