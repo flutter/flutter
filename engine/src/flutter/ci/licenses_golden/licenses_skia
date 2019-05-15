@@ -1,4 +1,4 @@
-Signature: ec11679e1ce29c41cb6cb1d3f244f138
+Signature: 511500e947ff271ad254644d57a52143
 
 UNUSED LICENSES:
 
@@ -5372,6 +5372,8 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrTransferFromOp.h
 FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.h
 FILE: ../../../third_party/skia/src/sksl/SkSLByteCodeGenerator.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLByteCodeGenerator.h
+FILE: ../../../third_party/skia/src/sksl/SkSLExternalValue.h
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLExternalValueReference.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC
 
