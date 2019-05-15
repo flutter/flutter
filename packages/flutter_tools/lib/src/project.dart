@@ -574,7 +574,7 @@ class MacOSProject {
   /// The Xcode project file.
   Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
 
-  /// The file where the Xcode bulid will write the name of the built app.
+  /// The file where the Xcode build will write the name of the built app.
   ///
   /// Ideally this will be replaced in the future with inpection of the Runner
   /// scheme's target.
