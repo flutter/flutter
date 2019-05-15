@@ -1,4 +1,4 @@
-Signature: b20afbc397e016f35432399d87bb21b4
+Signature: 44652e110b191bac979e7129d985e086
 
 UNUSED LICENSES:
 
@@ -4608,6 +4608,7 @@ FILE: ../../../third_party/dart/runtime/observatory/web/favicon.ico
 FILE: ../../../third_party/dart/runtime/observatory/web/index.html
 FILE: ../../../third_party/dart/runtime/observatory/web/third_party/trace_viewer_full.html
 FILE: ../../../third_party/dart/runtime/observatory/web/timeline.html
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi_dbc_trampoline_x64_linux_mac.S
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-default.svg
 FILE: ../../../third_party/dart/samples/ffi/sqlite/docs/lib/scenario-full.svg
 FILE: ../../../third_party/dart/sdk/lib/html/html_common/conversions_dart2js.dart
@@ -5134,6 +5135,7 @@ FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.h
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
 FILE: ../../../third_party/dart/runtime/bin/socket_base_android.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi.cc
+FILE: ../../../third_party/dart/runtime/lib/ffi.h
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/lib/ffi_dynamic_library_patch.dart
 FILE: ../../../third_party/dart/runtime/lib/ffi_native_type_patch.dart
@@ -5161,6 +5163,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator_test
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/ffi.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/ffi_dbc_trampoline.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm.cc
