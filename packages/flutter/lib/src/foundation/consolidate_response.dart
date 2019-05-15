@@ -37,8 +37,8 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// [HttpClient.autoUncompress] or not).
 // TODO(tvolkert): Remove the [client] param once https://github.com/dart-lang/sdk/issues/36971 is fixed.
 Future<Uint8List> consolidateHttpClientResponseBytes(
-  HttpClient client,
   HttpClientResponse response, {
+  HttpClient client,
   BytesReceivedCallback onBytesReceived,
 }) {
   final Completer<Uint8List> completer = Completer<Uint8List>.sync();
@@ -47,7 +47,7 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   ByteConversionSink sink = output;
   int expectedContentLength = response.contentLength;
   if (response.headers?.value(HttpHeaders.contentEncodingHeader) == 'gzip') {
-    if (client.autoUncompress) {
+    if (client?.autoUncompress ?? true) {
       // response.contentLength will not match our bytes stream, so we declare
       // that we don't know the expected content length.
       expectedContentLength = -1;

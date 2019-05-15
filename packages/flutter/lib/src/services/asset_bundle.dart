@@ -120,7 +120,7 @@ class NetworkAssetBundle extends AssetBundle {
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'
       );
-    final Uint8List bytes = await consolidateHttpClientResponseBytes(_httpClient, response);
+    final Uint8List bytes = await consolidateHttpClientResponseBytes(response, client: _httpClient);
     return bytes.buffer.asByteData();
   }
 

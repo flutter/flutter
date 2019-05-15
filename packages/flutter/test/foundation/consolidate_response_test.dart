@@ -50,7 +50,7 @@ void main() {
       when(response.contentLength)
           .thenReturn(chunkOne.length + chunkTwo.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(client, response);
+          await consolidateHttpClientResponseBytes(response, client: client);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -58,7 +58,7 @@ void main() {
     test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength).thenReturn(chunkOne.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(client, response);
+          await consolidateHttpClientResponseBytes(response, client: client);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -66,7 +66,7 @@ void main() {
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
       when(response.contentLength).thenReturn(-1);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(client, response);
+          await consolidateHttpClientResponseBytes(response, client: client);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -76,8 +76,8 @@ void main() {
       when(response.contentLength).thenReturn(syntheticTotal);
       final List<int> records = <int>[];
       await consolidateHttpClientResponseBytes(
-        client,
         response,
+        client: client,
         onBytesReceived: (int cumulative, int total) {
           records.addAll(<int>[cumulative, total]);
         },
@@ -114,7 +114,7 @@ void main() {
       });
       when(response.contentLength).thenReturn(-1);
 
-      expect(consolidateHttpClientResponseBytes(client, response),
+      expect(consolidateHttpClientResponseBytes(response, client: client),
           throwsA(isInstanceOf<Exception>()));
     });
 
@@ -149,7 +149,7 @@ void main() {
       test('Uncompresses GZIP bytes if autoUncompress is false', () async {
         when(client.autoUncompress).thenReturn(false);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> bytes = await consolidateHttpClientResponseBytes(client, response);
+        final List<int> bytes = await consolidateHttpClientResponseBytes(response, client: client);
         expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       });
 
@@ -158,8 +158,8 @@ void main() {
         when(response.contentLength).thenReturn(gzipped.length);
         final List<int> records = <int>[];
         await consolidateHttpClientResponseBytes(
-          client,
           response,
+          client: client,
           onBytesReceived: (int cumulative, int total) {
             records.addAll(<int>[cumulative, total]);
           },
@@ -178,8 +178,8 @@ void main() {
         when(response.contentLength).thenReturn(syntheticTotal);
         final List<int> records = <int>[];
         await consolidateHttpClientResponseBytes(
-          client,
           response,
+          client: client,
           onBytesReceived: (int cumulative, int total) {
             records.addAll(<int>[cumulative, total]);
           },

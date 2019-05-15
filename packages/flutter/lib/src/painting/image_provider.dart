@@ -547,8 +547,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
         throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
-        _httpClient,
         response,
+        client: _httpClient,
         onBytesReceived: (int cumulative, int total) {
           chunkEvents.add(ImageChunkEvent(cumulative, total));
         },
