@@ -75,8 +75,16 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LinkedLabelSwitch widget, but you can
-/// easily make your own configurable widget.
+/// Here is an example of a custom LinkedLabelSwitch widget that allows a
+/// [RichText] widget to be nested in a switch tile widget.
+///
+/// Since SwitchListTile is wrapped with a [MergeSemantics] widget, it wants
+/// to merge its children semantics nodes into one node in the semantics tree.
+/// Therefore, SwitchListTile would not work with [RichText], which forces
+/// itself to be a standalone semantics node.
+///
+/// If you're interested in learning more about this interaction, see the
+/// discussion in [TextSpan.recognizer].
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';

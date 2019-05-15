@@ -74,14 +74,16 @@ import 'theme_data.dart';
 ///
 /// ## RadioListTile isn't exactly what I want
 ///
-/// If the way RadioListTile pads and positions its elements isn't quite what
-/// you're looking for, you can create custom labeled radio widgets by
-/// combining [Radio] with other widgets, such as [RichText] and [Padding].
+/// Here is an example of a custom LinkedLabelRadio widget that allows a
+/// [RichText] widget to be nested in a radio tile widget.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// Since RadioListTile is wrapped with a [MergeSemantics] widget, it wants
+/// to merge its children semantics nodes into one node in the semantics tree.
+/// Therefore, RadioListTile would not work with [RichText], which forces
+/// itself to be a standalone semantics node.
 ///
-/// Here is an example of a custom LinkedLabelRadio widget, but you can
-/// easily make your own configurable widget.
+/// If you're interested in learning more about this interaction, see the
+/// discussion in [TextSpan.recognizer].
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
