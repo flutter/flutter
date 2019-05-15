@@ -8,7 +8,6 @@
 
 #include <vector>
 
-#include "flutter/fml/arraysize.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/macros.h"
@@ -16,6 +15,7 @@
 #include "flutter/fml/paths.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/paths_android.h"
+#include "flutter/fml/size.h"
 #include "flutter/lib/ui/plugins/callback_cache.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/runtime/start_up.h"
@@ -145,7 +145,7 @@ bool FlutterMain::Register(JNIEnv* env) {
     return false;
   }
 
-  return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
+  return env->RegisterNatives(clazz, methods, fml::size(methods)) == 0;
 }
 
 }  // namespace flutter
