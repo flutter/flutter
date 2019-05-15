@@ -193,6 +193,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   }
 
   /// Gets anchor for material-style text selection handles.
+  ///
+  /// See [TextSelectionControls.getHandleAnchor].
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     switch (type) {

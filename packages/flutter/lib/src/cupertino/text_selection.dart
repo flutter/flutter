@@ -295,6 +295,8 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   }
 
   /// Gets anchor for cupertino-style text selection handles.
+  ///
+  /// See [TextSelectionControls.getHandleAnchor].
   @override
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     final Size handleSize = getHandleSize(textLineHeight);
