@@ -7,9 +7,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
-import '../../widgets.dart';
 import 'basic.dart';
 import 'debug.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
