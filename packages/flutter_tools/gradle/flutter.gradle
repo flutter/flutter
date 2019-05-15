@@ -126,7 +126,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
             flutterJar = Paths.get(engineOut.absolutePath, "flutter.jar").toFile()
             if (!flutterJar.isFile()) {
-                throw new GradleException('Local engine build does not contain flutter.jar')
+                throw new GradleException('File not found: ' + flutterJar)
             }
 
             localEngine = engineOut.name

@@ -373,7 +373,7 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
-      final FlutterProject project = await FlutterProject.current();
+      final FlutterProject project = FlutterProject.current();
       await buildApk(
           project: project,
           target: mainPath,
@@ -382,6 +382,10 @@ class AndroidDevice extends Device {
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
       package = await AndroidApk.fromAndroidProject(project.android);
+    }
+    // There was a failure parsing the android project information.
+    if (package == null) {
+      throwToolExit('Problem building Android application: see above error(s).');
     }
 
     printTrace("Stopping app '${package.name}' on $name.");
@@ -530,6 +534,11 @@ class AndroidDevice extends Device {
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.android.existsSync();
   }
 }
 

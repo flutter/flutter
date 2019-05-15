@@ -26,7 +26,7 @@ class DevFSConfig {
   bool noDirectorySymlinks = false;
 }
 
-DevFSConfig get devFSConfig => context[DevFSConfig];
+DevFSConfig get devFSConfig => context.get<DevFSConfig>();
 
 /// Common superclass for content copied to the device.
 abstract class DevFSContent {

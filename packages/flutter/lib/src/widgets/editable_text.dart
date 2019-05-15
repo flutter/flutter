@@ -290,6 +290,7 @@ class EditableText extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
+    this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
@@ -645,6 +646,9 @@ class EditableText extends StatefulWidget {
   /// location).
   final SelectionChangedCallback onSelectionChanged;
 
+  /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
+  final VoidCallback onSelectionHandleTapped;
+
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
   ///
@@ -787,6 +791,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
   final LayerLink _layerLink = LayerLink();
   bool _didAutoFocus = false;
+  FocusAttachment _focusAttachment;
 
   // This value is an eyeball estimation of the time it takes for the iOS cursor
   // to ease in and out.
@@ -809,6 +814,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   void initState() {
     super.initState();
     widget.controller.addListener(_didChangeTextEditingValue);
+    _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
@@ -836,6 +842,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (widget.focusNode != oldWidget.focusNode) {
       oldWidget.focusNode.removeListener(_handleFocusChanged);
+      _focusAttachment?.detach();
+      _focusAttachment = widget.focusNode.attach(context);
       widget.focusNode.addListener(_handleFocusChanged);
       updateKeepAlive();
     }
@@ -852,6 +860,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     assert(_cursorTimer == null);
     _selectionOverlay?.dispose();
     _selectionOverlay = null;
+    _focusAttachment.detach();
     widget.focusNode.removeListener(_handleFocusChanged);
     super.dispose();
   }
@@ -1091,10 +1100,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (_hasFocus) {
       _openInputConnection();
     } else {
-      final List<FocusScopeNode> ancestorScopes = FocusScope.ancestorsOf(context);
-      for (int i = ancestorScopes.length - 1; i >= 1; i -= 1)
-        ancestorScopes[i].setFirstFocus(ancestorScopes[i - 1]);
-      FocusScope.of(context).requestFocus(widget.focusNode);
+      widget.focusNode.requestFocus();
     }
   }
 
@@ -1133,10 +1139,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
         dragStartBehavior: widget.dragStartBehavior,
+        onSelectionHandleTapped: widget.onSelectionHandleTapped,
       );
-      final bool longPress = cause == SelectionChangedCause.longPress;
-      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
-        _selectionOverlay.showHandles();
+
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
@@ -1379,6 +1384,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _selectionOverlay?.hide();
   }
 
+  /// Toggles the visibility of the toolbar.
+  void toggleToolbar() {
+    assert(_selectionOverlay != null);
+    if (_selectionOverlay.toolbarIsVisible) {
+      hideToolbar();
+    } else {
+      showToolbar();
+    }
+  }
+
+  /// Shows the handles at the location of the current selection.
+  void showHandles() {
+    assert(_selectionOverlay != null);
+    _selectionOverlay.showHandles();
+  }
+
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
     return widget.selectionEnabled && _hasFocus && controls?.canCopy(this) == true
       ? () => controls.handleCopy(this)
@@ -1400,7 +1421,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    FocusScope.of(context).reparentIfNeeded(widget.focusNode);
+    _focusAttachment.reparent();
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;

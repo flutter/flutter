@@ -9,6 +9,8 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/linux/makefile.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -19,7 +21,6 @@ import '../src/mocks.dart';
 void main() {
   Cache.disableLocking();
   final MockProcessManager mockProcessManager = MockProcessManager();
-  final MemoryFileSystem memoryFilesystem = MemoryFileSystem();
   final MockProcess mockProcess = MockProcess();
   final MockPlatform linuxPlatform = MockPlatform();
   final MockPlatform notLinuxPlatform = MockPlatform();
@@ -44,7 +45,7 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
   });
 
   testUsingContext('Linux build fails on non-linux platform', () async {
@@ -59,20 +60,20 @@ void main() {
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext('Linux build invokes build script', () async {
+  testUsingContext('Linux build invokes make and writes temporary files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+
     when(mockProcessManager.start(<String>[
-      '/linux/build.sh',
-      '/',
-      'release',
-      'no-track-widget-creation',
+      'make',
+      '-C',
+      '/linux',
     ], runInShell: true)).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
@@ -80,11 +81,27 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'linux']
     );
+    expect(fs.file('linux/flutter/generated_config').existsSync(), true);
   }, overrides: <Type, Generator>{
-    FileSystem: () => memoryFilesystem,
+    FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,
     Platform: () => linuxPlatform,
   });
+
+  testUsingContext('linux can extract binary name from Makefile', () async {
+    fs.file('linux/Makefile')
+      ..createSync(recursive: true)
+      ..writeAsStringSync(r'''
+# Comment
+SOMETHING_ELSE=FOO
+BINARY_NAME=fizz_bar
+''');
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(makefileExecutableName(flutterProject.linux), 'fizz_bar');
+  }, overrides: <Type, Generator>{FileSystem: () => MemoryFileSystem()});
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

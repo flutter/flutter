@@ -513,6 +513,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration != null
     && widget.decoration.counterText == null;
 
+  bool _shouldShowSelectionToolbar = true;
+
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
     final ThemeData themeData = Theme.of(context);
@@ -605,22 +607,53 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.dispose();
   }
 
+  EditableTextState get _editableText => _editableTextKey.currentState;
+
   void _requestKeyboard() {
-    _editableTextKey.currentState?.requestKeyboard();
+    _editableText?.requestKeyboard();
+  }
+
+  bool _shouldShowSelectionHandles(SelectionChangedCause cause) {
+    // When the text field is activated by something that doesn't trigger the
+    // selection overlay, we shouldn't show the handles either.
+    if (!_shouldShowSelectionToolbar)
+      return false;
+
+    if (cause == SelectionChangedCause.keyboard)
+      return false;
+
+    if (cause == SelectionChangedCause.longPress)
+      return true;
+
+    if (_effectiveController.text.isNotEmpty)
+      return true;
+
+    return false;
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
     // iOS cursor doesn't move via a selection handle. The scroll happens
     // directly from new text selection changes.
+    if (_shouldShowSelectionHandles(cause)) {
+      _editableText?.showHandles();
+    }
+
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         if (cause == SelectionChangedCause.longPress) {
-          _editableTextKey.currentState?.bringIntoView(selection.base);
+          _editableText?.bringIntoView(selection.base);
         }
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         // Do nothing.
+    }
+  }
+
+  /// Toggle the toolbar when a selection handle is tapped.
+  void _handleSelectionHandleTapped() {
+    if (_effectiveController.selection.isCollapsed) {
+      _editableText.toggleToolbar();
     }
   }
 
@@ -663,6 +696,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
     _startSplash(details.globalPosition);
+
+    // The selection overlay should only be shown when the user is interacting
+    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+    // trigger the selection overlay.
+    // For backwards-compatibility, we treat a null kind the same as touch.
+    final PointerDeviceKind kind = details.kind;
+    _shouldShowSelectionToolbar =
+        kind == null ||
+        kind == PointerDeviceKind.touch ||
+        kind == PointerDeviceKind.stylus;
   }
 
   void _handleForcePressStarted(ForcePressDetails details) {
@@ -671,7 +714,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         from: details.globalPosition,
         cause: SelectionChangedCause.forcePress,
       );
-      _editableTextKey.currentState.showToolbar();
+      if (_shouldShowSelectionToolbar)
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -738,13 +782,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    _editableTextKey.currentState.showToolbar();
+    print('long tap end');
+    if (_shouldShowSelectionToolbar)
+      _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      _editableTextKey.currentState.showToolbar();
+      if (_shouldShowSelectionToolbar)
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -884,6 +931,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
+        onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,

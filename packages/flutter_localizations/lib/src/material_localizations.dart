@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
 
+import 'cupertino_localizations.dart';
 import 'l10n/generated_material_localizations.dart';
 import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
@@ -20,9 +21,9 @@ import 'widgets_localizations.dart';
 ///
 /// This class supports locales with the following [Locale.languageCode]s:
 ///
-/// {@macro flutter.localizations.languages}
+/// {@macro flutter.localizations.material.languages}
 ///
-/// This list is available programatically via [kSupportedLanguages].
+/// This list is available programatically via [kMaterialSupportedLanguages].
 ///
 /// ## Sample code
 ///
@@ -530,6 +531,7 @@ abstract class GlobalMaterialLocalizations implements MaterialLocalizations {
   /// )
   /// ```
   static const List<LocalizationsDelegate<dynamic>> delegates = <LocalizationsDelegate<dynamic>>[
+    GlobalCupertinoLocalizations.delegate,
     GlobalMaterialLocalizations.delegate,
     GlobalWidgetsLocalizations.delegate,
   ];
@@ -556,7 +558,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   const _MaterialLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => kSupportedLanguages.contains(locale.languageCode);
+  bool isSupported(Locale locale) => kMaterialSupportedLanguages.contains(locale.languageCode);
 
   static final Map<Locale, Future<MaterialLocalizations>> _loadedTranslations = <Locale, Future<MaterialLocalizations>>{};
 
@@ -623,5 +625,5 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
   bool shouldReload(_MaterialLocalizationsDelegate old) => false;
 
   @override
-  String toString() => 'GlobalMaterialLocalizations.delegate(${kSupportedLanguages.length} locales)';
+  String toString() => 'GlobalMaterialLocalizations.delegate(${kMaterialSupportedLanguages.length} locales)';
 }

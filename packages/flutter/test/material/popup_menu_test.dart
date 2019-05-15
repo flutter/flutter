@@ -126,6 +126,55 @@ void main() {
     expect(cancels, equals(2));
   });
 
+  testWidgets('disabled PopupMenuButton will not call itemBuilder, onSelected or onCanceled', (WidgetTester tester) async {
+    final Key popupButtonKey = UniqueKey();
+    bool itemBuilderCalled = false;
+    bool onSelectedCalled = false;
+    bool onCanceledCalled = false;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Column(
+            children: <Widget>[
+              PopupMenuButton<int>(
+                key: popupButtonKey,
+                enabled: false,
+                itemBuilder: (BuildContext context) {
+                  itemBuilderCalled = true;
+                  return <PopupMenuEntry<int>>[
+                    const PopupMenuItem<int>(
+                      value: 1,
+                      child: Text('Tap me please!'),
+                    ),
+                  ];
+                },
+                onSelected: (int selected) => onSelectedCalled = true,
+                onCanceled: () => onCanceledCalled = true,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    // Try to bring up the popup menu and select the first item from it
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    expect(itemBuilderCalled, isFalse);
+    expect(onSelectedCalled, isFalse);
+
+    // Try to bring up the popup menu and tap outside it to cancel the menu
+    await tester.tap(find.byKey(popupButtonKey));
+    await tester.pumpAndSettle();
+    await tester.tapAt(const Offset(0.0, 0.0));
+    await tester.pumpAndSettle();
+    expect(itemBuilderCalled, isFalse);
+    expect(onCanceledCalled, isFalse);
+  });
+
   testWidgets('PopupMenuButton is horizontal on iOS', (WidgetTester tester) async {
     Widget build(TargetPlatform platform) {
       return MaterialApp(
@@ -369,24 +418,24 @@ void main() {
       });
     }
 
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
-    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
-    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.topCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.topCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 8.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.centerLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.ltr, Alignment.center, TextDirection.ltr, const Rect.fromLTWH(350.0, 250.0, 0.0, 0.0));
+    await testPositioningDown(tester, TextDirection.rtl, Alignment.center, TextDirection.rtl, const Rect.fromLTWH(450.0, 250.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomRight, TextDirection.rtl, const Rect.fromLTWH(792.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomLeft, TextDirection.ltr, const Rect.fromLTWH(8.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.ltr, Alignment.bottomCenter, TextDirection.ltr, const Rect.fromLTWH(350.0, 500.0, 0.0, 0.0));
+    await testPositioningDownThenUp(tester, TextDirection.rtl, Alignment.bottomCenter, TextDirection.rtl, const Rect.fromLTWH(450.0, 500.0, 0.0, 0.0));
   });
 
   testWidgets('PopupMenu removes MediaQuery padding', (WidgetTester tester) async {

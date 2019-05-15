@@ -157,8 +157,13 @@ abstract class CustomPainter extends Listenable {
   /// coordinate space configured such that the origin is at the top left of the
   /// box. The area of the box is the size of the [size] argument.
   ///
-  /// Paint operations should remain inside the given area. Graphical operations
-  /// outside the bounds may be silently ignored, clipped, or not clipped.
+  /// Paint operations should remain inside the given area. Graphical
+  /// operations outside the bounds may be silently ignored, clipped, or not
+  /// clipped. It may sometimes be difficult to guarantee that a certain
+  /// operation is inside the bounds (e.g., drawing a rectangle whose size is
+  /// determined by user inputs). In that case, consider calling
+  /// [Canvas.clipRect] at the beginning of [paint] so everything that follows
+  /// will be guaranteed to only draw within the clipped area.
   ///
   /// Implementations should be wary of correctly pairing any calls to
   /// [Canvas.save]/[Canvas.saveLayer] and [Canvas.restore], otherwise all
@@ -497,7 +502,7 @@ class RenderCustomPaint extends RenderProxyBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     if (_foregroundPainter != null && (_foregroundPainter.hitTest(position) ?? false))
       return true;
     return super.hitTestChildren(result, position: position);

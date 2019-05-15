@@ -209,7 +209,28 @@ class CupertinoIcons {
   /// For another version of this icon (introduced in iOS 7), see [share].
   static const IconData share_up = IconData(0xf220, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// Two right-facing intertwined arrows.
+  /// Two thin right-facing intertwined arrows.
+  ///
+  /// See also:
+  ///
+  ///  * [shuffle_medium], with slightly thicker arrows.
+  ///  * [shuffle_thick], with thicker, bold arrows.
+  static const IconData shuffle = IconData(0xf4a9, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two medium thickness right-facing intertwined arrows.
+  ///
+  /// See also:
+  ///
+  ///  * [shuffle], with thin arrows.
+  ///  * [shuffle_thick], with thicker, bold arrows.
+  static const IconData shuffle_medium = IconData(0xf4a8, fontFamily: iconFont, fontPackage: iconFontPackage);
+
+  /// Two thick right-facing intertwined arrows.
+  ///
+  /// See also:
+  ///
+  ///  * [shuffle], with thin arrows.
+  ///  * [shuffle_medium], with slightly thinner arrows.
   static const IconData shuffle_thick = IconData(0xf221, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A camera for still photographs. This icon is filled in.

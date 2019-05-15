@@ -52,6 +52,7 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
+    @required FlutterProject flutterProject,
     @required bool trackWidgetCreation,
     String dillOutputPath,
     List<String> fileSystemRoots,
@@ -64,7 +65,6 @@ class FlutterDevice {
     @required BuildMode buildMode,
   }) async {
     ResidentCompiler generator;
-    final FlutterProject flutterProject = await FlutterProject.current();
     if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
@@ -182,7 +182,7 @@ class FlutterDevice {
     // The flutterExit message only returns if it fails, so just wait a few
     // seconds then assume it worked.
     // TODO(ianh): We should make this return once the VM service disconnects.
-    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () { });
+    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () => <void>[]);
   }
 
   Future<Uri> setupDevFS(
@@ -1047,7 +1047,7 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      final FlutterProject project = await FlutterProject.current();
+      final FlutterProject project = FlutterProject.current();
       final String manifestPath = fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:

@@ -42,6 +42,12 @@ Any params for that command should be passed in through a `params` field. Here's
 [{"id":2,"result":[{"id":"702ABC1F-5EA5-4F83-84AB-6380CA91D39A","name":"iPhone 6","platform":"ios_x64","available":true}]}]
 ```
 
+Events that come from the server will have an `event` field containing the type of event, along with a `params` field.
+
+```
+[{"event":"device.added","params":{"id":"1DD6786B-37D4-4355-AA15-B818A87A18B4","name":"iPhone XS Max","platform":"ios","emulator":true}}]
+```
+
 ## Domains and Commands
 
 ### daemon domain

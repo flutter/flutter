@@ -60,6 +60,9 @@ class _ProxyLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => _layer.find(regionOffset);
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A [Canvas] that multicasts all method calls to a main canvas and a
@@ -684,6 +687,8 @@ class _SerializeConfig {
     this.pathToInclude,
     this.includeProperties = false,
     this.expandPropertyValues = true,
+    this.includeToStringDeep = false,
+    this.maxDescendentsTruncatableNode = -1,
   });
 
   _SerializeConfig.merge(
@@ -695,7 +700,9 @@ class _SerializeConfig {
        subtreeDepth = subtreeDepth ?? base.subtreeDepth,
        pathToInclude = pathToInclude ?? base.pathToInclude,
        includeProperties = base.includeProperties,
-       expandPropertyValues = base.expandPropertyValues;
+       expandPropertyValues = base.expandPropertyValues,
+       includeToStringDeep = base.includeToStringDeep,
+       maxDescendentsTruncatableNode = base.maxDescendentsTruncatableNode;
 
   /// Optional object group name used to manage manage lifetimes of object
   /// references in the returned JSON.
@@ -729,6 +736,11 @@ class _SerializeConfig {
   /// If [interactive] is true, a call to `ext.flutter.inspector.disposeGroup`
   /// is required before objects in the tree will ever be garbage collected.
   bool get interactive => groupName != null;
+
+  /// Include the text rendering of the nodes (helpful for debugging).
+  final bool includeToStringDeep;
+
+  final int maxDescendentsTruncatableNode;
 }
 
 // Production implementation of [WidgetInspectorService].
@@ -961,6 +973,22 @@ mixin WidgetInspectorService {
     return Future<void>.value();
   }
 
+  static const String _consoleObjectGroup = 'console-group';
+
+  void _reportError(FlutterErrorDetails details) {
+    postEvent('Flutter.Error', _nodeToJson(
+      details.toDiagnosticsNode(),
+      _SerializeConfig(
+        groupName: _consoleObjectGroup,
+        includeToStringDeep: true,
+        subtreeDepth: 5,
+        includeProperties: true,
+        expandPropertyValues: true,
+        maxDescendentsTruncatableNode: 5,
+      ),
+    ));
+  }
+
   /// Called to register service extensions.
   ///
   /// See also:
@@ -974,6 +1002,18 @@ mixin WidgetInspectorService {
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
 
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
+
+    final FlutterExceptionHandler structuredExceptionHandler = _reportError;
+    final FlutterExceptionHandler defaultExceptionHandler = FlutterError.onError;
+
+    _registerBoolServiceExtension(
+      name: 'structuredErrors',
+      getter: () async => FlutterError.onError == structuredExceptionHandler,
+      setter: (bool value) {
+        FlutterError.onError = value ? structuredExceptionHandler : defaultExceptionHandler;
+        return Future<void>.value();
+      },
+    );
 
     _registerBoolServiceExtension(
       name: 'show',
@@ -1236,7 +1276,7 @@ mixin WidgetInspectorService {
 
     final _InspectorReferenceData data = _idToReferenceData[id];
     if (data == null) {
-      throw FlutterError('Id does not exist.');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
     return data.object;
   }
@@ -1271,9 +1311,9 @@ mixin WidgetInspectorService {
 
     final _InspectorReferenceData referenceData = _idToReferenceData[id];
     if (referenceData == null)
-      throw FlutterError('Id does not exist');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist')]);
     if (_groups[groupName]?.remove(referenceData) != true)
-      throw FlutterError('Id is not in group');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id is not in group')]);
     _decrementReferenceCount(referenceData);
   }
 
@@ -1316,11 +1356,13 @@ mixin WidgetInspectorService {
           return false;
         }
         selection.currentElement = object;
+        developer.inspect(selection.currentElement);
       } else {
         if (object == selection.current) {
           return false;
         }
         selection.current = object;
+        developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
         if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
@@ -1357,7 +1399,7 @@ mixin WidgetInspectorService {
     else if (value is Element)
       path = _getElementParentChain(value, groupName);
     else
-      throw FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}')]);
 
     return path.map<Object>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,
@@ -1370,7 +1412,7 @@ mixin WidgetInspectorService {
       return null;
     return <String, Object>{
       'node': _nodeToJson(pathNode.node, config),
-      'children': _nodesToJson(pathNode.children, config),
+      'children': _nodesToJson(pathNode.children, config, parent: pathNode.node),
       'childIndex': pathNode.childIndex,
     };
   }
@@ -1444,16 +1486,36 @@ mixin WidgetInspectorService {
 
     if (config.subtreeDepth > 0 ||
         (config.pathToInclude != null && config.pathToInclude.isNotEmpty)) {
-      json['children'] = _nodesToJson(_getChildrenHelper(node, config), config);
+      json['children'] = _nodesToJson(_getChildrenHelper(node, config), config, parent: node);
     }
 
     if (config.includeProperties) {
-      json['properties'] = _nodesToJson(
-        node.getProperties().where(
-          (DiagnosticsNode node) => !node.isFiltered(createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel.info),
-        ),
-        _SerializeConfig(groupName: config.groupName, subtreeDepth: 1, expandPropertyValues: true),
-      );
+      final List<DiagnosticsNode> properties = node.getProperties();
+      if (properties.isEmpty && node is DiagnosticsProperty
+          && config.expandPropertyValues && value is Diagnosticable) {
+        // Special case to expand property values.
+        json['properties'] = _nodesToJson(
+          value.toDiagnosticsNode().getProperties().where(
+            (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info),
+          ),
+          _SerializeConfig(groupName: config.groupName,
+            subtreeDepth: 0,
+            expandPropertyValues: false,
+          ),
+          parent: node,
+        );
+      } else {
+        json['properties'] = _nodesToJson(
+          properties.where(
+                (DiagnosticsNode node) => !node.isFiltered(
+                createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel
+                    .info),
+          ),
+          _SerializeConfig.merge(
+              config, subtreeDepth: math.max(0, config.subtreeDepth - 1)),
+          parent: node,
+        );
+      }
     }
 
     if (node is DiagnosticsProperty) {
@@ -1470,17 +1532,6 @@ mixin WidgetInspectorService {
         json['valueProperties'] = <String, Object>{
           'codePoint': value.codePoint,
         };
-      }
-      if (config.expandPropertyValues && value is Diagnosticable) {
-        json['properties'] = _nodesToJson(
-          value.toDiagnosticsNode().getProperties().where(
-                (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info),
-          ),
-          _SerializeConfig(groupName: config.groupName,
-              subtreeDepth: 0,
-              expandPropertyValues: false,
-          ),
-        );
       }
     }
     return json;
@@ -1523,13 +1574,30 @@ mixin WidgetInspectorService {
     return jsonString;
   }
 
+  List<DiagnosticsNode> _truncateNodes(Iterable<DiagnosticsNode> nodes, _SerializeConfig config) {
+    if (nodes.every((DiagnosticsNode node) => node.value is Element) && isWidgetCreationTracked()) {
+      final List<DiagnosticsNode> localNodes = nodes.where((DiagnosticsNode node) =>
+          _isValueCreatedByLocalProject(node.value)).toList();
+      if (localNodes.isNotEmpty) {
+        return localNodes;
+      }
+    }
+    return nodes.take(config.maxDescendentsTruncatableNode).toList();
+  }
+
   List<Map<String, Object>> _nodesToJson(
     Iterable<DiagnosticsNode> nodes,
-    _SerializeConfig config,
-  ) {
+    _SerializeConfig config, {
+    @required DiagnosticsNode parent,
+  }) {
+    bool truncated = false;
     if (nodes == null)
       return <Map<String, Object>>[];
-    return nodes.map<Map<String, Object>>(
+    if (config.maxDescendentsTruncatableNode >= 0 && parent?.allowTruncate == true && nodes.length > config.maxDescendentsTruncatableNode) {
+      nodes = _truncateNodes(nodes, config)..add(DiagnosticsNode.message('...'));
+      truncated = true;
+    }
+    final List<Map<String, Object>> json = nodes.map<Map<String, Object>>(
       (DiagnosticsNode node) {
         if (config.pathToInclude != null && config.pathToInclude.isNotEmpty) {
           if (config.pathToInclude.first == node.value) {
@@ -1552,6 +1620,9 @@ mixin WidgetInspectorService {
               _SerializeConfig.merge(config, subtreeDepth: config.subtreeDepth - 1) : config,
         );
       }).toList();
+    if (truncated)
+      json.last['truncated'] = true;
+    return json;
   }
 
   /// Returns a JSON representation of the properties of the [DiagnosticsNode]
@@ -1563,7 +1634,7 @@ mixin WidgetInspectorService {
 
   List<Object> _getProperties(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), _SerializeConfig(groupName: groupName));
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), _SerializeConfig(groupName: groupName), parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1575,7 +1646,7 @@ mixin WidgetInspectorService {
   List<Object> _getChildren(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     final _SerializeConfig config = _SerializeConfig(groupName: groupName);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1597,7 +1668,7 @@ mixin WidgetInspectorService {
   List<Object> _getChildrenSummaryTree(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     final _SerializeConfig config = _SerializeConfig(groupName: groupName, summaryTree: true);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1614,7 +1685,7 @@ mixin WidgetInspectorService {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     // With this value of minDepth we only expand one extra level of important nodes.
     final _SerializeConfig config = _SerializeConfig(groupName: groupName, subtreeDepth: 1,  includeProperties: true);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config, parent: node);
   }
 
   List<DiagnosticsNode> _getChildrenHelper(DiagnosticsNode node, _SerializeConfig config) {
@@ -1622,6 +1693,9 @@ mixin WidgetInspectorService {
   }
 
   bool _shouldShowInSummaryTree(DiagnosticsNode node) {
+    if (node.level == DiagnosticLevel.error) {
+      return true;
+    }
     final Object value = node.value;
     if (value is! Diagnosticable) {
       return true;
@@ -1634,12 +1708,21 @@ mixin WidgetInspectorService {
     return _isValueCreatedByLocalProject(value);
   }
 
+  bool _isDeepStyle(DiagnosticsTreeStyle style) => false;
+
   List<DiagnosticsNode> _getChildrenFiltered(
     DiagnosticsNode node,
     _SerializeConfig config,
   ) {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (DiagnosticsNode child in node.getChildren()) {
+    final Object value = node.value;
+    List<DiagnosticsNode> rawChildren = node.getChildren();
+    if (rawChildren.isEmpty && node is DiagnosticsProperty && value is Diagnosticable && config.expandPropertyValues &&
+        _isDeepStyle(node.style)) {
+      rawChildren = value.toDiagnosticsNode().getChildren();
+    }
+
+    for (DiagnosticsNode child in rawChildren) {
       if (!config.summaryTree || _shouldShowInSummaryTree(child)) {
         children.add(child);
       } else {
@@ -2180,7 +2263,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
         // changed.
       });
     };
-    assert(WidgetInspectorService.instance.selectionChangedCallback == null);
     WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
   }
 
@@ -2557,10 +2639,12 @@ class _InspectorOverlayLayer extends Layer {
       return true;
     }());
     if (inDebugMode == false) {
-      throw FlutterError(
-        'The inspector should never be used in production mode due to the '
-        'negative performance impact.'
-      );
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'The inspector should never be used in production mode due to the '
+          'negative performance impact.'
+        )
+      ]);
     }
   }
 
@@ -2718,6 +2802,9 @@ class _InspectorOverlayLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 const double _kScreenEdgeMargin = 10.0;
