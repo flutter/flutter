@@ -72,8 +72,6 @@ import 'theme_data.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
-///
 /// ## Semantics in RadioListTile
 ///
 /// Since RadioListTile is wrapped with a [MergeSemantics] widget, it wants
@@ -220,7 +218,9 @@ import 'theme_data.dart';
 ///             Radio<bool>(
 ///               groupValue: groupValue,
 ///               value: value,
-///               onChanged: (bool newValue) => onChanged(newValue),
+///               onChanged: (bool newValue) {
+///                 onChanged(newValue);
+///               },
 ///             ),
 ///             Text(label),
 ///           ],
@@ -236,18 +236,32 @@ import 'theme_data.dart';
 /// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     body: Center(
-///       child: LabeledRadio(
-///         label: 'This is the label text',
-///         padding: EdgeInsets.symmetric(horizontal: 5.0),
-///         value: isRadioSelected,
-///         groupValue: true,
-///         onChanged: (bool newValue) {
-///           setState(() {
-///             isRadioSelected = newValue;
-///           });
-///         },
-///       ),
+///     body: Column(
+///       mainAxisAlignment: MainAxisAlignment.center,
+///       children: <LabeledRadio>[
+///         LabeledRadio(
+///           label: 'This is the first label text',
+///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           value: true,
+///           groupValue: isRadioSelected,
+///           onChanged: (bool newValue) {
+///             setState(() {
+///               isRadioSelected = newValue;
+///             });
+///           },
+///         ),
+///         LabeledRadio(
+///           label: 'This is the second label text',
+///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           value: false,
+///           groupValue: isRadioSelected,
+///           onChanged: (bool newValue) {
+///             setState(() {
+///               isRadioSelected = newValue;
+///             });
+///           },
+///         ),
+///       ],
 ///     ),
 ///   );
 /// }
