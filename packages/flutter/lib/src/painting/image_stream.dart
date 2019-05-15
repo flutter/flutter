@@ -87,6 +87,8 @@ typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTr
 ///
 ///  * [ImageChunkListener], the means by which callers get notified of
 ///    these events.
+///  * [Image.imageLoadingBuilder], which allows callers to visually represent
+///    the loading progress of an image at the widget layer.
 class ImageChunkEvent extends Diagnosticable {
   /// Creates a new chunk event.
   const ImageChunkEvent(this.cumulativeBytesLoaded, this.expectedTotalBytes);
@@ -98,12 +100,13 @@ class ImageChunkEvent extends Diagnosticable {
   ///
   /// This value will be -1 if the size of the image is not known in advance.
   /// When this is the case, the chunk event may still be useful as an
-  /// indication that data is still loading (and how much), but it cannot
-  /// represent a loading completion percentage.
+  /// indication that data is loading (and how much), but it cannot represent
+  /// a loading completion percentage.
   ///
-  /// Even when this value purports to know the size of the image in advance,
-  /// it may not always be trustworthy (e.g. when the estimated size was
-  /// provided prior to GZIP compression).
+  /// When used with [Image.network], this value comes from the `Content-Length`
+  /// HTTP response header, and as such is only as trustworthy as the server
+  /// that reported it. Callers are correspondingly advised to be defensive
+  /// when running calculations that rely on this value.
   final int expectedTotalBytes;
 
   @override
@@ -191,9 +194,9 @@ class ImageStream extends Diagnosticable {
   /// `listener`. If the stream produces images that are loaded in chunks
   /// (e.g. over a file system or a network), then the specified listener will
   /// be notified for every chunk of data that is loaded. The events that are
-  /// delivered to the listener are _not_ buffered, so it'd possible that the
-  /// listener will have missed delivery of some [ImageChunkEvent]s by the time
-  /// they add themselves as a listener.
+  /// delivered to the listener are _not_ buffered (rather, they are fired and
+  /// forgotten), so it'd possible that the listener will have missed delivery
+  /// of some [ImageChunkEvent]s by the time they add themselves as a listener.
   ///
   /// An [ImageErrorListener] can also optionally be added along with the
   /// `listener`. If an error occurred, `onError` will be called instead of
@@ -325,9 +328,9 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// `listener`. If the stream produces images that are loaded in chunks
   /// (e.g. over a file system or a network), then the specified listener will
   /// be notified for every chunk of data that is loaded. The events that are
-  /// delivered to the listener are _not_ buffered, so it'd possible that the
-  /// listener will have missed delivery of some [ImageChunkEvent]s by the time
-  /// they add themselves as a listener.
+  /// delivered to the listener are _not_ buffered (rather, they are fired and
+  /// forgotten), so it'd possible that the listener will have missed delivery
+  /// of some [ImageChunkEvent]s by the time they add themselves as a listener.
   ///
   /// An [ImageErrorListener] can also optionally be added along with the
   /// `listener`. If an error occurred, `onError` will be called instead of
@@ -567,8 +570,14 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   ///
   /// [codec] is a future for an initialized [ui.Codec] that will be used to
   /// decode the image.
+  ///
   /// [scale] is the linear scale factor for drawing this frames of this image
   /// at their intended size.
+  ///
+  /// [chunkEvents] is an optional stream of notifications about the loading
+  /// progress of the image. If this stream is provided, the events produced
+  /// by the stream will be delivered to registered [ImageChunkListener]s (see
+  /// [addListener]).
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,

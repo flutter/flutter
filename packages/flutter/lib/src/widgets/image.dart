@@ -36,10 +36,10 @@ export 'package:flutter/painting.dart' show
 /// file system or a network) and you want to give the user an indication of
 /// when the image will be displayed.
 ///
-/// For single-frame images, once the image loads, the image chunk events will
-/// stop firing, the image provider's stream will yield a completed [ImageInfo]
-/// object, and this builder will no longer be consulted.  In these cases, the
-/// `currentRawImage` parameter will be `null`.
+/// For single-frame images, once the image loads, the image [ImageChunkEvent]s
+/// will stop firing, the image provider's stream will yield a completed
+/// [ImageInfo] object, and this builder will no longer be consulted.  In these
+/// cases, the `currentRawImage` parameter will be `null`.
 ///
 /// For multi-frame images, it's possible that image chunk events will continue
 /// to fire after the first image frame has loaded.  In that case, the
@@ -50,7 +50,10 @@ export 'package:flutter/painting.dart' show
 ///
 /// See also:
 ///
-///  * [ImageChunkListener]
+///  * [Image.imageLoadingBuilder], which makes use of this signature in the
+///    [Image] widget.
+///  * [ImageChunkListener], a lower-level signature for listening to raw
+///    [ImageChunkEvent]s.
 typedef ImageLoadingBuilder = Widget Function(
   BuildContext context,
   ImageChunkEvent imageChunkEvent,
@@ -607,7 +610,7 @@ class Image extends StatefulWidget {
   ///
   /// If this is `null`, and the image is loaded incrementally (e.g. over a
   /// network), the user will receive no indication of the progress as the
-  /// bytes are loaded.
+  /// bytes of the image are loaded.
   ///
   /// Once an image has fully loaded, this builder will no longer be consulted.
   ///
@@ -627,7 +630,9 @@ class Image extends StatefulWidget {
   ///     imageLoadingBuilder: (BuildContext context, ImageChunkEvent event, Widget currentRawImage) {
   ///       return Center(
   ///         child: CircularProgressIndicator(
-  ///           value: event.cumulativeBytesLoaded / event.expectedTotalBytes,
+  ///           value: event.expectedTotalBytes > 0
+  ///               ? event.cumulativeBytesLoaded / event.expectedTotalBytes
+  ///               : null,
   ///         ),
   ///       );
   ///     },

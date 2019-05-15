@@ -518,9 +518,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   }
 
   /// Do not access this field directly; use [_httpClient] instead.
-  static final HttpClient _sharedHttpClient = HttpClient();
+  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
-  HttpClient get _httpClient {
+  static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
     assert(() {
       if (debugNetworkImageUseFreshHttpClient)
@@ -547,6 +547,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
         throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
+        _httpClient,
         response,
         onBytesReceived: (int cumulative, int total) {
           chunkEvents.add(ImageChunkEvent(cumulative, total));

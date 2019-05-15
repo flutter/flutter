@@ -14,10 +14,17 @@ void main() {
   group(consolidateHttpClientResponseBytes, () {
     final List<int> chunkOne = <int>[0, 1, 2, 3, 4, 5];
     final List<int> chunkTwo = <int>[6, 7, 8, 9, 10];
+    MockHttpClient client;
     MockHttpClientResponse response;
+    MockHttpHeaders headers;
 
     setUp(() {
+      client = MockHttpClient();
       response = MockHttpClientResponse();
+      headers = MockHttpHeaders();
+      when(client.autoUncompress).thenReturn(true);
+      when(response.headers).thenReturn(headers);
+      when(headers.value(HttpHeaders.contentEncodingHeader)).thenReturn(null);
       when(response.listen(
          any,
          onDone: anyNamed('onDone'),
@@ -43,7 +50,7 @@ void main() {
       when(response.contentLength)
           .thenReturn(chunkOne.length + chunkTwo.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response);
+          await consolidateHttpClientResponseBytes(client, response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -51,7 +58,7 @@ void main() {
     test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength).thenReturn(chunkOne.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response);
+          await consolidateHttpClientResponseBytes(client, response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -59,7 +66,7 @@ void main() {
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
       when(response.contentLength).thenReturn(-1);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response);
+          await consolidateHttpClientResponseBytes(client, response);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -69,6 +76,7 @@ void main() {
       when(response.contentLength).thenReturn(syntheticTotal);
       final List<int> records = <int>[];
       await consolidateHttpClientResponseBytes(
+        client,
         response,
         onBytesReceived: (int cumulative, int total) {
           records.addAll(<int>[cumulative, total]);
@@ -106,10 +114,88 @@ void main() {
       });
       when(response.contentLength).thenReturn(-1);
 
-      expect(consolidateHttpClientResponseBytes(response),
+      expect(consolidateHttpClientResponseBytes(client, response),
           throwsA(isInstanceOf<Exception>()));
+    });
+
+    group('when gzipped', () {
+      final List<int> gzipped = gzip.encode(chunkOne.followedBy(chunkTwo).toList());
+      final List<int> gzippedChunkOne = gzipped.sublist(0, gzipped.length ~/ 2);
+      final List<int> gzippedChunkTwo = gzipped.sublist(gzipped.length ~/ 2);
+
+      setUp(() {
+        when(headers.value(HttpHeaders.contentEncodingHeader)).thenReturn('gzip');
+        when(response.listen(
+          any,
+          onDone: anyNamed('onDone'),
+          onError: anyNamed('onError'),
+          cancelOnError: anyNamed('cancelOnError'),
+        )).thenAnswer((Invocation invocation) {
+          final void Function(List<int>) onData = invocation.positionalArguments[0];
+          final void Function(Object) onError = invocation.namedArguments[#onError];
+          final void Function() onDone = invocation.namedArguments[#onDone];
+          final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+
+          return Stream<List<int>>.fromIterable(
+              <List<int>>[gzippedChunkOne, gzippedChunkTwo]).listen(
+            onData,
+            onDone: onDone,
+            onError: onError,
+            cancelOnError: cancelOnError,
+          );
+        });
+      });
+
+      test('Uncompresses GZIP bytes if autoUncompress is false', () async {
+        when(client.autoUncompress).thenReturn(false);
+        when(response.contentLength).thenReturn(gzipped.length);
+        final List<int> bytes = await consolidateHttpClientResponseBytes(client, response);
+        expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+      });
+
+      test('Notifies onBytesReceived with gzipped numbers', () async {
+        when(client.autoUncompress).thenReturn(false);
+        when(response.contentLength).thenReturn(gzipped.length);
+        final List<int> records = <int>[];
+        await consolidateHttpClientResponseBytes(
+          client,
+          response,
+          onBytesReceived: (int cumulative, int total) {
+            records.addAll(<int>[cumulative, total]);
+          },
+        );
+
+        expect(records, <int>[
+          gzippedChunkOne.length,
+          gzipped.length,
+          gzipped.length,
+          gzipped.length,
+        ]);
+      });
+
+      test('Notifies onBytesReceived with expectedContentLength of -1 if autoUncompress is true', () async {
+        final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
+        when(response.contentLength).thenReturn(syntheticTotal);
+        final List<int> records = <int>[];
+        await consolidateHttpClientResponseBytes(
+          client,
+          response,
+          onBytesReceived: (int cumulative, int total) {
+            records.addAll(<int>[cumulative, total]);
+          },
+        );
+
+        expect(records, <int>[
+          gzippedChunkOne.length,
+          -1,
+          gzipped.length,
+          -1,
+        ]);
+      });
     });
   });
 }
 
+class MockHttpClient extends Mock implements HttpClient {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockHttpHeaders extends Mock implements HttpHeaders {}
