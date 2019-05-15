@@ -1062,8 +1062,20 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
     Object debugOwner,
   }) : super(debugOwner: debugOwner);
 
+  bool _exceededDeadline = false;
+
+  @override
+  void didExceedDeadline() {
+    _exceededDeadline = true;
+    super.didExceedDeadline();
+  }
+
   @override
   void rejectGesture(int pointer) {
-    acceptGesture(pointer);
+    // Ignore gestures that happen after the tap duration, so that this doesn't
+    // handle tap gestures after long press gestures.
+    if (!_exceededDeadline) {
+      acceptGesture(pointer);
+    }
   }
 }
