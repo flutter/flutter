@@ -33,8 +33,7 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// see the documentation on [BytesReceivedCallback].
 ///
 /// If the [response] is gzipped, this will automatically un-compress the
-/// bytes in the returned list (whether this was done automatically via
-/// [HttpClient.autoUncompress] or not).
+/// bytes in the returned list (even if [HttpClient.autoUncompress] is false).
 // TODO(tvolkert): Remove the [client] param once https://github.com/dart-lang/sdk/issues/36971 is fixed.
 Future<Uint8List> consolidateHttpClientResponseBytes(
   HttpClientResponse response, {
@@ -86,7 +85,7 @@ class _OutputBuffer extends ByteConversionSinkBase {
 
   @override
   void close() {
-    if(_bytes != null) {
+    if (_bytes != null) {
       // We've already been closed; this is a no-op
       return;
     }

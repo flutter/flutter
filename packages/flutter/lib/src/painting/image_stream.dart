@@ -93,15 +93,19 @@ class ImageChunkEvent extends Diagnosticable {
   /// Creates a new chunk event.
   const ImageChunkEvent(this.cumulativeBytesLoaded, this.expectedTotalBytes);
 
-  /// The number of bytes that have been loaded thus far.
+  /// The number of bytes that have been received across the wire thus far.
   final int cumulativeBytesLoaded;
 
-  /// The expected size of the image in bytes once it has completed loading.
+  /// The expected number of bytes that need to be received to finish loading
+  /// the image.
   ///
-  /// This value will be -1 if the size of the image is not known in advance.
-  /// When this is the case, the chunk event may still be useful as an
-  /// indication that data is loading (and how much), but it cannot represent
-  /// a loading completion percentage.
+  /// This value is not necessarily equal to the expected _size_ of the image
+  /// in bytes, as the bytes required to load the image may be compressed.
+  ///
+  /// This value will be -1 if the number is not known in advance. When this is
+  /// the case, the chunk event may still be useful as an indication that data
+  /// is loading (and how much), but it cannot represent a loading completion
+  /// percentage.
   ///
   /// When used with [Image.network], this value comes from the `Content-Length`
   /// HTTP response header, and as such is only as trustworthy as the server
@@ -196,7 +200,7 @@ class ImageStream extends Diagnosticable {
   /// be notified for every chunk of data that is loaded. The events that are
   /// delivered to the listener are _not_ buffered (rather, they are fired and
   /// forgotten), so it's possible that the listener will have missed delivery
-  /// of some [ImageChunkEvent]s by the time they add themselves as a listener.
+  /// of some [ImageChunkEvent]s by the time it is added as a listener.
   ///
   /// An [ImageErrorListener] can also optionally be added along with the
   /// `listener`. If an error occurred, `onError` will be called instead of
@@ -574,10 +578,10 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// [scale] is the linear scale factor for drawing this frames of this image
   /// at their intended size.
   ///
-  /// The [chunkEvents] parameter is an optional stream of notifications about the loading
-  /// progress of the image. If this stream is provided, the events produced
-  /// by the stream will be delivered to registered [ImageChunkListener]s (see
-  /// [addListener]).
+  /// The [chunkEvents] parameter is an optional stream of notifications about
+  /// the loading progress of the image. If this stream is provided, the events
+  /// produced by the stream will be delivered to registered [ImageChunkListener]s
+  /// (see [addListener]).
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,

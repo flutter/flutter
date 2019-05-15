@@ -36,8 +36,8 @@ export 'package:flutter/painting.dart' show
 /// file system or a network), and the application wishes to give the user an
 /// indication of when the image will be displayed.
 ///
-/// For single-frame images, once the image loads, the image [ImageChunkEvent]s
-/// will stop firing, the image provider's stream will yield a completed
+/// For single-frame images, once the image loads, the [ImageChunkEvent]s will
+/// stop firing, the image provider's stream will yield a completed
 /// [ImageInfo] object, and this builder will no longer be consulted.  In these
 /// cases, the `currentRawImage` parameter will be `null`.
 ///
@@ -738,11 +738,10 @@ class _ImageState extends State<Image> {
   }
 
   void _handleImageChunkLoaded(ImageChunkEvent event) {
-    if (widget.imageLoadingBuilder != null) {
-      setState(() {
-        _chunkEvent = event;
-      });
-    }
+    assert(widget.imageLoadingBuilder != null);
+    setState(() {
+      _chunkEvent = event;
+    });
   }
 
   // Update _imageStream to newStream, and moves the stream listener
@@ -763,13 +762,19 @@ class _ImageState extends State<Image> {
 
     _imageStream = newStream;
     if (_isListeningToStream)
-      _imageStream.addListener(_handleImageChanged, chunkListener: _handleImageChunkLoaded);
+      _imageStream.addListener(
+        _handleImageChanged,
+        chunkListener: widget.imageLoadingBuilder != null ? _handleImageChunkLoaded : null,
+      );
   }
 
   void _listenToStream() {
     if (_isListeningToStream)
       return;
-    _imageStream.addListener(_handleImageChanged, chunkListener: _handleImageChunkLoaded);
+    _imageStream.addListener(
+      _handleImageChanged,
+      chunkListener: widget.imageLoadingBuilder != null ? _handleImageChunkLoaded : null,
+    );
     _isListeningToStream = true;
   }
 
