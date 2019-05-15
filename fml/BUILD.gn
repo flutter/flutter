@@ -6,7 +6,6 @@ import("//build/fuchsia/sdk.gni")
 
 source_set("fml") {
   sources = [
-    "arraysize.h",
     "base32.cc",
     "base32.h",
     "build_config.h",
@@ -47,6 +46,7 @@ source_set("fml") {
     "native_library.h",
     "paths.cc",
     "paths.h",
+    "size.h",
     "string_view.cc",
     "string_view.h",
     "synchronization/atomic_object.h",

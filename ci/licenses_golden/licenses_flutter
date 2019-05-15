@@ -120,7 +120,6 @@ FILE: ../../../flutter/flow/texture.h
 FILE: ../../../flutter/flow/view_holder.cc
 FILE: ../../../flutter/flow/view_holder.h
 FILE: ../../../flutter/flutter_kernel_transformers/lib/track_widget_constructor_locations.dart
-FILE: ../../../flutter/fml/arraysize.h
 FILE: ../../../flutter/fml/base32.cc
 FILE: ../../../flutter/fml/base32.h
 FILE: ../../../flutter/fml/base32_unittest.cc
@@ -215,6 +214,7 @@ FILE: ../../../flutter/fml/platform/win/message_loop_win.h
 FILE: ../../../flutter/fml/platform/win/native_library_win.cc
 FILE: ../../../flutter/fml/platform/win/paths_win.cc
 FILE: ../../../flutter/fml/platform/win/wstring_conversion.h
+FILE: ../../../flutter/fml/size.h
 FILE: ../../../flutter/fml/string_view.cc
 FILE: ../../../flutter/fml/string_view.h
 FILE: ../../../flutter/fml/string_view_unittest.cc

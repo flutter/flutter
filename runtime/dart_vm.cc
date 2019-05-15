@@ -10,11 +10,11 @@
 #include <vector>
 
 #include "flutter/common/settings.h"
-#include "flutter/fml/arraysize.h"
 #include "flutter/fml/compiler_specific.h"
 #include "flutter/fml/file.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/size.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_delta.h"
@@ -292,11 +292,11 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     args.push_back(profiler_flag);
   }
 
-  PushBackAll(&args, kDartLanguageArgs, arraysize(kDartLanguageArgs));
+  PushBackAll(&args, kDartLanguageArgs, fml::size(kDartLanguageArgs));
 
   if (IsRunningPrecompiledCode()) {
     PushBackAll(&args, kDartPrecompilationArgs,
-                arraysize(kDartPrecompilationArgs));
+                fml::size(kDartPrecompilationArgs));
   }
 
   // Enable Dart assertions if we are not running precompiled code. We run non-
@@ -318,42 +318,42 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   // Debug mode uses the JIT, disable code page write protection to avoid
   // memory page protection changes before and after every compilation.
   PushBackAll(&args, kDartWriteProtectCodeArgs,
-              arraysize(kDartWriteProtectCodeArgs));
+              fml::size(kDartWriteProtectCodeArgs));
 #endif
 
   if (enable_asserts) {
-    PushBackAll(&args, kDartAssertArgs, arraysize(kDartAssertArgs));
+    PushBackAll(&args, kDartAssertArgs, fml::size(kDartAssertArgs));
   }
 
   if (settings_.start_paused) {
-    PushBackAll(&args, kDartStartPausedArgs, arraysize(kDartStartPausedArgs));
+    PushBackAll(&args, kDartStartPausedArgs, fml::size(kDartStartPausedArgs));
   }
 
   if (settings_.disable_service_auth_codes) {
     PushBackAll(&args, kDartDisableServiceAuthCodesArgs,
-                arraysize(kDartDisableServiceAuthCodesArgs));
+                fml::size(kDartDisableServiceAuthCodesArgs));
   }
 
   if (settings_.endless_trace_buffer || settings_.trace_startup) {
     // If we are tracing startup, make sure the trace buffer is endless so we
     // don't lose early traces.
     PushBackAll(&args, kDartEndlessTraceBufferArgs,
-                arraysize(kDartEndlessTraceBufferArgs));
+                fml::size(kDartEndlessTraceBufferArgs));
   }
 
   if (settings_.trace_systrace) {
     PushBackAll(&args, kDartSystraceTraceBufferArgs,
-                arraysize(kDartSystraceTraceBufferArgs));
-    PushBackAll(&args, kDartTraceStreamsArgs, arraysize(kDartTraceStreamsArgs));
+                fml::size(kDartSystraceTraceBufferArgs));
+    PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));
   }
 
   if (settings_.trace_startup) {
-    PushBackAll(&args, kDartTraceStartupArgs, arraysize(kDartTraceStartupArgs));
+    PushBackAll(&args, kDartTraceStartupArgs, fml::size(kDartTraceStartupArgs));
   }
 
 #if defined(OS_FUCHSIA)
-  PushBackAll(&args, kDartFuchsiaTraceArgs, arraysize(kDartFuchsiaTraceArgs));
-  PushBackAll(&args, kDartTraceStreamsArgs, arraysize(kDartTraceStreamsArgs));
+  PushBackAll(&args, kDartFuchsiaTraceArgs, fml::size(kDartFuchsiaTraceArgs));
+  PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));
 #endif
 
   for (size_t i = 0; i < settings_.dart_flags.size(); i++)

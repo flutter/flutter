@@ -8,10 +8,10 @@
 #include <utility>
 
 #include "flutter/common/task_runners.h"
-#include "flutter/fml/arraysize.h"
 #include "flutter/fml/logging.h"
 #include "flutter/fml/platform/android/jni_util.h"
 #include "flutter/fml/platform/android/scoped_java_ref.h"
+#include "flutter/fml/size.h"
 #include "flutter/fml/trace_event.h"
 
 namespace flutter {
@@ -102,7 +102,7 @@ bool VsyncWaiterAndroid::Register(JNIEnv* env) {
 
   FML_CHECK(g_async_wait_for_vsync_method_ != nullptr);
 
-  return env->RegisterNatives(clazz, methods, arraysize(methods)) == 0;
+  return env->RegisterNatives(clazz, methods, fml::size(methods)) == 0;
 }
 
 }  // namespace flutter

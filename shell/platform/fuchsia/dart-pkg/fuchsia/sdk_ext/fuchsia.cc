@@ -15,7 +15,7 @@
 #include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "dart-pkg/zircon/sdk_ext/natives.h"
 #include "dart-pkg/zircon/sdk_ext/system.h"
-#include "flutter/fml/arraysize.h"
+#include "flutter/fml/size.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 #include "third_party/tonic/dart_binding_macros.h"
 #include "third_party/tonic/dart_class_library.h"
@@ -64,7 +64,7 @@ Dart_NativeFunction NativeLookup(Dart_Handle name,
   FML_DCHECK(function_name != nullptr);
   FML_DCHECK(auto_setup_scope != nullptr);
   *auto_setup_scope = true;
-  size_t num_entries = arraysize(Entries);
+  size_t num_entries = fml::size(Entries);
   for (size_t i = 0; i < num_entries; ++i) {
     const struct NativeEntries& entry = Entries[i];
     if (!strcmp(function_name, entry.name) &&
@@ -78,7 +78,7 @@ Dart_NativeFunction NativeLookup(Dart_Handle name,
 }
 
 const uint8_t* NativeSymbol(Dart_NativeFunction native_function) {
-  size_t num_entries = arraysize(Entries);
+  size_t num_entries = fml::size(Entries);
   for (size_t i = 0; i < num_entries; ++i) {
     const struct NativeEntries& entry = Entries[i];
     if (entry.function == native_function) {
