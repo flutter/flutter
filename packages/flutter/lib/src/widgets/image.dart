@@ -614,30 +614,33 @@ class Image extends StatefulWidget {
   ///
   /// Once an image has fully loaded, this builder will no longer be consulted.
   ///
-  /// {@tool sample}
+  /// {@tool snippet --template=stateless_widget_material}
   ///
   /// The following sample uses [imageLoadingBuilder] to show a [CircularProgressIndicator]
   /// while an image loads over the network.
   ///
   /// ```dart
-  /// DecoratedBox(
-  ///   decoration: BoxDecoration(
-  ///     border: Border.all(),
-  ///     borderRadius: BorderRadius.circular(20),
-  ///   ),
-  ///   child: Image.network(
-  ///     'https://example.com/image.jpg',
-  ///     imageLoadingBuilder: (BuildContext context, ImageChunkEvent event, Widget currentRawImage) {
-  ///       return Center(
-  ///         child: CircularProgressIndicator(
-  ///           value: event.expectedTotalBytes > 0
-  ///               ? event.cumulativeBytesLoaded / event.expectedTotalBytes
-  ///               : null,
-  ///         ),
-  ///       );
-  ///     },
-  ///   ),
-  /// )
+  /// Widget build(BuildContext context) {
+  ///   return DecoratedBox(
+  ///     decoration: BoxDecoration(
+  ///       color: Colors.white,
+  ///       border: Border.all(),
+  ///       borderRadius: BorderRadius.circular(20),
+  ///     ),
+  ///     child: Image.network(
+  ///       'https://example.com/image.jpg',
+  ///       imageLoadingBuilder: (BuildContext context, ImageChunkEvent event, Widget currentRawImage) {
+  ///         return Center(
+  ///           child: CircularProgressIndicator(
+  ///             value: event.expectedTotalBytes > 0
+  ///                 ? event.cumulativeBytesLoaded / event.expectedTotalBytes
+  ///                 : null,
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
   /// ```
   /// {@end-tool}
   ///
