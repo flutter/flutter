@@ -208,8 +208,8 @@ import 'theme_data.dart';
 ///   Widget build(BuildContext context) {
 ///     return InkWell(
 ///       onTap: () {
-///         if (value == false)
-///           onChanged(true);
+///         if (value != groupValue)
+///           onChanged(value);
 ///       },
 ///       child: Padding(
 ///         padding: padding,
