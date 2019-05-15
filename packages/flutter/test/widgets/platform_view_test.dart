@@ -853,6 +853,58 @@ void main() {
 
       handle.dispose();
     });
+
+    testWidgets('AndroidView can take input focus', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      viewsController.createCompleter = Completer<void>();
+
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(
+        Center(
+          child: Column(
+            children: <Widget>[
+              const SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+              ),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Focus androidViewFocusWidget =
+      tester.widget(
+          find.descendant(
+              of: find.byType(AndroidView),
+              matching: find.byType(Focus)
+          )
+      );
+      final Element containerElement = tester.element(find.byKey(containerKey));
+      final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
+      final FocusNode containerFocusNode = Focus.of(containerElement);
+
+      containerFocusNode.requestFocus();
+
+      await tester.pump();
+
+      expect(containerFocusNode.hasFocus, isTrue);
+      expect(androidViewFocusNode.hasFocus, isFalse);
+
+      viewsController.invokeViewFocused(currentViewId + 1);
+
+      await tester.pump();
+
+      expect(containerFocusNode.hasFocus, isFalse);
+      expect(androidViewFocusNode.hasFocus, isTrue);
+    });
   });
 
   group('UiKitView', () {

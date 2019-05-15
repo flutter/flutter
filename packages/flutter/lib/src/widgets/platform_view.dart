@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'debug.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
 
 /// Embeds an Android view in the Widget hierarchy.
@@ -295,16 +297,20 @@ class _AndroidViewState extends State<AndroidView> {
   AndroidViewController _controller;
   TextDirection _layoutDirection;
   bool _initialized = false;
+  FocusNode _focusNode;
 
   static final Set<Factory<OneSequenceGestureRecognizer>> _emptyRecognizersSet =
     <Factory<OneSequenceGestureRecognizer>>{};
 
   @override
   Widget build(BuildContext context) {
-    return _AndroidPlatformView(
+    return Focus(
+      focusNode: _focusNode,
+      child: _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
         gestureRecognizers: widget.gestureRecognizers ?? _emptyRecognizersSet,
+      ),
     );
   }
 
@@ -314,6 +320,7 @@ class _AndroidViewState extends State<AndroidView> {
     }
     _initialized = true;
     _createNewAndroidView();
+    _focusNode = FocusNode(debugLabel: 'AndroidView(id: $_id)');
   }
 
   @override
@@ -369,6 +376,9 @@ class _AndroidViewState extends State<AndroidView> {
       layoutDirection: _layoutDirection,
       creationParams: widget.creationParams,
       creationParamsCodec: widget.creationParamsCodec,
+      onFocus: () {
+        _focusNode.requestFocus();
+      }
     );
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
