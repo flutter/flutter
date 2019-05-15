@@ -3263,6 +3263,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -6131,6 +6133,8 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+
+      await gesture.removePointer();
     },
   );
 
@@ -6163,6 +6167,8 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+
+      await gesture.removePointer();
     },
   );
 
@@ -6199,6 +6205,8 @@ void main() {
       final EditableTextState editableText = tester.state(find.byType(EditableText));
       expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
       expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+
+      await gesture.removePointer();
     },
   );
 

@@ -2654,7 +2654,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
 
   @override
-  bool get needsCompositing => _hasActiveAnnotation;
+  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {

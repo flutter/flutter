@@ -115,11 +115,10 @@ class TabController extends ChangeNotifier {
   /// Creates a new [TabController] with `index`, `previousIndex`, and `length`
   /// if they are non-null.
   ///
-  /// This will reuse the existing [_animationController].
+  /// This method is used by [DefaultTabController].
   ///
-  /// This is useful for [DefaultTabController], for example when
-  /// [DefaultTabController.length] is updated, this method is called so that a
-  /// new [TabController] is created without having to create a new [AnimationController].
+  /// When [DefaultTabController.length] is updated, this method is called to
+  /// create a new [TabController] without creating a new [AnimationController].
   TabController _copyWith({ int index, int length, int previousIndex }) {
     return TabController._(
       index: index ?? _index,
@@ -138,7 +137,7 @@ class TabController extends ChangeNotifier {
   /// animation's value can be [offset] by +/- 1.0 to reflect [TabBarView]
   /// drag scrolling.
   ///
-  /// If the TabController was disposed then return null.
+  /// If this [TabController] was disposed, then return null.
   Animation<double> get animation => _animationController?.view;
   AnimationController _animationController;
 
@@ -174,9 +173,10 @@ class TabController extends ChangeNotifier {
     }
   }
 
-  /// The index of the currently selected tab. Changing the index also updates
-  /// [previousIndex], sets the [animation]'s value to index, resets
-  /// [indexIsChanging] to false, and notifies listeners.
+  /// The index of the currently selected tab.
+  ///
+  /// Changing the index also updates [previousIndex], sets the [animation]'s
+  /// value to index, resets [indexIsChanging] to false, and notifies listeners.
   ///
   /// To change the currently selected tab and play the [animation] use [animateTo].
   ///
@@ -188,7 +188,9 @@ class TabController extends ChangeNotifier {
     _changeIndex(value);
   }
 
-  /// The index of the previously selected tab. Initially the same as [index].
+  /// The index of the previously selected tab.
+  ///
+  /// Initially the same as [index].
   int get previousIndex => _previousIndex;
   int _previousIndex;
 
@@ -210,8 +212,9 @@ class TabController extends ChangeNotifier {
     _changeIndex(value, duration: duration, curve: curve);
   }
 
-  /// The difference between the [animation]'s value and [index]. The offset
-  /// value must be between -1.0 and 1.0.
+  /// The difference between the [animation]'s value and [index].
+  ///
+  /// The offset value must be between -1.0 and 1.0.
   ///
   /// This property is typically set by the [TabBarView] when the user
   /// drags left or right. A value between -1.0 and 0.0 implies that the
@@ -313,8 +316,10 @@ class DefaultTabController extends StatefulWidget {
        assert(initialIndex >= 0 && initialIndex < length),
        super(key: key);
 
-  /// The total number of tabs. Typically greater than one. Must match
-  /// [TabBar.tabs]'s and [TabBarView.children]'s length.
+  /// The total number of tabs.
+  ///
+  /// Typically greater than one. Must match [TabBar.tabs]'s and
+  /// [TabBarView.children]'s length.
   final int length;
 
   /// The initial index of the selected tab.
