@@ -180,8 +180,7 @@ class SkiaGoldClient {
         ..writeln('Flutter + Skia Gold imgtest add failed.')
         ..writeln('If this is the first execution of this test, it may need to be triaged.')
         ..writeln('In this case, re-run the test after triage is completed.\n')
-        ..writeln('stdout: ${imgtestResult.stdout}')
-        ..writeln('stderr: ${imgtestResult.stderr}');
+        ..writeln('stdout: ${imgtestResult.stdout}');
       throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
     }
     return true;
@@ -189,7 +188,7 @@ class SkiaGoldClient {
 
   Future<String> _getCommitHash() async {
     // TODO(Piinks): Remove after pre-commit tests can be ingested by Skia Gold, https://github.com/flutter/flutter/pull/31630
-    return 'a40e5c90f0bd4efd334caf533abae189a8f84071';
+    return '5f9826040c14b1e73065ce5649cf6f027d994b17';
 //    if (!flutterRoot.existsSync()) {
 //      return null;
 //    } else {
@@ -218,8 +217,8 @@ class SkiaGoldClient {
     return convert.json.encode(
       <String, dynamic>{
         'Operating System' : io.Platform.operatingSystem,
-        'Operating System Version' : io.Platform.operatingSystemVersion,
-        'Dart Version' : io.Platform.version,
+        // 'Operating System Version' : io.Platform.operatingSystemVersion,
+        // 'Dart Version' : io.Platform.version,
       });
   }
 }
