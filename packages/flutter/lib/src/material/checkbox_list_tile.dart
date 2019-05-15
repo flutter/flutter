@@ -57,16 +57,7 @@ import 'theme_data.dart';
 /// ```
 /// {@end-tool}
 ///
-/// ## CheckboxListTile isn't exactly what I want
-///
-/// If the way CheckboxListTile pads and positions its elements isn't quite
-/// what you're looking for, you can create custom labeled checkbox widgets by
-/// combining [Checkbox] with other widgets, such as [RichText] and [Padding].
-///
-/// {@tool snippet --template=stateful_widget_scaffold}
-///
-/// Here is an example of a custom LinkedLabelCheckbox widget that allows a
-/// [RichText] widget to be nested in a checkbox tile widget.
+/// ## Semantics in CheckboxListTile
 ///
 /// Since CheckboxListTile is wrapped with a [MergeSemantics] widget, it wants
 /// to merge its children semantics nodes into one node in the semantics tree.
@@ -75,6 +66,11 @@ import 'theme_data.dart';
 ///
 /// If you're interested in learning more about this interaction, see the
 /// discussion in [TextSpan.recognizer].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of a LinkedLabelCheckbox widget that allows a
+/// [RichText] widget to be nested in a checkbox tile widget.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
@@ -133,6 +129,79 @@ import 'theme_data.dart';
 ///     body: Center(
 ///       child: LinkedLabelCheckbox(
 ///         label: 'Linked, tappable label text',
+///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         value: isSelected,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             isSelected = newValue;
+///           });
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## CheckboxListTile isn't exactly what I want
+///
+/// If the way CheckboxListTile pads and positions its elements isn't quite
+/// what you're looking for, you can create custom labeled checkbox widgets by
+/// combining [Checkbox] with other widgets, such as [Text], [Padding] and
+/// [InkWell].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of a custom LabeledCheckbox widget, but you can easily
+/// make your own configurable widget.
+///
+/// ```dart preamble
+/// class LabeledCheckbox extends StatelessWidget {
+///   const LabeledCheckbox({
+///     this.label,
+///     this.padding,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return InkWell(
+///       onTap: () {
+///         onChanged(!value);
+///       },
+///       child: Padding(
+///         padding: padding,
+///         child: Row(
+///           children: <Widget>[
+///             Checkbox(
+///               value: value,
+///               onChanged: (bool newValue) {
+///                 onChanged(newValue);
+///               },
+///             ),
+///             Text(label),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LabeledCheckbox(
+///         label: 'This is the label text',
 ///         padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
