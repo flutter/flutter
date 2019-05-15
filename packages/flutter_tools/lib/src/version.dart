@@ -104,7 +104,7 @@ class FlutterVersion {
 
   @override
   String toString() {
-    final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
+    final String versionText = frameworkVersion == 'unknown' ? '' : ' MT$frameworkVersion';
     final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
@@ -586,6 +586,17 @@ class GitTagVersion {
   }
 
   static GitTagVersion parse(String version) {
+    final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
+    if (parts == null) {
+      printTrace('Could not interpret results of "git describe": $version');
+      return parseMT(version);
+    }
+    final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parsedParts[4], parts[5]);
+  }
+
+  static GitTagVersion parseMT(String version) {
     final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {

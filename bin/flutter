@@ -36,11 +36,17 @@ function updateMTFlutter() {
     # framework版本不一致
     if [[ "$(cat "$FLUTTER_ROOT/version")" != "${MT_FLUTTER_VERSION}" ]]; then
       pushd ${FLUTTER_ROOT}
+      CURRENT_FLUTTER_ROOT_DIR_NAME=`basename $PWD`
       echo "====download full flutter v$MT_FLUTTER_VERSION ====="
       echo $FULL_FLUTTER
       pushd ..
       curl -o flutter.zip ${FULL_FLUTTER}
-      unzip -o flutter.zip -d .
+      unzip -o flutter.zip -d mtFlutterTemp
+      rm -rf ${CURRENT_FLUTTER_ROOT_DIR_NAME}
+      mkdir ${CURRENT_FLUTTER_ROOT_DIR_NAME}
+      mv mtFlutterTemp/flutter/* ${CURRENT_FLUTTER_ROOT_DIR_NAME}
+      mv mtFlutterTemp/flutter/.* ${CURRENT_FLUTTER_ROOT_DIR_NAME}
+      rm -r mtFlutterTemp
       rm flutter.zip
       popd
       popd
