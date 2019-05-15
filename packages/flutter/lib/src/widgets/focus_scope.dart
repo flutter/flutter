@@ -128,8 +128,6 @@ import 'inherited_notifier.dart';
 ///     traversal.
 ///   * [FocusManager], a singleton that manages the primary focus and
 ///     distributes key events to focused nodes.
-///   * [FocusHighlight], a widget used to display a highlight around a node
-///     based on the focus state of a [Focus] widget above it in the tree.
 ///   * [FocusTraversalPolicy], an object used to determine how to move the
 ///     focus to other nodes.
 ///   * [DefaultFocusTraversal], a widget used to configure the default focus
@@ -410,8 +408,6 @@ class _FocusState extends State<Focus> {
 ///     managing focus without having to manage the node.
 ///   * [FocusManager], a singleton that manages the focus and distributes key
 ///     events to focused nodes.
-///   * [FocusHighlight], a widget used to display a highlight around a node
-///     based on the focus state of a [Focus] widget above it in the tree.
 ///   * [FocusTraversalPolicy], an object used to determine how to move the
 ///     focus to other nodes.
 ///   * [DefaultFocusTraversal], a widget used to configure the default focus
