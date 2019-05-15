@@ -78,7 +78,7 @@ typedef ImageChunkListener = void Function(ImageChunkEvent event);
 /// Used by [ImageStream] and [precacheImage] to report errors.
 typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
 
-/// An immutable notification of image bytes having been incrementally loaded.
+/// An immutable notification of image bytes that have been incrementally loaded.
 ///
 /// Chunk events represent progress notifications while an image is being
 /// loaded (e.g. from disk or over the network).
@@ -190,12 +190,12 @@ class ImageStream extends Diagnosticable {
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
   ///
-  /// An [ImageChunkListener] can also optionally be added along with the
+  /// An [ImageChunkListener] can optionally be added along with the
   /// `listener`. If the stream produces images that are loaded in chunks
   /// (e.g. over a file system or a network), then the specified listener will
   /// be notified for every chunk of data that is loaded. The events that are
   /// delivered to the listener are _not_ buffered (rather, they are fired and
-  /// forgotten), so it'd possible that the listener will have missed delivery
+  /// forgotten), so it's possible that the listener will have missed delivery
   /// of some [ImageChunkEvent]s by the time they add themselves as a listener.
   ///
   /// An [ImageErrorListener] can also optionally be added along with the
@@ -324,13 +324,13 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// then use this flag to avoid calling [RenderObject.markNeedsPaint] during
   /// a paint.
   ///
-  /// An [ImageChunkListener] can also optionally be added along with the
+  /// An [ImageChunkListener] can optionally be added along with the
   /// `listener`. If the stream produces images that are loaded in chunks
   /// (e.g. over a file system or a network), then the specified listener will
   /// be notified for every chunk of data that is loaded. The events that are
   /// delivered to the listener are _not_ buffered (rather, they are fired and
-  /// forgotten), so it'd possible that the listener will have missed delivery
-  /// of some [ImageChunkEvent]s by the time they add themselves as a listener.
+  /// forgotten), so it's possible that the listener will have missed delivery
+  /// of some [ImageChunkEvent]s by the time it is added as a listener.
   ///
   /// An [ImageErrorListener] can also optionally be added along with the
   /// `listener`. If an error occurred, `onError` will be called instead of
@@ -574,7 +574,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   /// [scale] is the linear scale factor for drawing this frames of this image
   /// at their intended size.
   ///
-  /// [chunkEvents] is an optional stream of notifications about the loading
+  /// The [chunkEvents] parameter is an optional stream of notifications about the loading
   /// progress of the image. If this stream is provided, the events produced
   /// by the stream will be delivered to registered [ImageChunkListener]s (see
   /// [addListener]).
