@@ -326,7 +326,7 @@ class TestGesture {
     @required HitTester hitTester,
     int pointer = 1,
     PointerDeviceKind kind = PointerDeviceKind.touch,
-    int device = 1,
+    int device,
     int buttons = kPrimaryButton,
   }) : assert(dispatcher != null),
        assert(hitTester != null),
