@@ -142,10 +142,11 @@ class FlutterPlugin implements Plugin<Project> {
         } else {
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
             String targetArch = 'arm'
-//            if (project.hasProperty('target-platform') &&
-//                project.property('target-platform') == 'android-arm64') {
-//              targetArch = 'arm64'
-//            }
+            if((resolveProperty(project,'force-not-arm64','false') != 'true') && 
+            (project.hasProperty('target-platform') && project.property('target-platform') == 'android-arm64')) {
+                targetArch = 'arm64'
+            }
+
             debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
             profileFlutterJar = baseEnginePath.resolve("android-${targetArch}-profile").resolve("flutter.jar").toFile()
             releaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-release").resolve("flutter.jar").toFile()
@@ -361,9 +362,16 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('build-shared-library')) {
             buildSharedLibraryValue = project.property('build-shared-library').toBoolean()
         }
-        String targetPlatformValue = null
+        String targetPlatformValue = null;
         if (project.hasProperty('target-platform')) {
             targetPlatformValue = project.property('target-platform')
+        }
+        if(resolveProperty(project,'force-not-arm64','false') == 'true'){
+            // def gitSha = 'git rev-parse --short HEAD'.execute([], project.rootDir).text.trim()
+            def diviceTartgetPlatform = 'adb shell getprop ro.product.cpu.abi'.execute([],project.rootDir).text.trim();
+            if(diviceTartgetPlatform == 'arm64-v8a'){
+                targetPlatformValue = 'android-arm'
+            }
         }
 
         def addFlutterDeps = { variant ->
