@@ -252,14 +252,18 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> tap(Finder finder, {int pointer}) {
-    return tapAt(getCenter(finder), pointer: pointer);
+  Future<void> tap(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
+    return tapAt(getCenter(finder), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location.
-  Future<void> tapAt(Offset location, {int pointer}) {
+  Future<void> tapAt(Offset location, {int pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer);
+      final TestGesture gesture = await startGesture(
+        location,
+        pointer: pointer,
+        buttons: buttons,
+      );
       await gesture.up();
     });
   }
@@ -269,9 +273,9 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<TestGesture> press(Finder finder, {int pointer}) {
+  Future<TestGesture> press(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<TestGesture>(() {
-      return startGesture(getCenter(finder), pointer: pointer);
+      return startGesture(getCenter(finder), pointer: pointer, buttons: buttons);
     });
   }
 
@@ -538,12 +542,17 @@ abstract class WidgetController {
   ///
   /// You can use [startGesture] instead if your gesture begins with a down
   /// event.
-  Future<TestGesture> createGesture({int pointer, PointerDeviceKind kind = PointerDeviceKind.touch}) async {
+  Future<TestGesture> createGesture({
+    int pointer,
+    PointerDeviceKind kind = PointerDeviceKind.touch,
+    int buttons = kPrimaryButton,
+  }) async {
     final TestGesture gesture = TestGesture(
       hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
       kind: kind,
       pointer: pointer ?? _getNextPointer(),
+      buttons: buttons,
     );
     return gesture;
   }
@@ -558,8 +567,13 @@ abstract class WidgetController {
     Offset downLocation, {
     int pointer,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int buttons = kPrimaryButton,
   }) async {
-    final TestGesture result = await createGesture(pointer: pointer, kind: kind);
+    final TestGesture result = await createGesture(
+      pointer: pointer,
+      kind: kind,
+      buttons: buttons,
+    );
     await result.down(downLocation);
     return result;
   }
