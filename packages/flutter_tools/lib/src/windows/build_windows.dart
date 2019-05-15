@@ -14,10 +14,12 @@ import '../project.dart';
 import 'msbuild_utils.dart';
 
 /// Builds the Windows project using msbuild.
-Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo) async {
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
-    'EXTRA_BUNDLE_FLAGS': buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '',
+    'FLUTTER_TARGET': target,
+    'PROJECT_DIR': windowsProject.project.directory.path,
+    'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
   };
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
