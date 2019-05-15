@@ -30,7 +30,6 @@ class TestPointer {
   ])
       : assert(kind != null),
         assert(pointer != null),
-        assert(kind != null),
         assert(buttons != null) {
     switch (kind) {
       case PointerDeviceKind.mouse:
