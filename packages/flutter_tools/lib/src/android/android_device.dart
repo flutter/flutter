@@ -373,7 +373,7 @@ class AndroidDevice extends Device {
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
-      final FlutterProject project = await FlutterProject.current();
+      final FlutterProject project = FlutterProject.current();
       await buildApk(
           project: project,
           target: mainPath,
@@ -382,6 +382,10 @@ class AndroidDevice extends Device {
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
       package = await AndroidApk.fromAndroidProject(project.android);
+    }
+    // There was a failure parsing the android project information.
+    if (package == null) {
+      throwToolExit('Problem building Android application: see above error(s).');
     }
 
     printTrace("Stopping app '${package.name}' on $name.");
@@ -438,6 +442,8 @@ class AndroidDevice extends Device {
       }
       if (debuggingOptions.startPaused)
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
+      if (debuggingOptions.disableServiceAuthCodes)
+        cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
       if (debuggingOptions.verboseSystemLogs) {
@@ -528,6 +534,11 @@ class AndroidDevice extends Device {
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
     await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
+  }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.android.existsSync();
   }
 }
 
@@ -874,7 +885,20 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
         process.throwException('adb did not report forwarded port');
       hostPort = int.tryParse(process.stdout) ?? (throw 'adb returned invalid port number:\n${process.stdout}');
     } else {
-      if (process.stdout.isNotEmpty)
+      // stdout may be empty or the port we asked it to forward, though it's
+      // not documented (or obvious) what triggers each case.
+      //
+      // Observations are:
+      //   - On MacOS it's always empty when Flutter spawns the process, but
+      //   - On MacOS it prints the port number when run from the terminal, unless
+      //     the port is already forwarded, when it also prints nothing.
+      //   - On ChromeOS, the port appears to be printed even when Flutter spawns
+      //     the process
+      //
+      // To cover all cases, we accept the output being either empty or exactly
+      // the port number, but treat any other output as probably being an error
+      // message.
+      if (process.stdout.isNotEmpty && process.stdout.trim() != '$hostPort')
         process.throwException('adb returned error:\n${process.stdout}');
     }
 

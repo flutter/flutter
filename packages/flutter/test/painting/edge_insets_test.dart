@@ -23,11 +23,11 @@ void main() {
     expect(insets.along(Axis.horizontal), equals(16.0));
     expect(insets.along(Axis.vertical), equals(20.0));
 
-    expect(insets.inflateRect(Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           Rect.fromLTRB(18.0, 25.0, 135.0, 156.0));
+    expect(insets.inflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+           const Rect.fromLTRB(18.0, 25.0, 135.0, 156.0));
 
-    expect(insets.deflateRect(Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
-           Rect.fromLTRB(28.0, 39.0, 113.0, 130.0));
+    expect(insets.deflateRect(const Rect.fromLTRB(23.0, 32.0, 124.0, 143.0)),
+           const Rect.fromLTRB(28.0, 39.0, 113.0, 130.0));
 
     expect(insets.inflateSize(const Size(100.0, 125.0)), const Size(116.0, 145.0));
     expect(insets.deflateSize(const Size(100.0, 125.0)), const Size(84.0, 105.0));

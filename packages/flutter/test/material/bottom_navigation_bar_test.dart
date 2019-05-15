@@ -71,8 +71,8 @@ void main() {
   });
 
   testWidgets('Fixed BottomNavigationBar defaults', (WidgetTester tester) async {
-    const Color primaryColor = Colors.black;
-    const Color captionColor = Colors.purple;
+    const Color primaryColor = Color(0xFF000001);
+    const Color captionColor = Color(0xFF000002);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -100,17 +100,304 @@ void main() {
 
     const double selectedFontSize = 14.0;
     const double unselectedFontSize = 12.0;
-    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.fontSize, selectedFontSize);
+    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
+    final TextStyle unselectedFontStyle = tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+    expect(selectedFontStyle.color, equals(primaryColor));
+    expect(selectedFontStyle.fontSize, selectedFontSize);
+    expect(selectedFontStyle.fontWeight, equals(FontWeight.w400));
+    expect(selectedFontStyle.height, isNull);
+    expect(unselectedFontStyle.color, equals(captionColor));
+    expect(unselectedFontStyle.fontWeight, equals(FontWeight.w400));
+    expect(unselectedFontStyle.height, isNull);
     // Unselected label has a font size of 14 but is scaled down to be font size 12.
-    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.fontSize, selectedFontSize);
     expect(
       tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
       equals(Matrix4.diagonal3(Vector3.all(unselectedFontSize / selectedFontSize))),
     );
-    expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(primaryColor));
-    expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(captionColor));
+    expect(selectedIcon.color, equals(primaryColor));
+    expect(selectedIcon.fontSize, equals(24.0));
+    expect(unselectedIcon.color, equals(captionColor));
+    expect(unselectedIcon.fontSize, equals(24.0));
     expect(_getOpacity(tester, 'Alarm'), equals(1.0));
     expect(_getMaterial(tester).elevation, equals(8.0));
+  });
+
+  testWidgets('Custom selected and unselected font styles', (WidgetTester tester) async {
+    const TextStyle selectedTextStyle = TextStyle(fontWeight: FontWeight.w200, fontSize: 18.0);
+    const TextStyle unselectedTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12.0);
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              selectedLabelStyle: selectedTextStyle,
+              unselectedLabelStyle: unselectedTextStyle,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm'),
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
+    final TextStyle unselectedFontStyle = tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
+    expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
+    expect(selectedFontStyle.fontWeight, equals(selectedTextStyle.fontWeight));
+    expect(
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
+      equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize / selectedTextStyle.fontSize))),
+    );
+    expect(unselectedFontStyle.fontWeight, equals(unselectedTextStyle.fontWeight));
+  });
+
+  testWidgets('font size on text styles overrides font size params', (WidgetTester tester) async {
+    const TextStyle selectedTextStyle = TextStyle(fontSize: 18.0);
+    const TextStyle unselectedTextStyle = TextStyle(fontSize: 12.0);
+    const double selectedFontSize = 17.0;
+    const double unselectedFontSize = 11.0;
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              selectedLabelStyle: selectedTextStyle,
+              unselectedLabelStyle: unselectedTextStyle,
+              selectedFontSize: selectedFontSize,
+              unselectedFontSize: unselectedFontSize,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm'),
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
+    expect(selectedFontStyle.fontSize, equals(selectedTextStyle.fontSize));
+    expect(
+      tester.firstWidget<Transform>(find.ancestor(of: find.text('Alarm'), matching: find.byType(Transform))).transform,
+      equals(Matrix4.diagonal3(Vector3.all(unselectedTextStyle.fontSize / selectedTextStyle.fontSize))),
+    );
+  });
+
+  testWidgets('Custom selected and unselected icon themes', (WidgetTester tester) async {
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+    expect(selectedIcon.color, equals(selectedIconTheme.color));
+    expect(selectedIcon.fontSize, equals(selectedIconTheme.size));
+    expect(unselectedIcon.color, equals(unselectedIconTheme.color));
+    expect(unselectedIcon.fontSize, equals(unselectedIconTheme.size));
+  });
+
+  testWidgets('color on icon theme overrides selected and unselected item colors', (WidgetTester tester) async {
+    const IconThemeData selectedIconTheme = IconThemeData(size: 36, color: Color(1));
+    const IconThemeData unselectedIconTheme = IconThemeData(size: 18, color: Color(2));
+    const Color selectedItemColor = Color(3);
+    const Color unselectedItemColor = Color(4);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            selectedItemColor: selectedItemColor,
+            unselectedItemColor: unselectedItemColor,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    final TextStyle selectedFontStyle = tester.renderObject<RenderParagraph>(find.text('AC')).text.style;
+    final TextStyle unselectedFontStyle = tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style;
+    final TextStyle selectedIcon = _iconStyle(tester, Icons.ac_unit);
+    final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
+    expect(selectedIcon.color, equals(selectedIconTheme.color));
+    expect(unselectedIcon.color, equals(unselectedIconTheme.color));
+    expect(selectedFontStyle.color, equals(selectedItemColor));
+    expect(unselectedFontStyle.color, equals(unselectedItemColor));
+  });
+
+  testWidgets('Padding is calculated properly on items - all labels', (WidgetTester tester) async {
+    const double selectedFontSize = 16.0;
+    const double unselectedFontSize = 12.0;
+    const double selectedIconSize = 36.0;
+    const double unselectedIconSize = 20.0;
+    const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          bottomNavigationBar: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            selectedFontSize: selectedFontSize,
+            unselectedFontSize: unselectedFontSize,
+            selectedIconTheme: selectedIconTheme,
+            unselectedIconTheme: unselectedIconTheme,
+            items: const <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.ac_unit),
+                title: Text('AC'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.access_alarm),
+                title: Text('Alarm'),
+              ),
+            ],
+          ),
+        ),
+      )
+    );
+
+    final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
+    expect(selectedItemPadding.top, equals(selectedFontSize / 2.0));
+    expect(selectedItemPadding.bottom, equals(selectedFontSize / 2.0));
+    final EdgeInsets unselectedItemPadding = _itemPadding(tester, Icons.access_alarm);
+    const double expectedUnselectedPadding = (selectedIconSize - unselectedIconSize) / 2.0 + selectedFontSize / 2.0;
+    expect(unselectedItemPadding.top, equals(expectedUnselectedPadding));
+    expect(unselectedItemPadding.bottom, equals(expectedUnselectedPadding));
+  });
+
+  testWidgets('Padding is calculated properly on items - selected labels only', (WidgetTester tester) async {
+    const double selectedFontSize = 16.0;
+    const double unselectedFontSize = 12.0;
+    const double selectedIconSize = 36.0;
+    const double unselectedIconSize = 20.0;
+    const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              showSelectedLabels: true,
+              showUnselectedLabels: false,
+              selectedFontSize: selectedFontSize,
+              unselectedFontSize: unselectedFontSize,
+              selectedIconTheme: selectedIconTheme,
+              unselectedIconTheme: unselectedIconTheme,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm'),
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
+    expect(selectedItemPadding.top, equals(selectedFontSize / 2.0));
+    expect(selectedItemPadding.bottom, equals(selectedFontSize / 2.0));
+    final EdgeInsets unselectedItemPadding = _itemPadding(tester, Icons.access_alarm);
+    expect(unselectedItemPadding.top, equals((selectedIconSize - unselectedIconSize) / 2.0 + selectedFontSize));
+    expect(unselectedItemPadding.bottom, equals((selectedIconSize - unselectedIconSize) / 2.0));
+  });
+
+  testWidgets('Padding is calculated properly on items - no labels', (WidgetTester tester) async {
+    const double selectedFontSize = 16.0;
+    const double unselectedFontSize = 12.0;
+    const double selectedIconSize = 36.0;
+    const double unselectedIconSize = 20.0;
+    const IconThemeData selectedIconTheme = IconThemeData(size: selectedIconSize);
+    const IconThemeData unselectedIconTheme = IconThemeData(size: unselectedIconSize);
+
+    await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: BottomNavigationBar(
+              type: BottomNavigationBarType.fixed,
+              showSelectedLabels: false,
+              showUnselectedLabels: false,
+              selectedFontSize: selectedFontSize,
+              unselectedFontSize: unselectedFontSize,
+              selectedIconTheme: selectedIconTheme,
+              unselectedIconTheme: unselectedIconTheme,
+              items: const <BottomNavigationBarItem>[
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.ac_unit),
+                  title: Text('AC'),
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.access_alarm),
+                  title: Text('Alarm'),
+                ),
+              ],
+            ),
+          ),
+        )
+    );
+
+    final EdgeInsets selectedItemPadding = _itemPadding(tester, Icons.ac_unit);
+    expect(selectedItemPadding.top, equals(selectedFontSize));
+    expect(selectedItemPadding.bottom, equals(0.0));
+    final EdgeInsets unselectedItemPadding = _itemPadding(tester, Icons.access_alarm);
+    expect(unselectedItemPadding.top, equals((selectedIconSize - unselectedIconSize) / 2.0 + selectedFontSize));
+    expect(unselectedItemPadding.bottom, equals((selectedIconSize - unselectedIconSize) / 2.0));
   });
 
   testWidgets('Shifting BottomNavigationBar defaults', (WidgetTester tester) async {
@@ -1149,7 +1436,7 @@ void main() {
       await expectLater(
         find.byType(BottomNavigationBar),
         matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
-	      skip: !Platform.isLinux,
+        skip: !Platform.isLinux,
       );
     }
   });
@@ -1398,4 +1685,20 @@ Material _getMaterial(WidgetTester tester) {
   return tester.firstWidget<Material>(
     find.descendant(of: find.byType(BottomNavigationBar), matching: find.byType(Material)),
   );
+}
+
+TextStyle _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+      find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
+}
+
+EdgeInsets _itemPadding(WidgetTester tester, IconData icon) {
+  return tester.widget<Padding>(
+      find.descendant(
+        of: find.ancestor(of: find.byIcon(icon), matching: find.byType(InkResponse)),
+        matching: find.byType(Padding)
+      ).first,
+    ).padding.resolve(TextDirection.ltr);
 }

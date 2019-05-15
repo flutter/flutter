@@ -85,6 +85,9 @@ unlinked_spec.ds
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
 
+# Coverage
+coverage/
+
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3
 !**/ios/**/default.mode2v3

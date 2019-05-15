@@ -42,6 +42,12 @@ Any params for that command should be passed in through a `params` field. Here's
 [{"id":2,"result":[{"id":"702ABC1F-5EA5-4F83-84AB-6380CA91D39A","name":"iPhone 6","platform":"ios_x64","available":true}]}]
 ```
 
+Events that come from the server will have an `event` field containing the type of event, along with a `params` field.
+
+```
+[{"event":"device.added","params":{"id":"1DD6786B-37D4-4355-AA15-B818A87A18B4","name":"iPhone XS Max","platform":"ios","emulator":true}}]
+```
+
 ## Domains and Commands
 
 ### daemon domain
@@ -63,10 +69,9 @@ The `daemon.connected` event is sent when the daemon starts. The `params` field 
 - `version`: The protocol version. This is the same version returned by the `version()` command.
 - `pid`: The `pid` of the daemon process.
 
-#### daemon.logMessage
+#### daemon.log
 
-The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
-
+This is sent when user-facing output is received. The `params` field will be a map with the field `log`. The `log` field is a string with the output text. If the output indicates an error, an `error` boolean field will be present, and set to `true`.
 
 #### daemon.showMessage
 
@@ -74,11 +79,17 @@ The `daemon.showMessage` event is sent by the daemon when some if would be usefu
 
 It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over some reasonable period of time.
 
+#### daemon.logMessage
+
+The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
+
+Generally, clients won't display content from `daemon.logMessage` events unless they're set to a more verbose output mode.
+
 ### app domain
 
 #### app.restart
 
-The `restart()` restarts the given application. It returns a Map of `{ int code, String message, String hintMessage, String hintId }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure. If `hintId` is non-null and equal to `restartRecommended`, that indicates that the reload was successful, but not all reloaded elements were executed during view reassembly (i.e., the user might not see all the changes in the current UI, and a restart could be necessary).
+The `restart()` restarts the given application. It returns a Map of `{ int code, String message }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure.
 
 - `appId`: the id of a previously started app; this is required.
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
@@ -202,6 +213,7 @@ The following subset of the daemon domain is available in `flutter run --machine
   - [`shutdown`](#daemonshutdown)
 - Events
   - [`connected`](#daemonconnected)
+  - [`log`](#daemonlog)
   - [`logMessage`](#daemonlogmessage)
 
 ### app domain

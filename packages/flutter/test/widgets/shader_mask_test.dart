@@ -44,6 +44,6 @@ void main() {
     await tester.pumpWidget(widget);
 
     // The shader bounds rectangle should reflect the position of the centered SizedBox.
-    expect(shaderBounds, equals(Rect.fromLTWH(200.0, 100.0, 400.0, 400.0)));
+    expect(shaderBounds, equals(const Rect.fromLTWH(200.0, 100.0, 400.0, 400.0)));
   });
 }

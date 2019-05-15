@@ -82,7 +82,7 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
       delay *= 2;
   }
 
-  final WebSocketConnector constructor = context[WebSocketConnector] ?? io.WebSocket.connect;
+  final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? io.WebSocket.connect;
   while (socket == null) {
     attempts += 1;
     try {
@@ -236,6 +236,11 @@ class VMService {
     _openChannel = (Uri uri, {io.CompressionOptions compression}) async => ReplayVMServiceChannel(dir);
   }
 
+  static void _unhandledError(dynamic error, dynamic stack) {
+    logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
+    assert(false);
+  }
+
   /// Connect to a Dart VM Service at [httpUri].
   ///
   /// If the [reloadSources] parameter is not null, the 'reloadSources' service
@@ -253,7 +258,7 @@ class VMService {
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
-    final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel));
+    final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
     final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression);
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.

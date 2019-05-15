@@ -15,9 +15,9 @@ import 'cocoapods.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
 
-IOSWorkflow get iosWorkflow => context[IOSWorkflow];
-IOSValidator get iosValidator => context[IOSValidator];
-CocoaPodsValidator get cocoapodsValidator => context[CocoaPodsValidator];
+IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
+IOSValidator get iosValidator => context.get<IOSValidator>();
+CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 class IOSWorkflow implements Workflow {
   const IOSWorkflow();

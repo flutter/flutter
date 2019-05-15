@@ -116,7 +116,10 @@ Future<void> run(List<String> args) async {
     Directory testDirectory;
     CoverageCollector collector;
     if (argResults['coverage']) {
-      collector = CoverageCollector(await FlutterProject.current(), coverageDirectory: coverageDirectory);
+      collector = CoverageCollector(
+        flutterProject: FlutterProject.current(),
+        coverageDirectory: coverageDirectory,
+      );
       if (!argResults.options.contains(_kOptionTestDirectory)) {
         throwToolExit('Use of --coverage requires setting --test-directory');
       }

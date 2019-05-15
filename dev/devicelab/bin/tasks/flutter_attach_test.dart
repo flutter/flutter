@@ -128,13 +128,14 @@ void main() {
         // If the next line fails, your device may not support regexp search.
         final String observatoryLine = await device.adb(<String>['logcat', '-e', 'Observatory listening on http:', '-m', '1', '-T', currentTime]);
         print('Found observatory line: $observatoryLine');
-        final String observatoryPort = RegExp(r'Observatory listening on http://.*:([0-9]+)').firstMatch(observatoryLine)[1];
-        print('Extracted observatory port: $observatoryPort');
+        final String observatoryUri = RegExp('Observatory listening on ((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)').firstMatch(observatoryLine)[1];
+        print('Extracted observatory port: $observatoryUri');
 
         section('Launching attach with given port');
         attachProcess = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['--suppress-analytics', 'attach', '--debug-port', observatoryPort, '-d', device.deviceId],
+          <String>['--suppress-analytics', 'attach', '--debug-uri',
+          observatoryUri, '-d', device.deviceId],
           isBot: false, // we just want to test the output, not have any debugging info
         );
         await testReload(attachProcess);

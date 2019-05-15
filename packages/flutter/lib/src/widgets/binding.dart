@@ -302,6 +302,16 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
           };
         },
       );
+
+      // Expose the ability to send Widget rebuilds as [Timeline] events.
+      registerBoolServiceExtension(
+        name: 'profileWidgetBuilds',
+        getter: () async => debugProfileBuildsEnabled,
+        setter: (bool value) async {
+          if (debugProfileBuildsEnabled != value)
+            debugProfileBuildsEnabled = value;
+        },
+      );
     }
 
     assert(() {
@@ -313,16 +323,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
             return Future<void>.value();
           WidgetsApp.debugAllowBannerOverride = value;
           return _forceRebuild();
-        },
-      );
-
-      // Expose the ability to send Widget rebuilds as [Timeline] events.
-      registerBoolServiceExtension(
-        name: 'profileWidgetBuilds',
-        getter: () async => debugProfileBuildsEnabled,
-        setter: (bool value) async {
-          if (debugProfileBuildsEnabled != value)
-            debugProfileBuildsEnabled = value;
         },
       );
 
@@ -937,7 +937,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         exception: exception,
         stack: stack,
         library: 'widgets library',
-        context: 'attaching to the render tree',
+        context: ErrorDescription('attaching to the render tree'),
       );
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);

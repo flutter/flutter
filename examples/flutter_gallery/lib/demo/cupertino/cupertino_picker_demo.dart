@@ -95,8 +95,8 @@ class _CupertinoPickerDemoState extends State<CupertinoPickerDemo> {
                   setState(() => _selectedColorIndex = index);
                 },
                 children: List<Widget>.generate(coolColorNames.length, (int index) {
-                  return Center(child:
-                  Text(coolColorNames[index]),
+                  return Center(
+                    child: Text(coolColorNames[index]),
                   );
                 }),
               ),

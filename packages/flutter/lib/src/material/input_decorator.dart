@@ -834,6 +834,17 @@ class _RenderDecoration extends RenderBox {
   // This method applies layout to all of the renderers except the container.
   // For convenience, the container is laid out in performLayout().
   _RenderDecorationLayout _layout(BoxConstraints layoutConstraints) {
+    assert(
+      layoutConstraints.maxWidth < double.infinity,
+      'An InputDecorator, which is typically created by a TextField, cannot '
+      'have an unbounded width.\n'
+      'This happens when the parent widget does not provide a finite width '
+      'constraint. For example, if the InputDecorator is contained by a Row, '
+      'then its width must be constrained. An Expanded widget or a SizedBox '
+      'can be used to constrain the width of the InputDecorator or the '
+      'TextField that contains it.',
+    );
+
     // Margin on each side of subtext (counter and helperError)
     final Map<RenderBox, double> boxToBaseline = <RenderBox, double>{};
     final BoxConstraints boxConstraints = layoutConstraints.loosen();
@@ -1276,11 +1287,20 @@ class _RenderDecoration extends RenderBox {
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (RenderBox child in _children) {
       // TODO(hansmuller): label must be handled specially since we've transformed it
-      if (child.hitTest(result, position: position - _boxParentData(child).offset))
+      final Offset offset = _boxParentData(child).offset;
+      final bool isHit = result.addWithPaintOffset(
+        offset: offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - offset);
+          return child.hitTest(result, position: transformed);
+        },
+      );
+      if (isHit)
         return true;
     }
     return false;

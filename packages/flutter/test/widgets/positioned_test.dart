@@ -25,7 +25,7 @@ void main() {
     expect(a.width, null);
     expect(a.height, null);
     final Positioned b = Positioned.fromRect(
-      rect: Rect.fromLTRB(
+      rect: const Rect.fromLTRB(
         102.0,
         302.0,
         202.0,
@@ -59,12 +59,12 @@ void main() {
   testWidgets('Can animate position data', (WidgetTester tester) async {
     final RelativeRectTween rect = RelativeRectTween(
       begin: RelativeRect.fromRect(
-        Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
-        Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
+        const Rect.fromLTRB(10.0, 20.0, 20.0, 30.0),
+        const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
       ),
       end: RelativeRect.fromRect(
-        Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
-        Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
+        const Rect.fromLTRB(80.0, 90.0, 90.0, 100.0),
+        const Rect.fromLTRB(0.0, 10.0, 100.0, 110.0),
       ),
     );
     final AnimationController controller = AnimationController(

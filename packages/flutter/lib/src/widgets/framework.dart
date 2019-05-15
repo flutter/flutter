@@ -21,9 +21,9 @@ export 'package:flutter/foundation.dart' show
   protected,
   required,
   visibleForTesting;
-export 'package:flutter/foundation.dart' show FlutterError, debugPrint, debugPrintStack;
+export 'package:flutter/foundation.dart' show FlutterError, ErrorSummary, ErrorDescription, ErrorHint, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
-export 'package:flutter/foundation.dart' show DiagnosticLevel;
+export 'package:flutter/foundation.dart' show DiagnosticsNode, DiagnosticLevel;
 export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
@@ -149,6 +149,13 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
     assert(() {
       assert(parent != null);
       if (_debugReservations.containsKey(this) && _debugReservations[this] != parent) {
+        // Reserving a new parent while the old parent is not attached is ok.
+        // This can happen when a renderObject detaches and re-attaches to rendering
+        // tree multiple times.
+        if (_debugReservations[this].renderObject?.attached == false) {
+          _debugReservations[this] = parent;
+          return true;
+        }
         // It's possible for an element to get built multiple times in one
         // frame, in which case it'll reserve the same child's key multiple
         // times. We catch multiple children of one widget having the same key
@@ -197,16 +204,19 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       _debugIllFatedElements.clear();
       _debugReservations.clear();
       if (duplicates != null) {
-        final StringBuffer buffer = StringBuffer();
-        buffer.writeln('Multiple widgets used the same GlobalKey.\n');
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+        information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
         for (GlobalKey key in duplicates.keys) {
           final Set<Element> elements = duplicates[key];
-          buffer.writeln('The key $key was used by ${elements.length} widgets:');
-          for (Element element in elements)
-            buffer.writeln('- $element');
+          // TODO(jacobr): this will omit the '- ' before each widget name and
+          // use the more standard whitespace style instead. Please let me know
+          // if the '- ' style is a feature we want to maintain and we can add
+          // another tree style that supports it. I also see '* ' in some places
+          // so it would be nice to unify and normalize.
+          information.add(Element.describeElements('The key $key was used by ${elements.length} widgets', elements));
         }
-        buffer.write('A GlobalKey can only be specified on one widget at a time in the widget tree.');
-        throw FlutterError(buffer.toString());
+        information.add(ErrorDescription('A GlobalKey can only be specified on one widget at a time in the widget tree.'));
+        throw FlutterError.fromParts(information);
       }
       return true;
     }());
@@ -1653,7 +1663,15 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   /// objects.
   MultiChildRenderObjectWidget({ Key key, this.children = const <Widget>[] })
     : assert(children != null),
-      assert(!children.any((Widget child) => child == null)), // https://github.com/dart-lang/sdk/issues/29276
+      assert(() {
+        final int index = children.indexOf(null);
+        if (index >= 0) {
+          throw AssertionError(
+            "The widget's children must not contain any null values, but a null value was found at index $index"
+          );
+        }
+        return true;
+      }()), // https://github.com/dart-lang/sdk/issues/29276
       super(key: key);
 
   /// The widgets below this widget in the tree.
@@ -2066,6 +2084,24 @@ abstract class BuildContext {
   /// pull data down, than it is to use [visitChildElements] recursively to push
   /// data down to them.
   void visitChildElements(ElementVisitor visitor);
+
+  /// Returns a description of an [Element] from the current build context.
+  DiagnosticsNode describeElement(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty});
+
+  /// Returns a description of the [Widget] associated with the current build context.
+  DiagnosticsNode describeWidget(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty});
+
+  /// Adds a description of a specific type of widget missing from the current
+  /// build context's ancestry tree.
+  ///
+  /// You can find an example of using this method in [debugCheckHasMaterial].
+  List<DiagnosticsNode> describeMissingAncestor({ @required Type expectedAncestorType });
+
+  /// Adds a description of the ownership chain from a specific [Element]
+  /// to the error report.
+  ///
+  /// The ownership chain is useful for debugging the source of an element.
+  DiagnosticsNode describeOwnershipChain(String name);
 }
 
 /// Manager class for the widgets framework.
@@ -2117,7 +2153,7 @@ class BuildOwner {
   /// the [FocusScopeNode] for a given [BuildContext].
   ///
   /// See [FocusManager] for more details.
-  final FocusManager focusManager = FocusManager();
+  FocusManager focusManager = FocusManager();
 
   /// Adds an element to the dirty elements list so that it will be rebuilt
   /// when [WidgetsBinding.drawFrame] calls [buildScope].
@@ -2278,10 +2314,11 @@ class BuildOwner {
           _dirtyElements[index].rebuild();
         } catch (e, stack) {
           _debugReportException(
-            'while rebuilding dirty elements', e, stack,
-            informationCollector: (StringBuffer information) {
-              information.writeln('The element being rebuilt at the time was index $index of $dirtyCount:');
-              information.write('  ${_dirtyElements[index]}');
+            ErrorDescription('while rebuilding dirty elements'),
+            e,
+            stack,
+            informationCollector: () sync* {
+              yield _dirtyElements[index].describeElement('The element being rebuilt at the time was index $index of $dirtyCount');
             },
           );
         }
@@ -2442,7 +2479,7 @@ class BuildOwner {
         return true;
       }());
     } catch (e, stack) {
-      _debugReportException('while finalizing the widget tree', e, stack);
+      _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       Timeline.finishSync();
     }
@@ -2641,6 +2678,60 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     visit(this);
     return result;
   }
+
+  @override
+  List<DiagnosticsNode> describeMissingAncestor({ @required Type expectedAncestorType }) {
+    final List<DiagnosticsNode> information = <DiagnosticsNode>[];
+    final List<Element> ancestors = <Element>[];
+    visitAncestorElements((Element element) {
+      ancestors.add(element);
+      return true;
+    });
+
+    information.add(DiagnosticsProperty<Element>(
+      'The specific widget that could not find a $expectedAncestorType ancestor was',
+      this,
+      style: DiagnosticsTreeStyle.errorProperty,
+    ));
+
+    if (ancestors.isNotEmpty) {
+      information.add(describeElements('The ancestors of this widget were', ancestors));
+    } else {
+      information.add(ErrorDescription(
+        'This widget is the root of the tree, so it has no '
+        'ancestors, let alone a "$expectedAncestorType" ancestor.'
+      ));
+    }
+    return information;
+  }
+
+  /// Returns a list of [Element]s from the current build context to the error report.
+  static DiagnosticsNode describeElements(String name, Iterable<Element> elements) {
+    return DiagnosticsBlock(
+      name: name,
+      children: elements.map<DiagnosticsNode>((Element element) => DiagnosticsProperty<Element>('', element)).toList(),
+      allowTruncate: true,
+    );
+  }
+
+  @override
+  DiagnosticsNode describeElement(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty}) {
+    return DiagnosticsProperty<Element>(name, this, style: style);
+  }
+
+  @override
+  DiagnosticsNode describeWidget(String name, {DiagnosticsTreeStyle style = DiagnosticsTreeStyle.errorProperty}) {
+    return DiagnosticsProperty<Element>(name, this, style: style);
+  }
+
+  @override
+  DiagnosticsNode describeOwnershipChain(String name) {
+    // TODO(jacobr): make this structured so clients can support clicks on
+    // individual entries. For example, is this an iterable with arrows as
+    // separators?
+    return StringProperty(name, debugGetCreatorChain(10));
+  }
+
 
   // This is used to verify that Element objects move through life in an
   // orderly fashion.
@@ -3600,6 +3691,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
   /// Creates a widget that displays the given error message.
   ErrorWidget(Object exception)
     : message = _stringify(exception),
+      _flutterError = exception is FlutterError ? exception : null,
       super(key: UniqueKey());
 
   /// The configurable factory for [ErrorWidget].
@@ -3630,6 +3722,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
 
   /// The message to display.
   final String message;
+  final FlutterError _flutterError;
 
   static String _stringify(Object exception) {
     try {
@@ -3646,7 +3739,10 @@ class ErrorWidget extends LeafRenderObjectWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('message', message, quoted: false));
+    if (_flutterError == null)
+      properties.add(StringProperty('message', message, quoted: false));
+    else
+      properties.add(_flutterError.toDiagnosticsNode(style: DiagnosticsTreeStyle.whitespace));
   }
 }
 
@@ -3730,11 +3826,8 @@ abstract class ComponentElement extends Element {
   /// [rebuild] when the element needs updating.
   @override
   void performRebuild() {
-    assert(() {
-      if (debugProfileBuildsEnabled)
-        Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
-      return true;
-    }());
+    if (!kReleaseMode && debugProfileBuildsEnabled)
+      Timeline.startSync('${widget.runtimeType}',  arguments: timelineWhitelistArguments);
 
     assert(_debugSetAllowIgnoredCallsToMarkNeedsBuild(true));
     Widget built;
@@ -3742,7 +3835,7 @@ abstract class ComponentElement extends Element {
       built = build();
       debugWidgetBuilderValue(widget, built);
     } catch (e, stack) {
-      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
+      built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $this'), e, stack));
     } finally {
       // We delay marking the element as clean until after calling build() so
       // that attempts to markNeedsBuild() during build() will be ignored.
@@ -3753,15 +3846,12 @@ abstract class ComponentElement extends Element {
       _child = updateChild(_child, built, slot);
       assert(_child != null);
     } catch (e, stack) {
-      built = ErrorWidget.builder(_debugReportException('building $this', e, stack));
+      built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $this'), e, stack));
       _child = updateChild(null, built, slot);
     }
 
-    assert(() {
-      if (debugProfileBuildsEnabled)
-        Timeline.finishSync();
-      return true;
-    }());
+    if (!kReleaseMode && debugProfileBuildsEnabled)
+      Timeline.finishSync();
   }
 
   /// Subclasses should override this function to actually call the appropriate
@@ -5008,7 +5098,7 @@ class _DebugCreator {
 }
 
 FlutterErrorDetails _debugReportException(
-  String context,
+  DiagnosticsNode context,
   dynamic exception,
   StackTrace stack, {
   InformationCollector informationCollector,

@@ -40,7 +40,7 @@ class HotRunnerConfig {
   }
 }
 
-HotRunnerConfig get hotRunnerConfig => context[HotRunnerConfig];
+HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
 const bool kHotReloadDefault = true;
 
@@ -446,6 +446,7 @@ class HotRunner extends ResidentRunner {
                 // Resume the isolate so that it can be killed by the embedder.
                 return view.uiIsolate.resume();
               }
+              return null;
             },
           ).whenComplete(
             () { completer.complete(null); },
@@ -586,8 +587,6 @@ class HotRunner extends ResidentRunner {
           printStatus('${result.message}.');
         }
       }
-      if (result.hintMessage != null)
-        printStatus('\n${result.hintMessage}');
       return result;
     }
   }
