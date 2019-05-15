@@ -1,0 +1,87 @@
+# Copyright 2014 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+assert(is_linux)
+
+config("fontconfig_config") {
+  include_dirs = [ "src" ]
+}
+
+config("fontconfig_warnings") {
+  cflags = []
+  if (is_clang) {
+    cflags += [
+      "-Wno-sign-compare",
+      "-Wno-unused-result",
+    ]
+  }
+}
+
+component("fontconfig") {
+  sources = [
+    "src/src/fcarch.h",
+    "src/src/fcatomic.c",
+    "src/src/fccache.c",
+    "src/src/fccfg.c",
+    "src/src/fccharset.c",
+    "src/src/fccompat.c",
+    "src/src/fcdbg.c",
+    "src/src/fcdefault.c",
+    "src/src/fcdir.c",
+    "src/src/fcformat.c",
+    "src/src/fcfreetype.c",
+    "src/src/fcfs.c",
+    "src/src/fchash.c",
+    "src/src/fcinit.c",
+    "src/src/fclang.c",
+    "src/src/fclist.c",
+    "src/src/fcmatch.c",
+    "src/src/fcmatrix.c",
+    "src/src/fcname.c",
+    "src/src/fcobjs.c",
+    "src/src/fcpat.c",
+    "src/src/fcptrlist.c",
+    "src/src/fcrange.c",
+    "src/src/fcserialize.c",
+    "src/src/fcstat.c",
+    "src/src/fcstr.c",
+    "src/src/fcweight.c",
+    "src/src/fcxml.c",
+    "src/src/ftglue.c",
+    "src/src/ftglue.h",
+  ]
+
+  include_dirs = [
+    "include",
+    "include/src",
+  ]
+
+  defines = [
+    "HAVE_CONFIG_H",
+    "FC_CACHEDIR=\"/var/cache/fontconfig\"",
+    "FC_TEMPLATEDIR=\"/usr/share/fontconfig/conf.avail\"",
+    "FONTCONFIG_PATH=\"/etc/fonts\"",
+    "FC_ATTRIBUTE_VISIBILITY_HIDDEN=__attribute((visibility(\"hidden\")))",
+    "FC_ATTRIBUTE_VISIBILITY_EXPORT=__attribute((visibility(\"hidden\")))",
+  ]
+
+  deps = [
+    "//third_party/freetype2",
+    "//third_party/libxml",
+    "//third_party/zlib",
+  ]
+
+  configs += [ ":fontconfig_warnings" ]
+  public_configs = [ ":fontconfig_config" ]
+
+  if (is_clang) {
+    cflags = [
+      # Work around a null-conversion warning. See crbug.com/358852.
+      "-Wno-non-literal-null-conversion",
+
+      # Work around a pointer-to-bool conversion.
+      "-Wno-pointer-bool-conversion",
+    ]
+  }
+}

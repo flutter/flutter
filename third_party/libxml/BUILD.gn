@@ -173,6 +173,10 @@ static_library("libxml") {
       # threads.c attempts to forward declare a pthread_equal which doesn't
       # match the prototype in pthreads.h
       "-Wno-ignored-attributes",
+
+      # Comparison between xmlElementType and xmlXPathTypeVal.
+      # TODO(hans): See if we can fix upstream (http://crbug.com/763944).
+      "-Wno-enum-compare",
     ]
   }
 
