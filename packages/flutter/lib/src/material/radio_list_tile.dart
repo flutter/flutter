@@ -74,6 +74,12 @@ import 'theme_data.dart';
 ///
 /// ## RadioListTile isn't exactly what I want
 ///
+/// If the way RadioListTile pads and positions its elements isn't quite
+/// what you're looking for, you can create custom labeled radio widgets by
+/// combining [Radio] with other widgets, such as [RichText] and [Padding].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
 /// Here is an example of a custom LinkedLabelRadio widget that allows a
 /// [RichText] widget to be nested in a radio tile widget.
 ///
