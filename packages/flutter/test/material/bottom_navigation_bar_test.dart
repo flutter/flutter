@@ -106,10 +106,10 @@ void main() {
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.color, equals(primaryColor));
     expect(selectedFontStyle.fontSize, selectedFontSize);
-    expect(selectedFontStyle.fontWeight, isNull);
+    expect(selectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(selectedFontStyle.height, isNull);
     expect(unselectedFontStyle.color, equals(captionColor));
-    expect(unselectedFontStyle.fontWeight, isNull);
+    expect(unselectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(unselectedFontStyle.height, isNull);
     // Unselected label has a font size of 14 but is scaled down to be font size 12.
     expect(

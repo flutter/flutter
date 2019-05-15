@@ -778,7 +778,7 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   // If the given [TextStyle] has a non-null `fontSize`, it should be used.
   // Otherwise, the [selectedFontSize] parameter should be used.
   static TextStyle _effectiveTextStyle(TextStyle textStyle, double fontSize) {
-    textStyle ??= const TextStyle(inherit: false);
+    textStyle ??= const TextStyle();
     // Prefer the font size on textStyle if present.
     return textStyle.fontSize == null ? textStyle.copyWith(fontSize: fontSize) : textStyle;
   }
