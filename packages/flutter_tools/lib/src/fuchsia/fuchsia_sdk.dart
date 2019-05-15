@@ -86,6 +86,8 @@ class FuchsiaArtifacts {
     this.devFinder,
     this.platformKernelDill,
     this.flutterPatchedSdk,
+    this.kernelCompiler,
+    this.pm,
   });
 
   /// Creates a new [FuchsiaArtifacts] using the cached Fuchsia SDK.
@@ -116,6 +118,9 @@ class FuchsiaArtifacts {
           dartPrebuilts, 'flutter_runner', 'platform_strong.dill')),
       flutterPatchedSdk: fs.file(fs.path.join(
           dartPrebuilts, 'flutter_runner')),
+      kernelCompiler: fs.file(fs.path.join(
+          dartPrebuilts, 'kernel_compiler.snapshot')),
+      pm: fs.file(fs.path.join(tools, 'pm')),
     );
   }
 
@@ -135,4 +140,10 @@ class FuchsiaArtifacts {
 
   /// The directory containing [platformKernelDill].
   final File flutterPatchedSdk;
+
+  /// The snapshot of the Fuchsia kernel compiler.
+  final File kernelCompiler;
+
+  /// The pm tool.
+  final File pm;
 }

@@ -252,9 +252,7 @@ class SnippetGenerator {
         metadata.addAll(<String, Object>{
           'id': id,
           'file': path.basename(outputFile.path),
-          'description': description != null
-              ? description.mergedContent
-              : null,
+          'description': description?.mergedContent,
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;

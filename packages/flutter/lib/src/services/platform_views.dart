@@ -46,7 +46,7 @@ typedef PlatformViewCreatedCallback = void Function(int id);
 
 /// Provides access to the platform views service.
 ///
-/// This service allows creating and controlling Android views.
+/// This service allows creating and controlling platform-specific views.
 ///
 /// See also: [PlatformView].
 class PlatformViewsService {
@@ -623,9 +623,9 @@ class UiKitViewController {
 
   TextDirection _layoutDirection;
 
-  /// Sets the layout direction for the Android view.
+  /// Sets the layout direction for the iOS UIView.
   Future<void> setLayoutDirection(TextDirection layoutDirection) async {
-    assert(!_debugDisposed, 'trying to set a layout direction for a disposed Android View. View id: $id');
+    assert(!_debugDisposed, 'trying to set a layout direction for a disposed iOS UIView. View id: $id');
 
     if (layoutDirection == _layoutDirection)
       return;

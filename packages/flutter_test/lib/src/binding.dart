@@ -695,6 +695,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     _pendingExceptionDetails = null;
     _parentZone = null;
     buildOwner.focusManager = FocusManager();
+    assert(!RendererBinding.instance.mouseTracker.mouseIsConnected,
+        'The MouseTracker thinks that there is still a mouse connected, which indicates that a '
+        'test has not removed the mouse pointer which it added. Call removePointer on the '
+        'active mouse gesture to remove the mouse pointer.');
   }
 }
 

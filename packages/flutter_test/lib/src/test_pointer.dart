@@ -126,6 +126,7 @@ class TestPointer {
     return PointerDownEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: location,
       buttons: _buttons,
@@ -159,6 +160,7 @@ class TestPointer {
     return PointerMoveEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: newLocation,
       delta: delta,
@@ -178,6 +180,7 @@ class TestPointer {
     return PointerUpEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: location,
     );
@@ -195,6 +198,7 @@ class TestPointer {
     return PointerCancelEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       pointer: pointer,
       position: location,
     );
@@ -260,8 +264,8 @@ class TestPointer {
     return PointerHoverEvent(
       timeStamp: timeStamp,
       kind: kind,
-      position: newLocation,
       device: _device,
+      position: newLocation,
       delta: delta,
     );
   }
@@ -281,6 +285,7 @@ class TestPointer {
     return PointerScrollEvent(
       timeStamp: timeStamp,
       kind: kind,
+      device: _device,
       position: location,
       scrollDelta: scrollDelta,
     );

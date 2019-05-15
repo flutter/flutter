@@ -631,8 +631,8 @@ void main() {
 
       FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-      final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
       final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
+      final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
@@ -777,8 +777,8 @@ void main() {
 
       FocusScope.of(keyB.currentContext).requestFocus(keyB.currentState.focusNode);
       FocusScope.of(keyA.currentContext).requestFocus(keyA.currentState.focusNode);
-      final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
       final FocusScopeNode bScope = FocusScope.of(keyB.currentContext);
+      final FocusScopeNode aScope = FocusScope.of(keyA.currentContext);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(bScope);
       WidgetsBinding.instance.focusManager.rootScope.setFirstFocus(aScope);
 
