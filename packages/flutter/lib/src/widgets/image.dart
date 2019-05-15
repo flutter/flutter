@@ -33,8 +33,8 @@ export 'package:flutter/painting.dart' show
 /// progress.
 ///
 /// This is useful for images that are incrementally loaded (e.g. over a local
-/// file system or a network) and you want to give the user an indication of
-/// when the image will be displayed.
+/// file system or a network), and the application wishes to give the user an
+/// indication of when the image will be displayed.
 ///
 /// For single-frame images, once the image loads, the image [ImageChunkEvent]s
 /// will stop firing, the image provider's stream will yield a completed

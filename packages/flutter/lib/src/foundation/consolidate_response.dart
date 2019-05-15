@@ -11,11 +11,13 @@ import 'dart:typed_data';
 /// consolidating the bytes of an [HttpClientResponse] into a [Uint8List].
 ///
 /// The `cumulative` parameter will contain the total number of bytes received
-/// thus far.
+/// thus far. If the response has been gzipped, this number will be the number
+/// of compressed bytes that have received _across the wire_.
 ///
 /// The `total` parameter will contain the _expected_ total number of bytes to
-/// be received (extracted from the value of the `Content-Length` HTTP response
-/// header), or -1 if the size of the response body is not known in advance.
+/// be received across the wire (extracted from the value of the
+/// `Content-Length` HTTP response header), or -1 if the size of the response
+/// body is not known in advance.
 ///
 /// This is used in [consolidateHttpClientResponseBytes].
 typedef BytesReceivedCallback = void Function(int cumulative, int total);
