@@ -641,7 +641,6 @@ class ButtonThemeData extends Diagnosticable {
   ///    value of the `focusColor` constructor parameter if it is non-null,
   ///    otherwise the value of [getTextColor] with opacity 0.12.
   ///  * [ButtonTextTheme.primary], returns [Colors.transparent].
-  // TODO(gspencer): Verify the opacity default. It's probably different.
   Color getFocusColor(MaterialButton button) {
     return button.focusColor ?? _focusColor ?? getTextColor(button).withOpacity(0.12);
   }
@@ -654,10 +653,9 @@ class ButtonThemeData extends Diagnosticable {
   ///  * [ButtonTextTheme.normal], [ButtonTextTheme.accent],
   ///    [ButtonTextTheme.primary]: returns the value of the `focusColor`
   ///    constructor parameter if it is non-null, otherwise the value of
-  ///    [getTextColor] with opacity 0.12.
-  // TODO(gspencer): Verify the opacity default. It's probably different.
+  ///    [getTextColor] with opacity 0.04.
   Color getHoverColor(MaterialButton button) {
-    return button.hoverColor ?? _hoverColor ?? getTextColor(button).withOpacity(0.12);
+    return button.hoverColor ?? _hoverColor ?? getTextColor(button).withOpacity(0.04);
   }
 
   /// The color of the overlay that appears when the [button] is pressed.

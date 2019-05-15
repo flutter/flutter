@@ -270,7 +270,6 @@ class _FocusState extends State<Focus> {
     }
     node.skipTraversal = widget.skipTraversal;
     _focusAttachment = node.attach(context, onKey: widget.onKey);
-    print('Attaching $node');
     _hasFocus = node.hasFocus;
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one, because it should
