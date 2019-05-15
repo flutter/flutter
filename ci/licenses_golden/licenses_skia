@@ -1,4 +1,4 @@
-Signature: 527497ac71b722a40d655166194775e1
+Signature: 51b33c07754500c28ba2df04727c6459
 
 UNUSED LICENSES:
 
@@ -5756,7 +5756,6 @@ FILE: ../../../third_party/skia/include/private/SkFixed.h
 FILE: ../../../third_party/skia/include/private/SkFloatingPoint.h
 FILE: ../../../third_party/skia/include/private/SkNoncopyable.h
 FILE: ../../../third_party/skia/include/private/SkTDArray.h
-FILE: ../../../third_party/skia/include/private/SkTSearch.h
 FILE: ../../../third_party/skia/include/private/SkTemplates.h
 FILE: ../../../third_party/skia/include/utils/SkBase64.h
 FILE: ../../../third_party/skia/include/utils/SkCamera.h
@@ -5825,6 +5824,7 @@ FILE: ../../../third_party/skia/src/core/SkStroke.h
 FILE: ../../../third_party/skia/src/core/SkStrokerPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkStrokerPriv.h
 FILE: ../../../third_party/skia/src/core/SkTSearch.cpp
+FILE: ../../../third_party/skia/src/core/SkTSearch.h
 FILE: ../../../third_party/skia/src/core/SkTSort.h
 FILE: ../../../third_party/skia/src/core/SkUtils.cpp
 FILE: ../../../third_party/skia/src/core/SkUtils.h
