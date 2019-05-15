@@ -282,9 +282,7 @@ void main() {
         ),
       );
 
-      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
-
-      await spyController.tap(find.text('test'), buttons: kSecondaryMouseButton);
+      await tester.tap(find.text('test'), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {
@@ -315,9 +313,7 @@ void main() {
         ),
       );
 
-      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
-
-      await spyController.press(find.text('test'), buttons: kSecondaryMouseButton);
+      await tester.press(find.text('test'), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
       expect(logs, equals(<String>['down $b']));
@@ -341,9 +337,7 @@ void main() {
         ),
       );
 
-      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
-
-      await spyController.longPress(find.text('test'), buttons: kSecondaryMouseButton);
+      await tester.longPress(find.text('test'), buttons: kSecondaryMouseButton);
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
@@ -375,9 +369,7 @@ void main() {
         ),
       );
 
-      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
-
-      await spyController.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
+      await tester.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
 
       const String b = '$kSecondaryMouseButton';
       for(int i = 0; i < logs.length; i++) {
@@ -408,9 +400,7 @@ void main() {
         ),
       );
 
-      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
-
-      await spyController.fling(find.text('test'), const Offset(-10.0, 0.0), 1000.0, buttons: kSecondaryMouseButton);
+      await tester.fling(find.text('test'), const Offset(-10.0, 0.0), 1000.0, buttons: kSecondaryMouseButton);
       await tester.pumpAndSettle();
 
       const String b = '$kSecondaryMouseButton';
@@ -424,81 +414,4 @@ void main() {
       }
     },
   );
-}
-
-class WidgetControllerSpy extends WidgetController {
-  WidgetControllerSpy(
-    TestWidgetsFlutterBinding binding,
-  ) : super(binding) {
-    _binding = binding;
-  }
-
-  TestWidgetsFlutterBinding _binding;
-
-  @override
-  Future<void> pump(Duration duration) async {
-    if (duration != null)
-      await _binding.pump(duration);
-    _binding.scheduleFrame();
-    // TODO(tongmu): This line hangs tests and removing it doesn't seem to break any tests.
-    // await _binding.endOfFrame;
-  }
-
-  int _getNextPointer() {
-    final int result = nextPointer;
-    nextPointer += 1;
-    return result;
-  }
-
-  @override
-  Future<void> sendEventToBinding(PointerEvent event, HitTestResult result) {
-    return TestAsyncUtils.guard<void>(() async {
-      _binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
-    });
-  }
-
-  TestGestureSpy testGestureSpy;
-
-  @override
-  Future<TestGesture> createGesture({
-    int pointer,
-    PointerDeviceKind kind = PointerDeviceKind.touch,
-    int buttons = kPrimaryButton,
-  }) async {
-    return testGestureSpy = TestGestureSpy(
-      pointer: pointer ?? _getNextPointer(),
-      kind: kind,
-      dispatcher: sendEventToBinding,
-      hitTester: hitTestOnBinding,
-      buttons: buttons,
-    );
-  }
-}
-
-class TestGestureSpy extends TestGesture {
-  TestGestureSpy({
-    int pointer,
-    PointerDeviceKind kind,
-    EventDispatcher dispatcher,
-    HitTester hitTester,
-    int buttons = kPrimaryButton,
-  }) : super(
-        pointer: pointer,
-        kind: kind,
-        dispatcher: dispatcher,
-        hitTester: hitTester,
-        buttons: buttons,
-      );
-
-  List<Offset> offsets = <Offset>[];
-
-  void clearOffsets() {
-    offsets = <Offset>[];
-  }
-
-  @override
-  Future<void> moveBy(Offset offset, {Duration timeStamp = Duration.zero}) {
-    offsets.add(offset);
-    return super.moveBy(offset, timeStamp: timeStamp);
-  }
 }
