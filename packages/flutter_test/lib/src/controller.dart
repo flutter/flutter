@@ -285,15 +285,15 @@ abstract class WidgetController {
   ///
   /// If the center of the widget is not exposed, this might send events to
   /// another object.
-  Future<void> longPress(Finder finder, {int pointer}) {
-    return longPressAt(getCenter(finder), pointer: pointer);
+  Future<void> longPress(Finder finder, {int pointer, int buttons = kPrimaryButton}) {
+    return longPressAt(getCenter(finder), pointer: pointer, buttons: buttons);
   }
 
   /// Dispatch a pointer down / pointer up sequence at the given location with
   /// a delay of [kLongPressTimeout] + [kPressTimeout] between the two events.
-  Future<void> longPressAt(Offset location, {int pointer}) {
+  Future<void> longPressAt(Offset location, {int pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(location, pointer: pointer);
+      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await pump(kLongPressTimeout + kPressTimeout);
       await gesture.up();
     });
@@ -324,6 +324,7 @@ abstract class WidgetController {
     Offset offset,
     double speed, {
     int pointer,
+    int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
@@ -333,6 +334,7 @@ abstract class WidgetController {
       offset,
       speed,
       pointer: pointer,
+      buttons: buttons,
       frameInterval: frameInterval,
       initialOffset: initialOffset,
       initialOffsetDelay: initialOffsetDelay,
@@ -369,6 +371,7 @@ abstract class WidgetController {
     Offset offset,
     double speed, {
     int pointer,
+    int buttons = kPrimaryButton,
     Duration frameInterval = const Duration(milliseconds: 16),
     Offset initialOffset = Offset.zero,
     Duration initialOffsetDelay = const Duration(seconds: 1),
@@ -376,7 +379,7 @@ abstract class WidgetController {
     assert(offset.distance > 0.0);
     assert(speed > 0.0); // speed is pixels/second
     return TestAsyncUtils.guard<void>(() async {
-      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer());
+      final TestPointer testPointer = TestPointer(pointer ?? _getNextPointer(), PointerDeviceKind.touch, null, buttons);
       final HitTestResult result = hitTestOnBinding(startLocation);
       const int kMoveCount = 50; // Needs to be >= kHistorySize, see _LeastSquaresVelocityTrackerStrategy
       final double timeStampDelta = 1000.0 * offset.distance / (kMoveCount * speed);
@@ -438,9 +441,23 @@ abstract class WidgetController {
   /// 'touchSlopY' variables should be set to 0. However, generally, these values
   /// should be left to their default values.
   /// {@end template}
-  Future<void> drag(Finder finder, Offset offset, { int pointer, double touchSlopX = kDragSlopDefault, double touchSlopY = kDragSlopDefault }) {
+  Future<void> drag(
+    Finder finder,
+    Offset offset, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double touchSlopX = kDragSlopDefault,
+    double touchSlopY = kDragSlopDefault,
+  }) {
     assert(kDragSlopDefault > kTouchSlop);
-    return dragFrom(getCenter(finder), offset, pointer: pointer, touchSlopX: touchSlopX, touchSlopY: touchSlopY);
+    return dragFrom(
+      getCenter(finder),
+      offset,
+      pointer: pointer,
+      buttons: buttons,
+      touchSlopX: touchSlopX,
+      touchSlopY: touchSlopY,
+    );
   }
 
   /// Attempts a drag gesture consisting of a pointer down, a move by
@@ -451,10 +468,17 @@ abstract class WidgetController {
   /// instead.
   ///
   /// {@macro flutter.flutter_test.drag}
-  Future<void> dragFrom(Offset startLocation, Offset offset, { int pointer, double touchSlopX = kDragSlopDefault, double touchSlopY = kDragSlopDefault }) {
+  Future<void> dragFrom(
+    Offset startLocation,
+    Offset offset, {
+    int pointer,
+    int buttons = kPrimaryButton,
+    double touchSlopX = kDragSlopDefault,
+    double touchSlopY = kDragSlopDefault,
+  }) {
     assert(kDragSlopDefault > kTouchSlop);
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(startLocation, pointer: pointer);
+      final TestGesture gesture = await startGesture(startLocation, pointer: pointer, buttons: buttons);
       assert(gesture != null);
 
       final double xSign = offset.dx.sign;
@@ -547,14 +571,13 @@ abstract class WidgetController {
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int buttons = kPrimaryButton,
   }) async {
-    final TestGesture gesture = TestGesture(
+    return TestGesture(
       hitTester: hitTestOnBinding,
       dispatcher: sendEventToBinding,
       kind: kind,
       pointer: pointer ?? _getNextPointer(),
       buttons: buttons,
     );
-    return gesture;
   }
 
   /// Creates a gesture with an initial down gesture at a particular point, and
