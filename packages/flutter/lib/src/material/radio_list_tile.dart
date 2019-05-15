@@ -80,15 +80,15 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LabeledLinked Radio widget, but you can
+/// Here is an example of a custom LinkedLabelRadio widget, but you can
 /// easily make your own configurable widget.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
 /// ```
 /// ```dart preamble
-/// class LabeledLinkedRadio extends StatelessWidget {
-///   const LabeledLinkedRadio({
+/// class LinkedLabelRadio extends StatelessWidget {
+///   const LinkedLabelRadio({
 ///     this.label,
 ///     this.padding,
 ///     this.groupValue,
@@ -143,7 +143,7 @@ import 'theme_data.dart';
 ///     body: Column(
 ///       mainAxisAlignment: MainAxisAlignment.center,
 ///       children: <Widget>[
-///         LabeledLinkedRadio(
+///         LinkedLabelRadio(
 ///           label: 'First tappable label text',
 ///           padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: true,
@@ -154,7 +154,7 @@ import 'theme_data.dart';
 ///             });
 ///           },
 ///         ),
-///         LabeledLinkedRadio(
+///         LinkedLabelRadio(
 ///           label: 'Second tappable label text',
 ///           padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: false,

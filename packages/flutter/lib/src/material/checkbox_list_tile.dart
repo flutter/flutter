@@ -65,15 +65,15 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LabeledLinkedCheckbox widget, but you can
+/// Here is an example of a custom LinkedLabelCheckbox widget, but you can
 /// easily make your own configurable widget.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
 /// ```
 /// ```dart preamble
-/// class LabeledLinkedCheckbox extends StatelessWidget {
-///   const LabeledLinkedCheckbox({
+/// class LinkedLabelCheckbox extends StatelessWidget {
+///   const LinkedLabelCheckbox({
 ///     this.label,
 ///     this.padding,
 ///     this.value,
@@ -123,7 +123,7 @@ import 'theme_data.dart';
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
-///       child: LabeledLinkedCheckbox(
+///       child: LinkedLabelCheckbox(
 ///         label: 'Linked, tappable label text',
 ///         padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///         value: isSelected,

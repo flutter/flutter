@@ -75,15 +75,15 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LabeledLinkedCheckbox widget, but you can
+/// Here is an example of a custom LinkedLabelSwitch widget, but you can
 /// easily make your own configurable widget.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
 /// ```
 /// ```dart preamble
-/// class LabeledLinkedSwitch extends StatelessWidget {
-///   const LabeledLinkedSwitch({
+/// class LinkedLabelSwitch extends StatelessWidget {
+///   const LinkedLabelSwitch({
 ///     this.label,
 ///     this.padding,
 ///     this.value,
@@ -133,7 +133,7 @@ enum _SwitchListTileType { material, adaptive }
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(
-///       child: LabeledLinkedSwitch(
+///       child: LinkedLabelSwitch(
 ///         label: 'Linked, tappable label text',
 ///         padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///         value: isSelected,
