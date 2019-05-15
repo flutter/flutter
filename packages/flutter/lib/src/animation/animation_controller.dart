@@ -265,6 +265,7 @@ class AnimationController extends Animation<double>
   AnimationController.unbounded({
     double value = 0.0,
     this.duration,
+    this.reverseDuration,
     this.debugLabel,
     @required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
@@ -308,7 +309,8 @@ class AnimationController extends Animation<double>
 
   /// The length of time this animation should last when going in [reverse].
   ///
-  /// Defaults to [duration] if not specified.
+  /// The value of [duration] us used if [reverseDuration] is not specified or
+  /// set to null.
   Duration reverseDuration;
 
   Ticker _ticker;
@@ -562,7 +564,10 @@ class AnimationController extends Animation<double>
       }());
       final double range = upperBound - lowerBound;
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
-      final Duration directionDuration = (_direction == _AnimationDirection.reverse && reverseDuration != null) ? reverseDuration : this.duration;
+      final Duration directionDuration =
+        (_direction == _AnimationDirection.reverse && reverseDuration != null)
+        ? reverseDuration
+        : this.duration;
       simulationDuration = directionDuration * remainingFraction;
     } else if (target == value) {
       // Already at target, don't animate.
