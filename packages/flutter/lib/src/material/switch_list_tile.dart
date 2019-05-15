@@ -67,16 +67,7 @@ enum _SwitchListTileType { material, adaptive }
 /// ```
 /// {@end-tool}
 ///
-/// ## SwitchListTile isn't exactly what I want
-///
-/// If the way SwitchListTile pads and positions its elements isn't quite what
-/// you're looking for, you can create custom labeled switch widgets by
-/// combining [Switch] with other widgets, such as [RichText] and [Padding].
-///
-/// {@tool snippet --template=stateful_widget_scaffold}
-///
-/// Here is an example of a custom LinkedLabelSwitch widget that allows a
-/// [RichText] widget to be nested in a switch tile widget.
+/// ## Semantics in SwitchListTile
 ///
 /// Since SwitchListTile is wrapped with a [MergeSemantics] widget, it wants
 /// to merge its children semantics nodes into one node in the semantics tree.
@@ -85,6 +76,11 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// If you're interested in learning more about this interaction, see the
 /// discussion in [TextSpan.recognizer].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of a LinkedLabelSwitch widget that allows a
+/// [RichText] widget to be nested in a switch tile widget.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
@@ -143,6 +139,81 @@ enum _SwitchListTileType { material, adaptive }
 ///     body: Center(
 ///       child: LinkedLabelSwitch(
 ///         label: 'Linked, tappable label text',
+///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         value: isSelected,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             isSelected = newValue;
+///           });
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## SwitchListTile isn't exactly what I want
+///
+/// If the way SwitchListTile pads and positions its elements isn't quite what
+/// you're looking for, you can create custom labeled switch widgets by
+/// combining [Switch] with other widgets, such as [Text], [Padding] and
+/// [InkWell].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of a custom LabeledSwitch widget, but you can easily
+/// make your own configurable widget.
+///
+/// ```dart preamble
+/// class LabeledSwitch extends StatelessWidget {
+///   const LabeledSwitch({
+///     this.label,
+///     this.padding,
+///     this.groupValue,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool groupValue;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return InkWell(
+///       onTap: () {
+///         onChanged(!value);
+///       },
+///       child: Padding(
+///         padding: padding,
+///         child: Row(
+///           children: <Widget>[
+///             Switch(
+///               value: value,
+///               onChanged: (bool newValue) {
+///                 onChanged(newValue);
+///               },
+///             ),
+///             Text(label),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LabeledSwitch(
+///         label: 'This is the label text',
 ///         padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
