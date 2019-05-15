@@ -337,7 +337,7 @@ class ThemeData extends Diagnosticable {
   /// [new ThemeData] constructor.
   const ThemeData.raw({
     // Warning: make sure these properties are in the exact same order as in
-    // operator == and in the hashValues method and in the order of fields
+    // operator == and in the hashCode method and in the order of fields
     // in this class, and in the lerp() method.
     @required this.brightness,
     @required this.primaryColor,
@@ -449,7 +449,7 @@ class ThemeData extends Diagnosticable {
        assert(bottomSheetTheme != null);
 
   // Warning: make sure these properties are in the exact same order as in
-  // hashValues() and in the raw constructor and in the order of fields in
+  // hashCode() and in the raw constructor and in the order of fields in
   // the class and in the lerp() method.
 
   /// A default light blue theme.
@@ -703,9 +703,6 @@ class ThemeData extends Diagnosticable {
   /// that is possible without significant backwards compatibility breaks.
   final ColorScheme colorScheme;
 
-  /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
-  final SnackBarThemeData snackBarTheme;
-
   /// A theme for customizing the shape of a dialog.
   final DialogTheme dialogTheme;
 
@@ -731,6 +728,9 @@ class ThemeData extends Diagnosticable {
 
   /// A theme for customizing the color, elevation, and shape of a bottom sheet.
   final BottomSheetThemeData bottomSheetTheme;
+
+  /// A theme for customizing colors, shape, elevation, and behavior of a [SnackBar].
+  final SnackBarThemeData snackBarTheme;
 
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
@@ -925,7 +925,7 @@ class ThemeData extends Diagnosticable {
     assert(b != null);
     assert(t != null);
     // Warning: make sure these properties are in the exact same order as in
-    // hashValues() and in the raw constructor and in the order of fields in
+    // hashCode() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return ThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
@@ -992,61 +992,61 @@ class ThemeData extends Diagnosticable {
       return false;
     final ThemeData otherData = other;
     // Warning: make sure these properties are in the exact same order as in
-    // hashValues() and in the raw constructor and in the order of fields in
+    // hashCode() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
-    return (otherData.brightness == brightness) &&
-           (otherData.primaryColor == primaryColor) &&
-           (otherData.primaryColorBrightness == primaryColorBrightness) &&
-           (otherData.primaryColorLight == primaryColorLight) &&
-           (otherData.primaryColorDark == primaryColorDark) &&
-           (otherData.accentColor == accentColor) &&
-           (otherData.accentColorBrightness == accentColorBrightness) &&
-           (otherData.canvasColor == canvasColor) &&
-           (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
-           (otherData.bottomAppBarColor == bottomAppBarColor) &&
-           (otherData.cardColor == cardColor) &&
-           (otherData.dividerColor == dividerColor) &&
-           (otherData.highlightColor == highlightColor) &&
-           (otherData.splashColor == splashColor) &&
-           (otherData.splashFactory == splashFactory) &&
-           (otherData.selectedRowColor == selectedRowColor) &&
-           (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
-           (otherData.disabledColor == disabledColor) &&
-           (otherData.buttonTheme == buttonTheme) &&
-           (otherData.buttonColor == buttonColor) &&
-           (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
-           (otherData.textSelectionColor == textSelectionColor) &&
-           (otherData.cursorColor == cursorColor) &&
-           (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
-           (otherData.backgroundColor == backgroundColor) &&
-           (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
-           (otherData.indicatorColor == indicatorColor) &&
-           (otherData.hintColor == hintColor) &&
-           (otherData.errorColor == errorColor) &&
-           (otherData.toggleableActiveColor == toggleableActiveColor) &&
-           (otherData.textTheme == textTheme) &&
-           (otherData.primaryTextTheme == primaryTextTheme) &&
-           (otherData.accentTextTheme == accentTextTheme) &&
-           (otherData.inputDecorationTheme == inputDecorationTheme) &&
-           (otherData.iconTheme == iconTheme) &&
-           (otherData.primaryIconTheme == primaryIconTheme) &&
-           (otherData.accentIconTheme == accentIconTheme) &&
-           (otherData.sliderTheme == sliderTheme) &&
-           (otherData.tabBarTheme == tabBarTheme) &&
-           (otherData.cardTheme == cardTheme) &&
-           (otherData.chipTheme == chipTheme) &&
-           (otherData.platform == platform) &&
-           (otherData.materialTapTargetSize == materialTapTargetSize) &&
-           (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
-           (otherData.appBarTheme == appBarTheme) &&
-           (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
-           (otherData.colorScheme == colorScheme) &&
-           (otherData.dialogTheme == dialogTheme) &&
-           (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
-           (otherData.typography == typography) &&
-           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
-           (otherData.snackBarTheme == snackBarTheme) &&
-           (otherData.bottomSheetTheme == bottomSheetTheme);
+    return (otherData.brightness == brightness)
+        && (otherData.primaryColor == primaryColor)
+        && (otherData.primaryColorBrightness == primaryColorBrightness)
+        && (otherData.primaryColorLight == primaryColorLight)
+        && (otherData.primaryColorDark == primaryColorDark)
+        && (otherData.accentColor == accentColor)
+        && (otherData.accentColorBrightness == accentColorBrightness)
+        && (otherData.canvasColor == canvasColor)
+        && (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor)
+        && (otherData.bottomAppBarColor == bottomAppBarColor)
+        && (otherData.cardColor == cardColor)
+        && (otherData.dividerColor == dividerColor)
+        && (otherData.highlightColor == highlightColor)
+        && (otherData.splashColor == splashColor)
+        && (otherData.splashFactory == splashFactory)
+        && (otherData.selectedRowColor == selectedRowColor)
+        && (otherData.unselectedWidgetColor == unselectedWidgetColor)
+        && (otherData.disabledColor == disabledColor)
+        && (otherData.buttonTheme == buttonTheme)
+        && (otherData.buttonColor == buttonColor)
+        && (otherData.secondaryHeaderColor == secondaryHeaderColor)
+        && (otherData.textSelectionColor == textSelectionColor)
+        && (otherData.cursorColor == cursorColor)
+        && (otherData.textSelectionHandleColor == textSelectionHandleColor)
+        && (otherData.backgroundColor == backgroundColor)
+        && (otherData.dialogBackgroundColor == dialogBackgroundColor)
+        && (otherData.indicatorColor == indicatorColor)
+        && (otherData.hintColor == hintColor)
+        && (otherData.errorColor == errorColor)
+        && (otherData.toggleableActiveColor == toggleableActiveColor)
+        && (otherData.textTheme == textTheme)
+        && (otherData.primaryTextTheme == primaryTextTheme)
+        && (otherData.accentTextTheme == accentTextTheme)
+        && (otherData.inputDecorationTheme == inputDecorationTheme)
+        && (otherData.iconTheme == iconTheme)
+        && (otherData.primaryIconTheme == primaryIconTheme)
+        && (otherData.accentIconTheme == accentIconTheme)
+        && (otherData.sliderTheme == sliderTheme)
+        && (otherData.tabBarTheme == tabBarTheme)
+        && (otherData.cardTheme == cardTheme)
+        && (otherData.chipTheme == chipTheme)
+        && (otherData.platform == platform)
+        && (otherData.materialTapTargetSize == materialTapTargetSize)
+        && (otherData.pageTransitionsTheme == pageTransitionsTheme)
+        && (otherData.appBarTheme == appBarTheme)
+        && (otherData.bottomAppBarTheme == bottomAppBarTheme)
+        && (otherData.colorScheme == colorScheme)
+        && (otherData.dialogTheme == dialogTheme)
+        && (otherData.floatingActionButtonTheme == floatingActionButtonTheme)
+        && (otherData.typography == typography)
+        && (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme)
+        && (otherData.snackBarTheme == snackBarTheme)
+        && (otherData.bottomSheetTheme == bottomSheetTheme);
   }
 
   @override
