@@ -26,11 +26,12 @@ class TestPointer {
     this.pointer = 1,
     this.kind = PointerDeviceKind.touch,
     this._device,
-    this.buttons = kPrimaryButton,
+    int buttons = kPrimaryButton,
   ])
       : assert(kind != null),
         assert(pointer != null),
-        assert(buttons != null) {
+        assert(buttons != null),
+        _buttons = buttons {
     switch (kind) {
       case PointerDeviceKind.mouse:
         _device ??= 1;
@@ -62,7 +63,8 @@ class TestPointer {
 
   /// The kind of buttons to simulate on Down and Move events. Defaults to
   /// [kPrimaryButton].
-  int buttons;
+  int get buttons => _buttons;
+  int _buttons;
 
   /// Whether the pointer simulated by this object is currently down.
   ///
@@ -80,8 +82,14 @@ class TestPointer {
 
   /// If a custom event is created outside of this class, this function is used
   /// to set the [isDown].
-  bool setDownInfo(PointerEvent event, Offset newLocation) {
+  bool setDownInfo(
+    PointerEvent event,
+    Offset newLocation, {
+    int buttons,
+  }) {
     _location = newLocation;
+    if (buttons != null)
+      _buttons = buttons;
     switch (event.runtimeType) {
       case PointerDownEvent:
         assert(!isDown);
@@ -102,17 +110,26 @@ class TestPointer {
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  PointerDownEvent down(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+  ///
+  /// By default, the set of buttons in the last down or move event is used.
+  /// You can give a specific set of buttons by passing the `buttons` argument.
+  PointerDownEvent down(
+    Offset newLocation, {
+    Duration timeStamp = Duration.zero,
+    int buttons,
+  }) {
     assert(!isDown);
     _isDown = true;
     _location = newLocation;
+    if (buttons != null)
+      _buttons = buttons;
     return PointerDownEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
       pointer: pointer,
       position: location,
-      buttons: buttons,
+      buttons: _buttons,
     );
   }
 
@@ -123,7 +140,14 @@ class TestPointer {
   ///
   /// [isDown] must be true when this is called, since move events can only
   /// be generated when the pointer is down.
-  PointerMoveEvent move(Offset newLocation, { Duration timeStamp = Duration.zero }) {
+  ///
+  /// By default, the set of buttons in the last down or move event is used.
+  /// You can give a specific set of buttons by passing the `buttons` argument.
+  PointerMoveEvent move(
+    Offset newLocation, {
+    Duration timeStamp = Duration.zero,
+    int buttons,
+  }) {
     assert(
         isDown,
         'Move events can only be generated when the pointer is down. To '
@@ -131,6 +155,8 @@ class TestPointer {
         'up, use hover() instead.');
     final Offset delta = newLocation - location;
     _location = newLocation;
+    if (buttons != null)
+      _buttons = buttons;
     return PointerMoveEvent(
       timeStamp: timeStamp,
       kind: kind,
@@ -138,7 +164,7 @@ class TestPointer {
       pointer: pointer,
       position: newLocation,
       delta: delta,
-      buttons: buttons,
+      buttons: _buttons,
     );
   }
 
