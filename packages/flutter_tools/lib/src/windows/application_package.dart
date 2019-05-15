@@ -7,8 +7,6 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../project.dart';
 
@@ -61,14 +59,16 @@ class BuildableWindowsApp extends WindowsApp {
 
   @override
   String executable(BuildMode buildMode) {
-    final ProcessResult result = processManager.runSync(<String>[
-      project.nameScript.path,
-      buildMode == BuildMode.debug ? 'debug' : 'release',
-    ]);
-    if (result.exitCode != 0) {
-      throwToolExit('Failed to find Windows project name');
+    final File exeNameFile = project.nameFile;
+    if (!exeNameFile.existsSync()) {
+      throwToolExit('Failed to find Windows executable name');
     }
-    return result.stdout.toString().trim();
+    return fs.path.join(
+        getWindowsBuildDirectory(),
+        'x64',
+        buildMode == BuildMode.debug ? 'Debug' : 'Release',
+        'Runner',
+        exeNameFile.readAsStringSync().trim());
   }
 
   @override

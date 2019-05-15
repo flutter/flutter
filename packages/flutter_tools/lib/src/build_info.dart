@@ -399,6 +399,11 @@ String getLinuxBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'linux');
 }
 
+/// Returns the Windows build output directory.
+String getWindowsBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'windows');
+}
+
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'fuchsia');
