@@ -326,6 +326,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+    case 'windows-x64':
+      return TargetPlatform.windows_x64;
     case 'web':
       return TargetPlatform.web;
   }
