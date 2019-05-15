@@ -81,10 +81,10 @@ import 'theme_data.dart';
 /// Therefore, RadioListTile would not work with [RichText], which forces
 /// itself to be a standalone semantics node.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
-///
 /// If you're interested in learning more about this interaction, see the
 /// discussion in [TextSpan.recognizer].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// Here is an example of a LinkedLabelRadio widget that allows a
 /// [RichText] widget to be nested in a radio tile widget.
