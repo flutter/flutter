@@ -68,7 +68,7 @@ import 'theme_data.dart';
 /// Here is an example of a custom LabeledLinkedCheckbox widget, but you can
 /// easily make your own configurable widget.
 ///
-/// ```dart code-imports
+/// ```dart imports
 /// import 'package:flutter/gestures.dart';
 /// ```
 /// ```dart preamble
