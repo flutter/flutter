@@ -72,24 +72,22 @@ import 'theme_data.dart';
 /// ```
 /// {@end-tool}
 ///
-/// ## RadioListTile isn't exactly what I want
-///
-/// If the way RadioListTile pads and positions its elements isn't quite
-/// what you're looking for, you can create custom labeled radio widgets by
-/// combining [Radio] with other widgets, such as [RichText] and [Padding].
-///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LinkedLabelRadio widget that allows a
-/// [RichText] widget to be nested in a radio tile widget.
+/// ## Semantics in RadioListTile
 ///
 /// Since RadioListTile is wrapped with a [MergeSemantics] widget, it wants
 /// to merge its children semantics nodes into one node in the semantics tree.
 /// Therefore, RadioListTile would not work with [RichText], which forces
 /// itself to be a standalone semantics node.
 ///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
 /// If you're interested in learning more about this interaction, see the
 /// discussion in [TextSpan.recognizer].
+///
+/// Here is an example of a LinkedLabelRadio widget that allows a
+/// [RichText] widget to be nested in a radio tile widget.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
@@ -174,6 +172,82 @@ import 'theme_data.dart';
 ///           },
 ///         ),
 ///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## RadioListTile isn't exactly what I want
+///
+/// If the way RadioListTile pads and positions its elements isn't quite what
+/// you're looking for, you can create custom labeled radio widgets by
+/// combining [Radio] with other widgets, such as [Text], [Padding] and
+/// [InkWell].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of a custom LabeledRadio widget, but you can easily
+/// make your own configurable widget.
+///
+/// ```dart preamble
+/// class LabeledRadio extends StatelessWidget {
+///   const LabeledRadio({
+///     this.label,
+///     this.padding,
+///     this.groupValue,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool groupValue;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return InkWell(
+///       onTap: () {
+///         if (value == false)
+///           onChanged(true);
+///       },
+///       child: Padding(
+///         padding: padding,
+///         child: Row(
+///           children: <Widget>[
+///             Radio<bool>(
+///               groupValue: groupValue,
+///               value: value,
+///               onChanged: (bool newValue) => onChanged(newValue),
+///             ),
+///             Text(label),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool isRadioSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LabeledRadio(
+///         label: 'This is the label text',
+///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         value: isRadioSelected,
+///         groupValue: true,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             isRadioSelected = newValue;
+///           });
+///         },
+///       ),
 ///     ),
 ///   );
 /// }
