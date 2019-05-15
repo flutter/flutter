@@ -69,6 +69,8 @@ class _InputBorderPainter extends CustomPainter {
     this.gap,
     this.textDirection,
     this.fillColor,
+    this.focusAnimation,
+    this.focusColorTween,
   }) : super(repaint: repaint);
 
   final Animation<double> borderAnimation;
@@ -77,17 +79,21 @@ class _InputBorderPainter extends CustomPainter {
   final _InputBorderGap gap;
   final TextDirection textDirection;
   final Color fillColor;
+  final ColorTween focusColorTween;
+  final Animation<double> focusAnimation;
+
+  Color get blendedColor => Color.alphaBlend(focusColorTween.evaluate(focusAnimation), fillColor);
 
   @override
   void paint(Canvas canvas, Size size) {
     final InputBorder borderValue = border.evaluate(borderAnimation);
     final Rect canvasRect = Offset.zero & size;
-
-    if (fillColor.alpha > 0) {
+    final Color blendedFillColor = blendedColor;
+    if (blendedFillColor.alpha > 0) {
       canvas.drawPath(
         borderValue.getOuterPath(canvasRect, textDirection: textDirection),
         Paint()
-          ..color = fillColor
+          ..color = blendedFillColor
           ..style = PaintingStyle.fill,
       );
     }
@@ -105,6 +111,7 @@ class _InputBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(_InputBorderPainter oldPainter) {
     return borderAnimation != oldPainter.borderAnimation
+        || focusAnimation != oldPainter.focusAnimation
         || gapAnimation != oldPainter.gapAnimation
         || border != oldPainter.border
         || gap != oldPainter.gap
@@ -123,6 +130,8 @@ class _BorderContainer extends StatefulWidget {
     @required this.gap,
     @required this.gapAnimation,
     @required this.fillColor,
+    @required this.focusColor,
+    @required this.isFocused,
     this.child,
   }) : assert(border != null),
        assert(gap != null),
@@ -133,20 +142,33 @@ class _BorderContainer extends StatefulWidget {
   final _InputBorderGap gap;
   final Animation<double> gapAnimation;
   final Color fillColor;
+  final Color focusColor;
+  final bool isFocused;
   final Widget child;
 
   @override
   _BorderContainerState createState() => _BorderContainerState();
 }
 
-class _BorderContainerState extends State<_BorderContainer> with SingleTickerProviderStateMixin {
+class _BorderContainerState extends State<_BorderContainer> with TickerProviderStateMixin {
+  static const Duration _kFocusInDuration = Duration(milliseconds: 45);
+
   AnimationController _controller;
+  AnimationController _focusColorController;
   Animation<double> _borderAnimation;
+  Animation<double> _focusAnimation;
   _InputBorderTween _border;
+  ColorTween _focusColorTween;
 
   @override
   void initState() {
     super.initState();
+    _focusColorController = AnimationController(
+      duration: _kFocusInDuration,
+      // TODO(gspencer): use reverseDuration set to 15ms, once available.
+      value: widget.isFocused ? 1.0 : 0.0,
+      vsync: this,
+    );
     _controller = AnimationController(
       duration: _kTransitionDuration,
       vsync: this,
@@ -159,11 +181,17 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
       begin: widget.border,
       end: widget.border,
     );
+    _focusAnimation = CurvedAnimation(
+      parent: _focusColorController,
+      curve: Curves.linear,
+    );
+    _focusColorTween = ColorTween(begin: Colors.transparent, end: widget.focusColor);
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusColorController.dispose();
     super.dispose();
   }
 
@@ -179,19 +207,31 @@ class _BorderContainerState extends State<_BorderContainer> with SingleTickerPro
         ..value = 0.0
         ..forward();
     }
+    if (widget.focusColor != oldWidget.focusColor) {
+      _focusColorTween = ColorTween(begin: Colors.transparent, end: widget.focusColor);
+    }
+    if (widget.isFocused != oldWidget.isFocused) {
+      if (widget.isFocused) {
+        _focusColorController.forward();
+      } else {
+        _focusColorController.reverse();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       foregroundPainter: _InputBorderPainter(
-        repaint: Listenable.merge(<Listenable>[_borderAnimation, widget.gap]),
+        repaint: Listenable.merge(<Listenable>[_borderAnimation, widget.gap, _focusColorController]),
         borderAnimation: _borderAnimation,
         border: _border,
         gapAnimation: widget.gapAnimation,
         gap: widget.gap,
         textDirection: Directionality.of(context),
         fillColor: widget.fillColor,
+        focusColorTween: _focusColorTween,
+        focusAnimation: _focusAnimation,
       ),
       child: widget.child,
     );
@@ -1598,8 +1638,10 @@ class InputDecorator extends StatefulWidget {
 
   /// Whether the input field has focus.
   ///
-  /// Determines the position of the label text and the color and weight
-  /// of the border.
+  /// Determines the position of the label text and the color and weight of the
+  /// border, as well as the container fill color, which is a blend of
+  /// [InputDecoration.focusColor] with [InputDecoration.fillColor] when
+  /// focused, and [InputDecoration.fillColor] when not.
   ///
   /// Defaults to false.
   final bool isFocused;
@@ -1769,6 +1811,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return lightEnabled;
   }
 
+  Color _getFocusColor(ThemeData themeData) {
+    if (decoration.filled != true) // filled == null same as filled == false
+      return Colors.transparent;
+    return decoration.focusColor ?? themeData.inputDecorationTheme?.focusColor ?? themeData.focusColor;
+  }
+
   Color _getDefaultIconColor(ThemeData themeData) {
     if (!decoration.enabled)
       return themeData.disabledColor;
@@ -1880,6 +1928,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       gap: _borderGap,
       gapAnimation: _floatingLabelController.view,
       fillColor: _getFillColor(themeData),
+      focusColor: _getFocusColor(themeData),
+      isFocused: isFocused,
     );
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
@@ -2114,6 +2164,7 @@ class InputDecoration {
     this.counterStyle,
     this.filled,
     this.fillColor,
+    this.focusColor,
     this.errorBorder,
     this.focusedBorder,
     this.focusedErrorBorder,
@@ -2139,6 +2190,7 @@ class InputDecoration {
     this.hintStyle,
     this.filled = false,
     this.fillColor,
+    this.focusColor,
     this.border = InputBorder.none,
     this.enabled = true,
   }) : assert(enabled != null),
@@ -2274,9 +2326,9 @@ class InputDecoration {
   /// Whether the label floats on focus.
   ///
   /// If this is false, the placeholder disappears when the input has focus or
-  /// inputted text.
+  /// text has been entered.
   /// If this is true, the placeholder will rise to the top of the input when
-  /// the input has focus or inputted text.
+  /// the input has focus or text has been entered.
   ///
   /// Defaults to true.
   final bool hasFloatingPlaceholder;
@@ -2474,7 +2526,8 @@ class InputDecoration {
   /// If null, defaults to the [helperStyle].
   final TextStyle counterStyle;
 
-  /// If true the decoration's container is filled with [fillColor].
+  /// If true the decoration's container is filled with [fillColor] when not
+  /// focused and [focusColor] when focused.
   ///
   /// Typically this field set to true if [border] is an
   /// [UnderlineInputBorder].
@@ -2487,7 +2540,8 @@ class InputDecoration {
   /// This property is false by default.
   final bool filled;
 
-  /// The color to fill the decoration's container with, if [filled] is true.
+  /// The color to fill the decoration's container with, if [filled] is true and
+  /// the decoration is not focused.
   ///
   /// By default the fillColor is based on the current [Theme].
   ///
@@ -2495,7 +2549,20 @@ class InputDecoration {
   /// true and bordered per the [border]. It's the area adjacent to
   /// [decoration.icon] and above the widgets that contain [helperText],
   /// [errorText], and [counterText].
+  ///
+  /// This color is blended with [focusColor] if the decoration is focused.
   final Color fillColor;
+
+  /// The color to blend with [fillColor] and fill the decoration's container
+  /// with, if [filled] is true and the container has input focus.
+  ///
+  /// By default the [focusColor] is based on the current [Theme].
+  ///
+  /// The decoration's container is the area which is filled if [filled] is
+  /// true and bordered per the [border]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
+  final Color focusColor;
 
   /// The border to display when the [InputDecorator] does not have the focus and
   /// is showing an error.
@@ -2703,6 +2770,7 @@ class InputDecoration {
     TextStyle counterStyle,
     bool filled,
     Color fillColor,
+    Color focusColor,
     InputBorder errorBorder,
     InputBorder focusedBorder,
     InputBorder focusedErrorBorder,
@@ -2741,6 +2809,7 @@ class InputDecoration {
       counterStyle: counterStyle ?? this.counterStyle,
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
+      focusColor: focusColor ?? this.focusColor,
       errorBorder: errorBorder ?? this.errorBorder,
       focusedBorder: focusedBorder ?? this.focusedBorder,
       focusedErrorBorder: focusedErrorBorder ?? this.focusedErrorBorder,
@@ -2773,6 +2842,7 @@ class InputDecoration {
       counterStyle: counterStyle ?? theme.counterStyle,
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
+      focusColor: focusColor ?? theme.focusColor,
       errorBorder: errorBorder ?? theme.errorBorder,
       focusedBorder: focusedBorder ?? theme.focusedBorder,
       focusedErrorBorder: focusedErrorBorder ?? theme.focusedErrorBorder,
@@ -2818,6 +2888,7 @@ class InputDecoration {
         && typedOther.counterStyle == counterStyle
         && typedOther.filled == filled
         && typedOther.fillColor == fillColor
+        && typedOther.focusColor == focusColor
         && typedOther.errorBorder == errorBorder
         && typedOther.focusedBorder == focusedBorder
         && typedOther.focusedErrorBorder == focusedErrorBorder
@@ -2831,9 +2902,7 @@ class InputDecoration {
 
   @override
   int get hashCode {
-    // Split into several hashValues calls because the hashValues function is
-    // limited to 20 parameters.
-    return hashValues(
+    final List<Object> values = <Object>[
       icon,
       labelText,
       labelStyle,
@@ -2851,35 +2920,31 @@ class InputDecoration {
       isCollapsed,
       filled,
       fillColor,
+      focusColor,
       border,
       enabled,
-      hashValues(
-        prefixIcon,
-        prefix,
-        prefixText,
-        prefixStyle,
-        suffixIcon,
-        suffix,
-        suffixText,
-        suffixStyle,
-        counter,
-        counterText,
-        counterStyle,
-        filled,
-        fillColor,
-        errorBorder,
-        focusedBorder,
-        focusedErrorBorder,
-        disabledBorder,
-        enabledBorder,
-        border,
-        hashValues(
-          enabled,
-          semanticCounterText,
-          alignLabelWithHint,
-        ),
-      ),
-    );
+      prefixIcon,
+      prefix,
+      prefixText,
+      prefixStyle,
+      suffixIcon,
+      suffix,
+      suffixText,
+      suffixStyle,
+      counter,
+      counterText,
+      counterStyle,
+      errorBorder,
+      focusedBorder,
+      focusedErrorBorder,
+      disabledBorder,
+      enabledBorder,
+      border,
+      enabled,
+      semanticCounterText,
+      alignLabelWithHint,
+    ];
+    return hashList(values);
   }
 
   @override
@@ -2935,6 +3000,8 @@ class InputDecoration {
       description.add('filled: true');
     if (fillColor != null)
       description.add('fillColor: $fillColor');
+    if (focusColor != null)
+      description.add('focusColor: $focusColor');
     if (errorBorder != null)
       description.add('errorBorder: $errorBorder');
     if (focusedBorder != null)
@@ -2988,6 +3055,7 @@ class InputDecorationTheme extends Diagnosticable {
     this.counterStyle,
     this.filled = false,
     this.fillColor,
+    this.focusColor,
     this.errorBorder,
     this.focusedBorder,
     this.focusedErrorBorder,
@@ -3041,9 +3109,9 @@ class InputDecorationTheme extends Diagnosticable {
   /// Whether the placeholder text floats to become a label on focus.
   ///
   /// If this is false, the placeholder disappears when the input has focus or
-  /// inputted text.
+  /// text has been entered.
   /// If this is true, the placeholder will rise to the top of the input when
-  /// the input has focus or inputted text.
+  /// the input has focus or text has been entered.
   ///
   /// Defaults to true.
   final bool hasFloatingPlaceholder;
@@ -3109,6 +3177,16 @@ class InputDecorationTheme extends Diagnosticable {
   /// [InputBorder.getOuterPath], which is filled if [filled] is
   /// true and bordered per the [border].
   final Color fillColor;
+
+  /// The color to blend with the decoration's [fillColor] with, if [filled] is
+  /// true and the container has the input focus.
+  ///
+  /// By default the [focusColor] is based on the current [Theme].
+  ///
+  /// The decoration's container is the area, defined by the border's
+  /// [InputBorder.getOuterPath], which is filled if [filled] is
+  /// true and bordered per the [border].
+  final Color focusColor;
 
   /// The border to display when the [InputDecorator] does not have the focus and
   /// is showing an error.
@@ -3281,6 +3359,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<TextStyle>('counterStyle', counterStyle, defaultValue: defaultTheme.counterStyle));
     properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
     properties.add(DiagnosticsProperty<Color>('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
+    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: defaultTheme.focusColor));
     properties.add(DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
     properties.add(DiagnosticsProperty<InputBorder>('focusedBorder', focusedBorder, defaultValue: defaultTheme.focusedErrorBorder));
     properties.add(DiagnosticsProperty<InputBorder>('focusedErrorBorder', focusedErrorBorder, defaultValue: defaultTheme.focusedErrorBorder));
