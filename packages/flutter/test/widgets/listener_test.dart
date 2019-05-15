@@ -391,6 +391,28 @@ void main() {
       await gesture.removePointer();
     });
 
+    testWidgets('needsCompositing set when parent class needsCompositing is set', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Listener(
+          onPointerEnter: (PointerEnterEvent _) {},
+          child: const Opacity(opacity: 0.5, child: Placeholder()),
+        ),
+      );
+
+      RenderPointerListener listener = tester.renderObject(find.byType(Listener).first);
+      expect(listener.needsCompositing, isTrue);
+
+      await tester.pumpWidget(
+        Listener(
+          onPointerEnter: (PointerEnterEvent _) {},
+          child: const Placeholder(),
+        ),
+      );
+
+      listener = tester.renderObject(find.byType(Listener).first);
+      expect(listener.needsCompositing, isFalse);
+    });
+
     testWidgets('works with transform', (WidgetTester tester) async {
       // Regression test for https://github.com/flutter/flutter/issues/31986.
       final Key key = UniqueKey();
