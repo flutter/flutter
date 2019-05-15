@@ -301,6 +301,7 @@ class TestGesture {
     @required HitTester hitTester,
     int pointer = 1,
     PointerDeviceKind kind = PointerDeviceKind.touch,
+    int device,
     int buttons = kPrimaryButton,
   }) : assert(dispatcher != null),
        assert(hitTester != null),
@@ -309,7 +310,7 @@ class TestGesture {
        assert(buttons != null),
        _dispatcher = dispatcher,
        _hitTester = hitTester,
-       _pointer = TestPointer(pointer, kind, buttons),
+       _pointer = TestPointer(pointer, kind, device, buttons),
        _result = null;
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
