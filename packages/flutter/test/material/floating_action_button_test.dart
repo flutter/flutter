@@ -105,8 +105,25 @@ void main() {
     );
 
     expect(find.text('Add'), findsNothing);
+
+    // Test hover for tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test long press for tooltip.
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
+
     expect(find.text('Add'), findsOneWidget);
   });
 
@@ -687,20 +704,25 @@ void main() {
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: FloatingActionButton(
-              onPressed: () { /* to make sure the button is enabled */ },
-            ),
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: FloatingActionButton(
+            focusNode: focusNode,
+            onPressed: () { /* to make sure the button is enabled */ },
           ),
+        ),
       ),
     );
 
+    focusNode.unfocus();
+    await tester.pump();
+
     expect(
-        tester.renderObject(find.byType(FloatingActionButton)),
-        paintsExactlyCountTimes(#clipPath, 0),
+      tester.renderObject(find.byType(FloatingActionButton)),
+      paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }
