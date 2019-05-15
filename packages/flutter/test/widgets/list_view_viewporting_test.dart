@@ -42,7 +42,7 @@ void main() {
 
     expect(callbackTracker, equals(<int>[
       0, 1, 2, 3, 4, 5, // visible
-      6, 7, 8 // in cached area
+      6, 7, 8, // in cached area
     ]));
 
     callbackTracker.clear();
@@ -109,7 +109,7 @@ void main() {
     expect(callbackTracker, equals(<int>[
       0, 1, 2,
       3, 4, 5, //visible
-      6, 7
+      6, 7,
     ]));
     callbackTracker.clear();
 
@@ -189,7 +189,7 @@ void main() {
         key: ValueKey<int>(index),
         width: 500.0, // this should be ignored
         height: 220.0,
-        child: Text('$index', textDirection: TextDirection.ltr)
+        child: Text('$index', textDirection: TextDirection.ltr),
       );
     };
 
@@ -330,6 +330,7 @@ void main() {
       list.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderSliverList#00000 relayoutBoundary=up1\n'
+        ' │ needs compositing\n'
         ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -342,6 +343,7 @@ void main() {
         ' │ currently live children: 0 to 2\n'
         ' │\n'
         ' ├─child with index 0: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' │ │ needs compositing\n'
         ' │ │ parentData: index=0; layoutOffset=0.0 (can use size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │ │ layer: OffsetLayer#00000\n'
@@ -370,6 +372,7 @@ void main() {
         ' │         additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
         ' ├─child with index 1: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        ' │ │ needs compositing\n'
         ' │ │ parentData: index=1; layoutOffset=100.0 (can use size)\n'
         ' │ │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         ' │ │ layer: OffsetLayer#00000\n'
@@ -398,6 +401,7 @@ void main() {
         ' │         additionalConstraints: BoxConstraints(biggest)\n'
         ' │\n'
         ' └─child with index 2: RenderRepaintBoundary#00000 relayoutBoundary=up2\n'
+        '   │ needs compositing\n'
         '   │ parentData: index=2; layoutOffset=200.0 (can use size)\n'
         '   │ constraints: BoxConstraints(w=800.0, 0.0<=h<=Infinity)\n'
         '   │ layer: OffsetLayer#00000\n'
@@ -452,9 +456,9 @@ void main() {
                       Container(height: 80.0, child: text),
                       Container(height: 70.0, child: text),
                     ],
-                  )
+                  ),
               ),
-            )
+            ),
         )
     );
 
@@ -483,9 +487,9 @@ void main() {
                                   child: const Text('hey'),
                                 )).childrenDelegate),
                       ],
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
     );
 

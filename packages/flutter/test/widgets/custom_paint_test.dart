@@ -27,18 +27,18 @@ void main() {
     await tester.pumpWidget(CustomPaint(
       painter: TestCustomPainter(
         log: log,
-        name: 'background'
+        name: 'background',
       ),
       foregroundPainter: TestCustomPainter(
         log: log,
-        name: 'foreground'
+        name: 'foreground',
       ),
       child: CustomPaint(
         painter: TestCustomPainter(
           log: log,
-          name: 'child'
-        )
-      )
+          name: 'child',
+        ),
+      ),
     ));
 
     expect(log, equals(<String>['background', 'child', 'foreground']));
@@ -48,32 +48,32 @@ void main() {
     final GlobalKey target = GlobalKey();
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target)
+      child: CustomPaint(key: target),
     ));
     expect(target.currentContext.size, Size.zero);
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, child: Container())
+      child: CustomPaint(key: target, child: Container()),
     ));
     expect(target.currentContext.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, size: const Size(20.0, 20.0))
+      child: CustomPaint(key: target, size: const Size(20.0, 20.0)),
     ));
     expect(target.currentContext.size, const Size(20.0, 20.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, size: const Size(2000.0, 100.0))
+      child: CustomPaint(key: target, size: const Size(2000.0, 100.0)),
     ));
     expect(target.currentContext.size, const Size(800.0, 100.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, size: Size.zero, child: Container())
+      child: CustomPaint(key: target, size: Size.zero, child: Container()),
     ));
     expect(target.currentContext.size, const Size(800.0, 600.0));
 
     await tester.pumpWidget(Center(
-      child: CustomPaint(key: target, child: Container(height: 0.0, width: 0.0))
+      child: CustomPaint(key: target, child: Container(height: 0.0, width: 0.0)),
     ));
     expect(target.currentContext.size, Size.zero);
 

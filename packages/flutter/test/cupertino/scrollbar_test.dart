@@ -43,8 +43,7 @@ void main() {
     ));
   });
 
-  testWidgets('Scrollbar is not smaller than minLength with large scroll views',
-          (WidgetTester tester) async {
+  testWidgets('Scrollbar is not smaller than minLength with large scroll views', (WidgetTester tester) async {
     await tester.pumpWidget(const Directionality(
       textDirection: TextDirection.ltr,
       child: CupertinoScrollbar(
@@ -59,7 +58,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
 
     // Height is 36.0.
-    final Rect scrollbarRect = Rect.fromLTWH(795.0, 4.28659793814433, 2.5, 36.0);
+    const Rect scrollbarRect = Rect.fromLTWH(795.0, 4.28659793814433, 2.5, 36.0);
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       rrect: RRect.fromRectAndRadius(scrollbarRect, const Radius.circular(1.25)),
     ));

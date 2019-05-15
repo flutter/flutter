@@ -1,12 +1,20 @@
+// Copyright 2017 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:io' show ProcessResult, Process;
 
 import 'package:file/file.dart';
+import 'package:flutter_tools/src/build_info.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -20,6 +28,8 @@ class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcess extends Mock implements Process {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockXcode extends Mock implements Xcode {}
+class MockSimControl extends Mock implements SimControl {}
+class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 
 void main() {
   FakePlatform osx;
@@ -191,7 +201,7 @@ void main() {
         when(mockXcode.minorVersion).thenReturn(1);
         expect(deviceUnderTest.supportsScreenshot, false);
       },
-      overrides: <Type, Generator>{Xcode: () => mockXcode}
+      overrides: <Type, Generator>{Xcode: () => mockXcode},
     );
 
     testUsingContext(
@@ -213,7 +223,7 @@ void main() {
               fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
-          workingDirectory: null
+          workingDirectory: null,
         ));
       },
       overrides: <Type, Generator>{
@@ -221,7 +231,7 @@ void main() {
         // Test a real one. Screenshot doesn't require instance states.
         SimControl: () => SimControl(),
         Xcode: () => mockXcode,
-      }
+      },
     );
   });
 
@@ -301,21 +311,23 @@ void main() {
 
     testUsingContext('simulator can output `)`', () async {
       when(mockProcessManager.start(any, environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) {
-        final Process mockProcess = MockProcess();
-        when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
-            Stream<List<int>>.fromIterable(<List<int>>['''
+        .thenAnswer((Invocation invocation) {
+          final Process mockProcess = MockProcess();
+          when(mockProcess.stdout)
+            .thenAnswer((Invocation invocation) {
+              return Stream<List<int>>.fromIterable(<List<int>>['''
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) ))))))))))
 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
-                .codeUnits]));
-        when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
-        // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-        when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
-        return Future<Process>.value(mockProcess);
-      });
+                .codeUnits]);
+            });
+          when(mockProcess.stderr)
+              .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+          // Delay return of exitCode until after stdout stream data, since it terminates the logger.
+          when(mockProcess.exitCode)
+              .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+          return Future<Process>.value(mockProcess);
+        });
 
       final IOSSimulator device = IOSSimulator('123456', category: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
@@ -407,5 +419,70 @@ void main() {
       ProcessManager: () => mockProcessManager,
       SimControl: () => simControl,
     });
+  });
+
+  group('startApp', () {
+    SimControl simControl;
+
+    setUp(() {
+      simControl = MockSimControl();
+    });
+
+    testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
+        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+        when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
+
+        final Directory mockDir = fs.currentDirectory;
+        final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+
+        const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+
+        verify(simControl.launch(any, 'correct', any));
+      },
+      overrides: <Type, Generator>{
+        SimControl: () => simControl,
+        IOSWorkflow: () => MockIOSWorkflow()
+      },
+    );
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  module: {}
+''');
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('ios').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
   });
 }

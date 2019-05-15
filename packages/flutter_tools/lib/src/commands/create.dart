@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
 import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
@@ -18,6 +17,7 @@ import '../base/net.dart';
 import '../base/os.dart';
 import '../base/utils.dart';
 import '../cache.dart';
+import '../convert.dart';
 import '../dart/pub.dart';
 import '../doctor.dart';
 import '../globals.dart';
@@ -56,19 +56,19 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "flutter packages get" after the project has been created.'
+      help: 'Whether to run "flutter packages get" after the project has been created.',
     );
     argParser.addFlag('offline',
       defaultsTo: false,
       help: 'When "flutter packages get" is run by the create command, this indicates '
         'whether to run it in offline mode or not. In offline mode, it will need to '
-        'have all dependencies already available in the pub cache to succeed.'
+        'have all dependencies already available in the pub cache to succeed.',
     );
     argParser.addFlag(
       'with-driver-test',
       negatable: true,
       defaultsTo: false,
-      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test."
+      help: "Also add a flutter_driver dependency and generate a sample 'flutter drive' test.",
     );
     argParser.addOption(
       'template',
@@ -90,9 +90,17 @@ class CreateCommand extends FlutterCommand {
       'sample',
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
-        '--template=app.',
+        '--template=app. The value should be the sample ID of the desired sample from the API '
+        'documentation website (http://docs.flutter.dev). An example can be found at '
+        'https://master-api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       defaultsTo: null,
-      valueHelp: 'the sample ID of the desired sample from the API documentation website (http://docs.flutter.io)'
+      valueHelp: 'id',
+    );
+    argParser.addOption(
+      'list-samples',
+      help: 'Specifies a JSON output file for a listing of Flutter code samples '
+        'that can created with --sample.',
+      valueHelp: 'path',
     );
     argParser.addFlag(
       'overwrite',
@@ -103,18 +111,18 @@ class CreateCommand extends FlutterCommand {
     argParser.addOption(
       'description',
       defaultsTo: 'A new Flutter project.',
-      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.'
+      help: 'The description to use for your new Flutter project. This string ends up in the pubspec.yaml file.',
     );
     argParser.addOption(
       'org',
       defaultsTo: 'com.example',
       help: 'The organization responsible for your new Flutter project, in reverse domain name notation. '
-            'This string is used in Java package names and as prefix in the iOS bundle identifier.'
+            'This string is used in Java package names and as prefix in the iOS bundle identifier.',
     );
     argParser.addOption(
       'project-name',
       defaultsTo: null,
-      help: 'The project name for this new Flutter project. This must be a valid dart package name.'
+      help: 'The project name for this new Flutter project. This must be a valid dart package name.',
     );
     argParser.addOption(
       'ios-language',
@@ -178,6 +186,11 @@ class CreateCommand extends FlutterCommand {
     return null;
   }
 
+  /// The hostname for the Flutter docs for the current channel.
+  String get _snippetsHost => FlutterVersion.instance.channel == 'stable'
+        ? 'docs.flutter.io'
+        : 'master-docs.flutter.io';
+
   Future<String> _fetchSampleFromServer(String sampleId) async {
     // Sanity check the sampleId
     if (sampleId.contains(RegExp(r'[^-\w\.]'))) {
@@ -185,14 +198,36 @@ class CreateCommand extends FlutterCommand {
         'documentation and try again.');
     }
 
-    final String host = FlutterVersion.instance.channel == 'stable'
-        ? 'docs.flutter.io'
-        : 'master-docs-flutter-io.firebaseapp.com';
-    return utf8.decode(await fetchUrl(Uri.https(host, 'snippets/$sampleId.dart')));
+    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/$sampleId.dart')));
+  }
+
+  /// Fetches the samples index file from the Flutter docs website.
+  Future<String> _fetchSamplesIndexFromServer() async {
+    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json')));
+  }
+
+  /// Fetches the samples index file from the server and writes it to
+  /// [outputFilePath].
+  Future<void> _writeSamplesJson(String outputFilePath) async {
+    try {
+      final File outputFile = fs.file(outputFilePath);
+      if (outputFile.existsSync()) {
+        throwToolExit('File "$outputFilePath" already exists', exitCode: 1);
+      }
+      outputFile.writeAsStringSync(await _fetchSamplesIndexFromServer());
+      printStatus('Wrote samples JSON to "$outputFilePath"');
+    } catch (e) {
+      throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
+    }
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (argResults['list-samples'] != null) {
+      await _writeSamplesJson(argResults['list-samples']);
+      return null;
+    }
+
     if (argResults.rest.isEmpty)
       throwToolExit('No option specified for the output directory.\n$usage', exitCode: 2);
 
@@ -211,7 +246,7 @@ class CreateCommand extends FlutterCommand {
       throwToolExit('Neither the --flutter-root command line flag nor the FLUTTER_ROOT environment '
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
 
-    await Cache.instance.updateAll();
+    await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
 
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
 
@@ -269,7 +304,7 @@ class CreateCommand extends FlutterCommand {
 
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
-      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
@@ -350,7 +385,7 @@ class CreateCommand extends FlutterCommand {
       printStatus('Your module code is in $relativeMainPath.');
     } else {
       // Run doctor; tell the user the next steps.
-      final FlutterProject project = await FlutterProject.fromPath(projectDirPath);
+      final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = fs.path.normalize(fs.path.relative(app.directory.path));
       final String relativeAppMain = fs.path.join(relativeAppPath, 'lib', 'main.dart');
@@ -373,7 +408,7 @@ Your $application code is in $relativeAppMain.
 Your plugin code is in $relativePluginMain.
 
 Host platform code is in the "android" and "ios" directories under $relativePluginPath.
-To edit platform code in an IDE see https://flutter.io/developing-packages/#edit-plugin-package.
+To edit platform code in an IDE see https://flutter.dev/developing-packages/#edit-plugin-package.
 ''');
         }
       } else {
@@ -395,7 +430,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return null;
   }
 
-  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -408,13 +443,13 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
         directory: directory.path,
         offline: argResults['offline'],
       );
-      final FlutterProject project = await FlutterProject.fromDirectory(directory);
-      await project.ensureReadyForPlatformSpecificTooling();
+      final FlutterProject project = FlutterProject.fromDirectory(directory);
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
     return generatedCount;
   }
 
-  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePackage(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -431,7 +466,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generatePlugin(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     final String description = argResults.wasParsed('description')
         ? argResults['description']
@@ -445,7 +480,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
         offline: argResults['offline'],
       );
     }
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     final String projectName = templateContext['projectName'];
@@ -463,10 +498,10 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     return generatedCount;
   }
 
-  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, {bool overwrite = false}) async {
+  Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
     if (argResults['with-driver-test']) {
@@ -476,7 +511,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
 
     if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
-      await project.ensureReadyForPlatformSpecificTooling();
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
@@ -536,7 +571,7 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
     };
   }
 
-  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, {bool overwrite = false}) {
+  int _renderTemplate(String templateName, Directory directory, Map<String, dynamic> context, { bool overwrite = false }) {
     final Template template = Template.fromName(templateName);
     return template.render(directory, context, overwriteExisting: overwrite);
   }
@@ -559,7 +594,32 @@ To edit platform code in an IDE see https://flutter.io/developing-packages/#edit
 }
 
 String _createAndroidIdentifier(String organization, String name) {
-  return '$organization.$name'.replaceAll('_', '');
+  // Android application ID is specified in: https://developer.android.com/studio/build/application-id
+  // All characters must be alphanumeric or an underscore [a-zA-Z0-9_].
+  String tmpIdentifier = '$organization.$name';
+  final RegExp disallowed = RegExp(r'[^\w\.]');
+  tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
+
+  // It must have at least two segments (one or more dots).
+  final List<String> segments = tmpIdentifier
+      .split('.')
+      .where((String segment) => segment.isNotEmpty)
+      .toList();
+  while (segments.length < 2) {
+    segments.add('untitled');
+  }
+
+  // Each segment must start with a letter.
+  final RegExp segmentPatternRegex = RegExp(r'^[a-zA-Z][\w]*$');
+  final List<String> prefixedSegments = segments
+      .map((String segment) {
+        if (!segmentPatternRegex.hasMatch(segment)) {
+          return 'u'+segment;
+        }
+        return segment;
+      })
+      .toList();
+  return prefixedSegments.join('.');
 }
 
 String _createPluginClassName(String name) {
@@ -569,13 +629,24 @@ String _createPluginClassName(String name) {
 
 String _createUTIIdentifier(String organization, String name) {
   // Create a UTI (https://en.wikipedia.org/wiki/Uniform_Type_Identifier) from a base name
+  name = camelCase(name);
+  String tmpIdentifier = '$organization.$name';
   final RegExp disallowed = RegExp(r'[^a-zA-Z0-9\-\.\u0080-\uffff]+');
-  name = camelCase(name).replaceAll(disallowed, '');
-  name = name.isEmpty ? 'untitled' : name;
-  return '$organization.$name';
+  tmpIdentifier = tmpIdentifier.replaceAll(disallowed, '');
+
+  // It must have at least two segments (one or more dots).
+  final List<String> segments = tmpIdentifier
+      .split('.')
+      .where((String segment) => segment.isNotEmpty)
+      .toList();
+  while (segments.length < 2) {
+    segments.add('untitled');
+  }
+
+  return segments.join('.');
 }
 
-final Set<String> _packageDependencies = Set<String>.from(<String>[
+const Set<String> _packageDependencies = <String>{
   'analyzer',
   'args',
   'async',
@@ -601,8 +672,8 @@ final Set<String> _packageDependencies = Set<String>.from(<String>[
   'test',
   'utf',
   'watcher',
-  'yaml'
-]);
+  'yaml',
+};
 
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.

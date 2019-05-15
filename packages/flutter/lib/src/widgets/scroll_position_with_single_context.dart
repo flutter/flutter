@@ -160,6 +160,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   ///
   /// If this changes the value, then a [UserScrollNotification] is dispatched.
   @protected
+  @visibleForTesting
   void updateUserScrollDirection(ScrollDirection value) {
     assert(value != null);
     if (userScrollDirection == value)
@@ -169,7 +170,8 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
   }
 
   @override
-  Future<void> animateTo(double to, {
+  Future<void> animateTo(
+    double to, {
     @required Duration duration,
     @required Curve curve,
   }) {

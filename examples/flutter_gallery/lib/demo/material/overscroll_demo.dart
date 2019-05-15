@@ -23,22 +23,22 @@ class OverscrollDemoState extends State<OverscrollDemo> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey = GlobalKey<RefreshIndicatorState>();
   static final List<String> _items = <String>[
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N'
+    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
   ];
 
   Future<void> _handleRefresh() {
     final Completer<void> completer = Completer<void>();
     Timer(const Duration(seconds: 3), () { completer.complete(); });
     return completer.future.then<void>((_) {
-       _scaffoldKey.currentState?.showSnackBar(SnackBar(
-         content: const Text('Refresh complete'),
-         action: SnackBarAction(
-           label: 'RETRY',
-           onPressed: () {
-             _refreshIndicatorKey.currentState.show();
-           }
-         )
-       ));
+      _scaffoldKey.currentState?.showSnackBar(SnackBar(
+        content: const Text('Refresh complete'),
+        action: SnackBarAction(
+          label: 'RETRY',
+          onPressed: () {
+            _refreshIndicatorKey.currentState.show();
+          },
+        ),
+      ));
     });
   }
 
@@ -55,9 +55,9 @@ class OverscrollDemoState extends State<OverscrollDemo> {
             tooltip: 'Refresh',
             onPressed: () {
               _refreshIndicatorKey.currentState.show();
-            }
+            },
           ),
-        ]
+        ],
       ),
       body: RefreshIndicator(
         key: _refreshIndicatorKey,

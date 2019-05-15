@@ -44,7 +44,7 @@ abstract class AnalyzeBase {
     final Map<String, dynamic> data = <String, dynamic>{
       'time': stopwatch.elapsedMilliseconds / 1000.0,
       'issues': errorCount,
-      'missingDartDocs': membersMissingDocumentation
+      'missingDartDocs': membersMissingDocumentation,
     };
     fs.file(benchmarkOut).writeAsStringSync(toPrettyJson(data));
     printStatus('Analysis benchmark written to $benchmarkOut ($data).');

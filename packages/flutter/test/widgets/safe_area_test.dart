@@ -128,9 +128,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(0.0, 120.0, 780.0, 100.0),
-        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 120.0, 780.0, 100.0),
+        const Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -146,9 +146,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(20.0, 110.0, 760.0, 100.0),
-        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(20.0, 110.0, 760.0, 100.0),
+        const Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -166,9 +166,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
-        Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
+        const Rect.fromLTWH(0.0, 240.0, 800.0, 100.0),
       ]);
     });
 
@@ -188,9 +188,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
-        Rect.fromLTWH(0.0, 220.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(20.0, 120.0, 760.0, 100.0),
+        const Rect.fromLTWH(0.0, 220.0, 800.0, 100.0),
       ]);
 
       await tester.pumpWidget(
@@ -205,9 +205,9 @@ void main() {
         ),
       );
       verify(tester, <Rect>[
-        Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
-        Rect.fromLTWH(100.0, 130.0, 700.0, 100.0),
-        Rect.fromLTWH(0.0, 230.0, 800.0, 100.0),
+        const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0),
+        const Rect.fromLTWH(100.0, 130.0, 700.0, 100.0),
+        const Rect.fromLTWH(0.0, 230.0, 800.0, 100.0),
       ]);
     });
   });

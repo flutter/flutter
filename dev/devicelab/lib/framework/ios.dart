@@ -40,7 +40,7 @@ Future<void> _patchXcconfigFilesIfNotPatched(String flutterProjectPath) async {
   final List<File> xcconfigFiles = <File>[
     _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Flutter.xcconfig')),
     _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Debug.xcconfig')),
-    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Release.xcconfig'))
+    _fs.file(path.join(flutterProjectPath, 'ios/Flutter/Release.xcconfig')),
   ];
 
   bool xcconfigFileExists = false;

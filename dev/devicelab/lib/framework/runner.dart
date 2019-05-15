@@ -41,16 +41,16 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
     runnerFinished = true;
   });
 
-  final Completer<int> port = Completer<int>();
+  final Completer<Uri> uri = Completer<Uri>();
 
   final StreamSubscription<String> stdoutSub = runner.stdout
       .transform<String>(const Utf8Decoder())
       .transform<String>(const LineSplitter())
       .listen((String line) {
-    if (!port.isCompleted) {
-      final int portValue = parseServicePort(line, prefix: 'Observatory listening on ');
-      if (portValue != null)
-        port.complete(portValue);
+    if (!uri.isCompleted) {
+      final Uri serviceUri = parseServiceUri(line, prefix: 'Observatory listening on ');
+      if (serviceUri != null)
+        uri.complete(serviceUri);
     }
     if (!silent) {
       stdout.writeln('[$taskName] [STDOUT] $line');
@@ -66,7 +66,7 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
 
   String waitingFor = 'connection';
   try {
-    final VMIsolateRef isolate = await _connectToRunnerIsolate(await port.future);
+    final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
     waitingFor = 'task completion';
     final Map<String, dynamic> taskResult =
         await isolate.invokeExtension('ext.cocoonRunTask').timeout(taskTimeoutWithGracePeriod);
@@ -88,8 +88,15 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   }
 }
 
-Future<VMIsolateRef> _connectToRunnerIsolate(int vmServicePort) async {
-  final String url = 'ws://localhost:$vmServicePort/ws';
+Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
+  final List<String> pathSegments = <String>[];
+  if (vmServiceUri.pathSegments.isNotEmpty) {
+    // Add authentication code.
+    pathSegments.add(vmServiceUri.pathSegments[0]);
+  }
+  pathSegments.add('ws');
+  final String url = vmServiceUri.replace(scheme: 'ws', pathSegments:
+      pathSegments).toString();
   final DateTime started = DateTime.now();
 
   // TODO(yjbanov): due to lack of imagination at the moment the handshake with

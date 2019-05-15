@@ -10,10 +10,11 @@ import 'globals.dart';
 
 /// Information about a build to be performed or used.
 class BuildInfo {
-  const BuildInfo(this.mode, this.flavor, {
+  const BuildInfo(
+    this.mode,
+    this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
-    this.buildHotUpdate,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -43,9 +44,6 @@ class BuildInfo {
   /// Dart compilation trace file to use for JIT VM snapshot.
   final String compilationTraceFilePath;
 
-  /// Build differential snapshot.
-  final bool buildHotUpdate;
-
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
 
@@ -63,7 +61,7 @@ class BuildInfo {
   /// It is used to determine whether one build is more recent than another, with higher numbers indicating more recent build.
   /// On Android it is used as versionCode.
   /// On Xcode builds it is used as CFBundleVersion.
-  final int buildNumber;
+  final String buildNumber;
 
   /// A "x.y.z" string used as the version number shown to users.
   /// For each new version of your app, you will provide a version number to differentiate it from previous versions.
@@ -92,16 +90,19 @@ class BuildInfo {
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
   bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
 
+  /// Returns whether a dynamic build is requested.
+  bool get isDynamic => mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
+
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
+  String get friendlyModeName => getFriendlyModeName(mode);
 
   BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
       BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
-          buildHotUpdate: buildHotUpdate,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,
@@ -117,7 +118,88 @@ enum BuildMode {
   dynamicRelease
 }
 
+String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
+  if (buildNumber == null) {
+    return null;
+  }
+  if (targetPlatform == TargetPlatform.ios ||
+      targetPlatform == TargetPlatform.darwin_x64) {
+    // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+    final RegExp disallowed = RegExp(r'[^\d\.]');
+    String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
+    final List<String> segments = tmpBuildNumber
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
+    if (segments.isEmpty) {
+      segments.add('0');
+    }
+    tmpBuildNumber = segments.join('.');
+    if (tmpBuildNumber != buildNumber) {
+      printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+          'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
+    }
+    return tmpBuildNumber;
+  }
+  if (targetPlatform == TargetPlatform.android_arm ||
+      targetPlatform == TargetPlatform.android_arm64 ||
+      targetPlatform == TargetPlatform.android_x64 ||
+      targetPlatform == TargetPlatform.android_x86) {
+    // See versionCode at https://developer.android.com/studio/publish/versioning
+    final RegExp disallowed = RegExp(r'[^\d]');
+    String tmpBuildNumberStr = buildNumber.replaceAll(disallowed, '');
+    int tmpBuildNumberInt = int.tryParse(tmpBuildNumberStr) ?? 0;
+    if (tmpBuildNumberInt < 1) {
+      tmpBuildNumberInt = 1;
+    }
+    tmpBuildNumberStr = tmpBuildNumberInt.toString();
+    if (tmpBuildNumberStr != buildNumber) {
+      printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+          'See versionCode at https://developer.android.com/studio/publish/versioning');
+    }
+    return tmpBuildNumberStr;
+  }
+  return buildNumber;
+}
+
+String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName) {
+  if (buildName == null) {
+    return null;
+  }
+  if (targetPlatform == TargetPlatform.ios ||
+      targetPlatform == TargetPlatform.darwin_x64) {
+    // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+    final RegExp disallowed = RegExp(r'[^\d\.]');
+    String tmpBuildName = buildName.replaceAll(disallowed, '');
+    final List<String> segments = tmpBuildName
+        .split('.')
+        .where((String segment) => segment.isNotEmpty)
+        .toList();
+    while (segments.length < 3) {
+      segments.add('0');
+    }
+    tmpBuildName = segments.join('.');
+    if (tmpBuildName != buildName) {
+      printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+          'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
+    }
+    return tmpBuildName;
+  }
+  if (targetPlatform == TargetPlatform.android_arm ||
+      targetPlatform == TargetPlatform.android_arm64 ||
+      targetPlatform == TargetPlatform.android_x64 ||
+      targetPlatform == TargetPlatform.android_x86) {
+    // See versionName at https://developer.android.com/studio/publish/versioning
+    return buildName;
+  }
+  return buildName;
+}
+
 String getModeName(BuildMode mode) => getEnumName(mode);
+
+String getFriendlyModeName(BuildMode mode) {
+  return snakeCase(getModeName(mode)).replaceAll('_', ' ');
+}
 
 // Returns true if the selected build mode uses ahead-of-time compilation.
 bool isAotBuildMode(BuildMode mode) {
@@ -125,7 +207,11 @@ bool isAotBuildMode(BuildMode mode) {
 }
 
 // Returns true if the given build mode can be used on emulators / simulators.
-bool isEmulatorBuildMode(BuildMode mode) => mode == BuildMode.debug;
+bool isEmulatorBuildMode(BuildMode mode) {
+  return mode == BuildMode.debug ||
+    mode == BuildMode.dynamicRelease ||
+    mode == BuildMode.dynamicProfile;
+}
 
 enum HostPlatform {
   darwin_x64,
@@ -157,6 +243,7 @@ enum TargetPlatform {
   windows_x64,
   fuchsia,
   tester,
+  web,
 }
 
 /// iOS target device architecture.
@@ -216,6 +303,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'fuchsia';
     case TargetPlatform.tester:
       return 'flutter-tester';
+    case TargetPlatform.web:
+      return 'web';
   }
   assert(false);
   return null;
@@ -237,6 +326,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+    case 'web':
+      return TargetPlatform.web;
   }
   assert(platform != null);
   return null;
@@ -289,6 +380,26 @@ String getAssetBuildDirectory() {
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
+}
+
+/// Returns the macOS build output directory.
+String getMacOSBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'macos');
+}
+
+/// Returns the web build output directory.
+String getWebBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'web');
+}
+
+/// Returns the Linux build output directory.
+String getLinuxBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'linux');
+}
+
+/// Returns the Fuchsia build output directory.
+String getFuchsiaBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'fuchsia');
 }
 
 /// Returns directory used by incremental compiler (IKG - incremental kernel

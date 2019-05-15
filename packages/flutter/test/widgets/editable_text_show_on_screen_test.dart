@@ -26,6 +26,7 @@ void main() {
             controller: scrollController,
             children: <Widget>[
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
@@ -67,6 +68,7 @@ void main() {
                 height: 200.0,
               ),
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 scrollPadding: const EdgeInsets.all(50.0),
                 controller: controller,
                 focusNode: focusNode,
@@ -112,6 +114,7 @@ void main() {
                 height: 350.0,
               ),
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
@@ -161,6 +164,7 @@ void main() {
                 height: 350.0,
               ),
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,
@@ -197,28 +201,33 @@ void main() {
     final TextEditingController textController = TextEditingController();
     final PageController pageController = PageController(initialPage: 1);
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Material(
-        child: PageView(
-          controller: pageController,
-          children: <Widget>[
-            Container(
-              color: Colors.red,
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Material(
+            child: PageView(
+              controller: pageController,
+              children: <Widget>[
+                Container(
+                  color: Colors.red,
+                ),
+                Container(
+                  child: TextField(
+                    controller: textController,
+                  ),
+                  color: Colors.green,
+                ),
+                Container(
+                  color: Colors.red,
+                ),
+              ],
             ),
-            Container(
-              child: TextField(
-                controller: textController,
-              ),
-              color: Colors.green,
-            ),
-            Container(
-              color: Colors.red,
-            ),
-          ],
+          ),
         ),
       ),
-    ));
+    );
 
     await tester.showKeyboard(find.byType(EditableText));
     await tester.pumpAndSettle();
@@ -247,6 +256,7 @@ void main() {
             controller: scrollController,
             children: <Widget>[
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 maxLines: null, // multi-line
                 controller: controller,
                 focusNode: focusNode,
@@ -302,6 +312,7 @@ void main() {
                 height: 200.0,
               ),
               EditableText(
+                backgroundCursorColor: Colors.grey,
                 scrollPadding: const EdgeInsets.only(bottom: 300.0),
                 controller: controller,
                 focusNode: focusNode,

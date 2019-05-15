@@ -12,7 +12,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(
           children: <Widget>[
-            Container(height: 100000.0)
+            Container(height: 100000.0),
           ],
         ),
       ),

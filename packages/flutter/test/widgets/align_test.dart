@@ -99,7 +99,7 @@ void main() {
           key: alignKey,
           child: Container(
             width: 10.0,
-            height: 10.0
+            height: 10.0,
           ),
           alignment: const Alignment(0.0, 0.0),
         ),

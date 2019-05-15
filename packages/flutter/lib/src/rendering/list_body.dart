@@ -148,7 +148,7 @@ class RenderListBody extends RenderBox
         child.layout(innerConstraints, parentUsesSize: true);
         final ListBodyParentData childParentData = child.parentData;
         childParentData.offset = Offset(0.0, mainAxisExtent);
-          mainAxisExtent += child.size.height;
+        mainAxisExtent += child.size.height;
         assert(child.parentData == childParentData);
         child = childParentData.nextSibling;
       }
@@ -265,7 +265,7 @@ class RenderListBody extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 

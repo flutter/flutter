@@ -144,7 +144,7 @@ class MatrixUtils {
         _min4(point1.dx, point2.dx, point3.dx, point4.dx),
         _min4(point1.dy, point2.dy, point3.dy, point4.dy),
         _max4(point1.dx, point2.dx, point3.dx, point4.dx),
-        _max4(point1.dy, point2.dy, point3.dy, point4.dy)
+        _max4(point1.dy, point2.dy, point3.dy, point4.dy),
     );
   }
 
@@ -163,7 +163,10 @@ class MatrixUtils {
   /// 0.0 before computing its bounding rect.
   static Rect inverseTransformRect(Matrix4 transform, Rect rect) {
     assert(rect != null);
-    assert(transform.determinant != 0.0);
+    // As exposed by `unrelated_type_equality_checks`, this assert was a no-op.
+    // Fixing it introduces a bunch of runtime failures; for more context see:
+    // https://github.com/flutter/flutter/pull/31568
+    // assert(transform.determinant != 0.0);
     if (isIdentity(transform))
       return rect;
     transform = Matrix4.copy(transform)..invert();
@@ -246,6 +249,13 @@ class MatrixUtils {
     // Essentially perspective * view * model.
     return result;
   }
+
+  /// Returns a matrix that transforms every point to [offset].
+  static Matrix4 forceToPoint(Offset offset) {
+    return Matrix4.identity()
+      ..setRow(0, Vector4(0, 0, 0, offset.dx))
+      ..setRow(1, Vector4(0, 0, 0, offset.dy));
+  }
 }
 
 /// Returns a list of strings representing the given transform in a format
@@ -265,7 +275,9 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
   /// Create a diagnostics property for [Matrix4] objects.
   ///
   /// The [showName] and [level] arguments must not be null.
-  TransformProperty(String name, Matrix4 value, {
+  TransformProperty(
+    String name,
+    Matrix4 value, {
     bool showName = true,
     Object defaultValue = kNoDefaultValue,
     DiagnosticLevel level = DiagnosticLevel.info,

@@ -70,7 +70,7 @@ void main() {
                 flags: SemanticsFlag.hasCheckedState.index,
                 rect: TestSemantics.fullScreen,
               ),
-            ]
+            ],
           ),
         ],
       )

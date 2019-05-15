@@ -8,10 +8,12 @@ import 'dart:io' show Platform;
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 // Start of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
@@ -95,6 +97,39 @@ class _ClockTextState extends State<ClockText> {
 
 // End of block of code where widget creation location line numbers and
 // columns will impact whether tests pass.
+
+// Class to enable building trees of nodes with cycles between properties of
+// nodes and the properties of those properties.
+// This exposed a bug in code serializing DiagnosticsNode objects that did not
+// handle these sorts of cycles robustly.
+class CyclicDiagnostic extends DiagnosticableTree {
+  CyclicDiagnostic(this.name);
+
+  // Field used to create cyclic relationships.
+  CyclicDiagnostic related;
+  final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+
+  final String name;
+
+  @override
+  String toStringShort() => '$runtimeType-$name';
+
+  // We have to override toString to avoid the toString call itself triggering a
+  // stack overflow.
+  @override
+  String toString({ DiagnosticLevel minLevel = DiagnosticLevel.debug }) {
+    return toStringShort();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<CyclicDiagnostic>('related', related));
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() => children;
+}
 
 class _CreationLocation {
   const _CreationLocation({
@@ -193,8 +228,7 @@ void main() {
 class TestWidgetInspectorService extends Object with WidgetInspectorService {
   final Map<String, InspectorServiceExtensionCallback> extensions = <String, InspectorServiceExtensionCallback>{};
 
-  final Map<String, List<Map<Object, Object>>> eventsDispatched =
-      <String, List<Map<Object, Object>>>{};
+  final Map<String, List<Map<Object, Object>>> eventsDispatched = <String, List<Map<Object, Object>>>{};
 
   @override
   void registerServiceExtension({
@@ -212,6 +246,11 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
   List<Map<Object, Object>> getEventsDispatched(String eventKind) {
     return eventsDispatched.putIfAbsent(eventKind, () => <Map<Object, Object>>[]);
+  }
+
+  Iterable<Map<Object, Object>> getServiceExtensionStateChangedEvents(String extensionName) {
+    return getEventsDispatched('Flutter.ServiceExtensionStateChanged')
+      .where((Map<Object, Object> event) => event['extension'] == extensionName);
   }
 
   Future<Object> testExtension(String name, Map<String, String> arguments) async {
@@ -396,6 +435,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             key: inspectorKey,
             selectButtonBuilder: selectButtonBuilder,
             child: ListView(
+              dragStartBehavior: DragStartBehavior.down,
               children: <Widget>[
                 Container(
                   key: childKey,
@@ -434,7 +474,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await tester.pump();
 
       expect(tester.getTopLeft(find.byKey(childKey)).dy, equals(0.0));
-    });
+    }, skip: true); // https://github.com/flutter/flutter/issues/29108
 
     testWidgets('WidgetInspector long press', (WidgetTester tester) async {
       bool didLongPress = false;
@@ -874,7 +914,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This RichText widget is created by the build method of the Text widget
       // thus the creation location is in text.dart not basic.dart
       final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']).pathSegments;
-      expect(pathSegmentsFramework.join('/'), endsWith('/packages/flutter/lib/src/widgets/text.dart'));
+      expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
@@ -958,7 +998,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(selectionChangedCount, equals(2));
       expect(service.selection.current, equals(elementB.renderObject));
 
-      await service.testExtension('setSelectionById', <String, String>{'arg' : service.toId(elementA, 'my-group'), 'objectGroup': 'my-group'});
+      await service.testExtension('setSelectionById', <String, String>{'arg': service.toId(elementA, 'my-group'), 'objectGroup': 'my-group'});
       expect(selectionChangedCount, equals(3));
       expect(service.selection.currentElement, equals(elementA));
       expect(service.selection.current, equals(elementA.renderObject));
@@ -1139,6 +1179,40 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       }
     });
 
+    testWidgets('cyclic diagnostics regression test', (WidgetTester tester) async {
+      const String group = 'test-group';
+      final CyclicDiagnostic a = CyclicDiagnostic('a');
+      final CyclicDiagnostic b = CyclicDiagnostic('b');
+      a.related = b;
+      a.children.add(b.toDiagnosticsNode());
+      b.related = a;
+
+      final DiagnosticsNode diagnostic = a.toDiagnosticsNode();
+      final String id = service.toId(diagnostic, group);
+      final Map<String, Object> subtreeJson = await service.testExtension('getDetailsSubtree', <String, String>{'arg': id, 'objectGroup': group});
+      expect(subtreeJson['objectId'], equals(id));
+      expect(subtreeJson.containsKey('children'), isTrue);
+      final List<Object> propertiesJson = subtreeJson['properties'];
+      expect(propertiesJson.length, equals(1));
+      final Map<String, Object> relatedProperty = propertiesJson.first;
+      expect(relatedProperty['name'], equals('related'));
+      expect(relatedProperty['description'], equals('CyclicDiagnostic-b'));
+      expect(relatedProperty.containsKey('isDiagnosticableValue'), isTrue);
+      expect(relatedProperty.containsKey('children'), isFalse);
+      expect(relatedProperty.containsKey('properties'), isTrue);
+      final List<Object> relatedWidgetProperties = relatedProperty['properties'];
+      expect(relatedWidgetProperties.length, equals(1));
+      final Map<String, Object> nestedRelatedProperty = relatedWidgetProperties.first;
+      expect(nestedRelatedProperty['name'], equals('related'));
+      // Make sure we do not include properties or children for diagnostic a
+      // which we already included as the root node as that would indicate a
+      // cycle.
+      expect(nestedRelatedProperty['description'], equals('CyclicDiagnostic-a'));
+      expect(nestedRelatedProperty.containsKey('isDiagnosticableValue'), isTrue);
+      expect(nestedRelatedProperty.containsKey('properties'), isFalse);
+      expect(nestedRelatedProperty.containsKey('children'), isFalse);
+    });
+
     testWidgets('ext.flutter.inspector.getRootWidgetSummaryTree', (WidgetTester tester) async {
       const String group = 'test-group';
 
@@ -1275,7 +1349,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // the RichText object not the Text element.
       final Map<String, Object> regularSelection = await service.testExtension('getSelectedWidget', <String, String>{'arg': null, 'objectGroup': 'my-group'});
       expect(service.toObject(regularSelection['valueId']), richTextDiagnostic.value);
-   }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector creationLocation', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -1400,7 +1474,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This RichText widget is created by the build method of the Text widget
       // thus the creation location is in text.dart not basic.dart
       final List<String> pathSegmentsFramework = Uri.parse(creationLocation['file']).pathSegments;
-      expect(pathSegmentsFramework.join('/'), endsWith('/packages/flutter/lib/src/widgets/text.dart'));
+      expect(pathSegmentsFramework.join('/'), endsWith('/flutter/lib/src/widgets/text.dart'));
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
@@ -1509,7 +1583,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(49));
+      expect(location.line, equals(51));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1518,7 +1592,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(87));
+      expect(location.line, equals(89));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1543,7 +1617,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(49));
+      expect(location.line, equals(51));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1552,7 +1626,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(87));
+      expect(location.line, equals(89));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1723,21 +1797,38 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.show', (WidgetTester tester) async {
+      final Iterable<Map<Object, Object>> extensionChangedEvents = service.getServiceExtensionStateChangedEvents('ext.flutter.inspector.show');
+      Map<Object, Object> extensionChangedEvent;
+
       service.rebuildCount = 0;
+      expect(extensionChangedEvents, isEmpty);
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'true'}), equals('true'));
+      expect(extensionChangedEvents.length, equals(1));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
       expect(service.rebuildCount, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{}), equals('true'));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isTrue);
+      expect(extensionChangedEvents.length, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'true'}), equals('true'));
+      expect(extensionChangedEvents.length, equals(2));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isTrue);
       expect(service.rebuildCount, equals(1));
       expect(await service.testBoolExtension('show', <String, String>{'enabled': 'false'}), equals('false'));
+      expect(extensionChangedEvents.length, equals(3));
+      extensionChangedEvent = extensionChangedEvents.last;
+      expect(extensionChangedEvent['extension'], equals('ext.flutter.inspector.show'));
+      expect(extensionChangedEvent['value'], isFalse);
       expect(await service.testBoolExtension('show', <String, String>{}), equals('false'));
+      expect(extensionChangedEvents.length, equals(3));
       expect(service.rebuildCount, equals(2));
       expect(WidgetsApp.debugShowWidgetInspectorOverride, isFalse);
     });
 
-    testWidgets('ext.flutter.inspector.screenshot',
-        (WidgetTester tester) async {
+    testWidgets('ext.flutter.inspector.screenshot', (WidgetTester tester) async {
       final GlobalKey outerContainerKey = GlobalKey();
       final GlobalKey paddingKey = GlobalKey();
       final GlobalKey redContainerKey = GlobalKey();
@@ -2043,7 +2134,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint.png'),
+        matchesGoldenFile('inspector.sizedBox_debugPaint.1.png'),
         skip: !Platform.isLinux,
       );
 
@@ -2144,7 +2235,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_small.1.png'),
         skip: !Platform.isLinux,
       );
 

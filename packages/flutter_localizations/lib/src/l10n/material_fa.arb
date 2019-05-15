@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "۱ نویسه باقی مانده است",
   "remainingTextFieldCharacterCountOther": "$remainingCount نویسه باقی مانده است",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "بازخوانی"
 }

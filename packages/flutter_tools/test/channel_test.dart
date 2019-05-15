@@ -18,7 +18,7 @@ import 'package:process/process.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-Process createMockProcess({int exitCode = 0, String stdout = '', String stderr = ''}) {
+Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
   final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stdout),
   ]);
@@ -41,15 +41,23 @@ void main() {
       Cache.disableLocking();
     });
 
-    testUsingContext('list', () async {
+    Future<void> simpleChannelTest(List<String> args) async {
       final ChannelCommand command = ChannelCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      await runner.run(<String>['channel']);
+      await runner.run(args);
       expect(testLogger.errorText, hasLength(0));
       // The bots may return an empty list of channels (network hiccup?)
       // and when run locally the list of branches might be different
       // so we check for the header text rather than any specific channel name.
       expect(testLogger.statusText, contains('Flutter channels:'));
+    }
+
+    testUsingContext('list', () async {
+      await simpleChannelTest(<String>['channel']);
+    });
+
+    testUsingContext('verbose list', () async {
+      await simpleChannelTest(<String>['channel', '-v']);
     });
 
     testUsingContext('removes duplicates', () async {

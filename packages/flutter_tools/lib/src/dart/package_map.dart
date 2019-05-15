@@ -20,6 +20,8 @@ class PackageMap {
 
   static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
+  static String get globalGeneratedPackagesPath => fs.path.setExtension(globalPackagesPath, '.generated');
+
   static set globalPackagesPath(String value) {
     _globalPackagesPath = value;
   }

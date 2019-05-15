@@ -107,7 +107,7 @@ void main() {
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success']
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success'],
       );
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,
@@ -126,7 +126,7 @@ void main() {
 
       expect(
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning']
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning'],
       );
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,

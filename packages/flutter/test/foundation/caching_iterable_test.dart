@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+
 import '../flutter_test_alternative.dart';
 
 int yieldCount;
@@ -13,7 +14,7 @@ Iterable<int> range(int start, int end) sync* {
     yieldCount += 1;
     yield index;
   }
- }
+}
 
 void main() {
   setUp(() {

@@ -43,6 +43,7 @@ class CupertinoTabView extends StatefulWidget {
   const CupertinoTabView({
     Key key,
     this.builder,
+    this.navigatorKey,
     this.defaultTitle,
     this.routes,
     this.onGenerateRoute,
@@ -56,7 +57,29 @@ class CupertinoTabView extends StatefulWidget {
   ///
   /// If a [builder] is specified, then [routes] must not include an entry for `/`,
   /// as [builder] takes its place.
+  ///
+  /// Rebuilding a [CupertinoTabView] with a different [builder] will not clear
+  /// its current navigation stack or update its descendant. Instead, trigger a
+  /// rebuild from a descendant in its subtree. This can be done via methods such
+  /// as:
+  ///
+  ///  * Calling [State.setState] on a descendant [StatefulWidget]'s [State]
+  ///  * Modifying an [InheritedWidget] that a descendant registered itself
+  ///    as a dependent to.
   final WidgetBuilder builder;
+
+  /// A key to use when building this widget's [Navigator].
+  ///
+  /// If a [navigatorKey] is specified, the [Navigator] can be directly
+  /// manipulated without first obtaining it from a [BuildContext] via
+  /// [Navigator.of]: from the [navigatorKey], use the [GlobalKey.currentState]
+  /// getter.
+  ///
+  /// If this is changed, a new [Navigator] will be created, losing all the
+  /// tab's state in the process; in that case, the [navigatorObservers]
+  /// must also be changed, since the previous observers will be attached to the
+  /// previous navigator.
+  final GlobalKey<NavigatorState> navigatorKey;
 
   /// The title of the default route.
   final String defaultTitle;
@@ -120,9 +143,12 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   }
 
   @override
-   void didUpdateWidget(CupertinoTabView oldWidget) {
-     super.didUpdateWidget(oldWidget);
-     _updateObservers();
+  void didUpdateWidget(CupertinoTabView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.navigatorKey != oldWidget.navigatorKey
+        || widget.navigatorObservers != oldWidget.navigatorObservers) {
+      _updateObservers();
+    }
   }
 
   void _updateObservers() {
@@ -134,6 +160,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   Widget build(BuildContext context) {
     return Navigator(
+      key: widget.navigatorKey,
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,
@@ -147,9 +174,9 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     if (name == Navigator.defaultRouteName && widget.builder != null) {
       routeBuilder = widget.builder;
       title = widget.defaultTitle;
-    }
-    else if (widget.routes != null)
+    } else if (widget.routes != null) {
       routeBuilder = widget.routes[name];
+    }
     if (routeBuilder != null) {
       return CupertinoPageRoute<dynamic>(
         builder: routeBuilder,

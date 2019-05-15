@@ -63,7 +63,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-          drawer: Drawer()
+          drawer: Drawer(),
         ),
       ),
     );
@@ -88,7 +88,7 @@ void main() {
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
-            drawer: Drawer()
+            drawer: Drawer(),
         ),
       ),
     );
@@ -105,5 +105,73 @@ void main() {
     )));
 
     semantics.dispose();
+  });
+
+  testWidgets('Scaffold drawerScrimColor', (WidgetTester tester) async {
+    // The scrim is a Container within a Semantics node labeled "Dismiss",
+    // within a DrawerController. Sorry.
+    Container getScrim() {
+      return tester.widget<Container>(
+        find.descendant(
+          of: find.descendant(
+            of: find.byType(DrawerController),
+            matching: find.byWidgetPredicate((Widget widget) {
+              if (widget is! Semantics)
+                return false;
+              final Semantics semantics = widget;
+              return semantics.properties.label == 'Dismiss';
+            }),
+          ),
+          matching: find.byType(Container),
+        ),
+      );
+    }
+
+    final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+    Widget buildFrame({ Color drawerScrimColor }) {
+      return MaterialApp(
+        home: Scaffold(
+          key: scaffoldKey,
+          drawerScrimColor: drawerScrimColor,
+          drawer: Drawer(
+            child: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () { Navigator.pop(context); }, // close drawer
+                );
+              },
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Default drawerScrimColor
+
+    await tester.pumpWidget(buildFrame(drawerScrimColor: null));
+    scaffoldKey.currentState.openDrawer();
+    await tester.pumpAndSettle();
+
+    BoxDecoration decoration = getScrim().decoration;
+    expect(decoration.color, Colors.black54);
+    expect(decoration.shape, BoxShape.rectangle);
+
+    await tester.tap(find.byType(Drawer));
+    await tester.pumpAndSettle();
+    expect(find.byType(Drawer), findsNothing);
+
+    // Specific drawerScrimColor
+
+    await tester.pumpWidget(buildFrame(drawerScrimColor: const Color(0xFF323232)));
+    scaffoldKey.currentState.openDrawer();
+    await tester.pumpAndSettle();
+
+    decoration = getScrim().decoration;
+    expect(decoration.color, const Color(0xFF323232));
+    expect(decoration.shape, BoxShape.rectangle);
+
+    await tester.tap(find.byType(Drawer));
+    await tester.pumpAndSettle();
+    expect(find.byType(Drawer), findsNothing);
   });
 }

@@ -44,14 +44,15 @@ platform :ios do
       version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
     )
 
-    puts 'Retrieving signing certificates and profiles...'
     # Stop fastlane from echoing back PUBLISHING_MATCH_CERTIFICATE_REPO var.
+    # Doesn't matter too much since Cirrus doesn't echo back encrypted variables
+    # anyway.
     suppress_output {
       # Retrieves all the necessary certs and provisioning profiles.
       sync_code_signing(
-        git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
+        git_url:  "https://x-access-token:#{ENV['PUBLISHING_MATCH_REPO_TOKEN']}@#{ENV['PUBLISHING_MATCH_CERTIFICATE_REPO']}" ,
         type: 'appstore',
-        readonly: true
+        readonly: true,
       )
     }
     puts 'Certificates and profiles installed'
@@ -73,7 +74,7 @@ platform :ios do
       scheme: 'Runner',
       export_method: 'app-store',
       # Verify that the right signing identity is used for publishing.
-      codesigning_identity: 'iPhone Distribution: Store Ladd (S8QB4VV633)',
+      codesigning_identity: 'iPhone Distribution: FLUTTER.IO LLC (S8QB4VV633)',
     )
 
     if options[:upload]

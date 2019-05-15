@@ -363,7 +363,7 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
     return BorderRadius.lerp(
       borderRadius,
       BorderRadius.all(Radius.circular(rect.shortestSide / 2.0)),
-      1.0 - rectness
+      1.0 - rectness,
     );
   }
 

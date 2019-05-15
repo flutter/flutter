@@ -83,7 +83,7 @@ class _IconsDemoCard extends StatelessWidget {
       icon: Icon(icon),
       iconSize: iconSize,
       tooltip: "${enabled ? 'Enabled' : 'Disabled'} icon button",
-      onPressed: enabled ? handleIconButtonPress : null
+      onPressed: enabled ? handleIconButtonPress : null,
     );
   }
 

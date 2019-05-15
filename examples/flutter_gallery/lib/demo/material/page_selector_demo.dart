@@ -34,18 +34,18 @@ class _PageSelector extends StatelessWidget {
                   icon: const Icon(Icons.chevron_left),
                   color: color,
                   onPressed: () { _handleArrowButtonPress(context, -1); },
-                  tooltip: 'Page back'
+                  tooltip: 'Page back',
                 ),
                 TabPageSelector(controller: controller),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: color,
                   onPressed: () { _handleArrowButtonPress(context, 1); },
-                  tooltip: 'Page forward'
-                )
+                  tooltip: 'Page forward',
+                ),
               ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween
-            )
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
           ),
           Expanded(
             child: IconTheme(
@@ -63,7 +63,7 @@ class _PageSelector extends StatelessWidget {
                       ),
                     ),
                   );
-                }).toList()
+                }).toList(),
               ),
             ),
           ),

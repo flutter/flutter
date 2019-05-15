@@ -21,14 +21,14 @@ class PrimaryScrollController extends InheritedWidget {
   const PrimaryScrollController({
     Key key,
     @required this.controller,
-    @required Widget child
+    @required Widget child,
   }) : assert(controller != null),
        super(key: key, child: child);
 
   /// Creates a subtree without an associated [ScrollController].
   const PrimaryScrollController.none({
     Key key,
-    @required Widget child
+    @required Widget child,
   }) : controller = null,
        super(key: key, child: child);
 

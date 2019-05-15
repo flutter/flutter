@@ -6,7 +6,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
+import '../rendering/mock_canvas.dart';
 import 'semantics_tester.dart';
 
 void main() {
@@ -14,8 +16,8 @@ void main() {
     await tester.pumpWidget(const MediaQuery(
       data: MediaQueryData(textScaleFactor: 1.3),
       child: Center(
-        child: Text('Hello', textDirection: TextDirection.ltr)
-      )
+        child: Text('Hello', textDirection: TextDirection.ltr),
+      ),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -23,7 +25,7 @@ void main() {
     expect(text.textScaleFactor, 1.3);
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello', textDirection: TextDirection.ltr)
+      child: Text('Hello', textDirection: TextDirection.ltr),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -44,7 +46,7 @@ void main() {
     expect(baseSize.height, equals(14.0));
 
     await tester.pumpWidget(const Center(
-      child: Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr)
+      child: Text('Hello', textScaleFactor: 1.5, textDirection: TextDirection.ltr),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -58,7 +60,7 @@ void main() {
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
       child: Text('Hello',
-        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr)
+        style: TextStyle(fontSize: 20.0), textDirection: TextDirection.ltr),
     ));
 
     RichText text = tester.firstWidget(find.byType(RichText));
@@ -72,7 +74,7 @@ void main() {
       child: Text('Hello',
         style: TextStyle(fontSize: 20.0),
         textScaleFactor: 1.3,
-        textDirection: TextDirection.ltr)
+        textDirection: TextDirection.ltr),
     ));
 
     text = tester.firstWidget(find.byType(RichText));
@@ -147,7 +149,7 @@ void main() {
         TextSpan(
           children: <TextSpan>[
             const TextSpan(text: 'hello '),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
             const TextSpan(text: ' this is a '),
             const TextSpan(text: 'cat-astrophe'),
           ],
@@ -174,7 +176,7 @@ void main() {
             TestSemantics(
               label: ' this is a cat-astrophe',
               textDirection: TextDirection.ltr,
-            )
+            ),
           ],
         ),
       ],
@@ -182,6 +184,51 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
     semantics.dispose();
   });
+
+  testWidgets('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <TextSpan>[
+            const TextSpan(text: 'hello '),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            const TextSpan(text: ' this is a '),
+            const TextSpan(text: 'cat-astrophe', semanticsLabel: 'regrettable event'),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: 'hello ',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'world',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+            TestSemantics(
+              label: ' regrettable event',
+              textDirection: TextDirection.ltr,
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -192,9 +239,9 @@ void main() {
           style: textStyle,
           children: <TextSpan>[
             const TextSpan(text: 'hello world${Unicode.RLE}${Unicode.RLO} '),
-            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () {}),
+            TextSpan(text: 'BOY', recognizer: LongPressGestureRecognizer()..onLongPress = () { }),
             const TextSpan(text: ' HOW DO${Unicode.PDF} you ${Unicode.RLO} DO '),
-            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () {}),
+            TextSpan(text: 'SIR', recognizer: TapGestureRecognizer()..onTap = () { }),
             const TextSpan(text: '${Unicode.PDF}${Unicode.PDF} good bye'),
           ],
         ),
@@ -206,15 +253,15 @@ void main() {
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             TestSemantics(
-              rect: Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
+              rect: const Rect.fromLTRB(-4.0, -4.0, 480.0, 18.0),
               label: 'hello world ',
               textDirection: TextDirection.ltr, // text direction is declared as LTR.
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
+              rect: const Rect.fromLTRB(150.0, -4.0, 200.0, 18.0),
               label: 'RIS',
               textDirection: TextDirection.rtl,  // in the last string we switched to RTL using RLE.
               actions: <SemanticsAction>[
@@ -222,12 +269,12 @@ void main() {
               ],
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
+              rect: const Rect.fromLTRB(192.0, -4.0, 424.0, 18.0),
               label: ' OD you OD WOH ', // Still RTL.
               textDirection: TextDirection.rtl,
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
+              rect: const Rect.fromLTRB(416.0, -4.0, 466.0, 18.0),
               label: 'YOB',
               textDirection: TextDirection.rtl, // Still RTL.
               actions: <SemanticsAction>[
@@ -235,7 +282,7 @@ void main() {
               ],
             ),
             TestSemantics(
-              rect: Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
+              rect: const Rect.fromLTRB(472.0, -4.0, 606.0, 18.0),
               label: ' good bye',
               textDirection: TextDirection.rtl, // Begin as RTL but pop to LTR.
             ),
@@ -246,4 +293,130 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true));
     semantics.dispose();
   }, skip: true); // TODO(jonahwilliams): correct once https://github.com/flutter/flutter/issues/20891 is resolved.
+
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.clip,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: ellipsis', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.ellipsis,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.ellipsis,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: fade', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.fade,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: fade', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.fade,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - long text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
+      text: 'a long long long long text, should be clip',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('Overflow is clipping correctly - short text with overflow: visible', (WidgetTester tester) async {
+    await _pumpTextWidget(
+      tester: tester,
+      overflow: TextOverflow.visible,
+      text: 'Hi',
+    );
+
+    expect(find.byType(Text), isNot(paints..clipRect()));
+  });
+
+  testWidgets('textWidthBasis affects the width of a Text widget', (WidgetTester tester) async {
+    Future<void> createText(TextWidthBasis textWidthBasis) {
+      return tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Center(
+              child: Container(
+                // Each word takes up more than a half of a line. Together they
+                // wrap onto two lines, but leave a lot of extra space.
+                child: Text('twowordsthateachtakeupmorethanhalfof alineoftextsothattheywrapwithlotsofextraspace',
+                  textDirection: TextDirection.ltr,
+                  textWidthBasis: textWidthBasis,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    const double fontHeight = 14.0;
+    const double screenWidth = 800.0;
+
+    // When textWidthBasis is parent, takes up full screen width.
+    await createText(TextWidthBasis.parent);
+    final Size textSizeParent = tester.getSize(find.byType(Text));
+    expect(textSizeParent.width, equals(screenWidth));
+    expect(textSizeParent.height, equals(fontHeight * 2));
+
+    // When textWidthBasis is longestLine, sets the width to as small as
+    // possible for the two lines.
+    await createText(TextWidthBasis.longestLine);
+    final Size textSizeLongestLine = tester.getSize(find.byType(Text));
+    expect(textSizeLongestLine.width, equals(630.0));
+    expect(textSizeLongestLine.height, equals(fontHeight * 2));
+  });
+}
+
+Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
+  return tester.pumpWidget(
+    Directionality(
+      textDirection: TextDirection.ltr,
+      child: Center(
+        child: Container(
+          width: 50.0,
+          height: 50.0,
+          child: Text(
+            text,
+            overflow: overflow,
+          ),
+        ),
+      ),
+    ),
+  );
 }

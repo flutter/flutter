@@ -146,7 +146,7 @@ class _SliderDemoState extends State<SliderDemo> {
             Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Slider(
+                Slider.adaptive(
                   value: _value,
                   min: 0.0,
                   max: 100.0,
@@ -161,15 +161,58 @@ class _SliderDemoState extends State<SliderDemo> {
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Slider.adaptive(
+                        value: _value,
+                        min: 0.0,
+                        max: 100.0,
+                        onChanged: (double value) {
+                          setState(() {
+                            _value = value;
+                          });
+                        },
+                      ),
+                    ),
+                    Semantics(
+                      label: 'Editable numerical value',
+                      child: Container(
+                        width: 48,
+                        height: 48,
+                        child: TextField(
+                          onSubmitted: (String value) {
+                            final double newValue = double.tryParse(value);
+                            if (newValue != null && newValue != _value) {
+                              setState(() {
+                                _value = newValue.clamp(0, 100);
+                              });
+                            }
+                          },
+                          keyboardType: TextInputType.number,
+                          controller: TextEditingController(
+                            text: _value.toStringAsFixed(0),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const Text('Continuous with Editable Numerical Value'),
+              ],
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
               children: const <Widget>[
-                Slider(value: 0.25, onChanged: null),
+                Slider.adaptive(value: 0.25, onChanged: null),
                 Text('Disabled'),
               ],
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Slider(
+                Slider.adaptive(
                   value: _discreteValue,
                   min: 0.0,
                   max: 200.0,

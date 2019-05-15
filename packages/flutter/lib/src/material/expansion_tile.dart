@@ -142,7 +142,6 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
 
   Widget _buildChildren(BuildContext context, Widget child) {
     final Color borderSideColor = _borderColor.value ?? Colors.transparent;
-    final Color titleColor = _headerColor.value;
 
     return Container(
       decoration: BoxDecoration(
@@ -150,20 +149,18 @@ class _ExpansionTileState extends State<ExpansionTile> with SingleTickerProvider
         border: Border(
           top: BorderSide(color: borderSideColor),
           bottom: BorderSide(color: borderSideColor),
-        )
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          IconTheme.merge(
-            data: IconThemeData(color: _iconColor.value),
+          ListTileTheme.merge(
+            iconColor: _iconColor.value,
+            textColor: _headerColor.value,
             child: ListTile(
               onTap: _handleTap,
               leading: widget.leading,
-              title: DefaultTextStyle(
-                style: Theme.of(context).textTheme.subhead.copyWith(color: titleColor),
-                child: widget.title,
-              ),
+              title: widget.title,
               trailing: widget.trailing ?? RotationTransition(
                 turns: _iconTurns,
                 child: const Icon(Icons.expand_more),

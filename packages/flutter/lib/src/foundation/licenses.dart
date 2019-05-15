@@ -54,7 +54,8 @@ abstract class LicenseEntry {
 }
 
 enum _LicenseEntryWithLineBreaksParserState {
-  beforeParagraph, inParagraph,
+  beforeParagraph,
+  inParagraph,
 }
 
 /// Variant of [LicenseEntry] for licenses that separate paragraphs with blank

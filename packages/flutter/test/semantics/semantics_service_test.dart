@@ -22,8 +22,8 @@ void main() {
     await SemanticsService.announce('announcement 2', TextDirection.rtl);
 
     expect(log, equals(<Map<String, dynamic>>[
-      <String, dynamic> {'type': 'announce', 'data': <String, dynamic> {'message': 'announcement 1', 'textDirection': 1}},
-      <String, dynamic> {'type': 'announce', 'data': <String, dynamic> {'message': 'announcement 2', 'textDirection': 0}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 1', 'textDirection': 1}},
+      <String, dynamic>{'type': 'announce', 'data': <String, dynamic>{'message': 'announcement 2', 'textDirection': 0}},
     ]));
   });
 }

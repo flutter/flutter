@@ -82,7 +82,7 @@ void main() {
     });
 
     group('compare', () {
-      Future<bool> doComparison([String golden = 'golden.png']) {
+      Future<bool> doComparison([ String golden = 'golden.png' ]) {
         final Uri uri = fs.file(fix(golden)).uri;
         return comparator.compare(
           Uint8List.fromList(_kExpectedBytes),

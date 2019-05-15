@@ -6,13 +6,14 @@ import 'dart:async';
 
 import '../android/apk.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart' show FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
   BuildApkCommand({bool verboseHelp = false}) {
     usesTargetOption();
-    addBuildModeFlags();
+    addBuildModeFlags(verboseHelp: verboseHelp);
+    addDynamicModeFlags(verboseHelp: verboseHelp);
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();
@@ -26,11 +27,17 @@ class BuildApkCommand extends BuildSubCommand {
       )
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64']);
+        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64']);
   }
 
   @override
   final String name = 'apk';
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.android,
+  };
 
   @override
   final String description = 'Build an Android APK file from your app.\n\n'
@@ -40,9 +47,8 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await super.runCommand();
     await buildApk(
-      project: await FlutterProject.current(),
+      project: FlutterProject.current(),
       target: targetFile,
       buildInfo: getBuildInfo(),
     );

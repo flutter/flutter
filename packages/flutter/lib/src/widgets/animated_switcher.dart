@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
-
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 
@@ -22,9 +20,9 @@ class _ChildEntry {
     @required this.animation,
     @required this.transition,
     @required this.widgetChild,
-  })  : assert(animation != null),
-        assert(transition != null),
-        assert(controller != null);
+  }) : assert(animation != null),
+       assert(transition != null),
+       assert(controller != null);
 
   // The animation controller for the child's transition.
   final AnimationController controller;
@@ -156,12 +154,12 @@ class AnimatedSwitcher extends StatefulWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
-  })  : assert(duration != null),
-        assert(switchInCurve != null),
-        assert(switchOutCurve != null),
-        assert(transitionBuilder != null),
-        assert(layoutBuilder != null),
-        super(key: key);
+  }) : assert(duration != null),
+       assert(switchInCurve != null),
+       assert(switchOutCurve != null),
+       assert(transitionBuilder != null),
+       assert(layoutBuilder != null),
+       super(key: key);
 
   /// The current child widget to display. If there was a previous child, then
   /// that child will be faded out using the [switchOutCurve], while the new
@@ -278,7 +276,7 @@ class AnimatedSwitcher extends StatefulWidget {
 
 class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProviderStateMixin {
   _ChildEntry _currentEntry;
-  final Set<_ChildEntry> _outgoingEntries = LinkedHashSet<_ChildEntry>();
+  final Set<_ChildEntry> _outgoingEntries = <_ChildEntry>{};
   List<Widget> _outgoingWidgets = const <Widget>[];
   int _childNumber = 0;
 
@@ -321,7 +319,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
     }
   }
 
-  void _addEntryForNewChild({@required bool animate}) {
+  void _addEntryForNewChild({ @required bool animate }) {
     assert(animate || _currentEntry == null);
     if (_currentEntry != null) {
       assert(animate);

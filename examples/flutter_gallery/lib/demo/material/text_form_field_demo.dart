@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import '../../gallery/demo.dart';
 
@@ -67,6 +68,7 @@ class _PasswordFieldState extends State<PasswordField> {
         labelText: widget.labelText,
         helperText: widget.helperText,
         suffixIcon: GestureDetector(
+          dragStartBehavior: DragStartBehavior.down,
           onTap: () {
             setState(() {
               _obscureText = !_obscureText;
@@ -89,7 +91,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
 
   void showInSnackBar(String value) {
     _scaffoldKey.currentState.showSnackBar(SnackBar(
-      content: Text(value)
+      content: Text(value),
     ));
   }
 
@@ -167,6 +169,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawerDragStartBehavior: DragStartBehavior.down,
       key: _scaffoldKey,
       appBar: AppBar(
         title: const Text('Text fields'),
@@ -180,6 +183,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
           autovalidate: _autovalidate,
           onWillPop: _warnUserAboutInvalidData,
           child: SingleChildScrollView(
+            dragStartBehavior: DragStartBehavior.down,
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -233,7 +237,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 TextFormField(
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
-                    hintText: 'Tell us about yourself',
+                    hintText: 'Tell us about yourself (e.g., write down what you do or what hobbies you have)',
                     helperText: 'Keep it short, this is just a demo.',
                     labelText: 'Life story',
                   ),
@@ -247,7 +251,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                     labelText: 'Salary',
                     prefixText: '\$',
                     suffixText: 'USD',
-                    suffixStyle: TextStyle(color: Colors.green)
+                    suffixStyle: TextStyle(color: Colors.green),
                   ),
                   maxLines: 1,
                 ),
@@ -284,7 +288,7 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 const SizedBox(height: 24.0),
                 Text(
                   '* indicates required field',
-                  style: Theme.of(context).textTheme.caption
+                  style: Theme.of(context).textTheme.caption,
                 ),
                 const SizedBox(height: 24.0),
               ],
@@ -301,7 +305,7 @@ class _UsNumberTextInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
-    TextEditingValue newValue
+    TextEditingValue newValue,
   ) {
     final int newTextLength = newValue.text.length;
     int selectionIndex = newValue.selection.end;

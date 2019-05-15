@@ -12,7 +12,7 @@ Shader createShader(Rect bounds) {
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
     colors: <Color>[Color(0x00FFFFFF), Color(0xFFFFFFFF)],
-    stops: <double>[0.1, 0.35]
+    stops: <double>[0.1, 0.35],
   ).createShader(bounds);
 }
 
@@ -37,13 +37,13 @@ void main() {
         height: 400.0,
         child: ShaderMask(
           shaderCallback: recordShaderBounds,
-          child: Container(width: 100.0, height: 100.0)
+          child: Container(width: 100.0, height: 100.0),
         ),
       ),
     );
     await tester.pumpWidget(widget);
 
     // The shader bounds rectangle should reflect the position of the centered SizedBox.
-    expect(shaderBounds, equals(Rect.fromLTWH(200.0, 100.0, 400.0, 400.0)));
+    expect(shaderBounds, equals(const Rect.fromLTWH(200.0, 100.0, 400.0, 400.0)));
   });
 }

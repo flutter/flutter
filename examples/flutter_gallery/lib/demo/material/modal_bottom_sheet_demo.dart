@@ -28,15 +28,15 @@ class ModalBottomSheetDemo extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Theme.of(context).accentColor,
-                      fontSize: 24.0
-                    )
-                  )
-                )
+                      fontSize: 24.0,
+                    ),
+                  ),
+                ),
               );
             });
-          }
-        )
-      )
+          },
+        ),
+      ),
     );
   }
 }

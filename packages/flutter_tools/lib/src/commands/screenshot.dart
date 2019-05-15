@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
@@ -64,7 +64,7 @@ class ScreenshotCommand extends FlutterCommand {
   Device device;
 
   @override
-  Future<FlutterCommandResult> verifyThenRunCommand() async {
+  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     device = await findTargetDevice();
     if (device == null)
       throwToolExit('Must have a connected device');
@@ -72,7 +72,7 @@ class ScreenshotCommand extends FlutterCommand {
       throwToolExit('Screenshot not supported for ${device.name}.');
     if (argResults[_kType] != _kDeviceType && argResults[_kObservatoryPort] == null)
       throwToolExit('Observatory port must be specified for screenshot type ${argResults[_kType]}');
-    return super.verifyThenRunCommand();
+    return super.verifyThenRunCommand(commandPath);
   }
 
   @override

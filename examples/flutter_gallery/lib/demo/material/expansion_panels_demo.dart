@@ -21,7 +21,7 @@ class DualHeaderWithHint extends StatelessWidget {
     this.name,
     this.value,
     this.hint,
-    this.showHint
+    this.showHint,
   });
 
   final String name;
@@ -69,11 +69,11 @@ class DualHeaderWithHint extends StatelessWidget {
             child: _crossFade(
               Text(value, style: textTheme.caption.copyWith(fontSize: 15.0)),
               Text(hint, style: textTheme.caption.copyWith(fontSize: 15.0)),
-              showHint
-            )
-          )
-        )
-      ]
+              showHint,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -83,7 +83,7 @@ class CollapsibleBody extends StatelessWidget {
     this.margin = EdgeInsets.zero,
     this.child,
     this.onSave,
-    this.onCancel
+    this.onCancel,
   });
 
   final EdgeInsets margin;
@@ -102,14 +102,14 @@ class CollapsibleBody extends StatelessWidget {
           margin: const EdgeInsets.only(
             left: 24.0,
             right: 24.0,
-            bottom: 24.0
+            bottom: 24.0,
           ) - margin,
           child: Center(
             child: DefaultTextStyle(
               style: textTheme.caption.copyWith(fontSize: 15.0),
-              child: child
-            )
-          )
+              child: child,
+            ),
+          ),
         ),
         const Divider(height: 1.0),
         Container(
@@ -124,22 +124,22 @@ class CollapsibleBody extends StatelessWidget {
                   child: const Text('CANCEL', style: TextStyle(
                     color: Colors.black54,
                     fontSize: 15.0,
-                    fontWeight: FontWeight.w500
-                  ))
-                )
+                    fontWeight: FontWeight.w500,
+                  )),
+                ),
               ),
               Container(
                 margin: const EdgeInsets.only(right: 8.0),
                 child: FlatButton(
                   onPressed: onSave,
                   textTheme: ButtonTextTheme.accent,
-                  child: const Text('SAVE')
-                )
-              )
-            ]
-          )
-        )
-      ]
+                  child: const Text('SAVE'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -150,7 +150,7 @@ class DemoItem<T> {
     this.value,
     this.hint,
     this.builder,
-    this.valueToString
+    this.valueToString,
   }) : textController = TextEditingController(text: valueToString(value));
 
   final String name;
@@ -167,7 +167,7 @@ class DemoItem<T> {
         name: name,
         value: valueToString(value),
         hint: hint,
-        showHint: isExpanded
+        showHint: isExpanded,
       );
     };
   }
@@ -269,15 +269,15 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                             groupValue: field.value,
                             onChanged: field.didChange,
                           ),
-                        ]
+                        ],
                       );
-                    }
+                    },
                   ),
                 );
               }
-            )
+            ),
           );
-        }
+        },
       ),
       DemoItem<double>(
         name: 'Sun',
@@ -314,10 +314,10 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                   ),
                 );
               }
-            )
+            ),
           );
-        }
-      )
+        },
+      ),
     ];
   }
 
@@ -346,9 +346,9 @@ class _ExpansionPanelsDemoState extends State<ExpansionPanelsDemo> {
                 return ExpansionPanel(
                   isExpanded: item.isExpanded,
                   headerBuilder: item.headerBuilder,
-                  body: item.build()
+                  body: item.build(),
                 );
-              }).toList()
+              }).toList(),
             ),
           ),
         ),

@@ -53,7 +53,7 @@ Future<int> run(
     final String systemLocale = await intl_standalone.findSystemLocale();
     intl.Intl.defaultLocale = intl.Intl.verifiedLocale(
       systemLocale, intl.NumberFormat.localeExists,
-      onFailure: (String _) => 'en_US'
+      onFailure: (String _) => 'en_US',
     );
 
     try {
@@ -68,13 +68,13 @@ Future<int> run(
 }
 
 Future<int> _handleToolError(
-    dynamic error,
-    StackTrace stackTrace,
-    bool verbose,
-    List<String> args,
-    bool reportCrashes,
-    String getFlutterVersion(),
-    ) async {
+  dynamic error,
+  StackTrace stackTrace,
+  bool verbose,
+  List<String> args,
+  bool reportCrashes,
+  String getFlutterVersion(),
+) async {
   if (error is UsageException) {
     printError('${error.message}\n');
     printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");

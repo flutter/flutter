@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "एक वर्ण अाैर डाला जा सकता है",
   "remainingTextFieldCharacterCountOther": "$remainingCount वर्ण अाैर डाले जा सकते हैं",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "रीफ़्रेश करें"
 }

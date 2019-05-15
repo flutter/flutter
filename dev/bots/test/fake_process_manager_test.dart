@@ -27,10 +27,10 @@ void main() {
     test('start works', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
         'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output1', '')
+          ProcessResult(0, 0, 'output1', ''),
         ],
         'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output2', '')
+          ProcessResult(0, 0, 'output2', ''),
         ],
       };
       processManager.fakeResults = calls;
@@ -49,10 +49,10 @@ void main() {
     test('run works', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
         'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output1', '')
+          ProcessResult(0, 0, 'output1', ''),
         ],
         'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output2', '')
+          ProcessResult(0, 0, 'output2', ''),
         ],
       };
       processManager.fakeResults = calls;
@@ -66,10 +66,10 @@ void main() {
     test('runSync works', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
         'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output1', '')
+          ProcessResult(0, 0, 'output1', ''),
         ],
         'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output2', '')
+          ProcessResult(0, 0, 'output2', ''),
         ],
       };
       processManager.fakeResults = calls;
@@ -83,10 +83,10 @@ void main() {
     test('captures stdin', () async {
       final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
         'gsutil acl get gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output1', '')
+          ProcessResult(0, 0, 'output1', ''),
         ],
         'gsutil cat gs://flutter_infra/releases/releases.json': <ProcessResult>[
-          ProcessResult(0, 0, 'output2', '')
+          ProcessResult(0, 0, 'output2', ''),
         ],
       };
       processManager.fakeResults = calls;

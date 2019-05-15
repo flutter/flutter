@@ -61,4 +61,27 @@ void main() {
       '    "c"\n'
     ));
   });
+
+  test('TextSpan toPlainText', () {
+    const TextSpan textSpan = TextSpan(
+      text: 'a',
+      children: <TextSpan>[
+        TextSpan(text: 'b'),
+        TextSpan(text: 'c'),
+      ],
+    );
+    expect(textSpan.toPlainText(), 'abc');
+  });
+
+  test('TextSpan toPlainText with semanticsLabel', () {
+    const TextSpan textSpan = TextSpan(
+      text: 'a',
+      children: <TextSpan>[
+        TextSpan(text: 'b', semanticsLabel: 'foo'),
+        TextSpan(text: 'c'),
+      ],
+    );
+    expect(textSpan.toPlainText(), 'afooc');
+    expect(textSpan.toPlainText(includeSemanticsLabels: false), 'abc');
+  });
 }

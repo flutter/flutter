@@ -23,7 +23,7 @@ const double _kDrawerHeaderHeight = 160.0 + 1.0; // bottom edge
 ///
 ///  * [UserAccountsDrawerHeader], a variant of [DrawerHeader] that is
 ///    specialized for showing user accounts.
-///  * <https://material.google.com/patterns/navigation-drawer.html>
+///  * <https://material.io/design/components/navigation-drawer.html>
 class DrawerHeader extends StatelessWidget {
   /// Creates a material design drawer header.
   ///

@@ -26,7 +26,7 @@ class Rectangle extends StatelessWidget {
     return Expanded(
       child: Container(
         color: color,
-      )
+      ),
     );
   }
 }
@@ -53,7 +53,7 @@ void attachWidgetTreeToRenderTree(RenderProxyBox container) {
                     RaisedButton(
                       child: Row(
                         children: <Widget>[
-                          Image.network('https://flutter.io/images/favicon.png'),
+                          Image.network('https://flutter.dev/images/favicon.png'),
                           const Text('PRESS ME'),
                         ],
                       ),

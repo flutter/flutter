@@ -53,5 +53,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Преостао је 1 знак",
   "remainingTextFieldCharacterCountOther": "Преостало је $remainingCount знакова",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Освежи"
 }

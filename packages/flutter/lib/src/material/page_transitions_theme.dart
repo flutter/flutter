@@ -214,6 +214,7 @@ class FadeUpwardsPageTransitionsBuilder extends PageTransitionsBuilder {
 /// used on Android P.
 ///
 /// See also:
+///
 ///  * [FadeUpwardsPageTransitionsBuilder], which defines a default page transition.
 ///  * [CupertinoPageTransitionsBuilder], which defines a horizontal page
 ///    transition that matches native iOS page transitions.
@@ -347,7 +348,7 @@ class PageTransitionsTheme extends Diagnosticable {
       DiagnosticsProperty<Map<TargetPlatform, PageTransitionsBuilder>>(
         'builders',
         builders,
-        defaultValue: PageTransitionsTheme._defaultBuilders
+        defaultValue: PageTransitionsTheme._defaultBuilders,
       ),
     );
   }

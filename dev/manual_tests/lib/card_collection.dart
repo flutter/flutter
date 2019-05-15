@@ -56,14 +56,14 @@ class CardCollectionState extends State<CardCollection> {
       (int i) {
         _cardModels[i].height = _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i];
         return _cardModels[i];
-      }
+      },
     );
   }
 
   void _initVariableSizedCardModels() {
     _cardModels = List<CardModel>.generate(
       _cardHeights.length,
-      (int i) => CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i])
+      (int i) => CardModel(i, _editable ? max(_cardHeights[i], 60.0) : _cardHeights[i]),
     );
   }
 
@@ -234,7 +234,7 @@ class CardCollectionState extends State<CardCollection> {
   Widget _buildAppBar(BuildContext context) {
     return AppBar(
       actions: <Widget>[
-        Text(_dismissDirectionText(_dismissDirection))
+        Text(_dismissDirectionText(_dismissDirection)),
       ],
       flexibleSpace: Container(
         padding: const EdgeInsets.only(left: 72.0),

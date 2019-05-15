@@ -22,7 +22,7 @@ class TickerMode extends InheritedWidget {
   const TickerMode({
     Key key,
     @required this.enabled,
-    Widget child
+    Widget child,
   }) : assert(enabled != null),
        super(key: key, child: child);
 
@@ -90,7 +90,7 @@ mixin SingleTickerProviderStateMixin<T extends StatefulWidget> on State<T> imple
         'mixing in a SingleTickerProviderStateMixin, use a regular TickerProviderStateMixin.'
       );
     }());
-    _ticker = Ticker(onTick, debugLabel: 'created by $this');
+    _ticker = Ticker(onTick, debugLabel: kDebugMode ? 'created by $this' : null);
     // We assume that this is called from initState, build, or some sort of
     // event handler, and that thus TickerMode.of(context) would return true. We
     // can't actually check that here because if we're in initState then we're
@@ -157,7 +157,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
 
   @override
   Ticker createTicker(TickerCallback onTick) {
-    _tickers ??= Set<_WidgetTicker>();
+    _tickers ??= <_WidgetTicker>{};
     final _WidgetTicker result = _WidgetTicker(onTick, this, debugLabel: 'created by $this');
     _tickers.add(result);
     return result;

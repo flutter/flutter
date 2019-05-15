@@ -52,8 +52,8 @@ void main() {
         minWidth: 5.0,
         minHeight: 8.0,
         maxWidth: 500.0,
-        maxHeight: 800.0
-      )
+        maxHeight: 800.0,
+      ),
     );
     expect(parent.size.width, equals(100.0));
     expect(parent.size.height, equals(110.0));
@@ -86,8 +86,8 @@ void main() {
         minWidth: 5.0,
         minHeight: 8.0,
         maxWidth: 500.0,
-        maxHeight: 800.0
-      )
+        maxHeight: 800.0,
+      ),
     );
     expect(parent.size.width, equals(5.0));
     expect(parent.size.height, equals(8.0));
@@ -121,8 +121,8 @@ void main() {
         minWidth: 5.0,
         minHeight: 8.0,
         maxWidth: 500.0,
-        maxHeight: 800.0
-      )
+        maxHeight: 800.0,
+      ),
     );
     expect(parent.size.width, equals(3.0 * 47.0));
     expect(parent.size.height, equals(110.0));
@@ -156,8 +156,8 @@ void main() {
         minWidth: 5.0,
         minHeight: 8.0,
         maxWidth: 500.0,
-        maxHeight: 800.0
-      )
+        maxHeight: 800.0,
+      ),
     );
     expect(parent.size.width, equals(100.0));
     expect(parent.size.height, equals(235.0));
@@ -191,8 +191,8 @@ void main() {
         minWidth: 5.0,
         minHeight: 8.0,
         maxWidth: 500.0,
-        maxHeight: 800.0
-      )
+        maxHeight: 800.0,
+      ),
     );
     expect(parent.size.width, equals(3.0 * 37.0));
     expect(parent.size.height, equals(235.0));
@@ -226,8 +226,8 @@ void main() {
         minWidth: 5.0,
         minHeight: 8.0,
         maxWidth: 500.0,
-        maxHeight: 800.0
-      )
+        maxHeight: 800.0,
+      ),
     );
     expect(parent.size.width, equals(55.0));
     expect(parent.size.height, equals(200.0));
@@ -260,8 +260,8 @@ void main() {
         minWidth: 5.0,
         minHeight: 8.0,
         maxWidth: 500.0,
-        maxHeight: 800.0
-      )
+        maxHeight: 800.0,
+      ),
     );
     expect(parent.size.width, equals(5.0));
     expect(parent.size.height, equals(8.0));
@@ -290,7 +290,7 @@ void main() {
   test('Padding and boring intrinsics', () {
     final RenderBox box = RenderPadding(
       padding: const EdgeInsets.all(15.0),
-      child: RenderSizedBox(const Size(20.0, 20.0))
+      child: RenderSizedBox(const Size(20.0, 20.0)),
     );
 
     expect(box.getMinIntrinsicWidth(0.0), 50.0);
@@ -320,15 +320,15 @@ void main() {
         minWidth: 10.0,
         minHeight: 10.0,
         maxWidth: 10.0,
-        maxHeight: 10.0
-      )
+        maxHeight: 10.0,
+      ),
     );
   });
 
   test('Padding and interesting intrinsics', () {
     final RenderBox box = RenderPadding(
       padding: const EdgeInsets.all(15.0),
-      child: RenderAspectRatio(aspectRatio: 1.0)
+      child: RenderAspectRatio(aspectRatio: 1.0),
     );
 
     expect(box.getMinIntrinsicWidth(0.0), 30.0);
@@ -358,15 +358,15 @@ void main() {
         minWidth: 10.0,
         minHeight: 10.0,
         maxWidth: 10.0,
-        maxHeight: 10.0
-      )
+        maxHeight: 10.0,
+      ),
     );
   });
 
   test('Padding and boring intrinsics', () {
     final RenderBox box = RenderPadding(
       padding: const EdgeInsets.all(15.0),
-      child: RenderSizedBox(const Size(20.0, 20.0))
+      child: RenderSizedBox(const Size(20.0, 20.0)),
     );
 
     expect(box.getMinIntrinsicWidth(0.0), 50.0);
@@ -396,15 +396,15 @@ void main() {
         minWidth: 10.0,
         minHeight: 10.0,
         maxWidth: 10.0,
-        maxHeight: 10.0
-      )
+        maxHeight: 10.0,
+      ),
     );
   });
 
   test('Padding and interesting intrinsics', () {
     final RenderBox box = RenderPadding(
       padding: const EdgeInsets.all(15.0),
-      child: RenderAspectRatio(aspectRatio: 1.0)
+      child: RenderAspectRatio(aspectRatio: 1.0),
     );
 
     expect(box.getMinIntrinsicWidth(0.0), 30.0);
@@ -434,8 +434,8 @@ void main() {
         minWidth: 10.0,
         minHeight: 10.0,
         maxWidth: 10.0,
-        maxHeight: 10.0
-      )
+        maxHeight: 10.0,
+      ),
     );
   });
 }

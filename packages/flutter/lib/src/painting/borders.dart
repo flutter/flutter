@@ -121,7 +121,7 @@ class BorderSide {
   BorderSide copyWith({
     Color color,
     double width,
-    BorderStyle style
+    BorderStyle style,
   }) {
     assert(width == null || width >= 0.0);
     return BorderSide(
@@ -263,7 +263,18 @@ class BorderSide {
 
 /// Base class for shape outlines.
 ///
-/// This class handles how to add multiple borders together.
+/// This class handles how to add multiple borders together. Subclasses define
+/// various shapes, like circles ([CircleBorder]), rounded rectangles
+/// ([RoundedRectangleBorder]), continuous rectangles
+/// ([ContinuousRectangleBorder]), or beveled rectangles
+/// ([BeveledRectangleBorder]).
+///
+/// See also:
+///
+///  * [ShapeDecoration], which can be used with [DecoratedBox] to show a shape.
+///  * [Material] (and many other widgets in the Material library), which takes
+///    a [ShapeBorder] to define its shape.
+///  * [NotchedShape], which describes a shape with a hole in it.
 @immutable
 abstract class ShapeBorder {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -641,7 +652,9 @@ class _CompoundBorder extends ShapeBorder {
 ///  * [Border], which uses this function to paint its border when the border is
 ///    not uniform.
 ///  * [BoxDecoration], which describes its border using the [Border] class.
-void paintBorder(Canvas canvas, Rect rect, {
+void paintBorder(
+  Canvas canvas,
+  Rect rect, {
   BorderSide top = BorderSide.none,
   BorderSide right = BorderSide.none,
   BorderSide bottom = BorderSide.none,

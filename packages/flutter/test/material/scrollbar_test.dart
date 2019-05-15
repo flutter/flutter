@@ -94,7 +94,7 @@ void main() {
       maxScrollExtent: 0.0,
       pixels: 0.0,
       viewportDimension: 100.0,
-      axisDirection: AxisDirection.down
+      axisDirection: AxisDirection.down,
     );
     scrollPainter.update(metrics, AxisDirection.down);
 

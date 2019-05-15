@@ -162,7 +162,7 @@ Widget _buildSliverList({
           slivers: <Widget>[
             SliverList(
               delegate: SliverChildBuilderDelegate(
-                    (BuildContext context, int i) {
+                (BuildContext context, int i) {
                   return Container(
                     key: ValueKey<int>(items[i]),
                     height: itemHeight,

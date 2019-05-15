@@ -30,7 +30,7 @@ class FakeImageProvider extends ImageProvider<FakeImageProvider> {
     assert(key == this);
     return MultiFrameImageStreamCompleter(
       codec: SynchronousFuture<ui.Codec>(_codec),
-      scale: scale
+      scale: scale,
     );
   }
 }

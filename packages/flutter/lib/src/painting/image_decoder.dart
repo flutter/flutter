@@ -4,15 +4,24 @@
 
 import 'dart:async';
 import 'dart:typed_data';
-import 'dart:ui' as ui show Image, decodeImageFromList;
+import 'dart:ui' as ui show Codec, FrameInfo, Image;
+
+import 'binding.dart';
 
 /// Creates an image from a list of bytes.
 ///
 /// This function attempts to interpret the given bytes an image. If successful,
 /// the returned [Future] resolves to the decoded image. Otherwise, the [Future]
 /// resolves to null.
-Future<ui.Image> decodeImageFromList(Uint8List list) {
-  final Completer<ui.Image> completer = Completer<ui.Image>();
-  ui.decodeImageFromList(list, completer.complete);
-  return completer.future;
+///
+/// If the image is animated, this returns the first frame. Consider
+/// [instantiateImageCodec] if support for animated images is necessary.
+///
+/// This function differs from [ui.decodeImageFromList] in that it defers to
+/// [PaintingBinding.instantiateImageCodec], and therefore can be mocked in
+/// tests.
+Future<ui.Image> decodeImageFromList(Uint8List bytes) async {
+  final ui.Codec codec = await PaintingBinding.instance.instantiateImageCodec(bytes);
+  final ui.FrameInfo frameInfo = await codec.getNextFrame();
+  return frameInfo.image;
 }

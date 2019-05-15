@@ -75,7 +75,7 @@ abstract class FlowDelegate {
   /// Override to control the layout constraints given to each child.
   ///
   /// By default, the children will receive the given constraints, which are the
-  /// constrains the constraints used to size the container. The children need
+  /// constraints used to size the container. The children need
   /// not respect the given constraints, but they are required to respect the
   /// returned constraints. For example, the incoming constraints might require
   /// the container to have a width of exactly 100.0 and a height of exactly
@@ -181,7 +181,7 @@ class RenderFlow extends RenderBox
   /// [isRepaintBoundary].
   RenderFlow({
     List<RenderBox> children,
-    @required FlowDelegate delegate
+    @required FlowDelegate delegate,
   }) : assert(delegate != null),
        _delegate = delegate {
     addAll(children);
@@ -369,7 +369,7 @@ class RenderFlow extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     final List<RenderBox> children = getChildrenAsList();
     for (int i = _lastPaintOrder.length - 1; i >= 0; --i) {
       final int childIndex = _lastPaintOrder[i];
@@ -380,15 +380,14 @@ class RenderFlow extends RenderBox
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
-      final Matrix4 inverse = Matrix4.zero();
-      final double determinate = inverse.copyInverse(transform);
-      if (determinate == 0.0) {
-        // We cannot invert the transform. That means the child doesn't appear
-        // on screen and cannot be hit.
-        continue;
-      }
-      final Offset childPosition = MatrixUtils.transformPoint(inverse, position);
-      if (child.hitTest(result, position: childPosition))
+      final bool absorbed = result.addWithPaintTransform(
+        transform: transform,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          return child.hitTest(result, position: position);
+        },
+      );
+      if (absorbed)
         return true;
     }
     return false;

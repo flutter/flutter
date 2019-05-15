@@ -79,6 +79,8 @@ class _TableElementRow {
 
 /// A widget that uses the table layout algorithm for its children.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=_lbE0wsVZSw}
+///
 /// If you only have one row, the [Row] widget is more appropriate. If you only
 /// have one column, the [SliverList] or [Column] widgets will be more
 /// appropriate.
@@ -261,7 +263,7 @@ class _TableElement extends RenderObjectElement {
         children: row.children.map<Element>((Widget child) {
           assert(child != null);
           return inflateWidget(child, null);
-        }).toList(growable: false)
+        }).toList(growable: false),
       );
     }).toList(growable: false);
     assert(() { _debugWillReattachChildren = false; return true; }());
@@ -308,7 +310,7 @@ class _TableElement extends RenderObjectElement {
     }
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
-    final Set<List<Element>> taken = Set<List<Element>>();
+    final Set<List<Element>> taken = <List<Element>>{};
     for (TableRow row in newWidget.children) {
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
@@ -321,7 +323,7 @@ class _TableElement extends RenderObjectElement {
       }
       newChildren.add(_TableElementRow(
         key: row.key,
-        children: updateChildren(oldChildren, row.children, forgottenChildren: _forgottenChildren)
+        children: updateChildren(oldChildren, row.children, forgottenChildren: _forgottenChildren),
       ));
     }
     while (oldUnkeyedRows.moveNext())
@@ -345,7 +347,7 @@ class _TableElement extends RenderObjectElement {
           final RenderBox box = child.renderObject;
           return box;
         });
-      }).toList()
+      }).toList(),
     );
   }
 
@@ -375,7 +377,7 @@ class TableCell extends ParentDataWidget<Table> {
   const TableCell({
     Key key,
     this.verticalAlignment,
-    @required Widget child
+    @required Widget child,
   }) : super(key: key, child: child);
 
   /// How this cell is aligned vertically.

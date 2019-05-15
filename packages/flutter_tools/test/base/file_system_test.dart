@@ -20,12 +20,12 @@ void main() {
     testUsingContext('recursively creates a directory if it does not exist', () async {
       ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: <Type, Generator>{FileSystem: () => fs});
 
     testUsingContext('throws tool exit on failure to create', () async {
       fs.file('foo').createSync();
       expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
-    }, overrides: <Type, Generator>{ FileSystem: () => fs });
+    }, overrides: <Type, Generator>{FileSystem: () => fs});
   });
 
   group('copyDirectorySync', () {
@@ -92,7 +92,7 @@ void main() {
       expect(escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
       expect(escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'windows')
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
     testUsingContext('on Linux', () {
@@ -100,7 +100,7 @@ void main() {
       expect(escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
       expect(escapePath('foo\\cool.dart'), 'foo\\cool.dart');
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(operatingSystem: 'linux')
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 }

@@ -36,11 +36,18 @@ enum TestStep {
   testPassed,
 }
 
-Future<int> runTest() async {
+Future<int> runTest({bool coverage = false}) async {
   final Stopwatch clock = Stopwatch()..start();
+  final List<String> arguments = <String>[
+    'test',
+  ];
+  if (coverage) {
+    arguments.add('--coverage');
+  }
+  arguments.add(path.join('flutter_test', 'trivial_widget_test.dart'));
   final Process analysis = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['test', path.join('flutter_test', 'trivial_widget_test.dart')],
+    arguments,
     workingDirectory: path.join(flutterDirectory.path, 'dev', 'automated_tests'),
   );
   int badLines = 0;
@@ -50,6 +57,8 @@ Future<int> runTest() async {
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
       step = TestStep.buildingFlutterTool;
+    } else if (step == TestStep.testPassed && entry.contains('Collecting coverage information...')) {
+      // ignore this line
     } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter packages get" in automated_tests...') {
       // ignore this line
       step = TestStep.runningPubGet;
@@ -113,10 +122,13 @@ void main() {
           .replaceAll('_xyzzy', 'owner')
       );
       final int interfaceChange = await runTest(); // run test again with interface changed
+      // run test with coverage enabled.
+      final int withCoverage = await runTest(coverage: true);
       final Map<String, dynamic> data = <String, dynamic>{
         'without_change_elapsed_time_ms': withoutChange,
         'implementation_change_elapsed_time_ms': implementationChange,
         'interface_change_elapsed_time_ms': interfaceChange,
+        'with_coverage_time_ms': withCoverage,
       };
       return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     } finally {

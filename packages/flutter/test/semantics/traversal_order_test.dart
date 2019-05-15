@@ -15,18 +15,21 @@ void main() {
       MaterialApp(
         home: Column(
           children: List<Widget>.generate(3, (int column) {
-            return Row(children: List<Widget>.generate(3, (int row) {
-              return Semantics(
-                child: SizedBox(
-                  width: 50.0,
-                  height: 50.0,
-                  child: Text('$column - $row'),
-                ),
-              );
-          }));
-        }),
+            return Row(
+              children: List<Widget>.generate(3, (int row) {
+                return Semantics(
+                  child: SizedBox(
+                    width: 50.0,
+                    height: 50.0,
+                    child: Text('$column - $row'),
+                  ),
+                );
+              }),
+            );
+          }),
+        ),
       ),
-    ));
+    );
 
     final TestSemantics expected = TestSemantics.root(
       children: <TestSemantics>[

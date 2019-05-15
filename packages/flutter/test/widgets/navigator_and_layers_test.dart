@@ -39,13 +39,13 @@ void main() {
                   left: CustomPaint(
                     painter: TestCustomPainter(
                       log: log,
-                      name: 'left'
+                      name: 'left',
                     ),
                   ),
                   right: CustomPaint(
                     painter: TestCustomPainter(
                       log: log,
-                      name: 'right'
+                      name: 'right',
                     ),
                   ),
                 ),

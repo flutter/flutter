@@ -68,7 +68,7 @@ class _ListDemoState extends State<ListDemo> {
                   value: _showAvatars ? _MaterialListType.oneLineWithAvatar : _MaterialListType.oneLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
-                )
+                ),
               ),
             ),
             MergeSemantics(
@@ -79,7 +79,7 @@ class _ListDemoState extends State<ListDemo> {
                   value: _MaterialListType.twoLine,
                   groupValue: _itemType,
                   onChanged: changeItemType,
-                )
+                ),
               ),
             ),
             MergeSemantics(

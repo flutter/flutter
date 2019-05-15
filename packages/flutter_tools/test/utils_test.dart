@@ -62,7 +62,7 @@ baz=qux
     });
 
     test('is pretty random', () {
-      final Set<String> set = Set<String>();
+      final Set<String> set = <String>{};
 
       Uuid uuid = Uuid();
       for (int i = 0; i < 64; i++) {

@@ -57,7 +57,9 @@ class TimeOfDay {
   ///
   /// The [hour] is set to the time's hour and the [minute] is set to the time's
   /// minute in the timezone of the given [DateTime].
-  TimeOfDay.fromDateTime(DateTime time) : hour = time.hour, minute = time.minute;
+  TimeOfDay.fromDateTime(DateTime time)
+    : hour = time.hour,
+      minute = time.minute;
 
   /// Creates a time of day based on the current time.
   ///

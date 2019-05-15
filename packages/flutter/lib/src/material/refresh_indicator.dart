@@ -73,7 +73,7 @@ enum _RefreshIndicatorMode {
 ///
 /// See also:
 ///
-///  * <https://material.google.com/patterns/swipe-to-refresh.html>
+///  * <https://material.io/design/platform-guidance/android-swipe-to-refresh.html>
 ///  * [RefreshIndicatorState], can be used to programmatically show the refresh indicator.
 ///  * [RefreshProgressIndicator], widget used by [RefreshIndicator] to show
 ///    the inner circular progress spinner during refreshes.
@@ -91,7 +91,7 @@ class RefreshIndicator extends StatefulWidget {
   /// The [semanticsLabel] is used to specify an accessibility label for this widget.
   /// If it is null, it will be defaulted to [MaterialLocalizations.refreshIndicatorSemanticLabel].
   /// An empty string may be passed to avoid having anything read by screen reading software.
-  /// The [semanticsValue] may be used to specify progress on the widget. The
+  /// The [semanticsValue] may be used to specify progress on the widget.
   const RefreshIndicator({
     Key key,
     @required this.child,
@@ -189,7 +189,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     _valueColor = _positionController.drive(
       ColorTween(
         begin: (widget.color ?? theme.accentColor).withOpacity(0.0),
-        end: (widget.color ?? theme.accentColor).withOpacity(1.0)
+        end: (widget.color ?? theme.accentColor).withOpacity(1.0),
       ).chain(CurveTween(
         curve: const Interval(0.0, 1.0 / _kDragSizeFactorLimit)
       )),
@@ -362,7 +362,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
                   'The onRefresh callback returned null.\n'
                   'The RefreshIndicator onRefresh callback must return a Future.'
                 ),
-                context: 'when calling onRefresh',
+                context: ErrorDescription('when calling onRefresh'),
                 library: 'material library',
               ));
             return true;

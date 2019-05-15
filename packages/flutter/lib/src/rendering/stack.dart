@@ -50,7 +50,7 @@ class RelativeRect {
       rect.left - container.left,
       rect.top - container.top,
       container.right - rect.right,
-      container.bottom - rect.bottom
+      container.bottom - rect.bottom,
     );
   }
 
@@ -104,7 +104,7 @@ class RelativeRect {
       math.max(left, other.left),
       math.max(top, other.top),
       math.max(right, other.right),
-      math.max(bottom, other.bottom)
+      math.max(bottom, other.bottom),
     );
   }
 
@@ -581,7 +581,7 @@ class RenderStack extends RenderBox
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return defaultHitTestChildren(result, position: position);
   }
 
@@ -630,11 +630,12 @@ class RenderIndexedStack extends RenderStack {
     AlignmentGeometry alignment = AlignmentDirectional.topStart,
     TextDirection textDirection,
     int index = 0,
-  }) : _index = index, super(
-    children: children,
-    alignment: alignment,
-    textDirection: textDirection,
-  );
+  }) : _index = index,
+       super(
+         children: children,
+         alignment: alignment,
+         textDirection: textDirection,
+       );
 
   @override
   void visitChildrenForSemantics(RenderObjectVisitor visitor) {
@@ -667,13 +668,20 @@ class RenderIndexedStack extends RenderStack {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { @required Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     if (firstChild == null || index == null)
       return false;
     assert(position != null);
     final RenderBox child = _childAtIndex();
     final StackParentData childParentData = child.parentData;
-    return child.hitTest(result, position: position - childParentData.offset);
+    return result.addWithPaintOffset(
+      offset: childParentData.offset,
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset transformed) {
+        assert(transformed == position - childParentData.offset);
+        return child.hitTest(result, position: transformed);
+      },
+    );
   }
 
   @override

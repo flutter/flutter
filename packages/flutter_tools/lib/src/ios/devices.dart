@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:meta/meta.dart';
 
@@ -15,8 +14,10 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
+import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../protocol_discovery.dart';
 import 'code_signing.dart';
 import 'ios_workflow.dart';
@@ -25,8 +26,6 @@ import 'mac.dart';
 const String _kIdeviceinstallerInstructions =
     'To work with iOS devices, please install ideviceinstaller. To install, run:\n'
     'brew install ideviceinstaller.';
-
-const Duration kPortForwardTimeout = Duration(seconds: 10);
 
 class IOSDeploy {
   const IOSDeploy();
@@ -113,7 +112,9 @@ class IOSDevices extends PollingDeviceDiscovery {
 }
 
 class IOSDevice extends Device {
-  IOSDevice(String id, { this.name, String sdkVersion }) : _sdkVersion = sdkVersion, super(id) {
+  IOSDevice(String id, { this.name, String sdkVersion })
+      : _sdkVersion = sdkVersion,
+        super(id) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
   }
@@ -166,7 +167,7 @@ class IOSDevice extends Device {
 
   static String _checkForCommand(
     String command, [
-    String macInstructions = _kIdeviceinstallerInstructions
+    String macInstructions = _kIdeviceinstallerInstructions,
   ]) {
     try {
       command = runCheckedSync(<String>['which', command]).trim();
@@ -235,13 +236,15 @@ class IOSDevice extends Device {
     DebuggingOptions debuggingOptions,
     Map<String, dynamic> platformArgs,
     bool prebuiltApplication = false,
-    bool applicationNeedsRebuild = false,
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
       printTrace('Building ${package.name} for $id');
+
+      final String cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
+      final IOSArch iosArch = getIOSArchForName(cpuArchitecture);
 
       // Step 1: Build the precompiled/DBC application if necessary.
       final XcodeBuildResult buildResult = await buildXcodeProject(
@@ -250,6 +253,7 @@ class IOSDevice extends Device {
           targetOverride: mainPath,
           buildForDevice: true,
           usesTerminalUi: usesTerminalUi,
+          activeArch: iosArch,
       );
       if (!buildResult.success) {
         printError('Could not build the precompiled application for the device.');
@@ -276,11 +280,16 @@ class IOSDevice extends Device {
     if (debuggingOptions.startPaused)
       launchArguments.add('--start-paused');
 
+    if (debuggingOptions.disableServiceAuthCodes)
+      launchArguments.add('--disable-service-auth-codes');
+
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
-    if (debuggingOptions.debuggingEnabled)
+    if (debuggingOptions.debuggingEnabled) {
       launchArguments.add('--enable-checked-mode');
+      launchArguments.add('--verify-entry-points');
+    }
 
     if (debuggingOptions.enableSoftwareRendering)
       launchArguments.add('--enable-software-rendering');
@@ -291,13 +300,20 @@ class IOSDevice extends Device {
     if (debuggingOptions.traceSkia)
       launchArguments.add('--trace-skia');
 
+    if (debuggingOptions.dumpSkpOnShaderCompilation)
+      launchArguments.add('--dump-skp-on-shader-compilation');
+
+    if (debuggingOptions.verboseSystemLogs) {
+      launchArguments.add('--verbose-logging');
+    }
+
     if (platformArgs['trace-startup'] ?? false)
       launchArguments.add('--trace-startup');
 
     int installationResult = -1;
     Uri localObservatoryUri;
 
-    final Status installStatus = logger.startProgress('Installing and launching...', expectSlowOperation: true);
+    final Status installStatus = logger.startProgress('Installing and launching...', timeout: timeoutConfiguration.slowOperation);
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
@@ -368,7 +384,7 @@ class IOSDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'iOS $_sdkVersion';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) {
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
     _logReaders ??= <ApplicationPackage, _IOSDeviceLogReader>{};
     return _logReaders.putIfAbsent(app, () => _IOSDeviceLogReader(this, app));
   }
@@ -377,8 +393,7 @@ class IOSDevice extends Device {
   DevicePortForwarder get portForwarder => _portForwarder ??= _IOSDevicePortForwarder(this);
 
   @override
-  void clearLogs() {
-  }
+  void clearLogs() { }
 
   @override
   bool get supportsScreenshot => iMobileDevice.isInstalled;
@@ -387,9 +402,14 @@ class IOSDevice extends Device {
   Future<void> takeScreenshot(File outputFile) async {
     await iMobileDevice.takeScreenshot(outputFile);
   }
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.ios.existsSync();
+  }
 }
 
-/// Decodes an encoded syslog string to a UTF-8 representation.
+/// Decodes a vis-encoded syslog string to a UTF-8 representation.
 ///
 /// Apple's syslog logs are encoded in 7-bit form. Input bytes are encoded as follows:
 /// 1. 0x00 to 0x19: non-printing range. Some ignored, some encoded as <...>.
@@ -399,6 +419,8 @@ class IOSDevice extends Device {
 /// 5. 0xa0: octal representation \240.
 /// 6. 0xa1 to 0xf7: \M-x (where x is the input byte stripped of its high-order bit).
 /// 7. 0xf8 to 0xff: unused in 4-byte UTF-8.
+///
+/// See: [vis(3) manpage](https://www.freebsd.org/cgi/man.cgi?query=vis&sektion=3)
 String decodeSyslog(String line) {
   // UTF-8 values for \, M, -, ^.
   const int kBackslash = 0x5c;
@@ -418,7 +440,7 @@ String decodeSyslog(String line) {
   try {
     final List<int> bytes = utf8.encode(line);
     final List<int> out = <int>[];
-    for (int i = 0; i < bytes.length; ) {
+    for (int i = 0; i < bytes.length;) {
       if (bytes[i] != kBackslash || i > bytes.length - 4) {
         // Unmapped byte: copy as-is.
         out.add(bytes[i++]);
@@ -451,7 +473,7 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   _IOSDeviceLogReader(this.device, ApplicationPackage app) {
     _linesController = StreamController<String>.broadcast(
       onListen: _start,
-      onCancel: _stop
+      onCancel: _stop,
     );
 
     // Match for lines for the runner in syslog.
@@ -543,7 +565,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
   static const Duration _kiProxyPortForwardTimeout = Duration(seconds: 1);
 
   @override
-  Future<int> forward(int devicePort, {int hostPort}) async {
+  Future<int> forward(int devicePort, { int hostPort }) async {
     final bool autoselect = hostPort == null || hostPort == 0;
     if (autoselect)
       hostPort = 1024;

@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 import 'button.dart';
+import 'colors.dart';
 import 'localizations.dart';
 
 // Padding around the line at the edge of the text selection that has 0 width and
@@ -33,22 +34,40 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, h
 const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(7.5));
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
+  inherit: false,
   fontSize: 14.0,
   letterSpacing: -0.11,
   fontWeight: FontWeight.w300,
+  color: CupertinoColors.white,
 );
+
+/// The direction of the triangle attached to the toolbar.
+///
+/// Defaults to showing the triangle downwards if sufficient space is available
+/// to show the toolbar above the text field. Otherwise, the toolbar will
+/// appear below the text field and the triangle's direction will be [up].
+enum _ArrowDirection { up, down }
 
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
+  const _TextSelectionToolbarNotchPainter(
+    this.arrowDirection
+  ) : assert (arrowDirection != null);
+
+  final _ArrowDirection arrowDirection;
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
         ..color = _kToolbarBackgroundColor
         ..style = PaintingStyle.fill;
+    final double triangleBottomY = (arrowDirection == _ArrowDirection.down)
+        ? 0.0
+        : _kToolbarTriangleSize.height;
     final Path triangle = Path()
-        ..lineTo(_kToolbarTriangleSize.width / 2, 0.0)
+        ..lineTo(_kToolbarTriangleSize.width / 2, triangleBottomY)
         ..lineTo(0.0, _kToolbarTriangleSize.height)
-        ..lineTo(-(_kToolbarTriangleSize.width / 2), 0.0)
+        ..lineTo(-(_kToolbarTriangleSize.width / 2), triangleBottomY)
         ..close();
     canvas.drawPath(triangle, paint);
   }
@@ -65,12 +84,14 @@ class _TextSelectionToolbar extends StatelessWidget {
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
+    this.arrowDirection,
   }) : super(key: key);
 
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+  final _ArrowDirection arrowDirection;
 
   @override
   Widget build(BuildContext context) {
@@ -100,31 +121,47 @@ class _TextSelectionToolbar extends StatelessWidget {
       items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
 
+    const Widget padding = Padding(padding: EdgeInsets.only(bottom: 10.0));
+
     final Widget triangle = SizedBox.fromSize(
       size: _kToolbarTriangleSize,
       child: CustomPaint(
-        painter: _TextSelectionToolbarNotchPainter(),
-      )
+        painter: _TextSelectionToolbarNotchPainter(arrowDirection),
+      ),
     );
+
+    final Widget toolbar = ClipRRect(
+      borderRadius: _kToolbarBorderRadius,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _kToolbarDividerColor,
+          borderRadius: _kToolbarBorderRadius,
+          // Add a hairline border with the button color to avoid
+          // antialiasing artifacts.
+          border: Border.all(color: _kToolbarBackgroundColor, width: 0),
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      ),
+    );
+
+    final List<Widget> menus = (arrowDirection == _ArrowDirection.down)
+        ? <Widget>[
+            toolbar,
+            // TODO(xster): Position the triangle based on the layout delegate, and
+            // avoid letting the triangle line up with any dividers.
+            // https://github.com/flutter/flutter/issues/11274
+            triangle,
+            padding,
+          ]
+        : <Widget>[
+            padding,
+            triangle,
+            toolbar,
+          ];
 
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        ClipRRect(
-          borderRadius: _kToolbarBorderRadius,
-          child: DecoratedBox(
-            decoration: const BoxDecoration(
-              color: _kToolbarDividerColor,
-            ),
-            child: Row(mainAxisSize: MainAxisSize.min, children: items),
-          ),
-        ),
-        // TODO(xster): Position the triangle based on the layout delegate, and
-        // avoid letting the triangle line up with any dividers.
-        // https://github.com/flutter/flutter/issues/11274
-        triangle,
-        const Padding(padding: EdgeInsets.only(bottom: 10.0)),
-      ],
+      children: menus,
     );
   }
 
@@ -229,23 +266,51 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  ) {
     assert(debugCheckHasMediaQuery(context));
+
+    // The toolbar should appear below the TextField
+    // when there is not enough space above the TextField to show it.
+    final double availableHeight
+        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
+    final _ArrowDirection direction = (availableHeight > _kToolbarHeight)
+        ? _ArrowDirection.down
+        : _ArrowDirection.up;
+
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
+        ? endpoints[1]
+        : null;
+    final double x = (endTextSelectionPoint == null)
+        ? startTextSelectionPoint.point.dx
+        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
+    final double y = (direction == _ArrowDirection.up)
+        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight
+        : startTextSelectionPoint.point.dy - globalEditableRegion.height;
+    final Offset preciseMidpoint = Offset(x, y);
+
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
       child: CustomSingleChildLayout(
         delegate: _TextSelectionToolbarLayout(
           MediaQuery.of(context).size,
           globalEditableRegion,
-          position,
+          preciseMidpoint,
         ),
         child: _TextSelectionToolbar(
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
           handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
           handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          arrowDirection: direction,
         ),
-      )
+      ),
     );
   }
 
@@ -256,7 +321,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // padding in every direction that will constitute the selection drag area.
     final Size desiredSize = Size(
       2.0 * _kHandlesPadding,
-      textLineHeight + 2.0 * _kHandlesPadding
+      textLineHeight + 2.0 * _kHandlesPadding,
     );
 
     final Widget handle = SizedBox.fromSize(
@@ -281,16 +346,16 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
         return Transform(
           transform: Matrix4.rotationZ(math.pi)
               ..translate(-_kHandlesPadding, -_kHandlesPadding),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.right:
         return Transform(
           transform: Matrix4.translationValues(
             -_kHandlesPadding,
             -(textLineHeight + _kHandlesPadding),
-            0.0
+            0.0,
           ),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.collapsed: // iOS doesn't draw anything for collapsed selections.
         return Container();

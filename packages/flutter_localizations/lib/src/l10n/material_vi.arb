@@ -51,5 +51,5 @@
   "remainingTextFieldCharacterCountZero": "TBD",
   "remainingTextFieldCharacterCountOne": "Còn lại 1 ký tự",
   "remainingTextFieldCharacterCountOther": "Còn lại $remainingCount ký tự",
-  "refreshIndicatorSemanticLabel": "TBD"
+  "refreshIndicatorSemanticLabel": "Làm mới"
 }

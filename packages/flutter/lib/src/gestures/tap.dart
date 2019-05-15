@@ -19,11 +19,16 @@ class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapDownDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  TapDownDetails({
+    this.globalPosition = Offset.zero,
+    this.kind,
+  }) : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind kind;
 }
 
 /// Signature for when a pointer that might cause a tap has contacted the
@@ -172,8 +177,14 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   void handlePrimaryPointer(PointerEvent event) {
     if (event is PointerUpEvent) {
       _finalPosition = event.position;
-      _checkUp();
+      if (_wonArenaForPrimaryPointer) {
+        resolve(GestureDisposition.accepted);
+        _checkUp();
+      }
     } else if (event is PointerCancelEvent) {
+      if (_sentTapDown && onTapCancel != null) {
+        invokeCallback<void>('onTapCancel', onTapCancel);
+      }
       _reset();
     }
   }
@@ -183,6 +194,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
       // This can happen if the superclass decides the primary pointer
       // exceeded the touch slop, or if the recognizer is disposed.
+      assert(_sentTapDown);
       if (onTapCancel != null)
         invokeCallback<void>('spontaneous onTapCancel', onTapCancel);
       _reset();
@@ -191,15 +203,15 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void didExceedDeadline() {
-    _checkDown();
+  void didExceedDeadlineWithEvent(PointerDownEvent event) {
+    _checkDown(event.pointer);
   }
 
   @override
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
     if (pointer == primaryPointer) {
-      _checkDown();
+      _checkDown(pointer);
       _wonArenaForPrimaryPointer = true;
       _checkUp();
     }
@@ -211,31 +223,27 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     if (pointer == primaryPointer) {
       // Another gesture won the arena.
       assert(state != GestureRecognizerState.possible);
-      if (onTapCancel != null)
+      if (_sentTapDown && onTapCancel != null)
         invokeCallback<void>('forced onTapCancel', onTapCancel);
       _reset();
     }
   }
 
-  void _checkDown() {
+  void _checkDown(int pointer) {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<void>('onTapDown', () { onTapDown(TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<void>('onTapDown', () {
+          onTapDown(TapDownDetails(
+            globalPosition: initialPosition,
+            kind: getKindForPointer(pointer),
+          ));
+        });
       _sentTapDown = true;
     }
   }
 
   void _checkUp() {
-    if (_wonArenaForPrimaryPointer && _finalPosition != null) {
-      resolve(GestureDisposition.accepted);
-      if (!_wonArenaForPrimaryPointer || _finalPosition == null) {
-        // It is possible that resolve has just recursively called _checkUp
-        // (see https://github.com/flutter/flutter/issues/12470).
-        // In that case _wonArenaForPrimaryPointer will be false (as _checkUp
-        // calls _reset) and we return here to avoid double invocation of the
-        // tap callbacks.
-        return;
-      }
+    if (_finalPosition != null) {
       if (onTapUp != null)
         invokeCallback<void>('onTapUp', () { onTapUp(TapUpDetails(globalPosition: _finalPosition)); });
       if (onTap != null)

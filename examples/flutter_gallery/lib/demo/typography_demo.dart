@@ -30,13 +30,13 @@ class TextStyleItem extends StatelessWidget {
         children: <Widget>[
           SizedBox(
             width: 72.0,
-            child: Text(name, style: nameStyle)
+            child: Text(name, style: nameStyle),
           ),
           Expanded(
-            child: Text(text, style: style.copyWith(height: 1.0))
-          )
-        ]
-      )
+            child: Text(text, style: style.copyWith(height: 1.0)),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -64,7 +64,7 @@ class TypographyDemo extends StatelessWidget {
       styleItems.insert(0, TextStyleItem(
         name: 'Display 4',
         style: textTheme.display4,
-        text: 'Light 112sp'
+        text: 'Light 112sp',
       ));
     }
 

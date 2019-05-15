@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
@@ -15,6 +16,10 @@ import 'src/context.dart';
 import 'src/mocks.dart';
 
 class MockPeer implements rpc.Peer {
+
+  @override
+  rpc.ErrorCallback get onUnhandledError => null;
+
   @override
   Future<dynamic> get done async {
     throw 'unexpected call to done';
@@ -153,13 +158,32 @@ class MockPeer implements rpc.Peer {
 }
 
 void main() {
-  final MockStdio mockStdio = MockStdio();
+  MockStdio mockStdio;
   group('VMService', () {
+    setUp(() {
+      mockStdio = MockStdio();
+    });
+
     testUsingContext('fails connection eagerly in the connect() method', () async {
-      expect(
-        VMService.connect(Uri.parse('http://host.invalid:9999/')),
-        throwsToolExit(),
-      );
+      FakeAsync().run((FakeAsync time) {
+        bool failed = false;
+        final Future<VMService> future = VMService.connect(Uri.parse('http://host.invalid:9999/'));
+        future.whenComplete(() {
+          failed = true;
+        });
+        time.elapse(const Duration(seconds: 5));
+        expect(failed, isFalse);
+        expect(mockStdio.writtenToStdout.join(''), '');
+        expect(mockStdio.writtenToStderr.join(''), '');
+        time.elapse(const Duration(seconds: 5));
+        expect(failed, isFalse);
+        expect(mockStdio.writtenToStdout.join(''), 'This is taking longer than expected...\n');
+        expect(mockStdio.writtenToStderr.join(''), '');
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      Stdio: () => mockStdio,
+      WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
     testUsingContext('refreshViews', () {
@@ -167,7 +191,7 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, const Duration(seconds: 1), null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null);
         vmService.getVM().then((void value) { done = true; });
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 0);
