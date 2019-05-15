@@ -93,13 +93,9 @@ import 'inherited_notifier.dart';
 ///             return GestureDetector(
 ///               onTap: () {
 ///                 if (hasFocus) {
-///                   setState(() {
-///                     focusNode.unfocus();
-///                   });
+///                   focusNode.unfocus();
 ///                 } else {
-///                   setState(() {
-///                     focusNode.requestFocus();
-///                   });
+///                   focusNode.requestFocus();
 ///                 }
 ///               },
 ///               child: Center(
@@ -150,8 +146,10 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
+    this.skipTraversal = false,
   })  : assert(child != null),
         assert(autofocus != null),
+        assert(skipTraversal != null),
         super(key: key);
 
   /// A debug label for this widget.
@@ -212,6 +210,13 @@ class Focus extends StatefulWidget {
   /// node when needed.
   final FocusNode focusNode;
 
+  /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
+  /// be visited by the [FocusTraversalPolicy].
+  ///
+  /// This is sometimes useful if a Focus widget should receive key events as
+  /// part of the focus chain, but shouldn't be accessible via focus traversal.
+  final bool skipTraversal;
+
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the given
   /// [BuildContext].
   ///
@@ -238,7 +243,7 @@ class Focus extends StatefulWidget {
     super.debugFillProperties(properties);
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
-    properties.add(DiagnosticsProperty<FocusScopeNode>('node', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('node', focusNode, defaultValue: null));
   }
 
   @override
@@ -263,6 +268,7 @@ class _FocusState extends State<Focus> {
       // Only create a new node if the widget doesn't have one.
       _internalNode ??= _createNode();
     }
+    node.skipTraversal = widget.skipTraversal;
     _focusAttachment = node.attach(context, onKey: widget.onKey);
     _hasFocus = node.hasFocus;
     // Add listener even if the _internalNode existed before, since it should
