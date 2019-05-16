@@ -69,13 +69,15 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// ## Semantics in SwitchListTile
 ///
-/// Since SwitchListTile is wrapped with a [MergeSemantics] widget, it wants
-/// to merge its descendant [Semantics] nodes into one node in the semantics
-/// tree. Therefore, SwitchListTile would not work with [RichText], which
-/// forces itself to be a standalone semantics node.
+/// Since SwitchListTile wraps its children with a [MergeSemantics] widget, it
+/// wants to merge its descendant [Semantics] nodes to appear as just one
+/// interactive node in the semantics tree.
 ///
-/// If you're interested in learning more about this interaction, see the
-/// discussion in [TextSpan.recognizer].
+/// Thus, SwitchListTile will not work with children widgets that need to be a
+/// standalone interactive element. One example would be the [RichText]
+/// widget, which has an embedded gesture recognizer configured to have
+/// its own [Semantics] node. Thus, you may need to create a custom widget to
+/// accommodate your needs.
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
