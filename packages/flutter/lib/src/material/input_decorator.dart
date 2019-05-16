@@ -62,15 +62,17 @@ class _InputBorderTween extends Tween<InputBorder> {
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
 class _InputBorderPainter extends CustomPainter {
   _InputBorderPainter({
-    Listenable repaint,
-    this.borderAnimation,
-    this.border,
-    this.gapAnimation,
-    this.gap,
-    this.textDirection,
-    this.fillColor,
-    this.focusAnimation,
-    this.focusColorTween,
+    @required Listenable repaint,
+    @required this.borderAnimation,
+    @required this.border,
+    @required this.gapAnimation,
+    @required this.gap,
+    @required this.textDirection,
+    @required this.fillColor,
+    @required this.focusAnimation,
+    @required this.focusColorTween,
+    @required this.hoverAnimation,
+    @required this.hoverColorTween,
   }) : super(repaint: repaint);
 
   final Animation<double> borderAnimation;
@@ -81,8 +83,15 @@ class _InputBorderPainter extends CustomPainter {
   final Color fillColor;
   final ColorTween focusColorTween;
   final Animation<double> focusAnimation;
+  final ColorTween hoverColorTween;
+  final Animation<double> hoverAnimation;
 
-  Color get blendedColor => Color.alphaBlend(focusColorTween.evaluate(focusAnimation), fillColor);
+  Color get blendedColor {
+    return Color.alphaBlend(
+      hoverColorTween.evaluate(hoverAnimation),
+      Color.alphaBlend(focusColorTween.evaluate(focusAnimation), fillColor),
+    );
+  }
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -112,6 +121,7 @@ class _InputBorderPainter extends CustomPainter {
   bool shouldRepaint(_InputBorderPainter oldPainter) {
     return borderAnimation != oldPainter.borderAnimation
         || focusAnimation != oldPainter.focusAnimation
+        || hoverAnimation != oldPainter.hoverAnimation
         || gapAnimation != oldPainter.gapAnimation
         || border != oldPainter.border
         || gap != oldPainter.gap
@@ -132,6 +142,8 @@ class _BorderContainer extends StatefulWidget {
     @required this.fillColor,
     @required this.focusColor,
     @required this.isFocused,
+    @required this.hoverColor,
+    @required this.isHovering,
     this.child,
   }) : assert(border != null),
        assert(gap != null),
@@ -144,6 +156,8 @@ class _BorderContainer extends StatefulWidget {
   final Color fillColor;
   final Color focusColor;
   final bool isFocused;
+  final Color hoverColor;
+  final bool isHovering;
   final Widget child;
 
   @override
@@ -152,13 +166,17 @@ class _BorderContainer extends StatefulWidget {
 
 class _BorderContainerState extends State<_BorderContainer> with TickerProviderStateMixin {
   static const Duration _kFocusInDuration = Duration(milliseconds: 45);
+  static const Duration _kHoverDuration = Duration(milliseconds: 15);
 
   AnimationController _controller;
   AnimationController _focusColorController;
+  AnimationController _hoverColorController;
   Animation<double> _borderAnimation;
-  Animation<double> _focusAnimation;
   _InputBorderTween _border;
+  Animation<double> _focusAnimation;
   ColorTween _focusColorTween;
+  Animation<double> _hoverAnimation;
+  ColorTween _hoverColorTween;
 
   @override
   void initState() {
@@ -167,6 +185,11 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
       duration: _kFocusInDuration,
       // TODO(gspencer): use reverseDuration set to 15ms, once available.
       value: widget.isFocused ? 1.0 : 0.0,
+      vsync: this,
+    );
+    _hoverColorController = AnimationController(
+      duration: _kHoverDuration,
+      value: widget.isHovering ? 1.0 : 0.0,
       vsync: this,
     );
     _controller = AnimationController(
@@ -186,12 +209,18 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
       curve: Curves.linear,
     );
     _focusColorTween = ColorTween(begin: Colors.transparent, end: widget.focusColor);
+    _hoverAnimation = CurvedAnimation(
+      parent: _hoverColorController,
+      curve: Curves.linear,
+    );
+    _hoverColorTween = ColorTween(begin: Colors.transparent, end: widget.hoverColor);
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _focusColorController.dispose();
+    _hoverColorController.dispose();
     super.dispose();
   }
 
@@ -217,13 +246,28 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         _focusColorController.reverse();
       }
     }
+    if (widget.hoverColor != oldWidget.hoverColor) {
+      _hoverColorTween = ColorTween(begin: Colors.transparent, end: widget.hoverColor);
+    }
+    if (widget.isHovering != oldWidget.isHovering) {
+      if (widget.isHovering) {
+        _hoverColorController.forward();
+      } else {
+        _hoverColorController.reverse();
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       foregroundPainter: _InputBorderPainter(
-        repaint: Listenable.merge(<Listenable>[_borderAnimation, widget.gap, _focusColorController]),
+        repaint: Listenable.merge(<Listenable>[
+          _borderAnimation,
+          widget.gap,
+          _focusColorController,
+          _hoverColorController,
+        ]),
         borderAnimation: _borderAnimation,
         border: _border,
         gapAnimation: widget.gapAnimation,
@@ -232,6 +276,8 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         fillColor: widget.fillColor,
         focusColorTween: _focusColorTween,
         focusAnimation: _focusAnimation,
+        hoverColorTween: _hoverColorTween,
+        hoverAnimation: _hoverAnimation,
       ),
       child: widget.child,
     );
@@ -1602,17 +1648,21 @@ class InputDecorator extends StatefulWidget {
   /// Creates a widget that displays a border, labels, and icons,
   /// for a [TextField].
   ///
-  /// The [isFocused] and [isEmpty] arguments must not be null.
+  /// The [isFocused], [isHovering], [expands], and [isEmpty] arguments must not
+  /// be null.
   const InputDecorator({
     Key key,
     this.decoration,
     this.baseStyle,
     this.textAlign,
     this.isFocused = false,
+    this.isHovering = false,
     this.expands = false,
     this.isEmpty = false,
     this.child,
   }) : assert(isFocused != null),
+       assert(isHovering != null),
+       assert(expands != null),
        assert(isEmpty != null),
        super(key: key);
 
@@ -1645,6 +1695,15 @@ class InputDecorator extends StatefulWidget {
   ///
   /// Defaults to false.
   final bool isFocused;
+
+  /// Whether the input field is being hovered over by a mouse pointer.
+  ///
+  /// Determines the container fill color, which is a blend of
+  /// [InputDecoration.hoverColor] with [InputDecoration.fillColor] when
+  /// true, and [InputDecoration.fillColor] when not.
+  ///
+  /// Defaults to false.
+  final bool isHovering;
 
   /// If true, the height of the input field will be as large as possible.
   ///
@@ -1752,6 +1811,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 
   TextAlign get textAlign => widget.textAlign;
   bool get isFocused => widget.isFocused;
+  bool get isHovering => widget.isHovering;
   bool get isEmpty => widget.isEmpty;
 
   @override
@@ -1789,6 +1849,27 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.hintColor;
   }
 
+  Color _getBorderColor(ThemeData themeData) {
+    if (isFocused) {
+      switch (themeData.brightness) {
+        case Brightness.dark:
+          return themeData.accentColor;
+        case Brightness.light:
+          return themeData.primaryColor;
+      }
+    }
+    if (decoration.filled) {
+      return themeData.hintColor;
+    }
+    if (isHovering) {
+      // TODO(gspencer): Find out the actual value here from the spec writers.
+      final Color hoverColor = decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
+      return Color.alphaBlend(hoverColor.withOpacity(0.16), themeData.colorScheme.onSurface.withOpacity(0.12));
+    }
+    // TODO(gspencer): Find out the actual value here from the spec writers.
+    return themeData.colorScheme.onSurface.withOpacity(0.12);
+  }
+
   Color _getFillColor(ThemeData themeData) {
     if (decoration.filled != true) // filled == null same as filled == false
       return Colors.transparent;
@@ -1815,6 +1896,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled != true) // filled == null same as filled == false
       return Colors.transparent;
     return decoration.focusColor ?? themeData.inputDecorationTheme?.focusColor ?? themeData.focusColor;
+  }
+
+  Color _getHoverColor(ThemeData themeData) {
+    if (isFocused || decoration.filled != true) // filled == null same as filled == false
+      return Colors.transparent;
+    return decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
   }
 
   Color _getDefaultIconColor(ThemeData themeData) {
@@ -1875,7 +1962,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     Color borderColor;
     if (decoration.enabled) {
       borderColor = decoration.errorText == null
-        ? _getActiveColor(themeData)
+        ? _getBorderColor(themeData)
         : themeData.errorColor;
     } else {
       borderColor = (decoration.filled == true && decoration.border?.isOutline != true)
@@ -1929,7 +2016,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       gapAnimation: _floatingLabelController.view,
       fillColor: _getFillColor(themeData),
       focusColor: _getFocusColor(themeData),
+      hoverColor: _getHoverColor(themeData),
       isFocused: isFocused,
+      isHovering: isHovering,
     );
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
@@ -2165,6 +2254,7 @@ class InputDecoration {
     this.filled,
     this.fillColor,
     this.focusColor,
+    this.hoverColor,
     this.errorBorder,
     this.focusedBorder,
     this.focusedErrorBorder,
@@ -2191,6 +2281,7 @@ class InputDecoration {
     this.filled = false,
     this.fillColor,
     this.focusColor,
+    this.hoverColor,
     this.border = InputBorder.none,
     this.enabled = true,
   }) : assert(enabled != null),
@@ -2564,6 +2655,17 @@ class InputDecoration {
   /// [errorText], and [counterText].
   final Color focusColor;
 
+  /// The color to blend with [fillColor] and fill the decoration's container
+  /// with, if the container is being hovered over by a mouse.
+  ///
+  /// By default the [hoverColor] is based on the current [Theme].
+  ///
+  /// The decoration's container is the area which is filled if [filled] is
+  /// true and bordered per the [border]. It's the area adjacent to
+  /// [decoration.icon] and above the widgets that contain [helperText],
+  /// [errorText], and [counterText].
+  final Color hoverColor;
+
   /// The border to display when the [InputDecorator] does not have the focus and
   /// is showing an error.
   ///
@@ -2771,6 +2873,7 @@ class InputDecoration {
     bool filled,
     Color fillColor,
     Color focusColor,
+    Color hoverColor,
     InputBorder errorBorder,
     InputBorder focusedBorder,
     InputBorder focusedErrorBorder,
@@ -2810,6 +2913,7 @@ class InputDecoration {
       filled: filled ?? this.filled,
       fillColor: fillColor ?? this.fillColor,
       focusColor: focusColor ?? this.focusColor,
+      hoverColor: hoverColor ?? this.hoverColor,
       errorBorder: errorBorder ?? this.errorBorder,
       focusedBorder: focusedBorder ?? this.focusedBorder,
       focusedErrorBorder: focusedErrorBorder ?? this.focusedErrorBorder,
@@ -2843,6 +2947,7 @@ class InputDecoration {
       filled: filled ?? theme.filled,
       fillColor: fillColor ?? theme.fillColor,
       focusColor: focusColor ?? theme.focusColor,
+      hoverColor: hoverColor ?? theme.hoverColor,
       errorBorder: errorBorder ?? theme.errorBorder,
       focusedBorder: focusedBorder ?? theme.focusedBorder,
       focusedErrorBorder: focusedErrorBorder ?? theme.focusedErrorBorder,
@@ -2889,6 +2994,7 @@ class InputDecoration {
         && typedOther.filled == filled
         && typedOther.fillColor == fillColor
         && typedOther.focusColor == focusColor
+        && typedOther.hoverColor == hoverColor
         && typedOther.errorBorder == errorBorder
         && typedOther.focusedBorder == focusedBorder
         && typedOther.focusedErrorBorder == focusedErrorBorder
@@ -2921,6 +3027,7 @@ class InputDecoration {
       filled,
       fillColor,
       focusColor,
+      hoverColor,
       border,
       enabled,
       prefixIcon,
@@ -3002,6 +3109,8 @@ class InputDecoration {
       description.add('fillColor: $fillColor');
     if (focusColor != null)
       description.add('focusColor: $focusColor');
+    if (hoverColor != null)
+      description.add('hoverColor: $hoverColor');
     if (errorBorder != null)
       description.add('errorBorder: $errorBorder');
     if (focusedBorder != null)
@@ -3056,6 +3165,7 @@ class InputDecorationTheme extends Diagnosticable {
     this.filled = false,
     this.fillColor,
     this.focusColor,
+    this.hoverColor,
     this.errorBorder,
     this.focusedBorder,
     this.focusedErrorBorder,
@@ -3187,6 +3297,18 @@ class InputDecorationTheme extends Diagnosticable {
   /// [InputBorder.getOuterPath], which is filled if [filled] is
   /// true and bordered per the [border].
   final Color focusColor;
+
+  /// The color to blend with the decoration's [fillColor] with, if the
+  /// decoration is being hovered over by a mouse pointer.
+  ///
+  /// By default the [hoverColor] is based on the current [Theme].
+  ///
+  /// The decoration's container is the area, defined by the border's
+  /// [InputBorder.getOuterPath], which is filled if [filled] is
+  /// true and bordered per the [border].
+  ///
+  /// The container will be filled when hovered over even if [filled] is false.
+  final Color hoverColor;
 
   /// The border to display when the [InputDecorator] does not have the focus and
   /// is showing an error.
@@ -3360,6 +3482,7 @@ class InputDecorationTheme extends Diagnosticable {
     properties.add(DiagnosticsProperty<bool>('filled', filled, defaultValue: defaultTheme.filled));
     properties.add(DiagnosticsProperty<Color>('fillColor', fillColor, defaultValue: defaultTheme.fillColor));
     properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: defaultTheme.focusColor));
+    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: defaultTheme.hoverColor));
     properties.add(DiagnosticsProperty<InputBorder>('errorBorder', errorBorder, defaultValue: defaultTheme.errorBorder));
     properties.add(DiagnosticsProperty<InputBorder>('focusedBorder', focusedBorder, defaultValue: defaultTheme.focusedErrorBorder));
     properties.add(DiagnosticsProperty<InputBorder>('focusedErrorBorder', focusedErrorBorder, defaultValue: defaultTheme.focusedErrorBorder));

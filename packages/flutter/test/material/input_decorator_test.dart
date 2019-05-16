@@ -17,6 +17,7 @@ Widget buildInputDecorator({
   TextDirection textDirection = TextDirection.ltr,
   bool isEmpty = false,
   bool isFocused = false,
+  bool isHovering = false,
   TextStyle baseStyle,
   Widget child = const Text(
     'text',
@@ -39,6 +40,7 @@ Widget buildInputDecorator({
                   decoration: decoration,
                   isEmpty: isEmpty,
                   isFocused: isFocused,
+                  isHovering: isHovering,
                   baseStyle: baseStyle,
                   child: child,
                 ),
@@ -2042,7 +2044,57 @@ void main() {
     skip: !Platform.isLinux,
   );
 
-  testWidgets('InputDecorator draws and animats focusColor', (WidgetTester tester) async {
+  testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {
+    const Color fillColor = Color(0xFF00FF00);
+    const Color hoverColor = Color(0xFF0000FF);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isHovering: false,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          hoverColor: hoverColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(fillColor));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isHovering: true,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          hoverColor: hoverColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(hoverColor));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isHovering: false,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          hoverColor: hoverColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(hoverColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(fillColor));
+  });
+
+  testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
     const Color fillColor = Color(0xFF00FF00);
     const Color focusColor = Color(0xFF0000FF);
 
@@ -2075,7 +2127,6 @@ void main() {
     expect(getContainerColor(tester), equals(fillColor));
     await tester.pump(const Duration(milliseconds: 45));
     expect(getContainerColor(tester), equals(focusColor));
-
 
     await tester.pumpWidget(
       buildInputDecorator(
