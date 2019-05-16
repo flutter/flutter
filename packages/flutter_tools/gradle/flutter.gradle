@@ -31,15 +31,6 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
-    defaultConfig {
-        manifestPlaceholders = [aotAbiSplit: false]
-    }
-    buildTypes {
-        release {
-            // Sets the metadata in AndroidManifest.xml
-            manifestPlaceholders = [aotAbiSplit: true]
-        }
-    }
 }
 
 apply plugin: FlutterPlugin
