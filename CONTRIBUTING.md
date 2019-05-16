@@ -1,11 +1,16 @@
-Contributing to Flutter
+
+------------------------------------------------------------------------
+
+:outbox_tray: &nbsp; Contributing to Flutter &nbsp; :outbox_tray:
 =======================
 
 [![Build Status](https://api.cirrus-ci.com/github/flutter/flutter.svg)](https://cirrus-ci.org/flutter/flutter)
 
 _See also: [Flutter's code of conduct](CODE_OF_CONDUCT.md)_
 
-Welcome
+------------------------------------------------------------------------
+
+:tada: &nbsp; Welcome &nbsp; :tada:
 -------
 
 We invite you to join our team! Everyone is welcome to contribute code
@@ -23,7 +28,9 @@ and submitting pull requests for the Flutter framework. For
 information on contributing in other ways, see [the community page
 on flutter.dev](https://flutter.dev/community).
 
-Developing for Flutter
+------------------------------------------------------------------------
+
+:hammer: &nbsp; Developing for Flutter &nbsp; :hammer:
 ----------------------
 
 To develop for Flutter, you will eventually need to become familiar
