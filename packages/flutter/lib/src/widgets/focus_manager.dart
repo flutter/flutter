@@ -97,7 +97,8 @@ class FocusAttachment {
     assert(_node != null);
     if (isAttached) {
       assert(_node.context != null);
-      parent ??= Focus.of(_node.context);
+      parent ??= Focus.of(_node.context, nullOk: true);
+      parent ??= FocusScope.of(_node.context);
       assert(parent != null);
       parent._reparent(_node);
     }
