@@ -475,7 +475,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   void didChangeDependencies() {
     super.didChangeDependencies();
     _focusNode?.removeListener(_handleFocusUpdate);
-    _focusNode = Focus.of(context);
+    _focusNode = Focus.of(context, nullOk: true);
     _focusNode?.addListener(_handleFocusUpdate);
   }
 
