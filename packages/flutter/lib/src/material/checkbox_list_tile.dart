@@ -98,24 +98,26 @@ import 'theme_data.dart';
 ///       padding: padding,
 ///       child: Row(
 ///         children: <Widget>[
+///           Expanded(
+///             child: RichText(
+///               text: TextSpan(
+///                 text: label,
+///                 style: TextStyle(
+///                   color: Colors.blueAccent,
+///                   decoration: TextDecoration.underline,
+///                 ),
+///                 recognizer: TapGestureRecognizer()
+///                   ..onTap = () {
+///                   print('Label has been tapped.');
+///                 },
+///               ),
+///             ),
+///           ),
 ///           Checkbox(
 ///             value: value,
 ///             onChanged: (bool newValue) {
 ///               onChanged(newValue);
 ///             },
-///           ),
-///           RichText(
-///             text: TextSpan(
-///               text: label,
-///               style: TextStyle(
-///                 color: Colors.blueAccent,
-///                 decoration: TextDecoration.underline,
-///               ),
-///               recognizer: TapGestureRecognizer()
-///                 ..onTap = () {
-///                 print('Label has been tapped.');
-///               },
-///             ),
 ///           ),
 ///         ],
 ///       ),
@@ -182,13 +184,13 @@ import 'theme_data.dart';
 ///         padding: padding,
 ///         child: Row(
 ///           children: <Widget>[
+///             Expanded(child: Text(label)),
 ///             Checkbox(
 ///               value: value,
 ///               onChanged: (bool newValue) {
 ///                 onChanged(newValue);
 ///               },
 ///             ),
-///             Text(label),
 ///           ],
 ///         ),
 ///       ),

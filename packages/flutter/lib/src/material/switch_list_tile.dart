@@ -108,24 +108,26 @@ enum _SwitchListTileType { material, adaptive }
 ///       padding: padding,
 ///       child: Row(
 ///         children: <Widget>[
+///           Expanded(
+///             child: RichText(
+///               text: TextSpan(
+///                 text: label,
+///                 style: TextStyle(
+///                   color: Colors.blueAccent,
+///                   decoration: TextDecoration.underline,
+///                 ),
+///                 recognizer: TapGestureRecognizer()
+///                   ..onTap = () {
+///                   print('Label has been tapped.');
+///                 },
+///               ),
+///             ),
+///           ),
 ///           Switch(
 ///             value: value,
 ///             onChanged: (bool newValue) {
 ///               onChanged(newValue);
 ///             },
-///           ),
-///           RichText(
-///             text: TextSpan(
-///               text: label,
-///               style: TextStyle(
-///                 color: Colors.blueAccent,
-///                 decoration: TextDecoration.underline,
-///               ),
-///               recognizer: TapGestureRecognizer()
-///                 ..onTap = () {
-///                 print('Label has been tapped.');
-///               },
-///             ),
 ///           ),
 ///         ],
 ///       ),
@@ -194,13 +196,13 @@ enum _SwitchListTileType { material, adaptive }
 ///         padding: padding,
 ///         child: Row(
 ///           children: <Widget>[
+///             Expanded(child: Text(label)),
 ///             Switch(
 ///               value: value,
 ///               onChanged: (bool newValue) {
 ///                 onChanged(newValue);
 ///               },
 ///             ),
-///             Text(label),
 ///           ],
 ///         ),
 ///       ),
