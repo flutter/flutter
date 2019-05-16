@@ -361,7 +361,7 @@ class _Dependencies {
 String _validateDebugSnapshotDependency(
     FlutterProject project, String expectedTarget) {
   final _Dependencies deps = _Dependencies(path.join(project.rootPath, 'build',
-      'app', 'intermediates', 'flutter', 'debug', 'snapshot_blob.bin.d'));
+      'app', 'intermediates', 'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
   return deps.target == expectedTarget
       ? null
       : 'Debug dependency file should have $expectedTarget as target. Instead has ${deps.target}';

@@ -421,7 +421,7 @@ class FlutterPlugin implements Plugin<Project> {
                 if (flutterBuildMode == 'release') {
                     targetPlatforms = allArmPlatforms
                 } else {
-                    targetPlatforms = ['android-arm64']
+                    targetPlatforms = ['android-arm']
                 }
             } else {
                 targetPlatforms.add(targetPlatformValue)
@@ -429,15 +429,6 @@ class FlutterPlugin implements Plugin<Project> {
 
             targetPlatforms.each { currentTargetPlatformValue ->
                 String abiValue = allTargetPlatforms[currentTargetPlatformValue]
-                String intermidiateDir = "${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}"
-
-                File intermediateDirValue
-                if (flutterBuildMode == 'release') {
-                    intermediateDirValue = project.file("${intermidiateDir}/${currentTargetPlatformValue}")
-                } else {
-                    intermediateDirValue = project.file(intermidiateDir)
-                }
-
                 FlutterTask compileTask = project.tasks.create(name: "${flutterBuildPrefix}${variant.name.capitalize()}${currentTargetPlatformValue}:compile", 
                     type: FlutterTask) {
                     flutterRoot this.flutterRoot
@@ -458,14 +449,17 @@ class FlutterPlugin implements Plugin<Project> {
                     buildSharedLibrary buildSharedLibraryValue
                     targetPlatform currentTargetPlatformValue
                     sourceDir project.file(project.flutter.source)
-                    intermediateDir intermediateDirValue
+                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${currentTargetPlatformValue}")
                     extraFrontEndOptions extraFrontEndOptionsValue
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
                 flutterTasks.add(compileTask)
             }
 
-            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packFlutterSnapshotsAndLib${variant.name.capitalize()}", type: Jar) {
+            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: ":flutter:package:packLibs${variant.name.capitalize()}", type: Jar) {
+                if (flutterBuildMode != 'release' || targetPlatformValue != 'android-arm-all') {
+                    return
+                }
                 targetPlatforms.each { targetPlatform ->
                     // Include `libflutter.so` for each abi.
                     // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
@@ -506,7 +500,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.each { flutterTask -> 
                     with flutterTask.assets
                     // Include the snapshots in the assets directory in non-release mode.
-                    if (flutterBuildMode != 'release') {
+                    if (flutterBuildMode != 'release' || targetPlatformValue != 'android-arm-all') {
                         with flutterTask.snapshots
                     }
                 }
@@ -524,16 +518,12 @@ class FlutterPlugin implements Plugin<Project> {
                 Task mergeAssets = project.tasks.findByPath(":${mainModuleName}:merge${variant.name.capitalize()}Assets")
                 if (mergeAssets) {
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
-                    if (flutterBuildMode == 'release') {
-                        mergeAssets.dependsOn(packFlutterSnapshotsAndLibsTask)
-                    }
+                    mergeAssets.dependsOn(packFlutterSnapshotsAndLibsTask)
                 }
             } else {
                 def processResources = variant.outputs.first().processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
-                if (flutterBuildMode == 'release') {
-                    processResources.dependsOn(packFlutterSnapshotsAndLibsTask)
-                }
+                processResources.dependsOn(packFlutterSnapshotsAndLibsTask)
             }
         }
 
