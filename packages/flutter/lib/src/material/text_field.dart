@@ -782,7 +782,6 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    print('long tap end');
     if (_shouldShowSelectionToolbar)
       _editableTextKey.currentState.showToolbar();
   }
