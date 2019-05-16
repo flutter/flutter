@@ -48,6 +48,8 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
+/// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
+///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
 ///
@@ -86,6 +88,8 @@ enum _SwitchListTileType { material, adaptive }
 /// widget to accommodate similar use cases.
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
 ///
 /// Here is an example of a custom labeled radio widget, called
 /// LinkedLabelRadio, that includes an interactive [RichText] widget that
@@ -172,6 +176,8 @@ enum _SwitchListTileType { material, adaptive }
 /// [InkWell].
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
 ///
 /// Here is an example of a custom LabeledSwitch widget, but you can easily
 /// make your own configurable widget.

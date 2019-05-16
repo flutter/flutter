@@ -39,6 +39,8 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
+/// ![CheckboxListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile.png)
+///
 /// This widget shows a checkbox that, when checked, slows down all animations
 /// (including the animation of the checkbox itself getting checked!).
 ///
@@ -83,6 +85,8 @@ import 'theme_data.dart';
 /// widget to accommodate similar use cases.
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Checkbox list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_semantics.png)
 ///
 /// Here is an example of a custom labeled checkbox widget, called
 /// LinkedLabelCheckbox, that includes an interactive [RichText] widget that
@@ -169,6 +173,8 @@ import 'theme_data.dart';
 /// [InkWell].
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Custom checkbox list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_custom.png)
 ///
 /// Here is an example of a custom LabeledCheckbox widget, but you can easily
 /// make your own configurable widget.

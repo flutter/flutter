@@ -42,6 +42,8 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
+/// ![RadioListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile.png)
+///
 /// This widget shows a pair of radio buttons that control the `_character`
 /// field. The field is of the type `SingingCharacter`, an enum.
 ///
@@ -91,6 +93,8 @@ import 'theme_data.dart';
 /// widget to accommodate similar use cases.
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Radio list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_semantics.png)
 ///
 /// Here is an example of a custom labeled radio widget, called
 /// LinkedLabelRadio, that includes an interactive [RichText] widget that
@@ -193,6 +197,8 @@ import 'theme_data.dart';
 /// [InkWell].
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Custom radio list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/radio_list_tile_custom.png)
 ///
 /// Here is an example of a custom LabeledRadio widget, but you can easily
 /// make your own configurable widget.
