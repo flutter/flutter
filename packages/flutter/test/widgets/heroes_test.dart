@@ -2077,79 +2077,89 @@ Future<void> main() async {
     expect(shuttlesBuilt, 2);
   });
 
-  testWidgets("From hero's state should be preserved", (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-    const Key imageKey1 = Key('image1');
-    const Key imageKey2 = Key('image2');
-    final TestImageProvider imageProvider = TestImageProvider(img);
+  testWidgets("From hero's state should be preserved,"
+    'heroes should work with widgets that has global keys',
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      final GlobalKey imageKey1 = GlobalKey();
+      final GlobalKey imageKey2 = GlobalKey();
+      final TestImageProvider imageProvider = TestImageProvider(img);
 
-    await tester.pumpWidget(
-      CupertinoApp(
-        navigatorKey: navigatorKey,
-        home: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Hero(
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Hero(
+                tag: 'hero',
+                transitionOnUserGestures: true,
+                child: Container(
+                  width: 100,
+                  child: Image(
+                    image: imageProvider,
+                    key: imageKey1
+                  )
+                )
+              ),
+              const SizedBox(
+                width: 10,
+                height: 10,
+                child: Text('1')
+              )
+            ]
+          )
+        ),
+      );
+
+      final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: Hero(
               tag: 'hero',
-              // Since we're popping, only the destination route's builder is used.
               transitionOnUserGestures: true,
               child: Container(
-                width: 100,
                 child: Image(
                   image: imageProvider,
-                  key: imageKey1
+                  // imageKey2 is a `GlobalKey`. The hero animation should not
+                  // assert by having the same global keyed widget in more than
+                  // one place in the tree.
+                  key: imageKey2
                 )
               )
             ),
-            const SizedBox(
-              width: 10,
-              height: 10,
-              child: Text('1')
-            )
-          ]
-        )
-      ),
+          );
+        }
     );
 
-    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
-      builder: (BuildContext context) {
-        return CupertinoPageScaffold(
-          child: Hero(
-            tag: 'hero',
-            transitionOnUserGestures: true,
-            child: Container(
-              child: Image(
-                image: imageProvider,
-                key: imageKey2
-              )
-            )
-          ),
-        );
-      }
-    );
-
+    // Load image before measuring the `Rect` of the `RenderImage`.
     imageProvider.complete();
     await tester.pump();
     final RenderImage renderImage = tester.renderObject(
       find.descendant(of: find.byKey(imageKey1), matching: find.byType(RawImage))
     );
 
+    // Before push image1 should be laid out correctly.
     expect(renderImage.size, const Size(100, 100));
 
     navigatorKey.currentState.push(route2);
     await tester.pump();
 
     final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
-    await gesture.moveTo(const Offset(400, 200));
     await tester.pump();
 
+    // Move (almost) across the screen, to make the animation as close to finish
+    // as possible.
     await gesture.moveTo(const Offset(800, 200));
     await tester.pump();
 
+    // image1 should snap to the top left corner of the Row widget.
     expect(
       tester.getRect(find.byKey(imageKey1)),
       rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01)
     );
+
+    // Text should respect the correct final size of image1.
     expect(
       tester.getTopRight(find.byKey(imageKey1)).dx,
       moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
