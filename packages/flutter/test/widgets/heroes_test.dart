@@ -139,6 +139,19 @@ class MutatingRoute extends MaterialPageRoute<void> {
   }
 }
 
+class _SimpleStatefulWidget extends StatefulWidget {
+  const _SimpleStatefulWidget({ Key key }) : super(key: key);
+  @override
+  _SimpleState createState() => _SimpleState();
+}
+
+class _SimpleState extends State<_SimpleStatefulWidget> {
+  int state = 0;
+
+  @override
+  Widget build(BuildContext context) => Text(state.toString());
+}
+
 class _IsInvisible extends Matcher {
   const _IsInvisible({
     this.maintainState = true,
@@ -177,12 +190,7 @@ class _IsInvisible extends Matcher {
 
   @override
   Description describe(Description description) {
-    return description.add('inside a Visibility widget, '
-      'maintainState = $maintainState, '
-      'maintainAnimation = $maintainAnimation, '
-      'maintainSize = $maintainSize, '
-      'maintainSemantics = $maintainSemantics, '
-      'maintaintInteractivity = $maintainInteractivity');
+    return description.add('inside a matching Visibility widget');
   }
 }
 
@@ -1063,13 +1071,11 @@ Future<void> main() async {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    // One Opacity widget per Hero, only one is Visible
-
     bool _isVisible(Element node) {
       bool isVisible = true;
       node.visitAncestorElements((Element ancestor) {
           final RenderObject r = ancestor.renderObject;
-          if(r is RenderOpacity && r.opacity == 0) {
+          if (r is RenderOpacity && r.opacity == 0) {
             isVisible = false;
             return false;
           }
@@ -1149,6 +1155,8 @@ Future<void> main() async {
 
     // Push flight underway.
     await tester.pump(const Duration(milliseconds: 100));
+    // One visible in the hero animation, one hidden under an `Opacity` widget
+    // as a placeholder.
     expect(find.text('456'), findsNWidgets(2));
 
     // Push flight finished.
@@ -2077,12 +2085,78 @@ Future<void> main() async {
     expect(shuttlesBuilt, 2);
   });
 
-  testWidgets("From hero's state should be preserved,"
+  testWidgets("From hero's state should be preserved, "
     'heroes should work with widgets that has global keys',
     (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-      final GlobalKey imageKey1 = GlobalKey();
-      final GlobalKey imageKey2 = GlobalKey();
+      final GlobalKey key1 = GlobalKey();
+      final GlobalKey key2 = GlobalKey();
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          navigatorKey: navigatorKey,
+          home: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Hero(
+                tag: 'hero',
+                transitionOnUserGestures: true,
+                child: _SimpleStatefulWidget(key: key1)
+              ),
+              const SizedBox(
+                width: 10,
+                height: 10,
+                child: Text('1')
+              )
+            ]
+          )
+        ),
+      );
+
+      final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+        builder: (BuildContext context) {
+          return CupertinoPageScaffold(
+            child: Hero(
+              tag: 'hero',
+              transitionOnUserGestures: true,
+              // key2 is a `GlobalKey`. The hero animation should not
+              // assert by having the same global keyed widget in more
+              // than one place in the tree.
+              child: _SimpleStatefulWidget(key: key2)
+            ),
+          );
+        }
+      );
+
+      final _SimpleState state1 = key1.currentState;
+      state1.state = 1;
+
+      navigatorKey.currentState.push(route2);
+      await tester.pump();
+
+      expect(state1.mounted, isTrue);
+
+      await tester.pumpAndSettle();
+      expect(state1.state, 1);
+      // The element should be mounted and unique.
+      expect(state1.mounted, isTrue);
+
+      expect(navigatorKey.currentState.pop(), isTrue);
+      await tester.pumpAndSettle();
+
+      // State is preserved.
+      expect(state1.state, 1);
+      // The element should be mounted and unique.
+      expect(state1.mounted, isTrue);
+  });
+
+  testWidgets("Hero works with images that don't have both width and height specified",
+    // Regression test for https://github.com/flutter/flutter/issues/32356
+    // and https://github.com/flutter/flutter/issues/31503
+    (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+      const Key imageKey1 = Key('image1');
+      const Key imageKey2 = Key('image2');
       final TestImageProvider imageProvider = TestImageProvider(img);
 
       await tester.pumpWidget(
@@ -2121,16 +2195,13 @@ Future<void> main() async {
               child: Container(
                 child: Image(
                   image: imageProvider,
-                  // imageKey2 is a `GlobalKey`. The hero animation should not
-                  // assert by having the same global keyed widget in more than
-                  // one place in the tree.
                   key: imageKey2
                 )
               )
             ),
           );
         }
-    );
+      );
 
     // Load image before measuring the `Rect` of the `RenderImage`.
     imageProvider.complete();

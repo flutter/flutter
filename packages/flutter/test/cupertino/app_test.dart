@@ -35,9 +35,11 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // During the hero transition, the hero widget is lifted off of both
-    // page routes and exists as its own overlay on top of both routes.
-    expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
+    // During the hero transition, the to hero widget is lifted off of the
+    // to page route and exists as its own overlay on top of both routes.
+    // The from hero is still in the tree but it should be hidden.
+    expect(find.widgetWithText(Hero, 'foo'), findsOneWidget);
+    expect(find.text('foo'), findsNWidgets(2));
 
     final Visibility widget = tester.widget(find.widgetWithText(Visibility, 'foo'));
     expect(widget.visible, isFalse);
