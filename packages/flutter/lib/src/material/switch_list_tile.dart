@@ -80,7 +80,7 @@ enum _SwitchListTileType { material, adaptive }
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// Here is an example of a custom labeled switch widget, called
-/// LinkedLabelSwitch, that includes a nested [RichText] widget that
+/// LinkedLabelSwitch, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
 /// ```dart imports

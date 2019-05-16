@@ -84,8 +84,9 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a LinkedLabelRadio widget that allows a
-/// [RichText] widget to be nested in a radio tile widget.
+/// Here is an example of a custom labeled radio widget, called
+/// LinkedLabelRadio, that includes an interactive [RichText] widget that
+/// handles tap gestures.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
@@ -185,9 +186,8 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom labeled radio widget, called
-/// LinkedLabelRadio, that includes a nested [RichText] widget that
-/// handles tap gestures.
+/// Here is an example of a custom LabeledRadio widget, but you can easily
+/// make your own configurable widget.
 ///
 /// ```dart preamble
 /// class LabeledRadio extends StatelessWidget {

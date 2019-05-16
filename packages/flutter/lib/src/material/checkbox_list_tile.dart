@@ -70,7 +70,7 @@ import 'theme_data.dart';
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// Here is an example of a custom labeled checkbox widget, called
-/// LinkedLabelCheckbox, that includes a nested [RichText] widget that
+/// LinkedLabelCheckbox, that includes an interactive [RichText] widget that
 /// handles tap gestures.
 ///
 /// ```dart imports
