@@ -3032,7 +3032,8 @@ class SemanticsConfiguration {
   set onSetSelection(SetSelectionHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (dynamic args) {
-      final Map<String, int> selection = args;
+      assert(args != null && args is Map);
+      final Map<String, int> selection = args.cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
       value(TextSelection(
         baseOffset: selection['base'],
