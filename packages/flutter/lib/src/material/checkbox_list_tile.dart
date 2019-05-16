@@ -111,7 +111,7 @@ import 'theme_data.dart';
 ///               ),
 ///               recognizer: TapGestureRecognizer()
 ///                 ..onTap = () {
-///                 print('Link has been tapped.');
+///                 print('Label has been tapped.');
 ///               },
 ///             ),
 ///           ),
