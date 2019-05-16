@@ -749,7 +749,7 @@ class EditableText extends StatefulWidget {
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
+    return enableInteractiveSelection ?? true;
   }
 
   @override

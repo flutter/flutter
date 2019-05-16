@@ -921,18 +921,15 @@ class RenderEditable extends RenderBox {
 
   /// {@template flutter.rendering.editable.selectionEnabled}
   /// True if interactive selection is enabled based on the values of
-  /// [enableInteractiveSelection] and [obscureText].
+  /// [enableInteractiveSelection].
   ///
-  /// By default [enableInteractiveSelection] is null, obscureText is false,
-  /// and this method returns true.
-  /// If [enableInteractiveSelection] is null and obscureText is true, then this
-  /// method returns false. This is the common case for password fields.
+  /// By default [enableInteractiveSelection] is null, this method returns true.
   /// If [enableInteractiveSelection] is non-null then its value is returned. An
-  /// app might set it to true to enable interactive selection for a password
-  /// field, or to false to unconditionally disable interactive selection.
+  /// app might set it to false to disable interactive selection for a text
+  /// field.
   /// {@endtemplate}
   bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
+    return enableInteractiveSelection ?? true;
   }
 
   @override

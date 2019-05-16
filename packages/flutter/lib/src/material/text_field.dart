@@ -408,7 +408,7 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.rendering.editable.selectionEnabled}
   bool get selectionEnabled {
-    return enableInteractiveSelection ?? !obscureText;
+    return enableInteractiveSelection ?? true;
   }
 
   /// Called when the user taps on this text field.
