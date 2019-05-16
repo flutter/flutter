@@ -1,4 +1,4 @@
-Signature: 1a92f18e65d0b9963cd83fdf09bed13e
+Signature: 94543e33c50d928007beb9d72a517a9e
 
 UNUSED LICENSES:
 
@@ -1434,8 +1434,6 @@ FILE: ../../../third_party/skia/bench/PathOpsBench.cpp
 FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
 FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
 FILE: ../../../third_party/skia/bench/TypefaceBench.cpp
-FILE: ../../../third_party/skia/experimental/nima/NimaActor.cpp
-FILE: ../../../third_party/skia/experimental/nima/NimaActor.h
 FILE: ../../../third_party/skia/experimental/pvg/draw_msg.proto
 FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
@@ -1552,7 +1550,6 @@ FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCusp.cpp
 FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
 FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
-FILE: ../../../third_party/skia/samplecode/SampleNima.cpp
 FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
 FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
 FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
