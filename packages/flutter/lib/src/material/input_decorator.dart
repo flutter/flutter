@@ -1694,6 +1694,12 @@ class InputDecorator extends StatefulWidget {
   /// focused, and [InputDecoration.fillColor] when not.
   ///
   /// Defaults to false.
+  ///
+  /// See also:
+  ///
+  ///  - [InputDecoration.hoverColor], which is also blended into the focus
+  ///    color and fill color when the [isHovering] is true to produce the final
+  ///    color.
   final bool isFocused;
 
   /// Whether the input field is being hovered over by a mouse pointer.
@@ -1703,6 +1709,12 @@ class InputDecorator extends StatefulWidget {
   /// true, and [InputDecoration.fillColor] when not.
   ///
   /// Defaults to false.
+  ///
+  /// See also:
+  ///
+  ///  - [InputDecoration.focusColor], which is also blended into the hover
+  ///    color and fill color when [isFocused] is true to produce the final
+  ///    color.
   final bool isHovering;
 
   /// If true, the height of the input field will be as large as possible.
@@ -2617,8 +2629,11 @@ class InputDecoration {
   /// If null, defaults to the [helperStyle].
   final TextStyle counterStyle;
 
-  /// If true the decoration's container is filled with [fillColor] when not
-  /// focused and [focusColor] when focused.
+  /// If true the decoration's container is filled with [fillColor].
+  ///
+  /// When [isFocused] is true, the [focusColor] is also blended into the final
+  /// fill color.  When [isHovering] is true, the [hoverColor] is also blended
+  /// into the final fill color.
   ///
   /// Typically this field set to true if [border] is an
   /// [UnderlineInputBorder].
@@ -2631,8 +2646,11 @@ class InputDecoration {
   /// This property is false by default.
   final bool filled;
 
-  /// The color to fill the decoration's container with, if [filled] is true and
-  /// the decoration is not focused.
+  /// The base fill color of the decoration's container color.
+  ///
+  /// When [isFocused] is true, the [focusColor] is also blended into the final
+  /// fill color.  When [isHovering] is true, the [hoverColor] is also blended
+  /// into the final fill color.
   ///
   /// By default the fillColor is based on the current [Theme].
   ///
@@ -2647,6 +2665,9 @@ class InputDecoration {
   /// The color to blend with [fillColor] and fill the decoration's container
   /// with, if [filled] is true and the container has input focus.
   ///
+  /// When [isHovering] is true, the [hoverColor] is also blended into the final
+  /// fill color.
+  ///
   /// By default the [focusColor] is based on the current [Theme].
   ///
   /// The decoration's container is the area which is filled if [filled] is
@@ -2655,8 +2676,15 @@ class InputDecoration {
   /// [errorText], and [counterText].
   final Color focusColor;
 
-  /// The color to blend with [fillColor] and fill the decoration's container
-  /// with, if the container is being hovered over by a mouse.
+  /// The color of the focus highlight for the decoration shown if the container
+  /// is being hovered over by a mouse.
+  ///
+  /// If [filled] is true, the color is blended with [fillColor] and fills the
+  /// decoration's container. When [isFocused] is true, the [focusColor] is also
+  /// blended into the final fill color.
+  ///
+  /// If [filled] is false, and [isFocused] is false, the color is blended over
+  /// the [enabledBorder]'s color.
   ///
   /// By default the [hoverColor] is based on the current [Theme].
   ///
