@@ -40,35 +40,36 @@ import 'theme_data.dart';
 /// To show the [RadioListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample}
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// This widget shows a pair of radio buttons that control the `_character`
 /// field. The field is of the type `SingingCharacter`, an enum.
 ///
-/// ```dart
-/// // At the top level:
+/// ```dart preamble
 /// enum SingingCharacter { lafayette, jefferson }
-///
-/// // In the State of a stateful widget:
+/// ```
+/// ```dart
 /// SingingCharacter _character = SingingCharacter.lafayette;
 ///
-/// // In the build function of that State:
-/// Column(
-///   children: <Widget>[
-///     RadioListTile<SingingCharacter>(
-///       title: const Text('Lafayette'),
-///       value: SingingCharacter.lafayette,
-///       groupValue: _character,
-///       onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
-///     ),
-///     RadioListTile<SingingCharacter>(
-///       title: const Text('Thomas Jefferson'),
-///       value: SingingCharacter.jefferson,
-///       groupValue: _character,
-///       onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
-///     ),
-///   ],
-/// )
+/// @override
+/// Widget build(BuildContext context) {
+///   return Column(
+///     children: <Widget>[
+///       RadioListTile<SingingCharacter>(
+///         title: const Text('Lafayette'),
+///         value: SingingCharacter.lafayette,
+///         groupValue: _character,
+///         onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///       ),
+///       RadioListTile<SingingCharacter>(
+///         title: const Text('Thomas Jefferson'),
+///         value: SingingCharacter.jefferson,
+///         groupValue: _character,
+///         onChanged: (SingingCharacter value) { setState(() { _character = value; }); },
+///       ),
+///     ],
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

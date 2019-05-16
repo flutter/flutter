@@ -37,7 +37,7 @@ import 'theme_data.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample}
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// This widget shows a checkbox that, when checked, slows down all animations
 /// (including the animation of the checkbox itself getting checked!).
@@ -45,15 +45,23 @@ import 'theme_data.dart';
 /// This sample requires that you also import 'package:flutter/scheduler.dart',
 /// so that you can reference [timeDilation].
 ///
+/// ```dart imports
+/// import 'package:flutter/scheduler.dart' show timeDilation;
+/// ```
 /// ```dart
-/// CheckboxListTile(
-///   title: const Text('Animate Slowly'),
-///   value: timeDilation != 1.0,
-///   onChanged: (bool value) {
-///     setState(() { timeDilation = value ? 20.0 : 1.0; });
-///   },
-///   secondary: const Icon(Icons.hourglass_empty),
-/// )
+/// @override
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: CheckboxListTile(
+///       title: const Text('Animate Slowly'),
+///       value: timeDilation != 1.0,
+///       onChanged: (bool value) {
+///         setState(() { timeDilation = value ? 10.0 : 1.0; });
+///       },
+///       secondary: const Icon(Icons.hourglass_empty),
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

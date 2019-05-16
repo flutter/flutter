@@ -46,7 +46,7 @@ enum _SwitchListTileType { material, adaptive }
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// {@tool sample --template=stateful_widget_scaffold}
+/// {@tool snippet --template=stateful_widget_scaffold}
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
@@ -54,6 +54,7 @@ enum _SwitchListTileType { material, adaptive }
 /// ```dart
 /// bool _lights = false;
 ///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Center(
 ///     child: SwitchListTile(
@@ -83,6 +84,12 @@ enum _SwitchListTileType { material, adaptive }
 /// SwitchListTile's desire to merge all its descendants' semantic nodes
 /// into one. Therefore, it may be necessary to create a custom radio tile
 /// widget to accommodate similar use cases.
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// Here is an example of a custom labeled radio widget, called
+/// LinkedLabelRadio, that includes an interactive [RichText] widget that
+/// handles tap gestures.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
