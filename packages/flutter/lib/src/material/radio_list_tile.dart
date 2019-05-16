@@ -75,9 +75,9 @@ import 'theme_data.dart';
 /// ## Semantics in RadioListTile
 ///
 /// Since RadioListTile is wrapped with a [MergeSemantics] widget, it wants
-/// to merge its children semantics nodes into one node in the semantics tree.
-/// Therefore, RadioListTile would not work with [RichText], which forces
-/// itself to be a standalone semantics node.
+/// to merge its descendant [Semantics] nodes into one node in the semantics
+/// tree. Therefore, RadioListTile would not work with [RichText], which
+/// forces itself to be a standalone semantics node.
 ///
 /// If you're interested in learning more about this interaction, see the
 /// discussion in [TextSpan.recognizer].
