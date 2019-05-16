@@ -367,9 +367,9 @@ class MediaQueryData {
              'padding: $padding, '
              'viewInsets: $viewInsets, '
              'alwaysUse24HourFormat: $alwaysUse24HourFormat, '
-             'accessibleNavigation: $accessibleNavigation'
-             'disableAnimations: $disableAnimations'
-             'invertColors: $invertColors'
+             'accessibleNavigation: $accessibleNavigation, '
+             'disableAnimations: $disableAnimations, '
+             'invertColors: $invertColors, '
              'boldText: $boldText'
            ')';
   }

@@ -21,7 +21,7 @@ void main() {
     );
     layout(paragraph);
 
-    final Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
+    const Rect caret = Rect.fromLTWH(0.0, 0.0, 2.0, 20.0);
 
     final Offset offset5 = paragraph.getOffsetForCaret(const TextPosition(offset: 5), caret);
     expect(offset5.dx, greaterThan(0.0));

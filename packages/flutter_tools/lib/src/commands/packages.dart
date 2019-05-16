@@ -16,12 +16,12 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dev', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
-    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dartlang.org'));
+    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
     addSubcommand(PackagesPassthroughCommand());
   }
@@ -93,7 +93,7 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     await _runPubGet(target);
-    final FlutterProject rootProject = await FlutterProject.fromPath(target);
+    final FlutterProject rootProject = FlutterProject.fromPath(target);
     await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
 
     // Get/upgrade packages in example app as well

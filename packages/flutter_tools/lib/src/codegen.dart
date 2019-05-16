@@ -115,7 +115,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
         'sdkRoot, packagesPath are not supported when using the experimental '
         'build* pipeline');
     }
-    final FlutterProject flutterProject = await FlutterProject.current();
+    final FlutterProject flutterProject = FlutterProject.current();
     codeGenerator.updatePackages(flutterProject);
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();

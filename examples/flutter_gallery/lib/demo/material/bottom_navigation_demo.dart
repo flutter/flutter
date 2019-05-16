@@ -189,7 +189,6 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
           .toList(),
       currentIndex: _currentIndex,
       type: _type,
-      //iconSize: 4.0,
       onTap: (int index) {
         setState(() {
           _navigationViews[_currentIndex].controller.reverse();

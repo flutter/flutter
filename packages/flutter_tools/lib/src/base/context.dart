@@ -43,7 +43,7 @@ AppContext get context => Zone.current[_Key.key] as AppContext ?? AppContext._ro
 /// scope) is created.
 ///
 /// Child contexts are created and run using zones. To read more about how
-/// zones work, see https://www.dartlang.org/articles/libraries/zones.
+/// zones work, see https://api.dartlang.org/stable/dart-async/Zone-class.html.
 class AppContext {
   AppContext._(
     this._parent,

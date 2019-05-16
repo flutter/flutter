@@ -117,7 +117,7 @@ Future<void> run(List<String> args) async {
     CoverageCollector collector;
     if (argResults['coverage']) {
       collector = CoverageCollector(
-        flutterProject: await FlutterProject.current(),
+        flutterProject: FlutterProject.current(),
         coverageDirectory: coverageDirectory,
       );
       if (!argResults.options.contains(_kOptionTestDirectory)) {

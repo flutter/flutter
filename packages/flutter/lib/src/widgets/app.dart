@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
@@ -1190,12 +1191,15 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
     assert(_debugCheckLocalizations(appLocale));
 
-    return MediaQuery(
-      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-      child: Localizations(
-        locale: appLocale,
-        delegates: _localizationsDelegates.toList(),
-        child: title,
+    return DefaultFocusTraversal(
+      policy: ReadingOrderTraversalPolicy(),
+      child: MediaQuery(
+        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        child: Localizations(
+          locale: appLocale,
+          delegates: _localizationsDelegates.toList(),
+          child: title,
+        ),
       ),
     );
   }

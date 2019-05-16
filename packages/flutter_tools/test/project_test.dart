@@ -15,17 +15,19 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/testbed.dart';
 
 void main() {
   group('Project', () {
     group('construction', () {
       testInMemory('fails on null directory', () async {
-        await expectLater(
-          FlutterProject.fromDirectory(null),
+        expect(
+          () => FlutterProject.fromDirectory(null),
           throwsA(isInstanceOf<AssertionError>()),
         );
       });
@@ -35,9 +37,10 @@ void main() {
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
-        await expectToolExitLater(
-          FlutterProject.fromDirectory(directory),
-          contains('pubspec.yaml'),
+
+        expect(
+          () => FlutterProject.fromDirectory(directory),
+          throwsA(isInstanceOf<Exception>()),
         );
       });
 
@@ -46,17 +49,17 @@ void main() {
         directory.childDirectory('example').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
-        await expectToolExitLater(
-          FlutterProject.fromDirectory(directory),
-          contains('pubspec.yaml'),
+
+        expect(
+          () => FlutterProject.fromDirectory(directory),
+          throwsA(isInstanceOf<Exception>()),
         );
       });
 
       testInMemory('treats missing pubspec.yaml as empty', () async {
         final Directory directory = fs.directory('myproject')
           ..createSync(recursive: true);
-        expect(
-          (await FlutterProject.fromDirectory(directory)).manifest.isEmpty,
+        expect((FlutterProject.fromDirectory(directory)).manifest.isEmpty,
           true,
         );
       });
@@ -67,7 +70,7 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync(validPubspec);
         expect(
-          (await FlutterProject.fromDirectory(directory)).manifest.appName,
+          FlutterProject.fromDirectory(directory).manifest.appName,
           'hello',
         );
       });
@@ -75,15 +78,15 @@ void main() {
       testInMemory('sets up location', () async {
         final Directory directory = fs.directory('myproject');
         expect(
-          (await FlutterProject.fromDirectory(directory)).directory.absolute.path,
+          FlutterProject.fromDirectory(directory).directory.absolute.path,
           directory.absolute.path,
         );
         expect(
-          (await FlutterProject.fromPath(directory.path)).directory.absolute.path,
+          FlutterProject.fromPath(directory.path).directory.absolute.path,
           directory.absolute.path,
         );
         expect(
-          (await FlutterProject.current()).directory.absolute.path,
+          FlutterProject.current().directory.absolute.path,
           fs.currentDirectory.absolute.path,
         );
       });
@@ -340,6 +343,37 @@ void main() {
       });
     });
   });
+
+  group('Regression test for invalid pubspec', () {
+    Testbed testbed;
+
+    setUp(() {
+      testbed = Testbed();
+    });
+
+    test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+# Hello, World
+''');
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      expect(flutterProject.builders, null);
+    }));
+
+    test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
+      fs.file('pubspec.yaml')
+        ..createSync()
+        ..writeAsStringSync(r'''
+# Hello, World
+name: foo_bar
+''');
+      final FlutterProject flutterProject = FlutterProject.current();
+
+      expect(flutterProject.builders, null);
+    }));
+  });
 }
 
 Future<FlutterProject> someProject() async {
@@ -380,6 +414,7 @@ flutter:
 
 /// Executes the [testMethod] in a context where the file system
 /// is in memory.
+@isTest
 void testInMemory(String description, Future<void> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = MemoryFileSystem(

@@ -30,25 +30,48 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   /// Creates a theme that can be used for
   /// [ThemeData.floatingActionButtonTheme].
   const FloatingActionButtonThemeData({
-    this.backgroundColor,
     this.foregroundColor,
+    this.backgroundColor,
+    this.focusColor,
+    this.hoverColor,
     this.elevation,
+    this.focusElevation,
+    this.hoverElevation,
     this.disabledElevation,
     this.highlightElevation,
     this.shape,
   });
 
   /// Color to be used for the unselected, enabled [FloatingActionButton]'s
+  /// foreground.
+  final Color foregroundColor;
+
+  /// Color to be used for the unselected, enabled [FloatingActionButton]'s
   /// background.
   final Color backgroundColor;
 
-  /// Color to be used for the unselected, enabled [FloatingActionButton]'s
-  /// foreground.
-  final Color foregroundColor;
+  /// The color to use for filling the button when the button has input focus.
+  final Color focusColor;
+
+  /// The color to use for filling the button when the button has a pointer
+  /// hovering over it.
+  final Color hoverColor;
 
   /// The z-coordinate to be used for the unselected, enabled
   /// [FloatingActionButton]'s elevation foreground.
   final double elevation;
+
+  /// The z-coordinate at which to place this button relative to its parent when
+  /// the button has the input focus.
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  final double focusElevation;
+
+  /// The z-coordinate at which to place this button relative to its parent when
+  /// the button is enabled and has a pointer hovering over it.
+  ///
+  /// This controls the size of the shadow below the floating action button.
+  final double hoverElevation;
 
   /// The z-coordinate to be used for the disabled [FloatingActionButton]'s
   /// elevation foreground.
@@ -64,17 +87,25 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   /// Creates a copy of this object with the given fields replaced with the
   /// new values.
   FloatingActionButtonThemeData copyWith({
-    Color backgroundColor,
     Color foregroundColor,
+    Color backgroundColor,
+    Color focusColor,
+    Color hoverColor,
     double elevation,
+    double focusElevation,
+    double hoverElevation,
     double disabledElevation,
     double highlightElevation,
     ShapeBorder shape,
   }) {
     return FloatingActionButtonThemeData(
-      backgroundColor: backgroundColor ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      focusColor: focusColor ?? this.focusColor,
+      hoverColor: hoverColor ?? this.hoverColor,
       elevation: elevation ?? this.elevation,
+      focusElevation: focusElevation ?? this.focusElevation,
+      hoverElevation: hoverElevation ?? this.hoverElevation,
       disabledElevation: disabledElevation ?? this.disabledElevation,
       highlightElevation: highlightElevation ?? this.highlightElevation,
       shape: shape ?? this.shape,
@@ -91,9 +122,13 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     if (a == null && b == null)
       return null;
     return FloatingActionButtonThemeData(
-      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       foregroundColor: Color.lerp(a?.foregroundColor, b?.foregroundColor, t),
+      backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
+      focusColor: Color.lerp(a?.focusColor, b?.focusColor, t),
+      hoverColor: Color.lerp(a?.hoverColor, b?.hoverColor, t),
       elevation: lerpDouble(a?.elevation, b?.elevation, t),
+      focusElevation: lerpDouble(a?.focusElevation, b?.focusElevation, t),
+      hoverElevation: lerpDouble(a?.hoverElevation, b?.hoverElevation, t),
       disabledElevation: lerpDouble(a?.disabledElevation, b?.disabledElevation, t),
       highlightElevation: lerpDouble(a?.highlightElevation, b?.highlightElevation, t),
       shape: ShapeBorder.lerp(a?.shape, b?.shape, t),
@@ -103,9 +138,13 @@ class FloatingActionButtonThemeData extends Diagnosticable {
   @override
   int get hashCode {
     return hashValues(
-      backgroundColor,
       foregroundColor,
+      backgroundColor,
+      focusColor,
+      hoverColor,
       elevation,
+      focusElevation,
+      hoverElevation,
       disabledElevation,
       highlightElevation,
       shape,
@@ -119,9 +158,13 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     if (other.runtimeType != runtimeType)
       return false;
     final FloatingActionButtonThemeData otherData = other;
-    return otherData.backgroundColor == backgroundColor
-        && otherData.foregroundColor == foregroundColor
+    return otherData.foregroundColor == foregroundColor
+        && otherData.backgroundColor == backgroundColor
+        && otherData.focusColor == focusColor
+        && otherData.hoverColor == hoverColor
         && otherData.elevation == elevation
+        && otherData.focusElevation == focusElevation
+        && otherData.hoverElevation == hoverElevation
         && otherData.disabledElevation == disabledElevation
         && otherData.highlightElevation == highlightElevation
         && otherData.shape == shape;
@@ -132,9 +175,13 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     const FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
 
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
     properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
+    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: defaultData.focusColor));
+    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));
+    properties.add(DiagnosticsProperty<double>('focusElevation', focusElevation, defaultValue: defaultData.focusElevation));
+    properties.add(DiagnosticsProperty<double>('hoverElevation', hoverElevation, defaultValue: defaultData.hoverElevation));
     properties.add(DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: defaultData.disabledElevation));
     properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));

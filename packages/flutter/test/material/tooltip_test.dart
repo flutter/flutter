@@ -537,6 +537,12 @@ void main() {
   testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
     const Duration waitDuration = Duration(milliseconds: 0);
     const Duration showDuration = Duration(milliseconds: 1500);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
+
     await tester.pumpWidget(
       MaterialApp(
         home: Center(
@@ -554,7 +560,6 @@ void main() {
     );
 
     final Finder tooltip = find.byType(Tooltip);
-    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.moveTo(Offset.zero);
     await tester.pump();
     await gesture.moveTo(tester.getCenter(tooltip));
@@ -575,6 +580,7 @@ void main() {
     // Wait for it to disappear.
     await tester.pump(showDuration);
     await tester.pumpAndSettle();
+    await gesture.removePointer();
     expect(find.text(tooltipText), findsNothing);
   });
 
@@ -838,6 +844,52 @@ void main() {
     ]));
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+  testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Tooltip(message: 'message',).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      '"message"',
+      'position: below',
+    ]);
+  });
+  testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    // Not checking controller, inputFormatters, focusNode
+    const Tooltip(
+      key: ValueKey<String>('foo'),
+      message: 'message',
+      decoration: BoxDecoration(),
+      waitDuration: Duration(seconds: 1),
+      showDuration: Duration(seconds: 2),
+      padding: EdgeInsets.zero,
+      height: 100.0,
+      excludeFromSemantics: true,
+      preferBelow: false,
+      verticalOffset: 50.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      '"message"',
+      'height: 100.0',
+      'padding: EdgeInsets.zero',
+      'vertical offset: 50.0',
+      'position: above',
+      'semantics: excluded',
+      'wait duration: 0:00:01.000000',
+      'show duration: 0:00:02.000000',
+    ]);
   });
 }
 
