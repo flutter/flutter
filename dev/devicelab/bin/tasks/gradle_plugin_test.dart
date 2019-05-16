@@ -308,7 +308,8 @@ Future<void> _runGradleTask(
     print('stderr:');
     print(result.stderr);
   }
-  if (result.exitCode != 0) throw 'Gradle exited with error';
+  if (result.exitCode != 0)
+    throw 'Gradle exited with error';
 }
 
 Future<ProcessResult> _resultOfGradleTask(
