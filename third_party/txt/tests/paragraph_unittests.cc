@@ -2200,6 +2200,65 @@ TEST_F(ParagraphTest,
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeStrut)) {
+  const char* text = "Chinese 字典";
+
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.strut_enabled = true;
+  paragraph_style.strut_font_families.push_back("Roboto");
+  paragraph_style.strut_font_size = 14;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families.push_back("Noto Sans CJK JP");
+  text_style.font_size = 20;
+  text_style.color = SK_ColorBLACK;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(550);
+
+  paragraph->Paint(GetCanvas(), 0, 0);
+
+  SkPaint paint;
+  paint.setStyle(SkPaint::kStroke_Style);
+  paint.setAntiAlias(true);
+  paint.setStrokeWidth(1);
+
+  std::vector<txt::Paragraph::TextBox> strut_boxes =
+      paragraph->GetRectsForRange(0, 10, Paragraph::RectHeightStyle::kStrut,
+                                  Paragraph::RectWidthStyle::kMax);
+  ASSERT_EQ(strut_boxes.size(), 1ull);
+  const SkRect& strut_rect = strut_boxes.front().rect;
+  paint.setColor(SK_ColorRED);
+  GetCanvas()->drawRect(strut_rect, paint);
+
+  std::vector<txt::Paragraph::TextBox> tight_boxes =
+      paragraph->GetRectsForRange(0, 10, Paragraph::RectHeightStyle::kTight,
+                                  Paragraph::RectWidthStyle::kMax);
+  ASSERT_EQ(tight_boxes.size(), 1ull);
+  const SkRect& tight_rect = tight_boxes.front().rect;
+  paint.setColor(SK_ColorGREEN);
+  GetCanvas()->drawRect(tight_rect, paint);
+
+  EXPECT_FLOAT_EQ(strut_rect.left(), 0);
+  EXPECT_FLOAT_EQ(strut_rect.top(), 10.611719);
+  EXPECT_FLOAT_EQ(strut_rect.right(), 118.60547);
+  EXPECT_FLOAT_EQ(strut_rect.bottom(), 27.017969);
+
+  ASSERT_TRUE(tight_rect.contains(strut_rect));
+
+  ASSERT_TRUE(Snapshot());
+}
+
 SkRect GetCoordinatesForGlyphPosition(const txt::Paragraph& paragraph,
                                       size_t pos) {
   std::vector<txt::Paragraph::TextBox> boxes =
