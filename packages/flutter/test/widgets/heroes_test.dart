@@ -124,6 +124,55 @@ class MutatingRoute extends MaterialPageRoute<void> {
   }
 }
 
+class _IsInvisible extends Matcher {
+  const _IsInvisible({
+    this.maintainState = true,
+    this.maintainAnimation = true,
+    this.maintainSize = true,
+    this.maintainSemantics = false,
+    this.maintainInteractivity = false
+    });
+
+  final bool maintainState;
+  final bool maintainAnimation;
+  final bool maintainSize;
+  final bool maintainSemantics;
+  final bool maintainInteractivity;
+
+  @override
+  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
+    final Iterable<Element> nodes = finder.evaluate();
+    if (nodes.length != 1)
+      return false;
+    bool result = false;
+    nodes.single.visitAncestorElements((Element ancestor) {
+      final Widget widget = ancestor.widget;
+      if (widget is Visibility && !widget.visible) {
+        result = widget.maintainState == maintainState
+          && widget.maintainAnimation == maintainAnimation
+          && widget.maintainSize == maintainSize
+          && widget.maintainSemantics == maintainSemantics
+          && widget.maintainInteractivity == maintainInteractivity;
+        return false;
+      }
+      return true;
+    });
+    return result;
+  }
+
+  @override
+  Description describe(Description description) {
+    return description.add('inside a Visibility widget, '
+      'maintainState = $maintainState, '
+      'maintainAnimation = $maintainAnimation, '
+      'maintainSize = $maintainSize, '
+      'maintainSemantics = $maintainSemantics, '
+      'maintaintInteractivity = $maintainInteractivity');
+  }
+}
+
+const Matcher _isInvisible = _IsInvisible();
+
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({ Key key, this.value = '123' }) : super(key: key);
   final String value;
@@ -167,17 +216,23 @@ void main() {
     // at this stage, the heroes have just gone on their journey, we are
     // seeing them at t=16ms. The original page no longer contains the hero.
 
-    expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(firstKey), _isInvisible);
+
+    expect(find.byKey(secondKey), findsOneWidget);
     expect(find.byKey(secondKey), isNotInCard);
+    expect(find.byKey(secondKey), isOnstage);
 
     await tester.pump();
 
     // t=32ms for the journey. Surely they are still at it.
 
-    expect(find.byKey(firstKey), findsNothing);
-    expect(find.byKey(secondKey), isOnstage);
+    expect(find.byKey(firstKey), _isInvisible);
+
+    expect(find.byKey(secondKey), findsOneWidget);
+
+    expect(find.byKey(secondKey), findsOneWidget);
     expect(find.byKey(secondKey), isNotInCard);
+    expect(find.byKey(secondKey), isOnstage);
 
     await tester.pump(const Duration(seconds: 1));
 
@@ -215,7 +270,7 @@ void main() {
     // at this stage, the heroes have just gone on their journey, we are
     // seeing them at t=16ms. The original page no longer contains the hero.
 
-    expect(find.byKey(secondKey), findsNothing);
+    expect(find.byKey(secondKey), _isInvisible);
     expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isNotInCard);
 
@@ -223,7 +278,7 @@ void main() {
 
     // t=32ms for the journey. Surely they are still at it.
 
-    expect(find.byKey(secondKey), findsNothing);
+    expect(find.byKey(secondKey), _isInvisible);
     expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isNotInCard);
 
@@ -370,7 +425,7 @@ void main() {
     expect(log, isEmpty);
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(find.text('foo'), findsNothing);
+    expect(find.text('foo'), _isInvisible);
     await tester.tap(find.text('bar', skipOffstage: false));
     expect(log, isEmpty);
 
@@ -497,9 +552,9 @@ void main() {
 
     // At this point the hero widgets have been replaced by placeholders
     // and the destination hero has been moved to the overlay.
-    expect(find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)), findsNothing);
+    expect(find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)), _isInvisible);
     expect(find.descendant(of: find.byKey(routeTwoKey), matching: find.byKey(secondKey)), findsNothing);
-    expect(find.byKey(firstKey), findsNothing);
+    expect(find.byKey(firstKey), _isInvisible);
     expect(find.byKey(secondKey), isOnstage);
 
     // The duration of a MaterialPageRoute's transition is 300ms.
@@ -966,10 +1021,23 @@ void main() {
     await tester.pump(const Duration(milliseconds: 100));
     expect(tester.getTopLeft(find.byKey(heroABKey)).dy, 100.0);
 
-    // One Opacity widget per Hero, only one now has opacity 0.0
-    final Iterable<RenderOpacity> renderers = tester.renderObjectList(find.byType(Opacity));
-    final Iterable<double> opacities = renderers.map<double>((RenderOpacity r) => r.opacity);
-    expect(opacities.singleWhere((double opacity) => opacity == 0.0), 0.0);
+    // One Opacity widget per Hero, only one is Visible
+
+    bool _isVisible(Element node) {
+      bool isVisible = true;
+      node.visitAncestorElements((Element ancestor) {
+          final RenderObject r = ancestor.renderObject;
+          if(r is RenderOpacity && r.opacity == 0) {
+            isVisible = false;
+            return false;
+          }
+          return true;
+      });
+      return isVisible;
+    }
+
+    final Iterable<Element> heroElements = find.descendant(of: find.byType(ListView), matching: find.byType(Container)).evaluate();
+    expect(heroElements.where(_isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
@@ -1038,7 +1106,7 @@ void main() {
 
     // Push flight underway.
     await tester.pump(const Duration(milliseconds: 100));
-    expect(find.text('456'), findsOneWidget);
+    expect(find.text('456'), findsNWidgets(2));
 
     // Push flight finished.
     await tester.pump(const Duration(milliseconds: 300));
@@ -1426,7 +1494,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.text('foo'), findsNothing);
+    expect(find.text('foo'), _isInvisible);
     expect(find.text('bar'), findsNothing);
     expect(find.text('baz'), findsOneWidget);
   });
@@ -1709,14 +1777,14 @@ void main() {
     await tester.pump();
 
     // The hero started flying.
-    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(largeContainer), _isInvisible);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
 
     await tester.pump(const Duration(milliseconds: 100));
 
     // The hero is in-flight.
-    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(largeContainer), _isInvisible);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
     final Size size = tester.getSize(find.byKey(smallContainer));
@@ -1878,14 +1946,14 @@ void main() {
     await tester.pump();
 
     // The hero started flying.
-    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(largeContainer), _isInvisible);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
 
     await tester.pump(const Duration(milliseconds: 100));
 
     // The hero is in-flight.
-    expect(find.byKey(largeContainer), findsNothing);
+    expect(find.byKey(largeContainer), _isInvisible);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
     final Size size = tester.getSize(find.byKey(smallContainer));

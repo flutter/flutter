@@ -12,6 +12,7 @@ import 'overlay.dart';
 import 'pages.dart';
 import 'routes.dart';
 import 'transitions.dart';
+import 'visibility.dart';
 
 /// Signature for a function that takes two [Rect] instances and returns a
 /// [RectTween] that transitions between them.
@@ -285,21 +286,20 @@ class Hero extends StatefulWidget {
 class _HeroState extends State<Hero> {
   final GlobalKey _key = GlobalKey();
   Size _placeholderSize;
+  bool _shouldIncludeChild = true;
 
-  void startFlight() {
+  // `shouldIncludeChildInPlaceholder` should be false for to hero
+  void startFlight({ bool shouldIncludedChildInPlaceholder = true }) {
+    _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
     final RenderBox box = context.findRenderObject();
     assert(box != null && box.hasSize);
-    setState(() {
-      _placeholderSize = box.size;
-    });
+    setState(() => _placeholderSize = box.size);
   }
 
   void endFlight() {
     if (mounted) {
-      setState(() {
-        _placeholderSize = null;
-      });
+      setState(() => _placeholderSize = null);
     }
   }
 
@@ -310,20 +310,32 @@ class _HeroState extends State<Hero> {
       'A Hero widget cannot be the descendant of another Hero widget.'
     );
 
-    if (_placeholderSize != null) {
-      if (widget.placeholderBuilder == null) {
-        return SizedBox(
-          width: _placeholderSize.width,
-          height: _placeholderSize.height,
-        );
-      } else {
-        return widget.placeholderBuilder(context, widget.child);
-      }
-    }
-    return KeyedSubtree(
+    final Widget keyedChild = KeyedSubtree(
       key: _key,
       child: widget.child,
     );
+
+    // If this hero is not in flight.
+    if (_placeholderSize == null) {
+      return keyedChild;
+    }
+
+    if (widget.placeholderBuilder != null) {
+      return widget.placeholderBuilder(context, widget.child);
+    }
+
+    return _shouldIncludeChild
+      ? Visibility(
+          visible: false,
+          maintainState: true,
+          maintainAnimation: true,
+          maintainSize: true,
+          child: keyedChild
+        )
+        : SizedBox(
+          width: _placeholderSize.width,
+          height: _placeholderSize.height
+        );
   }
 }
 
@@ -496,8 +508,8 @@ class _HeroFlight {
     else
       _proxyAnimation.parent = manifest.animation;
 
-    manifest.fromHero.startFlight();
-    manifest.toHero.startFlight();
+    manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: manifest.type == HeroFlightDirection.push);
+    manifest.toHero.startFlight(shouldIncludedChildInPlaceholder: false);
 
     heroRectTween = _doCreateRectTween(
       _boundingBoxFor(manifest.fromHero.context, manifest.fromRoute.subtreeContext),
@@ -543,7 +555,7 @@ class _HeroFlight {
 
       if (manifest.fromHero != newManifest.toHero) {
         manifest.fromHero.endFlight();
-        newManifest.toHero.startFlight();
+        newManifest.toHero.startFlight(shouldIncludedChildInPlaceholder: false);
         heroRectTween = _doCreateRectTween(
             heroRectTween.end,
             _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
@@ -574,8 +586,8 @@ class _HeroFlight {
       manifest.toHero.endFlight();
 
       // Let the heroes in each of the routes rebuild with their placeholders.
-      newManifest.fromHero.startFlight();
-      newManifest.toHero.startFlight();
+      newManifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: newManifest.type == HeroFlightDirection.push);
+      newManifest.toHero.startFlight(shouldIncludedChildInPlaceholder: false);
 
       // Let the transition overlay on top of the routes also rebuild since
       // we cleared the old shuttle.

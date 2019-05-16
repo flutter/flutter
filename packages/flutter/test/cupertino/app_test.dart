@@ -37,8 +37,10 @@ void main() {
 
     // During the hero transition, the hero widget is lifted off of both
     // page routes and exists as its own overlay on top of both routes.
-    expect(find.widgetWithText(CupertinoPageRoute, 'foo'), findsNothing);
     expect(find.widgetWithText(Navigator, 'foo'), findsOneWidget);
+
+    final Visibility widget = tester.widget(find.widgetWithText(Visibility, 'foo'));
+    expect(widget.visible, isFalse);
   });
 
   testWidgets('Has default cupertino localizations', (WidgetTester tester) async {
