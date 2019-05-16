@@ -121,7 +121,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'c5afcce6d7972b20eded5b090b489b76622e8ff3',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + 'bc8826aab0fc4f7e17b21f64dec4c8a28ea42e3e',
 
    # Fuchsia compatibility
    #
@@ -364,7 +364,7 @@ deps = {
    Var('chromium_git') + '/external/colorama.git' + '@' + '799604a1041e9b3bc5d2789ecbd7e8db2e18e6b8',
 
   'src/third_party/freetype2':
-   Var('fuchsia_git') + '/third_party/freetype2' + '@' + 'a10b062df0c8958d69377aa04ea6554a9961a111',
+   Var('fuchsia_git') + '/third_party/freetype2' + '@' + 'edab12c07ac05d1185616688f338b1ad15936796',
 
   'src/third_party/root_certificates':
    Var('dart_git') + '/root_certificates.git' + '@' + Var('dart_root_certificates_rev'),
@@ -380,6 +380,9 @@ deps = {
 
   'src/third_party/wuffs':
    Var('fuchsia_git') + '/third_party/wuffs' + '@' + 'a71538baa8f1f4053176c0d9f31bc12fd4e8e71b',
+
+  'src/third_party/fontconfig/src':
+   Var('chromium_git') + '/external/fontconfig.git' + '@' + 'c336b8471877371f0190ba06f7547c54e2b890ba',
 
   'src/third_party/gyp':
    Var('chromium_git') + '/external/gyp.git' + '@' + '4801a5331ae62da9769a327f11c4213d32fb0dad',
