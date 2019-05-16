@@ -31,7 +31,8 @@ class CanvasGradient : public Shader {
   void initLinear(const tonic::Float32List& end_points,
                   const tonic::Int32List& colors,
                   const tonic::Float32List& color_stops,
-                  SkTileMode tile_mode);
+                  SkTileMode tile_mode,
+                  const tonic::Float64List& matrix4);
 
   void initRadial(double center_x,
                   double center_y,

@@ -1213,6 +1213,7 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
+    Float64List matrix4, // TODO(yjbanov): Implement this https://github.com/flutter/flutter/issues/32819
   ]) =>
       _GradientLinear(from, to, colors, colorStops, tileMode);
 

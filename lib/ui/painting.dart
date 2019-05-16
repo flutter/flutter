@@ -2722,25 +2722,31 @@ class Gradient extends Shader {
   /// If `from`, `to`, `colors`, or `tileMode` are null, or if `colors` or
   /// `colorStops` contain null values, this constructor will throw a
   /// [NoSuchMethodError].
+  ///
+  /// If `matrix4` is provided, the gradient fill will be transformed by the
+  /// specified 4x4 matrix relative to the local coordinate system. `matrix4` must
+  /// be a column-major matrix packed into a list of 16 values.
   Gradient.linear(
     Offset from,
     Offset to,
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
+    Float64List matrix4,
   ]) : assert(_offsetIsValid(from)),
        assert(_offsetIsValid(to)),
        assert(colors != null),
        assert(tileMode != null),
+       assert(matrix4 == null || _matrix4IsValid(matrix4)),
        super._() {
     _validateColorStops(colors, colorStops);
     final Float32List endPointsBuffer = _encodeTwoPoints(from, to);
     final Int32List colorsBuffer = _encodeColorList(colors);
     final Float32List colorStopsBuffer = colorStops == null ? null : Float32List.fromList(colorStops);
     _constructor();
-    _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index);
+    _initLinear(endPointsBuffer, colorsBuffer, colorStopsBuffer, tileMode.index, matrix4);
   }
-  void _initLinear(Float32List endPoints, Int32List colors, Float32List colorStops, int tileMode) native 'Gradient_initLinear';
+  void _initLinear(Float32List endPoints, Int32List colors, Float32List colorStops, int tileMode, Float64List matrix4) native 'Gradient_initLinear';
 
   /// Creates a radial gradient centered at `center` that ends at `radius`
   /// distance from the center.
