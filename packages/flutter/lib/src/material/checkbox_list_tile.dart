@@ -126,7 +126,7 @@ import 'theme_data.dart';
 /// }
 /// ```
 /// ```dart
-/// bool isSelected = false;
+/// bool _isSelected = false;
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -135,10 +135,10 @@ import 'theme_data.dart';
 ///       child: LinkedLabelCheckbox(
 ///         label: 'Linked, tappable label text',
 ///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: isSelected,
+///         value: _isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {
-///             isSelected = newValue;
+///             _isSelected = newValue;
 ///           });
 ///         },
 ///       ),
@@ -199,7 +199,7 @@ import 'theme_data.dart';
 /// }
 /// ```
 /// ```dart
-/// bool isSelected = false;
+/// bool _isSelected = false;
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -208,10 +208,10 @@ import 'theme_data.dart';
 ///       child: LabeledCheckbox(
 ///         label: 'This is the label text',
 ///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: isSelected,
+///         value: _isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {
-///             isSelected = newValue;
+///             _isSelected = newValue;
 ///           });
 ///         },
 ///       ),

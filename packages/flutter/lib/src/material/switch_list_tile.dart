@@ -136,7 +136,7 @@ enum _SwitchListTileType { material, adaptive }
 /// }
 /// ```
 /// ```dart
-/// bool isSelected = false;
+/// bool _isSelected = false;
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -145,10 +145,10 @@ enum _SwitchListTileType { material, adaptive }
 ///       child: LinkedLabelSwitch(
 ///         label: 'Linked, tappable label text',
 ///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: isSelected,
+///         value: _isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {
-///             isSelected = newValue;
+///             _isSelected = newValue;
 ///           });
 ///         },
 ///       ),
@@ -211,7 +211,7 @@ enum _SwitchListTileType { material, adaptive }
 /// }
 /// ```
 /// ```dart
-/// bool isSelected = false;
+/// bool _isSelected = false;
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -220,10 +220,10 @@ enum _SwitchListTileType { material, adaptive }
 ///       child: LabeledSwitch(
 ///         label: 'This is the label text',
 ///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
-///         value: isSelected,
+///         value: _isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {
-///             isSelected = newValue;
+///             _isSelected = newValue;
 ///           });
 ///         },
 ///       ),

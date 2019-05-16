@@ -147,7 +147,7 @@ import 'theme_data.dart';
 /// }
 /// ```
 /// ```dart
-/// bool isRadioSelected = false;
+/// bool _isRadioSelected = false;
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -159,10 +159,10 @@ import 'theme_data.dart';
 ///           label: 'First tappable label text',
 ///           padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: true,
-///           groupValue: isRadioSelected,
+///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
 ///             setState(() {
-///               isRadioSelected = newValue;
+///               _isRadioSelected = newValue;
 ///             });
 ///           },
 ///         ),
@@ -170,10 +170,10 @@ import 'theme_data.dart';
 ///           label: 'Second tappable label text',
 ///           padding: EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: false,
-///           groupValue: isRadioSelected,
+///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
 ///             setState(() {
-///               isRadioSelected = newValue;
+///               _isRadioSelected = newValue;
 ///             });
 ///           },
 ///         ),
@@ -239,7 +239,7 @@ import 'theme_data.dart';
 /// }
 /// ```
 /// ```dart
-/// bool isRadioSelected = false;
+/// bool _isRadioSelected = false;
 ///
 /// @override
 /// Widget build(BuildContext context) {
@@ -249,23 +249,23 @@ import 'theme_data.dart';
 ///       children: <LabeledRadio>[
 ///         LabeledRadio(
 ///           label: 'This is the first label text',
-///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: true,
-///           groupValue: isRadioSelected,
+///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
 ///             setState(() {
-///               isRadioSelected = newValue;
+///               _isRadioSelected = newValue;
 ///             });
 ///           },
 ///         ),
 ///         LabeledRadio(
 ///           label: 'This is the second label text',
-///           padding: EdgeInsets.symmetric(horizontal: 5.0),
+///           padding: const EdgeInsets.symmetric(horizontal: 5.0),
 ///           value: false,
-///           groupValue: isRadioSelected,
+///           groupValue: _isRadioSelected,
 ///           onChanged: (bool newValue) {
 ///             setState(() {
-///               isRadioSelected = newValue;
+///               _isRadioSelected = newValue;
 ///             });
 ///           },
 ///         ),
