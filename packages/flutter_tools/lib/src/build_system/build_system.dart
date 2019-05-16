@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
@@ -27,6 +30,20 @@ String getNameForBuildMode(BuildMode buildMode) {
       return 'dynamic-release';
   }
   return 'any';
+}
+
+/// Returns the [BuildMode] for a particular `name`.
+BuildMode getBuildModeForName(String name) {
+  switch (name) {
+    case 'debug':
+      return BuildMode.debug;
+    case 'profile':
+      return BuildMode.profile;
+    case 'release':
+      return BuildMode.release;
+    default:
+      throw ArgumentError('$name is not a valid build mode');
+  }
 }
 
 /// Returns the host folder name for a particular target platform.
@@ -106,15 +123,13 @@ typedef BuildInvocation = Future<void> Function(
 /// of at least one of the magic ambient value and zero or more magic local
 /// values.
 ///
-/// To determine if a target needs to be executed, the [BuildSystem] performs a
-/// timestamp analysis of the evaluated input files. If any date after an output
-/// stamp or are otherwise missing, the target is re-run.
+/// To determine if a target needs to be executed, the [BuildSystem] performs
+/// an md5 hash of the file contents.
 ///
 /// Because the set of inputs or outputs might change based on the invocation,
-/// each target stores a JSON file containing the input timestamps and named
-/// after the target invocation joined with target platform and mode.
-/// The modified time of the file stores the tool invocation time, and the
-/// output files are stored as well to detect deleted/modified files.
+/// each target stores a JSON file containing the input hash for each input.
+/// The name of each stamp is the target name joined with target platform and
+/// mode. The output files are also stored to protect against deleted files.
 ///
 ///
 ///  file: `example_target.debug.android_arm64`
@@ -122,8 +137,8 @@ typedef BuildInvocation = Future<void> Function(
 /// {
 ///   "build_number": 12345,
 ///   "inputs": [
-///      ["absolute/path/foo", 123456],
-///      ["absolute/path/bar", 123456],
+///      ["absolute/path/foo", "abcdefg"],
+///      ["absolute/path/bar", "12345g"],
 ///      ...
 ///    ],
 ///    "outputs": [
@@ -168,30 +183,44 @@ class Target {
   /// If left empty, this supports all modes.
   final List<BuildMode> modes;
 
-  /// Check if we can skip the target invocation.
-  bool canSkipInvocation(List<FileSystemEntity> inputs, Environment environment) {
+  /// Check if we can skip the target invocation and collect shas for all inputs.
+  _InvocationEvaluation _canSkipInvocation(List<FileSystemEntity> inputs, Environment environment) {
     // A phony target can never be skipped. This might be necessary if we're
     // not aware of its inputs or outputs, or they are tracked by a separate
     //  system.
     if (phony) {
-      return false;
+      return _InvocationEvaluation(false, const <String, String>{});
     }
-    final File stamp = _findStampFile(name, environment);
 
-    /// Case 1: The stamp file does not exist, then we cannot skip the target.
+    bool canSkip = true;
+    final File stamp = _findStampFile(name, environment);
+    final Map<String, String> previousStamps = <String, String>{};
+    final Map<String, String> currentStamps = <String, String>{};
+
+    // If the stamp file doesn't exist, we haven't run this step before.
     if (!stamp.existsSync()) {
-      return false;
+      canSkip = false;
+    } else {
+      final Map<String, Object> values = json.decode(stamp.readAsStringSync());
+      for (List<Object> pair in values['inputs']) {
+        assert(pair.length == 2);
+        previousStamps[pair.first] = pair.last;
+      }
+      // Check that the last set of output files have not been deleted since the
+      // last invocation. While the set of output files can vary based on inputs,
+      // it should be safe to skip if none of the inputs changed.
+      for (String absoluteOutputPath in values['outputs']) {
+        final FileStat fileStat = fs.statSync(absoluteOutputPath);
+        // Case 5: output was deleted for some reason.
+        if (fileStat == null) {
+          canSkip = false;
+        }
+      }
     }
-    final FileStat stampStat = stamp.statSync();
-    final Map<String, Object> values = json.decode(stamp.readAsStringSync());
-    final Map<String, int> inputStamps = <String, int>{};
-    for (List<Object> pair in values['inputs']) {
-      assert(pair.length == 2);
-      inputStamps[pair.first] = pair.last;
-    }
-    // Case 2: Files were removed.
-    if (inputs.length != inputStamps.length) {
-      return false;
+
+    // We've added or removed files, so we can't skip.
+    if (inputs.length != previousStamps.length) {
+      canSkip = false;
     }
 
     // Check that the current input files have not been changed since the last
@@ -199,41 +228,22 @@ class Target {
     for (File inputFile in inputs) {
       assert(inputFile.existsSync());
       final String absolutePath = inputFile.absolute.path;
-      final int previousTimestamp = inputStamps[absolutePath];
-      // Case 3: A new input was added.
-      if (previousTimestamp == null) {
-        return false;
+      final String previousSha = previousStamps[absolutePath];
+      final String currentSha = md5.convert(inputFile.readAsBytesSync()).bytes.toString();
+      // Shas are not identical or old sha was missing.
+      if (currentSha != previousSha) {
+        canSkip = false;
       }
-      final int currentTimestamp =
-          inputFile.statSync().modified.millisecondsSinceEpoch;
-      // Case 4: timestamps are not identical.
-      if (previousTimestamp != currentTimestamp) {
-        return false;
-      }
+      currentStamps[absolutePath] = currentSha;
     }
-
-    // Check that the last set of output files have no been changed since the
-    // last invocation. While the set of output files can vary based on inputs,
-    // it should be safe to skip if none of the inputs changed.
-    for (String absoluteOutputPath in values['outputs']) {
-      final FileStat fileStat = fs.statSync(absoluteOutputPath);
-      // Case 5: output was deleted for some reason.
-      if (fileStat == null) {
-        return false;
-      }
-      // Case 6: File was modified after stamp file was written.
-      if (fileStat.modified.isAfter(stampStat.modified)) {
-        return false;
-      }
-    }
-    // Once we've reached this point, it should be safe to skip the step.
-    return true;
+    return _InvocationEvaluation(canSkip, currentStamps);
   }
 
   void writeStamp(
     List<FileSystemEntity> inputs,
     List<FileSystemEntity> outputs,
     Environment environment,
+    Map<String, String> shas,
   ) {
     if (phony) {
       return;
@@ -244,12 +254,10 @@ class Target {
     }
     final List<List<Object>> inputStamps = <List<Object>>[];
     for (FileSystemEntity input in inputs) {
-      if (!input.existsSync())  {
-        throw Exception('$name: Did not find expected input ${input.path}');
-      }
+      assert(shas[input.absolute.path] != null);
       inputStamps.add(<Object>[
         input.absolute.path,
-        input.statSync().modified.millisecondsSinceEpoch,
+        shas[input.absolute.path],
       ]);
     }
     final List<String> outputStamps = <String>[];
@@ -338,6 +346,16 @@ class Target {
   }
 }
 
+class _InvocationEvaluation {
+  _InvocationEvaluation(this.canSkip, this.shas);
+
+  /// Whether this invocation can be skipped.
+  final bool canSkip;
+
+  /// The sha for each input file.
+  final Map<String, String> shas;
+}
+
 /// The [Environment] contains specical paths configured by the user.
 ///
 /// These are defined by a top level configuration or build arguments
@@ -407,7 +425,7 @@ class Environment {
       projectDir: projectDir,
       stampDir: stampDir ?? projectDir.childDirectory('build'),
       buildDir: buildDir ?? projectDir.childDirectory('build'),
-      cacheDir: cacheDir ?? Cache.instance.getCacheArtifacts(),
+      cacheDir: cacheDir ?? Cache.instance.getCacheArtifacts().childDirectory('engine'),
       copyDir: copyDir ?? projectDir
         .childDirectory(getHostFolderForTargetPlaltform(targetPlatform))
         .childDirectory('flutter'),
@@ -481,7 +499,9 @@ class BuildSystem {
     // we can safely skip it. Otherwise, we must invoke the associated rule.
     for (Target target in ordered) {
       final List<FileSystemEntity> inputs = target.resolveInputs(environment);
-      if (target.canSkipInvocation(inputs, environment)) {
+      final _InvocationEvaluation evaluation = target._canSkipInvocation(inputs, environment);
+
+      if (evaluation.canSkip) {
         printTrace('Skipping target: ${target.name}');
         continue;
       }
@@ -490,9 +510,7 @@ class BuildSystem {
 
       printTrace('${target.name}: Complete');
       final List<FileSystemEntity> outputs = target.resolveOutputs(environment);
-      // Write the stamp file containing the timestamps of all output, input
-      // files, as well as a build number.
-      target.writeStamp(inputs, outputs, environment);
+      target.writeStamp(inputs, outputs, environment, evaluation.shas);
     }
   }
 

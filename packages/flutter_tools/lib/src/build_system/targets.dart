@@ -9,7 +9,6 @@ import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../compile.dart';
 import '../devfs.dart';
-import '../flutter_manifest.dart';
 import '../project.dart';
 
 import 'build_system.dart';
@@ -39,14 +38,13 @@ List<File> listAssets(Environment environment) {
 /// List all output files in a project by parsing the asset manfiest and
 /// replacing the path with the output directory.
 List<File> listOutputAssets(Environment environment) {
-  final File pubspec = fs.file(environment.projectDir.childFile('pubpsec.yaml'));
-  final FlutterManifest manifest = FlutterManifest.createFromPath(pubspec.path);
+  final List<File> inputs = listAssets(environment);
   final List<File> results = <File>[];
-  for (Uri uri in manifest.assets) {
+  for (File input in inputs) {
     final String assetName = fs.path.join(
       environment.buildDir.path,
       'flutter_assets',
-      fs.path.basename(uri.toFilePath()),
+      fs.path.basename(input.path),
     );
     results.add(fs.file(assetName));
   }
