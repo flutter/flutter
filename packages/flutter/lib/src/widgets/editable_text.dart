@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:ui' as ui;
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -1184,12 +1185,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         curve: _caretAnimationCurve,
       );
       final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
-      // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling.
+      // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling. Include the height of the selection caret if it's
+      // being shown so that it remains visible.
+      final double bottomSpacing = math.max(
+        widget.scrollPadding.bottom,
+        _selectionOverlay?.selectionControls != null ? kMinimumInteractiveSize.height : 0,
+      );
       final Rect inflatedRect = Rect.fromLTRB(
           newCaretRect.left - widget.scrollPadding.left,
           newCaretRect.top - widget.scrollPadding.top,
           newCaretRect.right + widget.scrollPadding.right,
-          newCaretRect.bottom + widget.scrollPadding.bottom,
+          newCaretRect.bottom + bottomSpacing,
       );
       _editableKey.currentContext.findRenderObject().showOnScreen(
         rect: inflatedRect,

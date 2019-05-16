@@ -22,6 +22,8 @@ import 'transitions.dart';
 
 export 'package:flutter/services.dart' show TextSelectionDelegate;
 
+const Size kMinimumInteractiveSize = Size(48.0, 48.0);
+
 /// A duration that controls how often the drag selection update callback is
 /// called.
 const Duration _kDragSelectionUpdateThrottle = Duration(milliseconds: 50);
