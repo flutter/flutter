@@ -82,12 +82,12 @@ import 'theme_data.dart';
 /// nodes into one node in the semantics tree. Therefore, RadioListTile will
 /// throw an error if any of its children requires its own [Semantics] node.
 ///
-/// Consider nesting a [RichText] widget as a descendant of RadioListTile.
-/// [RichText] has an embedded gesture recognizer that requires its own
-/// [Semantics] node, which directly conflicts with RadioListTile's desire
-/// to merge all its descendants' semantic nodes into one. Therefore, it may be
-/// necessary to create a custom radio tile widget to accommodate similar use
-/// cases.
+/// For example, you cannot nest a [RichText] widget as a descendant of
+/// RadioListTile. [RichText] has an embedded gesture recognizer that
+/// requires its own [Semantics] node, which directly conflicts with
+/// RadioListTile's desire to merge all its descendants' semantic nodes
+/// into one. Therefore, it may be necessary to create a custom radio tile
+/// widget to accommodate similar use cases.
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///

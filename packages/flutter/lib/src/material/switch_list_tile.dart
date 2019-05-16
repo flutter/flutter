@@ -69,21 +69,20 @@ enum _SwitchListTileType { material, adaptive }
 ///
 /// ## Semantics in SwitchListTile
 ///
-/// Since SwitchListTile wraps its children with a [MergeSemantics] widget, it
-/// wants to merge its descendant [Semantics] nodes to appear as just one
-/// interactive node in the semantics tree.
+/// Since the entirety of the SwitchListTile is interactive, it should represent
+/// itself as a single interactive entity.
 ///
-/// Thus, SwitchListTile will not work with children widgets that need to be a
-/// standalone interactive element. One example would be the [RichText]
-/// widget, which has an embedded gesture recognizer configured to have
-/// its own [Semantics] node. Thus, you may need to create a custom widget to
-/// accommodate your needs.
+/// To do so, a SwitchListTile widget wraps its children with a [MergeSemantics]
+/// widget. [MergeSemantics] will attempt to merge its descendant [Semantics]
+/// nodes into one node in the semantics tree. Therefore, SwitchListTile will
+/// throw an error if any of its children requires its own [Semantics] node.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
-///
-/// Here is an example of a custom labeled switch widget, called
-/// LinkedLabelSwitch, that includes an interactive [RichText] widget that
-/// handles tap gestures.
+/// For example, you cannot nest a [RichText] widget as a descendant of
+/// SwitchListTile. [RichText] has an embedded gesture recognizer that
+/// requires its own [Semantics] node, which directly conflicts with
+/// SwitchListTile's desire to merge all its descendants' semantic nodes
+/// into one. Therefore, it may be necessary to create a custom radio tile
+/// widget to accommodate similar use cases.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';
