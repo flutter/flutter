@@ -63,13 +63,13 @@ Widget buildFrame({
             isDense: isDense,
             isExpanded: isExpanded,
             underline: underline,
-            items: items?.map<DropdownMenuItem<String>>((String item) {
+            items: items == null ? null : items.map<DropdownMenuItem<String>>((String item) {
               return DropdownMenuItem<String>(
                 key: ValueKey<String>(item),
                 value: item,
                 child: Text(item, key: ValueKey<String>(item + 'Text')),
               );
-            })?.toList(),
+            }).toList(),
           ),
         ),
       ),
