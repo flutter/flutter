@@ -1089,20 +1089,34 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
     Object debugOwner,
   }) : super(debugOwner: debugOwner);
 
-  bool _exceededDeadline = false;
+  bool _exceededLongpressDeadline = false;
+  Timer _longpressTimer;
 
   @override
-  void didExceedDeadline() {
-    _exceededDeadline = true;
-    super.didExceedDeadline();
+  void addAllowedPointer(PointerDownEvent event) {
+    _exceededLongpressDeadline = false;
+    _longpressTimer = Timer(kLongPressTimeout, () {
+      _exceededLongpressDeadline = true;
+      _longpressTimer = null;
+    });
+    super.addAllowedPointer(event);
   }
 
   @override
   void rejectGesture(int pointer) {
-    // Ignore gestures that happen after the tap duration, so that this doesn't
-    // handle tap gestures after long press gestures.
-    if (!_exceededDeadline) {
+    // Accept gestures that another recognizer has already won. However, don't
+    // do this for longpress gestures.
+    if (!_exceededLongpressDeadline) {
       acceptGesture(pointer);
     }
+  }
+
+  @override
+  void dispose() {
+    if (_longpressTimer != null) {
+      _longpressTimer.cancel();
+      _longpressTimer = null;
+    }
+    super.dispose();
   }
 }
