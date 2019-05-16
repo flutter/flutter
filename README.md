@@ -1,13 +1,20 @@
+
+------------------------------------------------------------------------
+
 # [![Flutter logo][]][flutter.dev]
+
+------------------------------------------------------------------------
 
 [![Build Status - Cirrus][]][Build status]
 [![Gitter Channel][]][Gitter badge]
 
-Flutter is Google's mobile app SDK for crafting high-quality native interfaces
+*Flutter is Google's mobile app SDK for crafting high-quality native interfaces
 on iOS and Android in record time. Flutter works with existing code, is used by
-developers and organizations around the world, and is free and open source.
+developers and organizations around the world, and is free and open source.*
 
-## Documentation
+------------------------------------------------------------------------
+
+## :notebook_with_decorative_cover: &nbsp; Documentation &nbsp; :notebook_with_decorative_cover:
 
 * [Install Flutter](https://flutter.dev/get-started/)
 * [Flutter documentation](https://flutter.dev/docs)
@@ -18,7 +25,9 @@ For announcements about new releases and breaking changes, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
 mailing list.
 
-## About Flutter
+------------------------------------------------------------------------
+
+## :information_source: &nbsp; About Flutter &nbsp; :information_source:
 
 We think Flutter will help you create beautiful, fast apps, with a productive,
 extensible and open development model.
@@ -94,3 +103,5 @@ Information on how to get started can be found at our
 [IntelliJ / Android Studio]: https://plugins.jetbrains.com/plugin/9212-flutter
 [Flutter packages]: https://pub.dev/flutter
 [interop example]: https://github.com/flutter/flutter/tree/master/examples/platform_channel
+
+------------------------------------------------------------------------
