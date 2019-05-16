@@ -144,7 +144,7 @@ enum _SwitchListTileType { material, adaptive }
 ///     body: Center(
 ///       child: LinkedLabelSwitch(
 ///         label: 'Linked, tappable label text',
-///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {
@@ -219,7 +219,7 @@ enum _SwitchListTileType { material, adaptive }
 ///     body: Center(
 ///       child: LabeledSwitch(
 ///         label: 'This is the label text',
-///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {

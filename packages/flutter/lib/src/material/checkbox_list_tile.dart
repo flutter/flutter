@@ -134,7 +134,7 @@ import 'theme_data.dart';
 ///     body: Center(
 ///       child: LinkedLabelCheckbox(
 ///         label: 'Linked, tappable label text',
-///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {
@@ -207,7 +207,7 @@ import 'theme_data.dart';
 ///     body: Center(
 ///       child: LabeledCheckbox(
 ///         label: 'This is the label text',
-///         padding: EdgeInsets.symmetric(horizontal: 5.0),
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
 ///         value: isSelected,
 ///         onChanged: (bool newValue) {
 ///           setState(() {
