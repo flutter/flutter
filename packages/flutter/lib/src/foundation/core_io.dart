@@ -1,7 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
 import 'dart:async';
 import 'dart:developer' show Timeline, Flow;
 import 'dart:io';
@@ -14,7 +15,6 @@ import 'constants.dart';
 import 'core_stub.dart' as core;
 import 'platform.dart';
 
-/// The io implementation of defaultTargetPlatform.
 TargetPlatform get defaultTargetPlatform {
   TargetPlatform result;
   if (Platform.isIOS) {
@@ -41,25 +41,13 @@ TargetPlatform get defaultTargetPlatform {
   return result;
 }
 
-/// The largest SMI value.
-///
-/// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
-///
-/// When compiling to JavaScript, this value is not supported since it is
-/// larger than the maximum safe 32bit integer.
 const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
 
-/// A BitField over an enum (or other class whose values implement "index").
-/// Only the first 62 values of the enum can be used as indices.
-///
-/// When compiling to JavaScript, this class is not supported.
 class BitField<T extends dynamic> implements core.BitField<T> {
-  ///
   BitField(this._length)
     : assert(_length <= _smiBits),
       _bits = _allZeros;
 
-  ///
   BitField.filled(this._length, bool value)
     : assert(_length <= _smiBits),
       _bits = value ? _allOnes : _allZeros;
@@ -92,10 +80,8 @@ class BitField<T extends dynamic> implements core.BitField<T> {
   }
 }
 
-///
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
-///
 Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
   if (!kReleaseMode) {
     debugLabel ??= callback.toString();

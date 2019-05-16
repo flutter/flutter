@@ -2,38 +2,35 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: public_member_api_docs
+// ignore_for_file: avoid_unused_constructor_parameters
 import 'dart:async';
+import 'dart:html' as html; // ignore: uri_does_not_exist
 
-import 'assertions.dart';
 import 'core_stub.dart' as core;
 import 'platform.dart';
 
-///
 TargetPlatform get defaultTargetPlatform {
-  TargetPlatform result = TargetPlatform.android;
+  TargetPlatform result;
+  // The existence of this method is tested via the dart2js compile test.
+  final String userAgent = html.window.navigator.userAgent;
+  if (userAgent.contains('iPhone')
+    || userAgent.contains('iPad')
+    || userAgent.contains('iPod')) {
+    result = TargetPlatform.iOS;
+  } else {
+    result = TargetPlatform.android;
+  }
   if (debugDefaultTargetPlatformOverride != null)
     result = debugDefaultTargetPlatformOverride;
-  if (result == null) {
-    throw FlutterError(
-      'Unknown platform.\n'
-      'Platform was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
-    );
-  }
   return result;
 }
 
-///
 const int kMaxUnsignedSMI = 0;
 
-///
 class BitField<T extends dynamic> implements core.BitField<T> {
-  ///
-  // ignore: avoid_unused_constructor_parameters
   BitField(int length);
 
-  ///
-  // ignore: avoid_unused_constructor_parameters
   BitField.filled(int length, bool value);
 
   @override
@@ -52,10 +49,8 @@ class BitField<T extends dynamic> implements core.BitField<T> {
   }
 }
 
-///
 typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 
-///
 Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
   await null;
   return callback(message);
