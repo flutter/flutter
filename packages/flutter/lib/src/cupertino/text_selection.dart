@@ -233,13 +233,13 @@ class _TextSelectionHandlePainter extends CustomPainter {
         ..color = _kHandlesColor
         ..strokeWidth = 2.0;
     canvas.drawCircle(
-      Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
+      const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
       _kSelectionHandleRadius,
       paint,
     );
     // Draw line so it slightly overlaps the circle.
     canvas.drawLine(
-      Offset(
+      const Offset(
         _kSelectionHandleRadius,
         2 * _kSelectionHandleRadius - _kSelectionHandleOverlap,
       ),
@@ -324,7 +324,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
-      child: CustomPaint(
+      child: const CustomPaint(
         painter: _TextSelectionHandlePainter(),
       ),
     );

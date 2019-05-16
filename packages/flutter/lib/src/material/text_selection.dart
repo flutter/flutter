@@ -224,11 +224,11 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
     switch (type) {
       case TextSelectionHandleType.left:
-        return Offset(_kHandleSize, 0);
+        return const Offset(_kHandleSize, 0);
       case TextSelectionHandleType.right:
-        return Offset(0, 0);
+        return const Offset(0, 0);
       default:
-        return Offset(_kHandleSize / 2, 0);
+        return const Offset(_kHandleSize / 2, 0);
     }
   }
 }
