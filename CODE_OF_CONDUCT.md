@@ -2,6 +2,8 @@
 
 # :page_with_curl: &nbsp; Code of conduct &nbsp; :page_with_curl:
 
+------------------------------------------------------------------------
+
 *We expect Flutter's contributors to act professionally and respectfully, and
 we expect our social spaces to be safe and dignified environments.*
 
