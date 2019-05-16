@@ -2965,7 +2965,7 @@ class RenderIgnorePointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
@@ -3171,7 +3171,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? absorbing;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {

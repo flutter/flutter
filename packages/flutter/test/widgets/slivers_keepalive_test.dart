@@ -460,9 +460,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
                     return children[index];
                   },
                   childCount: children.length,
-                  findChildIndexCallback: (Key key) {
-                    return _mapKeyToIndex[key] == null ? -1 : _mapKeyToIndex[key];
-                  }
+                  findChildIndexCallback: (Key key) => _mapKeyToIndex[key] ?? -1,
                 ),
               )
             ],

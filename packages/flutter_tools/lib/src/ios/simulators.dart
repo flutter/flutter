@@ -288,7 +288,7 @@ class IOSSimulator extends Device {
     if (isSupported())
       return 'Supported';
 
-    return _supportMessage != null ? _supportMessage : 'Unknown';
+    return _supportMessage ?? 'Unknown';
   }
 
   @override
