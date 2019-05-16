@@ -288,8 +288,18 @@ class _HeroState extends State<Hero> {
   Size _placeholderSize;
   bool _shouldIncludeChild = true;
 
-  // `shouldIncludeChildInPlaceholder` should be false for to hero
-  void startFlight({ bool shouldIncludedChildInPlaceholder = true }) {
+  // The `shouldIncludeChildInPlaceholder` flag dictates if the child widget of
+  // this hero should be included in the placeholder widget as a descendant.
+  //
+  // When the hero flight takes off, two placeholder widgets
+  // will be built for the from hero and the to hero. When `shouldIncludeChildInPlaceholder`
+  // is set to true, and `widget.placeholderBuilder` is null,  the placeholder
+  // widget will include the original hero's child widget as a descendant,
+  // allowing the orignal element tree to be preserved.
+  //
+  // It is typically set to true for the *from* hero in a push transition,
+  // and false otherwise.
+  void startFlight({ bool shouldIncludedChildInPlaceholder = false }) {
     _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
     final RenderBox box = context.findRenderObject();
@@ -315,7 +325,7 @@ class _HeroState extends State<Hero> {
       child: widget.child,
     );
 
-    // If this hero is not in flight.
+    // If the hero is not in flight, build its child widget.
     if (_placeholderSize == null) {
       return keyedChild;
     }
@@ -332,10 +342,10 @@ class _HeroState extends State<Hero> {
           maintainSize: true,
           child: keyedChild
         )
-        : SizedBox(
+      : SizedBox(
           width: _placeholderSize.width,
           height: _placeholderSize.height
-        );
+    );
   }
 }
 
@@ -509,7 +519,7 @@ class _HeroFlight {
       _proxyAnimation.parent = manifest.animation;
 
     manifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: manifest.type == HeroFlightDirection.push);
-    manifest.toHero.startFlight(shouldIncludedChildInPlaceholder: false);
+    manifest.toHero.startFlight();
 
     heroRectTween = _doCreateRectTween(
       _boundingBoxFor(manifest.fromHero.context, manifest.fromRoute.subtreeContext),
@@ -555,7 +565,7 @@ class _HeroFlight {
 
       if (manifest.fromHero != newManifest.toHero) {
         manifest.fromHero.endFlight();
-        newManifest.toHero.startFlight(shouldIncludedChildInPlaceholder: false);
+        newManifest.toHero.startFlight();
         heroRectTween = _doCreateRectTween(
             heroRectTween.end,
             _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
@@ -587,7 +597,7 @@ class _HeroFlight {
 
       // Let the heroes in each of the routes rebuild with their placeholders.
       newManifest.fromHero.startFlight(shouldIncludedChildInPlaceholder: newManifest.type == HeroFlightDirection.push);
-      newManifest.toHero.startFlight(shouldIncludedChildInPlaceholder: false);
+      newManifest.toHero.startFlight();
 
       // Let the transition overlay on top of the routes also rebuild since
       // we cleared the old shuttle.
