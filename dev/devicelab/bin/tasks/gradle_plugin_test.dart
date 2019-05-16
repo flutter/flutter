@@ -13,8 +13,10 @@ String javaHome;
 String errorMessage;
 
 /// Runs the given [testFunction] on a freshly generated Flutter project.
-Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
+Future<void> runProjectTest(
+    Future<void> testFunction(FlutterProject project)) async {
+  final Directory tempDir = Directory.systemTemp
+      .createTempSync('flutter_devicelab_gradle_plugin_test.');
   final FlutterProject project = await FlutterProject.create(tempDir, 'hello');
 
   try {
@@ -25,9 +27,12 @@ Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) a
 }
 
 /// Runs the given [testFunction] on a freshly generated Flutter plugin project.
-Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject pluginProject)) async {
-  final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
-  final FlutterPluginProject pluginProject = await FlutterPluginProject.create(tempDir, 'aaa');
+Future<void> runPluginProjectTest(
+    Future<void> testFunction(FlutterPluginProject pluginProject)) async {
+  final Directory tempDir = Directory.systemTemp
+      .createTempSync('flutter_devicelab_gradle_plugin_test.');
+  final FlutterPluginProject pluginProject =
+      await FlutterPluginProject.create(tempDir, 'aaa');
 
   try {
     await testFunction(pluginProject);
@@ -49,7 +54,8 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
-        errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
+        errorMessage = _validateDebugSnapshotDependency(project, 'build/app.dill');
+
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }
@@ -63,6 +69,41 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleRelease');
         await project.runGradleTask('assembleRelease');
+
+        final String androidArmSnapshotPath = path.join(
+            project.rootPath,
+            'build',
+            'app',
+            'intermediates',
+            'flutter',
+            'release',
+            'android-arm');
+
+        final String isolateSnapshotData =
+            path.join(androidArmSnapshotPath, 'isolate_snapshot_data');
+        if (!File(isolateSnapshotData).existsSync()) {
+          throw TaskResult.failure(
+              'Snapshot doesn\'t exist: $isolateSnapshotData');
+        }
+
+        final String isolateSnapshotInstr =
+            path.join(androidArmSnapshotPath, 'isolate_snapshot_instr');
+        if (!File(isolateSnapshotInstr).existsSync()) {
+          throw TaskResult.failure(
+              'Snapshot doesn\'t exist: $isolateSnapshotInstr');
+        }
+
+        final String vmSnapshotData =
+            path.join(androidArmSnapshotPath, 'vm_snapshot_data');
+        if (!File(isolateSnapshotData).existsSync()) {
+          throw TaskResult.failure('Snapshot doesn\'t exist: $vmSnapshotData');
+        }
+
+        final String vmSnapshotInstr =
+            path.join(androidArmSnapshotPath, 'vm_snapshot_instr');
+        if (!File(isolateSnapshotData).existsSync()) {
+          throw TaskResult.failure('Snapshot doesn\'t exist: $vmSnapshotInstr');
+        }
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -89,24 +130,22 @@ Future<void> main() async {
         final ProcessResult result =
             await project.resultOfGradleTask('assembleRelease');
         if (result.exitCode == 0)
-          throw _failure(
-              'Gradle did not exit with error as expected', result);
+          throw _failure('Gradle did not exit with error as expected', result);
         final String output = result.stdout + '\n' + result.stderr;
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
             output.contains('at org.gradle'))
-          throw _failure(
-              'Gradle output should not contain stacktrace', result);
+          throw _failure('Gradle output should not contain stacktrace', result);
         if (!output.contains('Build failed') || !output.contains('builTypes'))
           throw _failure(
-              'Gradle output should contain a readable error message',
-              result);
+              'Gradle output should contain a readable error message', result);
       });
 
       await runProjectTest((FlutterProject project) async {
         section('flutter build apk on build script with error');
         await project.introduceError();
-        final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
+        final ProcessResult result =
+            await project.resultOfFlutterCommand('build', <String>['apk']);
         if (result.exitCode == 0)
           throw _failure(
               'flutter build apk should fail when Gradle does', result);
@@ -206,18 +245,23 @@ android {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
-    await buildScript.writeAsString((await buildScript.readAsString()).replaceAll('buildTypes', 'builTypes'));
+    await buildScript.writeAsString((await buildScript.readAsString())
+        .replaceAll('buildTypes', 'builTypes'));
   }
 
   Future<void> runGradleTask(String task, {List<String> options}) async {
-    return _runGradleTask(workingDirectory: androidPath, task: task, options: options);
+    return _runGradleTask(
+        workingDirectory: androidPath, task: task, options: options);
   }
 
-  Future<ProcessResult> resultOfGradleTask(String task, {List<String> options}) {
-    return _resultOfGradleTask(workingDirectory: androidPath, task: task, options: options);
+  Future<ProcessResult> resultOfGradleTask(String task,
+      {List<String> options}) {
+    return _resultOfGradleTask(
+        workingDirectory: androidPath, task: task, options: options);
   }
 
-  Future<ProcessResult> resultOfFlutterCommand(String command, List<String> options) {
+  Future<ProcessResult> resultOfFlutterCommand(
+      String command, List<String> options) {
     return Process.run(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
       <String>[command]..addAll(options),
@@ -232,7 +276,8 @@ class FlutterPluginProject {
   final Directory parent;
   final String name;
 
-  static Future<FlutterPluginProject> create(Directory directory, String name) async {
+  static Future<FlutterPluginProject> create(
+      Directory directory, String name) async {
     await inDirectory(directory, () async {
       await flutter('create', options: <String>['--template=plugin', name]);
     });
@@ -242,44 +287,45 @@ class FlutterPluginProject {
   String get rootPath => path.join(parent.path, name);
   String get examplePath => path.join(rootPath, 'example');
   String get exampleAndroidPath => path.join(examplePath, 'android');
-  String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
+  String get debugApkPath => path.join(
+      examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
 
   Future<void> runGradleTask(String task, {List<String> options}) async {
-    return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
+    return _runGradleTask(
+        workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
   bool get hasDebugApk => File(debugApkPath).existsSync();
 }
 
-Future<void> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
+Future<void> _runGradleTask(
+    {String workingDirectory, String task, List<String> options}) async {
   final ProcessResult result = await _resultOfGradleTask(
-      workingDirectory: workingDirectory,
-      task: task,
-      options: options);
+      workingDirectory: workingDirectory, task: task, options: options);
   if (result.exitCode != 0) {
     print('stdout:');
     print(result.stdout);
     print('stderr:');
     print(result.stderr);
   }
-  if (result.exitCode != 0)
-    throw 'Gradle exited with error';
+  if (result.exitCode != 0) throw 'Gradle exited with error';
 }
 
-Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
-    List<String> options}) {
+Future<ProcessResult> _resultOfGradleTask(
+    {String workingDirectory, String task, List<String> options}) {
   final List<String> args = <String>['app:$task'];
   if (options != null) {
     args.addAll(options);
   }
   final String gradle = Platform.isWindows ? 'gradlew.bat' : './gradlew';
-  print('Running Gradle: ${path.join(workingDirectory, gradle)} ${args.join(' ')}');
+  print(
+      'Running Gradle: ${path.join(workingDirectory, gradle)} ${args.join(' ')}');
   print(File(path.join(workingDirectory, gradle)).readAsStringSync());
   return Process.run(
     gradle,
     args,
     workingDirectory: workingDirectory,
-    environment: <String, String>{ 'JAVA_HOME': javaHome },
+    environment: <String, String>{'JAVA_HOME': javaHome},
   );
 }
 
@@ -295,10 +341,13 @@ class _Dependencies {
     target = colonSeparated[0].trim();
     dependencies = colonSeparated[1]
         // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
+        .replaceAllMapped(
+            _separatorExpr, (Match match) => '${match.group(1)}\n')
         .split('\n')
         // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+        .map<String>((String path) => path
+            .replaceAllMapped(_escapeExpr, (Match match) => match.group(1))
+            .trim())
         .where((String path) => path.isNotEmpty)
         .toSet();
   }
@@ -308,10 +357,11 @@ class _Dependencies {
 }
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
-String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
-  final _Dependencies deps = _Dependencies(
-      path.join(project.rootPath, 'build', 'app', 'intermediates',
-          'flutter', 'debug', 'snapshot_blob.bin.d'));
-  return deps.target == expectedTarget ? null :
-    'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';
+String _validateDebugSnapshotDependency(
+    FlutterProject project, String expectedTarget) {
+  final _Dependencies deps = _Dependencies(path.join(project.rootPath, 'build',
+      'app', 'intermediates', 'flutter', 'debug', 'snapshot_blob.bin.d'));
+  return deps.target == expectedTarget
+      ? null
+      : 'Debug dependency file should have $expectedTarget as target. Instead has ${deps.target}';
 }

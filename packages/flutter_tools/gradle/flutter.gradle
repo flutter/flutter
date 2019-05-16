@@ -415,7 +415,9 @@ class FlutterPlugin implements Plugin<Project> {
             def flutterTasks = []
             def targetPlatforms = []
 
-            if (targetPlatformValue == 'android-arm-all') {
+            if (targetPlatformValue == null) {
+                targetPlatforms = ['android-arm']
+            } else if (targetPlatformValue == 'android-arm-all') {
                 if (flutterBuildMode == 'release') {
                     targetPlatforms = allArmPlatforms
                 } else {
@@ -426,7 +428,15 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             targetPlatforms.each { currentTargetPlatformValue ->
-                def abiValue = allTargetPlatforms[currentTargetPlatformValue]
+                String abiValue = allTargetPlatforms[currentTargetPlatformValue]
+                String intermidiateDir = "${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}"
+
+                File intermediateDirValue
+                if (flutterBuildMode == 'release') {
+                    intermediateDirValue = project.file("${intermidiateDir}/${currentTargetPlatformValue}")
+                } else {
+                    intermediateDirValue = project.file(intermidiateDir)
+                }
 
                 FlutterTask compileTask = project.tasks.create(name: "${flutterBuildPrefix}${variant.name.capitalize()}${currentTargetPlatformValue}:compile", 
                     type: FlutterTask) {
@@ -448,7 +458,7 @@ class FlutterPlugin implements Plugin<Project> {
                     buildSharedLibrary buildSharedLibraryValue
                     targetPlatform currentTargetPlatformValue
                     sourceDir project.file(project.flutter.source)
-                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${currentTargetPlatformValue}")
+                    intermediateDir intermediateDirValue
                     extraFrontEndOptions extraFrontEndOptionsValue
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
@@ -612,7 +622,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--suppress-analytics"
                 args "--quiet"
                 args "--target", targetPath
-                args "--target-platform", "android-arm"
                 args "--output-dir", "${intermediateDir}"
                 if (trackWidgetCreation) {
                     args "--track-widget-creation"
@@ -626,7 +635,9 @@ abstract class BaseFlutterTask extends DefaultTask {
                 if (buildSharedLibrary) {
                     args "--build-shared-library"
                 }
-                if (targetPlatform != null) {
+                if (targetPlatform == null) {
+                    args "--target-platform", "android-arm"
+                } else {
                     args "--target-platform", "${targetPlatform}"
                 }
                 args "--${buildMode}"
