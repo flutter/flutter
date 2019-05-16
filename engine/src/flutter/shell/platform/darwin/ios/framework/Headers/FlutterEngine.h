@@ -228,6 +228,15 @@ FLUTTER_EXPORT
  */
 @property(nonatomic, readonly) FlutterBasicMessageChannel* settingsChannel;
 
+/**
+ * The `NSURL` of the observatory for the service isolate.
+ *
+ * This is only set in debug and profile runtime modes, and only after the
+ * observatory service is ready. In release mode or before the observatory has
+ * started, it returns `nil`.
+ */
+@property(nonatomic, readonly) NSURL* observatoryUrl;
+
 @end
 
 #endif  // FLUTTER_FLUTTERENGINE_H_
