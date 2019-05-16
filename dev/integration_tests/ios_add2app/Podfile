@@ -14,6 +14,9 @@ end
 
 target 'ios_add2app' do
   eval(File.read(File.join(flutter_application_path, '.ios', 'Flutter', 'podhelper.rb')), binding)
+  post_install do |installer|
+    flutter_post_install(installer)
+  end
 end
 
 target 'ios_add2appTests' do
