@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -124,7 +125,11 @@ abstract class Gradient {
   /// If the gradient's configuration is text-direction-dependent, for example
   /// it uses [AlignmentDirectional] objects instead of [Alignment]
   /// objects, then the `textDirection` argument must not be null.
-  Shader createShader(Rect rect, { TextDirection textDirection });
+  ///
+  /// The `transform` property will be applied as a local transform to the
+  /// gradient, for example if you wish to rotate only the gradient with respect
+  /// to the drawing.
+  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform });
 
   /// Returns a new gradient with its properties scaled by the given factor.
   ///
@@ -330,11 +335,11 @@ class LinearGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection }) {
+  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform }) {
     return ui.Gradient.linear(
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
-      colors, _impliedStops(), tileMode,
+      colors, _impliedStops(), tileMode, transform,
     );
   }
 
@@ -600,12 +605,12 @@ class RadialGradient extends Gradient {
   final double focalRadius;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection }) {
+  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform }) {
     return ui.Gradient.radial(
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
-      null, // transform
+      transform,
       focal == null  ? null : focal.resolve(textDirection).withinRect(rect),
       focalRadius * rect.shortestSide,
     );
@@ -840,12 +845,13 @@ class SweepGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection }) {
+  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform }) {
     return ui.Gradient.sweep(
       center.resolve(textDirection).withinRect(rect),
       colors, _impliedStops(), tileMode,
       startAngle,
       endAngle,
+      transform,
     );
   }
 
