@@ -69,8 +69,9 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a LinkedLabelCheckbox widget that allows a
-/// [RichText] widget to be nested in a checkbox tile widget.
+/// Here is an example of a custom labeled checkbox widget, called
+/// LinkedLabelCheckbox, that includes a nested [RichText] widget that
+/// handles tap gestures.
 ///
 /// ```dart imports
 /// import 'package:flutter/gestures.dart';

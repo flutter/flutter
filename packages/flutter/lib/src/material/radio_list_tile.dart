@@ -185,8 +185,9 @@ import 'theme_data.dart';
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// Here is an example of a custom LabeledRadio widget, but you can easily
-/// make your own configurable widget.
+/// Here is an example of a custom labeled radio widget, called
+/// LinkedLabelRadio, that includes a nested [RichText] widget that
+/// handles tap gestures.
 ///
 /// ```dart preamble
 /// class LabeledRadio extends StatelessWidget {
