@@ -9,9 +9,9 @@ we expect our social spaces to be safe and dignified environments.*
 
 **Specifically:**
 
-• Respect people, their identities, their culture, and their work.
-• Be kind. Be courteous. Be welcoming.
-• Listen. Consider and acknowledge people's points before responding.
+• Respect people, their identities, their culture, and their work. <br>
+• Be kind. Be courteous. Be welcoming. <br>
+• Listen. Consider and acknowledge people's points before responding. <br>
 
 Should you experience anything that makes you feel unwelcome in Flutter's
 community, please contact someone on the team, for instance
