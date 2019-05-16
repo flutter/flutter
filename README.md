@@ -30,6 +30,8 @@ mailing list.
 We think Flutter will help you create beautiful, fast apps, with a productive,
 extensible and open development model.
 
+------------------------------------------------------------------------
+
 ### Beautiful apps
 
 We want to enable designers to deliver their full creative vision without being
@@ -42,6 +44,8 @@ iOS and Android.
 
 ![Reflectly hero image][Reflectly hero image]
 
+------------------------------------------------------------------------
+
 ### Fast apps
 
 Flutter is fast. It's powered by the same hardware-accelerated [Skia] 2D
@@ -50,12 +54,16 @@ support glitch-free, jank-free graphics at the native speed of your device.
 Flutter code is powered by the world-class [Dart platform], which enables
 compilation to native 32-bit and 64-bit ARM code for iOS and Android.
 
+------------------------------------------------------------------------
+
 ### Productive development
 
 Flutter offers stateful hot reload, allowing you to make changes to your code
 and see the results instantly without restarting your app or losing its state.
 
 [![Hot reload animation][]][Hot reload]
+
+------------------------------------------------------------------------
 
 ### Extensible and open model
 
