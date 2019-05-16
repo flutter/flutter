@@ -35,9 +35,9 @@ end
 
 # If this wasn't specified, assume it's two levels up from the directory of this script.
 flutter_application_path ||= File.join(__dir__, '..', '..')
-framework_dir = File.join(flutter_application_path, '.ios', 'Flutter')
+$framework_dir = File.join(flutter_application_path, '.ios', 'Flutter')
 
-engine_dir = File.join(framework_dir, 'engine')
+engine_dir = File.join($framework_dir, 'engine')
 if !File.exist?(engine_dir)
     # Copy the debug engine to have something to link against if the xcode backend script has not run yet.
     debug_framework_dir = File.join(flutter_root(flutter_application_path), 'bin', 'cache', 'artifacts', 'engine', 'ios')
@@ -47,9 +47,9 @@ if !File.exist?(engine_dir)
 end
 
 pod 'Flutter', :path => engine_dir
-pod 'FlutterPluginRegistrant', :path => File.join(framework_dir, 'FlutterPluginRegistrant')
+pod 'FlutterPluginRegistrant', :path => File.join($framework_dir, 'FlutterPluginRegistrant')
 
-symlinks_dir = File.join(framework_dir, '.symlinks')
+symlinks_dir = File.join($framework_dir, '.symlinks')
 FileUtils.mkdir_p(symlinks_dir)
 plugin_pods = parse_KV_file(File.join(flutter_application_path, '.flutter-plugins'))
 plugin_pods.map { |r|
@@ -61,14 +61,14 @@ plugin_pods.map { |r|
 
 # Ensure that ENABLE_BITCODE is set to NO, add a #include to Generated.xcconfig, and
 # add a run script to the Build Phases.
-post_install do |installer|
+def flutter_post_install(installer)
     installer.pods_project.targets.each do |target|
         target.build_configurations.each do |config|
             config.build_settings['ENABLE_BITCODE'] = 'NO'
             next if  config.base_configuration_reference == nil
             xcconfig_path = config.base_configuration_reference.real_path
             File.open(xcconfig_path, 'a+') do |file|
-                file.puts "#include \"#{File.realpath(File.join(framework_dir, 'Generated.xcconfig'))}\""
+                file.puts "#include \"#{File.realpath(File.join($framework_dir, 'Generated.xcconfig'))}\""
             end
         end
     end
