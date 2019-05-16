@@ -9,6 +9,8 @@
 
 @interface FlutterObservatoryPublisher : NSObject
 
+@property(nonatomic, readonly) NSURL* url;
+
 @end
 
 #endif  // FLUTTER_FLUTTEROBSERVATORYPUBLISHER_H_

@@ -207,6 +207,10 @@
   return _settingsChannel.get();
 }
 
+- (NSURL*)observatoryUrl {
+  return [_publisher.get() url];
+}
+
 - (void)resetChannels {
   _localizationChannel.reset();
   _navigationChannel.reset();
