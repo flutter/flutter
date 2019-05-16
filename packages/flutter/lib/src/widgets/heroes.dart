@@ -291,11 +291,11 @@ class _HeroState extends State<Hero> {
   // The `shouldIncludeChildInPlaceholder` flag dictates if the child widget of
   // this hero should be included in the placeholder widget as a descendant.
   //
-  // When the hero flight takes off, two placeholder widgets
-  // will be built for the from hero and the to hero. When `shouldIncludeChildInPlaceholder`
-  // is set to true, and `widget.placeholderBuilder` is null,  the placeholder
-  // widget will include the original hero's child widget as a descendant,
-  // allowing the orignal element tree to be preserved.
+  // When a new hero flight animation takes place, a placeholder widget
+  // needs to be built to replace the original hero widget. When
+  // `shouldIncludeChildInPlaceholder` is set to true and `widget.placeholderBuilder`
+  // is null, the placeholder widget will include the original hero's child
+  // widget as a descendant, allowing the orignal element tree to be preserved.
   //
   // It is typically set to true for the *from* hero in a push transition,
   // and false otherwise.

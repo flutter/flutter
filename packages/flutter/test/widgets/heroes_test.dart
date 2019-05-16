@@ -2086,7 +2086,7 @@ Future<void> main() async {
   });
 
   testWidgets("From hero's state should be preserved, "
-    'heroes should work with widgets that has global keys',
+    'heroes work well with child widgets that has global keys',
     (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
       final GlobalKey key1 = GlobalKey();
