@@ -2,10 +2,25 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+
+import '../painting/image_test_utils.dart' show TestImageProvider;
+
+Future<ui.Image> createTestImage() {
+  final ui.Paint paint = ui.Paint()
+    ..style = ui.PaintingStyle.stroke
+    ..strokeWidth = 1.0;
+  final ui.PictureRecorder recorder = ui.PictureRecorder();
+  final ui.Canvas pictureCanvas = ui.Canvas(recorder);
+  pictureCanvas.drawCircle(Offset.zero, 20.0, paint);
+  final ui.Picture picture = recorder.endRecording();
+  return picture.toImage(300, 300);
+}
 
 Key firstKey = const Key('first');
 Key secondKey = const Key('second');
@@ -185,7 +200,9 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
   Widget build(BuildContext context) => Text(widget.value);
 }
 
-void main() {
+Future<void> main() async {
+  final ui.Image img = await createTestImage();
+
   setUp(() {
     transitionFromUserGestures = false;
   });
@@ -938,7 +955,12 @@ void main() {
             children: <Widget>[
               // This container will appear at Y=0
               Container(
-                child: Hero(tag: 'BC', child: Container(key: heroBCKey, height: 150.0)),
+                child: Hero(
+                  tag: 'BC',
+                  child: Container(
+                    key: heroBCKey,
+                    height: 150.0,
+                    child: const Text('Hero'))),
               ),
               const SizedBox(height: 800.0),
             ],
@@ -956,14 +978,27 @@ void main() {
               const SizedBox(height: 100.0),
               // This container will appear at Y=100
               Container(
-                child: Hero(tag: 'AB', child: Container(key: heroABKey, height: 200.0)),
+                child: Hero(
+                  tag: 'AB',
+                  child: Container(
+                    key: heroABKey,
+                    height: 200.0,
+                    child: const Text('Hero')
+                  )
+                ),
               ),
               FlatButton(
                 child: const Text('PUSH C'),
                 onPressed: () { Navigator.push(context, routeC); },
               ),
               Container(
-                child: Hero(tag: 'BC', child: Container(height: 150.0)),
+                child: Hero(
+                  tag: 'BC',
+                  child: Container(
+                    height: 150.0,
+                    child: const Text('Hero')
+                  )
+                ),
               ),
               const SizedBox(height: 800.0),
             ],
@@ -983,7 +1018,14 @@ void main() {
                   const SizedBox(height: 200.0),
                   // This container will appear at Y=200
                   Container(
-                    child: Hero(tag: 'AB', child: Container(height: 100.0, width: 100.0)),
+                    child: Hero(
+                      tag: 'AB',
+                      child: Container(
+                        height: 100.0,
+                        width: 100.0,
+                        child: const Text('Hero')
+                      )
+                    ),
                   ),
                   FlatButton(
                     child: const Text('PUSH B'),
@@ -1036,8 +1078,9 @@ void main() {
       return isVisible;
     }
 
-    final Iterable<Element> heroElements = find.descendant(of: find.byType(ListView), matching: find.byType(Container)).evaluate();
-    expect(heroElements.where(_isVisible).length, 1);
+    // Of all heroes only one should be visible now.
+    final Iterable<Element> elements = find.text('Hero').evaluate();
+    expect(elements.where(_isVisible).length, 1);
 
     // Hero BC's flight finishes normally.
     await tester.pump(const Duration(milliseconds: 300));
@@ -2032,5 +2075,84 @@ void main() {
     expect(find.text('2'), findsNothing);
     // Still one shuttle.
     expect(shuttlesBuilt, 2);
+  });
+
+  testWidgets("From hero's state should be preserved", (WidgetTester tester) async {
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
+    const Key imageKey1 = Key('image1');
+    const Key imageKey2 = Key('image2');
+    final TestImageProvider imageProvider = TestImageProvider(img);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        navigatorKey: navigatorKey,
+        home: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Hero(
+              tag: 'hero',
+              // Since we're popping, only the destination route's builder is used.
+              transitionOnUserGestures: true,
+              child: Container(
+                width: 100,
+                child: Image(
+                  image: imageProvider,
+                  key: imageKey1
+                )
+              )
+            ),
+            const SizedBox(
+              width: 10,
+              height: 10,
+              child: Text('1')
+            )
+          ]
+        )
+      ),
+    );
+
+    final CupertinoPageRoute<void> route2 = CupertinoPageRoute<void>(
+      builder: (BuildContext context) {
+        return CupertinoPageScaffold(
+          child: Hero(
+            tag: 'hero',
+            transitionOnUserGestures: true,
+            child: Container(
+              child: Image(
+                image: imageProvider,
+                key: imageKey2
+              )
+            )
+          ),
+        );
+      }
+    );
+
+    imageProvider.complete();
+    await tester.pump();
+    final RenderImage renderImage = tester.renderObject(
+      find.descendant(of: find.byKey(imageKey1), matching: find.byType(RawImage))
+    );
+
+    expect(renderImage.size, const Size(100, 100));
+
+    navigatorKey.currentState.push(route2);
+    await tester.pump();
+
+    final TestGesture gesture = await tester.startGesture(const Offset(0.01, 300));
+    await gesture.moveTo(const Offset(400, 200));
+    await tester.pump();
+
+    await gesture.moveTo(const Offset(800, 200));
+    await tester.pump();
+
+    expect(
+      tester.getRect(find.byKey(imageKey1)),
+      rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01)
+    );
+    expect(
+      tester.getTopRight(find.byKey(imageKey1)).dx,
+      moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
+    );
   });
 }
