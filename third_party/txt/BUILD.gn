@@ -12,6 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+declare_args() {
+  flutter_use_fontconfig = false
+}
+
+if (flutter_use_fontconfig) {
+  assert(is_linux)
+}
+
 config("txt_config") {
   visibility = [ ":*" ]
   include_dirs = [ "src" ]
@@ -23,6 +31,9 @@ source_set("txt") {
   }
   if (is_android) {
     defines = [ "ANDROID_FONT_MANAGER_AVAILABLE" ]
+  }
+  if (flutter_use_fontconfig) {
+    defines = [ "FONTCONFIG_FONT_MANAGER_AVAILABLE" ]
   }
 
   sources = [
@@ -115,6 +126,10 @@ source_set("txt") {
   deps = [
     "//third_party/skia",
   ]
+
+  if (flutter_use_fontconfig) {
+    deps += [ "//third_party/fontconfig" ]
+  }
 
   if (is_mac || is_ios) {
     sources += [ "src/txt/platform_mac.mm" ]

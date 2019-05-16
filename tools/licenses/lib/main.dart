@@ -1752,6 +1752,7 @@ class _RepositoryRootThirdPartyDirectory extends _RepositoryGenericThirdPartyDir
         && entry.name != 'android_support' // build-time only
         && entry.name != 'googletest' // only used by tests
         && entry.name != 'skia' // treated as a separate component
+        && entry.name != 'fontconfig' // not used in standard configurations
         && super.shouldRecurse(entry);
   }
 
