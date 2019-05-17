@@ -11,14 +11,13 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
-// import 'context_menu.dart';
+import 'context_menu.dart';
 import 'debug.dart';
 import 'feedback.dart';
 import 'ink_well.dart' show InteractiveInkFeature;
 import 'input_decorator.dart';
 import 'material.dart';
 import 'material_localizations.dart';
-import 'popup_menu.dart';
 import 'text_selection.dart';
 import 'theme.dart';
 
@@ -518,6 +517,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration.counterText == null;
 
   bool _shouldShowSelectionToolbar = true;
+  bool _contextMenuIsOpen = false;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -821,16 +821,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     );
   }
 
-  void _handleContextMenu(ContextMenuDetails details) {
-    showMenu(
-      context: context,
-      position: RelativeRect.fromSize(details.location & Size.zero, MediaQuery.of(context).size),
-      items: <PopupMenuEntry<void>>[
-        PopupMenuItem<void>(
-          child: Text('Selection ${details.withinSelection}'),
-        ),
-      ],
-    );
+  void _handleContextMenuChanged(bool isOpen, [dynamic value]) {
+    if (isOpen != _contextMenuIsOpen)
+      setState(() {
+        _contextMenuIsOpen = true;
+      });
   }
 
   void _startSplash(Offset globalPosition) {
@@ -908,6 +903,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
     Radius cursorRadius = widget.cursorRadius;
+    TextContextMenuControls contextMenuControls;
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
@@ -934,6 +930,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= themeData.cursorColor;
+        contextMenuControls = materialTextContextMenuControls;
         break;
     }
 
@@ -961,7 +958,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
-        onContextMenu: _handleContextMenu,
+        contextMenuControls: contextMenuControls,
+        onContextMenuChanged: _handleContextMenuChanged,
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,

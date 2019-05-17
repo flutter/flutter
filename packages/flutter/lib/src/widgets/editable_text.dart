@@ -15,12 +15,15 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'binding.dart';
+import 'context_menu.dart';
 import 'debug.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'navigator.dart';
+import 'routes.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
@@ -33,25 +36,6 @@ export 'package:flutter/rendering.dart' show SelectionChangedCause;
 /// Signature for the callback that reports when the user changes the selection
 /// (including the cursor location).
 typedef SelectionChangedCallback = void Function(TextSelection selection, SelectionChangedCause cause);
-
-@immutable
-class ContextMenuDetails {
-  ContextMenuDetails({
-    @required this.withinSelection,
-    @required this.location,
-  }) : assert(withinSelection != null);
-
-  final bool withinSelection;
-
-  final Offset location;
-
-  @override
-  String toString() {
-    return 'ContextDetails(location: ${location.toString()} withinSelection: $withinSelection)';
-  }
-}
-
-typedef ContextMenuHandler = void Function(ContextMenuDetails details);
 
 // The time it takes for the cursor to fade from fully opaque to fully
 // transparent and vice versa. A full cursor blink, from transparent to opaque
@@ -213,6 +197,37 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
   }
 }
 
+/// TODO
+abstract class TextContextMenuControls {
+  /// TODO
+  TextContextMenuControls();
+
+  /// TODO
+  ModalRoute<dynamic> buildRoute({
+    @required BuildContext context,
+    @required Offset globalPosition,
+    @required EditableTextState editableText,
+  });
+
+  // /// TODO
+  // Future<T> showMenu({
+  //   @required BuildContext context,
+  //   @required Offset globalLocation,
+  // }) {
+  //   assert(context != null);
+  //   assert(globalLocation != null);
+  //   final ModalRoute<T> route = buildRoute(
+  //     position: RelativeRect.fromSize(
+  //       globalLocation & Size.zero,
+  //       MediaQuery.of(context).size,
+  //     ),
+  //   );
+  //   assert(route != null);
+
+  //   return Navigator.push(context, route);
+  // }
+}
+
 /// A basic text input field.
 ///
 /// This widget interacts with the [TextInput] service to let the user edit the
@@ -309,7 +324,8 @@ class EditableText extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
-    this.onContextMenu,
+    this.contextMenuControls,
+    this.onContextMenuChanged,
     this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
@@ -666,7 +682,11 @@ class EditableText extends StatefulWidget {
   /// location).
   final SelectionChangedCallback onSelectionChanged;
 
-  final ContextMenuHandler onContextMenu;
+  /// TODO
+  final TextContextMenuControls contextMenuControls;
+
+  /// TODO
+  final ContextMenuChangedCallback onContextMenuChanged;
 
   /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
   final VoidCallback onSelectionHandleTapped;
@@ -829,6 +849,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   bool get wantKeepAlive => widget.focusNode.hasFocus;
 
   Color get _cursorColor => widget.cursorColor.withOpacity(_cursorBlinkOpacityController.value);
+
+  bool _contextMenuIsOpen = false;
 
   // State lifecycle:
 
@@ -1183,28 +1205,35 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _handleContextTap(ContextTapDetails details) {
-    // Callback is only assigned when onContextMenu is not null
-    assert(widget.onContextMenu != null);
+  Future<void> _handleContextTap(ContextTapDetails details) async {
+    // Callback is only assigned when contextMenuControls is not null
+    assert(widget.contextMenuControls != null);
     final TextSelection selection = _value.selection;
     final bool withinSelection = selection.start <= details.textPosition.offset
       && selection.end > details.textPosition.offset;
     widget.focusNode.requestFocus();
-    if (withinSelection) {
-      widget.onContextMenu(ContextMenuDetails(
-        location: details.globalPosition,
-        withinSelection: true,
-      ));
-    } else {
+    if (!withinSelection) {
       renderEditable.selectPositionAt(
         from: details.globalPosition,
         cause: SelectionChangedCause.tap,
       );
-      widget.onContextMenu(ContextMenuDetails(
-        location: details.globalPosition,
-        withinSelection: false,
-      ));
     }
+    final ModalRoute<dynamic> route = widget.contextMenuControls.buildRoute(
+      context: context,
+      globalPosition: details.globalPosition,
+      editableText: this,
+    );
+    setState(() {
+      _contextMenuIsOpen = true;
+    });
+    if (widget.onContextMenuChanged != null)
+      widget.onContextMenuChanged(true);
+    final dynamic value = Navigator.push<dynamic>(context, route);
+    setState(() {
+      _contextMenuIsOpen = false;
+    });
+    if (widget.onContextMenuChanged != null)
+      widget.onContextMenuChanged(false, value);
   }
 
   // Animation configuration for scrolling the caret back on screen.
@@ -1513,7 +1542,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
-              onContextTap: widget.onContextMenu != null ? _handleContextTap : null,
+              onContextTap: widget.contextMenuControls != null ? _handleContextTap : null,
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,

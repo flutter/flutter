@@ -37,6 +37,7 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
+
 /// A base class for entries in a material design popup menu.
 ///
 /// The popup menu widget uses this interface to interact with the menu items.
@@ -659,6 +660,26 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
       ),
     );
   }
+}
+
+/// TODO
+_PopupMenuRoute<T> createPopupMenuRoute<T>({
+    RelativeRect position,
+    List<PopupMenuEntry<T>> items,
+    double elevation,
+    ThemeData theme,
+    String barrierLabel,
+    String semanticLabel,
+  }) {
+
+  return _PopupMenuRoute<T>(
+    position: position,
+    items: items,
+    elevation: elevation,
+    theme: theme,
+    barrierLabel: barrierLabel,
+    semanticLabel: semanticLabel,
+  );
 }
 
 /// Show a popup menu that contains the `items` at `position`.
