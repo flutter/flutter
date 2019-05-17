@@ -2499,11 +2499,10 @@ class SemanticsOwner extends ChangeNotifier {
         if (node.parent != null) {
           assert(
             !node.parent.isPartOfNodeMerging || node.isMergedIntoParent,
-            'SemanticsNode $node cannot be merged because an ancestor '
-            'SemanticsNode needs to merge its descendants\' semantic '
-            'information, but $node is set to be explicit. See '
-            '[SemanticsConfiguration.explicitChildNodes] for more '
-            'information.'
+            '$node cannot be merged because an ancestor SemanticsNode needs '
+            'to merge its descendants\' semantic information, but $node is '
+            'set to be explicit. See [SemanticsConfiguration.explicitChildNodes] '
+            'for more information.'
           );
         }
         if (node.isPartOfNodeMerging) {
@@ -2664,7 +2663,7 @@ class SemanticsConfiguration {
   /// annotate [SemanticNode]s of their parent with the semantic information
   /// they want to contribute to the semantic tree.
   /// When set to true the only way for children of the owning [RenderObject]
-  /// to contribute semantic information to the semantic tree is to introduce
+  /// to contribute semantic information2 to the semantic tree is to introduce
   /// new explicit [SemanticNode]s to the tree.
   ///
   /// This setting is often used in combination with [isSemanticBoundary] to
