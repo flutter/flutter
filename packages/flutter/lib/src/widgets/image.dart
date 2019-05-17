@@ -710,7 +710,7 @@ class _ImageState extends State<Image> {
     return Semantics(
       container: widget.semanticLabel != null,
       image: true,
-      label: widget.semanticLabel == null ? '' : widget.semanticLabel,
+      label: widget.semanticLabel ?? '',
       child: image,
     );
   }

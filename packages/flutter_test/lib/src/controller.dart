@@ -259,11 +259,7 @@ abstract class WidgetController {
   /// Dispatch a pointer down / pointer up sequence at the given location.
   Future<void> tapAt(Offset location, {int pointer, int buttons = kPrimaryButton}) {
     return TestAsyncUtils.guard<void>(() async {
-      final TestGesture gesture = await startGesture(
-        location,
-        pointer: pointer,
-        buttons: buttons,
-      );
+      final TestGesture gesture = await startGesture(location, pointer: pointer, buttons: buttons);
       await gesture.up();
     });
   }

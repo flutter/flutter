@@ -326,6 +326,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+    case 'windows-x64':
+      return TargetPlatform.windows_x64;
     case 'web':
       return TargetPlatform.web;
   }
@@ -395,6 +397,11 @@ String getWebBuildDirectory() {
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'linux');
+}
+
+/// Returns the Windows build output directory.
+String getWindowsBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'windows');
 }
 
 /// Returns the Fuchsia build output directory.

@@ -575,15 +575,20 @@ class MacOSProject {
 
   Directory get _editableDirectory => project.directory.childDirectory('macos');
 
+  Directory get _cacheDirectory => _editableDirectory.childDirectory('Flutter');
+
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the Xcode build.
-  File get generatedXcodePropertiesFile => _editableDirectory.childDirectory('Flutter').childFile('Generated.xcconfig');
+  File get generatedXcodePropertiesFile => _cacheDirectory.childFile('Generated.xcconfig');
 
   /// The Xcode project file.
   Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
 
-  // Note: The name script file exists as a temporary shim.
-  File get nameScript => project.directory.childDirectory('macos').childFile('name_output.sh');
+  /// The file where the Xcode build will write the name of the built app.
+  ///
+  /// Ideally this will be replaced in the future with inpection of the Runner
+  /// scheme's target.
+  File get nameFile => _cacheDirectory.childFile('.app_filename');
 }
 
 /// The Windows sub project
@@ -596,15 +601,19 @@ class WindowsProject {
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
 
+  Directory get _cacheDirectory => _editableDirectory.childDirectory('flutter');
+
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the build.
-  File get generatedPropertySheetFile => _editableDirectory.childDirectory('flutter').childFile('Generated.props');
+  File get generatedPropertySheetFile => _cacheDirectory.childFile('Generated.props');
 
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 
-  // Note: The name script file exists as a temporary shim.
-  File get nameScript => _editableDirectory.childFile('name_output.bat');
+  /// The file where the VS build will write the name of the built app.
+  ///
+  /// Ideally this will be replaced in the future with inspection of the project.
+  File get nameFile => _cacheDirectory.childFile('exe_filename');
 }
 
 /// The Linux sub project.

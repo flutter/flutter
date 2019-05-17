@@ -5,7 +5,7 @@
 import 'dart:io'; // ignore: dart_io_import.
 import 'package:path/path.dart' as path; // ignore: package_path_import.
 
-/// Executes the required flutter tasks for a linux build.
+/// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {
   final String targetPlatform = arguments[0];
   final String buildMode = arguments[1];
@@ -26,9 +26,9 @@ ERROR: Requested build with Flutter local engine at '$localEngine'
 This engine is not compatible with FLUTTER_BUILD_MODE: '$buildMode'.
 You can fix this by updating the LOCAL_ENGINE environment variable, or
 by running:
-  flutter build linux --local-engine=host_$buildMode
+  flutter build <platform> --local-engine=host_$buildMode
 or
-  flutter build linux --local-engine=host_${buildMode}_unopt
+  flutter build <platform> --local-engine=host_${buildMode}_unopt
 ========================================================================
 ''');
     exit(1);
@@ -38,6 +38,9 @@ or
   switch (targetPlatform) {
     case 'linux-x64':
       cacheDirectory = 'linux/flutter';
+      break;
+    case 'windows-x64':
+      cacheDirectory = 'windows/flutter';
       break;
     default:
       stderr.write('Unsupported target platform $targetPlatform');
