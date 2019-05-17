@@ -1873,12 +1873,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled) {
       return themeData.hintColor;
     }
-    if (isHovering) {
-      // TODO(gspencer): Find out the actual value here from the spec writers.
+    if (isHovering && decoration.enabled) {
       final Color hoverColor = decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
       return Color.alphaBlend(hoverColor.withOpacity(0.16), themeData.colorScheme.onSurface.withOpacity(0.12));
     }
-    // TODO(gspencer): Find out the actual value here from the spec writers.
     return themeData.colorScheme.onSurface.withOpacity(0.12);
   }
 
@@ -1905,13 +1903,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getFocusColor(ThemeData themeData) {
-    if (decoration.filled != true) // filled == null same as filled == false
+    if (decoration.filled != true || !decoration.enabled) // filled == null same as filled == false
       return Colors.transparent;
     return decoration.focusColor ?? themeData.inputDecorationTheme?.focusColor ?? themeData.focusColor;
   }
 
   Color _getHoverColor(ThemeData themeData) {
-    if (isFocused || decoration.filled != true) // filled == null same as filled == false
+    if (isFocused || decoration.filled != true || !decoration.enabled) // filled == null same as filled == false
       return Colors.transparent;
     return decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
   }
@@ -2029,8 +2027,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       fillColor: _getFillColor(themeData),
       focusColor: _getFocusColor(themeData),
       hoverColor: _getHoverColor(themeData),
-      isFocused: isFocused,
-      isHovering: isHovering,
+      isFocused: isFocused && decoration.enabled,
+      isHovering: isHovering && decoration.enabled,
     );
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);
