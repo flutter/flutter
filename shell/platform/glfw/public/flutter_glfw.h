@@ -98,7 +98,7 @@ FlutterDesktopGetPluginRegistrar(FlutterDesktopWindowControllerRef controller,
 //
 // If hover is enabled, mouse movement will send hover events to the Flutter
 // engine, rather than only tracking the mouse while the button is pressed.
-// Defaults to off.
+// Defaults to on.
 FLUTTER_EXPORT void FlutterDesktopWindowSetHoverEnabled(
     FlutterDesktopWindowRef flutter_window,
     bool enabled);
