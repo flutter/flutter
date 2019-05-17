@@ -164,7 +164,7 @@ class Locale {
   ///
   /// See also:
   ///
-  ///  * [new Locale.fromSubtags], which also allows a [scriptCode] to be
+  ///  * [Locale.fromSubtags], which also allows a [scriptCode] to be
   ///    specified.
   const Locale(
     this._languageCode, [
@@ -221,7 +221,7 @@ class Locale {
   ///
   /// See also:
   ///
-  ///  * [new Locale.fromSubtags], which describes the conventions for creating
+  ///  * [Locale.fromSubtags], which describes the conventions for creating
   ///    [Locale] objects.
   String get languageCode => _deprecatedLanguageSubtagMap[_languageCode] ?? _languageCode;
   final String _languageCode;
@@ -319,7 +319,7 @@ class Locale {
   ///
   /// See also:
   ///
-  ///  * [new Locale.fromSubtags], which describes the conventions for creating
+  ///  * [Locale.fromSubtags], which describes the conventions for creating
   ///    [Locale] objects.
   final String scriptCode;
 
@@ -340,7 +340,7 @@ class Locale {
   ///
   /// See also:
   ///
-  ///  * [new Locale.fromSubtags], which describes the conventions for creating
+  ///  * [Locale.fromSubtags], which describes the conventions for creating
   ///    [Locale] objects.
   String get countryCode => _deprecatedRegionSubtagMap[_countryCode] ?? _countryCode;
   final String _countryCode;
