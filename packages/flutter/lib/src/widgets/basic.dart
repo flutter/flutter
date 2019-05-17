@@ -6093,6 +6093,8 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
+/// ## Conflicting Semantics
+///
 /// Be aware that if two nodes in the subtree have conflicting
 /// semantics, the result may be nonsensical.
 ///
