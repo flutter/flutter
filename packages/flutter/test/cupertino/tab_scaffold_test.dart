@@ -664,6 +664,118 @@ void main() {
     expect(find.text('Tab 3'), findsNothing);
   });
 
+  testWidgets('A controller can control more than one CupertinoTabScaffold,'
+    'removal of listeners does not break the controller',
+    (WidgetTester tester) async {
+      final List<int> tabsPainted0 = <int>[];
+      final List<int> tabsPainted1 = <int>[];
+      MockCupertinoTabController controller = MockCupertinoTabController(initialIndex: 2);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Stack(
+              children: <Widget>[
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted0.add(index)
+                      )
+                    );
+                  }
+                ),
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted1.add(index)
+                      )
+                    );
+                  }
+                ),
+              ]
+            )
+          )
+        )
+      );
+      expect(tabsPainted0, const <int>[2]);
+      expect(tabsPainted1, const <int>[2]);
+      expect(controller.numOfListeners, 2);
+
+      controller.index = 0;
+      await tester.pump();
+      expect(tabsPainted0, const <int>[2, 0]);
+      expect(tabsPainted1, const <int>[2, 0]);
+
+      controller.index = 1;
+      // Removing one of the tabs works.
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Stack(
+              children: <Widget>[
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted0.add(index)
+                      )
+                    );
+                  }
+                ),
+              ]
+            )
+          )
+        )
+      );
+
+      expect(tabsPainted0, const <int>[2, 0, 1]);
+      expect(tabsPainted1, const <int>[2, 0]);
+      expect(controller.numOfListeners, 1);
+
+      // Replacing controller works.
+      controller = MockCupertinoTabController(initialIndex: 2);
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoPageScaffold(
+            child: Stack(
+              children: <Widget>[
+                CupertinoTabScaffold(
+                  tabBar: CupertinoTabBar(
+                    items: List<BottomNavigationBarItem>.generate(3, tabGenerator),
+                  ),
+                  controller: controller,
+                  tabBuilder: (BuildContext context, int index) {
+                    return CustomPaint(
+                      painter: TestCallbackPainter(
+                        onPaint: () => tabsPainted0.add(index)
+                      )
+                    );
+                  }
+                ),
+              ]
+            )
+          )
+        )
+      );
+      expect(tabsPainted0, const <int>[2, 0, 1, 2]);
+      expect(tabsPainted1, const <int>[2, 0]);
+      expect(controller.numOfListeners, 1);
+    });
+
   testWidgets('Assert when current tab index >= number of tabs', (WidgetTester tester) async {
     final CupertinoTabController controller = CupertinoTabController(initialIndex: 2);
 

@@ -85,6 +85,9 @@ class CupertinoTabController extends ChangeNotifier {
   set index(int value) {
     assert(value != null);
     assert(value >= 0);
+    if (_index == value) {
+      return;
+    }
     _index = value;
     notifyListeners();
   }
@@ -107,9 +110,10 @@ class CupertinoTabController extends ChangeNotifier {
 /// to change the active tab.
 ///
 /// A [controller] can be used to provide an initially selected tab index and manage
-/// subsequent tab changes. If set to null, the scaffold will create its own
-/// [CupertinoTabController] and manage it internally. Otherwise it's up to the
-/// owner of [controller] to call `dispose` on it after finish using it.
+/// subsequent tab changes. If a controller is not specified, the scaffold will
+/// create its own [CupertinoTabController] and manage it internally. Otherwise
+/// it's up to the owner of [controller] to call `dispose` on it after finish
+/// using it.
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
 /// tab index. The [tabBuilder] must be able to build the same number of
@@ -281,8 +285,6 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     final CupertinoTabController newController =
       // User provided a new controller, update `_controller` with it.
       widget.controller
-      // Always create this `_CupertinoTabScaffoldState`'s own controller,
-      // if oldWidget.controller != null && widget.controller == null
       ?? CupertinoTabController(initialIndex: widget.tabBar.currentIndex);
 
     if (newController == _controller) {
@@ -291,7 +293,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
     if (shouldDisposeOldController) {
       _controller?.dispose();
-    } else if(_controller?._isDisposed == false) {
+    } else if (_controller?._isDisposed == false) {
       _controller.removeListener(_onCurrentIndexChange);
     }
 
@@ -302,7 +304,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   void _onCurrentIndexChange() {
     assert(
       _controller.index >= 0 && _controller.index < widget.tabBar.items.length,
-      "The CupertinoTabController's current index ${_controller.index} is "
+      "The $runtimeType's current index ${_controller.index} is "
       'out of bounds for the tab bar with ${widget.tabBar.items.length} tabs'
     );
 
