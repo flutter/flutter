@@ -18,11 +18,14 @@ import 'package:process/process.dart';
 import 'src/common.dart';
 import 'src/context.dart';
 
-Process createMockProcess({ int exitCode = 0, String stdout = '', String stderr = '' }) {
-  final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(<List<int>>[
+Process createMockProcess(
+    {int exitCode = 0, String stdout = '', String stderr = ''}) {
+  final Stream<List<int>> stdoutStream =
+      Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stdout),
   ]);
-  final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(<List<int>>[
+  final Stream<List<int>> stderrStream =
+      Stream<List<int>>.fromIterable(<List<int>>[
     utf8.encode(stderr),
   ]);
   final Process process = MockProcess();
@@ -63,11 +66,11 @@ void main() {
     testUsingContext('removes duplicates', () async {
       final Process process = createMockProcess(
           stdout: 'origin/dev\n'
-                  'origin/beta\n'
-                  'origin/stable\n'
-                  'upstream/dev\n'
-                  'upstream/beta\n'
-                  'upstream/stable\n');
+              'origin/beta\n'
+              'origin/stable\n'
+              'upstream/dev\n'
+              'upstream/beta\n'
+              'upstream/stable\n');
       when(mockProcessManager.start(
         <String>['git', 'branch', '-r'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -88,10 +91,10 @@ void main() {
 
       // format the status text for a simpler assertion.
       final Iterable<String> rows = testLogger.statusText
-        .split('\n')
-        .map((String line) => line.trim())
-        .where((String line) => line?.isNotEmpty == true)
-        .skip(1); // remove `Flutter channels:` line
+          .split('\n')
+          .map((String line) => line.trim())
+          .where((String line) => line?.isNotEmpty == true)
+          .skip(1); // remove `Flutter channels:` line
 
       expect(rows, <String>['dev', 'beta', 'stable']);
     }, overrides: <Type, Generator>{
@@ -135,7 +138,8 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, contains("Switching to flutter channel 'beta'..."));
+      expect(testLogger.statusText,
+          contains("Switching to flutter channel 'beta'..."));
       expect(testLogger.errorText, hasLength(0));
 
       when(mockProcessManager.start(
@@ -178,7 +182,8 @@ void main() {
 
     // This verifies that bug https://github.com/flutter/flutter/issues/21134
     // doesn't return.
-    testUsingContext('removes version stamp file when switching channels', () async {
+    testUsingContext('removes version stamp file when switching channels',
+        () async {
       when(mockProcessManager.start(
         <String>['git', 'fetch'],
         workingDirectory: anyNamed('workingDirectory'),
@@ -229,7 +234,8 @@ void main() {
         environment: anyNamed('environment'),
       )).called(1);
 
-      expect(testLogger.statusText, isNot(contains('A new version of Flutter')));
+      expect(
+          testLogger.statusText, isNot(contains('A new version of Flutter')));
       expect(testLogger.errorText, hasLength(0));
       expect(versionCheckFile.existsSync(), isFalse);
     }, overrides: <Type, Generator>{

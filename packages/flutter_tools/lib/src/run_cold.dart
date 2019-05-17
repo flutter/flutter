@@ -27,12 +27,12 @@ class ColdRunner extends ResidentRunner {
     bool stayResident = true,
     bool ipv6 = false,
   }) : super(devices,
-             target: target,
-             debuggingOptions: debuggingOptions,
-             usesTerminalUI: usesTerminalUI,
-             saveCompilationTrace: saveCompilationTrace,
-             stayResident: stayResident,
-             ipv6: ipv6);
+            target: target,
+            debuggingOptions: debuggingOptions,
+            usesTerminalUI: usesTerminalUI,
+            saveCompilationTrace: saveCompilationTrace,
+            stayResident: stayResident,
+            ipv6: ipv6);
 
   final bool traceStartup;
   final bool awaitFirstFrameWhenTracing;
@@ -49,9 +49,11 @@ class ColdRunner extends ResidentRunner {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
       if (!fs.isFileSync(mainPath)) {
-        String message = 'Tried to run $mainPath, but that file does not exist.';
+        String message =
+            'Tried to run $mainPath, but that file does not exist.';
         if (target == null)
-          message += '\nConsider using the -t option to specify the Dart file to start.';
+          message +=
+              '\nConsider using the -t option to specify the Dart file to start.';
         printError(message);
         return 1;
       }
@@ -63,8 +65,7 @@ class ColdRunner extends ResidentRunner {
         route: route,
         shouldBuild: shouldBuild,
       );
-      if (result != 0)
-        return result;
+      if (result != 0) return result;
     }
 
     // Connect to observatory.
@@ -88,8 +89,7 @@ class ColdRunner extends ResidentRunner {
     printTrace('Application running.');
 
     for (FlutterDevice device in flutterDevices) {
-      if (device.vmServices == null)
-        continue;
+      if (device.vmServices == null) continue;
       device.initLogReader();
       await device.refreshViews();
       printTrace('Connected to ${device.device.name}');
@@ -113,8 +113,7 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    if (stayResident && !traceStartup)
-      return waitForAppToFinish();
+    if (stayResident && !traceStartup) return waitForAppToFinish();
     await cleanupAtFinish();
     return 0;
   }
@@ -153,7 +152,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> handleTerminalCommand(String code) async { }
+  Future<void> handleTerminalCommand(String code) async {}
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -172,14 +171,15 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp({ @required bool details }) {
+  void printHelp({@required bool details}) {
     bool haveDetails = false;
     bool haveAnything = false;
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.observatoryUris != null) {
         for (Uri uri in device.observatoryUris) {
-          printStatus('An Observatory debugger and profiler on $dname is available at $uri');
+          printStatus(
+              'An Observatory debugger and profiler on $dname is available at $uri');
           haveAnything = true;
         }
       }
@@ -192,11 +192,12 @@ class ColdRunner extends ResidentRunner {
       }
     }
     final String quitMessage = _didAttach
-      ? 'To detach, press "d"; to quit, press "q".'
-      : 'To quit, press "q".';
+        ? 'To detach, press "d"; to quit, press "q".'
+        : 'To quit, press "q".';
     if (haveDetails && !details) {
       if (saveCompilationTrace) {
-        printStatus('Compilation training data will be saved when flutter run quits...');
+        printStatus(
+            'Compilation training data will be saved when flutter run quits...');
       }
       printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {

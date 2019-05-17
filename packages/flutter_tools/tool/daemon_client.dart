@@ -20,17 +20,21 @@ Process daemon;
 //   launch: launch an emulator
 
 Future<void> main() async {
-  daemon = await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
+  daemon =
+      await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout
-    .transform<String>(utf8.decoder)
-    .transform<String>(const LineSplitter())
-    .listen((String line) => print('<== $line'));
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) => print('<== $line'));
   daemon.stderr.listen((dynamic data) => stderr.add(data));
 
   stdout.write('> ');
-  stdin.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
+  stdin
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
+      .listen((String line) {
     final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {

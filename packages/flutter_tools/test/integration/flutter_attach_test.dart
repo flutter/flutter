@@ -18,7 +18,7 @@ void main() {
   setUp(() async {
     tempDir = createResolvedTempDirectorySync('attach_test.');
     await _project.setUpIn(tempDir);
-    _flutterRun = FlutterRunTestDriver(tempDir,    logPrefix: '   RUN  ');
+    _flutterRun = FlutterRunTestDriver(tempDir, logPrefix: '   RUN  ');
     _flutterAttach = FlutterRunTestDriver(tempDir, logPrefix: 'ATTACH  ');
   });
 
@@ -58,5 +58,7 @@ void main() {
       await _flutterAttach.attach(_flutterRun.vmServicePort);
       await _flutterAttach.hotReload();
     });
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  },
+      timeout: const Timeout.factor(
+          10)); // The DevFS sync takes a really long time, so these tests can be slow.
 }

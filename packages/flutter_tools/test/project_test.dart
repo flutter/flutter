@@ -59,7 +59,8 @@ void main() {
       testInMemory('treats missing pubspec.yaml as empty', () async {
         final Directory directory = fs.directory('myproject')
           ..createSync(recursive: true);
-        expect((FlutterProject.fromDirectory(directory)).manifest.isEmpty,
+        expect(
+          (FlutterProject.fromDirectory(directory)).manifest.isEmpty,
           true,
         );
       });
@@ -103,29 +104,47 @@ void main() {
       testInMemory('exits on already editable module', () async {
         final FlutterProject project = await aModuleProject();
         await project.android.makeHostAppEditable();
-        return expectToolExitLater(project.android.makeHostAppEditable(), contains('already editable'));
+        return expectToolExitLater(project.android.makeHostAppEditable(),
+            contains('already editable'));
       });
-      testInMemory('creates android/app folder in place of .android/app', () async {
+      testInMemory('creates android/app folder in place of .android/app',
+          () async {
         final FlutterProject project = await aModuleProject();
         await project.android.makeHostAppEditable();
-        expectNotExists(project.directory.childDirectory('.android').childDirectory('app'));
+        expectNotExists(
+            project.directory.childDirectory('.android').childDirectory('app'));
         expect(
-          project.directory.childDirectory('.android').childFile('settings.gradle').readAsStringSync(),
+          project.directory
+              .childDirectory('.android')
+              .childFile('settings.gradle')
+              .readAsStringSync(),
           isNot(contains("include ':app'")),
         );
-        expectExists(project.directory.childDirectory('android').childDirectory('app'));
-        expectExists(project.directory.childDirectory('android').childFile('local.properties'));
+        expectExists(
+            project.directory.childDirectory('android').childDirectory('app'));
+        expectExists(project.directory
+            .childDirectory('android')
+            .childFile('local.properties'));
         expect(
-          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
+          project.directory
+              .childDirectory('android')
+              .childFile('settings.gradle')
+              .readAsStringSync(),
           contains("include ':app'"),
         );
       });
-      testInMemory('retains .android/Flutter folder and references it', () async {
+      testInMemory('retains .android/Flutter folder and references it',
+          () async {
         final FlutterProject project = await aModuleProject();
         await project.android.makeHostAppEditable();
-        expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
+        expectExists(project.directory
+            .childDirectory('.android')
+            .childDirectory('Flutter'));
         expect(
-          project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
+          project.directory
+              .childDirectory('android')
+              .childFile('settings.gradle')
+              .readAsStringSync(),
           contains('../.android/include_flutter.groovy'),
         );
       });
@@ -134,7 +153,8 @@ void main() {
         await project.android.makeHostAppEditable();
         project.directory.childDirectory('android').deleteSync(recursive: true);
         await project.android.makeHostAppEditable();
-        expectExists(project.directory.childDirectory('android').childDirectory('app'));
+        expectExists(
+            project.directory.childDirectory('android').childDirectory('app'));
       });
     });
 
@@ -151,49 +171,67 @@ void main() {
       testInMemory('does nothing in plugin or package root project', () async {
         final FlutterProject project = await aPluginProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectNotExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
-        expectNotExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
-        expectNotExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
-        expectNotExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+        expectNotExists(project.ios.hostAppRoot
+            .childDirectory('Runner')
+            .childFile('GeneratedPluginRegistrant.h'));
+        expectNotExists(androidPluginRegistrant(
+            project.android.hostAppGradleRoot.childDirectory('app')));
+        expectNotExists(project.ios.hostAppRoot
+            .childDirectory('Flutter')
+            .childFile('Generated.xcconfig'));
+        expectNotExists(
+            project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('injects plugins for iOS', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.ios.hostAppRoot.childDirectory('Runner').childFile('GeneratedPluginRegistrant.h'));
+        expectExists(project.ios.hostAppRoot
+            .childDirectory('Runner')
+            .childFile('GeneratedPluginRegistrant.h'));
       });
       testInMemory('generates Xcode configuration for iOS', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.ios.hostAppRoot.childDirectory('Flutter').childFile('Generated.xcconfig'));
+        expectExists(project.ios.hostAppRoot
+            .childDirectory('Flutter')
+            .childFile('Generated.xcconfig'));
       });
       testInMemory('injects plugins for Android', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('app')));
+        expectExists(androidPluginRegistrant(
+            project.android.hostAppGradleRoot.childDirectory('app')));
       });
       testInMemory('updates local properties for Android', () async {
         final FlutterProject project = await someProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
+        expectExists(
+            project.android.hostAppGradleRoot.childFile('local.properties'));
       });
       testInMemory('creates Android library in module', () async {
         final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        expectExists(project.android.hostAppGradleRoot.childFile('settings.gradle'));
-        expectExists(project.android.hostAppGradleRoot.childFile('local.properties'));
-        expectExists(androidPluginRegistrant(project.android.hostAppGradleRoot.childDirectory('Flutter')));
+        expectExists(
+            project.android.hostAppGradleRoot.childFile('settings.gradle'));
+        expectExists(
+            project.android.hostAppGradleRoot.childFile('local.properties'));
+        expectExists(androidPluginRegistrant(
+            project.android.hostAppGradleRoot.childDirectory('Flutter')));
       });
       testInMemory('creates iOS pod in module', () async {
         final FlutterProject project = await aModuleProject();
         await project.ensureReadyForPlatformSpecificTooling();
-        final Directory flutter = project.ios.hostAppRoot.childDirectory('Flutter');
+        final Directory flutter =
+            project.ios.hostAppRoot.childDirectory('Flutter');
         expectExists(flutter.childFile('podhelper.rb'));
         expectExists(flutter.childFile('Generated.xcconfig'));
         final Directory pluginRegistrantClasses = flutter
             .childDirectory('FlutterPluginRegistrant')
             .childDirectory('Classes');
-        expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.h'));
-        expectExists(pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
+        expectExists(
+            pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.h'));
+        expectExists(
+            pluginRegistrantClasses.childFile('GeneratedPluginRegistrant.m'));
       });
     });
 
@@ -256,23 +294,28 @@ void main() {
       });
       testWithMocks('from plist, if no variables', () async {
         final FlutterProject project = await someProject();
-        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('io.flutter.someProject');
+        when(mockIOSWorkflow.getPlistValueFromFile(any, any))
+            .thenReturn('io.flutter.someProject');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
       testWithMocks('from pbxproj and plist, if default variable', () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.directory, 'io.flutter.someProject');
-        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
+        when(mockIOSWorkflow.getPlistValueFromFile(any, any))
+            .thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
       testWithMocks('from pbxproj and plist, by substitution', () async {
         final FlutterProject project = await someProject();
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenReturn(<String, String>{
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any))
+            .thenReturn(<String, String>{
           'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
           'SUFFIX': 'suffix',
         });
-        when(mockIOSWorkflow.getPlistValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
-        expect(project.ios.productBundleIdentifier, 'io.flutter.someProject.suffix');
+        when(mockIOSWorkflow.getPlistValueFromFile(any, any))
+            .thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER).\$(SUFFIX)');
+        expect(project.ios.productBundleIdentifier,
+            'io.flutter.someProject.suffix');
       });
       testWithMocks('empty surrounded by quotes', () async {
         final FlutterProject project = await someProject();
@@ -281,12 +324,14 @@ void main() {
       });
       testWithMocks('surrounded by double quotes', () async {
         final FlutterProject project = await someProject();
-        addIosWithBundleId(project.directory, 'io.flutter.someProject', qualifier: '"');
+        addIosWithBundleId(project.directory, 'io.flutter.someProject',
+            qualifier: '"');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
       testWithMocks('surrounded by single quotes', () async {
         final FlutterProject project = await someProject();
-        addIosWithBundleId(project.directory, 'io.flutter.someProject', qualifier: '\'');
+        addIosWithBundleId(project.directory, 'io.flutter.someProject',
+            qualifier: '\'');
         expect(project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
     });
@@ -308,17 +353,21 @@ void main() {
       });
       testInMemory('is populated from Android application ID', () async {
         final FlutterProject project = await someProject();
-        addAndroidWithApplicationId(project.directory, 'io.flutter.someproject');
+        addAndroidWithApplicationId(
+            project.directory, 'io.flutter.someproject');
         expect(project.organizationNames, <String>['io.flutter']);
       });
-      testInMemory('is populated from iOS bundle identifier in plugin example', () async {
+      testInMemory('is populated from iOS bundle identifier in plugin example',
+          () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.example.directory, 'io.flutter.someProject');
         expect(project.organizationNames, <String>['io.flutter']);
       });
-      testInMemory('is populated from Android application ID in plugin example', () async {
+      testInMemory('is populated from Android application ID in plugin example',
+          () async {
         final FlutterProject project = await someProject();
-        addAndroidWithApplicationId(project.example.directory, 'io.flutter.someproject');
+        addAndroidWithApplicationId(
+            project.example.directory, 'io.flutter.someproject');
         expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is populated from Android group in plugin', () async {
@@ -329,13 +378,15 @@ void main() {
       testInMemory('is singleton, if sources agree', () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.directory, 'io.flutter.someProject');
-        addAndroidWithApplicationId(project.directory, 'io.flutter.someproject');
+        addAndroidWithApplicationId(
+            project.directory, 'io.flutter.someproject');
         expect(project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is non-singleton, if sources disagree', () async {
         final FlutterProject project = await someProject();
         addIosWithBundleId(project.directory, 'io.flutter.someProject');
-        addAndroidWithApplicationId(project.directory, 'io.clutter.someproject');
+        addAndroidWithApplicationId(
+            project.directory, 'io.clutter.someproject');
         expect(
           project.organizationNames,
           <String>['io.flutter', 'io.clutter'],
@@ -351,28 +402,32 @@ void main() {
       testbed = Testbed();
     });
 
-    test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
-      fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
+    test(
+        'Handles asking for builders from an invalid pubspec',
+        () => testbed.run(() {
+              fs.file('pubspec.yaml')
+                ..createSync()
+                ..writeAsStringSync(r'''
 # Hello, World
 ''');
-      final FlutterProject flutterProject = FlutterProject.current();
+              final FlutterProject flutterProject = FlutterProject.current();
 
-      expect(flutterProject.builders, null);
-    }));
+              expect(flutterProject.builders, null);
+            }));
 
-    test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
-      fs.file('pubspec.yaml')
-        ..createSync()
-        ..writeAsStringSync(r'''
+    test(
+        'Handles asking for builders from a trivial pubspec',
+        () => testbed.run(() {
+              fs.file('pubspec.yaml')
+                ..createSync()
+                ..writeAsStringSync(r'''
 # Hello, World
 name: foo_bar
 ''');
-      final FlutterProject flutterProject = FlutterProject.current();
+              final FlutterProject flutterProject = FlutterProject.current();
 
-      expect(flutterProject.builders, null);
-    }));
+              expect(flutterProject.builders, null);
+            }));
   });
 }
 
@@ -423,14 +478,20 @@ void testInMemory(String description, Future<void> testMethod()) {
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
   transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
-  transfer(fs.directory(Cache.flutterRoot)
-      .childDirectory('packages')
-      .childDirectory('flutter_tools')
-      .childDirectory('templates'), testFileSystem);
-  transfer(fs.directory(Cache.flutterRoot)
-      .childDirectory('packages')
-      .childDirectory('flutter_tools')
-      .childDirectory('schema'), testFileSystem);
+  transfer(
+      fs
+          .directory(Cache.flutterRoot)
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .childDirectory('templates'),
+      testFileSystem);
+  transfer(
+      fs
+          .directory(Cache.flutterRoot)
+          .childDirectory('packages')
+          .childDirectory('flutter_tools')
+          .childDirectory('schema'),
+      testFileSystem);
   testUsingContext(
     description,
     testMethod,
@@ -450,19 +511,22 @@ void transfer(FileSystemEntity entity, FileSystem target) {
       transfer(child, target);
     }
   } else if (entity is File) {
-    target.file(entity.absolute.path).writeAsBytesSync(entity.readAsBytesSync(), flush: true);
+    target
+        .file(entity.absolute.path)
+        .writeAsBytesSync(entity.readAsBytesSync(), flush: true);
   } else {
     throw 'Unsupported FileSystemEntity ${entity.runtimeType}';
   }
 }
 
-Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher) async {
+Future<void> expectToolExitLater(
+    Future<dynamic> future, Matcher messageMatcher) async {
   try {
     await future;
     fail('ToolExit expected, but nothing thrown');
-  } on ToolExit catch(e) {
+  } on ToolExit catch (e) {
     expect(e.message, messageMatcher);
-  } catch(e, trace) {
+  } catch (e, trace) {
     fail('ToolExit expected, got $e\n$trace');
   }
 }
@@ -481,7 +545,7 @@ void addIosWithBundleId(Directory directory, String id, {String qualifier}) {
       .childDirectory('Runner.xcodeproj')
       .childFile('project.pbxproj')
         ..createSync(recursive: true)
-    ..writeAsStringSync(projectFileWithBundleId(id, qualifier: qualifier));
+        ..writeAsStringSync(projectFileWithBundleId(id, qualifier: qualifier));
 }
 
 void addAndroidWithApplicationId(Directory directory, String id) {
@@ -551,18 +615,20 @@ android {
 }
 
 File androidPluginRegistrant(Directory parent) {
-  return parent.childDirectory('src')
-    .childDirectory('main')
-    .childDirectory('java')
-    .childDirectory('io')
-    .childDirectory('flutter')
-    .childDirectory('plugins')
-    .childFile('GeneratedPluginRegistrant.java');
+  return parent
+      .childDirectory('src')
+      .childDirectory('main')
+      .childDirectory('java')
+      .childDirectory('io')
+      .childDirectory('flutter')
+      .childDirectory('plugins')
+      .childFile('GeneratedPluginRegistrant.java');
 }
 
 class MockIOSWorkflow extends Mock implements IOSWorkflow {}
 
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {
+class MockXcodeProjectInterpreter extends Mock
+    implements XcodeProjectInterpreter {
   @override
   bool get isInstalled => true;
 }

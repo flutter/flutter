@@ -22,7 +22,8 @@ void main() {
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -45,7 +46,8 @@ void main() {
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -68,7 +70,8 @@ void main() {
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- attempting retry 3 in 4 seconds...\n'
@@ -80,8 +83,8 @@ void main() {
     expect(testLogger.traceText, contains('Download error: SocketException'));
   }, overrides: <Type, Generator>{
     HttpClientFactory: () => () => MockHttpClientThrowing(
-      const io.SocketException('test exception handling'),
-    ),
+          const io.SocketException('test exception handling'),
+        ),
   });
 
   testUsingContext('no retry from HandshakeException', () async {
@@ -100,22 +103,24 @@ void main() {
     expect(testLogger.traceText, contains('HandshakeException'));
   }, overrides: <Type, Generator>{
     HttpClientFactory: () => () => MockHttpClientThrowing(
-      const io.HandshakeException('test exception handling'),
-    ),
+          const io.HandshakeException('test exception handling'),
+        ),
   });
 
   testUsingContext('max attempts', () async {
     String error;
     List<int> actualResult;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then((List<int> value) {
+      fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then(
+          (List<int> value) {
         actualResult = value;
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
       });
       expect(testLogger.statusText, '');
       time.elapse(const Duration(milliseconds: 10000));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Download failed -- attempting retry 1 in 1 second...\n'
         'Download failed -- attempting retry 2 in 2 seconds...\n'
         'Download failed -- retry 3\n',
@@ -206,7 +211,8 @@ class MockHttpClientRequest implements io.HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientResponse {
+class MockHttpClientResponse extends Stream<List<int>>
+    implements io.HttpClientResponse {
   MockHttpClientResponse(this.statusCode);
 
   @override
@@ -222,8 +228,10 @@ class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientR
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromFuture(Future<List<int>>.error(const io.SocketException('test')))
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromFuture(
+            Future<List<int>>.error(const io.SocketException('test')))
+        .listen(onData,
+            onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override

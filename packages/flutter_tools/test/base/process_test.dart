@@ -22,10 +22,14 @@ void main() {
       mockProcessManager = PlainMockProcessManager();
     });
 
-    testUsingContext('runCheckedAsync exceptions should be ProcessException objects', () async {
-      when(mockProcessManager.run(<String>['false']))
-          .thenAnswer((Invocation invocation) => Future<ProcessResult>.value(ProcessResult(0, 1, '', '')));
-      expect(() async => await runCheckedAsync(<String>['false']), throwsA(isInstanceOf<ProcessException>()));
+    testUsingContext(
+        'runCheckedAsync exceptions should be ProcessException objects',
+        () async {
+      when(mockProcessManager.run(<String>['false'])).thenAnswer(
+          (Invocation invocation) =>
+              Future<ProcessResult>.value(ProcessResult(0, 1, '', '')));
+      expect(() async => await runCheckedAsync(<String>['false']),
+          throwsA(isInstanceOf<ProcessException>()));
     }, overrides: <Type, Generator>{ProcessManager: () => mockProcessManager});
   });
   group('shutdownHooks', () {
@@ -69,25 +73,30 @@ void main() {
       mockLogger = BufferLogger();
     });
 
-    MockProcess Function(List<String>) processMetaFactory(List<String> stdout, { List<String> stderr = const <String>[] }) {
-      final Stream<List<int>> stdoutStream =
-          Stream<List<int>>.fromIterable(stdout.map<List<int>>((String s) => s.codeUnits));
-      final Stream<List<int>> stderrStream =
-      Stream<List<int>>.fromIterable(stderr.map<List<int>>((String s) => s.codeUnits));
-      return (List<String> command) => MockProcess(stdout: stdoutStream, stderr: stderrStream);
+    MockProcess Function(List<String>) processMetaFactory(List<String> stdout,
+        {List<String> stderr = const <String>[]}) {
+      final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
+          stdout.map<List<int>>((String s) => s.codeUnits));
+      final Stream<List<int>> stderrStream = Stream<List<int>>.fromIterable(
+          stderr.map<List<int>>((String s) => s.codeUnits));
+      return (List<String> command) =>
+          MockProcess(stdout: stdoutStream, stderr: stderrStream);
     }
 
     testUsingContext('Command output is not wrapped.', () async {
       final List<String> testString = <String>['0123456789' * 10];
-      mockProcessManager.processFactory = processMetaFactory(testString, stderr: testString);
+      mockProcessManager.processFactory =
+          processMetaFactory(testString, stderr: testString);
       await runCommandAndStreamOutput(<String>['command']);
       expect(mockLogger.statusText, equals('${testString[0]}\n'));
       expect(mockLogger.errorText, equals('${testString[0]}\n'));
     }, overrides: <Type, Generator>{
       Logger: () => mockLogger,
       ProcessManager: () => mockProcessManager,
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+      OutputPreferences: () =>
+          OutputPreferences(wrapText: true, wrapColumn: 40),
+      Platform: () => FakePlatform.fromPlatform(const LocalPlatform())
+        ..stdoutSupportsAnsi = false,
     });
   });
 }

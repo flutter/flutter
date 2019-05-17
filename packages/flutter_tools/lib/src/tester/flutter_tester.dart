@@ -28,8 +28,8 @@ class FlutterTesterApp extends ApplicationPackage {
   }
 
   FlutterTesterApp._(Directory directory)
-    : _directory = directory,
-      super(id: directory.path);
+      : _directory = directory,
+        super(id: directory.path);
 
   final Directory _directory;
 
@@ -66,13 +66,13 @@ class FlutterTesterDevice extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.tester;
 
   @override
-  void clearLogs() { }
+  void clearLogs() {}
 
   final _FlutterTesterDeviceLogReader _logReader =
       _FlutterTesterDeviceLogReader();
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) => _logReader;
+  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
 
   @override
   Future<bool> installApp(ApplicationPackage app) async => true;
@@ -119,8 +119,7 @@ class FlutterTesterDevice extends Device {
       '--packages=${PackageMap.globalPackagesPath}',
     ];
     if (debuggingOptions.debuggingEnabled) {
-      if (debuggingOptions.startPaused)
-        command.add('--start-paused');
+      if (debuggingOptions.startPaused) command.add('--start-paused');
       if (debuggingOptions.disableServiceAuthCodes)
         command.add('--disable-service-auth-codes');
       if (debuggingOptions.hasObservatoryPort)
@@ -129,7 +128,8 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath = bundle.getKernelPathForTransformerOptions(
+    final String applicationKernelFilePath =
+        bundle.getKernelPathForTransformerOptions(
       fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
@@ -148,7 +148,8 @@ class FlutterTesterDevice extends Device {
       printTrace(command.join(' '));
 
       _isRunning = true;
-      _process = await processManager.start(command,
+      _process = await processManager.start(
+        command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
         },
@@ -156,22 +157,22 @@ class FlutterTesterDevice extends Device {
       // Setting a bool can't fail in the callback.
       unawaited(_process.exitCode.then<void>((_) => _isRunning = false));
       _process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          _logReader.addLine(line);
-        });
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+        _logReader.addLine(line);
+      });
       _process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String line) {
-          _logReader.addLine(line);
-        });
+          .transform<String>(utf8.decoder)
+          .transform<String>(const LineSplitter())
+          .listen((String line) {
+        _logReader.addLine(line);
+      });
 
-      if (!debuggingOptions.debuggingEnabled)
-        return LaunchResult.succeeded();
+      if (!debuggingOptions.debuggingEnabled) return LaunchResult.succeeded();
 
-      final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
+      final ProtocolDiscovery observatoryDiscovery =
+          ProtocolDiscovery.observatory(
         getLogReader(),
         hostPort: debuggingOptions.observatoryPort,
       );
@@ -240,7 +241,7 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
 /// where the VM is running on the same machine and does not need ports forwarding.
 class _NoopPortForwarder extends DevicePortForwarder {
   @override
-  Future<int> forward(int devicePort, { int hostPort }) {
+  Future<int> forward(int devicePort, {int hostPort}) {
     if (hostPort != null && hostPort != devicePort)
       throw 'Forwarding to a different port is not supported by flutter tester';
     return Future<int>.value(devicePort);
@@ -250,5 +251,5 @@ class _NoopPortForwarder extends DevicePortForwarder {
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async { }
+  Future<void> unforward(ForwardedPort forwardedPort) async {}
 }

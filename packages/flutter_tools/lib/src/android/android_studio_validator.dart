@@ -22,8 +22,8 @@ class AndroidStudioValidator extends DoctorValidator {
     if (studios.isEmpty) {
       validators.add(NoAndroidStudioValidator());
     } else {
-      validators.addAll(studios
-          .map<DoctorValidator>((AndroidStudio studio) => AndroidStudioValidator(studio)));
+      validators.addAll(studios.map<DoctorValidator>(
+          (AndroidStudio studio) => AndroidStudioValidator(studio)));
     }
     return validators;
   }
@@ -36,16 +36,19 @@ class AndroidStudioValidator extends DoctorValidator {
     final String studioVersionText = _studio.version == Version.unknown
         ? null
         : userMessages.androidStudioVersion(_studio.version.toString());
-    messages
-        .add(ValidationMessage(userMessages.androidStudioLocation(_studio.directory)));
+    messages.add(ValidationMessage(
+        userMessages.androidStudioLocation(_studio.directory)));
 
     final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath);
-    plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'],
-        'Flutter', minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
+    plugins.validatePackage(messages,
+        <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
+        minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
     plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_studio.isValid) {
-      type = _hasIssues(messages) ? ValidationType.partial : ValidationType.installed;
+      type = _hasIssues(messages)
+          ? ValidationType.partial
+          : ValidationType.installed;
       messages.addAll(_studio.validationMessages
           .map<ValidationMessage>((String m) => ValidationMessage(m)));
     } else {
@@ -75,7 +78,8 @@ class NoAndroidStudioValidator extends DoctorValidator {
 
     final String cfgAndroidStudio = config.getValue('android-studio-dir');
     if (cfgAndroidStudio != null) {
-      messages.add(ValidationMessage.error(userMessages.androidStudioMissing(cfgAndroidStudio)));
+      messages.add(ValidationMessage.error(
+          userMessages.androidStudioMissing(cfgAndroidStudio)));
     }
     messages.add(ValidationMessage(userMessages.androidStudioInstallation));
 

@@ -33,7 +33,8 @@ class ContextDependencyCycleException implements Exception {
 /// context will not have any values associated with it.
 ///
 /// This is guaranteed to never return `null`.
-AppContext get context => Zone.current[_Key.key] as AppContext ?? AppContext._root;
+AppContext get context =>
+    Zone.current[_Key.key] as AppContext ?? AppContext._root;
 
 /// A lookup table (mapping types to values) and an implied scope, in which
 /// code is run.
@@ -65,7 +66,8 @@ class AppContext {
 
   dynamic _boxNull(dynamic value) => value ?? _BoxedNull.instance;
 
-  dynamic _unboxNull(dynamic value) => value == _BoxedNull.instance ? null : value;
+  dynamic _unboxNull(dynamic value) =>
+      value == _BoxedNull.instance ? null : value;
 
   /// Returns the generated value for [type] if such a generator exists.
   ///
@@ -81,8 +83,7 @@ class AppContext {
   /// If the generator ends up triggering a reentrant call, it signals a
   /// dependency cycle, and a [ContextDependencyCycleException] will be thrown.
   dynamic _generateIfNecessary(Type type, Map<Type, Generator> generators) {
-    if (!generators.containsKey(type))
-      return null;
+    if (!generators.containsKey(type)) return null;
 
     return _values.putIfAbsent(type, () {
       _reentrantChecks ??= <Type>[];
@@ -99,8 +100,7 @@ class AppContext {
         return _boxNull(generators[type]());
       } finally {
         _reentrantChecks.removeLast();
-        if (_reentrantChecks.isEmpty)
-          _reentrantChecks = null;
+        if (_reentrantChecks.isEmpty) _reentrantChecks = null;
       }
     });
   }
@@ -120,8 +120,7 @@ class AppContext {
   @Deprecated('use get<T> instead for type safety.')
   Object operator [](Type type) {
     dynamic value = _generateIfNecessary(type, _overrides);
-    if (value == null && _parent != null)
-      value = _parent[type];
+    if (value == null && _parent != null) value = _parent[type];
     return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
   }
 
@@ -162,14 +161,12 @@ class AppContext {
     AppContext ctx = this;
     while (ctx != null) {
       buf.write('AppContext');
-      if (ctx.name != null)
-        buf.write('[${ctx.name}]');
+      if (ctx.name != null) buf.write('[${ctx.name}]');
       if (ctx._overrides.isNotEmpty)
         buf.write('\n$indent  overrides: [${ctx._overrides.keys.join(', ')}]');
       if (ctx._fallbacks.isNotEmpty)
         buf.write('\n$indent  fallbacks: [${ctx._fallbacks.keys.join(', ')}]');
-      if (ctx._parent != null)
-        buf.write('\n$indent  parent: ');
+      if (ctx._parent != null) buf.write('\n$indent  parent: ');
       ctx = ctx._parent;
       indent += '  ';
     }

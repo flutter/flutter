@@ -21,24 +21,29 @@ void main() {
       final RunCommand command = RunCommand();
       applyMocksToCommand(command);
       try {
-        await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123']);
+        await createTestCommandRunner(command)
+            .run(<String>['run', '-t', 'abc123']);
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
       }
     });
 
-    testUsingContext('should only request artifacts corresponding to connected devices', () async {
+    testUsingContext(
+        'should only request artifacts corresponding to connected devices',
+        () async {
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.fromIterable(<Device>[
           MockDevice(TargetPlatform.android_arm),
         ]);
       });
 
-      expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-        DevelopmentArtifact.android,
-      }));
+      expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.android,
+          }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.fromIterable(<Device>[
@@ -46,10 +51,12 @@ void main() {
         ]);
       });
 
-      expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-        DevelopmentArtifact.iOS,
-      }));
+      expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.iOS,
+          }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.fromIterable(<Device>[
@@ -58,11 +65,13 @@ void main() {
         ]);
       });
 
-      expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-        DevelopmentArtifact.iOS,
-        DevelopmentArtifact.android,
-      }));
+      expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.iOS,
+            DevelopmentArtifact.android,
+          }));
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.fromIterable(<Device>[
@@ -70,10 +79,12 @@ void main() {
         ]);
       });
 
-      expect(await RunCommand().requiredArtifacts, unorderedEquals(<DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-        DevelopmentArtifact.web,
-      }));
+      expect(
+          await RunCommand().requiredArtifacts,
+          unorderedEquals(<DevelopmentArtifact>{
+            DevelopmentArtifact.universal,
+            DevelopmentArtifact.web,
+          }));
     }, overrides: <Type, Generator>{
       DeviceManager: () => mockDeviceManager,
     });
@@ -81,6 +92,7 @@ void main() {
 }
 
 class MockDeviceManager extends Mock implements DeviceManager {}
+
 class MockDevice extends Mock implements Device {
   MockDevice(this._targetPlatform);
 

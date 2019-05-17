@@ -57,15 +57,13 @@ class AnalyzeOnce extends AnalyzeBase {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories.addAll(repoRoots);
-      if (argResults.wasParsed('current-package') && argResults['current-package'])
-        directories.add(currentDirectory);
+      if (argResults.wasParsed('current-package') &&
+          argResults['current-package']) directories.add(currentDirectory);
     } else {
-      if (argResults['current-package'])
-        directories.add(currentDirectory);
+      if (argResults['current-package']) directories.add(currentDirectory);
     }
 
-    if (directories.isEmpty)
-      throwToolExit('Nothing to analyze.', exitCode: 0);
+    if (directories.isEmpty) throwToolExit('Nothing to analyze.', exitCode: 0);
 
     // analyze all
     final Completer<void> analysisCompleter = Completer<void>();
@@ -88,7 +86,8 @@ class AnalyzeOnce extends AnalyzeBase {
     });
     server.onErrors.listen((FileAnalysisErrors fileErrors) {
       // Record the issues found (but filter out to do comments).
-      errors.addAll(fileErrors.errors.where((AnalysisError error) => error.type != 'TODO'));
+      errors.addAll(fileErrors.errors
+          .where((AnalysisError error) => error.type != 'TODO'));
     });
 
     await server.start();
@@ -107,7 +106,8 @@ class AnalyzeOnce extends AnalyzeBase {
         ? '${directories.length} ${directories.length == 1 ? 'directory' : 'directories'}'
         : fs.path.basename(directories.first);
     final Status progress = argResults['preamble']
-        ? logger.startProgress('Analyzing $message...', timeout: timeoutConfiguration.slowOperation)
+        ? logger.startProgress('Analyzing $message...',
+            timeout: timeoutConfiguration.slowOperation)
         : null;
 
     await analysisCompleter.future;
@@ -119,23 +119,25 @@ class AnalyzeOnce extends AnalyzeBase {
       return error.code == 'public_member_api_docs';
     }).length;
     if (!argResults['dartdocs'])
-      errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
+      errors.removeWhere(
+          (AnalysisError error) => error.code == 'public_member_api_docs');
 
     // emit benchmarks
     if (isBenchmarking)
       writeBenchmark(timer, errors.length, undocumentedMembers);
 
     // --write
-    dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+    dumpErrors(
+        errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
     // report errors
-    if (errors.isNotEmpty && argResults['preamble'])
-      printStatus('');
+    if (errors.isNotEmpty && argResults['preamble']) printStatus('');
     errors.sort();
     for (AnalysisError error in errors)
       printStatus(error.toString(), hangingIndent: 7);
 
-    final String seconds = (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
+    final String seconds =
+        (timer.elapsedMilliseconds / 1000.0).toStringAsFixed(1);
 
     String dartdocMessage;
     if (undocumentedMembers == 1) {
@@ -149,9 +151,11 @@ class AnalyzeOnce extends AnalyzeBase {
       final int errorCount = errors.length;
       printStatus('');
       if (undocumentedMembers > 0) {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
+        throwToolExit(
+            '$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
       } else {
-        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
+        throwToolExit(
+            '$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
       }
     }
 

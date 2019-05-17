@@ -21,91 +21,105 @@ import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
 import '../test/watcher.dart';
+
 class TestCommand extends FastFlutterCommand {
-  TestCommand({ bool verboseHelp = false }) {
+  TestCommand({bool verboseHelp = false}) {
     requiresPubspecYaml();
     usesPubOption();
     argParser
-      ..addMultiOption('name',
-        help: 'A regular expression matching substrings of the names of tests to run.',
+      ..addMultiOption(
+        'name',
+        help:
+            'A regular expression matching substrings of the names of tests to run.',
         valueHelp: 'regexp',
         splitCommas: false,
       )
-      ..addMultiOption('plain-name',
+      ..addMultiOption(
+        'plain-name',
         help: 'A plain-text substring of the names of tests to run.',
         valueHelp: 'substring',
         splitCommas: false,
       )
-      ..addFlag('start-paused',
+      ..addFlag(
+        'start-paused',
         defaultsTo: false,
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.\n'
-              'You must specify a single test file to run, explicitly.\n'
-              'Instructions for connecting with a debugger and printed to the '
-              'console once the test has started.',
+            'You must specify a single test file to run, explicitly.\n'
+            'Instructions for connecting with a debugger and printed to the '
+            'console once the test has started.',
       )
       ..addFlag('disable-service-auth-codes',
-        hide: !verboseHelp,
-        defaultsTo: false,
-        negatable: false,
-        help: 'No longer require an authentication code to connect to the VM '
-              'service (not recommended).'
-      )
-      ..addFlag('coverage',
+          hide: !verboseHelp,
+          defaultsTo: false,
+          negatable: false,
+          help: 'No longer require an authentication code to connect to the VM '
+              'service (not recommended).')
+      ..addFlag(
+        'coverage',
         defaultsTo: false,
         negatable: false,
         help: 'Whether to collect coverage information.',
       )
-      ..addFlag('merge-coverage',
+      ..addFlag(
+        'merge-coverage',
         defaultsTo: false,
         negatable: false,
         help: 'Whether to merge coverage data with "coverage/lcov.base.info".\n'
-              'Implies collecting coverage data. (Requires lcov)',
+            'Implies collecting coverage data. (Requires lcov)',
       )
-      ..addFlag('ipv6',
+      ..addFlag(
+        'ipv6',
         negatable: false,
         hide: true,
         help: 'Whether to use IPv6 for the test harness server socket.',
       )
-      ..addOption('coverage-path',
+      ..addOption(
+        'coverage-path',
         defaultsTo: 'coverage/lcov.info',
         help: 'Where to store coverage information (if coverage is enabled).',
       )
-      ..addFlag('machine',
+      ..addFlag(
+        'machine',
         hide: !verboseHelp,
         negatable: false,
         help: 'Handle machine structured JSON command input\n'
-              'and provide output and progress in machine friendly format.',
+            'and provide output and progress in machine friendly format.',
       )
-      ..addFlag('track-widget-creation',
+      ..addFlag(
+        'track-widget-creation',
         negatable: false,
         hide: !verboseHelp,
         help: 'Track widget creation locations.\n'
-              'This enables testing of features such as the widget inspector.',
+            'This enables testing of features such as the widget inspector.',
       )
-      ..addFlag('update-goldens',
+      ..addFlag(
+        'update-goldens',
         negatable: false,
-        help: 'Whether matchesGoldenFile() calls within your test methods should '
-              'update the golden files rather than test for an existing match.',
+        help:
+            'Whether matchesGoldenFile() calls within your test methods should '
+            'update the golden files rather than test for an existing match.',
       )
       ..addOption('concurrency',
-        abbr: 'j',
-        defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
-        help: 'The number of concurrent test processes to run.',
-        valueHelp: 'jobs'
-      )
-      ..addFlag('test-assets',
+          abbr: 'j',
+          defaultsTo:
+              math.max<int>(1, platform.numberOfProcessors - 2).toString(),
+          help: 'The number of concurrent test processes to run.',
+          valueHelp: 'jobs')
+      ..addFlag(
+        'test-assets',
         defaultsTo: true,
         negatable: true,
         help: 'Whether to build the assets bundle for testing.\n'
-              'Consider using --no-test-assets if assets are not required.',
+            'Consider using --no-test-assets if assets are not required.',
       );
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      <DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      };
 
   @override
   String get name => 'test';
@@ -118,13 +132,15 @@ class TestCommand extends FastFlutterCommand {
     await cache.updateAll(await requiredArtifacts);
     if (!fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
-        'Error: No pubspec.yaml file found in the current working directory.\n'
-        'Run this command from the root of your project. Test files must be '
-        'called *_test.dart and must reside in the package\'s \'test\' '
-        'directory (or one of its subdirectories).');
+          'Error: No pubspec.yaml file found in the current working directory.\n'
+          'Run this command from the root of your project. Test files must be '
+          'called *_test.dart and must reside in the package\'s \'test\' '
+          'directory (or one of its subdirectories).');
     }
     if (shouldRunPub) {
-      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
+      await pubGet(
+          context: PubContext.getVerifyContext(name),
+          skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
     final List<String> names = argResults['name'];
@@ -135,7 +151,9 @@ class TestCommand extends FastFlutterCommand {
       await _buildTestAsset();
     }
 
-    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
+    Iterable<String> files = argResults.rest
+        .map<String>((String testPath) => fs.path.absolute(testPath))
+        .toList();
 
     final bool startPaused = argResults['start-paused'];
     if (startPaused && files.length != 1) {
@@ -148,8 +166,7 @@ class TestCommand extends FastFlutterCommand {
     final int jobs = int.tryParse(argResults['concurrency']);
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
       throwToolExit(
-        'Could not parse -j/--concurrency argument. It must be an integer greater than zero.'
-      );
+          'Could not parse -j/--concurrency argument. It must be an integer greater than zero.');
     }
 
     Directory workDir;
@@ -163,8 +180,7 @@ class TestCommand extends FastFlutterCommand {
       if (files.isEmpty) {
         throwToolExit(
             'Test directory "${workDir.path}" does not appear to contain any test files.\n'
-            'Test files must be in that directory and end with the pattern "_test.dart".'
-        );
+            'Test files must be in that directory and end with the pattern "_test.dart".');
       }
     }
 
@@ -177,7 +193,8 @@ class TestCommand extends FastFlutterCommand {
 
     final bool machine = argResults['machine'];
     if (collector != null && machine) {
-      throwToolExit("The test command doesn't support --machine and coverage together");
+      throwToolExit(
+          "The test command doesn't support --machine and coverage together");
     }
 
     TestWatcher watcher;
@@ -191,7 +208,8 @@ class TestCommand extends FastFlutterCommand {
 
     // Run builders once before all tests.
     if (flutterProject.hasBuilders) {
-      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+      final CodegenDaemon codegenDaemon =
+          await codeGenerator.daemon(flutterProject);
       codegenDaemon.startBuild();
       await for (CodegenStatus status in codegenDaemon.buildResults) {
         if (status == CodegenStatus.Succeeded) {
@@ -204,7 +222,7 @@ class TestCommand extends FastFlutterCommand {
     }
 
     final bool disableServiceAuthCodes =
-      argResults['disable-service-auth-codes'];
+        argResults['disable-service-auth-codes'];
 
     final int result = await runTests(
       files,
@@ -225,13 +243,11 @@ class TestCommand extends FastFlutterCommand {
     );
 
     if (collector != null) {
-      if (!await collector.collectCoverageData(
-          argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
-        throwToolExit(null);
+      if (!await collector.collectCoverageData(argResults['coverage-path'],
+          mergeCoverageData: argResults['merge-coverage'])) throwToolExit(null);
     }
 
-    if (result != 0)
-      throwToolExit(null);
+    if (result != 0) throwToolExit(null);
     return const FlutterCommandResult(ExitStatus.success);
   }
 
@@ -246,8 +262,10 @@ class TestCommand extends FastFlutterCommand {
           assetBundle.entries);
     }
   }
+
   bool _needRebuild(Map<String, DevFSContent> entries) {
-    final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    final File manifest = fs
+        .file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     if (!manifest.existsSync()) {
       return true;
     }
@@ -257,7 +275,8 @@ class TestCommand extends FastFlutterCommand {
       return true;
     }
 
-    for (DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+    for (DevFSFileContent entry
+        in entries.values.whereType<DevFSFileContent>()) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {
@@ -269,8 +288,9 @@ class TestCommand extends FastFlutterCommand {
 }
 
 Iterable<String> _findTests(Directory directory) {
-  return directory.listSync(recursive: true, followLinks: false)
-      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
-      fs.isFileSync(entity.path))
+  return directory
+      .listSync(recursive: true, followLinks: false)
+      .where((FileSystemEntity entity) =>
+          entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path))
       .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
 }

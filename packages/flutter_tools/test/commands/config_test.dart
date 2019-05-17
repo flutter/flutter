@@ -45,7 +45,8 @@ void main() {
   });
 }
 
-class MockAndroidStudio extends Mock implements AndroidStudio, Comparable<AndroidStudio> {
+class MockAndroidStudio extends Mock
+    implements AndroidStudio, Comparable<AndroidStudio> {
   @override
   String get directory => 'path/to/android/stdio';
 }

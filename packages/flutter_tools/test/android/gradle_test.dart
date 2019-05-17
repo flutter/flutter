@@ -41,7 +41,8 @@ void main() {
       expect(shouldBeToolExit, isToolExit);
     });
 
-    test('androidXFailureRegex should match lines with likely AndroidX errors', () {
+    test('androidXFailureRegex should match lines with likely AndroidX errors',
+        () {
       final List<String> nonMatchingLines = <String>[
         ':app:preBuild UP-TO-DATE',
         'BUILD SUCCESSFUL in 0s',
@@ -63,7 +64,9 @@ void main() {
       }
     });
 
-    test('androidXPluginWarningRegex should match lines with the AndroidX plugin warnings', () {
+    test(
+        'androidXPluginWarningRegex should match lines with the AndroidX plugin warnings',
+        () {
       final List<String> nonMatchingLines = <String>[
         ':app:preBuild UP-TO-DATE',
         'BUILD SUCCESSFUL in 0s',
@@ -84,7 +87,8 @@ void main() {
       }
     });
 
-    test('ndkMessageFilter should only match lines without the error message', () {
+    test('ndkMessageFilter should only match lines without the error message',
+        () {
       final List<String> nonMatchingLines = <String>[
         'NDK is missing a "platforms" directory.',
         'If you are using NDK, verify the ndk.dir is set to a valid NDK directory.  It is currently set to /usr/local/company/home/username/Android/Sdk/ndk-bundle.',
@@ -106,7 +110,8 @@ void main() {
   });
 
   group('gradle project', () {
-    GradleProject projectFrom(String properties, String tasks) => GradleProject.fromAppProperties(properties, tasks);
+    GradleProject projectFrom(String properties, String tasks) =>
+        GradleProject.fromAppProperties(properties, tasks);
 
     test('should extract build directory from app properties', () {
       final GradleProject project = projectFrom('''
@@ -120,7 +125,8 @@ someOtherProperty: someOtherValue
       );
     });
     test('should extract default build variants from app properties', () {
-      final GradleProject project = projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
+      final GradleProject project =
+          projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
 someTask
 assemble
 assembleAndroidTest
@@ -133,7 +139,8 @@ someOtherTask
       expect(project.productFlavors, isEmpty);
     });
     test('should extract custom build variants from app properties', () {
-      final GradleProject project = projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
+      final GradleProject project =
+          projectFrom('buildDir: /Users/some/apps/hello/build/app', '''
 someTask
 assemble
 assembleAndroidTest
@@ -156,64 +163,137 @@ someOtherTask
       expect(project.productFlavors, <String>['free', 'paid']);
     });
     test('should provide apk file name for default build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>[],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
       expect(project.apkFileFor(BuildInfo.debug), 'app-debug.apk');
       expect(project.apkFileFor(BuildInfo.profile), 'app-profile.apk');
       expect(project.apkFileFor(BuildInfo.release), 'app-release.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')),
+          isNull);
     });
     test('should provide apk file name for flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.apkFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app-free-debug.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app-paid-release.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>['free', 'paid'],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
+      expect(project.apkFileFor(const BuildInfo(BuildMode.debug, 'free')),
+          'app-free-debug.apk');
+      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'paid')),
+          'app-paid-release.apk');
+      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')),
+          isNull);
     });
     test('should provide bundle file name for default build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>[],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
       expect(project.bundleFileFor(BuildInfo.debug), 'app.aab');
       expect(project.bundleFileFor(BuildInfo.profile), 'app.aab');
       expect(project.bundleFileFor(BuildInfo.release), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')), 'app.aab');
+      expect(
+          project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')),
+          'app.aab');
     });
     test('should provide bundle file name for flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app.aab');
-      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')), 'app.aab');
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>['free', 'paid'],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
+      expect(project.bundleFileFor(const BuildInfo(BuildMode.debug, 'free')),
+          'app.aab');
+      expect(project.bundleFileFor(const BuildInfo(BuildMode.release, 'paid')),
+          'app.aab');
+      expect(
+          project.bundleFileFor(const BuildInfo(BuildMode.release, 'unknown')),
+          'app.aab');
     });
     test('should provide assemble task name for default build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>[],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
       expect(project.assembleTaskFor(BuildInfo.debug), 'assembleDebug');
       expect(project.assembleTaskFor(BuildInfo.profile), 'assembleProfile');
       expect(project.assembleTaskFor(BuildInfo.release), 'assembleRelease');
-      expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      expect(
+          project
+              .assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')),
+          isNull);
     });
     test('should provide assemble task name for flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'free')), 'assembleFreeDebug');
-      expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'paid')), 'assemblePaidRelease');
-      expect(project.assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>['free', 'paid'],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
+      expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'free')),
+          'assembleFreeDebug');
+      expect(
+          project.assembleTaskFor(const BuildInfo(BuildMode.release, 'paid')),
+          'assemblePaidRelease');
+      expect(
+          project
+              .assembleTaskFor(const BuildInfo(BuildMode.release, 'unknown')),
+          isNull);
     });
     test('should respect format of the flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug'], <String>['randomFlavor'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.assembleTaskFor(const BuildInfo(BuildMode.debug, 'randomFlavor')), 'assembleRandomFlavorDebug');
+      final GradleProject project = GradleProject(
+          <String>['debug'],
+          <String>['randomFlavor'],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
+      expect(
+          project.assembleTaskFor(
+              const BuildInfo(BuildMode.debug, 'randomFlavor')),
+          'assembleRandomFlavorDebug');
     });
-    test('bundle should provide assemble task name for default build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
+    test('bundle should provide assemble task name for default build types',
+        () {
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>[],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
       expect(project.bundleTaskFor(BuildInfo.debug), 'bundleDebug');
       expect(project.bundleTaskFor(BuildInfo.profile), 'bundleProfile');
       expect(project.bundleTaskFor(BuildInfo.release), 'bundleRelease');
-      expect(project.bundleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      expect(
+          project.bundleTaskFor(const BuildInfo(BuildMode.release, 'unknown')),
+          isNull);
     });
-    test('bundle should provide assemble task name for flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.bundleTaskFor(const BuildInfo(BuildMode.debug, 'free')), 'bundleFreeDebug');
-      expect(project.bundleTaskFor(const BuildInfo(BuildMode.release, 'paid')), 'bundlePaidRelease');
-      expect(project.bundleTaskFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+    test('bundle should provide assemble task name for flavored build types',
+        () {
+      final GradleProject project = GradleProject(
+          <String>['debug', 'profile', 'release'],
+          <String>['free', 'paid'],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
+      expect(project.bundleTaskFor(const BuildInfo(BuildMode.debug, 'free')),
+          'bundleFreeDebug');
+      expect(project.bundleTaskFor(const BuildInfo(BuildMode.release, 'paid')),
+          'bundlePaidRelease');
+      expect(
+          project.bundleTaskFor(const BuildInfo(BuildMode.release, 'unknown')),
+          isNull);
     });
     test('bundle should respect format of the flavored build types', () {
-      final GradleProject project = GradleProject(<String>['debug'], <String>['randomFlavor'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.bundleTaskFor(const BuildInfo(BuildMode.debug, 'randomFlavor')), 'bundleRandomFlavorDebug');
+      final GradleProject project = GradleProject(
+          <String>['debug'],
+          <String>['randomFlavor'],
+          fs.directory('/some/dir'),
+          fs.directory('/some/dir'));
+      expect(
+          project
+              .bundleTaskFor(const BuildInfo(BuildMode.debug, 'randomFlavor')),
+          'bundleRandomFlavorDebug');
     });
   });
 
@@ -240,7 +320,8 @@ someOtherTask
     }
 
     String propertyFor(String key, File file) {
-      final Iterable<String> result = file.readAsLinesSync()
+      final Iterable<String> result = file
+          .readAsLinesSync()
           .where((String line) => line.startsWith('$key='))
           .map((String line) => line.split('=')[1]);
       return result.isEmpty ? null : result.first;
@@ -253,8 +334,10 @@ someOtherTask
       String expectedBuildNumber,
     }) async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
-          platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+              platform: TargetPlatform.android_arm, mode: anyNamed('mode')))
+          .thenReturn('engine');
+      when(mockArtifacts.engineOutPath)
+          .thenReturn(fs.path.join('out', 'android_arm'));
 
       final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
@@ -269,12 +352,16 @@ someOtherTask
         requireAndroidSdk: false,
       );
 
-      final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
-      expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
-      expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
+      final File localPropertiesFile =
+          fs.file('path/to/project/android/local.properties');
+      expect(propertyFor('flutter.versionName', localPropertiesFile),
+          expectedBuildName);
+      expect(propertyFor('flutter.versionCode', localPropertiesFile),
+          expectedBuildNumber);
     }
 
-    testUsingAndroidContext('extract build name and number from pubspec.yaml', () async {
+    testUsingAndroidContext('extract build name and number from pubspec.yaml',
+        () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -311,7 +398,8 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build name', () async {
+    testUsingAndroidContext('allow build info to override build name',
+        () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -320,7 +408,8 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2');
+      const BuildInfo buildInfo =
+          BuildInfo(BuildMode.release, null, buildName: '1.0.2');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -329,7 +418,8 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build number', () async {
+    testUsingAndroidContext('allow build info to override build number',
+        () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -338,7 +428,8 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildNumber: '3');
+      const BuildInfo buildInfo =
+          BuildInfo(BuildMode.release, null, buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -347,7 +438,8 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build name and number', () async {
+    testUsingAndroidContext(
+        'allow build info to override build name and number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+1
@@ -356,7 +448,8 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null,
+          buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -365,7 +458,8 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to override build name and set number', () async {
+    testUsingAndroidContext(
+        'allow build info to override build name and set number', () async {
       const String manifest = '''
 name: test
 version: 1.0.0
@@ -374,7 +468,8 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null,
+          buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -383,7 +478,8 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to set build name and number', () async {
+    testUsingAndroidContext('allow build info to set build name and number',
+        () async {
       const String manifest = '''
 name: test
 dependencies:
@@ -391,7 +487,8 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3');
+      const BuildInfo buildInfo = BuildInfo(BuildMode.release, null,
+          buildName: '1.0.2', buildNumber: '3');
       await checkBuildVersion(
         manifest: manifest,
         buildInfo: buildInfo,
@@ -400,7 +497,8 @@ flutter:
       );
     });
 
-    testUsingAndroidContext('allow build info to unset build name and number', () async {
+    testUsingAndroidContext('allow build info to unset build name and number',
+        () async {
       const String manifest = '''
 name: test
 dependencies:
@@ -410,19 +508,22 @@ flutter:
 ''';
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        buildInfo: const BuildInfo(BuildMode.release, null,
+            buildName: null, buildNumber: null),
         expectedBuildName: null,
         expectedBuildNumber: null,
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.2', buildNumber: '3'),
+        buildInfo: const BuildInfo(BuildMode.release, null,
+            buildName: '1.0.2', buildNumber: '3'),
         expectedBuildName: '1.0.2',
         expectedBuildNumber: '3',
       );
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: '1.0.3', buildNumber: '4'),
+        buildInfo: const BuildInfo(BuildMode.release, null,
+            buildName: '1.0.3', buildNumber: '4'),
         expectedBuildName: '1.0.3',
         expectedBuildNumber: '4',
       );
@@ -436,7 +537,8 @@ flutter:
       // Values get unset.
       await checkBuildVersion(
         manifest: manifest,
-        buildInfo: const BuildInfo(BuildMode.release, null, buildName: null, buildNumber: null),
+        buildInfo: const BuildInfo(BuildMode.release, null,
+            buildName: null, buildNumber: null),
         expectedBuildName: null,
         expectedBuildNumber: null,
       );
@@ -445,9 +547,13 @@ flutter:
 }
 
 Platform fakePlatform(String name) {
-  return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
+  return FakePlatform.fromPlatform(const LocalPlatform())
+    ..operatingSystem = name;
 }
 
 class MockLocalEngineArtifacts extends Mock implements LocalEngineArtifacts {}
+
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
+
+class MockXcodeProjectInterpreter extends Mock
+    implements XcodeProjectInterpreter {}

@@ -11,7 +11,8 @@ import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
+class InstallCommand extends FlutterCommand
+    with DeviceBasedDevelopmentArtifacts {
   InstallCommand() {
     requiresPubspecYaml();
   }
@@ -28,28 +29,27 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   Future<void> validateCommand() async {
     await super.validateCommand();
     device = await findTargetDevice();
-    if (device == null)
-      throwToolExit('No target device found');
+    if (device == null) throwToolExit('No target device found');
   }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ApplicationPackage package = await applicationPackages.getPackageForPlatform(await device.targetPlatform);
+    final ApplicationPackage package = await applicationPackages
+        .getPackageForPlatform(await device.targetPlatform);
 
     Cache.releaseLockEarly();
 
     printStatus('Installing $package to $device...');
 
-    if (!await installApp(device, package))
-      throwToolExit('Install failed');
+    if (!await installApp(device, package)) throwToolExit('Install failed');
 
     return null;
   }
 }
 
-Future<bool> installApp(Device device, ApplicationPackage package, { bool uninstall = true }) async {
-  if (package == null)
-    return false;
+Future<bool> installApp(Device device, ApplicationPackage package,
+    {bool uninstall = true}) async {
+  if (package == null) return false;
 
   if (uninstall && await device.isAppInstalled(package)) {
     printStatus('Uninstalling old version...');

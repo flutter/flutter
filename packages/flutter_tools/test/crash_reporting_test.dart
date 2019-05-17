@@ -31,7 +31,7 @@ void main() {
 
     setUp(() async {
       tools.crashFileSystem = MemoryFileSystem();
-      setExitFunctionForTests((_) { });
+      setExitFunctionForTests((_) {});
     });
 
     tearDown(() {
@@ -52,17 +52,16 @@ void main() {
         String boundary = request.headers['Content-Type'];
         boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
         fields = Map<String, String>.fromIterable(
-          utf8.decode(request.bodyBytes)
+          utf8
+              .decode(request.bodyBytes)
               .split('--$boundary')
               .map<List<String>>((String part) {
-                final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
-                if (nameMatch == null)
-                  return null;
-                final String name = nameMatch[1];
-                final String value = part.split('\n').skip(2).join('\n').trim();
-                return <String>[name, value];
-              })
-              .where((List<String> pair) => pair != null),
+            final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
+            if (nameMatch == null) return null;
+            final String name = nameMatch[1];
+            final String value = part.split('\n').skip(2).join('\n').trim();
+            return <String>[name, value];
+          }).where((List<String> pair) => pair != null),
           key: (dynamic key) {
             final List<String> pair = key;
             return pair[0];
@@ -74,8 +73,8 @@ void main() {
         );
 
         return Response(
-            'test-report-id',
-            200,
+          'test-report-id',
+          200,
         );
       }));
 
@@ -90,16 +89,18 @@ void main() {
 
       // Verify that we sent the crash report.
       expect(method, 'POST');
-      expect(uri, Uri(
-        scheme: 'https',
-        host: 'clients2.google.com',
-        port: 443,
-        path: '/cr/report',
-        queryParameters: <String, String>{
-          'product': 'Flutter_Tools',
-          'version': 'test-version',
-        },
-      ));
+      expect(
+          uri,
+          Uri(
+            scheme: 'https',
+            host: 'clients2.google.com',
+            port: 443,
+            path: '/cr/report',
+            queryParameters: <String, String>{
+              'product': 'Flutter_Tools',
+              'version': 'test-version',
+            },
+          ));
       expect(fields['uuid'], '00000000-0000-4000-0000-000000000000');
       expect(fields['product'], 'Flutter_Tools');
       expect(fields['version'], 'test-version');
@@ -110,13 +111,18 @@ void main() {
       expect(fields['error_message'], 'Bad state: Test bad state error');
 
       final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText, 'Sending crash report to Google.\n'
+      expect(
+          logger.statusText,
+          'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');
 
       // Verify that we've written the crash report to disk.
-      final List<String> writtenFiles =
-        (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
-            .map((FileSystemEntity e) => e.path).toList();
+      final List<String> writtenFiles = (await tools.crashFileSystem
+              .directory('/')
+              .list(recursive: true)
+              .toList())
+          .map((FileSystemEntity e) => e.path)
+          .toList();
       expect(writtenFiles, hasLength(1));
       expect(writtenFiles, contains('flutter_01.log'));
     }, overrides: <Type, Generator>{
@@ -141,25 +147,28 @@ void main() {
 
       // Verify that we sent the crash report.
       expect(uri, isNotNull);
-      expect(uri, Uri(
-        scheme: 'https',
-        host: 'localhost',
-        port: 12345,
-        path: '/fake_server',
-        queryParameters: <String, String>{
-          'product': 'Flutter_Tools',
-          'version': 'test-version',
-        },
-      ));
+      expect(
+          uri,
+          Uri(
+            scheme: 'https',
+            host: 'localhost',
+            port: 12345,
+            path: '/fake_server',
+            queryParameters: <String, String>{
+              'product': 'Flutter_Tools',
+              'version': 'test-version',
+            },
+          ));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(
-        operatingSystem: 'linux',
-        environment: <String, String>{
-          'HOME': '/',
-          'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
-        },
-        script: Uri(scheme: 'data'),
-      ),
+            operatingSystem: 'linux',
+            environment: <String, String>{
+              'HOME': '/',
+              'FLUTTER_CRASH_SERVER_BASE_URL':
+                  'https://localhost:12345/fake_server',
+            },
+            script: Uri(scheme: 'data'),
+          ),
       Stdio: () => const _NoStderr(),
     });
   });
@@ -167,7 +176,6 @@ void main() {
 
 /// Throws a random error to simulate a CLI crash.
 class _CrashCommand extends FlutterCommand {
-
   @override
   String get description => 'Simulates a crash';
 
@@ -211,32 +219,32 @@ class _NoopIOSink implements IOSink {
   set encoding(_) => throw UnsupportedError('');
 
   @override
-  void add(_) { }
+  void add(_) {}
 
   @override
-  void write(_) { }
+  void write(_) {}
 
   @override
-  void writeAll(_, [ __ = '' ]) { }
+  void writeAll(_, [__ = '']) {}
 
   @override
-  void writeln([ _ = '' ]) { }
+  void writeln([_ = '']) {}
 
   @override
-  void writeCharCode(_) { }
+  void writeCharCode(_) {}
 
   @override
-  void addError(_, [ __ ]) { }
+  void addError(_, [__]) {}
 
   @override
-  Future<dynamic> addStream(_) async { }
+  Future<dynamic> addStream(_) async {}
 
   @override
-  Future<dynamic> flush() async { }
+  Future<dynamic> flush() async {}
 
   @override
-  Future<dynamic> close() async { }
+  Future<dynamic> close() async {}
 
   @override
-  Future<dynamic> get done async { }
+  Future<dynamic> get done async {}
 }

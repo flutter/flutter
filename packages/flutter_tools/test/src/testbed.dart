@@ -53,16 +53,16 @@ class Testbed {
   /// `setup` may be provided to apply mocks within the tool managed zone,
   /// including any specified overrides.
   Testbed({Future<void> Function() setup, Map<Type, Generator> overrides})
-    : _setup = setup,
-      _overrides = overrides;
-
+      : _setup = setup,
+        _overrides = overrides;
 
   final Future<void> Function() _setup;
   final Map<Type, Generator> _overrides;
 
   /// Runs `test` within a tool zone.
   FutureOr<T> run<T>(FutureOr<T> Function() test) {
-    final Map<Type, Generator> testOverrides = Map<Type, Generator>.from(_testbedDefaults);
+    final Map<Type, Generator> testOverrides =
+        Map<Type, Generator>.from(_testbedDefaults);
     if (_overrides != null) {
       testOverrides.addAll(_overrides);
     }
@@ -70,17 +70,16 @@ class Testbed {
     final String originalFlutterRoot = Cache.flutterRoot;
     return runInContext<T>(() {
       return context.run<T>(
-        name: 'testbed',
-        overrides: testOverrides,
-        body: () async {
-          Cache.flutterRoot = '';
-          if (_setup != null) {
-            await _setup();
-          }
-          await test();
-          Cache.flutterRoot = originalFlutterRoot;
-        }
-      );
+          name: 'testbed',
+          overrides: testOverrides,
+          body: () async {
+            Cache.flutterRoot = '';
+            if (_setup != null) {
+              await _setup();
+            }
+            await test();
+            Cache.flutterRoot = originalFlutterRoot;
+          });
     });
   }
 }

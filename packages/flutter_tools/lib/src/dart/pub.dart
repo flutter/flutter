@@ -37,15 +37,18 @@ class PubContext {
 
   static final PubContext create = PubContext._(<String>['create']);
   static final PubContext createPackage = PubContext._(<String>['create_pkg']);
-  static final PubContext createPlugin = PubContext._(<String>['create_plugin']);
+  static final PubContext createPlugin =
+      PubContext._(<String>['create_plugin']);
   static final PubContext interactive = PubContext._(<String>['interactive']);
   static final PubContext pubGet = PubContext._(<String>['get']);
   static final PubContext pubUpgrade = PubContext._(<String>['upgrade']);
   static final PubContext pubForward = PubContext._(<String>['forward']);
   static final PubContext runTest = PubContext._(<String>['run_test']);
 
-  static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
-  static final PubContext updatePackages = PubContext._(<String>['update_packages']);
+  static final PubContext flutterTests =
+      PubContext._(<String>['flutter_tests']);
+  static final PubContext updatePackages =
+      PubContext._(<String>['update_packages']);
 
   final List<String> _values;
 
@@ -55,13 +58,13 @@ class PubContext {
   String toString() => 'PubContext: ${_values.join(':')}';
 }
 
-bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
-  if (!dotPackages.existsSync())
-    return true;
+bool _shouldRunPubGet({File pubSpecYaml, File dotPackages}) {
+  if (!dotPackages.existsSync()) return true;
   final DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
-  final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+  final File flutterToolsStamp =
+      Cache.instance.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.existsSync() &&
       flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
     return true;
@@ -85,23 +88,22 @@ Future<void> pubGet({
   final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
 
   if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
-    if (!skipIfAbsent)
-      throwToolExit('$directory: no pubspec.yaml found');
+    if (!skipIfAbsent) throwToolExit('$directory: no pubspec.yaml found');
     return;
   }
 
-  if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
+  if (!checkLastModified ||
+      _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
       timeout: timeoutConfiguration.slowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
-    if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
-      args.add('--verbose');
+    if (FlutterCommand.current != null &&
+        FlutterCommand.current.globalResults['verbose']) args.add('--verbose');
     args.addAll(<String>[command, '--no-precompile']);
-    if (offline)
-      args.add('--offline');
+    if (offline) args.add('--offline');
     try {
       await pub(
         args,
@@ -122,7 +124,8 @@ Future<void> pubGet({
     throwToolExit('$directory: pub did not create .packages file');
 
   if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync()))
-    throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
+    throwToolExit(
+        '$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
 }
 
 typedef MessageFilter = String Function(String message);
@@ -148,8 +151,7 @@ Future<void> pub(
 }) async {
   showTraceForErrors ??= isRunningOnBot;
 
-  if (showTraceForErrors)
-    arguments.insert(0, '--trace');
+  if (showTraceForErrors) arguments.insert(0, '--trace');
   int attempts = 0;
   int duration = 1;
   int code;
@@ -161,16 +163,16 @@ Future<void> pub(
       mapFunction: filter,
       environment: _createPubEnvironment(context),
     );
-    if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
+    if (code !=
+        69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
-    printStatus('$failureMessage ($code) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
+    printStatus(
+        '$failureMessage ($code) -- attempting retry $attempts in $duration second${duration == 1 ? "" : "s"}...');
     await Future<void>.delayed(Duration(seconds: duration));
-    if (duration < 64)
-      duration *= 2;
+    if (duration < 64) duration *= 2;
   }
   assert(code != null);
-  if (code != 0)
-    throwToolExit('$failureMessage ($code)', exitCode: code);
+  if (code != 0) throwToolExit('$failureMessage ($code)', exitCode: code);
 }
 
 /// Runs pub in 'interactive' mode, directly piping the stdin stream of this
@@ -192,7 +194,7 @@ Future<void> pubInteractively(
 
 /// The command used for running pub.
 List<String> _pubCommand(List<String> arguments) {
-  return <String>[ sdkBinaryName('pub') ]..addAll(arguments);
+  return <String>[sdkBinaryName('pub')]..addAll(arguments);
 }
 
 /// The full environment used when running pub.
@@ -211,7 +213,8 @@ Map<String, String> _createPubEnvironment(PubContext context) {
   return environment;
 }
 
-final RegExp _analyzerWarning = RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
+final RegExp _analyzerWarning =
+    RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
 /// The console environment key used by the pub tool.
 const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';
@@ -268,7 +271,6 @@ String _filterOverrideWarnings(String message) {
   //   ! front_end 0.1.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/front_end
   if (message == 'Warning: You are using these overridden dependencies:')
     return null;
-  if (message.contains(_analyzerWarning))
-    return null;
+  if (message.contains(_analyzerWarning)) return null;
   return message;
 }

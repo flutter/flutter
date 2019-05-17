@@ -110,7 +110,8 @@ void main() {
         FileSystem: () => fs,
         Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
-        KernelCompilerFactory: () => FakeKernelCompilerFactory(mockKernelCompiler),
+        KernelCompilerFactory: () =>
+            FakeKernelCompilerFactory(mockKernelCompiler),
         Artifacts: () => mockArtifacts,
       };
 
@@ -141,7 +142,8 @@ void main() {
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
+            debuggingOptions: DebuggingOptions.disabled(
+                const BuildInfo(BuildMode.release, null)));
         expect(result.started, isFalse);
       }, overrides: startOverrides);
 
@@ -150,7 +152,8 @@ void main() {
         expect(() async {
           await device.startApp(null,
               mainPath: mainPath,
-              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
+              debuggingOptions: DebuggingOptions.disabled(
+                  const BuildInfo(BuildMode.debug, null)));
         }, throwsToolExit());
       }, overrides: startOverrides);
 
@@ -167,7 +170,8 @@ Hello!
 
         when(mockKernelCompiler.compile(
           sdkRoot: anyNamed('sdkRoot'),
-          incrementalCompilerByteStorePath: anyNamed('incrementalCompilerByteStorePath'),
+          incrementalCompilerByteStorePath:
+              anyNamed('incrementalCompilerByteStorePath'),
           mainPath: anyNamed('mainPath'),
           outputFilePath: anyNamed('outputFilePath'),
           depFilePath: anyNamed('depFilePath'),
@@ -183,7 +187,8 @@ Hello!
 
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
+            debuggingOptions: DebuggingOptions.enabled(
+                const BuildInfo(BuildMode.debug, null)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
         expect(logLines.last, 'Hello!');
@@ -193,7 +198,9 @@ Hello!
 }
 
 class MockArtifacts extends Mock implements Artifacts {}
+
 class MockKernelCompiler extends Mock implements KernelCompiler {}
+
 class FakeKernelCompilerFactory implements KernelCompilerFactory {
   FakeKernelCompilerFactory(this.kernelCompiler);
 

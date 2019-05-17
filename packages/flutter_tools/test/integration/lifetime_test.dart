@@ -40,10 +40,14 @@ void main() {
       expect(_flutter.hasExited, equals(false));
     });
 
-    test('does not terminate when a debugger is attached and pause-on-exceptions', () async {
+    test(
+        'does not terminate when a debugger is attached and pause-on-exceptions',
+        () async {
       await _flutter.run(withDebugger: true, pauseOnExceptions: true);
       await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));
     });
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  },
+      timeout: const Timeout.factor(
+          10)); // The DevFS sync takes a really long time, so these tests can be slow.
 }

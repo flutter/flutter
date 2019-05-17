@@ -72,8 +72,10 @@ class BuildInfo {
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
-  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
-  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
+  static const BuildInfo dynamicProfile =
+      BuildInfo(BuildMode.dynamicProfile, null);
+  static const BuildInfo dynamicRelease =
+      BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -83,15 +85,18 @@ class BuildInfo {
   /// Returns whether a profile build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
+  bool get isProfile =>
+      mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
 
   /// Returns whether a release build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
+  bool get isRelease =>
+      mode == BuildMode.release || mode == BuildMode.dynamicRelease;
 
   /// Returns whether a dynamic build is requested.
-  bool get isDynamic => mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
+  bool get isDynamic =>
+      mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
@@ -110,15 +115,10 @@ class BuildInfo {
 }
 
 /// The type of build.
-enum BuildMode {
-  debug,
-  profile,
-  release,
-  dynamicProfile,
-  dynamicRelease
-}
+enum BuildMode { debug, profile, release, dynamicProfile, dynamicRelease }
 
-String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
+String validatedBuildNumberForPlatform(
+    TargetPlatform targetPlatform, String buildNumber) {
   if (buildNumber == null) {
     return null;
   }
@@ -136,7 +136,8 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      printTrace(
+          'Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -154,7 +155,8 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      printTrace(
+          'Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -162,7 +164,8 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
   return buildNumber;
 }
 
-String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName) {
+String validatedBuildNameForPlatform(
+    TargetPlatform targetPlatform, String buildName) {
   if (buildName == null) {
     return null;
   }
@@ -180,7 +183,8 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      printTrace(
+          'Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
@@ -209,8 +213,8 @@ bool isAotBuildMode(BuildMode mode) {
 // Returns true if the given build mode can be used on emulators / simulators.
 bool isEmulatorBuildMode(BuildMode mode) {
   return mode == BuildMode.debug ||
-    mode == BuildMode.dynamicRelease ||
-    mode == BuildMode.dynamicProfile;
+      mode == BuildMode.dynamicRelease ||
+      mode == BuildMode.dynamicProfile;
 }
 
 enum HostPlatform {
@@ -336,12 +340,9 @@ TargetPlatform getTargetPlatformForName(String platform) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS)
-    return HostPlatform.darwin_x64;
-  if (platform.isLinux)
-    return HostPlatform.linux_x64;
-  if (platform.isWindows)
-    return HostPlatform.windows_x64;
+  if (platform.isMacOS) return HostPlatform.darwin_x64;
+  if (platform.isLinux) return HostPlatform.linux_x64;
+  if (platform.isWindows) return HostPlatform.windows_x64;
 
   printError('Unsupported host platform, defaulting to Linux');
 
@@ -352,8 +353,7 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null)
-    return 'build';
+  if (context == null || config == null) return 'build';
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {

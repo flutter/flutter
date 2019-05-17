@@ -32,8 +32,7 @@ void main() {
         'hw.device.manufacturer': manufacturer,
         'avd.ini.displayname': label,
       };
-      final AndroidEmulator emulator =
-          AndroidEmulator(emulatorID, properties);
+      final AndroidEmulator emulator = AndroidEmulator(emulatorID, properties);
       expect(emulator.id, emulatorID);
       expect(emulator.name, name);
       expect(emulator.manufacturer, manufacturer);

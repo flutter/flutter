@@ -47,11 +47,15 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       plistFile,
       null,
     );
-    final RegExp _pathsSelectorMatcher = RegExp(r'"idea.paths.selector" = "[^;]+"');
-    final RegExp _jetBrainsToolboxAppMatcher = RegExp(r'JetBrainsToolboxApp = "[^;]+"');
+    final RegExp _pathsSelectorMatcher =
+        RegExp(r'"idea.paths.selector" = "[^;]+"');
+    final RegExp _jetBrainsToolboxAppMatcher =
+        RegExp(r'JetBrainsToolboxApp = "[^;]+"');
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
-    final String jetBrainsToolboxAppBundlePath = extractStudioPlistValueWithMatcher(plistValue, _jetBrainsToolboxAppMatcher);
+    final String jetBrainsToolboxAppBundlePath =
+        extractStudioPlistValueWithMatcher(
+            plistValue, _jetBrainsToolboxAppMatcher);
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = fs.path.join(studioPath, 'Info.plist');
@@ -67,14 +71,16 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     );
 
     Version version;
-    if (versionString != null)
-      version = Version.parse(versionString);
+    if (versionString != null) version = Version.parse(versionString);
 
-    final String pathsSelectorValue = extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
+    final String pathsSelectorValue =
+        extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
     final String presetPluginsPath = pathsSelectorValue == null
         ? null
-        : fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');
-    return AndroidStudio(studioPath, version: version, presetPluginsPath: presetPluginsPath);
+        : fs.path.join(homeDirPath, 'Library', 'Application Support',
+            '$pathsSelectorValue');
+    return AndroidStudio(studioPath,
+        version: version, presetPluginsPath: presetPluginsPath);
   }
 
   factory AndroidStudio.fromHomeDot(Directory homeDotDir) {
@@ -98,9 +104,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
     if (installPath != null && fs.isDirectorySync(installPath)) {
       return AndroidStudio(
-          installPath,
-          version: version,
-          studioAppName: studioAppName,
+        installPath,
+        version: version,
+        studioAppName: studioAppName,
       );
     }
     return null;
@@ -127,16 +133,11 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int major = version?.major;
     final int minor = version?.minor;
     if (platform.isMacOS) {
-      return fs.path.join(
-          homeDirPath,
-          'Library',
-          'Application Support',
+      return fs.path.join(homeDirPath, 'Library', 'Application Support',
           'AndroidStudio$major.$minor');
     } else {
-      return fs.path.join(homeDirPath,
-          '.$studioAppName$major.$minor',
-          'config',
-          'plugins');
+      return fs.path.join(
+          homeDirPath, '.$studioAppName$major.$minor', 'config', 'plugins');
     }
   }
 
@@ -145,8 +146,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   @override
   int compareTo(AndroidStudio other) {
     final int result = version.compareTo(other.version);
-    if (result == 0)
-      return directory.compareTo(other.directory);
+    if (result == 0) return directory.compareTo(other.directory);
     return result;
   }
 
@@ -157,8 +157,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       String configuredStudioPath = configuredStudio;
       if (platform.isMacOS && !configuredStudioPath.endsWith('Contents'))
         configuredStudioPath = fs.path.join(configuredStudioPath, 'Contents');
-      return AndroidStudio(configuredStudioPath,
-          configured: configuredStudio);
+      return AndroidStudio(configuredStudioPath, configured: configuredStudio);
     }
 
     // Find all available Studio installations.
@@ -178,8 +177,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
 
     void _checkForStudio(String path) {
-      if (!fs.isDirectorySync(path))
-        return;
+      if (!fs.isDirectorySync(path)) return;
       try {
         final Iterable<Directory> directories = fs
             .directory(path)
@@ -215,7 +213,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     }
 
     return candidatePaths
-        .map<AndroidStudio>((FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
+        .map<AndroidStudio>(
+            (FileSystemEntity e) => AndroidStudio.fromMacOSBundle(e.path))
         .where((AndroidStudio s) => s != null)
         .toList();
   }
@@ -223,10 +222,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   static List<AndroidStudio> _allLinuxOrWindows() {
     final List<AndroidStudio> studios = <AndroidStudio>[];
 
-    bool _hasStudioAt(String path, { Version newerThan }) {
+    bool _hasStudioAt(String path, {Version newerThan}) {
       return studios.any((AndroidStudio studio) {
-        if (studio.directory != path)
-          return false;
+        if (studio.directory != path) return false;
         if (newerThan != null) {
           return studio.version.compareTo(newerThan) >= 0;
         }
@@ -237,11 +235,15 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
     if (fs.directory(homeDirPath).existsSync()) {
-      for (FileSystemEntity entity in fs.directory(homeDirPath).listSync(followLinks: false)) {
-        if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
+      for (FileSystemEntity entity
+          in fs.directory(homeDirPath).listSync(followLinks: false)) {
+        if (entity is Directory &&
+            entity.basename.startsWith('.AndroidStudio')) {
           final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
-          if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {
-            studios.removeWhere((AndroidStudio other) => other.directory == studio.directory);
+          if (studio != null &&
+              !_hasStudioAt(studio.directory, newerThan: studio.version)) {
+            studios.removeWhere(
+                (AndroidStudio other) => other.directory == studio.directory);
             studios.add(studio);
           }
         }
@@ -250,8 +252,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     final String configuredStudioDir = config.getValue('android-studio-dir');
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
-      studios.add(AndroidStudio(configuredStudioDir,
-          configured: configuredStudioDir));
+      studios.add(
+          AndroidStudio(configuredStudioDir, configured: configuredStudioDir));
     }
 
     if (platform.isLinux) {
@@ -268,11 +270,17 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return studios;
   }
 
-  static String extractStudioPlistValueWithMatcher(String plistValue, RegExp keyMatcher) {
+  static String extractStudioPlistValueWithMatcher(
+      String plistValue, RegExp keyMatcher) {
     if (plistValue == null || keyMatcher == null) {
       return null;
     }
-    return keyMatcher?.stringMatch(plistValue)?.split('=')?.last?.trim()?.replaceAll('"', '');
+    return keyMatcher
+        ?.stringMatch(plistValue)
+        ?.split('=')
+        ?.last
+        ?.trim()
+        ?.replaceAll('"', '');
   }
 
   void _init() {
@@ -288,17 +296,19 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return;
     }
 
-    final String javaPath = platform.isMacOS ?
-        fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') :
-        fs.path.join(directory, 'jre');
+    final String javaPath = platform.isMacOS
+        ? fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home')
+        : fs.path.join(directory, 'jre');
     final String javaExecutable = fs.path.join(javaPath, 'bin', 'java');
     if (!processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');
     } else {
-      final ProcessResult result = processManager.runSync(<String>[javaExecutable, '-version']);
+      final ProcessResult result =
+          processManager.runSync(<String>[javaExecutable, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
-        final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
+        final String javaVersion =
+            versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         _validationMessages.add('Java version $javaVersion');
         _javaPath = javaPath;
         _isValid = true;

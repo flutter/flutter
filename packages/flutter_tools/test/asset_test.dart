@@ -31,7 +31,7 @@ void main() {
     testUsingContext('app font uses local font file', () async {
       final AssetBundle asset = AssetBundleFactory.instance.createBundle();
       await asset.build(
-        manifestPath : fs.path.join(dataPath, 'main', 'pubspec.yaml'),
+        manifestPath: fs.path.join(dataPath, 'main', 'pubspec.yaml'),
         packagesPath: fs.path.join(dataPath, 'main', '.packages'),
         includeDefaultFonts: false,
       );
@@ -55,7 +55,8 @@ void main() {
       );
       final AssetBundle asset = AssetBundleFactory.instance.createBundle();
       await asset.build(
-        manifestPath : fs.path.join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
+        manifestPath: fs.path
+            .join(dataPath, 'main', 'pubspec.yaml'), // file doesn't exist
         packagesPath: fs.path.join(dataPath, 'main', '.packages'),
         includeDefaultFonts: false,
       );

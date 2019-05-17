@@ -12,10 +12,9 @@ import 'package:mockito/mockito.dart';
 typedef CommandFunction = Future<FlutterCommandResult> Function();
 
 class DummyFlutterCommand extends FlutterCommand {
-
   DummyFlutterCommand({
     this.shouldUpdateCache = false,
-    this.noUsagePath  = false,
+    this.noUsagePath = false,
     this.commandFunction,
   });
 

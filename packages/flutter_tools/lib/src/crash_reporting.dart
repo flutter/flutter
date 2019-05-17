@@ -52,7 +52,8 @@ class CrashReportSender {
 
   static CrashReportSender _instance;
 
-  static CrashReportSender get instance => _instance ?? CrashReportSender._(http.Client());
+  static CrashReportSender get instance =>
+      _instance ?? CrashReportSender._(http.Client());
 
   /// Overrides the default [http.Client] with [client] for testing purposes.
   @visibleForTesting
@@ -64,7 +65,8 @@ class CrashReportSender {
   final Usage _usage = Usage.instance;
 
   Uri get _baseUrl {
-    final String overrideUrl = platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
+    final String overrideUrl =
+        platform.environment['FLUTTER_CRASH_SERVER_BASE_URL'];
 
     if (overrideUrl != null) {
       return Uri.parse(overrideUrl);
@@ -86,8 +88,7 @@ class CrashReportSender {
     @required String getFlutterVersion(),
   }) async {
     try {
-      if (_usage.suppressAnalytics)
-        return;
+      if (_usage.suppressAnalytics) return;
 
       printStatus('Sending crash report to Google.');
 
@@ -109,7 +110,8 @@ class CrashReportSender {
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
 
-      final String stackTraceWithRelativePaths = Chain.parse(stackTrace.toString()).terse.toString();
+      final String stackTraceWithRelativePaths =
+          Chain.parse(stackTrace.toString()).terse.toString();
       req.files.add(http.MultipartFile.fromString(
         _kStackTraceFileField,
         stackTraceWithRelativePaths,
@@ -119,18 +121,21 @@ class CrashReportSender {
       final http.StreamedResponse resp = await _client.send(req);
 
       if (resp.statusCode == 200) {
-        final String reportId = await http.ByteStream(resp.stream)
-            .bytesToString();
+        final String reportId =
+            await http.ByteStream(resp.stream).bytesToString();
         printStatus('Crash report sent (report ID: $reportId)');
       } else {
-        printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+        printError(
+            'Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
     } catch (sendError, sendStackTrace) {
       if (sendError is SocketException) {
-        printError('Failed to send crash report due to a network error: $sendError');
+        printError(
+            'Failed to send crash report due to a network error: $sendError');
       } else {
         // If the sender itself crashes, just print. We did our best.
-        printError('Crash report sender itself crashed: $sendError\n$sendStackTrace');
+        printError(
+            'Crash report sender itself crashed: $sendError\n$sendStackTrace');
       }
     }
   }

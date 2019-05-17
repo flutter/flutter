@@ -28,6 +28,7 @@ void main() {
       Future<void> expectDevice(String id, List<Device> expected) async {
         expect(await deviceManager.getDevicesById(id).toList(), expected);
       }
+
       await expectDevice('01abfc49119c410e', <Device>[device2]);
       await expectDevice('Nexus 5X', <Device>[device2]);
       await expectDevice('0553790d0a4e726f', <Device>[device1]);

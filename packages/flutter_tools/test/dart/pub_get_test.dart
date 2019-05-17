@@ -32,32 +32,38 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then(
+          (void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n',
       );
-      expect(processMock.lastPubEnvironment, contains('flutter_cli:flutter_tests'));
+      expect(processMock.lastPubEnvironment,
+          contains('flutter_cli:flutter_tests'));
       expect(processMock.lastPubCache, isNull);
       time.elapse(const Duration(milliseconds: 500));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n',
       );
       time.elapse(const Duration(seconds: 1));
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n',
       );
       time.elapse(const Duration(seconds: 100)); // from t=0 to t=100
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n'
@@ -68,7 +74,8 @@ void main() {
         'pub get failed (69) -- attempting retry 7 in 64 seconds...\n', // at t=61
       );
       time.elapse(const Duration(seconds: 200)); // from t=0 to t=200
-      expect(testLogger.statusText,
+      expect(
+        testLogger.statusText,
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n'
@@ -88,35 +95,38 @@ void main() {
     ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
     Platform: () => FakePlatform(
-      environment: <String, String>{},
-    ),
+          environment: <String, String>{},
+        ),
   });
 
   testUsingContext('pub cache in root is used', () async {
     String error;
 
-    final MockProcessManager processMock = context.get<ProcessManager>() as MockProcessManager;
+    final MockProcessManager processMock =
+        context.get<ProcessManager>() as MockProcessManager;
     final MockFileSystem fsMock = context.get<FileSystem>() as MockFileSystem;
 
     FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then(
+          (void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(processMock.lastPubCache, equals(fsMock.path.join(Cache.flutterRoot, '.pub-cache')));
+      expect(processMock.lastPubCache,
+          equals(fsMock.path.join(Cache.flutterRoot, '.pub-cache')));
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
     Platform: () => FakePlatform(
-      environment: <String, String>{},
-    ),
+          environment: <String, String>{},
+        ),
   });
 
   testUsingContext('pub cache in environment is used', () async {
@@ -128,7 +138,8 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then(
+          (void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -141,8 +152,8 @@ void main() {
     ProcessManager: () => MockProcessManager(69),
     FileSystem: () => MockFileSystem(),
     Platform: () => FakePlatform(
-      environment: <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
-    ),
+          environment: <String, String>{'PUB_CACHE': 'custom/pub-cache/path'},
+        ),
   });
 }
 
@@ -194,13 +205,15 @@ class MockProcess implements Process {
 
 class MockStream<T> implements Stream<T> {
   @override
-  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) => MockStream<S>();
+  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) =>
+      MockStream<S>();
 
   @override
   Stream<T> where(bool test(T event)) => MockStream<T>();
 
   @override
-  StreamSubscription<T> listen(void onData(T event), { Function onError, void onDone(), bool cancelOnError }) {
+  StreamSubscription<T> listen(void onData(T event),
+      {Function onError, void onDone(), bool cancelOnError}) {
     return MockStreamSubscription<T>();
   }
 
@@ -210,15 +223,14 @@ class MockStream<T> implements Stream<T> {
 
 class MockStreamSubscription<T> implements StreamSubscription<T> {
   @override
-  Future<E> asFuture<E>([ E futureValue ]) => Future<E>.value();
+  Future<E> asFuture<E>([E futureValue]) => Future<E>.value();
 
   @override
-  Future<void> cancel() async { }
+  Future<void> cancel() async {}
 
   @override
   dynamic noSuchMethod(Invocation invocation) => null;
 }
-
 
 class MockFileSystem extends ForwardingFileSystem {
   MockFileSystem() : super(MemoryFileSystem());
@@ -236,7 +248,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
 class MockFile implements File {
   @override
-  Future<RandomAccessFile> open({ FileMode mode = FileMode.read }) async {
+  Future<RandomAccessFile> open({FileMode mode = FileMode.read}) async {
     return MockRandomAccessFile();
   }
 

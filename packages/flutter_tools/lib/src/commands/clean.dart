@@ -23,7 +23,8 @@ class CleanCommand extends FlutterCommand {
   final String description = 'Delete the build/ and .dart_tool/ directories.';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{};
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -39,7 +40,8 @@ class CleanCommand extends FlutterCommand {
       }
     }
 
-    printStatus("Deleting '${flutterProject.dartTool.path}${fs.path.separator}'.");
+    printStatus(
+        "Deleting '${flutterProject.dartTool.path}${fs.path.separator}'.");
     if (flutterProject.dartTool.existsSync()) {
       try {
         flutterProject.dartTool.deleteSync(recursive: true);
@@ -50,4 +52,3 @@ class CleanCommand extends FlutterCommand {
     return const FlutterCommandResult(ExitStatus.success);
   }
 }
-

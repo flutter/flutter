@@ -38,8 +38,8 @@ abstract class LinuxApp extends ApplicationPackage {
 class PrebuiltLinuxApp extends LinuxApp {
   PrebuiltLinuxApp({
     @required String executable,
-  }) : _executable = executable,
-       super(projectBundleId: executable);
+  })  : _executable = executable,
+        super(projectBundleId: executable);
 
   final String _executable;
 
@@ -51,7 +51,8 @@ class PrebuiltLinuxApp extends LinuxApp {
 }
 
 class BuildableLinuxApp extends LinuxApp {
-  BuildableLinuxApp({this.project}) : super(projectBundleId: project.project.manifest.appName);
+  BuildableLinuxApp({this.project})
+      : super(projectBundleId: project.project.manifest.appName);
 
   final LinuxProject project;
 

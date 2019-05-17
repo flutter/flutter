@@ -13,20 +13,22 @@ import '../src/context.dart';
 
 void main() {
   group('ProcessSignal', () {
-
     testUsingContext('signals are properly delegated', () async {
       final MockIoProcessSignal mockSignal = MockIoProcessSignal();
       final ProcessSignal signalUnderTest = ProcessSignal(mockSignal);
-      final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
+      final StreamController<io.ProcessSignal> controller =
+          StreamController<io.ProcessSignal>();
 
-      when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
+      when(mockSignal.watch())
+          .thenAnswer((Invocation invocation) => controller.stream);
       controller.add(mockSignal);
 
       expect(signalUnderTest, await signalUnderTest.watch().first);
     });
 
     testUsingContext('toString() works', () async {
-      expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
+      expect(
+          io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
     });
   });
 }

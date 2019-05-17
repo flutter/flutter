@@ -48,7 +48,8 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
   }
 
   @override
-  StreamSink<String> get sink => _sinkRecorder ??= _RecordingSink(super.sink, _messages);
+  StreamSink<String> get sink =>
+      _sinkRecorder ??= _RecordingSink(super.sink, _messages);
 }
 
 /// Base class for request and response JSON-rpc messages.
@@ -150,7 +151,8 @@ class _RecordingStream {
         _recording.add(_Response.fromString(element));
         _controller.add(element);
       },
-      onError: _controller.addError, // We currently don't support recording of errors.
+      onError: _controller
+          .addError, // We currently don't support recording of errors.
       onDone: _controller.close,
     );
   }
@@ -180,7 +182,7 @@ class _RecordingSink implements StreamSink<String> {
   }
 
   @override
-  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
+  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
     throw UnimplementedError('Add support for this if the need ever arises');
   }
 
@@ -195,7 +197,7 @@ class _RecordingSink implements StreamSink<String> {
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   ReplayVMServiceChannel(Directory location)
-    : _transactions = _loadTransactions(location);
+      : _transactions = _loadTransactions(location);
 
   final Map<int, _Transaction> _transactions;
   final StreamController<String> _controller = StreamController<String>();
@@ -204,7 +206,8 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
     final String jsonData = file.readAsStringSync();
-    final Iterable<_Message> messages = json.decoder.convert(jsonData).map<_Message>(_toMessage);
+    final Iterable<_Message> messages =
+        json.decoder.convert(jsonData).map<_Message>(_toMessage);
     final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
       final _Transaction transaction =
@@ -237,8 +240,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
       exit(0);
     } else {
       _controller.add(json.encoder.convert(transaction.response.data));
-      if (_transactions.isEmpty)
-        _controller.close();
+      if (_transactions.isEmpty) _controller.close();
     }
   }
 
@@ -266,13 +268,12 @@ class _ReplaySink implements StreamSink<String> {
 
   @override
   void add(String data) {
-    if (_completer.isCompleted)
-      throw StateError('Sink already closed');
+    if (_completer.isCompleted) throw StateError('Sink already closed');
     channel.send(_Request.fromString(data));
   }
 
   @override
-  void addError(dynamic errorEvent, [ StackTrace stackTrace ]) {
+  void addError(dynamic errorEvent, [StackTrace stackTrace]) {
     throw UnimplementedError('Add support for this if the need ever arises');
   }
 

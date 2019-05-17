@@ -16,17 +16,20 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand() {
-    argParser.addFlag('debug',
+    argParser.addFlag(
+      'debug',
       negatable: false,
       help: 'Build a debug version of your app.',
     );
     argParser.addFlag('profile',
+        negatable: false,
+        help:
+            'Build a version of your app specialized for performance profiling.');
+    argParser.addFlag(
+      'release',
       negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
-    );
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.',
+      help:
+          'Build a version of your app specialized for performance profiling.',
     );
   }
 
@@ -40,10 +43,11 @@ class BuildLinuxCommand extends BuildSubCommand {
   bool hidden = true;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.linux,
-    DevelopmentArtifact.universal,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      <DevelopmentArtifact>{
+        DevelopmentArtifact.linux,
+        DevelopmentArtifact.universal,
+      };
 
   @override
   String get description => 'build the Linux desktop target (Experimental).';

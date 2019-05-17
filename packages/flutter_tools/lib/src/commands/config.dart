@@ -12,31 +12,33 @@ import '../runner/flutter_command.dart';
 import '../usage.dart';
 
 class ConfigCommand extends FlutterCommand {
-  ConfigCommand({ bool verboseHelp = false }) {
+  ConfigCommand({bool verboseHelp = false}) {
     argParser.addFlag('analytics',
-      negatable: true,
-      help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+        negatable: true,
+        help:
+            'Enable or disable reporting anonymously tool usage statistics and crash reports.');
     argParser.addFlag('clear-ios-signing-cert',
-      negatable: false,
-      help: 'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
+        negatable: false,
+        help:
+            'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('gradle-dir', help: 'The gradle install directory.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
-    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
+    argParser.addOption('android-studio-dir',
+        help: 'The Android Studio install directory.');
     argParser.addFlag('machine',
-      negatable: false,
-      hide: !verboseHelp,
-      help: 'Print config values as json.');
+        negatable: false,
+        hide: !verboseHelp,
+        help: 'Print config values as json.');
   }
 
   @override
   final String name = 'config';
 
   @override
-  final String description =
-    'Configure Flutter settings.\n\n'
-    'To remove a setting, configure it to an empty string.\n\n'
-    'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
-    'Flutter tools over time. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/';
+  final String description = 'Configure Flutter settings.\n\n'
+      'To remove a setting, configure it to an empty string.\n\n'
+      'The Flutter tool anonymously reports feature usage statistics and basic crash reports to help improve '
+      'Flutter tools over time. See Google\'s privacy policy: https://www.google.com/intl/en/policies/privacy/';
 
   @override
   final List<String> aliases = <String>['configure'];
@@ -45,7 +47,8 @@ class ConfigCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{};
 
   @override
   String get usageFooter {
@@ -53,11 +56,9 @@ class ConfigCommand extends FlutterCommand {
     String values = config.keys.map<String>((String key) {
       return '  $key: ${config.getValue(key)}';
     }).join('\n');
-    if (values.isEmpty)
-      values = '  No settings have been configured.';
-    return
-      '\nSettings:\n$values\n\n'
-      'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
+    if (values.isEmpty) values = '  No settings have been configured.';
+    return '\nSettings:\n$values\n\n'
+        'Analytics reporting is currently ${flutterUsage.enabled ? 'enabled' : 'disabled'}.';
   }
 
   /// Return null to disable analytics recording of the `config` command.
@@ -89,8 +90,7 @@ class ConfigCommand extends FlutterCommand {
     if (argResults.wasParsed('clear-ios-signing-cert'))
       _updateConfig('ios-signing-cert', '');
 
-    if (argResults.arguments.isEmpty)
-      printStatus(usage);
+    if (argResults.arguments.isEmpty) printStatus(usage);
 
     return null;
   }

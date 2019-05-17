@@ -33,8 +33,8 @@ FileSystem get fs => context.get<FileSystem>() ?? _kLocalFs;
 /// directory as long as there is no collision with the `"file"` subdirectory.
 RecordingFileSystem getRecordingFileSystem(String location) {
   final Directory dir = getRecordingSink(location, _kRecordingType);
-  final RecordingFileSystem fileSystem = RecordingFileSystem(
-      delegate: _kLocalFs, destination: dir);
+  final RecordingFileSystem fileSystem =
+      RecordingFileSystem(delegate: _kLocalFs, destination: dir);
   addShutdownHook(() async {
     await fileSystem.recording.flush();
   }, ShutdownStage.SERIALIZE_RECORDING);
@@ -55,12 +55,12 @@ ReplayFileSystem getReplayFileSystem(String location) {
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
   final String dirPath = fs.path.dirname(filePath);
-  if (fs.isDirectorySync(dirPath))
-    return;
+  if (fs.isDirectorySync(dirPath)) return;
   try {
     fs.directory(dirPath).createSync(recursive: true);
   } on FileSystemException catch (e) {
-    throwToolExit('Failed to create directory "$dirPath": ${e.osError.message}');
+    throwToolExit(
+        'Failed to create directory "$dirPath": ${e.osError.message}');
   }
 }
 
@@ -68,22 +68,23 @@ void ensureDirectoryExists(String filePath) {
 /// specified for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir, [ void onFileCopied(File srcFile, File destFile) ]) {
+void copyDirectorySync(Directory srcDir, Directory destDir,
+    [void onFileCopied(File srcFile, File destFile)]) {
   if (!srcDir.existsSync())
-    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+    throw Exception(
+        'Source directory "${srcDir.path}" does not exist, nothing to copy');
 
-  if (!destDir.existsSync())
-    destDir.createSync(recursive: true);
+  if (!destDir.existsSync()) destDir.createSync(recursive: true);
 
   for (FileSystemEntity entity in srcDir.listSync()) {
-    final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
+    final String newPath =
+        destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);
       newFile.writeAsBytesSync(entity.readAsBytesSync());
       onFileCopied?.call(entity, newFile);
     } else if (entity is Directory) {
-      copyDirectorySync(
-        entity, destDir.fileSystem.directory(newPath));
+      copyDirectorySync(entity, destDir.fileSystem.directory(newPath));
     } else {
       throw Exception('${entity.path} is neither File nor Directory');
     }
@@ -105,11 +106,13 @@ Directory getRecordingSink(String dirname, String basename) {
   switch (_kLocalFs.typeSync(location, followLinks: false)) {
     case FileSystemEntityType.file:
     case FileSystemEntityType.link:
-      throwToolExit('Invalid record-to location: $dirname ("$basename" exists as non-directory)');
+      throwToolExit(
+          'Invalid record-to location: $dirname ("$basename" exists as non-directory)');
       break;
     case FileSystemEntityType.directory:
       if (_kLocalFs.directory(location).listSync(followLinks: false).isNotEmpty)
-        throwToolExit('Invalid record-to location: $dirname ("$basename" is not empty)');
+        throwToolExit(
+            'Invalid record-to location: $dirname ("$basename" is not empty)');
       break;
     case FileSystemEntityType.notFound:
       _kLocalFs.directory(location).createSync(recursive: true);
@@ -125,9 +128,11 @@ Directory getRecordingSink(String dirname, String basename) {
 ///
 /// If the target directory does not exist, a [ToolExit] will be thrown.
 Directory getReplaySource(String dirname, String basename) {
-  final Directory dir = _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
+  final Directory dir =
+      _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
   if (!dir.existsSync())
-    throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
+    throwToolExit(
+        'Invalid replay-from location: $dirname ("$basename" does not exist)');
   return dir;
 }
 
@@ -137,13 +142,15 @@ Directory getReplaySource(String dirname, String basename) {
 /// `package:path`. However, unlike the original, it does not change the ASCII
 /// case of the path. Changing the case can break hot reload in some situations,
 /// for an example see: https://github.com/flutter/flutter/issues/9539.
-String canonicalizePath(String path) => fs.path.normalize(fs.path.absolute(path));
+String canonicalizePath(String path) =>
+    fs.path.normalize(fs.path.absolute(path));
 
 /// Escapes [path].
 ///
 /// On Windows it replaces all '\' with '\\'. On other platforms, it returns the
 /// path unchanged.
-String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
+String escapePath(String path) =>
+    platform.isWindows ? path.replaceAll('\\', '\\\\') : path;
 
 /// Returns true if the file system [entity] has not been modified since the
 /// latest modification to [referenceFile].
@@ -151,9 +158,9 @@ String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\
 /// Returns true, if [entity] does not exist.
 ///
 /// Returns false, if [entity] exists, but [referenceFile] does not.
-bool isOlderThanReference({ @required FileSystemEntity entity, @required File referenceFile }) {
-  if (!entity.existsSync())
-    return true;
-  return referenceFile.existsSync()
-      && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+bool isOlderThanReference(
+    {@required FileSystemEntity entity, @required File referenceFile}) {
+  if (!entity.existsSync()) return true;
+  return referenceFile.existsSync() &&
+      referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
 }

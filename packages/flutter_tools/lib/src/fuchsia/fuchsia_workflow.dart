@@ -15,7 +15,6 @@ FuchsiaWorkflow get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
 /// This workflow assumes development within the fuchsia source tree,
 /// including a working fx command-line tool in the user's PATH.
 class FuchsiaWorkflow implements Workflow {
-
   @override
   bool get appliesToHostPlatform => platform.isLinux || platform.isMacOS;
 
@@ -26,7 +25,8 @@ class FuchsiaWorkflow implements Workflow {
 
   @override
   bool get canLaunchDevices {
-    return fuchsiaArtifacts.devFinder != null && fuchsiaArtifacts.sshConfig != null;
+    return fuchsiaArtifacts.devFinder != null &&
+        fuchsiaArtifacts.sshConfig != null;
   }
 
   @override

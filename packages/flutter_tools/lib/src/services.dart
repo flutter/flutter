@@ -17,8 +17,7 @@ const String _kFlutterServicesManifestPath = 'flutter_services.yaml';
 
 dynamic _loadYamlFile(String path) {
   printTrace("Looking for YAML at '$path'");
-  if (!fs.isFileSync(path))
-    return null;
+  if (!fs.isFileSync(path)) return null;
   final String manifestString = fs.file(path).readAsStringSync();
   return loadYaml(manifestString);
 }
@@ -33,7 +32,8 @@ Future<void> parseServiceConfigs(
   try {
     packageMap = PackageMap(PackageMap.globalPackagesPath).map;
   } on FormatException catch (error) {
-    printTrace('Invalid ".packages" file while parsing service configs:\n$error');
+    printTrace(
+        'Invalid ".packages" file while parsing service configs:\n$error');
     return;
   }
 
@@ -53,9 +53,11 @@ Future<void> parseServiceConfigs(
 
   for (String service in manifest['services']) {
     final String serviceRoot = packageMap[service].path;
-    final dynamic serviceConfig = _loadYamlFile('$serviceRoot/$_kFlutterServicesManifestPath');
+    final dynamic serviceConfig =
+        _loadYamlFile('$serviceRoot/$_kFlutterServicesManifestPath');
     if (serviceConfig == null) {
-      printStatus('No $_kFlutterServicesManifestPath found for service "$serviceRoot"; skipping.');
+      printStatus(
+          'No $_kFlutterServicesManifestPath found for service "$serviceRoot"; skipping.');
       continue;
     }
 
@@ -75,7 +77,8 @@ Future<void> parseServiceConfigs(
   }
 }
 
-Future<String> getServiceFromUrl(String url, String rootDir, String serviceName) async {
+Future<String> getServiceFromUrl(
+    String url, String rootDir, String serviceName) async {
   if (url.startsWith('android-sdk:') && androidSdk != null) {
     // It's something shipped in the standard android SDK.
     return url.replaceAll('android-sdk:', '${androidSdk.directory}/');
@@ -99,14 +102,19 @@ File generateServiceDefinitions(
   String dir,
   List<Map<String, String>> servicesIn,
 ) {
-  final List<Map<String, String>> services =
-      servicesIn.map<Map<String, String>>((Map<String, String> service) => <String, String>{
-        'name': service['name'],
-        'class': service['android-class'],
-      }).toList();
+  final List<Map<String, String>> services = servicesIn
+      .map<Map<String, String>>(
+          (Map<String, String> service) => <String, String>{
+                'name': service['name'],
+                'class': service['android-class'],
+              })
+      .toList();
 
-  final Map<String, dynamic> jsonObject = <String, dynamic>{'services': services};
+  final Map<String, dynamic> jsonObject = <String, dynamic>{
+    'services': services
+  };
   final File servicesFile = fs.file(fs.path.join(dir, 'services.json'));
-  servicesFile.writeAsStringSync(json.encode(jsonObject), mode: FileMode.write, flush: true);
+  servicesFile.writeAsStringSync(json.encode(jsonObject),
+      mode: FileMode.write, flush: true);
   return servicesFile;
 }

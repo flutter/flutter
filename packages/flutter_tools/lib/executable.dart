@@ -51,48 +51,53 @@ Future<void> main(List<String> args) async {
 
   final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
       (args.length == 2 && verbose && args.last == 'doctor');
-  final bool help = args.contains('-h') || args.contains('--help') ||
-      (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
+  final bool help = args.contains('-h') ||
+      args.contains('--help') ||
+      (args.isNotEmpty && args.first == 'help') ||
+      (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
 
-  await runner.run(args, <FlutterCommand>[
-    AnalyzeCommand(verboseHelp: verboseHelp),
-    AttachCommand(verboseHelp: verboseHelp),
-    BuildCommand(verboseHelp: verboseHelp),
-    ChannelCommand(verboseHelp: verboseHelp),
-    CleanCommand(),
-    ConfigCommand(verboseHelp: verboseHelp),
-    CreateCommand(),
-    DaemonCommand(hidden: !verboseHelp),
-    DevicesCommand(),
-    DoctorCommand(verbose: verbose),
-    DriveCommand(),
-    EmulatorsCommand(),
-    FormatCommand(),
-    GenerateCommand(),
-    IdeConfigCommand(hidden: !verboseHelp),
-    InjectPluginsCommand(hidden: !verboseHelp),
-    InstallCommand(),
-    LogsCommand(),
-    MakeHostAppEditableCommand(),
-    PackagesCommand(),
-    PrecacheCommand(),
-    RunCommand(verboseHelp: verboseHelp),
-    ScreenshotCommand(),
-    ShellCompletionCommand(),
-    TestCommand(verboseHelp: verboseHelp),
-    TrainingCommand(),
-    UnpackCommand(),
-    UpdatePackagesCommand(hidden: !verboseHelp),
-    UpgradeCommand(),
-    VersionCommand(),
-  ], verbose: verbose,
-     muteCommandLogging: muteCommandLogging,
-     verboseHelp: verboseHelp,
-     overrides: <Type, Generator>{
-       // The build runner instance is not supported in google3 because
-       // the build runner packages are not synced internally.
-       CodeGenerator: () => const BuildRunner(),
-     });
+  await runner.run(
+      args,
+      <FlutterCommand>[
+        AnalyzeCommand(verboseHelp: verboseHelp),
+        AttachCommand(verboseHelp: verboseHelp),
+        BuildCommand(verboseHelp: verboseHelp),
+        ChannelCommand(verboseHelp: verboseHelp),
+        CleanCommand(),
+        ConfigCommand(verboseHelp: verboseHelp),
+        CreateCommand(),
+        DaemonCommand(hidden: !verboseHelp),
+        DevicesCommand(),
+        DoctorCommand(verbose: verbose),
+        DriveCommand(),
+        EmulatorsCommand(),
+        FormatCommand(),
+        GenerateCommand(),
+        IdeConfigCommand(hidden: !verboseHelp),
+        InjectPluginsCommand(hidden: !verboseHelp),
+        InstallCommand(),
+        LogsCommand(),
+        MakeHostAppEditableCommand(),
+        PackagesCommand(),
+        PrecacheCommand(),
+        RunCommand(verboseHelp: verboseHelp),
+        ScreenshotCommand(),
+        ShellCompletionCommand(),
+        TestCommand(verboseHelp: verboseHelp),
+        TrainingCommand(),
+        UnpackCommand(),
+        UpdatePackagesCommand(hidden: !verboseHelp),
+        UpgradeCommand(),
+        VersionCommand(),
+      ],
+      verbose: verbose,
+      muteCommandLogging: muteCommandLogging,
+      verboseHelp: verboseHelp,
+      overrides: <Type, Generator>{
+        // The build runner instance is not supported in google3 because
+        // the build runner packages are not synced internally.
+        CodeGenerator: () => const BuildRunner(),
+      });
 }

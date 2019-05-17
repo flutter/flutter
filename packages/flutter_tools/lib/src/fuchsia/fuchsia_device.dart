@@ -232,6 +232,7 @@ class FuchsiaDevice extends Device {
       flutterPatchedSdk: fuchsiaArtifacts.flutterPatchedSdk,
     );
   }
+
   OverrideArtifacts _artifactOverrides;
 
   @override

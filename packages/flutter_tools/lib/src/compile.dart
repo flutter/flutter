@@ -23,7 +23,8 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-KernelCompilerFactory get kernelCompilerFactory => context.get<KernelCompilerFactory>();
+KernelCompilerFactory get kernelCompilerFactory =>
+    context.get<KernelCompilerFactory>();
 
 class KernelCompilerFactory {
   const KernelCompilerFactory();
@@ -36,7 +37,8 @@ class KernelCompilerFactory {
   }
 }
 
-typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
+typedef CompilerMessageConsumer = void Function(String message,
+    {bool emphasis, TerminalColor color});
 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.
@@ -115,11 +117,10 @@ class StdoutHandler {
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
-      compilerOutput.complete(
-          CompilerOutput(
-              message.substring(boundaryKey.length + 1, spaceDelimiter),
-              int.parse(message.substring(spaceDelimiter + 1).trim()),
-              sources));
+      compilerOutput.complete(CompilerOutput(
+          message.substring(boundaryKey.length + 1, spaceDelimiter),
+          int.parse(message.substring(spaceDelimiter + 1).trim()),
+          sources));
       return;
     }
     if (state == StdoutState.CollectDiagnostic) {
@@ -147,7 +148,8 @@ class StdoutHandler {
 
   // This is needed to get ready to process next compilation result output,
   // with its own boundary key and new completer.
-  void reset({ bool suppressCompilerMessages = false, bool expectSources = true }) {
+  void reset(
+      {bool suppressCompilerMessages = false, bool expectSources = true}) {
     boundaryKey = null;
     compilerMessageReceived = false;
     compilerOutput = Completer<CompilerOutput>();
@@ -159,21 +161,25 @@ class StdoutHandler {
 
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
-    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
+  PackageUriMapper(String scriptPath, String packagesPath,
+      String fileSystemScheme, List<String> fileSystemRoots) {
+    final Map<String, Uri> packageMap =
+        PackageMap(fs.path.absolute(packagesPath)).map;
+    final String scriptUri =
+        Uri.file(scriptPath, windows: platform.isWindows).toString();
 
     for (String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       // Only perform a multi-root mapping if there are multiple roots.
-      if (fileSystemScheme != null
-        && fileSystemRoots != null
-        && fileSystemRoots.length > 1
-        && prefix.contains(fileSystemScheme)) {
+      if (fileSystemScheme != null &&
+          fileSystemRoots != null &&
+          fileSystemRoots.length > 1 &&
+          prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
         _uriPrefixes = fileSystemRoots
-          .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
-          .toList();
+            .map((String name) =>
+                Uri.file(name, windows: platform.isWindows).toString())
+            .toList();
         return;
       }
       if (scriptUri.startsWith(prefix)) {
@@ -191,17 +197,22 @@ class PackageUriMapper {
     if (_packageName == null) {
       return null;
     }
-    final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
+    final String scriptUri =
+        Uri.file(scriptPath, windows: platform.isWindows).toString();
     for (String uriPrefix in _uriPrefixes) {
       if (scriptUri.startsWith(uriPrefix)) {
-        return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
+        return Uri.parse(
+            'package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
       }
     }
     return null;
   }
 
-  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
-    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
+  static Uri findUri(String scriptPath, String packagesPath,
+      String fileSystemScheme, List<String> fileSystemRoots) {
+    return PackageUriMapper(
+            scriptPath, packagesPath, fileSystemScheme, fileSystemRoots)
+        .map(scriptPath);
   }
 }
 
@@ -225,9 +236,8 @@ class KernelCompiler {
     bool targetProductVm = false,
     String initializeFromDill,
   }) async {
-    final String frontendServer = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
-    );
+    final String frontendServer = artifacts
+        .getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
       flutterProject = FlutterProject.current();
@@ -246,7 +256,8 @@ class KernelCompiler {
           'trackWidgetCreation': trackWidgetCreation.toString(),
           'linkPlatformKernelIn': linkPlatformKernelIn.toString(),
           'engineHash': Cache.instance.engineRevision,
-          'buildersUsed': '${flutterProject != null ? flutterProject.hasBuilders : false}',
+          'buildersUsed':
+              '${flutterProject != null ? flutterProject.hasBuilders : false}',
         },
         depfilePaths: <String>[depFilePath],
         pathFilter: (String path) => !path.startsWith('/b/build/slave/'),
@@ -259,9 +270,9 @@ class KernelCompiler {
     }
 
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
-    if (!sdkRoot.endsWith('/'))
-      sdkRoot = '$sdkRoot/';
-    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    if (!sdkRoot.endsWith('/')) sdkRoot = '$sdkRoot/';
+    final String engineDartPath =
+        artifacts.getArtifactPath(Artifact.engineDartBinary);
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
@@ -273,10 +284,8 @@ class KernelCompiler {
       '--strong',
       '--target=$targetModel',
     ];
-    if (trackWidgetCreation)
-      command.add('--track-widget-creation');
-    if (!linkPlatformKernelIn)
-      command.add('--no-link-platform');
+    if (trackWidgetCreation) command.add('--track-widget-creation');
+    if (!linkPlatformKernelIn) command.add('--no-link-platform');
     if (aot) {
       command.add('--aot');
       command.add('--tfa');
@@ -294,12 +303,14 @@ class KernelCompiler {
     Uri mainUri;
     if (packagesPath != null) {
       command.addAll(<String>['--packages', packagesPath]);
-      mainUri = PackageUriMapper.findUri(mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
+      mainUri = PackageUriMapper.findUri(
+          mainPath, packagesPath, fileSystemScheme, fileSystemRoots);
     }
     if (outputFilePath != null) {
       command.addAll(<String>['--output-dill', outputFilePath]);
     }
-    if (depFilePath != null && (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
+    if (depFilePath != null &&
+        (fileSystemRoots == null || fileSystemRoots.isEmpty)) {
       command.addAll(<String>['--depfile', depFilePath]);
     }
     if (fileSystemRoots != null) {
@@ -314,27 +325,24 @@ class KernelCompiler {
       command.addAll(<String>['--initialize-from-dill', initializeFromDill]);
     }
 
-    if (extraFrontEndOptions != null)
-      command.addAll(extraFrontEndOptions);
+    if (extraFrontEndOptions != null) command.addAll(extraFrontEndOptions);
 
     command.add(mainUri?.toString() ?? mainPath);
 
     printTrace(command.join(' '));
     final Process server = await processManager
-      .start(command)
-      .catchError((dynamic error, StackTrace stack) {
-        printError('Failed to start frontend server $error, $stack');
-      });
+        .start(command)
+        .catchError((dynamic error, StackTrace stack) {
+      printError('Failed to start frontend server $error, $stack');
+    });
 
     final StdoutHandler _stdoutHandler = StdoutHandler();
 
-    server.stderr
-      .transform<String>(utf8.decoder)
-      .listen(printError);
+    server.stderr.transform<String>(utf8.decoder).listen(printError);
     server.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen(_stdoutHandler.handler);
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen(_stdoutHandler.handler);
     final int exitCode = await server.exitCode;
     if (exitCode == 0) {
       if (fingerprinter != null) {
@@ -426,20 +434,19 @@ class ResidentCompiler {
     TargetModel targetModel = TargetModel.flutter,
     bool unsafePackageSerialization,
     List<String> experimentalFlags,
-  }) : assert(_sdkRoot != null),
-       _trackWidgetCreation = trackWidgetCreation,
-       _packagesPath = packagesPath,
-       _fileSystemRoots = fileSystemRoots,
-       _fileSystemScheme = fileSystemScheme,
-       _targetModel = targetModel,
-       _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
-       _controller = StreamController<_CompilationRequest>(),
-       _initializeFromDill = initializeFromDill,
-       _unsafePackageSerialization = unsafePackageSerialization,
-       _experimentalFlags = experimentalFlags {
+  })  : assert(_sdkRoot != null),
+        _trackWidgetCreation = trackWidgetCreation,
+        _packagesPath = packagesPath,
+        _fileSystemRoots = fileSystemRoots,
+        _fileSystemScheme = fileSystemScheme,
+        _targetModel = targetModel,
+        _stdoutHandler = StdoutHandler(consumer: compilerMessageConsumer),
+        _controller = StreamController<_CompilationRequest>(),
+        _initializeFromDill = initializeFromDill,
+        _unsafePackageSerialization = unsafePackageSerialization,
+        _experimentalFlags = experimentalFlags {
     // This is a URI, not a file path, so the forward slash is correct even on Windows.
-    if (!_sdkRoot.endsWith('/'))
-      _sdkRoot = '$_sdkRoot/';
+    if (!_sdkRoot.endsWith('/')) _sdkRoot = '$_sdkRoot/';
   }
 
   final bool _trackWidgetCreation;
@@ -470,15 +477,14 @@ class ResidentCompiler {
     @required String outputPath,
     String packagesFilePath,
   }) async {
-    assert (outputPath != null);
+    assert(outputPath != null);
     if (!_controller.hasListener) {
       _controller.stream.listen(_handleCompilationRequest);
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
-    _controller.add(
-        _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath)
-    );
+    _controller.add(_RecompileRequest(
+        completer, mainPath, invalidatedFiles, outputPath, packagesFilePath));
     return completer.future;
   }
 
@@ -501,9 +507,10 @@ class ResidentCompiler {
 
     if (_server == null) {
       return _compile(
-          _mapFilename(request.mainPath, packageUriMapper),
-          request.outputPath,
-          _mapFilename(request.packagesFilePath ?? _packagesPath, /* packageUriMapper= */ null),
+        _mapFilename(request.mainPath, packageUriMapper),
+        request.outputPath,
+        _mapFilename(request.packagesFilePath ?? _packagesPath,
+            /* packageUriMapper= */ null),
       );
     }
 
@@ -545,9 +552,8 @@ class ResidentCompiler {
     String outputPath,
     String packagesFilePath,
   ) async {
-    final String frontendServer = artifacts.getArtifactPath(
-      Artifact.frontendServerSnapshotForEngineDartSdk
-    );
+    final String frontendServer = artifacts
+        .getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
     final List<String> command = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       frontendServer,
@@ -589,22 +595,22 @@ class ResidentCompiler {
     printTrace(command.join(' '));
     _server = await processManager.start(command);
     _server.stdout
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen(
-        _stdoutHandler.handler,
-        onDone: () {
-          // when outputFilename future is not completed, but stdout is closed
-          // process has died unexpectedly.
-          if (!_stdoutHandler.compilerOutput.isCompleted) {
-            _stdoutHandler.compilerOutput.complete(null);
-          }
-        });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen(_stdoutHandler.handler, onDone: () {
+      // when outputFilename future is not completed, but stdout is closed
+      // process has died unexpectedly.
+      if (!_stdoutHandler.compilerOutput.isCompleted) {
+        _stdoutHandler.compilerOutput.complete(null);
+      }
+    });
 
     _server.stderr
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String message) { printError(message); });
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .listen((String message) {
+      printError(message);
+    });
 
     _server.stdin.writeln('compile $scriptUri');
     printTrace('<- compile $scriptUri');
@@ -625,20 +631,18 @@ class ResidentCompiler {
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
-    _controller.add(
-        _CompileExpressionRequest(
-            completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic)
-    );
+    _controller.add(_CompileExpressionRequest(completer, expression,
+        definitions, typeDefinitions, libraryUri, klass, isStatic));
     return completer.future;
   }
 
-  Future<CompilerOutput> _compileExpression(_CompileExpressionRequest request) async {
+  Future<CompilerOutput> _compileExpression(
+      _CompileExpressionRequest request) async {
     _stdoutHandler.reset(suppressCompilerMessages: true, expectSources: false);
 
     // 'compile-expression' should be invoked after compiler has been started,
     // program was compiled.
-    if (_server == null)
-      return null;
+    if (_server == null) return null;
 
     final String inputKey = Uuid().generateV4();
     _server.stdin.writeln('compile-expression $inputKey');
@@ -714,20 +718,22 @@ class ResidentCompiler {
   String _doMapFilename(String filename, PackageUriMapper packageUriMapper) {
     if (packageUriMapper != null) {
       final Uri packageUri = packageUriMapper.map(filename);
-      if (packageUri != null)
-        return packageUri.toString();
+      if (packageUri != null) return packageUri.toString();
     }
 
     if (_fileSystemRoots != null) {
       for (String root in _fileSystemRoots) {
         if (filename.startsWith(root)) {
           return Uri(
-              scheme: _fileSystemScheme, path: filename.substring(root.length))
+                  scheme: _fileSystemScheme,
+                  path: filename.substring(root.length))
               .toString();
         }
       }
     }
-    if (platform.isWindows && _fileSystemRoots != null && _fileSystemRoots.length > 1) {
+    if (platform.isWindows &&
+        _fileSystemRoots != null &&
+        _fileSystemRoots.length > 1) {
       return Uri.file(filename, windows: platform.isWindows).toString();
     }
     return null;

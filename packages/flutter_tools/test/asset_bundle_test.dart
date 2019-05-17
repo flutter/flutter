@@ -26,10 +26,11 @@ void main() {
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
+            ? FileSystemStyle.windows
+            : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory
+          .createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('nonempty', () async {
@@ -50,16 +51,20 @@ void main() {
       expect(bundle.entries.length, 1);
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(
+            await bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('wildcard directories are updated when filesystem changes', () async {
+    testUsingContext('wildcard directories are updated when filesystem changes',
+        () async {
       fs.file('.packages').createSync();
-      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      fs
+          .file(fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
       fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -81,7 +86,9 @@ flutter:
       // Adding a file should update the stat of the directory, but instead
       // we need to fully recreate it.
       fs.directory(fs.path.join('assets', 'foo')).deleteSync(recursive: true);
-      fs.file(fs.path.join('assets', 'foo', 'fizz.txt')).createSync(recursive: true);
+      fs
+          .file(fs.path.join('assets', 'foo', 'fizz.txt'))
+          .createSync(recursive: true);
       fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync();
 
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), true);
@@ -99,7 +106,9 @@ flutter:
 
     testUsingContext('handle removal of wildcard directories', () async {
       fs.file('.packages').createSync();
-      fs.file(fs.path.join('assets', 'foo', 'bar.txt')).createSync(recursive: true);
+      fs
+          .file(fs.path.join('assets', 'foo', 'bar.txt'))
+          .createSync(recursive: true);
       fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
@@ -140,5 +149,4 @@ name: example''');
       FileSystem: () => testFileSystem,
     });
   });
-
 }

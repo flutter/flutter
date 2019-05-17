@@ -23,7 +23,6 @@ class AlwaysTrueBotDetector implements BotDetector {
   bool get isRunningOnBot => true;
 }
 
-
 class AlwaysFalseBotDetector implements BotDetector {
   const AlwaysFalseBotDetector();
 
@@ -31,22 +30,24 @@ class AlwaysFalseBotDetector implements BotDetector {
   bool get isRunningOnBot => false;
 }
 
-
 void main() {
   Cache.disableLocking();
   group('packages get/upgrade', () {
     Directory tempDir;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir =
+          fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
       tryToDelete(tempDir);
     });
 
-    Future<String> createProjectWithPlugin(String plugin, { List<String> arguments }) async {
-      final String projectPath = await createProject(tempDir, arguments: arguments);
+    Future<String> createProjectWithPlugin(String plugin,
+        {List<String> arguments}) async {
+      final String projectPath =
+          await createProject(tempDir, arguments: arguments);
       final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
@@ -57,13 +58,13 @@ void main() {
       return projectPath;
     }
 
-    Future<void> runCommandIn(String projectPath, String verb, { List<String> args }) async {
+    Future<void> runCommandIn(String projectPath, String verb,
+        {List<String> args}) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       final List<String> commandArgs = <String>['packages', verb];
-      if (args != null)
-        commandArgs.addAll(args);
+      if (args != null) commandArgs.addAll(args);
       commandArgs.add(projectPath);
 
       await runner.run(commandArgs);
@@ -94,7 +95,8 @@ void main() {
       );
     }
 
-    void expectNotContains(String projectPath, String relPath, String substring) {
+    void expectNotContains(
+        String projectPath, String relPath, String substring) {
       expectExists(projectPath, relPath);
       expect(
         fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
@@ -131,13 +133,17 @@ void main() {
     ];
 
     const Map<String, String> pluginContentWitnesses = <String, String>{
-      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+      'ios/Flutter/Debug.xcconfig':
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      'ios/Flutter/Release.xcconfig':
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
     const Map<String, String> modulePluginContentWitnesses = <String, String>{
-      '.ios/Config/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      '.ios/Config/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+      '.ios/Config/Debug.xcconfig':
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      '.ios/Config/Release.xcconfig':
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
     void expectDependenciesResolved(String projectPath) {
@@ -190,14 +196,13 @@ void main() {
       ].expand<String>((List<String> list) => list);
       for (String path in allFiles) {
         final File file = fs.file(fs.path.join(projectPath, path));
-        if (file.existsSync())
-          file.deleteSync();
+        if (file.existsSync()) file.deleteSync();
       }
     }
 
     testUsingContext('get fetches packages', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
+          arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
@@ -208,7 +213,7 @@ void main() {
 
     testUsingContext('get --offline fetches packages', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
+          arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get', args: <String>['--offline']);
@@ -219,7 +224,7 @@ void main() {
 
     testUsingContext('upgrade fetches packages', () async {
       final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
+          arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'upgrade');
@@ -230,7 +235,7 @@ void main() {
 
     testUsingContext('get fetches packages and injects plugin', () async {
       final String projectPath = await createProjectWithPlugin('path_provider',
-        arguments: <String>['--no-pub', '--template=module']);
+          arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
@@ -239,7 +244,8 @@ void main() {
       expectModulePluginInjected(projectPath);
     }, timeout: allowForRemotePubInvocation);
 
-    testUsingContext('get fetches packages and injects plugin in plugin project', () async {
+    testUsingContext(
+        'get fetches packages and injects plugin in plugin project', () async {
       final String projectPath = await createProject(
         tempDir,
         arguments: <String>['--template=plugin', '--no-pub'],
@@ -269,7 +275,8 @@ void main() {
     });
 
     testUsingContext('test without bot', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -282,7 +289,8 @@ void main() {
     });
 
     testUsingContext('test with bot', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'test']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'test']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(4));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -296,7 +304,8 @@ void main() {
     });
 
     testUsingContext('run', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', '--verbose', 'pub', 'run', '--foo', 'bar']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(4));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -311,12 +320,16 @@ void main() {
     testUsingContext('pub publish', () async {
       final PromptingProcess process = PromptingProcess();
       mockProcessManager.processFactory = (List<String> commands) => process;
-      final Future<void> runPackages = createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
-      final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
+      final Future<void> runPackages =
+          createTestCommandRunner(PackagesCommand())
+              .run(<String>['packages', 'pub', 'publish']);
+      final Future<void> runPrompt =
+          process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
       final Future<void> simulateUserInput = Future<void>(() {
         mockStdio.simulateStdin('y');
       });
-      await Future.wait<void>(<Future<void>>[runPackages, runPrompt, simulateUserInput]);
+      await Future.wait<void>(
+          <Future<void>>[runPackages, runPrompt, simulateUserInput]);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(2));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -333,7 +346,8 @@ void main() {
     });
 
     testUsingContext('publish', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'publish']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'publish']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -346,7 +360,8 @@ void main() {
     });
 
     testUsingContext('deps', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'deps']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'deps']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -359,7 +374,8 @@ void main() {
     });
 
     testUsingContext('cache', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'cache']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'cache']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -372,7 +388,8 @@ void main() {
     });
 
     testUsingContext('version', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'version']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'version']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -385,7 +402,8 @@ void main() {
     });
 
     testUsingContext('uploader', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'uploader']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'uploader']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(3));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));
@@ -398,7 +416,8 @@ void main() {
     });
 
     testUsingContext('global', () async {
-      await createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'global', 'list']);
+      await createTestCommandRunner(PackagesCommand())
+          .run(<String>['packages', 'global', 'list']);
       final List<String> commands = mockProcessManager.commands;
       expect(commands, hasLength(4));
       expect(commands[0], matches(r'dart-sdk[\\/]bin[\\/]pub'));

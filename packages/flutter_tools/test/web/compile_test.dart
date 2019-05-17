@@ -19,30 +19,34 @@ void main() {
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      testBed = Testbed(setup: () async {
-        final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-        when(mockProcessManager.start(any)).thenAnswer((Invocation invocation) async => FakeProcess());
-        when(mockProcessManager.canRun(engineDartPath)).thenReturn(true);
-
-      }, overrides: <Type, Generator>{
-        ProcessManager: () => mockProcessManager,
-      });
+      testBed = Testbed(
+          setup: () async {
+            final String engineDartPath =
+                artifacts.getArtifactPath(Artifact.engineDartBinary);
+            when(mockProcessManager.start(any))
+                .thenAnswer((Invocation invocation) async => FakeProcess());
+            when(mockProcessManager.canRun(engineDartPath)).thenReturn(true);
+          },
+          overrides: <Type, Generator>{
+            ProcessManager: () => mockProcessManager,
+          });
     });
 
-    test('invokes dart2js with correct arguments', () => testBed.run(() async {
-      await webCompiler.compile(target: 'lib/main.dart');
+    test(
+        'invokes dart2js with correct arguments',
+        () => testBed.run(() async {
+              await webCompiler.compile(target: 'lib/main.dart');
 
-      verify(mockProcessManager.start(<String>[
-        'bin/cache/dart-sdk/bin/dart',
-        'bin/cache/dart-sdk/bin/snapshots/dart2js.dart.snapshot',
-        'lib/main.dart',
-        '-o',
-        'build/web/main.dart.js',
-        '--libraries-spec=bin/cache/flutter_web_sdk/libraries.json',
-        '-m',
-      ])).called(1);
-
-    }));
+              verify(mockProcessManager.start(<String>[
+                'bin/cache/dart-sdk/bin/dart',
+                'bin/cache/dart-sdk/bin/snapshots/dart2js.dart.snapshot',
+                'lib/main.dart',
+                '-o',
+                'build/web/main.dart.js',
+                '--libraries-spec=bin/cache/flutter_web_sdk/libraries.json',
+                '-m',
+              ])).called(1);
+            }));
   });
 }
 

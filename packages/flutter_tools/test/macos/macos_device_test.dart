@@ -54,10 +54,12 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
 ''';
       final MockMacOSApp mockMacOSApp = MockMacOSApp();
       when(mockMacOSApp.executable(any)).thenReturn('/Applications/foo');
-      when(mockProcessManager.run(<String>['ps', 'aux'])).thenAnswer((Invocation invocation) async {
+      when(mockProcessManager.run(<String>['ps', 'aux']))
+          .thenAnswer((Invocation invocation) async {
         return ProcessResult(1, 0, psOut, '');
       });
-      when(mockProcessManager.run(<String>['kill', '17193'])).thenAnswer((Invocation invocation) async {
+      when(mockProcessManager.run(<String>['kill', '17193']))
+          .thenAnswer((Invocation invocation) async {
         return ProcessResult(2, 0, '', '');
       });
       expect(await device.stopApp(mockMacOSApp), true);
@@ -74,7 +76,8 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       when(macOSApp.executable(any)).thenReturn('test');
       when(mockFileSystem.file('test')).thenReturn(mockFile);
       when(mockFile.existsSync()).thenReturn(true);
-      when(mockProcessManager.start(<String>['test'])).thenAnswer((Invocation invocation) async {
+      when(mockProcessManager.start(<String>['test']))
+          .thenAnswer((Invocation invocation) async {
         return FakeProcess(
           exitCode: Completer<int>().future,
           stdout: Stream<List<int>>.fromIterable(<List<int>>[
@@ -83,12 +86,14 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
           stderr: const Stream<List<int>>.empty(),
         );
       });
-      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
+      when(mockProcessManager.run(any))
+          .thenAnswer((Invocation invocation) async {
         return ProcessResult(0, 1, '', '');
       });
 
       testUsingContext('Can run from prebuilt application', () async {
-        final LaunchResult result = await device.startApp(macOSApp, prebuiltApplication: true);
+        final LaunchResult result =
+            await device.startApp(macOSApp, prebuiltApplication: true);
         expect(result.started, true);
         expect(result.observatoryUri, Uri.parse('http://127.0.0.1/0'));
       }, overrides: <Type, Generator>{
@@ -111,7 +116,8 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       Platform: () => notMac,
     });
 
-    testUsingContext('isSupportedForProject is true with editable host app', () async {
+    testUsingContext('isSupportedForProject is true with editable host app',
+        () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       fs.directory('macos').createSync();
@@ -122,7 +128,8 @@ tester    17193   0.0  0.2  4791128  37820   ??  S     2:27PM   0:00.09 /Applica
       FileSystem: () => MemoryFileSystem(),
     });
 
-    testUsingContext('isSupportedForProject is false with no host app', () async {
+    testUsingContext('isSupportedForProject is false with no host app',
+        () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.current();

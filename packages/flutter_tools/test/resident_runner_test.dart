@@ -12,17 +12,16 @@ import 'src/common.dart';
 import 'src/context.dart';
 
 class TestRunner extends ResidentRunner {
-  TestRunner(List<FlutterDevice> devices)
-    : super(devices);
+  TestRunner(List<FlutterDevice> devices) : super(devices);
 
   bool hasHelpBeenPrinted = false;
   String receivedCommand;
 
   @override
-  Future<void> cleanupAfterSignal() async { }
+  Future<void> cleanupAfterSignal() async {}
 
   @override
-  Future<void> cleanupAtFinish() async { }
+  Future<void> cleanupAtFinish() async {}
 
   @override
   Future<void> handleTerminalCommand(String code) async {
@@ -30,7 +29,7 @@ class TestRunner extends ResidentRunner {
   }
 
   @override
-  void printHelp({ bool details }) {
+  void printHelp({bool details}) {
     hasHelpBeenPrinted = true;
   }
 
@@ -40,13 +39,15 @@ class TestRunner extends ResidentRunner {
     Completer<void> appStartedCompleter,
     String route,
     bool shouldBuild = true,
-  }) async => null;
+  }) async =>
+      null;
 
   @override
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
-  }) async => null;
+  }) async =>
+      null;
 }
 
 void main() {
@@ -54,7 +55,10 @@ void main() {
     // TODO(jacobr): make these tests run with `trackWidgetCreation: true` as
     // well as the default flags.
     return TestRunner(
-      <FlutterDevice>[FlutterDevice(MockDevice(), trackWidgetCreation: false, buildMode: BuildMode.debug)],
+      <FlutterDevice>[
+        FlutterDevice(MockDevice(),
+            trackWidgetCreation: false, buildMode: BuildMode.debug)
+      ],
     );
   }
 

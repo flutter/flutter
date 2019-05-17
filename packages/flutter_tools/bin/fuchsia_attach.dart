@@ -21,7 +21,9 @@ final ArgParser parser = ArgParser()
   ..addOption('build-dir', help: 'The fuchsia build directory')
   ..addOption('dart-sdk', help: 'The prebuilt dart SDK')
   ..addOption('target', help: 'The GN target to attach to')
-  ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
+  ..addOption('entrypoint',
+      defaultsTo: 'main.dart',
+      help: 'The filename of the main method. Defaults to main.dart')
   ..addOption('device', help: 'The device id to attach to')
   ..addOption('dev-finder', help: 'The location of the dev_finder binary')
   ..addFlag('verbose', negatable: true);
@@ -39,12 +41,16 @@ Future<void> main(List<String> args) async {
   final String name = targetParts[1];
   final File dartSdk = fs.file(argResults['dart-sdk']);
   final String buildDirectory = argResults['build-dir'];
-  final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
+  final File frontendServer = fs.file(
+      '$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
   final File devFinder = fs.file(argResults['dev-finder']);
-  final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
-  final File flutterPatchedSdk = fs.file('$buildDirectory/flutter_runner_patched_sdk');
-  final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
+  final File platformKernelDill = fs
+      .file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
+  final File flutterPatchedSdk =
+      fs.file('$buildDirectory/flutter_runner_patched_sdk');
+  final String packages =
+      '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
   final String outputDill = '$buildDirectory/${name}_tmp.dill';
 
   // TODO(jonahwilliams): running from fuchsia root hangs hot reload for some reason.
@@ -57,11 +63,9 @@ Future<void> main(List<String> args) async {
     return 1;
   }
   if (!frontendServer.existsSync()) {
-    print(
-      'Error: frontend_server not found at ${frontendServer.path}. This '
-      'Usually means you ran fx set without specifying '
-      '--args=flutter_profile=true.'
-    );
+    print('Error: frontend_server not found at ${frontendServer.path}. This '
+        'Usually means you ran fx set without specifying '
+        '--args=flutter_profile=true.');
     return 1;
   }
 
@@ -105,14 +109,15 @@ Future<void> main(List<String> args) async {
     muteCommandLogging: false,
     verboseHelp: false,
     overrides: <Type, Generator>{
-      FuchsiaArtifacts: () => FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
+      FuchsiaArtifacts: () =>
+          FuchsiaArtifacts(sshConfig: sshConfig, devFinder: devFinder),
       Artifacts: () => OverrideArtifacts(
-        parent: CachedArtifacts(),
-        frontendServer: frontendServer,
-        engineDartBinary: dartSdk,
-        platformKernelDill: platformKernelDill,
-        flutterPatchedSdk: flutterPatchedSdk,
-      ),
+            parent: CachedArtifacts(),
+            frontendServer: frontendServer,
+            engineDartBinary: dartSdk,
+            platformKernelDill: platformKernelDill,
+            flutterPatchedSdk: flutterPatchedSdk,
+          ),
     },
   );
 }
@@ -135,7 +140,8 @@ List<String> _extractPathAndName(String gnTarget) {
 class _FuchsiaDoctorCommand extends DoctorCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.flutterRoot = '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
+    Cache.flutterRoot =
+        '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
     return super.runCommand();
   }
 }
@@ -143,7 +149,8 @@ class _FuchsiaDoctorCommand extends DoctorCommand {
 class _FuchsiaAttachCommand extends AttachCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
-    Cache.flutterRoot = '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
+    Cache.flutterRoot =
+        '$originalWorkingDirectory/third_party/dart-pkg/git/flutter';
     return super.runCommand();
   }
 }

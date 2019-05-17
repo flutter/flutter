@@ -7,7 +7,8 @@ import 'dart:async';
 import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
+import '../runner/flutter_command.dart'
+    show FlutterOptions, FlutterCommandResult;
 import '../version.dart';
 import 'build.dart';
 
@@ -22,11 +23,13 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
       // remove it once we've updated those build scripts.
-      ..addOption('asset-base', help: 'Ignored. Will be removed.', hide: !verboseHelp)
+      ..addOption('asset-base',
+          help: 'Ignored. Will be removed.', hide: !verboseHelp)
       ..addOption('manifest', defaultsTo: defaultManifestPath)
       ..addOption('private-key', defaultsTo: defaultPrivateKeyPath)
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
-      ..addOption('target-platform',
+      ..addOption(
+        'target-platform',
         defaultsTo: 'android-arm',
         allowed: const <String>[
           'android-arm',
@@ -39,23 +42,28 @@ class BuildBundleCommand extends BuildSubCommand {
           'windows-x64',
         ],
       )
-      ..addFlag('track-widget-creation',
+      ..addFlag(
+        'track-widget-creation',
         hide: !verboseHelp,
-        help: 'Track widget creation locations. Requires Dart 2.0 functionality.',
+        help:
+            'Track widget creation locations. Requires Dart 2.0 functionality.',
       )
-      ..addMultiOption(FlutterOptions.kExtraFrontEndOptions,
+      ..addMultiOption(
+        FlutterOptions.kExtraFrontEndOptions,
         splitCommas: true,
         hide: true,
       )
-      ..addMultiOption(FlutterOptions.kExtraGenSnapshotOptions,
+      ..addMultiOption(
+        FlutterOptions.kExtraGenSnapshotOptions,
         splitCommas: true,
         hide: true,
       )
       ..addOption('asset-dir', defaultsTo: getAssetBuildDirectory())
       ..addFlag('report-licensed-packages',
-        help: 'Whether to report the names of all the packages that are included '
+          help:
+              'Whether to report the names of all the packages that are included '
               'in the application\'s LICENSE file.',
-        defaultsTo: false);
+          defaultsTo: false);
     usesPubOption();
   }
 
@@ -63,7 +71,8 @@ class BuildBundleCommand extends BuildSubCommand {
   final String name = 'bundle';
 
   @override
-  final String description = 'Build the Flutter assets directory from your app.';
+  final String description =
+      'Build the Flutter assets directory from your app.';
 
   @override
   final String usageFooter = 'The Flutter assets directory contains your '
@@ -105,7 +114,8 @@ class BuildBundleCommand extends BuildSubCommand {
       trackWidgetCreation: argResults['track-widget-creation'],
       compilationTraceFilePath: argResults['compilation-trace-file'],
       extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-      extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
+      extraGenSnapshotOptions:
+          argResults[FlutterOptions.kExtraGenSnapshotOptions],
       fileSystemScheme: argResults['filesystem-scheme'],
       fileSystemRoots: argResults['filesystem-root'],
     );

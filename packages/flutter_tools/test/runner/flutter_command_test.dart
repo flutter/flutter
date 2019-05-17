@@ -26,26 +26,25 @@ void main() {
       usage = MockitoUsage();
       clock = MockClock();
       when(usage.isFirstRun).thenReturn(false);
-      when(clock.now()).thenAnswer(
-        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
+      when(clock.now()).thenAnswer((Invocation _) =>
+          DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
+      final DummyFlutterCommand flutterCommand =
+          DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
       verifyZeroInteractions(cache);
-    },
-    overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Cache: () => cache,
     });
 
     testUsingContext('honors shouldUpdateCache true', () async {
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
+      final DummyFlutterCommand flutterCommand =
+          DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
       verify(cache.updateAll(any)).called(1);
-    },
-    overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       Cache: () => cache,
     });
 
@@ -58,13 +57,12 @@ void main() {
       verify(clock.now()).called(2);
 
       expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
+        verify(usage.sendTiming(captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label')))
+            .captured,
         <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null],
       );
-    },
-    overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       SystemClock: () => clock,
       Usage: () => usage,
     });
@@ -77,11 +75,8 @@ void main() {
           DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
       verify(clock.now()).called(2);
-      verifyNever(usage.sendTiming(
-                   any, any, any,
-                   label: anyNamed('label')));
-    },
-    overrides: <Type, Generator>{
+      verifyNever(usage.sendTiming(any, any, any, label: anyNamed('label')));
+    }, overrides: <Type, Generator>{
       SystemClock: () => clock,
       Usage: () => usage,
     });
@@ -93,28 +88,28 @@ void main() {
       final FlutterCommandResult commandResult = FlutterCommandResult(
         ExitStatus.success,
         // nulls should be cleaned up.
-        timingLabelParts: <String> ['blah1', 'blah2', null, 'blah3'],
+        timingLabelParts: <String>['blah1', 'blah2', null, 'blah3'],
         endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
-        commandFunction: () async => commandResult
-      );
+      final DummyFlutterCommand flutterCommand =
+          DummyFlutterCommand(commandFunction: () async => commandResult);
       await flutterCommand.run();
       verify(clock.now()).called(2);
       expect(
-        verify(usage.sendTiming(
-                captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label'))).captured,
+        verify(usage.sendTiming(captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label')))
+            .captured,
         <dynamic>[
           'flutter',
           'dummy',
-          const Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
+          const Duration(
+              milliseconds:
+                  500), // FlutterCommandResult's end time used instead.
           'success-blah1-blah2-blah3',
         ],
       );
-    },
-    overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       SystemClock: () => clock,
       Usage: () => usage,
     });
@@ -138,9 +133,9 @@ void main() {
         verify(clock.now()).called(2);
 
         expect(
-          verify(usage.sendTiming(
-                  captureAny, captureAny, captureAny,
-                  label: captureAnyNamed('label'))).captured,
+          verify(usage.sendTiming(captureAny, captureAny, captureAny,
+                  label: captureAnyNamed('label')))
+              .captured,
           <dynamic>[
             'flutter',
             'dummy',
@@ -149,12 +144,10 @@ void main() {
           ],
         );
       }
-    },
-    overrides: <Type, Generator>{
+    }, overrides: <Type, Generator>{
       SystemClock: () => clock,
       Usage: () => usage,
     });
-
   });
 
   group('Experimental commands', () {
@@ -177,7 +170,6 @@ void main() {
     });
   });
 }
-
 
 class FakeCommand extends FlutterCommand {
   @override

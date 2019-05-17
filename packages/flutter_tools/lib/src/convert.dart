@@ -33,16 +33,15 @@ class Utf8Decoder extends cnv.Utf8Decoder {
   final bool reportErrors;
 
   @override
-  String convert(List<int> codeUnits, [ int start = 0, int end ]) {
+  String convert(List<int> codeUnits, [int start = 0, int end]) {
     final String result = super.convert(codeUnits, start, end);
     // Finding a unicode replacement character indicates that the input
     // was malformed.
     if (reportErrors && result.contains('\u{FFFD}')) {
-      throwToolExit(
-        'Bad UTF-8 encoding found while decoding string: $result. '
-        'The Flutter team would greatly appreciate if you could file a bug or leave a'
-        'comment on the issue https://github.com/flutter/flutter/issues/15646.\n'
-        'The source bytes were:\n$codeUnits\n\n');
+      throwToolExit('Bad UTF-8 encoding found while decoding string: $result. '
+          'The Flutter team would greatly appreciate if you could file a bug or leave a'
+          'comment on the issue https://github.com/flutter/flutter/issues/15646.\n'
+          'The source bytes were:\n$codeUnits\n\n');
     }
     return result;
   }

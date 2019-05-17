@@ -11,18 +11,21 @@ import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
   FormatCommand() {
-    argParser.addFlag('dry-run',
+    argParser.addFlag(
+      'dry-run',
       abbr: 'n',
       help: 'Show which files would be modified but make no changes.',
       defaultsTo: false,
       negatable: false,
     );
-    argParser.addFlag('set-exit-if-changed',
+    argParser.addFlag(
+      'set-exit-if-changed',
       help: 'Return exit code 1 if there are any formatting changes.',
       defaultsTo: false,
       negatable: false,
     );
-    argParser.addFlag('machine',
+    argParser.addFlag(
+      'machine',
       abbr: 'm',
       help: 'Produce machine-readable JSON output.',
       defaultsTo: false,
@@ -40,9 +43,10 @@ class FormatCommand extends FlutterCommand {
   final String description = 'Format one or more dart files.';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      };
 
   @override
   String get invocation => '${runner.executableName} $name <one or more paths>';
@@ -50,14 +54,12 @@ class FormatCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.isEmpty) {
-      throwToolExit(
-        'No files specified to be formatted.\n'
-        '\n'
-        'To format all files in the current directory tree:\n'
-        '${runner.executableName} $name .\n'
-        '\n'
-        '$usage'
-      );
+      throwToolExit('No files specified to be formatted.\n'
+          '\n'
+          'To format all files in the current directory tree:\n'
+          '${runner.executableName} $name .\n'
+          '\n'
+          '$usage');
     }
 
     final String dartfmt = sdkBinaryName('dartfmt');

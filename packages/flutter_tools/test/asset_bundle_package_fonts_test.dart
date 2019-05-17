@@ -26,7 +26,8 @@ void main() {
     // rolls into Flutter.
     return path?.replaceAll('/', fs.path.separator);
   }
-  void writePubspecFile(String path, String name, { String fontsSection }) {
+
+  void writePubspecFile(String path, String name, {String fontsSection}) {
     if (fontsSection == null) {
       fontsSection = '';
     } else {
@@ -89,7 +90,8 @@ $fontsSection
     }
 
     expect(
-      json.decode(utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes())),
+      json.decode(utf8
+          .decode(await bundle.entries['FontManifest.json'].contentsAsBytes())),
       json.decode(expectedAssetManifest),
     );
   }
@@ -106,13 +108,16 @@ $fontsSection
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
+            ? FileSystemStyle.windows
+            : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory
+          .createTempSync('flutter_asset_bundle_test.');
     });
 
-    testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
+    testUsingContext(
+        'App includes neither font manifest nor fonts when no defines fonts',
+        () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -156,7 +161,8 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('App font uses local font file and package font file', () async {
+    testUsingContext('App font uses local font file and package font file',
+        () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -221,7 +227,8 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('App uses package font with font file from another package', () async {
+    testUsingContext(
+        'App uses package font with font file from another package', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -255,7 +262,8 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('App uses package font with properties and own font file', () async {
+    testUsingContext('App uses package font with properties and own font file',
+        () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -290,7 +298,8 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('App uses local font and package font with own font file.', () async {
+    testUsingContext('App uses local font and package font with own font file.',
+        () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 

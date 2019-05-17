@@ -24,7 +24,6 @@ void main() {
   });
 
   group('which on POSIX', () {
-
     testUsingContext('returns null when executable does not exist', () async {
       when(mockProcessManager.runSync(<String>['which', kExecutable]))
           .thenReturn(ProcessResult(0, 1, null, null));
@@ -60,7 +59,6 @@ void main() {
   });
 
   group('which on Windows', () {
-
     testUsingContext('returns null when executable does not exist', () async {
       when(mockProcessManager.runSync(<String>['where', kExecutable]))
           .thenReturn(ProcessResult(0, 1, null, null));

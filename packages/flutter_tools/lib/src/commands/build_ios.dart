@@ -10,7 +10,8 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../globals.dart';
 import '../ios/mac.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart'
+    show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
 class BuildIOSCommand extends BuildSubCommand {
@@ -21,24 +22,33 @@ class BuildIOSCommand extends BuildSubCommand {
     usesBuildNumberOption();
     usesBuildNameOption();
     argParser
-      ..addFlag('debug',
+      ..addFlag(
+        'debug',
         negatable: false,
-        help: 'Build a debug version of your app (default mode for iOS simulator builds).',
+        help:
+            'Build a debug version of your app (default mode for iOS simulator builds).',
       )
-      ..addFlag('profile',
+      ..addFlag(
+        'profile',
         negatable: false,
-        help: 'Build a version of your app specialized for performance profiling.',
+        help:
+            'Build a version of your app specialized for performance profiling.',
       )
-      ..addFlag('release',
+      ..addFlag(
+        'release',
         negatable: false,
-        help: 'Build a release version of your app (default mode for device builds).',
+        help:
+            'Build a release version of your app (default mode for device builds).',
       )
-      ..addFlag('simulator',
+      ..addFlag(
+        'simulator',
         help: 'Build for the iOS simulator instead of the device.',
       )
-      ..addFlag('codesign',
+      ..addFlag(
+        'codesign',
         defaultsTo: true,
-        help: 'Codesign the application bundle (only available on device builds).',
+        help:
+            'Codesign the application bundle (only available on device builds).',
       );
   }
 
@@ -46,13 +56,15 @@ class BuildIOSCommand extends BuildSubCommand {
   final String name = 'ios';
 
   @override
-  final String description = 'Build an iOS application bundle (Mac OS X host only).';
+  final String description =
+      'Build an iOS application bundle (Mac OS X host only).';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-    DevelopmentArtifact.iOS,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+        DevelopmentArtifact.iOS,
+      };
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -62,24 +74,27 @@ class BuildIOSCommand extends BuildSubCommand {
     if (getCurrentHostPlatform() != HostPlatform.darwin_x64)
       throwToolExit('Building for iOS is only supported on the Mac.');
 
-    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final BuildableIOSApp app =
+        await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
 
-    if (app == null)
-      throwToolExit('Application not configured for iOS');
+    if (app == null) throwToolExit('Application not configured for iOS');
 
     final bool shouldCodesign = argResults['codesign'];
 
     if (!forSimulator && !shouldCodesign) {
-      printStatus('Warning: Building for device with codesigning disabled. You will '
-        'have to manually codesign before deploying to device.');
+      printStatus(
+          'Warning: Building for device with codesigning disabled. You will '
+          'have to manually codesign before deploying to device.');
     }
     final BuildInfo buildInfo = getBuildInfo();
     if (forSimulator && !buildInfo.supportsSimulator)
-      throwToolExit('${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
+      throwToolExit(
+          '${toTitleCase(buildInfo.friendlyModeName)} mode is not supported for simulators.');
 
     final String logTarget = forSimulator ? 'simulator' : 'device';
 
-    final String typeName = artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
+    final String typeName =
+        artifacts.getEngineType(TargetPlatform.ios, buildInfo.mode);
     printStatus('Building $app for $logTarget ($typeName)...');
     final XcodeBuildResult result = await buildXcodeProject(
       app: app,
@@ -94,8 +109,7 @@ class BuildIOSCommand extends BuildSubCommand {
       throwToolExit('Encountered error while building for $logTarget.');
     }
 
-    if (result.output != null)
-      printStatus('Built ${result.output}.');
+    if (result.output != null) printStatus('Built ${result.output}.');
 
     return null;
   }

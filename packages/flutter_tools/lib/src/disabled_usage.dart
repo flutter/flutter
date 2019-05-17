@@ -14,28 +14,30 @@ class DisabledUsage implements Usage {
   bool get suppressAnalytics => true;
 
   @override
-  set suppressAnalytics(bool value) { }
+  set suppressAnalytics(bool value) {}
 
   @override
   bool get enabled => false;
 
   @override
-  set enabled(bool value) { }
+  set enabled(bool value) {}
 
   @override
   String get clientId => null;
 
   @override
-  void sendCommand(String command, { Map<String, String> parameters }) { }
+  void sendCommand(String command, {Map<String, String> parameters}) {}
 
   @override
-  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
+  void sendEvent(String category, String parameter,
+      {Map<String, String> parameters}) {}
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, { String label }) { }
+  void sendTiming(String category, String variableName, Duration duration,
+      {String label}) {}
 
   @override
-  void sendException(dynamic exception, StackTrace trace) { }
+  void sendException(dynamic exception, StackTrace trace) {}
 
   @override
   Stream<Map<String, dynamic>> get onSend => null;
@@ -44,5 +46,5 @@ class DisabledUsage implements Usage {
   Future<void> ensureAnalyticsSent() => Future<void>.value();
 
   @override
-  void printWelcome() { }
+  void printWelcome() {}
 }

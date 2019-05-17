@@ -21,7 +21,9 @@ typedef FingerprintPathFilter = bool Function(String path);
 /// This is done by always returning false from fingerprinter invocations. This
 /// is safe to do generally, because fingerprinting is only a performance
 /// improvement.
-bool get _disableBuildCache => platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
+bool get _disableBuildCache =>
+    platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() ==
+    'true';
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -37,14 +39,15 @@ class Fingerprinter {
     @required Map<String, String> properties,
     Iterable<String> depfilePaths = const <String>[],
     FingerprintPathFilter pathFilter,
-  }) : _paths = paths.toList(),
-       _properties = Map<String, String>.from(properties),
-       _depfilePaths = depfilePaths.toList(),
-       _pathFilter = pathFilter,
-       assert(fingerprintPath != null),
-       assert(paths != null && paths.every((String path) => path != null)),
-       assert(properties != null),
-       assert(depfilePaths != null && depfilePaths.every((String path) => path != null));
+  })  : _paths = paths.toList(),
+        _properties = Map<String, String>.from(properties),
+        _depfilePaths = depfilePaths.toList(),
+        _pathFilter = pathFilter,
+        assert(fingerprintPath != null),
+        assert(paths != null && paths.every((String path) => path != null)),
+        assert(properties != null),
+        assert(depfilePaths != null &&
+            depfilePaths.every((String path) => path != null));
 
   final String fingerprintPath;
   final List<String> _paths;
@@ -63,17 +66,15 @@ class Fingerprinter {
     }
     try {
       final File fingerprintFile = fs.file(fingerprintPath);
-      if (!fingerprintFile.existsSync())
-        return false;
+      if (!fingerprintFile.existsSync()) return false;
 
-      if (!_depfilePaths.every(fs.isFileSync))
-        return false;
+      if (!_depfilePaths.every(fs.isFileSync)) return false;
 
       final List<String> paths = await _getPaths();
-      if (!paths.every(fs.isFileSync))
-        return false;
+      if (!paths.every(fs.isFileSync)) return false;
 
-      final Fingerprint oldFingerprint = Fingerprint.fromJson(await fingerprintFile.readAsString());
+      final Fingerprint oldFingerprint =
+          Fingerprint.fromJson(await fingerprintFile.readAsString());
       final Fingerprint newFingerprint = await buildFingerprint();
       return oldFingerprint == newFingerprint;
     } catch (e) {
@@ -107,9 +108,11 @@ class Fingerprinter {
 ///
 /// See [Fingerprinter].
 class Fingerprint {
-  Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
+  Fingerprint.fromBuildInputs(
+      Map<String, String> properties, Iterable<String> inputPaths) {
     final Iterable<File> files = inputPaths.map<File>(fs.file);
-    final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
+    final Iterable<File> missingInputs =
+        files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty)
       throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
 
@@ -131,33 +134,32 @@ class Fingerprint {
     final String version = content['version'];
     if (version != FlutterVersion.instance.frameworkRevision)
       throw ArgumentError('Incompatible fingerprint version: $version');
-    _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
-    _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
+    _checksums = content['files']?.cast<String, String>() ?? <String, String>{};
+    _properties =
+        content['properties']?.cast<String, String>() ?? <String, String>{};
   }
 
   Map<String, String> _checksums;
   Map<String, String> _properties;
 
   String toJson() => json.encode(<String, dynamic>{
-    'version': FlutterVersion.instance.frameworkRevision,
-    'properties': _properties,
-    'files': _checksums,
-  });
+        'version': FlutterVersion.instance.frameworkRevision,
+        'properties': _properties,
+        'files': _checksums,
+      });
 
   @override
-  bool operator==(dynamic other) {
-    if (identical(other, this))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
+  bool operator ==(dynamic other) {
+    if (identical(other, this)) return true;
+    if (other.runtimeType != runtimeType) return false;
     final Fingerprint typedOther = other;
-    return _equalMaps(typedOther._checksums, _checksums)
-        && _equalMaps(typedOther._properties, _properties);
+    return _equalMaps(typedOther._checksums, _checksums) &&
+        _equalMaps(typedOther._properties, _properties);
   }
 
   bool _equalMaps(Map<String, String> a, Map<String, String> b) {
-    return a.length == b.length
-        && a.keys.every((String key) => a[key] == b[key]);
+    return a.length == b.length &&
+        a.keys.every((String key) => a[key] == b[key]);
   }
 
   @override
@@ -190,9 +192,9 @@ Future<Set<String>> readDepfile(String depfilePath) async {
   return dependencies
       .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
       .split('\n')
-      .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+      .map<String>((String path) => path
+          .replaceAllMapped(_escapeExpr, (Match match) => match.group(1))
+          .trim())
       .where((String path) => path.isNotEmpty)
       .toSet();
 }
-
-

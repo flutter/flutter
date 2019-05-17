@@ -45,7 +45,8 @@ void testUsingContext(
   Map<Type, Generator> overrides = const <Type, Generator>{},
   bool initializeFlutterRoot = true,
   String testOn,
-  bool skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
+  bool
+      skip, // should default to `false`, but https://github.com/dart-lang/test/issues/545 doesn't allow this
 }) {
   // Ensure we don't rely on the default [Config] constructor which will
   // leak a sticky $HOME/.flutter_settings behind!
@@ -57,10 +58,10 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir = fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    final File settingsFile = fs.file(
-      fs.path.join(configDir.path, '.flutter_settings')
-    );
+    configDir =
+        fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    final File settingsFile =
+        fs.file(fs.path.join(configDir.path, '.flutter_settings'));
     return Config(settingsFile);
   }
 
@@ -121,15 +122,16 @@ void testUsingContext(
         },
       );
     });
-  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)),
-      testOn: testOn, skip: skip);
+  },
+      timeout: timeout ?? const Timeout(Duration(seconds: 60)),
+      testOn: testOn,
+      skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
     final BufferLogger bufferLogger = testContext.get<Logger>();
-    if (bufferLogger.errorText.isNotEmpty)
-      print(bufferLogger.errorText);
+    if (bufferLogger.errorText.isNotEmpty) print(bufferLogger.errorText);
     bufferLogger.clear();
   }
 }
@@ -141,8 +143,7 @@ class MockDeviceManager implements DeviceManager {
 
   @override
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
-      return null;
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') return null;
     return _specifiedDeviceId;
   }
 
@@ -160,7 +161,8 @@ class MockDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
+  Stream<Device> getAllConnectedDevices() =>
+      Stream<Device>.fromIterable(devices);
 
   @override
   Stream<Device> getDevicesById(String deviceId) {
@@ -202,6 +204,7 @@ class MockDoctor extends Doctor {
   bool get canLaunchAnything => true;
 
   @override
+
   /// Replaces the android workflow with a version that overrides licensesAccepted,
   /// to prevent individual tests from having to mock out the process for
   /// the Doctor.
@@ -243,28 +246,30 @@ class MockUsage implements Usage {
   bool get suppressAnalytics => false;
 
   @override
-  set suppressAnalytics(bool value) { }
+  set suppressAnalytics(bool value) {}
 
   @override
   bool get enabled => true;
 
   @override
-  set enabled(bool value) { }
+  set enabled(bool value) {}
 
   @override
   String get clientId => '00000000-0000-4000-0000-000000000000';
 
   @override
-  void sendCommand(String command, { Map<String, String> parameters }) { }
+  void sendCommand(String command, {Map<String, String> parameters}) {}
 
   @override
-  void sendEvent(String category, String parameter, { Map<String, String> parameters }) { }
+  void sendEvent(String category, String parameter,
+      {Map<String, String> parameters}) {}
 
   @override
-  void sendTiming(String category, String variableName, Duration duration, { String label }) { }
+  void sendTiming(String category, String variableName, Duration duration,
+      {String label}) {}
 
   @override
-  void sendException(dynamic exception, StackTrace trace) { }
+  void sendException(dynamic exception, StackTrace trace) {}
 
   @override
   Stream<Map<String, dynamic>> get onSend => null;
@@ -273,7 +278,7 @@ class MockUsage implements Usage {
   Future<void> ensureAnalyticsSent() => Future<void>.value();
 
   @override
-  void printWelcome() { }
+  void printWelcome() {}
 }
 
 class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
@@ -317,8 +322,8 @@ class LocalFileSystemBlockingSetCurrentDirectory extends LocalFileSystem {
   @override
   set currentDirectory(dynamic value) {
     throw 'fs.currentDirectory should not be set on the local file system during '
-          'tests as this can cause race conditions with concurrent tests. '
-          'Consider using a MemoryFileSystem for testing if possible or refactor '
-          'code to not require setting fs.currentDirectory.';
+        'tests as this can cause race conditions with concurrent tests. '
+        'Consider using a MemoryFileSystem for testing if possible or refactor '
+        'code to not require setting fs.currentDirectory.';
   }
 }

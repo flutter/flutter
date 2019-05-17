@@ -22,29 +22,36 @@ class BotDetector {
   const BotDetector();
 
   bool get isRunningOnBot {
-    return platform.environment['BOT'] != 'false'
-       && (platform.environment['BOT'] == 'true'
+    return platform.environment['BOT'] != 'false' &&
+        (platform.environment['BOT'] == 'true'
 
-        // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-        || platform.environment['TRAVIS'] == 'true'
-        || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
-        || platform.environment.containsKey('CI') // Travis and AppVeyor
+            // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
+            ||
+            platform.environment['TRAVIS'] == 'true' ||
+            platform.environment['CONTINUOUS_INTEGRATION'] == 'true' ||
+            platform.environment.containsKey('CI') // Travis and AppVeyor
 
-        // https://www.appveyor.com/docs/environment-variables/
-        || platform.environment.containsKey('APPVEYOR')
+            // https://www.appveyor.com/docs/environment-variables/
+            ||
+            platform.environment.containsKey('APPVEYOR')
 
-        // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
-        || platform.environment.containsKey('CIRRUS_CI')
+            // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
+            ||
+            platform.environment.containsKey('CIRRUS_CI')
 
-        // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-        || (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
+            // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
+            ||
+            (platform.environment.containsKey('AWS_REGION') &&
+                platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
-        // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
-        || platform.environment.containsKey('JENKINS_URL')
+            // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
+            ||
+            platform.environment.containsKey('JENKINS_URL')
 
-        // Properties on Flutter's Chrome Infra bots.
-        || platform.environment['CHROME_HEADLESS'] == '1'
-        || platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
+            // Properties on Flutter's Chrome Infra bots.
+            ||
+            platform.environment['CHROME_HEADLESS'] == '1' ||
+            platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
   }
 }
 
@@ -69,8 +76,8 @@ String camelCase(String str) {
   int index = str.indexOf('_');
   while (index != -1 && index < str.length - 2) {
     str = str.substring(0, index) +
-      str.substring(index + 1, index + 2).toUpperCase() +
-      str.substring(index + 2);
+        str.substring(index + 1, index + 2).toUpperCase() +
+        str.substring(index + 2);
     index = str.indexOf('_');
   }
   return str;
@@ -79,14 +86,13 @@ String camelCase(String str) {
 final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
-String snakeCase(String str, [ String sep = '_' ]) {
+String snakeCase(String str, [String sep = '_']) {
   return str.replaceAllMapped(_upperRegex,
       (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
 }
 
 String toTitleCase(String str) {
-  if (str.isEmpty)
-    return str;
+  if (str.isEmpty) return str;
   return str.substring(0, 1).toUpperCase() + str.substring(1);
 }
 
@@ -107,8 +113,7 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
   while (true) {
     final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
     final File file = fs.file(fs.path.join(dir.path, name));
-    if (!file.existsSync())
-      return file;
+    if (!file.existsSync()) return file;
     i++;
   }
 }
@@ -126,7 +131,8 @@ final NumberFormat kSecondsFormat = NumberFormat('0.0');
 final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
-  final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
+  final double seconds =
+      duration.inMilliseconds / Duration.millisecondsPerSecond;
   return '${kSecondsFormat.format(seconds)}s';
 }
 
@@ -156,7 +162,8 @@ class ItemListNotifier<T> {
   Set<T> _items;
 
   final StreamController<T> _addedController = StreamController<T>.broadcast();
-  final StreamController<T> _removedController = StreamController<T>.broadcast();
+  final StreamController<T> _removedController =
+      StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -188,8 +195,7 @@ class SettingsFile {
   SettingsFile.parse(String contents) {
     for (String line in contents.split('\n')) {
       line = line.trim();
-      if (line.startsWith('#') || line.isEmpty)
-        continue;
+      if (line.startsWith('#') || line.isEmpty) continue;
       final int index = line.indexOf('=');
       if (index != -1)
         values[line.substring(0, index)] = line.substring(index + 1);
@@ -227,12 +233,11 @@ class Uuid {
     // Generate xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx / 8-4-4-4-12.
     final int special = 8 + _random.nextInt(4);
 
-    return
-      '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}-'
-          '${_bitsDigits(16, 4)}-'
-          '4${_bitsDigits(12, 3)}-'
-          '${_printDigits(special, 1)}${_bitsDigits(12, 3)}-'
-          '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}';
+    return '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}-'
+        '${_bitsDigits(16, 4)}-'
+        '4${_bitsDigits(12, 3)}-'
+        '${_printDigits(special, 1)}${_bitsDigits(12, 3)}-'
+        '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}';
   }
 
   String _bitsDigits(int bitCount, int digitCount) =>
@@ -257,7 +262,8 @@ typedef AsyncCallback = Future<void> Function();
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
-  Poller(this.callback, this.pollingInterval, { this.initialDelay = Duration.zero }) {
+  Poller(this.callback, this.pollingInterval,
+      {this.initialDelay = Duration.zero}) {
     Future<void>.delayed(initialDelay, _handleCallback);
   }
 
@@ -269,8 +275,7 @@ class Poller {
   Timer _timer;
 
   Future<void> _handleCallback() async {
-    if (_cancelled)
-      return;
+    if (_cancelled) return;
 
     try {
       await callback();
@@ -278,8 +283,7 @@ class Poller {
       printTrace('Error from poller: $error');
     }
 
-    if (!_cancelled)
-      _timer = Timer(pollingInterval, _handleCallback);
+    if (!_cancelled) _timer = Timer(pollingInterval, _handleCallback);
   }
 
   /// Cancels the poller.
@@ -300,6 +304,7 @@ class Poller {
 Future<List<T>> waitGroup<T>(Iterable<Future<T>> futures) {
   return Future.wait<T>(futures.where((Future<T> future) => future != null));
 }
+
 /// The terminal width used by the [wrapText] function if there is no terminal
 /// attached to [io.Stdio], --wrap is on, and --wrap-columns was not specified.
 const int kDefaultTerminalColumns = 100;
@@ -343,7 +348,8 @@ const int kMinColumnWidth = 10;
 ///
 /// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
 /// added together.
-String wrapText(String text, { int columnWidth, int hangingIndent, int indent, bool shouldWrap }) {
+String wrapText(String text,
+    {int columnWidth, int hangingIndent, int indent, bool shouldWrap}) {
   if (text == null || text.isEmpty) {
     return '';
   }
@@ -357,7 +363,8 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
   final List<String> result = <String>[];
   for (String line in splitText) {
     String trimmedText = line.trimLeft();
-    final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
+    final String leadingWhitespace =
+        line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
     if (hangingIndent != 0) {
       // When we have a hanging indent, we want to wrap the first line at one
@@ -392,7 +399,8 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
         if (line.isEmpty) {
           return '';
         }
-        final String result = '$indentString${hangingIndentString ?? ''}$leadingWhitespace$line';
+        final String result =
+            '$indentString${hangingIndentString ?? ''}$leadingWhitespace$line';
         hangingIndentString ??= ' ' * hangingIndent;
         return result;
       },
@@ -431,7 +439,8 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, bool shouldWrap }) {
+List<String> _wrapTextAsLines(String text,
+    {int start = 0, int columnWidth, bool shouldWrap}) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
@@ -445,7 +454,8 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, boo
   ///
   /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
   bool isWhitespace(_AnsiRun run) {
-    final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
+    final int rune =
+        run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
     return rune >= 0x0009 && rune <= 0x000D ||
         rune == 0x0020 ||
         rune == 0x0085 ||
@@ -466,7 +476,8 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, boo
   // reconstitute the original string. This is useful for manipulating "visible"
   // characters in the presence of ANSI control codes.
   List<_AnsiRun> splitWithCodes(String input) {
-    final RegExp characterOrCode = RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
+    final RegExp characterOrCode =
+        RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
     List<_AnsiRun> result = <_AnsiRun>[];
     final StringBuffer current = StringBuffer();
     for (Match match in characterOrCode.allMatches(input)) {
@@ -491,8 +502,12 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, boo
     return result;
   }
 
-  String joinRun(List<_AnsiRun> list, int start, [ int end ]) {
-    return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
+  String joinRun(List<_AnsiRun> list, int start, [int end]) {
+    return list
+        .sublist(start, end)
+        .map<String>((_AnsiRun run) => run.original)
+        .join()
+        .trim();
   }
 
   final List<String> result = <String>[];
@@ -514,7 +529,8 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, boo
     int lastWhitespace;
     // Find the start of the current line.
     for (int index = 0; index < splitLine.length; ++index) {
-      if (splitLine[index].character.isNotEmpty && isWhitespace(splitLine[index])) {
+      if (splitLine[index].character.isNotEmpty &&
+          isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
 

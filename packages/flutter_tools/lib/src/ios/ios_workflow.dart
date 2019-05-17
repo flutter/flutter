@@ -27,7 +27,8 @@ class IOSWorkflow implements Workflow {
 
   // We need xcode (+simctl) to list simulator devices, and libimobiledevice to list real devices.
   @override
-  bool get canListDevices => xcode.isInstalledAndMeetsVersionCheck && xcode.isSimctlInstalled;
+  bool get canListDevices =>
+      xcode.isInstalledAndMeetsVersionCheck && xcode.isSimctlInstalled;
 
   // We need xcode to launch simulator devices, and ideviceinstaller and ios-deploy
   // for real devices.
@@ -43,31 +44,40 @@ class IOSWorkflow implements Workflow {
 }
 
 class IOSValidator extends DoctorValidator {
-
   const IOSValidator() : super('iOS toolchain - develop for iOS devices');
 
-  Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
+  Future<bool> get hasIDeviceInstaller =>
+      exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
-  Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
+  Future<bool> get hasIosDeploy =>
+      exitsHappyAsync(<String>['ios-deploy', '--version']);
 
   String get iosDeployMinimumVersion => '1.9.4';
 
   // ios-deploy <= v1.9.3 declares itself as v2.0.0
   List<String> get iosDeployBadVersions => <String>['2.0.0'];
 
-  Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
+  Future<String> get iosDeployVersionText async =>
+      (await runAsync(<String>['ios-deploy', '--version']))
+          .processResult
+          .stdout
+          .replaceAll('\n', '');
 
   bool get hasHomebrew => os.which('brew') != null;
 
-  Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
+  Future<String> get macDevMode async =>
+      (await runAsync(<String>['DevToolsSecurity', '-status']))
+          .processResult
+          .stdout;
 
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
-    if (!await hasIosDeploy)
-      return false;
+    if (!await hasIosDeploy) return false;
     try {
       final Version version = Version.parse(await iosDeployVersionText);
-      return version >= Version.parse(iosDeployMinimumVersion)
-          && !iosDeployBadVersions.map((String v) => Version.parse(v)).contains(version);
+      return version >= Version.parse(iosDeployMinimumVersion) &&
+          !iosDeployBadVersions
+              .map((String v) => Version.parse(v))
+              .contains(version);
     } on FormatException catch (_) {
       return false;
     }
@@ -86,18 +96,19 @@ class IOSValidator extends DoctorValidator {
     if (xcode.isInstalled) {
       xcodeStatus = ValidationType.installed;
 
-      messages.add(ValidationMessage(userMessages.iOSXcodeLocation(xcode.xcodeSelectPath)));
+      messages.add(ValidationMessage(
+          userMessages.iOSXcodeLocation(xcode.xcodeSelectPath)));
 
       xcodeVersionInfo = xcode.versionText;
       if (xcodeVersionInfo.contains(','))
-        xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
+        xcodeVersionInfo =
+            xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
       messages.add(ValidationMessage(xcode.versionText));
 
       if (!xcode.isInstalledAndMeetsVersionCheck) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-            userMessages.iOSXcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
-        ));
+        messages.add(ValidationMessage.error(userMessages.iOSXcodeOutdated(
+            kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)));
       }
 
       if (!xcode.eulaSigned) {
@@ -106,9 +117,9 @@ class IOSValidator extends DoctorValidator {
       }
       if (!xcode.isSimctlInstalled) {
         xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.iOSXcodeMissingSimct));
+        messages
+            .add(ValidationMessage.error(userMessages.iOSXcodeMissingSimct));
       }
-
     } else {
       xcodeStatus = ValidationType.missing;
       if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
@@ -123,27 +134,32 @@ class IOSValidator extends DoctorValidator {
     if (!iMobileDevice.isInstalled) {
       checksFailed += 3;
       packageManagerStatus = ValidationType.partial;
-      messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceMissing));
+      messages
+          .add(ValidationMessage.error(userMessages.iOSIMobileDeviceMissing));
     } else if (!await iMobileDevice.isWorking) {
       checksFailed += 2;
       packageManagerStatus = ValidationType.partial;
-      messages.add(ValidationMessage.error(userMessages.iOSIMobileDeviceBroken));
+      messages
+          .add(ValidationMessage.error(userMessages.iOSIMobileDeviceBroken));
     } else if (!await hasIDeviceInstaller) {
       checksFailed += 1;
       packageManagerStatus = ValidationType.partial;
-      messages.add(ValidationMessage.error(userMessages.iOSDeviceInstallerMissing));
+      messages
+          .add(ValidationMessage.error(userMessages.iOSDeviceInstallerMissing));
     }
 
     final bool iHasIosDeploy = await hasIosDeploy;
 
     // Check ios-deploy is installed at meets version requirements.
     if (iHasIosDeploy) {
-      messages.add(ValidationMessage(userMessages.iOSDeployVersion(await iosDeployVersionText)));
+      messages.add(ValidationMessage(
+          userMessages.iOSDeployVersion(await iosDeployVersionText)));
     }
     if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
       packageManagerStatus = ValidationType.partial;
       if (iHasIosDeploy) {
-        messages.add(ValidationMessage.error(userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
+        messages.add(ValidationMessage.error(
+            userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
       } else {
         checksFailed += 1;
         messages.add(ValidationMessage.error(userMessages.iOSDeployMissing));
@@ -159,9 +175,10 @@ class IOSValidator extends DoctorValidator {
     }
 
     return ValidationResult(
-        <ValidationType>[xcodeStatus, packageManagerStatus].reduce(_mergeValidationTypes),
-        messages,
-        statusInfo: xcodeVersionInfo,
+      <ValidationType>[xcodeStatus, packageManagerStatus]
+          .reduce(_mergeValidationTypes),
+      messages,
+      statusInfo: xcodeVersionInfo,
     );
   }
 
@@ -181,29 +198,34 @@ class CocoaPodsValidator extends DoctorValidator {
 
     ValidationType status = ValidationType.installed;
     if (hasHomebrew) {
-      final CocoaPodsStatus cocoaPodsStatus = await cocoaPods
-          .evaluateCocoaPodsInstallation;
+      final CocoaPodsStatus cocoaPodsStatus =
+          await cocoaPods.evaluateCocoaPodsInstallation;
 
       if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
         if (await cocoaPods.isCocoaPodsInitialized) {
-          messages.add(ValidationMessage(userMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
+          messages.add(ValidationMessage(userMessages
+              .cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
         } else {
           status = ValidationType.partial;
-          messages.add(ValidationMessage.error(userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
+          messages.add(ValidationMessage.error(
+              userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
         }
       } else {
         if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
           status = ValidationType.missing;
-          messages.add(ValidationMessage.error(
-              userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
+          messages.add(ValidationMessage.error(userMessages.cocoaPodsMissing(
+              noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
         } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(
-              userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+              userMessages.cocoaPodsUnknownVersion(
+                  unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
         } else {
           status = ValidationType.partial;
-          messages.add(ValidationMessage.hint(
-              userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          messages.add(ValidationMessage.hint(userMessages.cocoaPodsOutdated(
+              cocoaPods.cocoaPodsRecommendedVersion,
+              noCocoaPodsConsequence,
+              cocoaPodsUpgradeInstructions)));
         }
       }
     } else {

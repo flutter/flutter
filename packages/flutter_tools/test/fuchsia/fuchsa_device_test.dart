@@ -98,10 +98,13 @@ void main() {
       expect(device.artifactOverrides.flutterPatchedSdk, equals(patchedSdk));
       await context.run<void>(
         body: () {
-          expect(Artifacts.instance.getArtifactPath(Artifact.platformKernelDill),
-                 equals(platformDill.path));
-          expect(Artifacts.instance.getArtifactPath(Artifact.flutterPatchedSdkPath),
-                 equals(patchedSdk.path));
+          expect(
+              Artifacts.instance.getArtifactPath(Artifact.platformKernelDill),
+              equals(platformDill.path));
+          expect(
+              Artifacts.instance
+                  .getArtifactPath(Artifact.flutterPatchedSdkPath),
+              equals(patchedSdk.path));
         },
         overrides: <Type, Generator>{
           Artifacts: () => device.artifactOverrides,
@@ -199,7 +202,8 @@ void main() {
         exitCode = Completer<int>();
         when(mockProcessManager.start(any))
             .thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
-        when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
+        when(mockProcess.exitCode)
+            .thenAnswer((Invocation _) => exitCode.future);
         when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
         when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
         devFinder = MockFile();

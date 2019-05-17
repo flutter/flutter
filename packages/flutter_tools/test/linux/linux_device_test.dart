@@ -26,7 +26,8 @@ void main() {
     when(notLinux.isLinux).thenReturn(false);
     when(notLinux.environment).thenReturn(const <String, String>{});
     when(mockProcessManager.run(<String>[
-      'ps', 'aux',
+      'ps',
+      'aux',
     ])).thenAnswer((Invocation invocation) async {
       final MockProcessResult result = MockProcessResult();
       when(result.exitCode).thenReturn(0);
@@ -62,7 +63,9 @@ void main() {
     });
   });
 
-  testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
+  testUsingContext(
+      'LinuxDevice.isSupportedForProject is true with editable host app',
+      () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('linux').createSync();
@@ -73,7 +76,8 @@ void main() {
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
+  testUsingContext(
+      'LinuxDevice.isSupportedForProject is false with no host app', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();

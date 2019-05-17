@@ -17,7 +17,8 @@ void main() {
       fs = MemoryFileSystem();
     });
 
-    testUsingContext('recursively creates a directory if it does not exist', () async {
+    testUsingContext('recursively creates a directory if it does not exist',
+        () async {
       ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
     }, overrides: <Type, Generator>{FileSystem: () => fs});
@@ -34,11 +35,15 @@ void main() {
     test('test directory copy', () async {
       final MemoryFileSystem sourceMemoryFs = MemoryFileSystem();
       const String sourcePath = '/some/origin';
-      final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
+      final Directory sourceDirectory =
+          await sourceMemoryFs.directory(sourcePath).create(recursive: true);
       sourceMemoryFs.currentDirectory = sourcePath;
-      final File sourceFile1 = sourceMemoryFs.file('some_file.txt')..writeAsStringSync('bleh');
+      final File sourceFile1 = sourceMemoryFs.file('some_file.txt')
+        ..writeAsStringSync('bleh');
       final DateTime writeTime = sourceFile1.lastModifiedSync();
-      sourceMemoryFs.file('sub_dir/another_file.txt').createSync(recursive: true);
+      sourceMemoryFs
+          .file('sub_dir/another_file.txt')
+          .createSync(recursive: true);
       sourceMemoryFs.directory('empty_directory').createSync();
 
       // Copy to another memory file system instance.
@@ -50,11 +55,13 @@ void main() {
       expect(targetDirectory.existsSync(), true);
       targetMemoryFs.currentDirectory = targetPath;
       expect(targetMemoryFs.directory('empty_directory').existsSync(), true);
-      expect(targetMemoryFs.file('sub_dir/another_file.txt').existsSync(), true);
+      expect(
+          targetMemoryFs.file('sub_dir/another_file.txt').existsSync(), true);
       expect(targetMemoryFs.file('some_file.txt').readAsStringSync(), 'bleh');
 
       // Assert that the copy operation hasn't modified the original file in some way.
-      expect(sourceMemoryFs.file('some_file.txt').lastModifiedSync(), writeTime);
+      expect(
+          sourceMemoryFs.file('some_file.txt').lastModifiedSync(), writeTime);
       // There's still 3 things in the original directory as there were initially.
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
     });
@@ -68,7 +75,8 @@ void main() {
       expect(fs.path.canonicalize(path), isNot(path));
 
       path = '..\\bar\\.\\\\Foo';
-      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      final String expected =
+          fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
       expect(canonicalizePath(path), expected);
       // fs.path.canonicalize should return the same result (modulo casing)
       expect(fs.path.canonicalize(path), expected.toLowerCase());
@@ -81,14 +89,16 @@ void main() {
       expect(fs.path.canonicalize(path), path);
 
       path = '../bar/.//Foo';
-      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      final String expected =
+          fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
       expect(canonicalizePath(path), expected);
     }, testOn: 'posix');
   });
 
   group('escapePath', () {
     testUsingContext('on Windows', () {
-      expect(escapePath('C:\\foo\\bar\\cool.dart'), 'C:\\\\foo\\\\bar\\\\cool.dart');
+      expect(escapePath('C:\\foo\\bar\\cool.dart'),
+          'C:\\\\foo\\\\bar\\\\cool.dart');
       expect(escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
       expect(escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
     }, overrides: <Type, Generator>{

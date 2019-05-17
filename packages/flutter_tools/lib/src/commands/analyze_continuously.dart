@@ -19,7 +19,8 @@ import '../globals.dart';
 import 'analyze_base.dart';
 
 class AnalyzeContinuously extends AnalyzeBase {
-  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages) : super(argResults);
+  AnalyzeContinuously(ArgResults argResults, this.repoRoots, this.repoPackages)
+      : super(argResults);
 
   final List<String> repoRoots;
   final List<Directory> repoPackages;
@@ -27,7 +28,8 @@ class AnalyzeContinuously extends AnalyzeBase {
   String analysisTarget;
   bool firstAnalysis = true;
   Set<String> analyzedPaths = <String>{};
-  Map<String, List<AnalysisError>> analysisErrors = <String, List<AnalysisError>>{};
+  Map<String, List<AnalysisError>> analysisErrors =
+      <String, List<AnalysisError>>{};
   Stopwatch analysisTimer;
   int lastErrorCount = 0;
   Status analysisStatus;
@@ -55,7 +57,8 @@ class AnalyzeContinuously extends AnalyzeBase {
     final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(sdkPath, directories);
-    server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
+    server.onAnalyzing.listen(
+        (bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
     server.onErrors.listen(_handleAnalysisErrors);
 
     Cache.releaseLockEarly();
@@ -64,20 +67,18 @@ class AnalyzeContinuously extends AnalyzeBase {
     final int exitCode = await server.onExit;
 
     final String message = 'Analysis server exited with code $exitCode.';
-    if (exitCode != 0)
-      throwToolExit(message, exitCode: exitCode);
+    if (exitCode != 0) throwToolExit(message, exitCode: exitCode);
     printStatus(message);
 
-    if (server.didServerErrorOccur)
-      throwToolExit('Server error(s) occurred.');
+    if (server.didServerErrorOccur) throwToolExit('Server error(s) occurred.');
   }
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
     if (isAnalyzing) {
       analysisStatus?.cancel();
-      if (!firstAnalysis)
-        printStatus('\n');
-      analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
+      if (!firstAnalysis) printStatus('\n');
+      analysisStatus = logger.startProgress('Analyzing $analysisTarget...',
+          timeout: timeoutConfiguration.slowOperation);
       analyzedPaths.clear();
       analysisTimer = Stopwatch()..start();
     } else {
@@ -104,7 +105,8 @@ class AnalyzeContinuously extends AnalyzeBase {
         return error.code == 'public_member_api_docs';
       }).length;
       if (!argResults['dartdocs']) {
-        errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
+        errors.removeWhere(
+            (AnalysisError error) => error.code == 'public_member_api_docs');
         issueCount -= undocumentedMembers;
       }
 
@@ -112,11 +114,11 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       for (AnalysisError error in errors) {
         printStatus(error.toString());
-        if (error.code != null)
-          printTrace('error code: ${error.code}');
+        if (error.code != null) printTrace('error code: ${error.code}');
       }
 
-      dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
+      dumpErrors(
+          errors.map<String>((AnalysisError error) => error.toLegacyString()));
 
       // Print an analysis summary.
       String errorsMessage;
@@ -126,9 +128,11 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (firstAnalysis)
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
       else if (issueDiff > 0)
-        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found ($issueDiff new)';
+        errorsMessage =
+            '$issueCount ${pluralize('issue', issueCount)} found ($issueDiff new)';
       else if (issueDiff < 0)
-        errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found (${-issueDiff} fixed)';
+        errorsMessage =
+            '$issueCount ${pluralize('issue', issueCount)} found (${-issueDiff} fixed)';
       else if (issueCount != 0)
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
       else
@@ -138,20 +142,26 @@ class AnalyzeContinuously extends AnalyzeBase {
       if (undocumentedMembers == 1) {
         dartdocMessage = 'one public member lacks documentation';
       } else {
-        dartdocMessage = '$undocumentedMembers public members lack documentation';
+        dartdocMessage =
+            '$undocumentedMembers public members lack documentation';
       }
 
-      final String files = '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
-      final String seconds = (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
+      final String files =
+          '${analyzedPaths.length} ${pluralize('file', analyzedPaths.length)}';
+      final String seconds =
+          (analysisTimer.elapsedMilliseconds / 1000.0).toStringAsFixed(2);
       if (undocumentedMembers > 0) {
-        printStatus('$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
+        printStatus(
+            '$errorsMessage • $dartdocMessage • analyzed $files in $seconds seconds');
       } else {
         printStatus('$errorsMessage • analyzed $files in $seconds seconds');
       }
 
       if (firstAnalysis && isBenchmarking) {
         writeBenchmark(analysisTimer, issueCount, undocumentedMembers);
-        server.dispose().whenComplete(() { exit(issueCount > 0 ? 1 : 0); });
+        server.dispose().whenComplete(() {
+          exit(issueCount > 0 ? 1 : 0);
+        });
       }
 
       firstAnalysis = false;
@@ -159,7 +169,8 @@ class AnalyzeContinuously extends AnalyzeBase {
   }
 
   void _handleAnalysisErrors(FileAnalysisErrors fileErrors) {
-    fileErrors.errors.removeWhere((AnalysisError error) => error.type == 'TODO');
+    fileErrors.errors
+        .removeWhere((AnalysisError error) => error.type == 'TODO');
 
     analyzedPaths.add(fileErrors.file);
     analysisErrors[fileErrors.file] = fileErrors.errors;

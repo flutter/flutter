@@ -46,8 +46,7 @@ class IntelliJPlugins {
 
   bool _hasPackage(String packageName) {
     final String packagePath = fs.path.join(pluginsPath, packageName);
-    if (packageName.endsWith('.jar'))
-      return fs.isFileSync(packagePath);
+    if (packageName.endsWith('.jar')) return fs.isFileSync(packagePath);
     return fs.isDirectorySync(packagePath);
   }
 

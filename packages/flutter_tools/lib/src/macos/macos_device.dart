@@ -23,12 +23,13 @@ class MacOSDevice extends Device {
   MacOSDevice() : super('macOS');
 
   @override
-  void clearLogs() { }
+  void clearLogs() {}
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+  DeviceLogReader getLogReader({ApplicationPackage app}) {
     return _deviceLogReader;
   }
+
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
 
   // Since the host and target devices are the same, no work needs to be done
@@ -79,7 +80,8 @@ class MacOSDevice extends Device {
     }
 
     // Ensure that the executable is locatable.
-    final String executable = package.executable(debuggingOptions?.buildInfo?.mode);
+    final String executable =
+        package.executable(debuggingOptions?.buildInfo?.mode);
     if (executable == null) {
       printError('Unable to find executable to run');
       return LaunchResult.failed();
@@ -87,19 +89,19 @@ class MacOSDevice extends Device {
 
     // Make sure to call stop app after we've built.
     await stopApp(package);
-    final Process process = await processManager.start(<String>[
-      executable
-    ]);
+    final Process process = await processManager.start(<String>[executable]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
     _deviceLogReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
+    final ProtocolDiscovery observatoryDiscovery =
+        ProtocolDiscovery.observatory(_deviceLogReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       // Bring app to foreground.
       await processManager.run(<String>[
-        'open', package.applicationBundle(debuggingOptions?.buildInfo?.mode),
+        'open',
+        package.applicationBundle(debuggingOptions?.buildInfo?.mode),
       ]);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {

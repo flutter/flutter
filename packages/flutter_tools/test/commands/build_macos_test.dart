@@ -38,12 +38,13 @@ void main() {
   when(macosPlatform.isMacOS).thenReturn(true);
   when(notMacosPlatform.isMacOS).thenReturn(false);
 
-  testUsingContext('macOS build fails when there is no macos project', () async {
+  testUsingContext('macOS build fails when there is no macos project',
+      () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'macos']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    expect(
+        createTestCommandRunner(command).run(const <String>['build', 'macos']),
+        throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
   });
@@ -54,9 +55,9 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'macos']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    expect(
+        createTestCommandRunner(command).run(const <String>['build', 'macos']),
+        throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => memoryFilesystem,
@@ -68,26 +69,31 @@ void main() {
     fs.directory('macos').createSync();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
+    final FlutterProject flutterProject =
+        FlutterProject.fromDirectory(fs.currentDirectory);
     final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
 
     when(mockProcessManager.start(<String>[
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',
-      '-project', flutterProject.macos.xcodeProjectFile.path,
-      '-configuration', 'Debug',
-      '-scheme', 'Runner',
-      '-derivedDataPath', flutterBuildDir.absolute.path,
+      '-project',
+      flutterProject.macos.xcodeProjectFile.path,
+      '-configuration',
+      'Debug',
+      '-scheme',
+      'Runner',
+      '-derivedDataPath',
+      flutterBuildDir.absolute.path,
       'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
       'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
-    ], runInShell: true)).thenAnswer((Invocation invocation) async {
+    ], runInShell: true))
+        .thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'macos']
-    );
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'macos']);
   }, overrides: <Type, Generator>{
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,
@@ -96,7 +102,9 @@ void main() {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+
 class MockProcess extends Mock implements Process {}
+
 class MockPlatform extends Mock implements Platform {
   @override
   Map<String, String> environment = <String, String>{

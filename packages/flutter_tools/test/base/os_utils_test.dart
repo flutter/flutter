@@ -14,7 +14,8 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_os_utils_test.');
+      tempDir =
+          fs.systemTempDirectory.createTempSync('flutter_tools_os_utils_test.');
     });
 
     tearDown(() {

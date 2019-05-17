@@ -33,33 +33,38 @@ void main() {
       );
     });
 
-    test('Reports a dill file when compile is successful', () => testbed.run(() async {
-      when(residentCompiler.recompile(
-        'test/foo.dart',
-        <Uri>[Uri.parse('test/foo.dart')],
-        outputPath: testCompiler.outputDill.path,
-      )).thenAnswer((Invocation invocation) async {
-        fs.file('abc.dill').createSync();
-        return const CompilerOutput('abc.dill', 0, <Uri>[]);
-      });
+    test(
+        'Reports a dill file when compile is successful',
+        () => testbed.run(() async {
+              when(residentCompiler.recompile(
+                'test/foo.dart',
+                <Uri>[Uri.parse('test/foo.dart')],
+                outputPath: testCompiler.outputDill.path,
+              )).thenAnswer((Invocation invocation) async {
+                fs.file('abc.dill').createSync();
+                return const CompilerOutput('abc.dill', 0, <Uri>[]);
+              });
 
-      expect(await testCompiler.compile('test/foo.dart'), 'test/foo.dart.dill');
-      expect(fs.file('test/foo.dart.dill').existsSync(), true);
-    }));
+              expect(await testCompiler.compile('test/foo.dart'),
+                  'test/foo.dart.dill');
+              expect(fs.file('test/foo.dart.dill').existsSync(), true);
+            }));
 
-    test('Reports null when a compile fails', () => testbed.run(() async {
-      when(residentCompiler.recompile(
-        'test/foo.dart',
-        <Uri>[Uri.parse('test/foo.dart')],
-        outputPath: testCompiler.outputDill.path,
-      )).thenAnswer((Invocation invocation) async {
-        fs.file('abc.dill').createSync();
-        return const CompilerOutput('abc.dill', 1, <Uri>[]);
-      });
+    test(
+        'Reports null when a compile fails',
+        () => testbed.run(() async {
+              when(residentCompiler.recompile(
+                'test/foo.dart',
+                <Uri>[Uri.parse('test/foo.dart')],
+                outputPath: testCompiler.outputDill.path,
+              )).thenAnswer((Invocation invocation) async {
+                fs.file('abc.dill').createSync();
+                return const CompilerOutput('abc.dill', 1, <Uri>[]);
+              });
 
-      expect(await testCompiler.compile('test/foo.dart'), null);
-      expect(fs.file('test/foo.dart.dill').existsSync(), false);
-    }));
+              expect(await testCompiler.compile('test/foo.dart'), null);
+              expect(fs.file('test/foo.dart.dill').existsSync(), false);
+            }));
   });
 }
 

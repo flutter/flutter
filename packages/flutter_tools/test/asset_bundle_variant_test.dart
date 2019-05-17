@@ -31,10 +31,11 @@ void main() {
     setUp(() async {
       testFileSystem = MemoryFileSystem(
         style: platform.isWindows
-          ? FileSystemStyle.windows
-          : FileSystemStyle.posix,
+            ? FileSystemStyle.windows
+            : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_variant_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory
+          .createTempSync('flutter_asset_bundle_variant_test.');
     });
 
     testUsingContext('main asset and variants', () async {
@@ -45,8 +46,7 @@ void main() {
 
       fs.file('pubspec.yaml')
         ..createSync()
-        ..writeAsStringSync(
-'''
+        ..writeAsStringSync('''
 name: test
 dependencies:
   flutter:
@@ -54,8 +54,7 @@ dependencies:
 flutter:
   assets:
     - a/b/c/foo
-'''
-      );
+''');
       fs.file('.packages')..createSync();
 
       final List<String> assets = <String>[
@@ -76,7 +75,8 @@ flutter:
       // The main asset file, /a/b/c/foo, and its variants exist.
       for (String asset in assets) {
         expect(bundle.entries.containsKey(asset), true);
-        expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+        expect(
+            utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
 
       fs.file(fixPath('a/b/c/foo')).deleteSync();
@@ -88,7 +88,8 @@ flutter:
       expect(bundle.entries.containsKey('a/b/c/foo'), false);
       for (String asset in assets.skip(1)) {
         expect(bundle.entries.containsKey(asset), true);
-        expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
+        expect(
+            utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,

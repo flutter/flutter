@@ -17,9 +17,11 @@ import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
   VersionCommand() : super() {
-    argParser.addFlag('force',
+    argParser.addFlag(
+      'force',
       abbr: 'f',
-      help: 'Force switch to older Flutter versions that do not include a version command',
+      help:
+          'Force switch to older Flutter versions that do not include a version command',
     );
   }
 
@@ -59,10 +61,9 @@ class VersionCommand extends FlutterCommand {
     if (targetVersion < minSupportedVersion) {
       if (!argResults['force']) {
         printError(
-          'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
-          'which means if you switch to version $minSupportedVersion then you can not use version command.'
-          'If you really want to switch to version $targetVersion, please use `--force` flag: `flutter version --force $targetVersion`.'
-        );
+            'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
+            'which means if you switch to version $minSupportedVersion then you can not use version command.'
+            'If you really want to switch to version $targetVersion, please use `--force` flag: `flutter version --force $targetVersion`.');
         return const FlutterCommandResult(ExitStatus.success);
       }
       withForce = true;
@@ -79,7 +80,8 @@ class VersionCommand extends FlutterCommand {
 
     final FlutterVersion flutterVersion = FlutterVersion();
 
-    printStatus('Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
+    printStatus(
+        'Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here

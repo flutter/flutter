@@ -167,7 +167,9 @@ baz=qux
       }, kShortDelay);
       final Duration duration = await completer.future;
       expect(
-          duration, greaterThanOrEqualTo(Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
+          duration,
+          greaterThanOrEqualTo(
+              Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
     });
   });
 
@@ -187,26 +189,32 @@ baz=qux
   group('text wrapping', () {
     const int _lineLength = 40;
     const String _longLine = 'This is a long line that needs to be wrapped.';
-    final String _longLineWithNewlines = 'This is a long line with newlines that\n'
-        'needs to be wrapped.\n\n' +
-        '0123456789' * 5;
-    final String _longAnsiLineWithNewlines = '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
-        'needs to be wrapped.\n\n'
-        '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}' +
-        '0123456789' * 3 +
-        '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}';
-    const String _onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
-    final String _indentedLongLineWithNewlines = '    This is an indented long line with newlines that\n'
-        'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
-        '0123456789' * 5;
+    final String _longLineWithNewlines =
+        'This is a long line with newlines that\n'
+                'needs to be wrapped.\n\n' +
+            '0123456789' * 5;
+    final String _longAnsiLineWithNewlines =
+        '${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that\n'
+                'needs to be wrapped.\n\n'
+                '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}' +
+            '0123456789' * 3 +
+            '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}';
+    const String _onlyAnsiSequences =
+        '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
+    final String _indentedLongLineWithNewlines =
+        '    This is an indented long line with newlines that\n'
+                'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
+            '0123456789' * 5;
     const String _shortLine = 'Short line.';
-    const String _indentedLongLine = '    This is an indented long line that needs to be '
+    const String _indentedLongLine =
+        '    This is an indented long line that needs to be '
         'wrapped and indentation preserved.';
     final FakeStdio fakeStdio = FakeStdio();
 
     void testWrap(String description, Function body) {
       testUsingContext(description, body, overrides: <Type, Generator>{
-        OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: _lineLength),
+        OutputPreferences: () =>
+            OutputPreferences(wrapText: true, wrapColumn: _lineLength),
       });
     }
 
@@ -220,7 +228,8 @@ baz=qux
       expect(wrapText(_longLine), equals(_longLine));
     });
     testNoWrap('can override wrap preference if preference is off', () {
-      expect(wrapText(_longLine, columnWidth: _lineLength, shouldWrap: true), equals('''
+      expect(wrapText(_longLine, columnWidth: _lineLength, shouldWrap: true),
+          equals('''
 This is a long line that needs to be
 wrapped.'''));
     });
@@ -231,14 +240,16 @@ wrapped.'''));
       expect(wrapText(_longLine), equals(_longLine));
     });
     testWrap('does not wrap short lines.', () {
-      expect(wrapText(_shortLine, columnWidth: _lineLength), equals(_shortLine));
+      expect(
+          wrapText(_shortLine, columnWidth: _lineLength), equals(_shortLine));
     });
     testWrap('able to wrap long lines', () {
       expect(wrapText(_longLine, columnWidth: _lineLength), equals('''
 This is a long line that needs to be
 wrapped.'''));
     });
-    testUsingContext('able to handle dynamically changing terminal column size', () {
+    testUsingContext('able to handle dynamically changing terminal column size',
+        () {
       fakeStdio.currentColumnSize = 20;
       expect(wrapText(_longLine), equals('''
 This is a long line
@@ -258,7 +269,8 @@ wrapped.'''));
 0123456789'''));
     });
     testWrap('refuses to wrap to a column smaller than 10 characters', () {
-      expect(wrapText('$_longLine ' + '0123456789' * 4, columnWidth: 1), equals('''
+      expect(
+          wrapText('$_longLine ' + '0123456789' * 4, columnWidth: 1), equals('''
 This is a
 long line
 that needs
@@ -276,13 +288,15 @@ wrapped.
     preserved.'''));
     });
     testWrap('preserves indentation and stripping trailing whitespace', () {
-      expect(wrapText('$_indentedLongLine   ', columnWidth: _lineLength), equals('''
+      expect(wrapText('$_indentedLongLine   ', columnWidth: _lineLength),
+          equals('''
     This is an indented long line that
     needs to be wrapped and indentation
     preserved.'''));
     });
     testWrap('wraps text with newlines', () {
-      expect(wrapText(_longLineWithNewlines, columnWidth: _lineLength), equals('''
+      expect(
+          wrapText(_longLineWithNewlines, columnWidth: _lineLength), equals('''
 This is a long line with newlines that
 needs to be wrapped.
 
@@ -290,7 +304,8 @@ needs to be wrapped.
 0123456789'''));
     });
     testWrap('wraps text with ANSI sequences embedded', () {
-      expect(wrapText(_longAnsiLineWithNewlines, columnWidth: _lineLength), equals('''
+      expect(wrapText(_longAnsiLineWithNewlines, columnWidth: _lineLength),
+          equals('''
 ${AnsiTerminal.red}This${AnsiTerminal.resetAll} is a long line with newlines that
 needs to be wrapped.
 
@@ -302,7 +317,8 @@ ${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}'''));
           equals('${AnsiTerminal.red}${AnsiTerminal.resetAll}'));
     });
     testWrap('preserves indentation in the presence of newlines', () {
-      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength), equals('''
+      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength),
+          equals('''
     This is an indented long line with
     newlines that
 needs to be wrapped.
@@ -317,40 +333,57 @@ This is a long line that needs to be
 wrapped.'''));
     });
     testWrap('honors hangingIndent parameter', () {
-      expect(wrapText(_longLine, columnWidth: _lineLength, hangingIndent: 6), equals('''
+      expect(wrapText(_longLine, columnWidth: _lineLength, hangingIndent: 6),
+          equals('''
 This is a long line that needs to be
       wrapped.'''));
     });
     testWrap('handles hangingIndent with a single unwrapped line.', () {
-      expect(wrapText(_shortLine, columnWidth: _lineLength, hangingIndent: 6), equals('''
+      expect(wrapText(_shortLine, columnWidth: _lineLength, hangingIndent: 6),
+          equals('''
 Short line.'''));
     });
-    testWrap('handles hangingIndent with two unwrapped lines and the second is empty.', () {
-      expect(wrapText('$_shortLine\n', columnWidth: _lineLength, hangingIndent: 6), equals('''
+    testWrap(
+        'handles hangingIndent with two unwrapped lines and the second is empty.',
+        () {
+      expect(
+          wrapText('$_shortLine\n', columnWidth: _lineLength, hangingIndent: 6),
+          equals('''
 Short line.
 '''));
     });
     testWrap('honors hangingIndent parameter on already indented line.', () {
-      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, hangingIndent: 6), equals('''
+      expect(
+          wrapText(_indentedLongLine,
+              columnWidth: _lineLength, hangingIndent: 6),
+          equals('''
     This is an indented long line that
           needs to be wrapped and
           indentation preserved.'''));
     });
-    testWrap('honors hangingIndent and indent parameters at the same time.', () {
-      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6, hangingIndent: 6), equals('''
+    testWrap('honors hangingIndent and indent parameters at the same time.',
+        () {
+      expect(
+          wrapText(_indentedLongLine,
+              columnWidth: _lineLength, indent: 6, hangingIndent: 6),
+          equals('''
           This is an indented long line
                 that needs to be wrapped
                 and indentation
                 preserved.'''));
     });
     testWrap('honors indent parameter on already indented line.', () {
-      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6), equals('''
+      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6),
+          equals('''
           This is an indented long line
           that needs to be wrapped and
           indentation preserved.'''));
     });
     testWrap('honors hangingIndent parameter on already indented line.', () {
-      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength, hangingIndent: 6), equals('''
+      expect(
+          wrapText(_indentedLongLineWithNewlines,
+              columnWidth: _lineLength, hangingIndent: 6),
+          equals('''
     This is an indented long line with
           newlines that
 needs to be wrapped.

@@ -84,9 +84,9 @@ class FuchsiaKernelCompiler {
     ];
 
     final List<String> command = <String>[
-          artifacts.getArtifactPath(Artifact.engineDartBinary),
-          fuchsiaArtifacts.kernelCompiler.path,
-        ]..addAll(flags);
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      fuchsiaArtifacts.kernelCompiler.path,
+    ]..addAll(flags);
     printTrace("Running: '${command.join(' ')}'");
     final Process process = await processManager.start(command);
     final Status status = logger.startProgress(

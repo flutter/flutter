@@ -20,13 +20,15 @@ void main() {
     FlutterProject flutterProject;
 
     setUp(() async {
-      flutterProject = FlutterProject.fromPath(fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'web'));
+      flutterProject = FlutterProject.fromPath(
+          fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'web'));
       when(mockWebCompiler.compile(
         target: anyNamed('target'),
         minify: anyNamed('minify'),
         enabledAssertions: anyNamed('enabledAssertions'),
       )).thenAnswer((Invocation invocation) async => 0);
-      when(mockChromeLauncher.launch(any)).thenAnswer((Invocation invocation) async { });
+      when(mockChromeLauncher.launch(any))
+          .thenAnswer((Invocation invocation) async {});
     });
 
     testUsingContext('can build and connect to chrome', () async {
@@ -41,6 +43,7 @@ void main() {
 }
 
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
-class MockWebCompiler extends Mock implements WebCompiler {}
-class MockPlatform extends Mock implements Platform {}
 
+class MockWebCompiler extends Mock implements WebCompiler {}
+
+class MockPlatform extends Mock implements Platform {}

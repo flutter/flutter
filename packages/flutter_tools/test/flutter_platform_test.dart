@@ -13,16 +13,24 @@ import 'src/context.dart';
 
 void main() {
   group('FlutterPlatform', () {
-    testUsingContext('ensureConfiguration throws an error if an explicitObservatoryPort is specified and more than one test file', () async {
-      final FlutterPlatform flutterPlatfrom = FlutterPlatform(shellPath: '/', explicitObservatoryPort: 1234);
+    testUsingContext(
+        'ensureConfiguration throws an error if an explicitObservatoryPort is specified and more than one test file',
+        () async {
+      final FlutterPlatform flutterPlatfrom =
+          FlutterPlatform(shellPath: '/', explicitObservatoryPort: 1234);
       flutterPlatfrom.loadChannel('test1.dart', MockPlatform());
-      expect(() => flutterPlatfrom.loadChannel('test2.dart', MockPlatform()), throwsA(isA<ToolExit>()));
+      expect(() => flutterPlatfrom.loadChannel('test2.dart', MockPlatform()),
+          throwsA(isA<ToolExit>()));
     });
 
-    testUsingContext('ensureConfiguration throws an error if a precompiled entrypoint is specified and more that one test file', () {
-      final FlutterPlatform flutterPlatfrom = FlutterPlatform(shellPath: '/', precompiledDillPath: 'example.dill');
+    testUsingContext(
+        'ensureConfiguration throws an error if a precompiled entrypoint is specified and more that one test file',
+        () {
+      final FlutterPlatform flutterPlatfrom =
+          FlutterPlatform(shellPath: '/', precompiledDillPath: 'example.dill');
       flutterPlatfrom.loadChannel('test1.dart', MockPlatform());
-      expect(() => flutterPlatfrom.loadChannel('test2.dart', MockPlatform()), throwsA(isA<ToolExit>()));
+      expect(() => flutterPlatfrom.loadChannel('test2.dart', MockPlatform()),
+          throwsA(isA<ToolExit>()));
     });
   });
 }

@@ -15,8 +15,7 @@ class VsCodeValidator extends DoctorValidator {
   final VsCode _vsCode;
 
   static Iterable<DoctorValidator> get installedValidators {
-    return VsCode
-        .allInstalled()
+    return VsCode.allInstalled()
         .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 
@@ -26,9 +25,8 @@ class VsCodeValidator extends DoctorValidator {
         ? null
         : userMessages.vsCodeVersion(_vsCode.version.toString());
 
-    final ValidationType validationType = _vsCode.isValid
-        ? ValidationType.installed
-        : ValidationType.partial;
+    final ValidationType validationType =
+        _vsCode.isValid ? ValidationType.installed : ValidationType.partial;
 
     return ValidationResult(
       validationType,

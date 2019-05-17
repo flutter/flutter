@@ -33,9 +33,11 @@ void main() {
     testUsingContext('version switch', () async {
       const String version = '10.0.0';
       final VersionCommand command = VersionCommand();
-      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', version]);
+      final Future<void> runCommand =
+          createTestCommandRunner(command).run(<String>['version', version]);
       await Future.wait<void>(<Future<void>>[runCommand]);
-      expect(testLogger.statusText, contains('Switching Flutter to version $version'));
+      expect(testLogger.statusText,
+          contains('Switching Flutter to version $version'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
@@ -43,9 +45,11 @@ void main() {
     testUsingContext('switch to not supported version without force', () async {
       const String version = '1.1.5';
       final VersionCommand command = VersionCommand();
-      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', version]);
+      final Future<void> runCommand =
+          createTestCommandRunner(command).run(<String>['version', version]);
       await Future.wait<void>(<Future<void>>[runCommand]);
-      expect(testLogger.errorText, contains('Version command is not supported in'));
+      expect(testLogger.errorText,
+          contains('Version command is not supported in'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
@@ -53,9 +57,11 @@ void main() {
     testUsingContext('switch to not supported version with force', () async {
       const String version = '1.1.5';
       final VersionCommand command = VersionCommand();
-      final Future<void> runCommand = createTestCommandRunner(command).run(<String>['version', '--force', version]);
+      final Future<void> runCommand = createTestCommandRunner(command)
+          .run(<String>['version', '--force', version]);
       await Future.wait<void>(<Future<void>>[runCommand]);
-      expect(testLogger.statusText, contains('Switching Flutter to version $version with force'));
+      expect(testLogger.statusText,
+          contains('Switching Flutter to version $version with force'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });

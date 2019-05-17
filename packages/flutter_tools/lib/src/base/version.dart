@@ -7,22 +7,17 @@ class Version implements Comparable<Version> {
   factory Version(int major, int minor, int patch, {String text}) {
     if (text == null) {
       text = major == null ? '0' : '$major';
-      if (minor != null)
-        text = '$text.$minor';
-      if (patch != null)
-        text = '$text.$patch';
+      if (minor != null) text = '$text.$minor';
+      if (patch != null) text = '$text.$patch';
     }
 
     return Version._(major ?? 0, minor ?? 0, patch ?? 0, text);
   }
 
   Version._(this.major, this.minor, this.patch, this._text) {
-    if (major < 0)
-      throw ArgumentError('Major version must be non-negative.');
-    if (minor < 0)
-      throw ArgumentError('Minor version must be non-negative.');
-    if (patch < 0)
-      throw ArgumentError('Patch version must be non-negative.');
+    if (major < 0) throw ArgumentError('Major version must be non-negative.');
+    if (minor < 0) throw ArgumentError('Minor version must be non-negative.');
+    if (patch < 0) throw ArgumentError('Patch version must be non-negative.');
   }
 
   /// Creates a new [Version] by parsing [text].
@@ -55,7 +50,6 @@ class Version implements Comparable<Version> {
     return primary;
   }
 
-
   static Version get unknown => Version(0, 0, 0, text: 'unknown');
 
   /// The major version number: "1" in "1.2.3".
@@ -73,15 +67,13 @@ class Version implements Comparable<Version> {
   /// of the parsed version.
   final String _text;
 
-  static final RegExp versionPattern =
-      RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
+  static final RegExp versionPattern = RegExp(r'^(\d+)(\.(\d+)(\.(\d+))?)?');
 
   /// Two [Version]s are equal if their version numbers are. The version text
   /// is ignored.
   @override
   bool operator ==(dynamic other) {
-    if (other is! Version)
-      return false;
+    if (other is! Version) return false;
     return major == other.major && minor == other.minor && patch == other.patch;
   }
 
@@ -95,10 +87,8 @@ class Version implements Comparable<Version> {
 
   @override
   int compareTo(Version other) {
-    if (major != other.major)
-      return major.compareTo(other.major);
-    if (minor != other.minor)
-      return minor.compareTo(other.minor);
+    if (major != other.major) return major.compareTo(other.major);
+    if (minor != other.minor) return minor.compareTo(other.minor);
     return patch.compareTo(other.patch);
   }
 

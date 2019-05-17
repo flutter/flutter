@@ -12,17 +12,17 @@ import '../doctor.dart';
 // Include VS Code insiders (useful for debugging).
 const bool _includeInsiders = false;
 
-
 const String extensionIdentifier = 'Dart-Code.flutter';
 const String extensionMarketplaceUrl =
-  'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
+    'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
 
 class VsCode {
-  VsCode._(this.directory, this.extensionDirectory, { Version version, this.edition })
+  VsCode._(this.directory, this.extensionDirectory,
+      {Version version, this.edition})
       : version = version ?? Version.unknown {
-
     if (!fs.isDirectorySync(directory)) {
-      _validationMessages.add(ValidationMessage.error('VS Code not found at $directory'));
+      _validationMessages
+          .add(ValidationMessage.error('VS Code not found at $directory'));
       return;
     } else {
       _validationMessages.add(ValidationMessage('VS Code at $directory'));
@@ -31,7 +31,7 @@ class VsCode {
     // If the extensions directory doesn't exist at all, the listSync()
     // below will fail, so just bail out early.
     final ValidationMessage notInstalledMessage = ValidationMessage.error(
-          'Flutter extension not installed; install from\n$extensionMarketplaceUrl');
+        'Flutter extension not installed; install from\n$extensionMarketplaceUrl');
     if (!fs.isDirectorySync(extensionDirectory)) {
       _validationMessages.add(notInstalledMessage);
       return;
@@ -43,7 +43,8 @@ class VsCode {
         .directory(extensionDirectory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
+        .where((Directory d) =>
+            d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
@@ -51,7 +52,8 @@ class VsCode {
       _isValid = true;
       _extensionVersion = Version.parse(
           extensionDir.basename.substring('$extensionIdentifier-'.length));
-      _validationMessages.add(ValidationMessage('Flutter extension version $_extensionVersion'));
+      _validationMessages.add(
+          ValidationMessage('Flutter extension version $_extensionVersion'));
     } else {
       _validationMessages.add(notInstalledMessage);
     }
@@ -66,9 +68,9 @@ class VsCode {
         fs.path.join(installPath, 'resources', 'app', 'package.json');
     final String versionString = _getVersionFromPackageJson(packageJsonPath);
     Version version;
-    if (versionString != null)
-      version = Version.parse(versionString);
-    return VsCode._(installPath, extensionDirectory, version: version, edition: edition);
+    if (versionString != null) version = Version.parse(versionString);
+    return VsCode._(installPath, extensionDirectory,
+        version: version, edition: edition);
   }
 
   final String directory;
@@ -112,16 +114,19 @@ class VsCode {
         '.vscode',
       ),
       _VsCodeInstallLocation(
-        fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code.app', 'Contents'),
+        fs.path.join(
+            homeDirPath, 'Applications', 'Visual Studio Code.app', 'Contents'),
         '.vscode',
       ),
       _VsCodeInstallLocation(
-        fs.path.join('/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
+        fs.path.join(
+            '/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
       ),
       _VsCodeInstallLocation(
-        fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
+        fs.path.join(homeDirPath, 'Applications',
+            'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
       ),
@@ -188,23 +193,28 @@ class VsCode {
   static List<VsCode> _installedLinux() {
     return _findInstalled(<_VsCodeInstallLocation>[
       const _VsCodeInstallLocation('/usr/share/code', '.vscode'),
-      const _VsCodeInstallLocation('/usr/share/code-insiders', '.vscode-insiders', isInsiders: true),
+      const _VsCodeInstallLocation(
+          '/usr/share/code-insiders', '.vscode-insiders',
+          isInsiders: true),
     ]);
   }
 
-  static List<VsCode> _findInstalled(List<_VsCodeInstallLocation> allLocations) {
-    final Iterable<_VsCodeInstallLocation> searchLocations =
-      _includeInsiders
+  static List<VsCode> _findInstalled(
+      List<_VsCodeInstallLocation> allLocations) {
+    final Iterable<_VsCodeInstallLocation> searchLocations = _includeInsiders
         ? allLocations
-        : allLocations.where((_VsCodeInstallLocation p) => p.isInsiders != true);
+        : allLocations
+            .where((_VsCodeInstallLocation p) => p.isInsiders != true);
 
     final List<VsCode> results = <VsCode>[];
 
     for (_VsCodeInstallLocation searchLocation in searchLocations) {
       if (fs.isDirectorySync(searchLocation.installPath)) {
-        final String extensionDirectory =
-            fs.path.join(homeDirPath, searchLocation.extensionsFolder, 'extensions');
-        results.add(VsCode.fromDirectory(searchLocation.installPath, extensionDirectory, edition: searchLocation.edition));
+        final String extensionDirectory = fs.path
+            .join(homeDirPath, searchLocation.extensionsFolder, 'extensions');
+        results.add(VsCode.fromDirectory(
+            searchLocation.installPath, extensionDirectory,
+            edition: searchLocation.edition));
       }
     }
 
@@ -216,8 +226,7 @@ class VsCode {
       'VS Code ($version)${_extensionVersion != Version.unknown ? ', Flutter ($_extensionVersion)' : ''}';
 
   static String _getVersionFromPackageJson(String packageJsonPath) {
-    if (!fs.isFileSync(packageJsonPath))
-      return null;
+    if (!fs.isFileSync(packageJsonPath)) return null;
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
     final Map<String, dynamic> jsonObject = json.decode(jsonString);
     return jsonObject['version'];
@@ -225,8 +234,9 @@ class VsCode {
 }
 
 class _VsCodeInstallLocation {
-  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder, { this.edition, bool isInsiders })
-    : isInsiders = isInsiders ?? false;
+  const _VsCodeInstallLocation(this.installPath, this.extensionsFolder,
+      {this.edition, bool isInsiders})
+      : isInsiders = isInsiders ?? false;
   final String installPath;
   final String extensionsFolder;
   final String edition;

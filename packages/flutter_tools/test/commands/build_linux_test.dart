@@ -37,12 +37,13 @@ void main() {
   when(linuxPlatform.isLinux).thenReturn(true);
   when(notLinuxPlatform.isLinux).thenReturn(false);
 
-  testUsingContext('Linux build fails when there is no linux project', () async {
+  testUsingContext('Linux build fails when there is no linux project',
+      () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    expect(
+        createTestCommandRunner(command).run(const <String>['build', 'linux']),
+        throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -55,15 +56,16 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
-    expect(createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    expect(
+        createTestCommandRunner(command).run(const <String>['build', 'linux']),
+        throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext('Linux build invokes make and writes temporary files', () async {
+  testUsingContext('Linux build invokes make and writes temporary files',
+      () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file('linux/build.sh').createSync(recursive: true);
@@ -74,13 +76,13 @@ void main() {
       'make',
       '-C',
       '/linux',
-    ], runInShell: true)).thenAnswer((Invocation invocation) async {
+    ], runInShell: true))
+        .thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
-    );
+    await createTestCommandRunner(command)
+        .run(const <String>['build', 'linux']);
     expect(fs.file('linux/flutter/generated_config').existsSync(), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
@@ -105,7 +107,9 @@ BINARY_NAME=fizz_bar
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+
 class MockProcess extends Mock implements Process {}
+
 class MockPlatform extends Mock implements Platform {
   @override
   Map<String, String> environment = <String, String>{

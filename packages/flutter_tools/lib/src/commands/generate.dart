@@ -22,21 +22,23 @@ class GenerateCommand extends FlutterCommand {
   bool get hidden => true;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{
+        DevelopmentArtifact.universal,
+      };
 
   @override
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
     final FlutterProject flutterProject = FlutterProject.current();
-    final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
+    final CodegenDaemon codegenDaemon =
+        await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
     await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
       if (codegenStatus == CodegenStatus.Failed) {
         throwToolExit('Code generation failed');
       }
-      if (codegenStatus ==CodegenStatus.Succeeded) {
+      if (codegenStatus == CodegenStatus.Succeeded) {
         break;
       }
     }

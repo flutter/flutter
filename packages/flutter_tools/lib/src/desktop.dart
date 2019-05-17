@@ -14,9 +14,11 @@ import 'version.dart';
 // Only launch or display desktop embedding devices if
 // `ENABLE_FLUTTER_DESKTOP` environment variable is set to true.
 bool get flutterDesktopEnabled {
-  _flutterDesktopEnabled ??= platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
+  _flutterDesktopEnabled ??=
+      platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
   return _flutterDesktopEnabled && !FlutterVersion.instance.isStable;
 }
+
 bool _flutterDesktopEnabled;
 
 /// Kills a process on linux or macOS.
@@ -25,7 +27,8 @@ Future<bool> killProcess(String executable) async {
   bool succeeded = true;
   try {
     final ProcessResult result = await processManager.run(<String>[
-      'ps', 'aux',
+      'ps',
+      'aux',
     ]);
     if (result.exitCode != 0) {
       return false;
@@ -41,7 +44,8 @@ Future<bool> killProcess(String executable) async {
       }
       final String pid = values[1];
       final ProcessResult killResult = await processManager.run(<String>[
-        'kill', pid,
+        'kill',
+        pid,
       ]);
       succeeded &= killResult.exitCode == 0;
     }
@@ -53,7 +57,8 @@ Future<bool> killProcess(String executable) async {
 }
 
 class DesktopLogReader extends DeviceLogReader {
-  final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
+  final StreamController<List<int>> _inputController =
+      StreamController<List<int>>.broadcast();
 
   void initializeProcess(Process process) {
     process.stdout.listen(_inputController.add);
@@ -66,8 +71,8 @@ class DesktopLogReader extends DeviceLogReader {
   @override
   Stream<String> get logLines {
     return _inputController.stream
-      .transform(utf8.decoder)
-      .transform(const LineSplitter());
+        .transform(utf8.decoder)
+        .transform(const LineSplitter());
   }
 
   @override

@@ -10,7 +10,7 @@ import '../project.dart';
 import '../runner/flutter_command.dart';
 
 class InjectPluginsCommand extends FlutterCommand {
-  InjectPluginsCommand({ this.hidden = false }) {
+  InjectPluginsCommand({this.hidden = false}) {
     requiresPubspecYaml();
   }
 
@@ -24,7 +24,8 @@ class InjectPluginsCommand extends FlutterCommand {
   final bool hidden;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{};
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -35,7 +36,8 @@ class InjectPluginsCommand extends FlutterCommand {
     if (result) {
       printStatus('GeneratedPluginRegistrants successfully written.');
     } else {
-      printStatus('This project does not use plugins, no GeneratedPluginRegistrants have been created.');
+      printStatus(
+          'This project does not use plugins, no GeneratedPluginRegistrants have been created.');
     }
 
     return null;

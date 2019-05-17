@@ -18,16 +18,17 @@ String getValueFromFile(String plistFilePath, String key) {
   // 'defaults' requires the path to be absolute and without the 'plist'
   // extension.
   const String executable = '/usr/bin/defaults';
-  if (!fs.isFileSync(executable))
-    return null;
-  if (!fs.isFileSync(plistFilePath))
-    return null;
+  if (!fs.isFileSync(executable)) return null;
+  if (!fs.isFileSync(plistFilePath)) return null;
 
-  final String normalizedPlistPath = fs.path.withoutExtension(fs.path.absolute(plistFilePath));
+  final String normalizedPlistPath =
+      fs.path.withoutExtension(fs.path.absolute(plistFilePath));
 
   try {
     final List<String> args = <String>[
-      executable, 'read', normalizedPlistPath,
+      executable,
+      'read',
+      normalizedPlistPath,
     ];
     if (key != null && key.isNotEmpty) {
       args.add(key);

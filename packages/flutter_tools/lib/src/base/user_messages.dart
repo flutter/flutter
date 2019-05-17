@@ -9,7 +9,8 @@ UserMessages get userMessages => context.get<UserMessages>();
 /// Class containing message strings that can be produced by Flutter tools.
 class UserMessages {
   // Messages used in FlutterValidator
-  String flutterStatusInfo(String channel, String version, String os, String locale) =>
+  String flutterStatusInfo(
+          String channel, String version, String os, String locale) =>
       'Channel $channel, v$version, on $os, locale $locale';
   String flutterVersion(String version, String flutterRoot) =>
       'Flutter version $version at $flutterRoot';
@@ -27,7 +28,8 @@ class UserMessages {
 
   // Messages used in NoIdeValidator
   String get noIdeStatusInfo => 'No supported IDEs installed';
-  String get noIdeInstallationInfo => 'IntelliJ - https://www.jetbrains.com/idea/';
+  String get noIdeInstallationInfo =>
+      'IntelliJ - https://www.jetbrains.com/idea/';
 
   // Messages used in IntellijValidator
   String intellijStatusInfo(String version) => 'version $version';
@@ -39,14 +41,16 @@ class UserMessages {
   String intellijLocation(String installPath) => 'IntelliJ at $installPath';
 
   // Message used in IntellijValidatorOnMac
-  String get intellijMacUnknownResult => 'Cannot determine if IntelliJ is installed';
+  String get intellijMacUnknownResult =>
+      'Cannot determine if IntelliJ is installed';
 
   // Messages used in DeviceValidator
   String get devicesMissing => 'No devices available';
   String devicesAvailable(int devices) => '$devices available';
 
   // Messages used in AndroidValidator
-  String androidCantRunJavaBinary(String javaBinary) => 'Cannot execute $javaBinary to determine the version';
+  String androidCantRunJavaBinary(String javaBinary) =>
+      'Cannot execute $javaBinary to determine the version';
   String get androidUnknownJavaVersion => 'Could not determine java version';
   String androidJavaVersion(String javaVersion) => 'Java version $javaVersion';
   String androidSdkLicenseOnly(String envKey) =>
@@ -74,7 +78,8 @@ class UserMessages {
   String get androidSdkInstallHelp =>
       'Try re-installing or updating your Android SDK,\n'
       'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String get androidMissingNdk => 'Android NDK location not configured (optional; useful for native profiling support)';
+  String get androidMissingNdk =>
+      'Android NDK location not configured (optional; useful for native profiling support)';
   String androidNdkLocation(String directory) => 'Android NDK at $directory';
   // Also occurs in AndroidLicenseValidator
   String androidStatusInfo(String version) => 'Android SDK version $version';
@@ -86,23 +91,26 @@ class UserMessages {
       'You can download the JDK from https://www.oracle.com/technetwork/java/javase/downloads/.';
   String androidJdkLocation(String location) => 'Java binary at: $location';
   String get androidLicensesAll => 'All Android licenses accepted.';
-  String get androidLicensesSome => 'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesNone => 'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
-  String get androidLicensesUnknown =>
-      'Android license status unknown.\n'
+  String get androidLicensesSome =>
+      'Some Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
+  String get androidLicensesNone =>
+      'Android licenses not accepted.  To resolve this, run: flutter doctor --android-licenses';
+  String get androidLicensesUnknown => 'Android license status unknown.\n'
       'Try re-installing or updating your Android SDK Manager.\n'
       'See https://developer.android.com/studio/#downloads or visit '
       'https://flutter.dev/setup/#android-setup for detailed instructions.';
   String androidSdkManagerOutdated(String managerPath) =>
       'A newer version of the Android SDK is required. To update, run:\n'
       '$managerPath --update\n';
-  String androidLicensesTimeout(String managerPath) => 'Intentionally killing $managerPath';
+  String androidLicensesTimeout(String managerPath) =>
+      'Intentionally killing $managerPath';
   String get androidSdkShort => 'Unable to locate Android SDK.';
   String androidMissingSdkManager(String sdkManagerPath) =>
       'Android sdkmanager tool not found ($sdkManagerPath).\n'
       'Try re-installing or updating your Android SDK,\n'
       'visit https://flutter.dev/setup/#android-setup for detailed instructions.';
-  String androidSdkBuildToolsOutdated(String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
+  String androidSdkBuildToolsOutdated(
+          String managerPath, int sdkMinVersion, String buildToolsMinVersion) =>
       'Flutter requires Android SDK $sdkMinVersion and the Android BuildTools $buildToolsMinVersion\n'
       'To update using sdkmanager, run:\n'
       '  "$managerPath" "platforms;android-$sdkMinVersion" "build-tools;$buildToolsMinVersion"\n'
@@ -110,8 +118,10 @@ class UserMessages {
 
   // Messages used in AndroidStudioValidator
   String androidStudioVersion(String version) => 'version $version';
-  String androidStudioLocation(String location) => 'Android Studio at $location';
-  String get androidStudioNeedsUpdate => 'Try updating or re-installing Android Studio.';
+  String androidStudioLocation(String location) =>
+      'Android Studio at $location';
+  String get androidStudioNeedsUpdate =>
+      'Try updating or re-installing Android Studio.';
   String get androidStudioResetDir =>
       'Consider removing your android-studio-dir setting by running:\n'
       'flutter config --android-studio-dir=';
@@ -131,7 +141,8 @@ class UserMessages {
   String iOSXcodeOutdated(int versionMajor, int versionMinor) =>
       'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.0.\n'
       'Download the latest version or update via the Mac App Store.';
-  String get iOSXcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
+  String get iOSXcodeEula =>
+      'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
   String get iOSXcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
       'Launch Xcode and install additional required components when prompted.';
@@ -174,8 +185,7 @@ class UserMessages {
   String iOSDeployOutdated(String minVersion) =>
       'ios-deploy out of date ($minVersion is required). To upgrade with Brew:\n'
       '  brew upgrade ios-deploy';
-  String get iOSDeployMissing =>
-      'ios-deploy not installed. To install:\n'
+  String get iOSDeployMissing => 'ios-deploy not installed. To install:\n'
       '  brew install ios-deploy';
   String get iOSBrewMissing =>
       'Brew can be used to install tools for iOS device development.\n'
@@ -194,12 +204,14 @@ class UserMessages {
       '$consequence\n'
       'To install:\n'
       '$installInstructions';
-  String cocoaPodsUnknownVersion(String consequence, String upgradeInstructions) =>
+  String cocoaPodsUnknownVersion(
+          String consequence, String upgradeInstructions) =>
       'Unknown CocoaPods version installed.\n'
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
-  String cocoaPodsOutdated(String recVersion, String consequence, String upgradeInstructions) =>
+  String cocoaPodsOutdated(
+          String recVersion, String consequence, String upgradeInstructions) =>
       'CocoaPods out of date ($recVersion is recommended).\n'
       '$consequence\n'
       'To upgrade:\n'
@@ -208,14 +220,17 @@ class UserMessages {
   // Messages used in VsCodeValidator
   String vsCodeVersion(String version) => 'version $version';
   String vsCodeLocation(String location) => 'VS Code at $location';
-  String vsCodeFlutterExtensionMissing(String url) => 'Flutter extension not installed; install from\n$url';
+  String vsCodeFlutterExtensionMissing(String url) =>
+      'Flutter extension not installed; install from\n$url';
 
   // Messages used in FlutterCommand
-  String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
+  String flutterElapsedTime(String name, String elapsedTime) =>
+      '"flutter $name" took $elapsedTime.';
   String get flutterNoDevelopmentDevice =>
       "Unable to locate a development device; please run 'flutter doctor' "
       'for information about installing additional components.';
-  String flutterNoMatchingDevice(String deviceId) => 'No devices found with name or id '
+  String flutterNoMatchingDevice(String deviceId) =>
+      'No devices found with name or id '
       "matching '$deviceId'";
   String get flutterNoDevicesFound => 'No devices found';
   String get flutterNoSupportedDevices => 'No supported devices connected.';
@@ -228,8 +243,7 @@ class UserMessages {
       'More than one device connected; please specify a device with '
       "the '-d <deviceId>' flag.";
   String get flutterNoConnectedDevices => 'No connected devices.';
-  String get flutterNoPubspec =>
-      'Error: No pubspec.yaml file found.\n'
+  String get flutterNoPubspec => 'Error: No pubspec.yaml file found.\n'
       'This command should be run from the root of your Flutter project.\n'
       'Do not run this command from the root of your git clone of Flutter.';
   String get flutterMergeYamlFiles =>
@@ -246,10 +260,14 @@ class UserMessages {
       'For an example of what a new-style pubspec.yaml file might look like,\n'
       'check out the Flutter Gallery pubspec.yaml:\n'
       'https://github.com/flutter/flutter/blob/master/examples/flutter_gallery/pubspec.yaml\n';
-  String flutterTargetFileMissing(String path) => 'Target file "$path" not found.';
-  String get flutterBasePatchFlagsExclusive => 'Error: Only one of --baseline, --patch is allowed.';
-  String get flutterBaselineRequiresTraceFile => 'Error: --baseline requires --compilation-trace-file to be specified.';
-  String get flutterPatchRequiresTraceFile => 'Error: --patch requires --compilation-trace-file to be specified.';
+  String flutterTargetFileMissing(String path) =>
+      'Target file "$path" not found.';
+  String get flutterBasePatchFlagsExclusive =>
+      'Error: Only one of --baseline, --patch is allowed.';
+  String get flutterBaselineRequiresTraceFile =>
+      'Error: --baseline requires --compilation-trace-file to be specified.';
+  String get flutterPatchRequiresTraceFile =>
+      'Error: --patch requires --compilation-trace-file to be specified.';
 
   // Messages used in FlutterCommandRunner
   String runnerNoRoot(String error) => 'Unable to locate flutter root: $error';

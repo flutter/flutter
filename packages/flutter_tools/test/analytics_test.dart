@@ -29,7 +29,8 @@ void main() {
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
+      tempDir = fs.systemTempDirectory
+          .createTempSync('flutter_tools_analytics_test.');
     });
 
     tearDown(() {
@@ -52,7 +53,7 @@ void main() {
       count = 0;
       flutterUsage.enabled = false;
       final DoctorCommand doctorCommand = DoctorCommand();
-      final CommandRunner<void>runner = createTestCommandRunner(doctorCommand);
+      final CommandRunner<void> runner = createTestCommandRunner(doctorCommand);
       await runner.run(<String>['doctor']);
       expect(count, 0);
     }, overrides: <Type, Generator>{
@@ -91,14 +92,14 @@ void main() {
       when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = MockClock();
       mockDoctor = MockDoctor();
-      when(mockClock.now()).thenAnswer(
-        (Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0))
-      );
+      when(mockClock.now()).thenAnswer((Invocation _) =>
+          DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
     });
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => true);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false))
+          .thenAnswer((_) async => true);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -106,8 +107,15 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success'],
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label')))
+            .captured,
+        <dynamic>[
+          'flutter',
+          'doctor',
+          const Duration(milliseconds: 1000),
+          'success'
+        ],
       );
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,
@@ -117,7 +125,8 @@ void main() {
 
     testUsingContext('doctor fail sends warning', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false))
+          .thenAnswer((_) async => false);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -125,8 +134,15 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning'],
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny,
+                label: captureAnyNamed('label')))
+            .captured,
+        <dynamic>[
+          'flutter',
+          'doctor',
+          const Duration(milliseconds: 1000),
+          'warning'
+        ],
       );
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,
@@ -154,7 +170,8 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
+      tempDir = fs.systemTempDirectory
+          .createTempSync('flutter_tools_analytics_bots_test.');
     });
 
     tearDown(() {
@@ -169,10 +186,10 @@ void main() {
       expect(count, 0);
     }, overrides: <Type, Generator>{
       Usage: () => Usage(
-        settingsName: 'flutter_bot_test',
-        versionOverride: 'dev/unknown',
-        configDirOverride: tempDir.path,
-      ),
+            settingsName: 'flutter_bot_test',
+            versionOverride: 'dev/unknown',
+            configDirOverride: tempDir.path,
+          ),
     });
 
     testUsingContext('don\'t send on bots even when opted in', () async {
@@ -184,10 +201,10 @@ void main() {
       expect(count, 0);
     }, overrides: <Type, Generator>{
       Usage: () => Usage(
-        settingsName: 'flutter_bot_test',
-        versionOverride: 'dev/unknown',
-        configDirOverride: tempDir.path,
-      ),
+            settingsName: 'flutter_bot_test',
+            versionOverride: 'dev/unknown',
+            configDirOverride: tempDir.path,
+          ),
     });
   });
 }

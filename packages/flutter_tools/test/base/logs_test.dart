@@ -15,7 +15,8 @@ void main() {
       final LogsCommand command = LogsCommand();
       applyMocksToCommand(command);
       try {
-        await createTestCommandRunner(command).run(<String>['-d', 'abc123', 'logs']);
+        await createTestCommandRunner(command)
+            .run(<String>['-d', 'abc123', 'logs']);
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);

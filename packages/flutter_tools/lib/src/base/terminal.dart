@@ -31,9 +31,10 @@ enum TerminalColor {
 
 final OutputPreferences _kOutputPreferences = OutputPreferences();
 
-OutputPreferences get outputPreferences => (context == null || context.get<OutputPreferences>() == null)
-    ? _kOutputPreferences
-    : context.get<OutputPreferences>();
+OutputPreferences get outputPreferences =>
+    (context == null || context.get<OutputPreferences>() == null)
+        ? _kOutputPreferences
+        : context.get<OutputPreferences>();
 
 /// A class that contains the context settings for command text output to the
 /// console.
@@ -42,9 +43,10 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  }) : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
-       _overrideWrapColumn = wrapColumn,
-       showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
+  })  : wrapText =
+            wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
+        _overrideWrapColumn = wrapColumn,
+        showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
@@ -65,8 +67,10 @@ class OutputPreferences {
   /// default of 100. It will be ignored if [wrapText] is false.
   final int _overrideWrapColumn;
   int get wrapColumn {
-    return  _overrideWrapColumn ?? io.stdio?.terminalColumns
-      ?? const io.Stdio().terminalColumns ?? kDefaultTerminalColumns;
+    return _overrideWrapColumn ??
+        io.stdio?.terminalColumns ??
+        const io.Stdio().terminalColumns ??
+        kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output
@@ -108,12 +112,12 @@ class AnsiTerminal {
   static String colorCode(TerminalColor color) => _colorMap[color];
 
   bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
-  final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
+  final RegExp _boldControls =
+      RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   String bolden(String message) {
     assert(message != null);
-    if (!supportsColor || message.isEmpty)
-      return message;
+    if (!supportsColor || message.isEmpty) return message;
     final StringBuffer buffer = StringBuffer();
     for (String line in message.split('\n')) {
       // If there were bolds or resetBolds in the string before, then nuke them:
@@ -131,8 +135,7 @@ class AnsiTerminal {
 
   String color(String message, TerminalColor color) {
     assert(message != null);
-    if (!supportsColor || color == null || message.isEmpty)
-      return message;
+    if (!supportsColor || color == null || message.isEmpty) return message;
     final StringBuffer buffer = StringBuffer();
     final String colorCodes = _colorMap[color];
     for (String line in message.split('\n')) {
@@ -171,7 +174,9 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes {
-    _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    _broadcastStdInString ??= io.stdin
+        .transform<String>(const AsciiDecoder(allowInvalid: true))
+        .asBroadcastStream();
     return _broadcastStdInString;
   }
 
@@ -198,14 +203,18 @@ class AnsiTerminal {
     assert(displayAcceptedCharacters != null);
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
-      assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
+      assert(defaultChoiceIndex >= 0 &&
+          defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.from(charactersToDisplay);
-      charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
+      charactersToDisplay[defaultChoiceIndex] =
+          bolden(charactersToDisplay[defaultChoiceIndex]);
       acceptedCharacters.add('\n');
     }
     String choice;
     singleCharMode = true;
-    while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
+    while (choice == null ||
+        choice.length > 1 ||
+        !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
         printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters)

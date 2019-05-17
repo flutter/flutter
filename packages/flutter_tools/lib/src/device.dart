@@ -29,40 +29,45 @@ DeviceManager get deviceManager => context.get<DeviceManager>();
 
 /// A class to get all available devices.
 class DeviceManager {
-
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
-  final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-    AndroidDevices(),
-    IOSDevices(),
-    IOSSimulators(),
-    FuchsiaDevices(),
-    FlutterTesterDevices(),
-  ] + _conditionalDesktopDevices + _conditionalWebDevices);
+  final List<DeviceDiscovery> _deviceDiscoverers =
+      List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
+            AndroidDevices(),
+            IOSDevices(),
+            IOSSimulators(),
+            FuchsiaDevices(),
+            FlutterTesterDevices(),
+          ] +
+          _conditionalDesktopDevices +
+          _conditionalWebDevices);
 
   /// Only add desktop devices if the flag is enabled.
   static List<DeviceDiscovery> get _conditionalDesktopDevices {
-    return flutterDesktopEnabled ? <DeviceDiscovery>[
-      MacOSDevices(),
-      LinuxDevices(),
-      WindowsDevices(),
-    ] : <DeviceDiscovery>[];
+    return flutterDesktopEnabled
+        ? <DeviceDiscovery>[
+            MacOSDevices(),
+            LinuxDevices(),
+            WindowsDevices(),
+          ]
+        : <DeviceDiscovery>[];
   }
 
   /// Only add web devices if the flag is enabled.
   static List<DeviceDiscovery> get _conditionalWebDevices {
-    return flutterWebEnabled ? <DeviceDiscovery>[
-      WebDevices(),
-    ] : <DeviceDiscovery>[];
+    return flutterWebEnabled
+        ? <DeviceDiscovery>[
+            WebDevices(),
+          ]
+        : <DeviceDiscovery>[];
   }
 
   String _specifiedDeviceId;
 
   /// A user-specified device ID.
   String get specifiedDeviceId {
-    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all')
-      return null;
+    if (_specifiedDeviceId == null || _specifiedDeviceId == 'all') return null;
     return _specifiedDeviceId;
   }
 
@@ -87,16 +92,15 @@ class DeviceManager {
         device.id.toLowerCase().startsWith(deviceId) ||
         device.name.toLowerCase().startsWith(deviceId);
 
-    final Device exactMatch = devices.firstWhere(
-        exactlyMatchesDeviceId, orElse: () => null);
+    final Device exactMatch =
+        devices.firstWhere(exactlyMatchesDeviceId, orElse: () => null);
     if (exactMatch != null) {
       yield exactMatch;
       return;
     }
 
     // Match on a id or name starting with [deviceId].
-    for (Device device in devices.where(startsWithDeviceId))
-      yield device;
+    for (Device device in devices.where(startsWithDeviceId)) yield device;
   }
 
   /// Return the list of connected devices, filtered by any user-specified device id.
@@ -107,7 +111,8 @@ class DeviceManager {
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
-    return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+    return deviceDiscoverers
+        .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
   /// Return the list of all connected devices.
@@ -121,7 +126,8 @@ class DeviceManager {
 
   /// Whether we're capable of listing any devices given the current environment configuration.
   bool get canListAnything {
-    return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
+    return _platformDiscoverers
+        .any((DeviceDiscovery discoverer) => discoverer.canListAnything);
   }
 
   /// Get diagnostics about issues with any connected devices.
@@ -146,7 +152,8 @@ abstract class DeviceDiscovery {
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
-  Future<List<String>> getDiagnostics() => Future<List<String>>.value(<String>[]);
+  Future<List<String>> getDiagnostics() =>
+      Future<List<String>>.value(<String>[]);
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -169,7 +176,8 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
       _poller = Poller(() async {
         try {
-          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
+          final List<Device> devices =
+              await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
           printTrace('Device poll timed out. Will retry.');
@@ -206,7 +214,6 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
-
   Device(this.id);
 
   final String id;
@@ -267,7 +274,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ ApplicationPackage app });
+  DeviceLogReader getLogReader({ApplicationPackage app});
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -315,17 +322,16 @@ abstract class Device {
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
 
-  Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) =>
+      Future<void>.error('unimplemented');
 
   @override
   int get hashCode => id.hashCode;
 
   @override
   bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other is! Device)
-      return false;
+    if (identical(this, other)) return true;
+    if (other is! Device) return false;
     return id == other.id;
   }
 
@@ -333,8 +339,7 @@ abstract class Device {
   String toString() => name;
 
   static Stream<String> descriptions(List<Device> devices) async* {
-    if (devices.isEmpty)
-      return;
+    if (devices.isEmpty) return;
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
@@ -342,7 +347,8 @@ abstract class Device {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type =
+            targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -354,15 +360,21 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
+    final List<int> indices =
+        List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
     for (List<String> row in table) {
-      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
+      widths = indices
+          .map<int>((int i) => math.max(widths[i], row[i].length))
+          .toList();
     }
 
     // Join columns into lines of text
     for (List<String> row in table) {
-      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
+      yield indices
+              .map<String>((int i) => row[i].padRight(widths[i]))
+              .join(' • ') +
+          ' • ${row.last}';
     }
   }
 
@@ -384,20 +396,20 @@ class DebuggingOptions {
     this.useTestFonts = false,
     this.verboseSystemLogs = false,
     this.observatoryPort,
-   }) : debuggingEnabled = true;
+  }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo)
-    : debuggingEnabled = false,
-      useTestFonts = false,
-      startPaused = false,
-      disableServiceAuthCodes = false,
-      enableSoftwareRendering = false,
-      skiaDeterministicRendering = false,
-      traceSkia = false,
-      traceSystrace = false,
-      dumpSkpOnShaderCompilation = false,
-      verboseSystemLogs = false,
-      observatoryPort = null;
+      : debuggingEnabled = false,
+        useTestFonts = false,
+        startPaused = false,
+        disableServiceAuthCodes = false,
+        enableSoftwareRendering = false,
+        skiaDeterministicRendering = false,
+        traceSkia = false,
+        traceSystrace = false,
+        dumpSkpOnShaderCompilation = false,
+        verboseSystemLogs = false,
+        observatoryPort = null;
 
   final bool debuggingEnabled;
 
@@ -417,10 +429,10 @@ class DebuggingOptions {
 }
 
 class LaunchResult {
-  LaunchResult.succeeded({ this.observatoryUri }) : started = true;
+  LaunchResult.succeeded({this.observatoryUri}) : started = true;
   LaunchResult.failed()
-    : started = false,
-      observatoryUri = null;
+      : started = false,
+        observatoryUri = null;
 
   bool get hasObservatory => observatoryUri != null;
 
@@ -430,8 +442,7 @@ class LaunchResult {
   @override
   String toString() {
     final StringBuffer buf = StringBuffer('started=$started');
-    if (observatoryUri != null)
-      buf.write(', observatory=$observatoryUri');
+    if (observatoryUri != null) buf.write(', observatory=$observatoryUri');
     return buf.toString();
   }
 }
@@ -457,7 +468,7 @@ abstract class DevicePortForwarder {
   /// Forward [hostPort] on the host to [devicePort] on the device.
   /// If [hostPort] is null or zero, will auto select a host port.
   /// Returns a Future that completes with the host port.
-  Future<int> forward(int devicePort, { int hostPort });
+  Future<int> forward(int devicePort, {int hostPort});
 
   /// Stops forwarding [forwardedPort].
   Future<void> unforward(ForwardedPort forwardedPort);
@@ -503,11 +514,11 @@ class NoOpDevicePortForwarder implements DevicePortForwarder {
   const NoOpDevicePortForwarder();
 
   @override
-  Future<int> forward(int devicePort, { int hostPort }) async => devicePort;
+  Future<int> forward(int devicePort, {int hostPort}) async => devicePort;
 
   @override
   List<ForwardedPort> get forwardedPorts => <ForwardedPort>[];
 
   @override
-  Future<void> unforward(ForwardedPort forwardedPort) async { }
+  Future<void> unforward(ForwardedPort forwardedPort) async {}
 }

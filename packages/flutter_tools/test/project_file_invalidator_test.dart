@@ -14,20 +14,25 @@ void main() {
     final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
     testUsingContext('Empty project', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(lastCompiled: DateTime.now(), urisToMonitor: <Uri>[], packagesPath: ''),
-        isEmpty);
+          ProjectFileInvalidator.findInvalidated(
+              lastCompiled: DateTime.now(),
+              urisToMonitor: <Uri>[],
+              packagesPath: ''),
+          isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
     });
 
     testUsingContext('Non-existent files are ignored', () async {
       expect(
-        ProjectFileInvalidator.findInvalidated(
+          ProjectFileInvalidator.findInvalidated(
             lastCompiled: DateTime.now(),
-            urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+            urisToMonitor: <Uri>[
+              Uri.parse('/not-there-anymore'),
+            ],
             packagesPath: '',
           ),
-        isEmpty);
+          isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
     });

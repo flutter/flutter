@@ -42,30 +42,36 @@ class DriveCommand extends RunCommandBase {
     requiresPubspecYaml();
 
     argParser
-      ..addFlag('keep-app-running',
+      ..addFlag(
+        'keep-app-running',
         defaultsTo: null,
         help: 'Will keep the Flutter application running when done testing.\n'
-              'By default, "flutter drive" stops the application after tests are finished, '
-              'and --keep-app-running overrides this. On the other hand, if --use-existing-app '
-              'is specified, then "flutter drive" instead defaults to leaving the application '
-              'running, and --no-keep-app-running overrides it.',
+            'By default, "flutter drive" stops the application after tests are finished, '
+            'and --keep-app-running overrides this. On the other hand, if --use-existing-app '
+            'is specified, then "flutter drive" instead defaults to leaving the application '
+            'running, and --no-keep-app-running overrides it.',
       )
-      ..addOption('use-existing-app',
-        help: 'Connect to an already running instance via the given observatory URL. '
-              'If this option is given, the application will not be automatically started, '
-              'and it will only be stopped if --no-keep-app-running is explicitly set.',
+      ..addOption(
+        'use-existing-app',
+        help:
+            'Connect to an already running instance via the given observatory URL. '
+            'If this option is given, the application will not be automatically started, '
+            'and it will only be stopped if --no-keep-app-running is explicitly set.',
         valueHelp: 'url',
       )
-      ..addOption('driver',
-        help: 'The test file to run on the host (as opposed to the target file to run on '
-              'the device).\n'
-              'By default, this file has the same base name as the target file, but in the '
-              '"test_driver/" directory instead, and with "_test" inserted just before the '
-              'extension, so e.g. if the target is "lib/main.dart", the driver will be '
-              '"test_driver/main_test.dart".',
+      ..addOption(
+        'driver',
+        help:
+            'The test file to run on the host (as opposed to the target file to run on '
+            'the device).\n'
+            'By default, this file has the same base name as the target file, but in the '
+            '"test_driver/" directory instead, and with "_test" inserted just before the '
+            'extension, so e.g. if the target is "lib/main.dart", the driver will be '
+            '"test_driver/main_test.dart".',
         valueHelp: 'path',
       )
-      ..addFlag('build',
+      ..addFlag(
+        'build',
         defaultsTo: true,
         help: 'Build the app before running.',
       );
@@ -75,7 +81,8 @@ class DriveCommand extends RunCommandBase {
   final String name = 'drive';
 
   @override
-  final String description = 'Runs Flutter Driver tests for the current project.';
+  final String description =
+      'Runs Flutter Driver tests for the current project.';
 
   @override
   final List<String> aliases = <String>['driver'];
@@ -91,12 +98,10 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String testFile = _getTestFile();
-    if (testFile == null)
-      throwToolExit(null);
+    if (testFile == null) throwToolExit(null);
 
     _device = await targetDeviceFinder();
-    if (device == null)
-      throwToolExit(null);
+    if (device == null) throwToolExit(null);
 
     if (await fs.type(testFile) != FileSystemEntityType.file)
       throwToolExit('Test file not found: $testFile');
@@ -108,16 +113,17 @@ class DriveCommand extends RunCommandBase {
       if (getBuildInfo().isRelease) {
         // This is because we need VM service to be able to drive the app.
         throwToolExit(
-          'Flutter Driver does not support running in release mode.\n'
-          '\n'
-          'Use --profile mode for testing application performance.\n'
-          'Use --debug (default) mode for testing correctness (with assertions).'
-        );
+            'Flutter Driver does not support running in release mode.\n'
+            '\n'
+            'Use --profile mode for testing application performance.\n'
+            'Use --debug (default) mode for testing correctness (with assertions).');
       }
 
       final LaunchResult result = await appStarter(this);
       if (result == null)
-        throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
+        throwToolExit(
+            'Application failed to start. Will not run test. Quitting.',
+            exitCode: 1);
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
@@ -129,11 +135,11 @@ class DriveCommand extends RunCommandBase {
     try {
       await testRunner(<String>[testFile], observatoryUri);
     } catch (error, stackTrace) {
-      if (error is ToolExit)
-        rethrow;
+      if (error is ToolExit) rethrow;
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
+      if (argResults['keep-app-running'] ??
+          (argResults['use-existing-app'] != null)) {
         printStatus('Leaving the application running.');
       } else {
         printStatus('Stopping application instance.');
@@ -145,8 +151,7 @@ class DriveCommand extends RunCommandBase {
   }
 
   String _getTestFile() {
-    if (argResults['driver'] != null)
-      return argResults['driver'];
+    if (argResults['driver'] != null) return argResults['driver'];
 
     // If the --driver argument wasn't provided, then derive the value from
     // the target file.
@@ -160,8 +165,7 @@ class DriveCommand extends RunCommandBase {
     if (!fs.path.isRelative(appFile)) {
       if (!fs.path.isWithin(packageDir, appFile)) {
         printError(
-          'Application file $appFile is outside the package directory $packageDir'
-        );
+            'Application file $appFile is outside the package directory $packageDir');
         return null;
       }
 
@@ -172,17 +176,16 @@ class DriveCommand extends RunCommandBase {
 
     if (parts.length < 2) {
       printError(
-        'Application file $appFile must reside in one of the sub-directories '
-        'of the package structure, not in the root directory.'
-      );
+          'Application file $appFile must reside in one of the sub-directories '
+          'of the package structure, not in the root directory.');
       return null;
     }
 
     // Look for the test file inside `test_driver/` matching the sub-path, e.g.
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
-    final String pathWithNoExtension = fs.path.withoutExtension(fs.path.joinAll(
-      <String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
+    final String pathWithNoExtension = fs.path.withoutExtension(fs.path
+        .joinAll(<String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
     return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
   }
 }
@@ -199,11 +202,13 @@ Future<Device> findTargetDevice() async {
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
-      printStatus("No devices found with name or id matching '${deviceManager.specifiedDeviceId}'");
+      printStatus(
+          "No devices found with name or id matching '${deviceManager.specifiedDeviceId}'");
       return null;
     }
     if (devices.length > 1) {
-      printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
+      printStatus(
+          "Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
       await Device.printDevices(devices);
       return null;
     }
@@ -256,11 +261,8 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   printTrace('Starting application.');
 
   // Forward device log messages to the terminal window running the "drive" command.
-  command._deviceLogSubscription = command
-      .device
-      .getLogReader(app: package)
-      .logLines
-      .listen(printStatus);
+  command._deviceLogSubscription =
+      command.device.getLogReader(app: package).logLines.listen(printStatus);
 
   final LaunchResult result = await command.device.startApp(
     package,
@@ -285,7 +287,8 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(
+    List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
@@ -294,7 +297,8 @@ void restoreTestRunner() {
 Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
-  PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
+  PackageMap.globalPackagesPath =
+      fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
     <String>[dartVmPath]
@@ -310,7 +314,6 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
     throwToolExit('Driver tests failed: $result', exitCode: result);
 }
 
-
 /// Stops the application.
 typedef AppStopper = Future<bool> Function(DriveCommand command);
 AppStopper appStopper = _stopApp;
@@ -320,7 +323,8 @@ void restoreAppStopper() {
 
 Future<bool> _stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
-  final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
+  final ApplicationPackage package = await command.applicationPackages
+      .getPackageForPlatform(await command.device.targetPlatform);
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;

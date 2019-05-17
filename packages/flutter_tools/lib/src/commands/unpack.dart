@@ -22,7 +22,8 @@ const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
 
 // TODO(jonahwilliams): this should come from a configuration in each build
 // directory.
-const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatform, List<String>>{
+const Map<TargetPlatform, List<String>> artifactFilesByPlatform =
+    <TargetPlatform, List<String>>{
   TargetPlatform.linux_x64: <String>[
     'libflutter_linux.so',
     'flutter_export.h',
@@ -80,7 +81,8 @@ class UnpackCommand extends FlutterCommand {
       fs.directory(targetDirectory).createSync(recursive: true);
     }
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetName);
-    final ArtifactUnpacker flutterArtifactFetcher = ArtifactUnpacker(targetPlatform);
+    final ArtifactUnpacker flutterArtifactFetcher =
+        ArtifactUnpacker(targetPlatform);
     bool success = true;
     if (artifacts is LocalEngineArtifacts) {
       final LocalEngineArtifacts localEngineArtifacts = artifacts;
@@ -210,8 +212,9 @@ class ArtifactUnpacker {
               fs.directory(targetPath),
             );
           } else {
-            fs.file(sourcePath)
-              .copySync(fs.path.join(targetDirectory, entityName));
+            fs
+                .file(sourcePath)
+                .copySync(fs.path.join(targetDirectory, entityName));
           }
         }
       }

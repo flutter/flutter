@@ -73,17 +73,19 @@ Future<void> run(List<String> args) async {
 
   final List<Future<void>> calls = <Future<void>>[];
   assets.entries.forEach((String fileName, DevFSContent content) {
-    final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
+    final libfs.File outputFile =
+        libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
     calls.add(writeFile(outputFile, content));
   });
   await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
-  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan,
+      argResults[_kOptionComponentName]);
 }
 
-Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
-
+Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase,
+    String fileDest, String componentName) async {
   final libfs.File destFile = libfs.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();

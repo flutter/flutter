@@ -16,7 +16,8 @@ import '../project.dart';
 /// Builds the macOS project through xcode build.
 // TODO(jonahwilliams): support target option.
 // TODO(jonahwilliams): refactor to share code with the existing iOS code.
-Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) async {
+Future<void> buildMacOS(
+    FlutterProject flutterProject, BuildInfo buildInfo) async {
   final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
@@ -38,10 +39,14 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    '-project', flutterProject.macos.xcodeProjectFile.path,
-    '-configuration', '$config',
-    '-scheme', 'Runner',
-    '-derivedDataPath', flutterBuildDir.absolute.path,
+    '-project',
+    flutterProject.macos.xcodeProjectFile.path,
+    '-configuration',
+    '$config',
+    '-scheme',
+    'Runner',
+    '-derivedDataPath',
+    flutterBuildDir.absolute.path,
     'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
     'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
   ], runInShell: true);
@@ -52,13 +57,13 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
   int result;
   try {
     process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printError);
     process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printTrace);
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .listen(printTrace);
     result = await process.exitCode;
   } finally {
     status.cancel();

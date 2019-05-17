@@ -20,7 +20,8 @@ class EmulatorsCommand extends FlutterCommand {
         help: 'Creates a new Android emulator based on a Pixel device.',
         negatable: false);
     argParser.addOption('name',
-        help: 'Used with flag --create. Specifies a name for the emulator being created.');
+        help:
+            'Used with flag --create. Specifies a name for the emulator being created.');
   }
 
   @override
@@ -37,7 +38,7 @@ class EmulatorsCommand extends FlutterCommand {
     if (doctor.workflows.every((Workflow w) => !w.canListEmulators)) {
       throwToolExit(
           'Unable to find any emulator sources. Please ensure you have some\n'
-              'Android AVD images ' +
+                  'Android AVD images ' +
               (platform.isMacOS ? 'or an iOS Simulator ' : '') +
               'available.',
           exitCode: 1);
@@ -72,8 +73,7 @@ class EmulatorsCommand extends FlutterCommand {
     } else {
       try {
         await emulators.first.launch();
-      }
-      catch (e) {
+      } catch (e) {
         if (e is String) {
           printError(e);
         } else {
@@ -83,14 +83,16 @@ class EmulatorsCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _createEmulator({ String name }) async {
+  Future<void> _createEmulator({String name}) async {
     final CreateEmulatorResult createResult =
         await emulatorManager.createEmulator(name: name);
 
     if (createResult.success) {
-      printStatus("Emulator '${createResult.emulatorName}' created successfully.");
+      printStatus(
+          "Emulator '${createResult.emulatorName}' created successfully.");
     } else {
-      printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
+      printStatus(
+          "Failed to create emulator '${createResult.emulatorName}'.\n");
       printStatus(createResult.error.trim());
       _printAdditionalInfo();
     }
@@ -137,7 +139,8 @@ class EmulatorsCommand extends FlutterCommand {
     }
     // TODO(dantup): Update this link to flutter.dev if/when we have a better page.
     // That page can then link out to these places if required.
-    printStatus('You can find more information on managing emulators at the links below:\n'
+    printStatus(
+        'You can find more information on managing emulators at the links below:\n'
         '  https://developer.android.com/studio/run/managing-avds\n'
         '  https://developer.android.com/studio/command-line/avdmanager');
   }

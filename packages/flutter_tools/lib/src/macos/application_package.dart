@@ -31,7 +31,8 @@ abstract class MacOSApp extends ApplicationPackage {
   /// which is expected to start the application and send the observatory
   /// port over stdout.
   factory MacOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final _ExecutableAndId executableAndId = _executableFromBundle(applicationBinary);
+    final _ExecutableAndId executableAndId =
+        _executableFromBundle(applicationBinary);
     final Directory applicationBundle = fs.directory(applicationBinary);
     return PrebuiltMacOSApp(
       bundleDir: applicationBundle,
@@ -60,18 +61,23 @@ abstract class MacOSApp extends ApplicationPackage {
       printError('Folder "${applicationBundle.path}" is not an app bundle.');
       return null;
     }
-    final String plistPath = fs.path.join(bundleDir.path, 'Contents', 'Info.plist');
+    final String plistPath =
+        fs.path.join(bundleDir.path, 'Contents', 'Info.plist');
     if (!fs.file(plistPath).existsSync()) {
       printError('Invalid prebuilt macOS app. Does not contain Info.plist.');
       return null;
     }
-    final String id = plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
-    final String executableName = plist.getValueFromFile(plistPath, plist.kCFBundleExecutable);
+    final String id =
+        plist.getValueFromFile(plistPath, plist.kCFBundleIdentifierKey);
+    final String executableName =
+        plist.getValueFromFile(plistPath, plist.kCFBundleExecutable);
     if (id == null) {
-      printError('Invalid prebuilt macOS app. Info.plist does not contain bundle identifier');
+      printError(
+          'Invalid prebuilt macOS app. Info.plist does not contain bundle identifier');
       return null;
     }
-    final String executable = fs.path.join(bundleDir.path, 'Contents', 'MacOS', executableName);
+    final String executable =
+        fs.path.join(bundleDir.path, 'Contents', 'MacOS', executableName);
     if (!fs.file(executable).existsSync()) {
       printError('Could not find macOS binary at $executable');
     }
@@ -92,8 +98,8 @@ class PrebuiltMacOSApp extends MacOSApp {
     @required this.bundleName,
     @required this.projectBundleId,
     @required String executable,
-  }) : _executable = executable,
-       super(projectBundleId: projectBundleId);
+  })  : _executable = executable,
+        super(projectBundleId: projectBundleId);
 
   final Directory bundleDir;
   final String bundleName;
@@ -123,7 +129,8 @@ class BuildableMacOSApp extends MacOSApp {
   String applicationBundle(BuildMode buildMode) {
     final File appBundleNameFile = project.nameFile;
     if (!appBundleNameFile.existsSync()) {
-      printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
+      printError(
+          'Unable to find app name. ${appBundleNameFile.path} does not exist');
       return null;
     }
     return fs.path.join(
@@ -140,7 +147,8 @@ class BuildableMacOSApp extends MacOSApp {
     if (directory == null) {
       return null;
     }
-    final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
+    final _ExecutableAndId executableAndId =
+        MacOSApp._executableFromBundle(fs.directory(directory));
     return executableAndId.executable;
   }
 }

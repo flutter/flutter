@@ -70,18 +70,23 @@ void main() {
       await evaluateComplexExpressions(_flutter);
     });
 
-    test('can evaluate expressions returning complex objects in top level function', () async {
+    test(
+        'can evaluate expressions returning complex objects in top level function',
+        () async {
       await _flutter.run(withDebugger: true);
       await breakInTopLevelFunction(_flutter);
       await evaluateComplexReturningExpressions(_flutter);
     });
 
-    test('can evaluate expressions returning complex objects in build method', () async {
+    test('can evaluate expressions returning complex objects in build method',
+        () async {
       await _flutter.run(withDebugger: true);
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions(_flutter);
     });
-  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  },
+      timeout: const Timeout.factor(
+          10)); // The DevFS sync takes a really long time, so these tests can be slow.
 
   group('flutter test expression evaluation', () {
     Directory tempDir;
@@ -102,7 +107,8 @@ void main() {
     test('can evaluate trivial expressions in a test', () async {
       await _flutter.test(
         withDebugger: true,
-        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+        beforeStart: () => _flutter.addBreakpoint(
+            _project.breakpointUri, _project.breakpointLine),
       );
       await _flutter.waitForPause();
       await evaluateTrivialExpressions(_flutter);
@@ -111,49 +117,64 @@ void main() {
     test('can evaluate complex expressions in a test', () async {
       await _flutter.test(
         withDebugger: true,
-        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+        beforeStart: () => _flutter.addBreakpoint(
+            _project.breakpointUri, _project.breakpointLine),
       );
       await _flutter.waitForPause();
       await evaluateComplexExpressions(_flutter);
     });
 
-    test('can evaluate expressions returning complex objects in a test', () async {
+    test('can evaluate expressions returning complex objects in a test',
+        () async {
       await _flutter.test(
         withDebugger: true,
-        beforeStart: () => _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine),
+        beforeStart: () => _flutter.addBreakpoint(
+            _project.breakpointUri, _project.breakpointLine),
       );
       await _flutter.waitForPause();
       await evaluateComplexReturningExpressions(_flutter);
     });
     // Skipped due to https://github.com/flutter/flutter/issues/26518
-  }, timeout: const Timeout.factor(10), skip: true); // The DevFS sync takes a really long time, so these tests can be slow.
+  },
+      timeout: const Timeout.factor(10),
+      skip:
+          true); // The DevFS sync takes a really long time, so these tests can be slow.
 }
 
 Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
   InstanceRef res;
 
   res = await flutter.evaluateInFrame('"test"');
-  expect(res.kind == InstanceKind.kString && res.valueAsString == 'test', isTrue);
+  expect(
+      res.kind == InstanceKind.kString && res.valueAsString == 'test', isTrue);
 
   res = await flutter.evaluateInFrame('1');
-  expect(res.kind == InstanceKind.kInt && res.valueAsString == 1.toString(), isTrue);
+  expect(res.kind == InstanceKind.kInt && res.valueAsString == 1.toString(),
+      isTrue);
 
   res = await flutter.evaluateInFrame('true');
-  expect(res.kind == InstanceKind.kBool && res.valueAsString == true.toString(), isTrue);
+  expect(res.kind == InstanceKind.kBool && res.valueAsString == true.toString(),
+      isTrue);
 }
 
 Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
-  final InstanceRef res = await flutter.evaluateInFrame('new DateTime.now().year');
-  expect(res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
+  final InstanceRef res =
+      await flutter.evaluateInFrame('new DateTime.now().year');
+  expect(
+      res.kind == InstanceKind.kInt &&
+          res.valueAsString == DateTime.now().year.toString(),
+      isTrue);
 }
 
-Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {
+Future<void> evaluateComplexReturningExpressions(
+    FlutterTestDriver flutter) async {
   final DateTime now = DateTime.now();
   final InstanceRef resp = await flutter.evaluateInFrame('new DateTime.now()');
   expect(resp.classRef.name, equals('DateTime'));
   // Ensure we got a reasonable approximation. The more accurate we try to
   // make this, the more likely it'll fail due to differences in the time
   // in the remote VM and the local VM at the time the code runs.
-  final InstanceRef res = await flutter.evaluate(resp.id, r'"$year-$month-$day"');
+  final InstanceRef res =
+      await flutter.evaluate(resp.id, r'"$year-$month-$day"');
   expect(res.valueAsString, equals('${now.year}-${now.month}-${now.day}'));
 }

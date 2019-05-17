@@ -12,11 +12,12 @@ import '../runner/flutter_command.dart';
 import '../version.dart';
 
 class ChannelCommand extends FlutterCommand {
-  ChannelCommand({ bool verboseHelp = false }) {
+  ChannelCommand({bool verboseHelp = false}) {
     argParser.addFlag(
       'all',
       abbr: 'a',
-      help: 'Include all the available branches (including local branches) when listing channels.',
+      help:
+          'Include all the available branches (including local branches) when listing channels.',
       defaultsTo: false,
       hide: !verboseHelp,
     );
@@ -32,7 +33,8 @@ class ChannelCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name [<channel-name>]';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{};
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -51,7 +53,7 @@ class ChannelCommand extends FlutterCommand {
     }
   }
 
-  Future<void> _listChannels({ bool showAll, bool verbose }) async {
+  Future<void> _listChannels({bool showAll, bool verbose}) async {
     // Beware: currentBranch could contain PII. See getBranchName().
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
@@ -65,18 +67,15 @@ class ChannelCommand extends FlutterCommand {
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
-        if (verbose)
-          rawOutput.add(line);
+        if (verbose) rawOutput.add(line);
         final List<String> split = line.split('/');
-        if (split.length < 2)
-          return null;
+        if (split.length < 2) return null;
         final String branchName = split[1];
         if (seenChannels.contains(branchName)) {
           return null;
         }
         seenChannels.add(branchName);
-        if (branchName == currentBranch)
-          return '* $branchName';
+        if (branchName == currentBranch) return '* $branchName';
         if (!branchName.startsWith('HEAD ') &&
             (showAll || FlutterVersion.officialChannels.contains(branchName)))
           return '  $branchName';
@@ -93,9 +92,11 @@ class ChannelCommand extends FlutterCommand {
     printStatus("Switching to flutter channel '$branchName'...");
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
-      printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
+      printStatus(
+          "This channel is obsolete. Consider switching to the '$alternative' channel instead.");
     } else if (!FlutterVersion.officialChannels.contains(branchName)) {
-      printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
+      printStatus(
+          'This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     return _checkout(branchName);
   }
@@ -119,7 +120,13 @@ class ChannelCommand extends FlutterCommand {
 
     if (result == 0) {
       result = await runCommandAndStreamOutput(
-        <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/$branchName'],
+        <String>[
+          'git',
+          'show-ref',
+          '--verify',
+          '--quiet',
+          'refs/heads/$branchName'
+        ],
         workingDirectory: Cache.flutterRoot,
         prefix: 'git: ',
       );
@@ -133,14 +140,22 @@ class ChannelCommand extends FlutterCommand {
       } else {
         // branch does not exist, we have to create it
         result = await runCommandAndStreamOutput(
-          <String>['git', 'checkout', '--track', '-b', branchName, 'origin/$branchName'],
+          <String>[
+            'git',
+            'checkout',
+            '--track',
+            '-b',
+            branchName,
+            'origin/$branchName'
+          ],
           workingDirectory: Cache.flutterRoot,
           prefix: 'git: ',
         );
       }
     }
     if (result != 0) {
-      throwToolExit('Switching channels failed with error code $result.', exitCode: result);
+      throwToolExit('Switching channels failed with error code $result.',
+          exitCode: result);
     } else {
       // Remove the version check stamp, since it could contain out-of-date
       // information that pertains to the previous channel.

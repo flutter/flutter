@@ -46,12 +46,14 @@ class AnalysisServer {
     // This callback hookup can't throw.
     unawaited(_process.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream =
-        _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    final Stream<String> errorStream = _process.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter());
     errorStream.listen(printError);
 
-    final Stream<String> inStream =
-        _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
+    final Stream<String> inStream = _process.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
@@ -154,7 +156,8 @@ enum _AnalysisSeverity {
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(this.json);
 
-  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
+  static final Map<String, _AnalysisSeverity> _severityMap =
+      <String, _AnalysisSeverity>{
     'INFO': _AnalysisSeverity.info,
     'WARNING': _AnalysisSeverity.warning,
     'ERROR': _AnalysisSeverity.error,
@@ -169,7 +172,7 @@ class AnalysisError implements Comparable<AnalysisError> {
 
   String get severity => json['severity'];
   String get colorSeverity {
-    switch(_severityLevel) {
+    switch (_severityLevel) {
       case _AnalysisSeverity.error:
         return terminal.color(severity, TerminalColor.red);
       case _AnalysisSeverity.warning:
@@ -180,7 +183,9 @@ class AnalysisError implements Comparable<AnalysisError> {
     }
     return null;
   }
-  _AnalysisSeverity get _severityLevel => _severityMap[severity] ?? _AnalysisSeverity.none;
+
+  _AnalysisSeverity get _severityLevel =>
+      _severityMap[severity] ?? _AnalysisSeverity.none;
   String get type => json['type'];
   String get message => json['message'];
   String get code => json['code'];
@@ -201,15 +206,12 @@ class AnalysisError implements Comparable<AnalysisError> {
   @override
   int compareTo(AnalysisError other) {
     // Sort in order of file path, error location, severity, and message.
-    if (file != other.file)
-      return file.compareTo(other.file);
+    if (file != other.file) return file.compareTo(other.file);
 
-    if (offset != other.offset)
-      return offset - other.offset;
+    if (offset != other.offset) return offset - other.offset;
 
     final int diff = other._severityLevel.index - _severityLevel.index;
-    if (diff != 0)
-      return diff;
+    if (diff != 0) return diff;
 
     return message.compareTo(other.message);
   }

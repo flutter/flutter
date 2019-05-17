@@ -19,9 +19,12 @@ Platform linuxPlatform() {
 
 void main() {
   group('NoAndroidStudioValidator', () {
-    testUsingContext('shows Android Studio as "not available" when not available.', () async {
+    testUsingContext(
+        'shows Android Studio as "not available" when not available.',
+        () async {
       final NoAndroidStudioValidator validator = NoAndroidStudioValidator();
-      expect((await validator.validate()).type, equals(ValidationType.notAvailable));
+      expect((await validator.validate()).type,
+          equals(ValidationType.notAvailable));
     }, overrides: <Type, Generator>{
       // Custom home paths are not supported on macOS nor Windows yet,
       // so we force the platform to fake Linux here.

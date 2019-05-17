@@ -17,8 +17,7 @@ Flags get flags => context.get<Flags>();
 /// the Flutter tool (immediately after the arguments have been parsed in
 /// [FlutterCommandRunner]) and is available via the [flags] global property.
 class Flags {
-  Flags(this._globalResults)
-    : assert(_globalResults != null);
+  Flags(this._globalResults) : assert(_globalResults != null);
 
   final ArgResults _globalResults;
 
@@ -38,8 +37,7 @@ class Flags {
     final Iterable<String> options = commandResults?.options;
     if (options != null && options.contains(key))
       return commandResults[key];
-    else if (_globalResults.options.contains(key))
-      return _globalResults[key];
+    else if (_globalResults.options.contains(key)) return _globalResults[key];
     return null;
   }
 
@@ -48,7 +46,8 @@ class Flags {
   bool contains(String key) {
     final ArgResults commandResults = _globalResults.command;
     final Iterable<String> options = commandResults?.options;
-    return (options != null && options.contains(key)) || _globalResults.options.contains(key);
+    return (options != null && options.contains(key)) ||
+        _globalResults.options.contains(key);
   }
 }
 

@@ -114,12 +114,11 @@ class FuchsiaArtifacts {
     return FuchsiaArtifacts(
       sshConfig: sshConfig,
       devFinder: fs.file(fs.path.join(tools, 'dev_finder')),
-      platformKernelDill: fs.file(fs.path.join(
-          dartPrebuilts, 'flutter_runner', 'platform_strong.dill')),
-      flutterPatchedSdk: fs.file(fs.path.join(
-          dartPrebuilts, 'flutter_runner')),
-      kernelCompiler: fs.file(fs.path.join(
-          dartPrebuilts, 'kernel_compiler.snapshot')),
+      platformKernelDill: fs.file(fs.path
+          .join(dartPrebuilts, 'flutter_runner', 'platform_strong.dill')),
+      flutterPatchedSdk: fs.file(fs.path.join(dartPrebuilts, 'flutter_runner')),
+      kernelCompiler:
+          fs.file(fs.path.join(dartPrebuilts, 'kernel_compiler.snapshot')),
       pm: fs.file(fs.path.join(tools, 'pm')),
     );
   }

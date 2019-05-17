@@ -43,13 +43,17 @@ CocoaPods get cocoaPods => context.get<CocoaPods>();
 enum CocoaPodsStatus {
   /// iOS plugins will not work, installation required.
   notInstalled,
+
   /// iOS plugins might not work, upgrade recommended.
   unknownVersion,
+
   /// iOS plugins will not work, upgrade required.
   belowMinimumVersion,
+
   /// iOS plugins may not work in certain situations (Swift, static libraries),
   /// upgrade recommended.
   belowRecommendedVersion,
+
   /// Everything should be fine.
   recommended,
 }
@@ -61,7 +65,8 @@ class CocoaPods {
   String get cocoaPodsRecommendedVersion => '1.5.0';
 
   Future<String> get cocoaPodsVersionText {
-    _versionText ??= runAsync(<String>['pod', '--version']).then<String>((RunResult result) {
+    _versionText ??=
+        runAsync(<String>['pod', '--version']).then<String>((RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
     }, onError: (dynamic _) => null);
     return _versionText;
@@ -69,12 +74,10 @@ class CocoaPods {
 
   Future<CocoaPodsStatus> get evaluateCocoaPodsInstallation async {
     final String versionText = await cocoaPodsVersionText;
-    if (versionText == null)
-      return CocoaPodsStatus.notInstalled;
+    if (versionText == null) return CocoaPodsStatus.notInstalled;
     try {
       final Version installedVersion = Version.parse(versionText);
-      if (installedVersion == null)
-        return CocoaPodsStatus.unknownVersion;
+      if (installedVersion == null) return CocoaPodsStatus.unknownVersion;
       if (installedVersion < Version.parse(cocoaPodsMinimumVersion))
         return CocoaPodsStatus.belowMinimumVersion;
       else if (installedVersion < Version.parse(cocoaPodsRecommendedVersion))
@@ -95,7 +98,8 @@ class CocoaPods {
   /// See https://github.com/CocoaPods/CocoaPods/blob/master/lib/cocoapods/config.rb#L138
   /// for details of this variable.
   Future<bool> get isCocoaPodsInitialized {
-    final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ?? fs.path.join(homeDirPath, '.cocoapods', 'repos');
+    final String cocoapodsReposDir = platform.environment['CP_REPOS_DIR'] ??
+        fs.path.join(homeDirPath, '.cocoapods', 'repos');
     return fs.isDirectory(fs.path.join(cocoapodsReposDir, 'master'));
   }
 
@@ -190,10 +194,12 @@ class CocoaPods {
     }
     final File podfile = iosProject.podfile;
     if (!podfile.existsSync()) {
-      final bool isSwift = xcodeProjectInterpreter.getBuildSettings(
-        runnerProject.path,
-        'Runner',
-      ).containsKey('SWIFT_VERSION');
+      final bool isSwift = xcodeProjectInterpreter
+          .getBuildSettings(
+            runnerProject.path,
+            'Runner',
+          )
+          .containsKey('SWIFT_VERSION');
       final File podfileTemplate = fs.file(fs.path.join(
         Cache.flutterRoot,
         'packages',
@@ -218,8 +224,8 @@ class CocoaPods {
     final File file = iosProject.xcodeConfigFor(mode);
     if (file.existsSync()) {
       final String content = file.readAsStringSync();
-      final String include = '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode
-          .toLowerCase()}.xcconfig"';
+      final String include =
+          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.${mode.toLowerCase()}.xcconfig"';
       if (!content.contains(include))
         file.writeAsStringSync('$include\n$content', flush: true);
     }
@@ -240,21 +246,26 @@ class CocoaPods {
   // 3. Pods/Manifest.lock doesn't exist (It is deleted when plugins change)
   // 4. Podfile.lock doesn't match Pods/Manifest.lock.
   bool _shouldRunPodInstall(IosProject iosProject, bool dependenciesChanged) {
-    if (dependenciesChanged)
-      return true;
+    if (dependenciesChanged) return true;
 
     final File podfileFile = iosProject.podfile;
     final File podfileLockFile = iosProject.podfileLock;
     final File manifestLockFile = iosProject.podManifestLock;
 
-    return !podfileLockFile.existsSync()
-        || !manifestLockFile.existsSync()
-        || podfileLockFile.statSync().modified.isBefore(podfileFile.statSync().modified)
-        || podfileLockFile.readAsStringSync() != manifestLockFile.readAsStringSync();
+    return !podfileLockFile.existsSync() ||
+        !manifestLockFile.existsSync() ||
+        podfileLockFile
+            .statSync()
+            .modified
+            .isBefore(podfileFile.statSync().modified) ||
+        podfileLockFile.readAsStringSync() !=
+            manifestLockFile.readAsStringSync();
   }
 
-  Future<void> _runPodInstall(IosProject iosProject, String engineDirectory) async {
-    final Status status = logger.startProgress('Running pod install...', timeout: timeoutConfiguration.slowOperation);
+  Future<void> _runPodInstall(
+      IosProject iosProject, String engineDirectory) async {
+    final Status status = logger.startProgress('Running pod install...',
+        timeout: timeoutConfiguration.slowOperation);
     final ProcessResult result = await processManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: iosProject.hostAppRoot.path,
@@ -285,7 +296,8 @@ class CocoaPods {
   }
 
   void _diagnosePodInstallFailure(ProcessResult result) {
-    if (result.stdout is String && result.stdout.contains('out-of-date source repos')) {
+    if (result.stdout is String &&
+        result.stdout.contains('out-of-date source repos')) {
       printError(
         "Error: CocoaPods's specs repository is too out-of-date to satisfy dependencies.\n"
         'To update the CocoaPods specs, run:\n'
