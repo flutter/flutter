@@ -57,20 +57,24 @@ class _HoverDemoState extends State<HoverDemo> {
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
-                RaisedButton(
-                  onPressed: () => print('Button pressed.'),
-                  child: const Text('Button'),
-                  focusColor: Colors.deepOrangeAccent,
-                ),
-                FlatButton(
-                  onPressed: () => print('Button pressed.'),
-                  child: const Text('Button'),
-                  focusColor: Colors.deepOrangeAccent,
-                ),
-                IconButton(
-                  onPressed: () => print('Button pressed'),
-                  icon: const Icon(Icons.access_alarm),
-                  focusColor: Colors.deepOrangeAccent,
+                Row(
+                  children: <Widget>[
+                    RaisedButton(
+                      onPressed: () => print('Button pressed.'),
+                      child: const Text('Button'),
+                      focusColor: Colors.deepOrangeAccent,
+                    ),
+                    FlatButton(
+                      onPressed: () => print('Button pressed.'),
+                      child: const Text('Button'),
+                      focusColor: Colors.deepOrangeAccent,
+                    ),
+                    IconButton(
+                      onPressed: () => print('Button pressed'),
+                      icon: const Icon(Icons.access_alarm),
+                      focusColor: Colors.deepOrangeAccent,
+                    ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
