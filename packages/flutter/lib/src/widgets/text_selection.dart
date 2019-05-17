@@ -1118,6 +1118,8 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
     // longpress.
     if (!_exceededLongpressDeadline) {
       acceptGesture(pointer);
+    } else {
+      super.rejectGesture(pointer);
     }
   }
 
