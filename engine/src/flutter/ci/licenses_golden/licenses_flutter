@@ -543,6 +543,7 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/Flutt
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterTextureView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/android/FlutterView.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEngine.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterEnginePluginRegistry.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterJNI.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/FlutterShellArgs.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/dart/DartExecutor.java
@@ -553,6 +554,15 @@ FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugin
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/activity/ActivityAware.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/activity/ActivityControlSurface.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/activity/ActivityPluginBinding.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverAware.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverControlSurface.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/broadcastreceiver/BroadcastReceiverPluginBinding.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/contentprovider/ContentProviderAware.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/contentprovider/ContentProviderControlSurface.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/contentprovider/ContentProviderPluginBinding.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServiceAware.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServiceControlSurface.java
+FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/plugins/service/ServicePluginBinding.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/FlutterRenderer.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/renderer/OnFirstFrameRenderedListener.java
 FILE: ../../../flutter/shell/platform/android/io/flutter/embedding/engine/systemchannels/AccessibilityChannel.java
