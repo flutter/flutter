@@ -15,11 +15,6 @@ import 'build_system.dart';
 
 /// Build definitions.
 
-/// An empty invocation for testing.
-Future<void> empty(List<FileSystemEntity> inputs, Environment environment) async {
-  throw UnsupportedError('Empty invocation.');
-}
-
 /// List all asset files in a project by parsing the asset manfiest.
 List<File> listAssets(Environment environment) {
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -65,8 +60,27 @@ const Target copyAssets = Target(
     listOutputAssets, // <- everything in this subdirectory.
   ],
   dependencies: <Target>[],
-  invocation: empty,
+  invocation: copyAssetsInvocation,
 );
+
+/// Copies the asset files from the [copyAssets] rule into place.
+Future<void> copyAssetsInvocation(List<FileSystemEntity> inputs, Environment environment) async {
+  final Directory output = environment.buildDir.childDirectory('flutter_assets');
+  if (!output.existsSync()) {
+    output.createSync(recursive: true);
+  }
+  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+  await assetBundle.build(
+    manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
+    packagesPath: environment.projectDir.childFile('.packages').path,
+  );
+  await Future.wait<void>(
+    assetBundle.entries.entries.map((MapEntry<String, DevFSContent> entry) async {
+      final File file = fs.file(fs.path.join(output.path, entry.key));
+      file.parent.createSync(recursive: true);
+      await file.writeAsBytes(await entry.value.contentsAsBytes());
+  }));
+}
 
 /// Supports compiling dart source to kernel with a subset of flags.
 Future<void> compileKernel(List<FileSystemEntity> inputs, Environment environment) async {

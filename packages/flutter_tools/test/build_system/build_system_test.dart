@@ -80,7 +80,7 @@ void main() {
       // Delete required input file.
       fs.file('foo.dart').deleteSync();
 
-      expect(buildSystem.build('foo', environment), throwsA(isInstanceOf<Exception>()));
+      expect(buildSystem.build('foo', environment), throwsA(isInstanceOf<AssertionError>()));
     }));
 
     test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
@@ -93,7 +93,7 @@ void main() {
       expect(stampContents['inputs'], <Object>[
         <Object>[
           contains('/foo.dart'),
-          fs.file('foo.dart').statSync().modified.millisecondsSinceEpoch,
+          '[212, 29, 140, 217, 143, 0, 178, 4, 233, 128, 9, 152, 236, 248, 66, 126]',
         ]
       ]);
       expect(stampContents['outputs'], <Object>['/build/out']);
@@ -110,8 +110,7 @@ void main() {
     test('Re-invoke build if input is modified', () => testbed.run(() async {
       await buildSystem.build('foo', environment);
 
-      fs.file('foo.dart').deleteSync();
-      fs.file('foo.dart').createSync();
+      fs.file('foo.dart').writeAsStringSync('new contents');
 
       await buildSystem.build('foo', environment);
       expect(fooInvocations, 2);

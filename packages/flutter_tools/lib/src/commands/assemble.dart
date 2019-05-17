@@ -32,8 +32,6 @@ class AssembleCommand extends FlutterCommand {
   }
 }
 
-TargetPlatform x;
-
 abstract class AssembleBase extends FlutterCommand {
   AssembleBase() {
     argParser.addOption(

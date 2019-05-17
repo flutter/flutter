@@ -321,20 +321,20 @@ class Target {
         // First, perform substituion of the environmental values and then
         // of the local values.
         rawInput = rawInput
-          .replaceAll('{PROJECT_DIR}', environment.projectDir.absolute.path)
-          .replaceAll('{BUILD_DIR}', environment.buildDir.absolute.path)
-          .replaceAll('{CACHE_DIR}', environment.cacheDir.absolute.path)
-          .replaceAll('{COPY_DIR}', environment.copyDir.absolute.path)
+          .replaceAll('{PROJECT_DIR}', environment.projectDir.absolute.uri.toString())
+          .replaceAll('{BUILD_DIR}', environment.buildDir.absolute.uri.toString())
+          .replaceAll('{CACHE_DIR}', environment.cacheDir.absolute.uri.toString())
+          .replaceAll('{COPY_DIR}', environment.copyDir.absolute.uri.toString())
           .replaceAll('{platform}', getNameForTargetPlatform(environment.targetPlatform))
           .replaceAll('{mode}', getNameForBuildMode(environment.buildMode));
-        // On windows, swap `/` to `\`.
-        if (platform.isWindows) {
-          rawInput = rawInput.replaceAll(r'/', r'\');
-        }
+        final String filePath = Uri.file(rawInput)
+          .toFilePath(windows: platform.isWindows)
+          .substring(5); // remove file:
+        print(fs.path.normalize(filePath));
         if (rawInput.endsWith(platform.pathSeparator)) {
-          files.add(fs.directory(fs.path.normalize(rawInput)));
+          files.add(fs.directory(fs.path.normalize(filePath)));
         } else {
-          files.add(fs.file(fs.path.normalize(rawInput)));
+          files.add(fs.file(fs.path.normalize(filePath)));
         }
       } else if (rawInput is InputFunction) {
         files.addAll(rawInput(environment));
