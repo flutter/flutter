@@ -736,6 +736,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   @override
   void dispose() {
     _timer?.cancel();
+    _chevronOpacityController?.dispose();
     _dayPickerController?.dispose();
     super.dispose();
   }
