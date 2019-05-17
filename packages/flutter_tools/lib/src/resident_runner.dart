@@ -1045,7 +1045,6 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
   switch (platform) {
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
-    case TargetPlatform.android_arm_all:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       final FlutterProject project = FlutterProject.current();

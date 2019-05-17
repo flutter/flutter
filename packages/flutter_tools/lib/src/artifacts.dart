@@ -123,7 +123,6 @@ class CachedArtifacts extends Artifacts {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
-      case TargetPlatform.android_arm_all:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         return _getAndroidArtifactPath(artifact, platform, mode);
@@ -240,7 +239,6 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.ios:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
-      case TargetPlatform.android_arm_all:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');

@@ -46,15 +46,15 @@ Future<void> main() async {
     section('Find Java');
 
     javaHome = await findJavaHome();
-    if (javaHome == null)
-      return TaskResult.failure('Could not find Java');
+    if (javaHome == null) return TaskResult.failure('Could not find Java');
     print('\nUsing JAVA_HOME=$javaHome');
 
     try {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
-        errorMessage = _validateDebugSnapshotDependency(project, 'build/app.dill');
+        errorMessage =
+            _validateDebugSnapshotDependency(project, 'build/app.dill');
 
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
@@ -70,39 +70,48 @@ Future<void> main() async {
         section('gradlew assembleRelease');
         await project.runGradleTask('assembleRelease');
 
-        final String androidArmSnapshotPath = path.join(
-            project.rootPath,
-            'build',
-            'app',
-            'intermediates',
-            'flutter',
-            'release',
-            'android-arm');
+        // When the platform-target isn't specified, we generate the snapshots for arm and arm64.
+        final List<String> targetPlatforms = <String>[
+          'android-arm',
+          'android-arm64'
+        ];
+        for (final String targetPlatform in targetPlatforms) {
+          final String androidArmSnapshotPath = path.join(
+              project.rootPath,
+              'build',
+              'app',
+              'intermediates',
+              'flutter',
+              'release',
+              targetPlatform);
 
-        final String isolateSnapshotData =
-            path.join(androidArmSnapshotPath, 'isolate_snapshot_data');
-        if (!File(isolateSnapshotData).existsSync()) {
-          throw TaskResult.failure(
-              'Snapshot doesn\'t exist: $isolateSnapshotData');
-        }
+          final String isolateSnapshotData =
+              path.join(androidArmSnapshotPath, 'isolate_snapshot_data');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $isolateSnapshotData');
+          }
 
-        final String isolateSnapshotInstr =
-            path.join(androidArmSnapshotPath, 'isolate_snapshot_instr');
-        if (!File(isolateSnapshotInstr).existsSync()) {
-          throw TaskResult.failure(
-              'Snapshot doesn\'t exist: $isolateSnapshotInstr');
-        }
+          final String isolateSnapshotInstr =
+              path.join(androidArmSnapshotPath, 'isolate_snapshot_instr');
+          if (!File(isolateSnapshotInstr).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $isolateSnapshotInstr');
+          }
 
-        final String vmSnapshotData =
-            path.join(androidArmSnapshotPath, 'vm_snapshot_data');
-        if (!File(isolateSnapshotData).existsSync()) {
-          throw TaskResult.failure('Snapshot doesn\'t exist: $vmSnapshotData');
-        }
+          final String vmSnapshotData =
+              path.join(androidArmSnapshotPath, 'vm_snapshot_data');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $vmSnapshotData');
+          }
 
-        final String vmSnapshotInstr =
-            path.join(androidArmSnapshotPath, 'vm_snapshot_instr');
-        if (!File(isolateSnapshotData).existsSync()) {
-          throw TaskResult.failure('Snapshot doesn\'t exist: $vmSnapshotInstr');
+          final String vmSnapshotInstr =
+              path.join(androidArmSnapshotPath, 'vm_snapshot_instr');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $vmSnapshotInstr');
+          }
         }
       });
 
@@ -308,8 +317,7 @@ Future<void> _runGradleTask(
     print('stderr:');
     print(result.stderr);
   }
-  if (result.exitCode != 0)
-    throw 'Gradle exited with error';
+  if (result.exitCode != 0) throw 'Gradle exited with error';
 }
 
 Future<ProcessResult> _resultOfGradleTask(
@@ -360,8 +368,15 @@ class _Dependencies {
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String _validateDebugSnapshotDependency(
     FlutterProject project, String expectedTarget) {
-  final _Dependencies deps = _Dependencies(path.join(project.rootPath, 'build',
-      'app', 'intermediates', 'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
+  final _Dependencies deps = _Dependencies(path.join(
+      project.rootPath,
+      'build',
+      'app',
+      'intermediates',
+      'flutter',
+      'debug',
+      'android-arm',
+      'snapshot_blob.bin.d'));
   return deps.target == expectedTarget
       ? null
       : 'Debug dependency file should have $expectedTarget as target. Instead has ${deps.target}';

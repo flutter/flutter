@@ -395,7 +395,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         Boolean buildSharedLibraryValue = this.getBuildShareLibrary(project)
-   
         String targetPlatformValue = this.getTargetPlatform(project)
 
         def addFlutterDeps = { variant ->
@@ -416,12 +415,10 @@ class FlutterPlugin implements Plugin<Project> {
             def targetPlatforms = []
 
             if (targetPlatformValue == null) {
-                targetPlatforms = ['android-arm']
-            } else if (targetPlatformValue == 'android-arm-all') {
                 if (flutterBuildMode == 'release') {
-                    targetPlatforms = allArmPlatforms
+                    targetPlatforms.addAll(allArmPlatforms)
                 } else {
-                    targetPlatforms = ['android-arm']
+                    targetPlatforms.add('android-arm')
                 }
             } else {
                 targetPlatforms.add(targetPlatformValue)
@@ -482,7 +479,9 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            if (flutterBuildMode == 'release' && targetPlatformValue == 'android-arm-all') {
+
+            // Include the snapshots and libflutter.so in `lib/`.
+            if (flutterBuildMode == 'release' && targetPlatformValue == null) {
                 project.dependencies {
                     String configuration;
                     if (project.getConfigurations().findByName("api")) {
@@ -512,7 +511,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.each { flutterTask -> 
                     with flutterTask.assets
                     // Include the snapshots in the assets directory.
-                    if (flutterBuildMode != 'release' || targetPlatformValue != 'android-arm-all') {
+                    if (flutterBuildMode != 'release' || targetPlatformValue != null) {
                         with flutterTask.snapshots
                     }
                 }
