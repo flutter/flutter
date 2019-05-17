@@ -90,7 +90,7 @@ import 'package:flutter/foundation.dart';
 ///                 onTap: () {
 ///                   FocusScope.of(context).requestFocus(_focusNode);
 ///                 },
-///                 child: Text('Tap to focus'),
+///                 child: const Text('Tap to focus'),
 ///               );
 ///             }
 ///             return Text(_message ?? 'Press a key');
@@ -283,11 +283,6 @@ class LogicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey turbo = LogicalKeyboardKey(0x00100000016, debugName: kReleaseMode ? null : 'Turbo');
 
-  /// Represents the logical "Launch Assistant" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey launchAssistant = LogicalKeyboardKey(0x00100000017, debugName: kReleaseMode ? null : 'Launch Assistant');
-
   /// Represents the logical "Sleep" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -297,6 +292,11 @@ class LogicalKeyboardKey extends Diagnosticable {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey wakeUp = LogicalKeyboardKey(0x00100010083, debugName: kReleaseMode ? null : 'Wake Up');
+
+  /// Represents the logical "Display Toggle Int Ext" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey displayToggleIntExt = LogicalKeyboardKey(0x001000100b5, debugName: kReleaseMode ? null : 'Display Toggle Int Ext');
 
   /// Represents the logical "Usb Reserved" key on the keyboard.
   ///
@@ -1303,6 +1303,11 @@ class LogicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey launchScreenSaver = LogicalKeyboardKey(0x001000c01b1, debugName: kReleaseMode ? null : 'Launch Screen Saver');
 
+  /// Represents the logical "Launch Assistant" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey launchAssistant = LogicalKeyboardKey(0x001000c01cb, debugName: kReleaseMode ? null : 'Launch Assistant');
+
   /// Represents the logical "Launch Audio Browser" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1398,6 +1403,11 @@ class LogicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mailSend = LogicalKeyboardKey(0x001000c028c, debugName: kReleaseMode ? null : 'Mail Send');
 
+  /// Represents the logical "Show All Windows" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey showAllWindows = LogicalKeyboardKey(0x001000c029f, debugName: kReleaseMode ? null : 'Show All Windows');
+
   // A list of all predefined constant LogicalKeyboardKeys so they can be
   // searched.
   static const Map<int, LogicalKeyboardKey> _knownLogicalKeys = <int, LogicalKeyboardKey>{
@@ -1409,9 +1419,9 @@ class LogicalKeyboardKey extends Diagnosticable {
     0x0100000014: suspend,
     0x0100000015: resume,
     0x0100000016: turbo,
-    0x0100000017: launchAssistant,
     0x0100010082: sleep,
     0x0100010083: wakeUp,
+    0x01000100b5: displayToggleIntExt,
     0x0100070000: usbReserved,
     0x0100070001: usbErrorRollOver,
     0x0100070002: usbPostFail,
@@ -1613,6 +1623,7 @@ class LogicalKeyboardKey extends Diagnosticable {
     0x01000c01ab: spellCheck,
     0x01000c01ae: launchKeyboardLayout,
     0x01000c01b1: launchScreenSaver,
+    0x01000c01cb: launchAssistant,
     0x01000c01b7: launchAudioBrowser,
     0x01000c0201: newKey,
     0x01000c0203: close,
@@ -1632,6 +1643,7 @@ class LogicalKeyboardKey extends Diagnosticable {
     0x01000c0289: mailReply,
     0x01000c028b: mailForward,
     0x01000c028c: mailSend,
+    0x01000c029f: showAllWindows,
   };
 }
 
@@ -1822,12 +1834,6 @@ class PhysicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey turbo = PhysicalKeyboardKey(0x00000016, debugName: kReleaseMode ? null : 'Turbo');
 
-  /// Represents the location of the "Launch Assistant" key on a generalized
-  /// keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey launchAssistant = PhysicalKeyboardKey(0x00000017, debugName: kReleaseMode ? null : 'Launch Assistant');
-
   /// Represents the location of the "Sleep" key on a generalized keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
@@ -1837,6 +1843,12 @@ class PhysicalKeyboardKey extends Diagnosticable {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey wakeUp = PhysicalKeyboardKey(0x00010083, debugName: kReleaseMode ? null : 'Wake Up');
+
+  /// Represents the location of the "Display Toggle Int Ext" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey displayToggleIntExt = PhysicalKeyboardKey(0x000100b5, debugName: kReleaseMode ? null : 'Display Toggle Int Ext');
 
   /// Represents the location of the "Usb Reserved" key on a generalized
   /// keyboard.
@@ -2912,6 +2924,12 @@ class PhysicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey launchScreenSaver = PhysicalKeyboardKey(0x000c01b1, debugName: kReleaseMode ? null : 'Launch Screen Saver');
 
+  /// Represents the location of the "Launch Assistant" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey launchAssistant = PhysicalKeyboardKey(0x000c01cb, debugName: kReleaseMode ? null : 'Launch Assistant');
+
   /// Represents the location of the "Launch Audio Browser" key on a generalized
   /// keyboard.
   ///
@@ -3017,6 +3035,12 @@ class PhysicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey mailSend = PhysicalKeyboardKey(0x000c028c, debugName: kReleaseMode ? null : 'Mail Send');
 
+  /// Represents the location of the "Show All Windows" key on a generalized
+  /// keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey showAllWindows = PhysicalKeyboardKey(0x000c029f, debugName: kReleaseMode ? null : 'Show All Windows');
+
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{
@@ -3028,9 +3052,9 @@ class PhysicalKeyboardKey extends Diagnosticable {
     0x00000014: suspend,
     0x00000015: resume,
     0x00000016: turbo,
-    0x00000017: launchAssistant,
     0x00010082: sleep,
     0x00010083: wakeUp,
+    0x000100b5: displayToggleIntExt,
     0x00070000: usbReserved,
     0x00070001: usbErrorRollOver,
     0x00070002: usbPostFail,
@@ -3232,6 +3256,7 @@ class PhysicalKeyboardKey extends Diagnosticable {
     0x000c01ab: spellCheck,
     0x000c01ae: launchKeyboardLayout,
     0x000c01b1: launchScreenSaver,
+    0x000c01cb: launchAssistant,
     0x000c01b7: launchAudioBrowser,
     0x000c0201: newKey,
     0x000c0203: close,
@@ -3251,5 +3276,6 @@ class PhysicalKeyboardKey extends Diagnosticable {
     0x000c0289: mailReply,
     0x000c028b: mailForward,
     0x000c028c: mailSend,
+    0x000c029f: showAllWindows,
   };
 }

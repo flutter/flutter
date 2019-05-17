@@ -91,30 +91,52 @@ Future<void> main(List<String> args) async {
 }
 
 Future<void> _verifyInternationalizations() async {
-  final EvalResult genResult = await _evalCommand(
+  final EvalResult materialGenResult = await _evalCommand(
     dart,
     <String>[
       path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      '--material',
+    ],
+    workingDirectory: flutterRoot,
+  );
+  final EvalResult cupertinoGenResult = await _evalCommand(
+    dart,
+    <String>[
+      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      '--cupertino',
     ],
     workingDirectory: flutterRoot,
   );
 
-  final String localizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
-  final String expectedResult = await File(localizationsFile).readAsString();
+  final String materialLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_material_localizations.dart');
+  final String cupertinoLocalizationsFile = path.join('packages', 'flutter_localizations', 'lib', 'src', 'l10n', 'generated_cupertino_localizations.dart');
+  final String expectedMaterialResult = await File(materialLocalizationsFile).readAsString();
+  final String expectedCupertinoResult = await File(cupertinoLocalizationsFile).readAsString();
 
-  if (genResult.stdout.trim() != expectedResult.trim()) {
+  if (materialGenResult.stdout.trim() != expectedMaterialResult.trim()) {
     stderr
-      ..writeln('<<<<<<< $localizationsFile')
-      ..writeln(expectedResult.trim())
+      ..writeln('<<<<<<< $materialLocalizationsFile')
+      ..writeln(expectedMaterialResult.trim())
       ..writeln('=======')
-      ..writeln(genResult.stdout.trim())
+      ..writeln(materialGenResult.stdout.trim())
       ..writeln('>>>>>>> gen_localizations')
-      ..writeln('The contents of $localizationsFile are different from that produced by gen_localizations.')
+      ..writeln('The contents of $materialLocalizationsFile are different from that produced by gen_localizations.')
       ..writeln()
       ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
     exit(1);
   }
-  print('Contents of $localizationsFile matches output of gen_localizations.dart script.');
+  if (cupertinoGenResult.stdout.trim() != expectedCupertinoResult.trim()) {
+    stderr
+      ..writeln('<<<<<<< $cupertinoLocalizationsFile')
+      ..writeln(expectedCupertinoResult.trim())
+      ..writeln('=======')
+      ..writeln(cupertinoGenResult.stdout.trim())
+      ..writeln('>>>>>>> gen_localizations')
+      ..writeln('The contents of $cupertinoLocalizationsFile are different from that produced by gen_localizations.')
+      ..writeln()
+      ..writeln('Did you forget to run gen_localizations.dart after updating a .arb file?');
+    exit(1);
+  }
 }
 
 Future<String> _getCommitRange() async {

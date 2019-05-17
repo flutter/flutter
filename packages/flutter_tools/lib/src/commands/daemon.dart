@@ -19,6 +19,7 @@ import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
@@ -344,13 +345,16 @@ class AppDomain extends Domain {
     // We change the current working directory for the duration of the `start` command.
     final Directory cwd = fs.currentDirectory;
     fs.currentDirectory = fs.directory(projectDirectory);
+    final FlutterProject flutterProject = FlutterProject.current();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
       device,
+      flutterProject: flutterProject,
       trackWidgetCreation: trackWidgetCreation,
       dillOutputPath: dillOutputPath,
       viewFilter: isolateFilter,
       target: target,
+      buildMode: options.buildInfo.mode,
     );
 
     ResidentRunner runner;
@@ -721,17 +725,10 @@ Map<String, dynamic> _emulatorToMap(Emulator emulator) {
 }
 
 Map<String, dynamic> _operationResultToMap(OperationResult result) {
-  final Map<String, dynamic> map = <String, dynamic>{
+  return <String, dynamic>{
     'code': result.code,
     'message': result.message,
   };
-
-  if (result.hintMessage != null)
-    map['hintMessage'] = result.hintMessage;
-  if (result.hintId != null)
-    map['hintId'] = result.hintId;
-
-  return map;
 }
 
 dynamic _toJsonable(dynamic obj) {

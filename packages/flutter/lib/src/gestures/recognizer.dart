@@ -64,7 +64,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// by providing the optional [kind] argument. If [kind] is null,
   /// the recognizer will accept pointer events from all device kinds.
   /// {@endtemplate}
-  GestureRecognizer({ this.debugOwner, PointerDeviceKind kind }) : _kind = kind;
+  GestureRecognizer({ this.debugOwner, PointerDeviceKind kind }) : _kindFilter = kind;
 
   /// The recognizer's owner.
   ///
@@ -74,7 +74,11 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
 
   /// The kind of device that's allowed to be recognized. If null, events from
   /// all device kinds will be tracked and recognized.
-  final PointerDeviceKind _kind;
+  final PointerDeviceKind _kindFilter;
+
+  /// Holds a mapping between pointer IDs and the kind of devices they are
+  /// coming from.
+  final Map<int, PointerDeviceKind> _pointerToKind = <int, PointerDeviceKind>{};
 
   /// Registers a new pointer that might be relevant to this gesture
   /// detector.
@@ -92,6 +96,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   /// This method is called for each and all pointers being added. In
   /// most cases, you want to override [addAllowedPointer] instead.
   void addPointer(PointerDownEvent event) {
+    _pointerToKind[event.pointer] = event.kind;
     if (isPointerAllowed(event)) {
       addAllowedPointer(event);
     } else {
@@ -123,7 +128,17 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   bool isPointerAllowed(PointerDownEvent event) {
     // Currently, it only checks for device kind. But in the future we could check
     // for other things e.g. mouse button.
-    return _kind == null || _kind == event.kind;
+    return _kindFilter == null || _kindFilter == event.kind;
+  }
+
+  /// For a given pointer ID, returns the device kind associated with it.
+  ///
+  /// The pointer ID is expected to be a valid one i.e. an event was received
+  /// with that pointer ID.
+  @protected
+  PointerDeviceKind getKindForPointer(int pointer) {
+    assert(_pointerToKind.containsKey(pointer));
+    return _pointerToKind[pointer];
   }
 
   /// Releases any resources used by the object.
@@ -169,12 +184,11 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
         exception: exception,
         stack: stack,
         library: 'gesture',
-        context: 'while handling a gesture',
-        informationCollector: (StringBuffer information) {
-          information.writeln('Handler: $name');
-          information.writeln('Recognizer:');
-          information.writeln('  $this');
-        },
+        context: ErrorDescription('while handling a gesture'),
+        informationCollector: () sync* {
+          yield StringProperty('Handler', name);
+          yield DiagnosticsProperty<GestureRecognizer>('Recognizer', this, style: DiagnosticsTreeStyle.errorProperty);
+        }
       ));
     }
     return result;
@@ -412,7 +426,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
       primaryPointer = event.pointer;
       initialPosition = event.position;
       if (deadline != null)
-        _timer = Timer(deadline, didExceedDeadline);
+        _timer = Timer(deadline, () => didExceedDeadlineWithEvent(event));
     }
   }
 
@@ -445,10 +459,21 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   /// Override to be notified when [deadline] is exceeded.
   ///
-  /// You must override this method if you supply a [deadline].
+  /// You must override this method or [didExceedDeadlineWithEvent] if you
+  /// supply a [deadline].
   @protected
   void didExceedDeadline() {
     assert(deadline == null);
+  }
+
+  /// Same as [didExceedDeadline] but receives the [event] that initiated the
+  /// gesture.
+  ///
+  /// You must override this method or [didExceedDeadline] if you supply a
+  /// [deadline].
+  @protected
+  void didExceedDeadlineWithEvent(PointerDownEvent event) {
+    didExceedDeadline();
   }
 
   @override

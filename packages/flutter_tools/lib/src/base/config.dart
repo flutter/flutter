@@ -14,7 +14,7 @@ class Config {
       _values = json.decode(_configFile.readAsStringSync());
   }
 
-  static Config get instance => context[Config];
+  static Config get instance => context.get<Config>();
 
   File _configFile;
   String get configPath => _configFile.path;
@@ -46,6 +46,5 @@ class Config {
 
 String _userHomeDir() {
   final String envKey = platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
-  final String value = platform.environment[envKey];
-  return value == null ? '.' : value;
+  return platform.environment[envKey] ?? '.';
 }

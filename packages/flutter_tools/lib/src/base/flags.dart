@@ -8,7 +8,7 @@ import 'context.dart';
 
 /// command-line flags and options that were specified during the invocation of
 /// the Flutter tool.
-Flags get flags => context[Flags];
+Flags get flags => context.get<Flags>();
 
 /// Encapsulation of the command-line flags and options that were specified
 /// during the invocation of the Flutter tool.

@@ -23,10 +23,21 @@ final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, TargetPlatform.ios, mode)));
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(
+      Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode)));
+}
+
+String flutterMacOSFrameworkDir(BuildMode mode) {
+  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(
+      Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin_x64, mode: mode)));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
+///
+/// useMacOSConfig: Optional parameter that controls whether we use the macOS
+/// project file instead. Defaults to false.
+///
+/// setSymroot: Optional parameter to control whether to set SYMROOT.
 ///
 /// targetOverride: Optional parameter, if null or unspecified the default value
 /// from xcode_backend.sh is used 'lib/main.dart'.
@@ -34,6 +45,8 @@ Future<void> updateGeneratedXcodeProperties({
   @required FlutterProject project,
   @required BuildInfo buildInfo,
   String targetOverride,
+  bool useMacOSConfig = false,
+  bool setSymroot = true,
 }) async {
   final StringBuffer localsBuffer = StringBuffer();
 
@@ -52,14 +65,19 @@ Future<void> updateGeneratedXcodeProperties({
   // The build outputs directory, relative to FLUTTER_APPLICATION_PATH.
   localsBuffer.writeln('FLUTTER_BUILD_DIR=${getBuildDirectory()}');
 
-  localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
+  if (setSymroot) {
+    localsBuffer.writeln('SYMROOT=\${SOURCE_ROOT}/../${getIosBuildDirectory()}');
+  }
 
   if (!project.isModule) {
     // For module projects we do not want to write the FLUTTER_FRAMEWORK_DIR
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
     // However, this is necessary for regular projects using Cocoapods.
-    localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=${flutterFrameworkDir(buildInfo.mode)}');
+    final String frameworkDir = useMacOSConfig
+        ? flutterMacOSFrameworkDir(buildInfo.mode)
+        : flutterFrameworkDir(buildInfo.mode);
+    localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
   final String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
@@ -84,20 +102,26 @@ Future<void> updateGeneratedXcodeProperties({
     // NOTE: this assumes that local engine binary paths are consistent with
     // the conventions uses in the engine: 32-bit iOS engines are built to
     // paths ending in _arm, 64-bit builds are not.
-    final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
-    localsBuffer.writeln('ARCHS=$arch');
+    //
+    // Skip this step for macOS builds.
+    if (!useMacOSConfig) {
+      final String arch = engineOutPath.endsWith('_arm') ? 'armv7' : 'arm64';
+      localsBuffer.writeln('ARCHS=$arch');
+    }
   }
 
   if (buildInfo.trackWidgetCreation) {
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File generatedXcodePropertiesFile = project.ios.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile = useMacOSConfig
+      ? project.macos.generatedXcodePropertiesFile
+      : project.ios.generatedXcodePropertiesFile;
   generatedXcodePropertiesFile.createSync(recursive: true);
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
 
-XcodeProjectInterpreter get xcodeProjectInterpreter => context[XcodeProjectInterpreter];
+XcodeProjectInterpreter get xcodeProjectInterpreter => context.get<XcodeProjectInterpreter>();
 
 /// Interpreter of Xcode projects.
 class XcodeProjectInterpreter {

@@ -15,11 +15,6 @@ class BuildInfo {
     this.flavor, {
     this.trackWidgetCreation = false,
     this.compilationTraceFilePath,
-    this.createBaseline = false,
-    this.createPatch = false,
-    this.patchNumber,
-    this.patchDir,
-    this.baselineDir,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
     this.buildSharedLibrary,
@@ -48,25 +43,6 @@ class BuildInfo {
 
   /// Dart compilation trace file to use for JIT VM snapshot.
   final String compilationTraceFilePath;
-
-  /// Save baseline package.
-  final bool createBaseline;
-
-  /// Build differential snapshot.
-  final bool createPatch;
-
-  /// Internal version number of dynamic patch (not displayed to users).
-  /// Each patch may have a unique number to differentiate from previous
-  /// patches for the same versionCode on Android or CFBundleVersion on iOS.
-  final int patchNumber;
-
-  /// The directory where to store generated dynamic patches.
-  final String patchDir;
-
-  /// The directory where to store generated baseline packages.
-  /// Built packages, such as APK files on Android, are saved and can be used
-  /// to generate dynamic patches in later builds.
-  final String baselineDir;
 
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
@@ -127,7 +103,6 @@ class BuildInfo {
       BuildInfo(mode, flavor,
           trackWidgetCreation: trackWidgetCreation,
           compilationTraceFilePath: compilationTraceFilePath,
-          createPatch: createPatch,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
           buildSharedLibrary: buildSharedLibrary,
@@ -351,6 +326,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+    case 'windows-x64':
+      return TargetPlatform.windows_x64;
     case 'web':
       return TargetPlatform.web;
   }
@@ -407,9 +384,29 @@ String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
 }
 
+/// Returns the macOS build output directory.
+String getMacOSBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'macos');
+}
+
 /// Returns the web build output directory.
 String getWebBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'web');
+}
+
+/// Returns the Linux build output directory.
+String getLinuxBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'linux');
+}
+
+/// Returns the Windows build output directory.
+String getWindowsBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'windows');
+}
+
+/// Returns the Fuchsia build output directory.
+String getFuchsiaBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'fuchsia');
 }
 
 /// Returns directory used by incremental compiler (IKG - incremental kernel

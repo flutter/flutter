@@ -105,7 +105,7 @@ class FlutterVersion {
   @override
   String toString() {
     final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
-    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
@@ -179,7 +179,7 @@ class FlutterVersion {
       await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
   }
 
-  static FlutterVersion get instance => context[FlutterVersion];
+  static FlutterVersion get instance => context.get<FlutterVersion>();
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({ bool redactUnknownBranches = false }) {
@@ -572,7 +572,7 @@ class GitTagVersion {
   /// The Z in vX.Y.Z.
   final int z;
 
-  /// the F in vX.Y.Z-hotfix.F
+  /// the F in vX.Y.Z+hotfix.F
   final int hotfix;
 
   /// Number of commits since the vX.Y.Z tag.
@@ -586,7 +586,7 @@ class GitTagVersion {
   }
 
   static GitTagVersion parse(String version) {
-    final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:-hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
+    final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       printTrace('Could not interpret results of "git describe": $version');
@@ -601,11 +601,11 @@ class GitTagVersion {
       return '0.0.0-unknown';
     if (commits == 0) {
       if (hotfix != null)
-        return '$x.$y.$z-hotfix.$hotfix';
+        return '$x.$y.$z+hotfix.$hotfix';
       return '$x.$y.$z';
     }
     if (hotfix != null)
-      return '$x.$y.$z-hotfix.${hotfix + 1}-pre.$commits';
+      return '$x.$y.$z+hotfix.${hotfix + 1}-pre.$commits';
     return '$x.$y.${z + 1}-pre.$commits';
   }
 }

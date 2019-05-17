@@ -21,7 +21,7 @@ import 'transitions.dart';
 /// [MaterialRectArcTween].
 typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 
-/// A function that lets [Hero]s self supply a [Widget] that is shown during the
+/// A function that lets [Hero]es self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
 typedef HeroFlightShuttleBuilder = Widget Function(
@@ -53,11 +53,15 @@ enum HeroFlightDirection {
   pop,
 }
 
-// The bounding box for context in global coordinates.
-Rect _globalBoundingBoxFor(BuildContext context) {
+// The bounding box for context in ancestorContext coordinate system, or in the global
+// coordinate system when null.
+Rect _boundingBoxFor(BuildContext context, [BuildContext ancestorContext]) {
   final RenderBox box = context.findRenderObject();
   assert(box != null && box.hasSize);
-  return MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size);
+  return MatrixUtils.transformRect(
+      box.getTransformTo(ancestorContext?.findRenderObject()),
+      Offset.zero & box.size,
+  );
 }
 
 /// A widget that marks its child as being a candidate for
@@ -118,10 +122,10 @@ Rect _globalBoundingBoxFor(BuildContext context) {
 ///
 /// ### Nested Navigators
 ///
-/// If either or both routes contain nested [Navigator]s, only [Hero]s
+/// If either or both routes contain nested [Navigator]s, only [Hero]es
 /// contained in the top-most routes (as defined by [Route.isCurrent]) *of those
 /// nested [Navigator]s* are considered for animation. Just like in the
-/// non-nested case the top-most routes containing these [Hero]s in the nested
+/// non-nested case the top-most routes containing these [Hero]es in the nested
 /// [Navigator]s have to be [PageRoute]s.
 ///
 /// ## Parts of a Hero Transition
@@ -131,7 +135,7 @@ class Hero extends StatefulWidget {
   /// Create a hero.
   ///
   /// The [tag] and [child] parameters must not be null.
-  /// The [child] parameter and all of the its descendants must not be [Hero]s.
+  /// The [child] parameter and all of the its descendants must not be [Hero]es.
   const Hero({
     Key key,
     @required this.tag,
@@ -160,7 +164,7 @@ class Hero extends StatefulWidget {
   ///
   /// If this property is null, the default, then the value of
   /// [HeroController.createRectTween] is used. The [HeroController] created by
-  /// [MaterialApp] creates a [MaterialRectAreTween].
+  /// [MaterialApp] creates a [MaterialRectArcTween].
   final CreateRectTween createRectTween;
 
   /// The widget subtree that will "fly" from one route to another during a
@@ -180,7 +184,7 @@ class Hero extends StatefulWidget {
   /// well as the incoming and outgoing routes' [Hero] descendants' widgets and
   /// layout.
   ///
-  /// When both the source and destination [Hero]s provide a [flightShuttleBuilder],
+  /// When both the source and destination [Hero]es provide a [flightShuttleBuilder],
   /// the destination's [flightShuttleBuilder] takes precedence.
   ///
   /// If none is provided, the destination route's Hero child is shown in-flight
@@ -196,7 +200,7 @@ class Hero extends StatefulWidget {
   /// Whether to perform the hero transition if the [PageRoute] transition was
   /// triggered by a user gesture, such as a back swipe on iOS.
   ///
-  /// If [Hero]s with the same [tag] on both the from and the to routes have
+  /// If [Hero]es with the same [tag] on both the from and the to routes have
   /// [transitionOnUserGestures] set to true, a back swipe gesture will
   /// trigger the same hero animation as a programmatically triggered push or
   /// pop.
@@ -496,8 +500,8 @@ class _HeroFlight {
     manifest.toHero.startFlight();
 
     heroRectTween = _doCreateRectTween(
-      _globalBoundingBoxFor(manifest.fromHero.context),
-      _globalBoundingBoxFor(manifest.toHero.context),
+      _boundingBoxFor(manifest.fromHero.context, manifest.fromRoute.subtreeContext),
+      _boundingBoxFor(manifest.toHero.context, manifest.toRoute.subtreeContext),
     );
 
     overlayEntry = OverlayEntry(builder: _buildOverlay);
@@ -540,7 +544,10 @@ class _HeroFlight {
       if (manifest.fromHero != newManifest.toHero) {
         manifest.fromHero.endFlight();
         newManifest.toHero.startFlight();
-        heroRectTween = _doCreateRectTween(heroRectTween.end, _globalBoundingBoxFor(newManifest.toHero.context));
+        heroRectTween = _doCreateRectTween(
+            heroRectTween.end,
+            _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
+        );
       } else {
         // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
         heroRectTween = _doCreateRectTween(heroRectTween.end, heroRectTween.begin);
@@ -552,7 +559,10 @@ class _HeroFlight {
       assert(manifest.fromHero != newManifest.fromHero);
       assert(manifest.toHero != newManifest.toHero);
 
-      heroRectTween = _doCreateRectTween(heroRectTween.evaluate(_proxyAnimation), _globalBoundingBoxFor(newManifest.toHero.context));
+      heroRectTween = _doCreateRectTween(
+          heroRectTween.evaluate(_proxyAnimation),
+          _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
+      );
       shuttle = null;
 
       if (newManifest.type == HeroFlightDirection.pop)
@@ -620,7 +630,10 @@ class HeroController extends NavigatorObserver {
   void didPop(Route<dynamic> route, Route<dynamic> previousRoute) {
     assert(navigator != null);
     assert(route != null);
-    _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
+    // Don't trigger another flight when a pop is committed as a user gesture
+    // back swipe is snapped.
+    if (!navigator.userGestureInProgress)
+      _maybeStartHeroTransition(route, previousRoute, HeroFlightDirection.pop, false);
   }
 
   @override
@@ -703,7 +716,7 @@ class HeroController extends NavigatorObserver {
       return;
     }
 
-    final Rect navigatorRect = _globalBoundingBoxFor(navigator.context);
+    final Rect navigatorRect = _boundingBoxFor(navigator.context);
 
     // At this point the toHeroes may have been built and laid out for the first time.
     final Map<Object, _HeroState> fromHeroes = Hero._allHeroesFor(from.subtreeContext, isUserGestureTransition, navigator);

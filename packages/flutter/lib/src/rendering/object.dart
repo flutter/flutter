@@ -17,7 +17,7 @@ import 'binding.dart';
 import 'debug.dart';
 import 'layer.dart';
 
-export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
+export 'package:flutter/foundation.dart' show FlutterError, InformationCollector, DiagnosticsNode, ErrorSummary, ErrorDescription, ErrorHint, DiagnosticsProperty, StringProperty, DoubleProperty, EnumProperty, FlagProperty, IntProperty, DiagnosticPropertiesBuilder;
 export 'package:flutter/gestures.dart' show HitTestEntry, HitTestResult;
 export 'package:flutter/painting.dart';
 
@@ -1187,38 +1187,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       exception: exception,
       stack: stack,
       library: 'rendering library',
-      context: 'during $method()',
+      context: ErrorDescription('during $method()'),
       renderObject: this,
-      informationCollector: (StringBuffer information) {
-        information.writeln('The following RenderObject was being processed when the exception was fired:');
-        information.writeln('  ${toStringShallow(joiner: '\n  ')}');
-        final List<String> descendants = <String>[];
-        const int maxDepth = 5;
-        int depth = 0;
-        const int maxLines = 25;
-        int lines = 0;
-        void visitor(RenderObject child) {
-          if (lines < maxLines) {
-            depth += 1;
-            descendants.add('${"  " * depth}$child');
-            if (depth < maxDepth)
-              child.visitChildren(visitor);
-            depth -= 1;
-          } else if (lines == maxLines) {
-            descendants.add('  ...(descendants list truncated after $lines lines)');
-          }
-          lines += 1;
-        }
-        visitChildren(visitor);
-        if (lines > 1) {
-          information.writeln('This RenderObject had the following descendants (showing up to depth $maxDepth):');
-        } else if (descendants.length == 1) {
-          information.writeln('This RenderObject had the following child:');
-        } else {
-          information.writeln('This RenderObject has no descendants.');
-        }
-        information.writeAll(descendants, '\n');
-      },
+      informationCollector: () sync* {
+        yield describeForError('The following RenderObject was being processed when the exception was fired');
+        // TODO(jacobr): this error message has a code smell. Consider whether
+        // displaying the truncated children is really useful for command line
+        // users. Inspector users can see the full tree by clicking on the
+        // render object so this may not be that useful.
+        yield describeForError('This RenderObject', style: DiagnosticsTreeStyle.truncateChildren);
+      }
     ));
   }
 
@@ -1558,7 +1536,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     assert(constraints != null);
     assert(constraints.debugAssertIsValid(
       isAppliedConstraint: true,
-      informationCollector: (StringBuffer information) {
+      informationCollector: () sync* {
         final List<String> stack = StackTrace.current.toString().split('\n');
         int targetFrame;
         final Pattern layoutFramePattern = RegExp(r'^#[0-9]+ +RenderObject.layout \(');
@@ -1569,18 +1547,16 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
           }
         }
         if (targetFrame != null && targetFrame < stack.length) {
-          information.writeln(
-            'These invalid constraints were provided to $runtimeType\'s layout() '
-            'function by the following function, which probably computed the '
-            'invalid constraints in question:'
-          );
           final Pattern targetFramePattern = RegExp(r'^#[0-9]+ +(.+)$');
           final Match targetFrameMatch = targetFramePattern.matchAsPrefix(stack[targetFrame]);
-          if (targetFrameMatch != null && targetFrameMatch.groupCount > 0) {
-            information.writeln('  ${targetFrameMatch.group(1)}');
-          } else {
-            information.writeln(stack[targetFrame]);
-          }
+          final String problemFunction = (targetFrameMatch != null && targetFrameMatch.groupCount > 0) ? targetFrameMatch.group(1) : stack[targetFrame].trim();
+          // TODO(jacobr): this case is similar to displaying a single stack frame.
+          yield ErrorDescription(
+            'These invalid constraints were provided to $runtimeType\'s layout() '
+            'function by the following function, which probably computed the '
+            'invalid constraints in question:\n'
+            '  $problemFunction'
+          );
         }
       },
     ));
@@ -2601,6 +2577,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       header += ' NEEDS-LAYOUT';
     if (_needsPaint)
       header += ' NEEDS-PAINT';
+    if (_needsCompositingBitsUpdate)
+      header += ' NEEDS-COMPOSITING-BITS-UPDATE';
     if (!attached)
       header += ' DETACHED';
     return header;
@@ -2664,6 +2642,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
+    properties.add(FlagProperty('needsCompositing', value: _needsCompositing, ifTrue: 'needs compositing'));
     properties.add(DiagnosticsProperty<dynamic>('creator', debugCreator, defaultValue: null, level: DiagnosticLevel.debug));
     properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
     properties.add(DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
@@ -2711,6 +2690,19 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
         curve: curve,
       );
     }
+  }
+
+  /// Adds a debug representation of a [RenderObject] optimized for including in
+  /// error messages.
+  ///
+  /// The default [style] of [DiagnosticsTreeStyle.shallow] ensures that all of
+  /// the properties of the render object are included in the error output but
+  /// none of the children of the object are.
+  ///
+  /// You should always include a RenderObject in an error message if it is the
+  /// [RenderObject] causing the failure or contract violation of the error.
+  DiagnosticsNode describeForError(String name, { DiagnosticsTreeStyle style = DiagnosticsTreeStyle.shallow }) {
+    return toDiagnosticsNode(name: name, style: style);
   }
 }
 
@@ -3108,7 +3100,7 @@ class FlutterErrorDetailsForRendering extends FlutterErrorDetails {
     dynamic exception,
     StackTrace stack,
     String library,
-    String context,
+    DiagnosticsNode context,
     this.renderObject,
     InformationCollector informationCollector,
     bool silent = false,

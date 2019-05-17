@@ -206,11 +206,14 @@ Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///
+/// {@template flutter.flutter_test.moreOrLessEquals.epsilon}
 /// Two values are considered equal if the difference between them is within
-/// 1e-10 of the larger one. This is an arbitrary value which can be adjusted
-/// using the `epsilon` argument. This matcher is intended to compare floating
-/// point numbers that are the result of different sequences of operations, such
-/// that they may have accumulated slightly different errors.
+/// [precisionErrorTolerance] of the larger one. This is an arbitrary value
+/// which can be adjusted using the `epsilon` argument. This matcher is intended
+/// to compare floating point numbers that are the result of different sequences
+/// of operations, such that they may have accumulated slightly different
+/// errors.
+/// {@endtemplate}
 ///
 /// See also:
 ///
@@ -218,8 +221,38 @@ Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
 ///    required and not named.
 ///  * [inInclusiveRange], which matches if the argument is in a specified
 ///    range.
-Matcher moreOrLessEquals(double value, { double epsilon = 1e-10 }) {
+///  * [rectMoreOrLessEquals] and [offsetMoreOrLessEquals], which do something
+///    similar but for [Rect]s and [Offset]s respectively.
+Matcher moreOrLessEquals(double value, { double epsilon = precisionErrorTolerance }) {
   return _MoreOrLessEquals(value, epsilon);
+}
+
+/// Asserts that two [Rect]s are equal, within some tolerated error.
+///
+/// {@macro flutter.flutter_test.moreOrLessEquals.epsilon}
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [offsetMoreOrLessEquals], which is for [Offset]s.
+///  * [within], which offers a generic version of this functionality that can
+///    be used to match [Rect]s as well as other types.
+Matcher rectMoreOrLessEquals(Rect value, { double epsilon = precisionErrorTolerance }) {
+  return _IsWithinDistance<Rect>(_rectDistance, value, epsilon);
+}
+
+/// Asserts that two [Offset]s are equal, within some tolerated error.
+///
+/// {@macro flutter.flutter_test.moreOrLessEquals.epsilon}
+///
+/// See also:
+///
+///  * [moreOrLessEquals], which is for [double]s.
+///  * [rectMoreOrLessEquals], which is for [Rect]s.
+///  * [within], which offers a generic version of this functionality that can
+///    be used to match [Offset]s as well as other types.
+Matcher offsetMoreOrLessEquals(Offset value, { double epsilon = precisionErrorTolerance }) {
+  return _IsWithinDistance<Offset>(_offsetDistance, value, epsilon);
 }
 
 /// Asserts that two [String]s are equal after normalizing likely hash codes.
@@ -279,6 +312,9 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// await expectLater(image, matchesGoldenFile('save.png'));
 /// await expectLater(imageFuture, matchesGoldenFile('save.png'));
 /// ```
+///
+/// Golden image files can be created or updated by running `flutter test
+/// --update-goldens` on the test.
 ///
 /// See also:
 ///
@@ -734,7 +770,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
   static final Object _mismatchedValueKey = Object();
 
   static String _normalize(String s) {
-    return s.replaceAll(RegExp(r'#[0-9a-f]{5}'), '#00000');
+    return s.replaceAll(RegExp(r'#[0-9a-fA-F]{5}'), '#00000');
   }
 
   @override
@@ -1004,6 +1040,8 @@ double _sizeDistance(Size a, Size b) {
 ///
 ///  * [moreOrLessEquals], which is similar to this function, but specializes in
 ///    [double]s and has an optional `epsilon` parameter.
+///  * [rectMoreOrLessEquals], which is similar to this function, but
+///    specializes in [Rect]s and has an optional `epsilon` parameter.
 ///  * [closeTo], which specializes in numbers only.
 Matcher within<T>({
   @required num distance,

@@ -230,7 +230,7 @@ class RenderAndroidView extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position))
       return false;
     result.add(BoxHitTestEntry(this, position));
@@ -365,7 +365,7 @@ class RenderUiKitView extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position))
       return false;
     result.add(BoxHitTestEntry(this, position));

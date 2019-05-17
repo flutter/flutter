@@ -142,6 +142,10 @@ abstract class CupertinoLocalizations {
   // The global version uses the translated string from the arb file.
   String get postMeridiemAbbreviation;
 
+  /// Label shown in date pickers when the date is today.
+  // The global version uses the translated string from the arb file.
+  String get todayLabel;
+
   /// The term used by the system to announce dialog alerts.
   // The global version uses the translated string from the arb file.
   String get alertDialogLabel;
@@ -339,6 +343,9 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String get postMeridiemAbbreviation => 'PM';
 
   @override
+  String get todayLabel => 'Today';
+
+  @override
   String get alertDialogLabel => 'Alert';
 
   @override
@@ -354,10 +361,10 @@ class DefaultCupertinoLocalizations implements CupertinoLocalizations {
   String timerPickerHourLabel(int hour) => hour == 1 ? 'hour' : 'hours';
 
   @override
-  String timerPickerMinuteLabel(int minute) => 'min';
+  String timerPickerMinuteLabel(int minute) => 'min.';
 
   @override
-  String timerPickerSecondLabel(int second) => 'sec';
+  String timerPickerSecondLabel(int second) => 'sec.';
 
   @override
   String get cutButtonLabel => 'Cut';

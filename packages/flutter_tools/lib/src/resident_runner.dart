@@ -38,9 +38,10 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    @required BuildMode buildMode,
   }) : assert(trackWidgetCreation != null),
        generator = generator ?? ResidentCompiler(
-         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+         artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
          trackWidgetCreation: trackWidgetCreation,
          fileSystemRoots: fileSystemRoots,
          fileSystemScheme: fileSystemScheme,
@@ -51,6 +52,7 @@ class FlutterDevice {
   /// Create a [FlutterDevice] with optional code generation enabled.
   static Future<FlutterDevice> create(
     Device device, {
+    @required FlutterProject flutterProject,
     @required bool trackWidgetCreation,
     String dillOutputPath,
     List<String> fileSystemRoots,
@@ -60,16 +62,16 @@ class FlutterDevice {
     TargetModel targetModel = TargetModel.flutter,
     List<String> experimentalFlags,
     ResidentCompiler generator,
+    @required BuildMode buildMode,
   }) async {
     ResidentCompiler generator;
-    final FlutterProject flutterProject = await FlutterProject.current();
     if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
       );
     } else {
       generator = ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
@@ -87,6 +89,7 @@ class FlutterDevice {
       experimentalFlags: experimentalFlags,
       targetModel: targetModel,
       generator: generator,
+      buildMode: buildMode,
     );
   }
 
@@ -179,7 +182,7 @@ class FlutterDevice {
     // The flutterExit message only returns if it fails, so just wait a few
     // seconds then assume it worked.
     // TODO(ianh): We should make this return once the VM service disconnects.
-    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () { });
+    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () => <void>[]);
   }
 
   Future<Uri> setupDevFS(
@@ -1014,24 +1017,13 @@ abstract class ResidentRunner {
 }
 
 class OperationResult {
-  OperationResult(this.code, this.message, { this.hintMessage, this.hintId });
+  OperationResult(this.code, this.message);
 
   /// The result of the operation; a non-zero code indicates a failure.
   final int code;
 
   /// A user facing message about the results of the operation.
   final String message;
-
-  /// An optional hint about the results of the operation. This is used to provide
-  /// sidecar data about the operation results. For example, this is used when
-  /// a reload is successful but some changed program elements where not run after a
-  /// reassemble.
-  final String hintMessage;
-
-  /// A key used by tools to discriminate between different kinds of operation results.
-  /// For example, a successful reload might have a [code] of 0 and a [hintId] of
-  /// `'restartRecommended'`.
-  final String hintId;
 
   bool get isOk => code == 0;
 
@@ -1055,7 +1047,7 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
-      final FlutterProject project = await FlutterProject.current();
+      final FlutterProject project = FlutterProject.current();
       final String manifestPath = fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:

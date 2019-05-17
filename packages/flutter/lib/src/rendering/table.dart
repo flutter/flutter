@@ -918,7 +918,7 @@ class RenderTable extends RenderBox {
       int availableColumns = columns;
       // Handle double precision errors which causes this loop to become
       // stuck in certain configurations.
-      const double minimumDeficit = 0.00000001;
+      const double minimumDeficit = precisionErrorTolerance;
       while (deficit > minimumDeficit && totalFlex > minimumDeficit) {
         double newTotalFlex = 0.0;
         for (int x = 0; x < columns; x += 1) {
@@ -1104,13 +1104,21 @@ class RenderTable extends RenderBox {
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     assert(_children.length == rows * columns);
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];
       if (child != null) {
         final BoxParentData childParentData = child.parentData;
-        if (child.hitTest(result, position: position - childParentData.offset))
+        final bool isHit = result.addWithPaintOffset(
+          offset: childParentData.offset,
+          position: position,
+          hitTest: (BoxHitTestResult result, Offset transformed) {
+            assert(transformed == position - childParentData.offset);
+            return child.hitTest(result, position: transformed);
+          },
+        );
+        if (isHit)
           return true;
       }
     }

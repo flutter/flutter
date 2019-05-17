@@ -15,6 +15,31 @@ import 'text_span.dart';
 
 export 'package:flutter/services.dart' show TextRange, TextSelection;
 
+/// The different ways of considering the width of one or more lines of text.
+///
+/// See [Text.widthType].
+enum TextWidthBasis {
+  /// Multiline text will take up the full width given by the parent. For single
+  /// line text, only the minimum amount of width needed to contain the text
+  /// will be used. A common use case for this is a standard series of
+  /// paragraphs.
+  parent,
+
+  /// The width will be exactly enough to contain the longest line and no
+  /// longer. A common use case for this is chat bubbles.
+  longestLine,
+}
+
+class _CaretMetrics {
+  const _CaretMetrics({this.offset, this.fullHeight});
+  /// The offset of the top left corner of the caret from the top left
+  /// corner of the paragraph.
+  final Offset offset;
+
+  /// The full height of the glyph at the caret position.
+  final double fullHeight;
+}
+
 /// An object that paints a [TextSpan] tree into a [Canvas].
 ///
 /// To use a [TextPainter], follow these steps:
@@ -50,10 +75,12 @@ class TextPainter {
     String ellipsis,
     Locale locale,
     StrutStyle strutStyle,
+    TextWidthBasis textWidthBasis = TextWidthBasis.parent,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
+       assert(textWidthBasis != null),
        _text = text,
        _textAlign = textAlign,
        _textDirection = textDirection,
@@ -61,7 +88,8 @@ class TextPainter {
        _maxLines = maxLines,
        _ellipsis = ellipsis,
        _locale = locale,
-       _strutStyle = strutStyle;
+       _strutStyle = strutStyle,
+       _textWidthBasis = textWidthBasis;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -223,6 +251,18 @@ class TextPainter {
     _needsLayout = true;
   }
 
+  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  TextWidthBasis get textWidthBasis => _textWidthBasis;
+  TextWidthBasis _textWidthBasis;
+  set textWidthBasis(TextWidthBasis value) {
+    assert(value != null);
+    if (_textWidthBasis == value)
+      return;
+    _textWidthBasis = value;
+    _paragraph = null;
+    _needsLayout = true;
+  }
+
 
   ui.Paragraph _layoutTemplate;
 
@@ -307,7 +347,9 @@ class TextPainter {
   /// Valid only after [layout] has been called.
   double get width {
     assert(!_needsLayout);
-    return _applyFloatingPointHack(_paragraph.width);
+    return _applyFloatingPointHack(
+      textWidthBasis == TextWidthBasis.longestLine ? _paragraph.longestLine : _paragraph.width,
+    );
   }
 
   /// The vertical space required to paint this text.
@@ -444,11 +486,11 @@ class TextPainter {
   // Unicode value for a zero width joiner character.
   static const int _zwjUtf16 = 0x200d;
 
-  // Get the Offset of the cursor (in logical pixels) based off the near edge
+  // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character upstream from the given string offset.
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
-  Offset _getOffsetFromUpstream(int offset, Rect caretPrototype) {
+  Rect _getRectFromUpstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text.toPlainText();
     final int prevCodeUnit = _text.codeUnitAt(max(0, offset - 1));
     if (prevCodeUnit == null)
@@ -481,21 +523,21 @@ class TextPainter {
       // If the upstream character is a newline, cursor is at start of next line
       const int NEWLINE_CODE_UNIT = 10;
       if (prevCodeUnit == NEWLINE_CODE_UNIT) {
-        return Offset(_emptyOffset.dx, box.bottom);
+        return Rect.fromLTRB(_emptyOffset.dx, box.bottom, _emptyOffset.dx, box.bottom + box.bottom - box.top);
       }
 
       final double caretEnd = box.end;
       final double dx = box.direction == TextDirection.rtl ? caretEnd - caretPrototype.width : caretEnd;
-      return Offset(min(dx, width), box.top);
+      return Rect.fromLTRB(min(dx, width), box.top, min(dx, width), box.bottom);
     }
     return null;
   }
 
-  // Get the Offset of the cursor (in logical pixels) based off the near edge
+  // Get the Rect of the cursor (in logical pixels) based off the near edge
   // of the character downstream from the given string offset.
   // TODO(garyq): Use actual extended grapheme cluster length instead of
   // an increasing cluster length amount to achieve deterministic performance.
-  Offset _getOffsetFromDownstream(int offset, Rect caretPrototype) {
+  Rect _getRectFromDownstream(int offset, Rect caretPrototype) {
     final String flattenedText = _text.toPlainText();
     // We cap the offset at the final index of the _text.
     final int nextCodeUnit = _text.codeUnitAt(min(offset, flattenedText == null ? 0 : flattenedText.length - 1));
@@ -526,7 +568,7 @@ class TextPainter {
       final TextBox box = boxes.last;
       final double caretStart = box.start;
       final double dx = box.direction == TextDirection.rtl ? caretStart - caretPrototype.width : caretStart;
-      return Offset(min(dx, width), box.top);
+      return Rect.fromLTRB(min(dx, width), box.top, min(dx, width), box.bottom);
     }
     return null;
   }
@@ -568,20 +610,52 @@ class TextPainter {
   ///
   /// Valid only after [layout] has been called.
   Offset getOffsetForCaret(TextPosition position, Rect caretPrototype) {
+    _computeCaretMetrics(position, caretPrototype);
+    return _caretMetrics.offset;
+  }
+
+  /// Returns the tight bounded height of the glyph at the given [position].
+  ///
+  /// Valid only after [layout] has been called.
+  double getFullHeightForCaret(TextPosition position, Rect caretPrototype) {
+    _computeCaretMetrics(position, caretPrototype);
+    return _caretMetrics.fullHeight;
+  }
+
+  // Cached caret metrics. This allows multiple invokes of [getOffsetForCaret] and
+  // [getFullHeightForCaret] in a row without performing redundant and expensive
+  // get rect calls to the paragraph.
+  _CaretMetrics _caretMetrics;
+
+  // Holds the TextPosition and caretPrototype the last caret metrics were
+  // computed with. When new values are passed in, we recompute the caret metrics.
+  // only as nessecary.
+  TextPosition _previousCaretPosition;
+  Rect _previousCaretPrototype;
+
+  // Checks if the [position] and [caretPrototype] have changed from the cached
+  // version and recomputes the metrics required to position the caret.
+  void _computeCaretMetrics(TextPosition position, Rect caretPrototype) {
     assert(!_needsLayout);
+    if (position == _previousCaretPosition && caretPrototype == _previousCaretPrototype)
+      return;
     final int offset = position.offset;
     assert(position.affinity != null);
+    Rect rect;
     switch (position.affinity) {
-      case TextAffinity.upstream:
-        return _getOffsetFromUpstream(offset, caretPrototype)
-            ?? _getOffsetFromDownstream(offset, caretPrototype)
-            ?? _emptyOffset;
-      case TextAffinity.downstream:
-        return _getOffsetFromDownstream(offset, caretPrototype)
-            ?? _getOffsetFromUpstream(offset, caretPrototype)
-            ?? _emptyOffset;
+      case TextAffinity.upstream: {
+        rect = _getRectFromUpstream(offset, caretPrototype) ?? _getRectFromDownstream(offset, caretPrototype);
+        break;
+      }
+      case TextAffinity.downstream: {
+        rect = _getRectFromDownstream(offset, caretPrototype) ??  _getRectFromUpstream(offset, caretPrototype);
+        break;
+      }
     }
-    return null;
+    _caretMetrics = _CaretMetrics(
+      offset: rect != null ? Offset(rect.left, rect.top) : _emptyOffset,
+      fullHeight: rect != null ? rect.bottom - rect.top : null,
+    );
   }
 
   /// Returns a list of rects that bound the given selection.

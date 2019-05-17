@@ -39,12 +39,12 @@ class FlutterProject {
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> fromDirectory(Directory directory) async {
+  static FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    final FlutterManifest manifest = await _readManifest(
+    final FlutterManifest manifest = _readManifest(
       directory.childFile(bundle.defaultManifestPath).path,
     );
-    final FlutterManifest exampleManifest = await _readManifest(
+    final FlutterManifest exampleManifest = _readManifest(
       _exampleDirectory(directory).childFile(bundle.defaultManifestPath).path,
     );
     return FlutterProject(directory, manifest, exampleManifest);
@@ -52,11 +52,11 @@ class FlutterProject {
 
   /// Returns a future that completes with a [FlutterProject] view of the current directory.
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> current() => fromDirectory(fs.currentDirectory);
+  static FlutterProject current() => fromDirectory(fs.currentDirectory);
 
   /// Returns a future that completes with a [FlutterProject] view of the given directory.
   /// or a ToolExit error, if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static Future<FlutterProject> fromPath(String path) => fromDirectory(fs.directory(path));
+  static FlutterProject fromPath(String path) => fromDirectory(fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
@@ -91,13 +91,32 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => IosProject.fromFlutter(this);
+  IosProject _ios;
+  IosProject get ios => _ios ??= IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  AndroidProject get android => AndroidProject._(this);
+  AndroidProject _android;
+  AndroidProject get android => _android ??= AndroidProject._(this);
 
   /// The web sub project of this project.
-  WebProject get web => WebProject._(this);
+  WebProject _web;
+  WebProject get web => _web ??= WebProject._(this);
+
+  /// The MacOS sub project of this project.
+  MacOSProject _macos;
+  MacOSProject get macos => _macos ??= MacOSProject._(this);
+
+  /// The Linux sub project of this project.
+  LinuxProject _linux;
+  LinuxProject get linux => _linux ??= LinuxProject._(this);
+
+  /// The Windows sub project of this project.
+  WindowsProject _windows;
+  WindowsProject get windows => _windows ??= WindowsProject._(this);
+
+  /// The Fuchsia sub project of this project.
+  FuchsiaProject _fuchsia;
+  FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -140,8 +159,8 @@ class FlutterProject {
   ///
   /// Completes with an empty [FlutterManifest], if the file does not exist.
   /// Completes with a ToolExit on validation error.
-  static Future<FlutterManifest> _readManifest(String path) async {
-    final FlutterManifest manifest = await FlutterManifest.createFromPath(path);
+  static FlutterManifest _readManifest(String path) {
+    final FlutterManifest manifest = FlutterManifest.createFromPath(path);
     if (manifest == null)
       throwToolExit('Please correct the pubspec.yaml file at $path');
     return manifest;
@@ -149,16 +168,21 @@ class FlutterProject {
 
   /// Generates project files necessary to make Gradle builds work on Android
   /// and CocoaPods+Xcode work on iOS, for app and module projects only.
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    if (!directory.existsSync() || hasExampleApp)
+  Future<void> ensureReadyForPlatformSpecificTooling({bool checkProjects = false}) async {
+    if (!directory.existsSync() || hasExampleApp) {
       return;
+    }
     refreshPluginsList(this);
-    await android.ensureReadyForPlatformSpecificTooling();
-    await ios.ensureReadyForPlatformSpecificTooling();
+    if ((android.existsSync() && checkProjects) || !checkProjects) {
+      await android.ensureReadyForPlatformSpecificTooling();
+    }
+    if ((ios.existsSync() && checkProjects) || !checkProjects) {
+      await ios.ensureReadyForPlatformSpecificTooling();
+    }
     if (flutterWebEnabled) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
-    await injectPlugins(this);
+    await injectPlugins(this, checkProjects: checkProjects);
   }
 
   /// Return the set of builders used by this package.
@@ -167,6 +191,10 @@ class FlutterProject {
       return null;
     }
     final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    // If the pubspec file is empty, this will be null.
+    if (pubspec == null) {
+      return null;
+    }
     return pubspec['builders'];
   }
 
@@ -215,6 +243,9 @@ class IosProject {
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
 
+  /// Whether the flutter application has an iOS project.
+  bool get exists => hostAppRoot.existsSync();
+
   /// The xcode config file for [mode].
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
@@ -244,6 +275,11 @@ class IosProject {
 
   /// Xcode workspace shared workspace settings file for the host app.
   File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
+
+  /// Whether the current flutter project has an iOS subproject.
+  bool existsSync()  {
+    return parent.isModule || _editableDirectory.existsSync();
+  }
 
   /// The product bundle identifier of the host app, or null if not set or if
   /// iOS tooling needed to read it is not installed.
@@ -399,6 +435,11 @@ class AndroidProject {
     return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'bundle'));
   }
 
+  /// Whether the current flutter project has an Android sub-project.
+  bool existsSync() {
+    return parent.isModule || _editableHostAppDirectory.existsSync();
+  }
+
   bool get isUsingGradle {
     return hostAppGradleRoot.childFile('build.gradle').existsSync();
   }
@@ -477,6 +518,11 @@ class WebProject {
 
   final FlutterProject parent;
 
+  /// Whether this flutter project has a web sub-project.
+  bool existsSync() {
+    return parent.directory.childDirectory('web').existsSync();
+  }
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     /// Generate index.html in build/web. Eventually we could support
     /// a custom html under the web sub directory.
@@ -517,4 +563,88 @@ Match _firstMatchInFile(File file, RegExp regExp) {
     }
   }
   return null;
+}
+
+/// The macOS sub project.
+class MacOSProject {
+  MacOSProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => project.directory.childDirectory('macos').existsSync();
+
+  Directory get _editableDirectory => project.directory.childDirectory('macos');
+
+  Directory get _cacheDirectory => _editableDirectory.childDirectory('Flutter');
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the Xcode build.
+  File get generatedXcodePropertiesFile => _cacheDirectory.childFile('Generated.xcconfig');
+
+  /// The Xcode project file.
+  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
+
+  /// The file where the Xcode build will write the name of the built app.
+  ///
+  /// Ideally this will be replaced in the future with inpection of the Runner
+  /// scheme's target.
+  File get nameFile => _cacheDirectory.childFile('.app_filename');
+}
+
+/// The Windows sub project
+class WindowsProject {
+  WindowsProject._(this.project);
+
+  final FlutterProject project;
+
+  bool existsSync() => _editableDirectory.existsSync();
+
+  Directory get _editableDirectory => project.directory.childDirectory('windows');
+
+  Directory get _cacheDirectory => _editableDirectory.childDirectory('flutter');
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the build.
+  File get generatedPropertySheetFile => _cacheDirectory.childFile('Generated.props');
+
+  // The MSBuild project file.
+  File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
+
+  /// The file where the VS build will write the name of the built app.
+  ///
+  /// Ideally this will be replaced in the future with inspection of the project.
+  File get nameFile => _cacheDirectory.childFile('exe_filename');
+}
+
+/// The Linux sub project.
+class LinuxProject {
+  LinuxProject._(this.project);
+
+  final FlutterProject project;
+
+  Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
+
+  Directory get cacheDirectory => editableHostAppDirectory.childDirectory('flutter');
+
+  bool existsSync() => editableHostAppDirectory.existsSync();
+
+  /// The Linux project makefile.
+  File get makeFile => editableHostAppDirectory.childFile('Makefile');
+}
+
+/// The Fuchisa sub project
+class FuchsiaProject {
+  FuchsiaProject._(this.project);
+
+  final FlutterProject project;
+
+  Directory _editableHostAppDirectory;
+  Directory get editableHostAppDirectory =>
+      _editableHostAppDirectory ??= project.directory.childDirectory('fuchsia');
+
+  bool existsSync() => editableHostAppDirectory.existsSync();
+
+  Directory _meta;
+  Directory get meta =>
+      _meta ??= editableHostAppDirectory.childDirectory('meta');
 }

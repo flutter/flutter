@@ -17,6 +17,7 @@ Widget buildInputDecorator({
   TextDirection textDirection = TextDirection.ltr,
   bool isEmpty = false,
   bool isFocused = false,
+  bool isHovering = false,
   TextStyle baseStyle,
   Widget child = const Text(
     'text',
@@ -39,6 +40,7 @@ Widget buildInputDecorator({
                   decoration: decoration,
                   isEmpty: isEmpty,
                   isFocused: isFocused,
+                  isHovering: isHovering,
                   baseStyle: baseStyle,
                   child: child,
                 ),
@@ -89,6 +91,12 @@ BorderRadius getBorderRadius(WidgetTester tester) {
 double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
 
 Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
+
+Color getContainerColor(WidgetTester tester) {
+  final CustomPaint customPaint = tester.widget(findBorderPainter());
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  return inputBorderPainter.blendedColor;
+}
 
 double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
@@ -1825,6 +1833,7 @@ void main() {
         counterStyle: themeStyle,
         filled: true,
         fillColor: Colors.red,
+        focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
       )
@@ -1873,6 +1882,7 @@ void main() {
         counterStyle: themeStyle,
         filled: true,
         fillColor: Colors.red,
+        focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
       ),
@@ -2034,6 +2044,107 @@ void main() {
     skip: !Platform.isLinux,
   );
 
+  testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {
+    const Color fillColor = Color(0xFF00FF00);
+    const Color hoverColor = Color(0xFF0000FF);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isHovering: false,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          hoverColor: hoverColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(fillColor));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isHovering: true,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          hoverColor: hoverColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(hoverColor));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isHovering: false,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          hoverColor: hoverColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(hoverColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(fillColor));
+  });
+
+  testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
+    const Color fillColor = Color(0xFF00FF00);
+    const Color focusColor = Color(0xFF0000FF);
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: false,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          focusColor: focusColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(fillColor));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: true,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          focusColor: focusColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(milliseconds: 45));
+    expect(getContainerColor(tester), equals(focusColor));
+
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isFocused: false,
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: fillColor,
+          focusColor: focusColor,
+        ),
+      ),
+    );
+
+    expect(getContainerColor(tester), equals(focusColor));
+    // TODO(gspencer): convert this to 15ms once reverseDuration for AnimationController lands.
+    await tester.pump(const Duration(milliseconds: 45));
+    expect(getContainerColor(tester), equals(fillColor));
+  });
+
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305
     expect(
@@ -2065,7 +2176,8 @@ void main() {
       suffixStyle: TextStyle(height: 8.0),
       counterStyle: TextStyle(height: 9.0),
       filled: true,
-      fillColor: Color(10),
+      fillColor: Color(0x10),
+      focusColor: Color(0x20),
       errorBorder: UnderlineInputBorder(),
       focusedBorder: OutlineInputBorder(),
       focusedErrorBorder: UnderlineInputBorder(),
@@ -2077,7 +2189,8 @@ void main() {
     // Spot check
     expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
     expect(debugString, contains('isDense: true'));
-    expect(debugString, contains('fillColor: Color(0x0000000a)'));
+    expect(debugString, contains('fillColor: Color(0x00000010)'));
+    expect(debugString, contains('focusColor: Color(0x00000020)'));
     expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
     expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
   });
@@ -2320,8 +2433,8 @@ void main() {
       gapPadding: 32.0,
     );
     expect(outlineInputBorder.hashCode, const OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
       gapPadding: 32.0,
     ).hashCode);
     expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
@@ -2346,6 +2459,7 @@ void main() {
       counterStyle: TextStyle(),
       filled: true,
       fillColor: Colors.red,
+      focusColor: Colors.blue,
       errorBorder: UnderlineInputBorder(),
       focusedBorder: UnderlineInputBorder(),
       focusedErrorBorder: UnderlineInputBorder(),
@@ -2369,6 +2483,7 @@ void main() {
       'counterStyle: TextStyle(<all styles inherited>)',
       'filled: true',
       'fillColor: MaterialColor(primary value: Color(0xfff44336))',
+      'focusColor: MaterialColor(primary value: Color(0xff2196f3))',
       'errorBorder: UnderlineInputBorder()',
       'focusedBorder: UnderlineInputBorder()',
       'focusedErrorBorder: UnderlineInputBorder()',

@@ -339,7 +339,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       onNotification: (LayoutChangedNotification notification) {
         final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
         renderer._didChangeLayout();
-        return true;
+        return false;
       },
       child: _InkFeatures(
         key: _inkFeatureRenderer,
