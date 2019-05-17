@@ -207,7 +207,10 @@ class FlutterPlugin implements Plugin<Project> {
         }
 
         // Add x86/x86_64 native library. Debug mode only, for now.
+        File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
         Task debugX86JarTask = project.tasks.create("${flutterBuildPrefix}X86Jar", Jar) {
+            destinationDir flutterX86Jar.parentFile
+            archiveName flutterX86Jar.name
             from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
                 into 'lib/x86'
             }
@@ -215,16 +218,13 @@ class FlutterPlugin implements Plugin<Project> {
                 into 'lib/x86_64'
             }
         }
-        // This task is required to be able to include the libflutter.so and lib_snapshots*.so in the main jar.
-        Task allJarTask = project.tasks.create("${flutterBuildPrefix}AllJar", Jar) {}
-    
         // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
         // added after applying the Flutter plugin.
         project.android.buildTypes.each { 
-            addFlutterJarApiDependency(project, it, debugX86JarTask, allJarTask)
+            addFlutterJarApiDependency(project, it, debugX86JarTask)
         }
         project.android.buildTypes.whenObjectAdded {
-            addFlutterJarApiDependency(project, it, debugX86JarTask, allJarTask)
+            addFlutterJarApiDependency(project, it, debugX86JarTask)
         }
 
         File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
@@ -284,7 +284,7 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      */
-    private void addFlutterJarApiDependency(Project project, buildType, Task debugX86JarTask, Task allJarTask) {
+    private void addFlutterJarApiDependency(Project project, buildType, Task debugX86JarTask) {
         project.dependencies {
             String configuration;
             if (project.getConfigurations().findByName("api")) {
@@ -308,7 +308,7 @@ class FlutterPlugin implements Plugin<Project> {
                         dynamicReleaseFlutterJar
                         break
                     case "release":
-                        [allJarTask, releaseFlutterJar]
+                        releaseFlutterJar
                         break
                     default:
                         throw new GradleException("Invalid build mode: ${buildMode}")
@@ -456,10 +456,10 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.add(compileTask)
             }
 
+            def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/libs.jar")
             Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: ":flutter:package:packLibs${variant.name.capitalize()}", type: Jar) {
-                if (flutterBuildMode != 'release' || targetPlatformValue != 'android-arm-all') {
-                    return
-                }
+                destinationDir libJar.parentFile
+                archiveName libJar.name
                 targetPlatforms.each { targetPlatform ->
                     // Include `libflutter.so` for each abi.
                     // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
@@ -482,7 +482,19 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-
+            if (flutterBuildMode == 'release' && targetPlatformValue == 'android-arm-all') {
+                project.dependencies {
+                    String configuration;
+                    if (project.getConfigurations().findByName("api")) {
+                        configuration = buildType.name + "Api";
+                    } else {
+                        configuration = buildType.name + "Compile";
+                    }
+                    add(configuration, project.files {
+                        packFlutterSnapshotsAndLibsTask
+                    })
+                }
+            }
             // We know that the flutter app is a subproject in another Android app when these tasks exist.
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
             Task cleanPackageAssets = project.tasks.findByPath(":flutter:cleanPackage${variant.name.capitalize()}Assets")
@@ -499,7 +511,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
                 flutterTasks.each { flutterTask -> 
                     with flutterTask.assets
-                    // Include the snapshots in the assets directory in non-release mode.
+                    // Include the snapshots in the assets directory.
                     if (flutterBuildMode != 'release' || targetPlatformValue != 'android-arm-all') {
                         with flutterTask.snapshots
                     }
@@ -518,12 +530,10 @@ class FlutterPlugin implements Plugin<Project> {
                 Task mergeAssets = project.tasks.findByPath(":${mainModuleName}:merge${variant.name.capitalize()}Assets")
                 if (mergeAssets) {
                     mergeAssets.dependsOn(copyFlutterAssetsTask)
-                    mergeAssets.dependsOn(packFlutterSnapshotsAndLibsTask)
                 }
             } else {
                 def processResources = variant.outputs.first().processResources
                 processResources.dependsOn(copyFlutterAssetsTask)
-                processResources.dependsOn(packFlutterSnapshotsAndLibsTask)
             }
         }
 
