@@ -1228,7 +1228,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
     if (widget.onContextMenuChanged != null)
       widget.onContextMenuChanged(true);
-    final dynamic value = Navigator.push<dynamic>(context, route);
+    final dynamic value = await Navigator.push<dynamic>(context, route);
     setState(() {
       _contextMenuIsOpen = false;
     });
@@ -1362,26 +1362,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
-  void _stopCursorTimer({ bool resetCharTicks = true }) {
+  void _stopCursorTimer({ bool resetCharTicks = true, double opacity = 0.0 }) {
     _cursorTimer?.cancel();
     _cursorTimer = null;
     _targetCursorVisibility = false;
-    _cursorBlinkOpacityController.value = 0.0;
+    _cursorBlinkOpacityController.value = opacity;
     if (EditableText.debugDeterministicCursor)
       return;
     if (resetCharTicks)
       _obscureShowCharTicksPending = 0;
     if (widget.cursorOpacityAnimates) {
       _cursorBlinkOpacityController.stop();
-      _cursorBlinkOpacityController.value = 0.0;
+      _cursorBlinkOpacityController.value = opacity;
     }
   }
 
   void _startOrStopCursorTimerIfNeeded() {
     if (_cursorTimer == null && _hasFocus && _value.selection.isCollapsed)
       _startCursorTimer();
-    else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed))
-      _stopCursorTimer();
+    else if (_cursorTimer != null && (!_hasFocus || !_value.selection.isCollapsed)) {
+      _stopCursorTimer(opacity: _contextMenuIsOpen ? 1.0 : 0.0);
+    }
   }
 
   void _didChangeTextEditingValue() {
@@ -1504,7 +1505,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.build(context); // See AutomaticKeepAliveClientMixin.
 
     final TextSelectionControls controls = widget.selectionControls;
-    final Color selectionColor = _hasFocus ? widget.selectionColor : const Color.fromARGB(255, 170, 170, 170);
     return Scrollable(
       excludeFromSemantics: true,
       axisDirection: _isMultiline ? AxisDirection.down : AxisDirection.right,
@@ -1532,7 +1532,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               minLines: widget.minLines,
               expands: widget.expands,
               strutStyle: widget.strutStyle,
-              selectionColor: selectionColor,
+              selectionColor: widget.selectionColor,
               textScaleFactor: widget.textScaleFactor ?? MediaQuery.textScaleFactorOf(context),
               textAlign: widget.textAlign,
               textDirection: _textDirection,

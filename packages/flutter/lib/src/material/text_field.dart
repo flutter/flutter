@@ -824,7 +824,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleContextMenuChanged(bool isOpen, [dynamic value]) {
     if (isOpen != _contextMenuIsOpen)
       setState(() {
-        _contextMenuIsOpen = true;
+        _contextMenuIsOpen = isOpen;
       });
   }
 
@@ -987,7 +987,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             baseStyle: widget.style,
             textAlign: widget.textAlign,
             isHovering: _isHovering,
-            isFocused: focusNode.hasFocus,
+            isFocused: focusNode.hasFocus || _contextMenuIsOpen,
             isEmpty: controller.value.text.isEmpty,
             expands: widget.expands,
             child: child,
