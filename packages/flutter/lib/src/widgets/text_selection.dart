@@ -1101,6 +1101,7 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     _exceededLongpressDeadline = false;
+    _disposeLongpressTimer();
     _longpressTimer = Timer(kLongPressTimeout, () {
       _exceededLongpressDeadline = true;
       _longpressTimer = null;
@@ -1122,10 +1123,14 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
 
   @override
   void dispose() {
+    _disposeLongpressTimer();
+    super.dispose();
+  }
+
+  void _disposeLongpressTimer() {
     if (_longpressTimer != null) {
       _longpressTimer.cancel();
       _longpressTimer = null;
     }
-    super.dispose();
   }
 }
