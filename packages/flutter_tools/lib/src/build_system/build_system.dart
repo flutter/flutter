@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:convert';
-
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 
@@ -225,11 +223,19 @@ class Target {
 
     // Check that the current input files have not been changed since the last
     // invocation.
-    for (File inputFile in inputs) {
-      assert(inputFile.existsSync());
-      final String absolutePath = inputFile.absolute.path;
+    for (FileSystemEntity inputEntity in inputs) {
+      assert(inputEntity.existsSync());
+      final String absolutePath = inputEntity.absolute.path;
       final String previousSha = previousStamps[absolutePath];
-      final String currentSha = md5.convert(inputFile.readAsBytesSync()).bytes.toString();
+      // TODO(jonahwilliams): implement framework copy in dart so we don't need
+      // to shell out to cp.
+      String currentSha;
+      if (inputEntity is File) {
+        currentSha = md5.convert(inputEntity.readAsBytesSync()).bytes.toString();
+      } else if (inputEntity is Directory) {
+        // In case of a directory use the stat for now.
+        currentSha = inputEntity.statSync().modified.toIso8601String();
+      }
       // Shas are not identical or old sha was missing.
       if (currentSha != previousSha) {
         canSkip = false;
@@ -330,7 +336,7 @@ class Target {
         final String filePath = Uri.file(rawInput)
           .toFilePath(windows: platform.isWindows)
           .substring(5); // remove file:
-        print(fs.path.normalize(filePath));
+
         if (rawInput.endsWith(platform.pathSeparator)) {
           files.add(fs.directory(fs.path.normalize(filePath)));
         } else {
