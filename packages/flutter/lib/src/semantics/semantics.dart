@@ -1247,7 +1247,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// Whether this node is taking part in a merge of semantic information.
   ///
   /// This returns true if the node is either merged into an ancestor node or if
-  /// decedent nodes are merged into this node.
+  /// descendant nodes are merged into this node.
   ///
   /// See also:
   ///
@@ -2496,7 +2496,16 @@ class SemanticsOwner extends ChangeNotifier {
       visitedNodes.addAll(localDirtyNodes);
       for (SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
-        assert(node.parent == null || !node.parent.isPartOfNodeMerging || node.isMergedIntoParent);
+        if (node.parent != null) {
+          assert(
+            !node.parent.isPartOfNodeMerging || node.isMergedIntoParent,
+            'SemanticsNode $node cannot be merged because an ancestor '
+            'SemanticsNode needs to merge its descendants\' semantic '
+            'information, but $node is set to be explicit. See '
+            '[SemanticsConfiguration.explicitChildNodes] for more '
+            'information.'
+          );
+        }
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
           // if we're merged into our parent, make sure our parent is added to the dirty list
