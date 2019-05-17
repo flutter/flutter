@@ -2663,7 +2663,7 @@ class SemanticsConfiguration {
   /// annotate [SemanticNode]s of their parent with the semantic information
   /// they want to contribute to the semantic tree.
   /// When set to true the only way for children of the owning [RenderObject]
-  /// to contribute semantic information2 to the semantic tree is to introduce
+  /// to contribute semantic information to the semantic tree is to introduce
   /// new explicit [SemanticNode]s to the tree.
   ///
   /// This setting is often used in combination with [isSemanticBoundary] to
