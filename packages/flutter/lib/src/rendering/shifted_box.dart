@@ -151,13 +151,43 @@ class RenderPadding extends RenderShiftedBox {
     _markNeedResolution();
   }
 
+  // TODO(ianh): https://github.com/flutter/flutter/issues/19696
+  // The asserts all over the following four methods are about trying to track
+  // down the flaky bug on Windows cited above. For some reason, sometimes, the
+  // intrinsics of this class return bogus values, but only on Windows.
+
+  bool _debugDoingIntrinsicsAsserts = false;
+
   @override
   double computeMinIntrinsicWidth(double height) {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.infinity absorption
+    assert(totalHorizontalPadding == _resolvedPadding.horizontal);
+    assert(totalVerticalPadding == _resolvedPadding.vertical);
+    if (child != null) {
+      assert(() {
+        if (height >= double.infinity) {
+          assert(height == double.infinity);
+          assert(height + totalVerticalPadding == double.infinity);
+          assert(height - totalVerticalPadding == double.infinity);
+          assert(math.max(0.0, double.infinity - totalVerticalPadding) == double.infinity);
+          assert(math.max(0.0, height - totalVerticalPadding) == double.infinity);
+        }
+        assert(child.getMinIntrinsicWidth(0.0) <= child.getMaxIntrinsicWidth(0.0));
+        assert(child.getMinIntrinsicWidth(double.infinity) <= child.getMaxIntrinsicWidth(double.infinity));
+        assert(child.getMinIntrinsicWidth(height) <= child.getMaxIntrinsicWidth(height));
+        assert(child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) <= child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)));
+        if (!_debugDoingIntrinsicsAsserts) {
+          _debugDoingIntrinsicsAsserts = true;
+          assert(child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding <= computeMaxIntrinsicWidth(height));
+          _debugDoingIntrinsicsAsserts = false;
+        }
+        return true;
+      }());
+      // next line relies on double.infinity absorption
       return child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
+    }
     return totalHorizontalPadding;
   }
 
@@ -166,8 +196,31 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.infinity absorption
+    assert(totalHorizontalPadding == _resolvedPadding.horizontal);
+    assert(totalVerticalPadding == _resolvedPadding.vertical);
+    if (child != null) {
+      assert(() {
+        if (height >= double.infinity) {
+          assert(height == double.infinity);
+          assert(height + totalVerticalPadding == double.infinity);
+          assert(height - totalVerticalPadding == double.infinity);
+          assert(math.max(0.0, double.infinity - totalVerticalPadding) == double.infinity);
+          assert(math.max(0.0, height - totalVerticalPadding) == double.infinity);
+        }
+        assert(child.getMinIntrinsicWidth(0.0) <= child.getMaxIntrinsicWidth(0.0));
+        assert(child.getMinIntrinsicWidth(double.infinity) <= child.getMaxIntrinsicWidth(double.infinity));
+        assert(child.getMinIntrinsicWidth(height) <= child.getMaxIntrinsicWidth(height));
+        assert(child.getMinIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) <= child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)));
+        if (!_debugDoingIntrinsicsAsserts) {
+          _debugDoingIntrinsicsAsserts = true;
+          assert(computeMinIntrinsicWidth(height) <= child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding);
+          _debugDoingIntrinsicsAsserts = false;
+        }
+        return true;
+      }());
+      // next line relies on double.infinity absorption
       return child.getMaxIntrinsicWidth(math.max(0.0, height - totalVerticalPadding)) + totalHorizontalPadding;
+    }
     return totalHorizontalPadding;
   }
 
@@ -176,8 +229,31 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.infinity absorption
+    assert(totalHorizontalPadding == _resolvedPadding.horizontal);
+    assert(totalVerticalPadding == _resolvedPadding.vertical);
+    if (child != null) {
+      assert(() {
+        if (width >= double.infinity) {
+          assert(width == double.infinity);
+          assert(width + totalHorizontalPadding == double.infinity);
+          assert(width - totalHorizontalPadding == double.infinity);
+          assert(math.max(0.0, double.infinity - totalHorizontalPadding) == double.infinity);
+          assert(math.max(0.0, width - totalHorizontalPadding) == double.infinity);
+        }
+        assert(child.getMinIntrinsicHeight(0.0) <= child.getMaxIntrinsicHeight(0.0));
+        assert(child.getMinIntrinsicHeight(double.infinity) <= child.getMaxIntrinsicHeight(double.infinity));
+        assert(child.getMinIntrinsicHeight(width) <= child.getMaxIntrinsicHeight(width));
+        assert(child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) <= child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)));
+        if (!_debugDoingIntrinsicsAsserts) {
+          _debugDoingIntrinsicsAsserts = true;
+          assert(child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding <= computeMaxIntrinsicHeight(width));
+          _debugDoingIntrinsicsAsserts = false;
+        }
+        return true;
+      }());
+      // next line relies on double.infinity absorption
       return child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
+    }
     return totalVerticalPadding;
   }
 
@@ -186,8 +262,31 @@ class RenderPadding extends RenderShiftedBox {
     _resolve();
     final double totalHorizontalPadding = _resolvedPadding.left + _resolvedPadding.right;
     final double totalVerticalPadding = _resolvedPadding.top + _resolvedPadding.bottom;
-    if (child != null) // next line relies on double.infinity absorption
+    assert(totalHorizontalPadding == _resolvedPadding.horizontal);
+    assert(totalVerticalPadding == _resolvedPadding.vertical);
+    if (child != null) {
+      assert(() {
+        if (width >= double.infinity) {
+          assert(width == double.infinity);
+          assert(width + totalHorizontalPadding == double.infinity);
+          assert(width - totalHorizontalPadding == double.infinity);
+          assert(math.max(0.0, double.infinity - totalHorizontalPadding) == double.infinity);
+          assert(math.max(0.0, width - totalHorizontalPadding) == double.infinity);
+        }
+        assert(child.getMinIntrinsicHeight(0.0) <= child.getMaxIntrinsicHeight(0.0));
+        assert(child.getMinIntrinsicHeight(double.infinity) <= child.getMaxIntrinsicHeight(double.infinity));
+        assert(child.getMinIntrinsicHeight(width) <= child.getMaxIntrinsicHeight(width));
+        assert(child.getMinIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) <= child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)));
+        if (!_debugDoingIntrinsicsAsserts) {
+          _debugDoingIntrinsicsAsserts = true;
+          assert(computeMinIntrinsicHeight(width) <= child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding);
+          _debugDoingIntrinsicsAsserts = false;
+        }
+        return true;
+      }());
+      // next line relies on double.infinity absorption
       return child.getMaxIntrinsicHeight(math.max(0.0, width - totalHorizontalPadding)) + totalVerticalPadding;
+    }
     return totalVerticalPadding;
   }
 
