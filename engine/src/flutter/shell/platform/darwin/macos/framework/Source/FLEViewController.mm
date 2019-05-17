@@ -204,6 +204,7 @@ static bool HeadlessOnMakeResourceCurrent(FLEViewController* controller) {
 static void CommonInit(FLEViewController* controller) {
   controller->_messageHandlers = [[NSMutableDictionary alloc] init];
   controller->_additionalKeyResponders = [[NSMutableOrderedSet alloc] init];
+  controller->_mouseTrackingMode = FlutterMouseTrackingModeInKeyWindow;
 }
 
 - (instancetype)initWithCoder:(NSCoder*)coder {
