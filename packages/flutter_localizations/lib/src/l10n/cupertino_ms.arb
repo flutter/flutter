@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "Pukul $hour",
   "datePickerMinuteSemanticsLabelOne": "1 minit",
   "datePickerMinuteSemanticsLabelOther": "$minute minit",
-  "datePickerDateOrder": "hbt",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "PG",
   "postMeridiemAbbreviation": "PTG",

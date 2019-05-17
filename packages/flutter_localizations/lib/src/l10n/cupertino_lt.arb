@@ -13,7 +13,7 @@
   "datePickerHourSemanticsLabelOther": "$hour val.",
   "datePickerMinuteSemanticsLabelOne": "1 min.",
   "datePickerMinuteSemanticsLabelOther": "$minute min.",
-  "datePickerDateOrder": "y-M-d",
+  "datePickerDateOrder": "ymd",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "priešpiet",
   "postMeridiemAbbreviation": "popiet",

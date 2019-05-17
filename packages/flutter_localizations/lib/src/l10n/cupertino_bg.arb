@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "$hour часа",
   "datePickerMinuteSemanticsLabelOne": "1 минута",
   "datePickerMinuteSemanticsLabelOther": "$minute минути",
-  "datePickerDateOrder": "мдг",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "AM",
   "postMeridiemAbbreviation": "PM",

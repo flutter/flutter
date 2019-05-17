@@ -209,7 +209,7 @@ class CupertinoLocalizationBg extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => r'Изрязване';
 
   @override
-  String get datePickerDateOrderString => r'мдг';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
@@ -1097,7 +1097,7 @@ class CupertinoLocalizationEl extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => r'Αποκοπή';
 
   @override
-  String get datePickerDateOrderString => r'μηε';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
@@ -3439,7 +3439,7 @@ class CupertinoLocalizationGl extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => r'Cortar';
 
   @override
-  String get datePickerDateOrderString => r'dma';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
@@ -4327,7 +4327,7 @@ class CupertinoLocalizationHy extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => r'Կտրել';
 
   @override
-  String get datePickerDateOrderString => r'օատ';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
@@ -5363,7 +5363,7 @@ class CupertinoLocalizationLt extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => r'Iškirpti';
 
   @override
-  String get datePickerDateOrderString => r'y-M-d';
+  String get datePickerDateOrderString => r'ymd';
 
   @override
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
@@ -5955,7 +5955,7 @@ class CupertinoLocalizationMs extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => r'Potong';
 
   @override
-  String get datePickerDateOrderString => r'hbt';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';

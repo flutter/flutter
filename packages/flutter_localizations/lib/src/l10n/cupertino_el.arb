@@ -3,7 +3,7 @@
   "datePickerHourSemanticsLabelOther": "$hour ακριβώς",
   "datePickerMinuteSemanticsLabelOne": "1 λεπτό",
   "datePickerMinuteSemanticsLabelOther": "$minute λεπτά",
-  "datePickerDateOrder": "μηε",
+  "datePickerDateOrder": "dmy",
   "datePickerDateTimeOrder": "date_time_dayPeriod",
   "anteMeridiemAbbreviation": "π.μ.",
   "postMeridiemAbbreviation": "μ.μ.",
