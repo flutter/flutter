@@ -50,6 +50,10 @@ typedef ExpansionPanelCallback = void Function(int panelIndex, bool isExpanded);
 /// [ExpansionPanel] needs to rebuild.
 typedef ExpansionPanelHeaderBuilder = Widget Function(BuildContext context, bool isExpanded);
 
+/// Signature for the callback that's called when the expansion indicator of the
+/// [ExpansionPanel] needs to rebuild.
+typedef ExpansionPanelIndicatorBuilder = Widget Function(BuildContext context, bool isExpanded);
+
 /// A material expansion panel. It has a header and a body and can be either
 /// expanded or collapsed. The body of the panel is only visible when it is
 /// expanded.
@@ -73,6 +77,7 @@ class ExpansionPanel {
     @required this.body,
     this.isExpanded = false,
     this.canTapOnHeader = false,
+    this.expansionIndicator,
   }) : assert(headerBuilder != null),
        assert(body != null),
        assert(isExpanded != null),
@@ -80,6 +85,10 @@ class ExpansionPanel {
 
   /// The widget builder that builds the expansion panels' header.
   final ExpansionPanelHeaderBuilder headerBuilder;
+
+  /// The widget builder that builds the expansion panels' indicator.
+  /// If null, use [ExpandIcon] for default
+  final ExpansionPanelIndicatorBuilder expansionIndicator;
 
   /// The body of the expansion panel that's displayed below the header.
   ///
@@ -118,11 +127,13 @@ class ExpansionPanelRadio extends ExpansionPanel {
     @required ExpansionPanelHeaderBuilder headerBuilder,
     @required Widget body,
     bool canTapOnHeader = false,
+    ExpansionPanelIndicatorBuilder expansionIndicator,
   }) : assert(value != null),
       super(
         body: body,
         headerBuilder: headerBuilder,
         canTapOnHeader: canTapOnHeader,
+        expansionIndicator:expansionIndicator,
       );
 
   /// The value that uniquely identifies a radio panel so that the currently
@@ -446,6 +457,24 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         context,
         _isChildExpanded(index),
       );
+      final Widget expansionIndicator = child.expansionIndicator != null
+          ? InkResponse(
+        onTap: !child.canTapOnHeader
+            ? () => _handlePressed(_isChildExpanded(index), index)
+            : null,
+        child: child
+            .expansionIndicator(
+          context,
+          _isChildExpanded(index),
+        ),
+      )
+          : ExpandIcon(
+        isExpanded: _isChildExpanded(index),
+        padding: const EdgeInsets.all(16.0),
+        onPressed: !child.canTapOnHeader
+            ? (bool isExpanded) => _handlePressed(isExpanded, index)
+            : null,
+      );
       final Row header = Row(
         children: <Widget>[
           Expanded(
@@ -461,13 +490,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
           ),
           Container(
             margin: const EdgeInsetsDirectional.only(end: 8.0),
-            child: ExpandIcon(
-              isExpanded: _isChildExpanded(index),
-              padding: const EdgeInsets.all(16.0),
-              onPressed: !child.canTapOnHeader
-                ? (bool isExpanded) => _handlePressed(isExpanded, index)
-                : null,
-            ),
+            child: expansionIndicator,
           ),
         ],
       );
