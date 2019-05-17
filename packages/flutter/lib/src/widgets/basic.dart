@@ -6070,7 +6070,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// @override
 /// Widget build(BuildContext context) {
 ///   Center(
-///     child: MergeSemantics( // comment out MergeSemantics to see difference
+///     child: MergeSemantics( // comment out this line to see difference
 ///       child: Padding(
 ///         padding: EdgeInsets.symmetric(horizontal: 20.0),
 ///         child: Row(
@@ -6087,7 +6087,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///           ],
 ///         ),
 ///       ),
-///     ),  // comment out MergeSemantics to see difference
+///     ),  // comment out this line to see difference
 ///   );
 /// }
 /// ```
