@@ -6049,22 +6049,63 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// A widget that merges the semantics of its descendants.
 ///
 /// Causes all the semantics of the subtree rooted at this node to be
-/// merged into one node in the semantics tree. For example, if you
-/// have a widget with a Text node next to a checkbox widget, this
-/// could be used to merge the label from the Text node with the
+/// merged into one node in the semantics tree.
+///
+/// If you have a widget with a Text node next to a checkbox
+/// widget, this could be used to merge the label from the Text node with the
 /// "checked" semantic state of the checkbox into a single node that
 /// had both the label and the checked state. Otherwise, the label
 /// would be presented as a separate feature than the checkbox, and
 /// the user would not be able to be sure that they were related.
 ///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// To see the end result, make sure to set the MaterialApp's
+/// showSemanticsDebugger property is set to `true`. The property is available
+/// in WidgetApp and CupertinoApp as well.
+///
+/// ```dart
+/// bool _isChecked = true;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   Center(
+///     child: MergeSemantics( // comment out to see difference
+///       child: Padding(
+///         padding: EdgeInsets.symmetric(horizontal: 20.0),
+///         child: Row(
+///           children: <Widget>[
+///             Expanded(child: Text('Checkbox is here')),
+///             Checkbox(
+///               value: _isChecked,
+///               onChanged: (bool newValue) {
+///                 setState(() {
+///                   _isChecked = newValue;
+///                 });
+///               },
+///             ),
+///           ],
+///         ),
+///       ),
+///     ),  // comment out to see difference
+///   );
+/// }
+/// ```
+///
 /// Be aware that if two nodes in the subtree have conflicting
-/// semantics, the result may be nonsensical. For example, a subtree
-/// with a checked checkbox and an unchecked checkbox will be
-/// presented as checked. All the labels will be merged into a single
+/// semantics, the result may be nonsensical.
+///
+/// For example, a subtree with a checked [Checkbox] and an unchecked [Checkbox]
+/// will be presented as checked. All the labels will be merged into a single
 /// string (with newlines separating each label from the other). If
 /// multiple nodes in the merged subtree can handle semantic gestures,
 /// the first one in tree order will be the one to receive the
 /// callbacks.
+///
+/// If a descendant widget of MergeSemantics requires its own [SemanticsNode]
+/// (i.e. [SemanticsConfiguration.explicitChildNodes] is set to true), an
+/// error will be thrown since this directly conflicts with the intent of
+/// MergeSemantics.
 class MergeSemantics extends SingleChildRenderObjectWidget {
   /// Creates a widget that merges the semantics of its descendants.
   const MergeSemantics({ Key key, Widget child }) : super(key: key, child: child);
