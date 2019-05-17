@@ -6062,7 +6062,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///
 /// To see the end result, make sure to set the MaterialApp's
 /// showSemanticsDebugger property is set to `true`. The property is available
-/// in WidgetApp and CupertinoApp as well.
+/// for WidgetApp and CupertinoApp as well.
 ///
 /// ```dart
 /// bool _isChecked = true;
@@ -6070,7 +6070,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 /// @override
 /// Widget build(BuildContext context) {
 ///   Center(
-///     child: MergeSemantics( // comment out to see difference
+///     child: MergeSemantics( // comment out MergeSemantics to see difference
 ///       child: Padding(
 ///         padding: EdgeInsets.symmetric(horizontal: 20.0),
 ///         child: Row(
@@ -6087,10 +6087,11 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///           ],
 ///         ),
 ///       ),
-///     ),  // comment out to see difference
+///     ),  // comment out MergeSemantics to see difference
 ///   );
 /// }
 /// ```
+/// {@end-tool}
 ///
 /// Be aware that if two nodes in the subtree have conflicting
 /// semantics, the result may be nonsensical.
