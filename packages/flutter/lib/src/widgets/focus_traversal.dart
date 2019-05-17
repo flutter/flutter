@@ -227,7 +227,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   }
 
   FocusNode _sortAndFindInitial(FocusNode currentNode, { bool vertical, bool first }) {
-    final Iterable<FocusNode> nodes = currentNode.nearestScope.descendants;
+    final Iterable<FocusNode> nodes = currentNode.nearestScope.traversalDescendants;
     final List<FocusNode> sorted = nodes.toList();
     sorted.sort((FocusNode a, FocusNode b) {
       if (vertical) {
@@ -261,7 +261,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
     FocusNode nearestScope,
   ) {
     assert(direction == TraversalDirection.left || direction == TraversalDirection.right);
-    final Iterable<FocusNode> nodes = nearestScope.descendants;
+    final Iterable<FocusNode> nodes = nearestScope.traversalDescendants;
     assert(!nodes.contains(nearestScope));
     final List<FocusNode> sorted = nodes.toList();
     sorted.sort((FocusNode a, FocusNode b) => a.rect.center.dx.compareTo(b.rect.center.dx));
@@ -397,7 +397,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         final Iterable<FocusNode> eligibleNodes = _sortAndFilterVertically(
           direction,
           focusedChild.rect,
-          nearestScope.descendants,
+          nearestScope.traversalDescendants,
         );
         if (eligibleNodes.isEmpty) {
           break;
@@ -434,7 +434,7 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
         final Rect band = Rect.fromLTRB(-double.infinity, focusedChild.rect.top, double.infinity, focusedChild.rect.bottom);
         final Iterable<FocusNode> inBand = sorted.where((FocusNode node) => !node.rect.intersect(band).isEmpty);
         if (inBand.isNotEmpty) {
-          // The inBand list is already sorted by horizontal distance, so pick the closest one.
+          // The inBand list is already sorted by vertical distance, so pick the closest one.
           found = inBand.first;
           break;
         }
@@ -483,8 +483,8 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     // doesn't have a focusedChild, or a non-scope is encountered.
     FocusNode candidate = scope.focusedChild;
     if (candidate == null) {
-      if (scope.children.isNotEmpty) {
-        candidate = scope.children.first;
+      if (scope.traversalChildren.isNotEmpty) {
+        candidate = scope.traversalChildren.first;
       } else {
         candidate = currentNode;
       }
@@ -513,7 +513,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     FocusNode firstNode;
     FocusNode lastNode;
     bool visit(FocusNode node) {
-      for (FocusNode visited in node.children) {
+      for (FocusNode visited in node.traversalChildren) {
         firstNode ??= visited;
         if (!visit(visited)) {
           return false;
@@ -600,7 +600,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     // doesn't have a focusedChild, or a non-scope is encountered.
     FocusNode candidate = scope.focusedChild;
     while (candidate == null) {
-      if (candidate.nearestScope.children.isNotEmpty) {
+      if (candidate.nearestScope.traversalChildren.isNotEmpty) {
         candidate = _sortByGeometry(scope).first;
       }
       if (candidate is FocusScopeNode) {
@@ -611,7 +611,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     }
 
     if (candidate == null) {
-      if (scope.children.isNotEmpty) {
+      if (scope.traversalChildren.isNotEmpty) {
         candidate = _sortByGeometry(scope).first;
       } else {
         candidate = currentNode;
@@ -627,7 +627,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   // Sorts the list of nodes based on their geometry into the desired reading
   // order based on the directionality of the context for each node.
   Iterable<FocusNode> _sortByGeometry(FocusNode scope) {
-    final Iterable<FocusNode> nodes = scope.descendants;
+    final Iterable<FocusNode> nodes = scope.traversalDescendants;
     if (nodes.length <= 1) {
       return nodes;
     }

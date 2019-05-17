@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/rendering.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -65,7 +66,6 @@ void main() {
     expect(material.textStyle.fontSize, 14);
     expect(material.textStyle.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.transparency);
-
 
     // Disabled MaterialButton
     await tester.pumpWidget(
@@ -319,6 +319,217 @@ void main() {
     expect(material.textStyle.fontSize, 14);
     expect(material.textStyle.fontWeight, FontWeight.w500);
     expect(material.type, MaterialType.button);
+  });
+
+  testWidgets('Do buttons work with hover', (WidgetTester tester) async {
+    const Color hoverColor = Color(0xff001122);
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          hoverColor: hoverColor,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(MaterialButton)));
+    await tester.pumpAndSettle();
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: hoverColor));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          hoverColor: hoverColor,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: hoverColor));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          hoverColor: hoverColor,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: hoverColor));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          hoverColor: hoverColor,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: hoverColor));
+
+    gesture.removePointer();
+  });
+
+  testWidgets('Do buttons work with focus', (WidgetTester tester) async {
+    const Color focusColor = Color(0xff001122);
+
+    FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode = FocusNode(debugLabel: 'FlatButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: FlatButton(
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode = FocusNode(debugLabel: 'RaisedButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: RaisedButton(
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+
+    focusNode = FocusNode(debugLabel: 'OutlineButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: OutlineButton(
+          focusColor: focusColor,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+  });
+
+  testWidgets('Button elevation and colors have proper precedence', (WidgetTester tester) async {
+    const double elevation = 10.0;
+    const double focusElevation = 11.0;
+    const double hoverElevation = 12.0;
+    const double highlightElevation = 13.0;
+    const Color focusColor = Color(0xff001122);
+    const Color hoverColor = Color(0xff112233);
+    const Color highlightColor = Color(0xff223344);
+
+    final Finder rawButtonMaterial = find.descendant(
+      of: find.byType(MaterialButton),
+      matching: find.byType(Material),
+    );
+
+    final FocusNode focusNode = FocusNode(debugLabel: 'MaterialButton Node');
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MaterialButton(
+          focusColor: focusColor,
+          hoverColor: hoverColor,
+          highlightColor: highlightColor,
+          elevation: elevation,
+          focusElevation: focusElevation,
+          hoverElevation: hoverElevation,
+          highlightElevation: highlightElevation,
+          focusNode: focusNode,
+          onPressed: () { },
+          child: const Text('button'),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Base elevation
+    Material material = tester.widget<Material>(rawButtonMaterial);
+    expect(material.elevation, equals(elevation));
+
+    // Focus elevation overrides base
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(rawButtonMaterial);
+    RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor));
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    expect(material.elevation, equals(focusElevation));
+
+    // Hover elevation overrides focus
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(MaterialButton)));
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(rawButtonMaterial);
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor)..rect(color: hoverColor));
+    expect(material.elevation, equals(hoverElevation));
+    await gesture.removePointer();
+
+    // Highlight elevation overrides hover
+    gesture = await tester.startGesture(tester.getCenter(find.byType(MaterialButton)));
+    await tester.pumpAndSettle();
+    material = tester.widget<Material>(rawButtonMaterial);
+    inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..rect(color: focusColor)..rect(color: highlightColor));
+    expect(material.elevation, equals(highlightElevation));
+    await gesture.up();
   });
 
   testWidgets('Does FlatButton contribute semantics', (WidgetTester tester) async {
@@ -952,7 +1163,7 @@ void main() {
     expect(tester.widget<Material>(rawButtonMaterial).shape, const StadiumBorder());
   });
 
-  testWidgets('MaterialButton defaults', (WidgetTester tester) async {
+  testWidgets('MaterialButton disabled default is correct.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/30012.
 
     final Finder rawButtonMaterial = find.descendant(

@@ -19,11 +19,16 @@ class TapDownDetails {
   /// Creates details for a [GestureTapDownCallback].
   ///
   /// The [globalPosition] argument must not be null.
-  TapDownDetails({ this.globalPosition = Offset.zero })
-    : assert(globalPosition != null);
+  TapDownDetails({
+    this.globalPosition = Offset.zero,
+    this.kind,
+  }) : assert(globalPosition != null);
 
   /// The global position at which the pointer contacted the screen.
   final Offset globalPosition;
+
+  /// The kind of the device that initiated the event.
+  final PointerDeviceKind kind;
 }
 
 /// Signature for when a pointer that might cause a tap has contacted the
@@ -198,15 +203,15 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   }
 
   @override
-  void didExceedDeadline() {
-    _checkDown();
+  void didExceedDeadlineWithEvent(PointerDownEvent event) {
+    _checkDown(event.pointer);
   }
 
   @override
   void acceptGesture(int pointer) {
     super.acceptGesture(pointer);
     if (pointer == primaryPointer) {
-      _checkDown();
+      _checkDown(pointer);
       _wonArenaForPrimaryPointer = true;
       _checkUp();
     }
@@ -224,10 +229,15 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
     }
   }
 
-  void _checkDown() {
+  void _checkDown(int pointer) {
     if (!_sentTapDown) {
       if (onTapDown != null)
-        invokeCallback<void>('onTapDown', () { onTapDown(TapDownDetails(globalPosition: initialPosition)); });
+        invokeCallback<void>('onTapDown', () {
+          onTapDown(TapDownDetails(
+            globalPosition: initialPosition,
+            kind: getKindForPointer(pointer),
+          ));
+        });
       _sentTapDown = true;
     }
   }

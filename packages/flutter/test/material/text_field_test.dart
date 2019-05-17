@@ -764,6 +764,8 @@ void main() {
     // The cursor is placed just like a regular tap.
     expect(controller.selection.baseOffset, eIndex);
     expect(controller.selection.extentOffset, eIndex);
+
+    await gesture.removePointer();
   });
 
   testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
@@ -827,6 +829,8 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
+
+    await gesture.removePointer();
   });
 
   testWidgets('Continuous dragging does not cause flickering', (WidgetTester tester) async {
@@ -879,6 +883,8 @@ void main() {
     expect(selectionChangedCount, 1);
     expect(controller.selection.baseOffset, 2);
     expect(controller.selection.extentOffset, 9);
+
+    await gesture.removePointer();
   });
 
   testWidgets('Dragging in opposite direction also works', (WidgetTester tester) async {
@@ -911,6 +917,8 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
+
+    await gesture.removePointer();
   });
 
   testWidgets('Slow mouse dragging also selects text', (WidgetTester tester) async {
@@ -942,6 +950,8 @@ void main() {
 
     expect(controller.selection.baseOffset, testValue.indexOf('e'));
     expect(controller.selection.extentOffset, testValue.indexOf('g'));
+
+    await gesture.removePointer();
   });
 
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
@@ -3253,6 +3263,8 @@ void main() {
         ),
       ),
     );
+    focusNode.requestFocus();
+    await tester.pump();
 
     const String testValue = 'a big house\njumped over a mouse'; // 11 \n 19
     await tester.enterText(find.byType(TextField), testValue);
@@ -3927,7 +3939,7 @@ void main() {
     ), ignoreTransform: true, ignoreRect: true));
 
     // move cursor back once
-    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <String, int>{
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <dynamic, dynamic>{
       'base': 4,
       'extent': 4,
     });
@@ -3935,7 +3947,7 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: 4));
 
     // move cursor to front
-    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <String, int>{
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <dynamic, dynamic>{
       'base': 0,
       'extent': 0,
     });
@@ -3943,7 +3955,7 @@ void main() {
     expect(controller.selection, const TextSelection.collapsed(offset: 0));
 
     // select all
-    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <String, int>{
+    semanticsOwner.performAction(inputFieldId, SemanticsAction.setSelection, <dynamic, dynamic>{
       'base': 0,
       'extent': 5,
     });
@@ -5899,8 +5911,9 @@ void main() {
       ),
     );
 
-    final RenderEditable renderEditable =
-      tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+    final EditableTextState state =
+      tester.state<EditableTextState>(find.byType(EditableText));
+    final RenderEditable renderEditable = state.renderEditable;
 
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
@@ -5950,5 +5963,288 @@ void main() {
     expect(right.opacity.value, equals(1.0));
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('Tap shows handles but not toolbar', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'abc def ghi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    // Tap to trigger the text field.
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+  });
+
+  testWidgets(
+    'Tap in empty text field does not show handles nor toolbar',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(controller: controller),
+          ),
+        ),
+      );
+
+      // Tap to trigger the text field.
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      final EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+    },
+  );
+
+  testWidgets('Long press shows handles and toolbar', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'abc def ghi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    // Long press to trigger the text field.
+    await tester.longPress(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+  });
+
+  testWidgets(
+    'Long press in empty text field shows handles and toolbar',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(controller: controller),
+          ),
+        ),
+      );
+
+      // Tap to trigger the text field.
+      await tester.longPress(find.byType(TextField));
+      await tester.pump();
+
+      final EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    },
+  );
+
+  testWidgets('Double tap shows handles and toolbar', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'abc def ghi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    // Double tap to trigger the text field.
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+  });
+
+  testWidgets(
+    'Double tap in empty text field shows toolbar but not handles',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(controller: controller),
+          ),
+        ),
+      );
+
+      // Double tap to trigger the text field.
+      await tester.tap(find.byType(TextField));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(find.byType(TextField));
+      await tester.pump();
+
+      final EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+      expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+    },
+  );
+
+  testWidgets(
+    'Mouse tap does not show handles nor toolbar',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'abc def ghi',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(controller: controller),
+          ),
+        ),
+      );
+
+      // Long press to trigger the text field.
+      final Offset textFieldPos = tester.getCenter(find.byType(TextField));
+      final TestGesture gesture = await tester.startGesture(
+        textFieldPos,
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      final EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+
+      await gesture.removePointer();
+    },
+  );
+
+  testWidgets(
+    'Mouse long press does not show handles nor toolbar',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'abc def ghi',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(controller: controller),
+          ),
+        ),
+      );
+
+      // Long press to trigger the text field.
+      final Offset textFieldPos = tester.getCenter(find.byType(TextField));
+      final TestGesture gesture = await tester.startGesture(
+        textFieldPos,
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump(const Duration(seconds: 2));
+      await gesture.up();
+      await tester.pump();
+
+      final EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+
+      await gesture.removePointer();
+    },
+  );
+
+  testWidgets(
+    'Mouse double tap does not show handles nor toolbar',
+        (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'abc def ghi',
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: TextField(controller: controller),
+          ),
+        ),
+      );
+
+      // Double tap to trigger the text field.
+      final Offset textFieldPos = tester.getCenter(find.byType(TextField));
+      final TestGesture gesture = await tester.startGesture(
+        textFieldPos,
+        pointer: 7,
+        kind: PointerDeviceKind.mouse,
+      );
+      await tester.pump(const Duration(milliseconds: 50));
+      await gesture.up();
+      await tester.pump();
+      await gesture.down(textFieldPos);
+      await tester.pump();
+      await gesture.up();
+      await tester.pump();
+
+      final EditableTextState editableText = tester.state(find.byType(EditableText));
+      expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+      expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+
+      await gesture.removePointer();
+    },
+  );
+
+  testWidgets('Tapping selection handles toggles the toolbar', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(
+      text: 'abc def ghi',
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: TextField(controller: controller),
+        ),
+      ),
+    );
+
+    // Tap to position the cursor and show the selection handles.
+    final Offset ePos = textOffsetToPosition(tester, 5); // Index of 'e'.
+    await tester.tapAt(ePos, pointer: 7);
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    final List<TextSelectionPoint> endpoints = globalize(
+      renderEditable.getEndpointsForSelection(controller.selection),
+      renderEditable,
+    );
+    expect(endpoints.length, 1);
+
+    // Tap the handle to show the toolbar.
+    final Offset handlePos = endpoints[0].point + const Offset(0.0, 1.0);
+    await tester.tapAt(handlePos, pointer: 7);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isTrue);
+
+    // Tap the handle again to hide the toolbar.
+    await tester.tapAt(handlePos, pointer: 7);
+    expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
   });
 }

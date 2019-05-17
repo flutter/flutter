@@ -13,7 +13,7 @@ void main() {
   testWidgets('OutlineButton implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     OutlineButton(
-      onPressed: () { },
+      onPressed: () {},
       textColor: const Color(0xFF00FF00),
       disabledTextColor: const Color(0xFFFF0000),
       color: const Color(0xFF000000),
@@ -42,7 +42,7 @@ void main() {
           body: Center(
             child: OutlineButton(
               child: const Text('OutlineButton'),
-              onPressed: () { },
+              onPressed: () {},
             ),
           ),
         ),
@@ -108,7 +108,7 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(() { }));
+    await tester.pumpWidget(buildFrame(() {}));
     await tester.press(find.byType(OutlineButton));
     await tester.pumpAndSettle();
     await tester.pumpWidget(buildFrame(null));
@@ -176,7 +176,7 @@ void main() {
 
     // Pump a new button with a no-op onPressed callback to make it enabled.
     await tester.pumpWidget(
-      buildFrame(onPressed: () { }),
+      buildFrame(onPressed: () {}),
     );
 
     // Wait for the border color to change from disabled to enabled.
@@ -236,9 +236,9 @@ void main() {
         child: Material(
           child: Center(
             child: OutlineButton(
-                key: buttonKey,
-                onPressed: () { },
-                child: const Text('ABC'),
+              key: buttonKey,
+              onPressed: () {},
+              child: const Text('ABC'),
             ),
           ),
         ),
@@ -259,7 +259,7 @@ void main() {
         child: Material(
           child: Center(
             child: OutlineButton(
-              onPressed: () { },
+              onPressed: () {},
               child: const Text('ABC'),
             ),
           ),
@@ -300,7 +300,7 @@ void main() {
             data: const MediaQueryData(textScaleFactor: 1.0),
             child: Center(
               child: OutlineButton(
-                onPressed: () { },
+                onPressed: () {},
                 child: const Text('ABC'),
               ),
             ),
@@ -321,7 +321,7 @@ void main() {
             data: const MediaQueryData(textScaleFactor: 1.3),
             child: Center(
               child: FlatButton(
-                onPressed: () { },
+                onPressed: () {},
                 child: const Text('ABC'),
               ),
             ),
@@ -345,7 +345,7 @@ void main() {
             data: const MediaQueryData(textScaleFactor: 3.0),
             child: Center(
               child: FlatButton(
-                onPressed: () { },
+                onPressed: () {},
                 child: const Text('ABC'),
               ),
             ),
@@ -369,7 +369,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
-              onPressed: () { },
+              onPressed: () {},
               // Causes the button to be filled with the theme's canvasColor
               // instead of Colors.transparent before the button material's
               // elevation is animated to 2.0.
