@@ -6069,7 +6069,7 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///
 /// @override
 /// Widget build(BuildContext context) {
-///   Center(
+///   return Center(
 ///     child: MergeSemantics( // comment out this line to see difference
 ///       child: Padding(
 ///         padding: EdgeInsets.symmetric(horizontal: 20.0),
