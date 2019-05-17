@@ -31,3 +31,12 @@ bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOv
   }());
   return true;
 }
+
+/// Whether [NetworkImage] should use a newly instantiated [HttpClient] when
+/// loading images.
+///
+/// This setting can be overridden for testing to ensure that each test receives
+/// a mock client that hasn't been affected by other tests.
+///
+/// This value is ignored in non-debug builds.
+bool debugNetworkImageUseFreshHttpClient = false;

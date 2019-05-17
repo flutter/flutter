@@ -22,12 +22,6 @@ void main() {
       imageCache.clear();
     });
 
-    test('NetworkImage non-null url test', () {
-      expect(() {
-        NetworkImage(nonconst(null));
-      }, throwsAssertionError);
-    });
-
     test('ImageProvider can evict images', () async {
       final Uint8List bytes = Uint8List.fromList(kTransparentImage);
       final MemoryImage imageProvider = MemoryImage(bytes);
@@ -94,7 +88,7 @@ void main() {
     final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
         uncaught = true;
-      }
+      },
     ));
     await testZone.run(() async {
       final ImageProvider imageProvider = LoadErrorImageProvider();
@@ -112,12 +106,12 @@ void main() {
     expect(uncaught, false);
   });
 
-   test('ImageProvider.resolve errors in the completer will be caught', () async {
+  test('ImageProvider.resolve errors in the completer will be caught', () async {
     bool uncaught = false;
     final Zone testZone = Zone.current.fork(specification: ZoneSpecification(
       handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
         uncaught = true;
-      }
+      },
     ));
     await testZone.run(() async {
       final ImageProvider imageProvider = LoadErrorCompleterImageProvider();
@@ -135,30 +129,56 @@ void main() {
     expect(uncaught, false);
   });
 
-  test('ImageProvider.resolve errors in the http client will be caught', () async {
-    bool uncaught = false;
-    final HttpClientMock httpClientMock = HttpClientMock();
-    when(httpClientMock.getUrl(any)).thenThrow(Error());
+  group(NetworkImage, () {
+    MockHttpClient httpClient;
 
-    await HttpOverrides.runZoned(() async {
-      const ImageProvider imageProvider = NetworkImage('asdasdasdas');
-      final Completer<bool> caughtError = Completer<bool>();
-      FlutterError.onError = (FlutterErrorDetails details) {
-        throw Error();
-      };
-      final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-      result.addListener((ImageInfo info, bool syncCall) {
-      }, onError: (dynamic error, StackTrace stackTrace) {
-        caughtError.complete(true);
-      });
-      expect(await caughtError.future, true);
-    }, createHttpClient: (SecurityContext context) => httpClientMock, zoneSpecification: ZoneSpecification(
-      handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
-        uncaught = true;
-      }
-    ));
-    expect(uncaught, false);
+    setUp(() {
+      debugNetworkImageUseFreshHttpClient = true;
+      httpClient = MockHttpClient();
+    });
+
+    tearDown(() {
+      debugNetworkImageUseFreshHttpClient = false;
+    });
+
+    R runWithHttpClientMock<R>(R runnable(), {ZoneSpecification zoneSpecification}) {
+      return HttpOverrides.runZoned<R>(
+        runnable,
+        createHttpClient: (SecurityContext context) => httpClient,
+        zoneSpecification: zoneSpecification,
+      );
+    }
+
+    test('Disallows null urls', () {
+      expect(() {
+        NetworkImage(nonconst(null));
+      }, throwsAssertionError);
+    });
+
+    test('Propagates http client errors during resolve()', () async {
+      when(httpClient.getUrl(any)).thenThrow(Error());
+      bool uncaught = false;
+
+      await runWithHttpClientMock(() async {
+        const ImageProvider imageProvider = NetworkImage('asdasdasdas');
+        final Completer<bool> caughtError = Completer<bool>();
+        FlutterError.onError = (FlutterErrorDetails details) {
+          throw Error();
+        };
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        result.addListener((ImageInfo info, bool syncCall) {
+        }, onError: (dynamic error, StackTrace stackTrace) {
+          caughtError.complete(true);
+        });
+        expect(await caughtError.future, true);
+      }, zoneSpecification: ZoneSpecification(
+        handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {
+          uncaught = true;
+        },
+      ));
+      expect(uncaught, false);
+    });
   });
 }
 
-class HttpClientMock extends Mock implements HttpClient {}
+class MockHttpClient extends Mock implements HttpClient {}
