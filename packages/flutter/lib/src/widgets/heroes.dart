@@ -345,7 +345,7 @@ class _HeroState extends State<Hero> {
       : SizedBox(
           width: _placeholderSize.width,
           height: _placeholderSize.height
-    );
+        );
   }
 }
 
