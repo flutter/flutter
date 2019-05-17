@@ -1203,8 +1203,8 @@ class ParagraphConstraints {
   /// forced line break is placed after it (even if an explicit line break
   /// follows).
   ///
-  /// The width influences how ellipses are applied. See the discussion at [new
-  /// ParagraphStyle] for more details.
+  /// The width influences how ellipses are applied. See the discussion at
+  /// [new ParagraphStyle] for more details.
   ///
   /// This width is also used to position glyphs according to the [TextAlign]
   /// alignment described in the [ParagraphStyle] used when building the
@@ -1354,8 +1354,8 @@ class Paragraph extends NativeFieldWrapperClass2 {
   /// null, `ellipsis` was not null, and one of the lines exceeded the width
   /// constraint.
   ///
-  /// See the discussion of the `maxLines` and `ellipsis` arguments at [new
-  /// ParagraphStyle].
+  /// See the discussion of the `maxLines` and `ellipsis` arguments at
+  /// [new ParagraphStyle].
   bool get didExceedMaxLines native 'Paragraph_didExceedMaxLines';
 
   /// Computes the size and position of each glyph in the paragraph.
@@ -1405,8 +1405,8 @@ class Paragraph extends NativeFieldWrapperClass2 {
 /// Builds a [Paragraph] containing text with the given styling information.
 ///
 /// To set the paragraph's alignment, truncation, and ellipsizing behavior, pass
-/// an appropriately-configured [ParagraphStyle] object to the [new
-/// ParagraphBuilder] constructor.
+/// an appropriately-configured [ParagraphStyle] object to the
+/// [new ParagraphBuilder] constructor.
 ///
 /// Then, call combinations of [pushStyle], [addText], and [pop] to add styled
 /// text to the object.
