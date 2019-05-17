@@ -28,3 +28,10 @@ import 'package:flutter/widgets.dart';
 // }
 
 typedef ContextMenuChangedCallback = void Function(bool isOpen, [dynamic value]);
+
+@immutable
+/// TODO
+class ContextMenuActionDetails {
+}
+
+typedef ContextMenuAction = Future<void> Function(ContextMenuActionDetails details);

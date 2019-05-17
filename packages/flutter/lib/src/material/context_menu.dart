@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import '../widgets/context_menu.dart';
 import '../widgets/editable_text.dart';
 import 'debug.dart';
 import 'material_localizations.dart';
@@ -8,34 +9,43 @@ import 'popup_menu.dart';
 import 'theme.dart';
 
 /// TODO
-RelativeRect getLocalPosition({
-  @required Offset globalPosition,
-  @required BuildContext context
-}) {
-  return RelativeRect.fromSize(globalPosition & Size.zero, MediaQuery.of(context).size);
-}
-
-/// TODO
 class _MaterialTextContextMenuControls extends TextContextMenuControls {
 
+  List<PopupMenuEntry<ContextMenuAction>> _buildItems({
+    @required EditableTextState editableText,
+  }) {
+    final TextSelectionControls controls = editableText.widget.selectionControls;
+    return <PopupMenuEntry<ContextMenuAction>>[
+      PopupMenuItem<ContextMenuAction>(
+        child: const Text('Cut'),
+        enabled: controls.canCut(editableText),
+        value: (_) async => controls.handleCut(editableText),
+      ),
+      PopupMenuItem<ContextMenuAction>(
+        child: const Text('Copy'),
+        enabled: controls.canCopy(editableText),
+        value: (_) async => controls.handleCopy(editableText),
+      ),
+      PopupMenuItem<ContextMenuAction>(
+        child: const Text('Paste'),
+        enabled: controls.canPaste(editableText),
+        value: (_) async => controls.handlePaste(editableText),
+      ),
+      PopupMenuItem<ContextMenuAction>(
+        child: const Text('Select all'),
+        enabled: controls.canSelectAll(editableText),
+        value: (_) async => controls.handleSelectAll(editableText),
+      ),
+    ];
+  }
+
   @override
-  ModalRoute<dynamic> buildRoute({
+  ModalRoute<ContextMenuAction> buildRoute({
     @required BuildContext context,
     @required Offset globalPosition,
     @required EditableTextState editableText,
   }) {
     assert(debugCheckHasMaterialLocalizations(context));
-
-    final TextSelection selection = editableText.textEditingValue.selection;
-    final TextPosition textPosition = editableText.renderEditable.getPositionForPoint(globalPosition);
-    final bool withinSelection = selection.start <= textPosition.offset
-      && selection.end > textPosition.offset;
-
-    final List<PopupMenuEntry<dynamic>> items = <PopupMenuEntry<dynamic>>[
-      PopupMenuItem<dynamic>(
-        child: Text('Selection $withinSelection'),
-      ),
-    ];
 
     String label;
     switch (defaultTargetPlatform) {
@@ -47,9 +57,9 @@ class _MaterialTextContextMenuControls extends TextContextMenuControls {
     }
 
     const double elevation = 8.0;
-    return createPopupMenuRoute<dynamic>(
+    return createPopupMenuRoute<ContextMenuAction>(
       position: getLocalPosition(globalPosition: globalPosition, context: context),
-      items: items,
+      items: _buildItems(editableText: editableText),
       elevation: elevation,
       semanticLabel: label,
       theme: Theme.of(context, shadowThemeOnly: true),

@@ -203,29 +203,33 @@ abstract class TextContextMenuControls {
   TextContextMenuControls();
 
   /// TODO
-  ModalRoute<dynamic> buildRoute({
+  ModalRoute<ContextMenuAction> buildRoute({
     @required BuildContext context,
     @required Offset globalPosition,
     @required EditableTextState editableText,
   });
 
-  // /// TODO
-  // Future<T> showMenu({
-  //   @required BuildContext context,
-  //   @required Offset globalLocation,
-  // }) {
-  //   assert(context != null);
-  //   assert(globalLocation != null);
-  //   final ModalRoute<T> route = buildRoute(
-  //     position: RelativeRect.fromSize(
-  //       globalLocation & Size.zero,
-  //       MediaQuery.of(context).size,
-  //     ),
-  //   );
-  //   assert(route != null);
+  /// TODO
+  RelativeRect getLocalPosition({
+    @required Offset globalPosition,
+    @required BuildContext context
+  }) {
+    return RelativeRect.fromSize(globalPosition & Size.zero, MediaQuery.of(context).size);
+  }
 
-  //   return Navigator.push(context, route);
-  // }
+  /// TODO
+  Future<ContextMenuAction> showMenu({
+    @required BuildContext context,
+    @required Offset globalPosition,
+    @required EditableTextState editableText,
+  }) {
+    final ModalRoute<ContextMenuAction> route = buildRoute(
+      context: context,
+      globalPosition: globalPosition,
+      editableText: editableText,
+    );
+    return Navigator.push<ContextMenuAction>(context, route);
+  }
 }
 
 /// A basic text input field.
@@ -1208,6 +1212,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   Future<void> _handleContextTap(ContextTapDetails details) async {
     // Callback is only assigned when contextMenuControls is not null
     assert(widget.contextMenuControls != null);
+
     final TextSelection selection = _value.selection;
     final bool withinSelection = selection.start <= details.textPosition.offset
       && selection.end > details.textPosition.offset;
@@ -1218,17 +1223,20 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         cause: SelectionChangedCause.tap,
       );
     }
-    final ModalRoute<dynamic> route = widget.contextMenuControls.buildRoute(
-      context: context,
-      globalPosition: details.globalPosition,
-      editableText: this,
-    );
     setState(() {
       _contextMenuIsOpen = true;
     });
     if (widget.onContextMenuChanged != null)
       widget.onContextMenuChanged(true);
-    final dynamic value = await Navigator.push<dynamic>(context, route);
+
+    final ContextMenuAction value = await widget.contextMenuControls.showMenu(
+      context: context,
+      globalPosition: details.globalPosition,
+      editableText: this,
+    );
+    if (value != null)
+      await value(ContextMenuActionDetails());
+
     setState(() {
       _contextMenuIsOpen = false;
     });
