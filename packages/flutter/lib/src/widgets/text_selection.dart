@@ -1083,7 +1083,13 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
 
 // A TapGestureRecognizer which allows other GestureRecognizers to win in the
 // GestureArena. This means both _TransparentTapGestureRecognizer and other
-// GestureRecognizer and other GestureRecognizers can handle the same event.
+// GestureRecognizers can handle the same event.
+//
+// This enables proper handling of events on both the selection handle and the
+// underlying input, since there is significant overlap between the two given
+// the handle's padded hit area.  For example, the selection handle needs to
+// handle single taps on itself, but double taps need to be handled by the
+// underlying input.
 class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
   _TransparentTapGestureRecognizer({
     Object debugOwner,
@@ -1105,7 +1111,10 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
   @override
   void rejectGesture(int pointer) {
     // Accept gestures that another recognizer has already won. However, don't
-    // do this for longpress gestures.
+    // do this for longpress gestures, in order to allow longpress-to-select.
+    // This longpress timer prevents a tap from being received after the
+    // conclusion of a longpress, which interferes with the effects of the
+    // longpress.
     if (!_exceededLongpressDeadline) {
       acceptGesture(pointer);
     }
