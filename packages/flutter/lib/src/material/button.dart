@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
+import 'colors.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -231,14 +232,24 @@ class RawMaterialButton extends StatefulWidget {
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
-  bool _highlight = false;
-  bool _focused = false;
-  bool _hovering = false;
+  Set<MaterialState> states = <MaterialState>{};
+
+  bool get _highlight => states.contains(MaterialState.pressed);
+  bool get _hovered => states.contains(MaterialState.hovered);
+  bool get _focused => states.contains(MaterialState.hovered);
+
+  void _updateState(bool value, MaterialState state) {
+    if (value) {
+      states.add(state);
+    } else {
+      states.remove(state);
+    }
+  }
 
   void _handleHighlightChanged(bool value) {
     if (_highlight != value) {
       setState(() {
-        _highlight = value;
+        _updateState(value, MaterialState.pressed);
         if (widget.onHighlightChanged != null) {
           widget.onHighlightChanged(value);
         }
@@ -250,7 +261,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_highlight && !widget.enabled) {
-      _highlight = false;
+      states.remove(MaterialState.pressed);
       if (widget.onHighlightChanged != null) {
         widget.onHighlightChanged(false);
       }
@@ -264,7 +275,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       if (_highlight) {
         return widget.highlightElevation;
       }
-      if (_hovering) {
+      if (_hovered) {
         return widget.hoverElevation;
       }
       if (_focused) {
@@ -278,14 +289,18 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
+    final Color effectiveTextColor = MaterialStateColor.getColorInStates(widget.textStyle?.color, states);
+
     final Widget result = Focus(
       focusNode: widget.focusNode,
-      onFocusChange: (bool focused) => setState(() { _focused = focused; }),
+      onFocusChange: (bool focused) => setState(() {
+        _updateState(focused, MaterialState.focused);
+      }),
       child: ConstrainedBox(
         constraints: widget.constraints,
         child: Material(
           elevation: _effectiveElevation(),
-          textStyle: widget.textStyle,
+          textStyle: widget.textStyle.copyWith(color: effectiveTextColor),
           shape: widget.shape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
@@ -297,11 +312,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
             highlightColor: widget.highlightColor,
             focusColor: widget.focusColor,
             hoverColor: widget.hoverColor,
-            onHover: (bool hovering) => setState(() => _hovering = hovering),
+            onHover: (bool hovering) => setState(() {
+              _updateState(hovering, MaterialState.hovered);
+            }),
             onTap: widget.onPressed,
             customBorder: widget.shape,
             child: IconTheme.merge(
-              data: IconThemeData(color: widget.textStyle?.color),
+              data: IconThemeData(color: effectiveTextColor),
               child: Container(
                 padding: widget.padding,
                 child: Center(

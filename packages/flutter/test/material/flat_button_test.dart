@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 
 import '../rendering/mock_canvas.dart';
@@ -33,6 +34,8 @@ void main() {
   });
 
   testWidgets('Default FlatButton meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -40,6 +43,7 @@ void main() {
             child: FlatButton(
               child: const Text('FlatButton'),
               onPressed: () { },
+              focusNode: focusNode,
             ),
           ),
         ),
@@ -54,6 +58,21 @@ void main() {
     await tester.startGesture(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Hovered.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await gesture.removePointer();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,

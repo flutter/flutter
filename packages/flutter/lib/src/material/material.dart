@@ -14,6 +14,16 @@ import 'theme.dart';
 /// Used by [InkHighlight] and [InkSplash], for example.
 typedef RectCallback = Rect Function();
 
+enum MaterialState {
+  disabled,
+  hovered,
+  focused,
+  selected,
+  pressed,
+  dragged,
+  error,
+}
+
 /// The various kinds of material in material design. Used to
 /// configure the default behavior of [Material] widgets.
 ///

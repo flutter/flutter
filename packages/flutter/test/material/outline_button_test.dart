@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
@@ -36,6 +37,8 @@ void main() {
   });
 
   testWidgets('Default OutlineButton meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -43,6 +46,7 @@ void main() {
             child: OutlineButton(
               child: const Text('OutlineButton'),
               onPressed: () {},
+              focusNode: focusNode,
             ),
           ),
         ),
@@ -57,6 +61,95 @@ void main() {
     await tester.startGesture(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Hovered.
+    final TestGesture gesture = await tester.createGesture(
+        kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    // Hovered and Pressed
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await gesture.removePointer();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
+    semanticsEnabled: true,
+  );
+
+  testWidgets('OutlineButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    final ColorScheme colorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue);
+
+    Color getTextColor(Set<MaterialState> states) {
+      final Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if(states.any(interactiveStates.contains)) {
+        return Colors.blue[900];
+      }
+      return Colors.blue[800];
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ButtonTheme(
+              colorScheme: colorScheme,
+              textTheme: ButtonTextTheme.primary,
+              child: OutlineButton(
+                child: const Text('OutlineButton'),
+                onPressed: () {},
+                focusNode: focusNode,
+                textColor: MaterialStateColor(getTextColor),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Highlighted (pressed).
+    final Offset center = tester.getCenter(find.byType(OutlineButton));
+    await tester.startGesture(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Hovered.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+
+    // Hovered and Pressed
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await gesture.removePointer();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,

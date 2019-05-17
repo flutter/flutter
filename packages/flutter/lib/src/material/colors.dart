@@ -6,6 +6,8 @@ import 'dart:ui' show Color;
 
 import 'package:flutter/painting.dart';
 
+import 'material.dart';
+
 /// Defines a single color as well a color swatch with ten shades of the color.
 ///
 /// The color's shades are referred to by index. The greater the index, the
@@ -86,6 +88,68 @@ class MaterialAccentColor extends ColorSwatch<int> {
 
   /// The darkest shade.
   Color get shade700 => this[700];
+}
+
+/// Signature for the function that returns a (potentially different) color
+/// based on a given set of states.
+typedef ColorFunction = Color Function(Set<MaterialState> states);
+
+/// Defines a type of color that can potentially change depending on given
+/// states.
+///
+/// The [colorFunction] member is the callback that will be used to get the color
+/// in a given context.
+///
+/// This should only be used as parameters when they are documented to take
+/// [MaterialStatefulColor], otherwise only the default state will be used.
+///
+/// Example:
+/// ```dart
+/// Color getTextColor(Set<MaterialSet> states) {
+///   final interactiveStates = <MaterialState>{
+///     MaterialState.pressed,
+///     MaterialState.hovered,
+///     MaterialState.focused,
+///   };
+///   if(states.any(interactiveStates.contains) {
+///     return Colors.blue[900];
+///   }
+///   return Colors.blue[600];
+/// }
+///
+/// FlatButton(
+///   ...
+///   textColor: MaterialStateColor(getTextColor),
+/// ),
+/// ```
+class MaterialStateColor extends Color {
+  /// Creates a [MaterialStateColor], a color that can return different values
+  /// depending on a given [MaterialState].
+  ///
+  /// The callback must return a non null color in the default state (empty set).
+  MaterialStateColor(this.colorFunction) :
+    assert(colorFunction(_defaultState) != null),
+    super(colorFunction(_defaultState).value);
+
+  /// The callback that returns a [Color] for a given state.
+  ///
+  /// The callback must return a non null color in the default state (empty set).
+  final ColorFunction colorFunction;
+
+  /// The default state. This is useful
+  static const Set<MaterialState> _defaultState = <MaterialState>{};
+
+  /// Returns the color for the given set of states if `color` is a
+  /// [MaterialStateColor], otherwise returns the color itself.
+  ///
+  /// This is useful for widgets that accept [Color] params, this will work for
+  /// both [Color]s and [MaterialStateColor]s.
+  static Color getColorInStates(Color color, Set<MaterialState> states) {
+    if (color is MaterialStateColor) {
+      return color.colorFunction(states);
+    }
+    return color;
+  }
 }
 
 /// [Color] and [ColorSwatch] constants which represent Material design's
