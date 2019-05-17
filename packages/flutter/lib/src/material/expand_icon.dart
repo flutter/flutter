@@ -65,20 +65,24 @@ class ExpandIcon extends StatefulWidget {
 
   /// The color of the icon.
   ///
-  /// Defaults to [Colors.black54] when the theme's
+  /// Defaults to [Colors.black87] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white54] when it is [Brightness.dark]  final Color color;
+  /// [Colors.white] when it is [Brightness.dark]
   final Color color;
 
   /// The color of the icon when it is disabled,
   /// i.e. if [onPressed] is null.
   ///
-  /// Defaults to [Colors.grey.shade400] when the theme's
+  /// Defaults to [Colors.black38] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white10] when it is [Brightness.dark]
+  /// [Colors.white50] when it is [Brightness.dark]
   final Color disabledColor;
 
-  // add expandedColor
+  /// The color of the icon when the icon is expanded.
+  ///
+  /// Defaults to [Colors.black87] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white] when it is [Brightness.dark]
   final Color expandedColor;
 
   @override
@@ -127,15 +131,29 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   }
 
   Color get _iconColor {
-    if (widget.color != null) {
-      return widget.color;
-    }
-
-    switch(Theme.of(context).brightness) {
-      case Brightness.light:
-        return Colors.black54;
-      case Brightness.dark:
-        return Colors.white54;
+    if (widget.onPressed == null) {
+      if (widget.disabledColor != null) {
+        return widget.disabledColor;
+      }
+      switch(Theme.of(context).brightness) {
+        case Brightness.light:
+          return Colors.black38;
+        case Brightness.dark:
+          return Colors.white50;
+      }
+    } else {
+      if (widget.isExpanded && widget.expandedColor != null) {
+        return widget.expandedColor;
+      }
+      if (!widget.isExpanded && widget.color != null) {
+        return widget.color;
+      }
+      switch(Theme.of(context).brightness) {
+        case Brightness.light:
+          return Colors.black87;
+        case Brightness.dark:
+          return Colors.white;
+      }
     }
 
     assert(false);
