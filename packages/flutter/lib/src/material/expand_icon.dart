@@ -31,6 +31,9 @@ class ExpandIcon extends StatefulWidget {
     this.size = 24.0,
     @required this.onPressed,
     this.padding = const EdgeInsets.all(8.0),
+    this.color,
+    this.disabledColor,
+    this.expandedColor,
   }) : assert(isExpanded != null),
        assert(size != null),
        assert(padding != null),
@@ -58,6 +61,25 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// This property must not be null. It defaults to 8.0 padding on all sides.
   final EdgeInsetsGeometry padding;
+
+
+  /// The color of the icon.
+  ///
+  /// Defaults to [Colors.black54] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white54] when it is [Brightness.dark]  final Color color;
+  final Color color;
+
+  /// The color of the icon when it is disabled,
+  /// i.e. if [onPressed] is null.
+  ///
+  /// Defaults to [Colors.grey.shade400] when the theme's
+  /// [ThemeData.brightness] is [Brightness.light] and to
+  /// [Colors.white10] when it is [Brightness.dark]
+  final Color disabledColor;
+
+  // add expandedColor
+  final Color expandedColor;
 
   @override
   _ExpandIconState createState() => _ExpandIconState();
@@ -104,19 +126,34 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       widget.onPressed(widget.isExpanded);
   }
 
+  Color get _iconColor {
+    if (widget.color != null) {
+      return widget.color;
+    }
+
+    switch(Theme.of(context).brightness) {
+      case Brightness.light:
+        return Colors.black54;
+      case Brightness.dark:
+        return Colors.white54;
+    }
+
+    assert(false);
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     assert(debugCheckHasMaterialLocalizations(context));
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
-    final ThemeData theme = Theme.of(context);
     final String onTapHint = widget.isExpanded ? localizations.expandedIconTapHint : localizations.collapsedIconTapHint;
 
     return Semantics(
       onTapHint: widget.onPressed == null ? null : onTapHint,
       child: IconButton(
         padding: widget.padding,
-        color: theme.brightness == Brightness.dark ? Colors.white54 : Colors.black54,
+        color: _iconColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
