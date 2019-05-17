@@ -133,21 +133,13 @@ void main() {
     MockHttpClient httpClient;
 
     setUp(() {
-      debugNetworkImageUseFreshHttpClient = true;
       httpClient = MockHttpClient();
+      debugNetworkImageHttpClientProvider = () => httpClient;
     });
 
     tearDown(() {
-      debugNetworkImageUseFreshHttpClient = false;
+      debugNetworkImageHttpClientProvider = null;
     });
-
-    R runWithHttpClientMock<R>(R runnable(), {ZoneSpecification zoneSpecification}) {
-      return HttpOverrides.runZoned<R>(
-        runnable,
-        createHttpClient: (SecurityContext context) => httpClient,
-        zoneSpecification: zoneSpecification,
-      );
-    }
 
     test('Disallows null urls', () {
       expect(() {
@@ -159,7 +151,7 @@ void main() {
       when(httpClient.getUrl(any)).thenThrow(Error());
       bool uncaught = false;
 
-      await runWithHttpClientMock(() async {
+      await runZoned(() async {
         const ImageProvider imageProvider = NetworkImage('asdasdasdas');
         final Completer<bool> caughtError = Completer<bool>();
         FlutterError.onError = (FlutterErrorDetails details) {

@@ -517,8 +517,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
     assert(() {
-      if (debugNetworkImageUseFreshHttpClient)
-        client = HttpClient()..autoUncompress = false;
+      if (debugNetworkImageHttpClientProvider != null)
+        client = debugNetworkImageHttpClientProvider();
       return true;
     }());
     return client;
