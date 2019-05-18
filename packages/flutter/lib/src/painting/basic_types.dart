@@ -41,9 +41,10 @@ export 'dart:ui' show
   TextPosition,
   TileMode,
   VertexMode,
-  VoidCallback,
   hashValues,
   hashList;
+
+export '../foundation/basic_types.dart';
 
 // Intentionally not exported:
 //  - Image, instantiateImageCodec, decodeImageFromList:
