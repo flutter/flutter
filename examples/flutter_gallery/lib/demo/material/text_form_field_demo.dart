@@ -223,7 +223,6 @@ class TextFormFieldDemoState extends State<TextFormFieldDemo> {
                 ),
                 const SizedBox(height: 24.0),
                 TextFormField(
-                  enabled: false,
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
                     filled: true,

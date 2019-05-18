@@ -609,7 +609,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   }
 
   void _handleFocusUpdate() {
-    updateHighlight(_HighlightType.focus, value: enabled && Focus.of(context).hasPrimaryFocus);
+    final bool showFocus = enabled && (Focus.of(context, nullOk: true)?.hasPrimaryFocus ?? false);
+    updateHighlight(_HighlightType.focus, value: showFocus);
   }
 
   void _handleTapDown(TapDownDetails details) {
@@ -702,8 +703,8 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;
     return Listener(
-      onPointerEnter: _handlePointerEnter,
-      onPointerExit: _handlePointerExit,
+      onPointerEnter: enabled ? _handlePointerEnter : null,
+      onPointerExit: enabled ? _handlePointerExit : null,
       behavior: HitTestBehavior.translucent,
       child: GestureDetector(
         onTapDown: enabled ? _handleTapDown : null,

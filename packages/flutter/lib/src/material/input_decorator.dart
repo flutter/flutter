@@ -1910,7 +1910,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getHoverColor(ThemeData themeData) {
-    if (decoration.filled ==null || !decoration.filled || isFocused ||  !decoration.enabled)
+    if (decoration.filled == null || !decoration.filled || isFocused || !decoration.enabled)
       return Colors.transparent;
     return decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
   }
