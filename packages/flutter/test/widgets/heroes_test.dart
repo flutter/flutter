@@ -158,8 +158,8 @@ class _IsInvisible extends Matcher {
     this.maintainAnimation = true,
     this.maintainSize = true,
     this.maintainSemantics = false,
-    this.maintainInteractivity = false
-    });
+    this.maintainInteractivity = false,
+  });
 
   final bool maintainState;
   final bool maintainAnimation;
@@ -209,7 +209,7 @@ class MyStatefulWidgetState extends State<MyStatefulWidget> {
 }
 
 Future<void> main() async {
-  final ui.Image img = await createTestImage();
+  final ui.Image testImage = await createTestImage();
 
   setUp(() {
     transitionFromUserGestures = false;
@@ -968,7 +968,9 @@ Future<void> main() async {
                   child: Container(
                     key: heroBCKey,
                     height: 150.0,
-                    child: const Text('Hero'))),
+                    child: const Text('Hero'),
+                  )
+                ),
               ),
               const SizedBox(height: 800.0),
             ],
@@ -991,7 +993,7 @@ Future<void> main() async {
                   child: Container(
                     key: heroABKey,
                     height: 200.0,
-                    child: const Text('Hero')
+                    child: const Text('Hero'),
                   )
                 ),
               ),
@@ -1004,7 +1006,7 @@ Future<void> main() async {
                   tag: 'BC',
                   child: Container(
                     height: 150.0,
-                    child: const Text('Hero')
+                    child: const Text('Hero'),
                   )
                 ),
               ),
@@ -1031,7 +1033,7 @@ Future<void> main() async {
                       child: Container(
                         height: 100.0,
                         width: 100.0,
-                        child: const Text('Hero')
+                        child: const Text('Hero'),
                       )
                     ),
                   ),
@@ -2044,7 +2046,7 @@ Future<void> main() async {
           // Since we're popping, only the destination route's builder is used.
           flightShuttleBuilder: shuttleBuilder,
           transitionOnUserGestures: true,
-          child: const Text('1')
+          child: const Text('1'),
         ),
       ),
     );
@@ -2055,7 +2057,7 @@ Future<void> main() async {
           child: Hero(
             tag: navigatorKey,
             transitionOnUserGestures: true,
-            child: const Text('2')
+            child: const Text('2'),
           ),
         );
       }
@@ -2089,7 +2091,7 @@ Future<void> main() async {
     'heroes work well with child widgets that has global keys',
     (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-      final GlobalKey key1 = GlobalKey();
+      final GlobalKey<_SimpleState> key1 = GlobalKey<_SimpleState>();
       final GlobalKey key2 = GlobalKey();
 
       await tester.pumpWidget(
@@ -2101,12 +2103,12 @@ Future<void> main() async {
               Hero(
                 tag: 'hero',
                 transitionOnUserGestures: true,
-                child: _SimpleStatefulWidget(key: key1)
+                child: _SimpleStatefulWidget(key: key1),
               ),
               const SizedBox(
                 width: 10,
                 height: 10,
-                child: Text('1')
+                child: Text('1'),
               )
             ]
           )
@@ -2122,7 +2124,7 @@ Future<void> main() async {
               // key2 is a `GlobalKey`. The hero animation should not
               // assert by having the same global keyed widget in more
               // than one place in the tree.
-              child: _SimpleStatefulWidget(key: key2)
+              child: _SimpleStatefulWidget(key: key2),
             ),
           );
         }
@@ -2157,7 +2159,7 @@ Future<void> main() async {
       final GlobalKey<NavigatorState> navigatorKey = GlobalKey();
       const Key imageKey1 = Key('image1');
       const Key imageKey2 = Key('image2');
-      final TestImageProvider imageProvider = TestImageProvider(img);
+      final TestImageProvider imageProvider = TestImageProvider(testImage);
 
       await tester.pumpWidget(
         CupertinoApp(
@@ -2172,14 +2174,14 @@ Future<void> main() async {
                   width: 100,
                   child: Image(
                     image: imageProvider,
-                    key: imageKey1
+                    key: imageKey1,
                   )
                 )
               ),
               const SizedBox(
                 width: 10,
                 height: 10,
-                child: Text('1')
+                child: Text('1'),
               )
             ]
           )
@@ -2195,7 +2197,7 @@ Future<void> main() async {
               child: Container(
                 child: Image(
                   image: imageProvider,
-                  key: imageKey2
+                  key: imageKey2,
                 )
               )
             ),

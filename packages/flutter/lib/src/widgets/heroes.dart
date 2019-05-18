@@ -190,6 +190,12 @@ class Hero extends StatefulWidget {
   ///
   /// If none is provided, the destination route's Hero child is shown in-flight
   /// by default.
+  ///
+  /// ## Limitations
+  ///
+  /// Currently if a widget built by [flightShuttleBuilder] takes part in a
+  /// [Navigator] push transition, that widget or its descendants must not have
+  /// any [GlobalKey] that presents in the source Hero's descendant widgets.
   final HeroFlightShuttleBuilder flightShuttleBuilder;
 
   /// Placeholder widget left in place as the Hero's child once the flight takes off.
@@ -286,6 +292,9 @@ class Hero extends StatefulWidget {
 class _HeroState extends State<Hero> {
   final GlobalKey _key = GlobalKey();
   Size _placeholderSize;
+  // Whether the placeholder widget should wrap the hero's child widget as its
+  // own child, when `_placeholderSize` is non-null (i.e. the hero is currently
+  // in its flight animation). See `startFlight`.
   bool _shouldIncludeChild = true;
 
   // The `shouldIncludeChildInPlaceholder` flag dictates if the child widget of
@@ -304,12 +313,16 @@ class _HeroState extends State<Hero> {
     assert(mounted);
     final RenderBox box = context.findRenderObject();
     assert(box != null && box.hasSize);
-    setState(() => _placeholderSize = box.size);
+    setState(() {
+      _placeholderSize = box.size;
+    });
   }
 
   void endFlight() {
     if (mounted) {
-      setState(() => _placeholderSize = null);
+      setState(() {
+        _placeholderSize = null;
+      });
     }
   }
 
@@ -340,11 +353,11 @@ class _HeroState extends State<Hero> {
           maintainState: true,
           maintainAnimation: true,
           maintainSize: true,
-          child: keyedChild
+          child: keyedChild,
         )
       : SizedBox(
           width: _placeholderSize.width,
-          height: _placeholderSize.height
+          height: _placeholderSize.height,
         );
   }
 }
