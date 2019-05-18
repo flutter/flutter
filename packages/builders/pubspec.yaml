@@ -1,0 +1,28 @@
+name: builders
+description: Build runner builders for the flutter tool
+homepage: https://flutter.dev
+author: Flutter Authors <flutter-dev@googlegroups.com>
+
+environment:
+  # The pub client defaults to an <2.0.0 sdk constraint which we need to explicitly overwrite.
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  # To update these, use "flutter update-packages --force-upgrade".
+
+  # Code generation dependencies
+  build_runner_core: 3.0.4
+  dart_style: 1.2.7
+  code_builder: 3.2.0
+  build: 1.1.4
+  build_modules: 2.1.2
+  build_daemon: 0.6.0
+
+dev_dependencies:
+  test:
+
+dartdoc:
+  # Exclude this package from the hosted API docs.
+  nodoc: true
+
+# PUBSPEC CHECKSUM: 9773

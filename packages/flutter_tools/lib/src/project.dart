@@ -201,7 +201,7 @@ class FlutterProject {
   /// Whether there are any builders used by this package.
   bool get hasBuilders {
     final YamlMap result = builders;
-    return result != null && result.isNotEmpty;
+    return (result != null && result.isNotEmpty) || web.existsSync();
   }
 }
 

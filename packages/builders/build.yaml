@@ -1,0 +1,62 @@
+builders:
+  ddc_modules:
+    import: "package:builders/builders.dart"
+    builder_factories:
+      - ddcMetaModuleBuilder
+      - ddcMetaModuleCleanBuilder
+      - ddcModuleBuilder
+    build_extensions:
+      $lib$:
+        - .flutter_ddc.meta_module.raw
+        - .flutter_ddc.meta_module.clean
+      .dart:
+        - .ddc.module
+    is_optional: True
+    auto_apply: none
+    required_inputs: [".dart", ".module.library"]
+    applies_builders: ["build_modules|module_cleanup"]
+  ddc:
+    import: "package:builders/builders.dart"
+    builder_factories:
+      - ddcKernelBuilder
+      - ddcBuilder
+    build_extensions:
+      .ddc.module:
+        - .ddc.dill
+        - .ddc.js.errors
+        - .ddc.js
+        - .ddc.js.map
+    is_optional: True
+    auto_apply: all_packages
+    required_inputs:
+      - .flutter_ddc.module
+    applies_builders:
+      - builders|ddc_modules
+  entrypoint:
+    import: "package:builders/builders.dart"
+    builder_factories:
+      - webEntrypointBuilder
+    build_extensions:
+      .dart:
+        - .dart.bootstrap.js
+        - .dart.js
+        - .dart.js.map
+        - .dart.js.tar.gz
+        - .digests
+    required_inputs:
+      - .dart
+      - .ddc.js
+      - .ddc.module
+      - .dart2js.module
+    build_to: cache
+    auto_apply: root_package
+    defaults:
+      generate_for:
+        include:
+          - web/**
+          - test/**.dart.browser_test.dart
+          - example/**
+          - benchmark/**
+        exclude:
+          - test/**.node_test.dart
+          - test/**.vm_test.dart
