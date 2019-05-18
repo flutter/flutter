@@ -1823,8 +1823,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextAlign get textAlign => widget.textAlign;
-  bool get isFocused => widget.isFocused;
-  bool get isHovering => widget.isHovering;
+  bool get isFocused => widget.isFocused && decoration.enabled;
+  bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
 
   @override
@@ -1874,7 +1874,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled) {
       return themeData.hintColor;
     }
-    if (isHovering && decoration.enabled) {
+    if (isHovering) {
       final Color hoverColor = decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
       return Color.alphaBlend(hoverColor.withOpacity(0.16), themeData.colorScheme.onSurface.withOpacity(0.12));
     }
@@ -1904,13 +1904,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getFocusColor(ThemeData themeData) {
-    if (decoration.filled != true || !decoration.enabled) // filled == null same as filled == false
+    if (decoration.filled == null || !decoration.filled || !decoration.enabled)
       return Colors.transparent;
     return decoration.focusColor ?? themeData.inputDecorationTheme?.focusColor ?? themeData.focusColor;
   }
 
   Color _getHoverColor(ThemeData themeData) {
-    if (isFocused || decoration.filled != true || !decoration.enabled) // filled == null same as filled == false
+    if (decoration.filled ==null || !decoration.filled || isFocused ||  !decoration.enabled)
       return Colors.transparent;
     return decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
   }
@@ -2028,8 +2028,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       fillColor: _getFillColor(themeData),
       focusColor: _getFocusColor(themeData),
       hoverColor: _getHoverColor(themeData),
-      isFocused: isFocused && decoration.enabled,
-      isHovering: isHovering && decoration.enabled,
+      isFocused: isFocused,
+      isHovering: isHovering,
     );
 
     final TextStyle inlineLabelStyle = inlineStyle.merge(decoration.labelStyle);

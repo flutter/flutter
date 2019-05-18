@@ -2065,7 +2065,7 @@ void main() {
       );
     }
 
-    // Filled
+    // Test filled text field.
     await pumpDecorator(hovering: false);
     expect(getContainerColor(tester), equals(fillColor));
     await tester.pump(const Duration(seconds: 10));
@@ -2091,7 +2091,7 @@ void main() {
     await tester.pump(const Duration(seconds: 10));
     expect(getContainerColor(tester), equals(disabledColor));
 
-    // Outlined
+    // Test outline text field.
     const Color blendedHoverColor = Color(0x43009c00);
     await pumpDecorator(hovering: false, filled: false);
     await tester.pumpAndSettle();
@@ -2142,7 +2142,7 @@ void main() {
       );
     }
 
-    // Filled
+    // Test filled text field.
     await pumpDecorator(focused: false);
     expect(getContainerColor(tester), equals(fillColor));
     await tester.pump(const Duration(seconds: 10));
@@ -2168,7 +2168,7 @@ void main() {
     await tester.pump(const Duration(seconds: 10));
     expect(getContainerColor(tester), equals(disabledColor));
 
-    // Outline
+    // Test outline text field.
     await pumpDecorator(focused: false, filled: false);
     await tester.pumpAndSettle();
     expect(getBorderColor(tester), equals(enabledBorderColor));
