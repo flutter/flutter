@@ -345,6 +345,7 @@ class AOTSnapshotter {
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
       TargetPlatform.ios,
+      TargetPlatform.darwin_x64,
     ].contains(platform);
   }
 

@@ -81,5 +81,24 @@ or
     stderr.write(buildResult.stderr);
     exit(1);
   }
+  if (buildMode.toLowerCase() == 'release') {
+    final ProcessResult buildResult = await Process.run(
+      flutterExecutable,
+      <String>[
+        '--suppress-analytics',
+        if (verbose) '--verbose',
+        'build',
+        'aot',
+        '--target=$flutterTarget',
+        '--target-platform=$targetPlatform',
+        if (trackWidgetCreation) '--track-widget-creation',
+        if (flutterEngine != null) '--local-engine-src-path=$flutterEngine',
+        if (localEngine != null) '--local-engine=$localEngine',
+      ]);
+    if (buildResult.exitCode != 0) {
+      stderr.write(buildResult.stderr);
+      exit(1);
+    }
+  }
   exit(0);
 }
