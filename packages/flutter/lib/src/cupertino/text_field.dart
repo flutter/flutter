@@ -836,29 +836,35 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(
-          decoration: widget.decoration,
-          // The main decoration and the disabled scrim exists separately.
-          child: Container(
+          decoration: BoxDecoration(
             color: enabled
                 ? null
                 : CupertinoTheme.of(context).brightness == Brightness.light
                     ? _kDisabledBackground
                     : CupertinoColors.darkBackgroundGray,
-            child: TextSelectionGestureDetector(
-              onTapDown: _handleTapDown,
-              onForcePressStart: _handleForcePressStarted,
-              onForcePressEnd: _handleForcePressEnded,
-              onSingleTapUp: _handleSingleTapUp,
-              onSingleLongTapStart: _handleSingleLongTapStart,
-              onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-              onSingleLongTapEnd: _handleSingleLongTapEnd,
-              onDoubleTapDown: _handleDoubleTapDown,
-              onDragSelectionStart: _handleMouseDragSelectionStart,
-              onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-              onDragSelectionEnd: _handleMouseDragSelectionEnd,
-              behavior: HitTestBehavior.translucent,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
-            ),
+            // The main decoration and the disabled scrim exists separately.
+            border: widget.decoration.border,
+            borderRadius: widget.decoration.borderRadius,
+            shape: widget.decoration.shape,
+            image: widget.decoration.image,
+            gradient: widget.decoration.gradient,
+            boxShadow: widget.decoration.boxShadow,
+            backgroundBlendMode: widget.decoration.backgroundBlendMode,
+          ),
+          child: TextSelectionGestureDetector(
+            onTapDown: _handleTapDown,
+            onForcePressStart: _handleForcePressStarted,
+            onForcePressEnd: _handleForcePressEnded,
+            onSingleTapUp: _handleSingleTapUp,
+            onSingleLongTapStart: _handleSingleLongTapStart,
+            onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+            onSingleLongTapEnd: _handleSingleLongTapEnd,
+            onDoubleTapDown: _handleDoubleTapDown,
+            onDragSelectionStart: _handleMouseDragSelectionStart,
+            onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+            onDragSelectionEnd: _handleMouseDragSelectionEnd,
+            behavior: HitTestBehavior.translucent,
+            child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
           ),
         ),
       ),
