@@ -21,7 +21,7 @@ if (using_fuchsia_sdk) {
   }
 
   executable("dart") {
-    output_name = "dt_rush"
+    output_name = "dart_runner"
 
     public = []
 
