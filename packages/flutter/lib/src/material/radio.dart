@@ -42,6 +42,8 @@ const double _kInnerRadius = 4.5;
 /// This causes the buttons to rebuild with the updated `groupValue`, and
 /// therefore the selection of the second button.
 ///
+/// Requires one of its ancestors to be a [Material] widget.
+///
 /// ```dart preamble
 /// enum SingingCharacter { lafayette, jefferson }
 /// ```
@@ -79,8 +81,6 @@ const double _kInnerRadius = 4.5;
 /// }
 /// ```
 /// {@end-tool}
-///
-/// Requires one of its ancestors to be a [Material] widget.
 ///
 /// See also:
 ///
