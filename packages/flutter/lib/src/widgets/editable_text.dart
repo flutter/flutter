@@ -1213,6 +1213,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     // Callback is only assigned when contextMenuControls is not null
     assert(widget.contextMenuControls != null);
 
+    // Focus and select the clicked position
     final TextSelection selection = _value.selection;
     final bool withinSelection = selection.start <= details.textPosition.offset
       && selection.end > details.textPosition.offset;
@@ -1223,20 +1224,24 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         cause: SelectionChangedCause.tap,
       );
     }
+
+    // Open menu
     setState(() {
       _contextMenuIsOpen = true;
     });
     if (widget.onContextMenuChanged != null)
       widget.onContextMenuChanged(true);
-
     final ContextMenuAction value = await widget.contextMenuControls.showMenu(
       context: context,
       globalPosition: details.globalPosition,
       editableText: this,
     );
+
+    // Execute action
     if (value != null)
       await value(ContextMenuActionDetails());
 
+    // Clean-up after closing menu
     setState(() {
       _contextMenuIsOpen = false;
     });
