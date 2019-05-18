@@ -781,6 +781,11 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final TextStyle placeholderStyle = textStyle.merge(widget.placeholderStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
     final Color cursorColor = widget.cursorColor ?? themeData.primaryColor;
+    final Color disabledColor = enabled
+        ? null
+        : CupertinoTheme.of(context).brightness == Brightness.light
+            ? _kDisabledBackground
+            : CupertinoColors.darkBackgroundGray;
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -825,12 +830,6 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         ),
       ),
     );
-
-    final Color disabledColor = enabled
-        ? null
-        : CupertinoTheme.of(context).brightness == Brightness.light
-            ? _kDisabledBackground
-            : CupertinoColors.darkBackgroundGray;
 
     return Semantics(
       onTap: () {
