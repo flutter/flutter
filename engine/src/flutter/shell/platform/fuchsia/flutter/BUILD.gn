@@ -8,7 +8,7 @@ import("//build/fuchsia/sdk.gni")
 
 if (using_fuchsia_sdk) {
   executable("flutter") {
-    output_name = "four_gate"
+    output_name = "flutter_runner"
 
     sources = [
       "component.cc",
