@@ -826,6 +826,12 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       ),
     );
 
+    final Color disabledColor = enabled
+        ? null
+        : CupertinoTheme.of(context).brightness == Brightness.light
+            ? _kDisabledBackground
+            : CupertinoColors.darkBackgroundGray;
+
     return Semantics(
       onTap: () {
         if (!controller.selection.isValid) {
@@ -836,21 +842,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(
-          decoration: BoxDecoration(
-            color: enabled
-                ? null
-                : CupertinoTheme.of(context).brightness == Brightness.light
-                    ? _kDisabledBackground
-                    : CupertinoColors.darkBackgroundGray,
-            // The main decoration and the disabled scrim exists separately.
-            border: widget.decoration.border,
-            borderRadius: widget.decoration.borderRadius,
-            shape: widget.decoration.shape,
-            image: widget.decoration.image,
-            gradient: widget.decoration.gradient,
-            boxShadow: widget.decoration.boxShadow,
-            backgroundBlendMode: widget.decoration.backgroundBlendMode,
-          ),
+          decoration: widget.decoration == null
+              ? BoxDecoration(
+                  color: disabledColor,
+                )
+              : BoxDecoration(
+                  color: disabledColor,
+                  // The main decoration
+                  border: widget.decoration.border,
+                  borderRadius: widget.decoration.borderRadius,
+                  shape: widget.decoration.shape,
+                  image: widget.decoration.image,
+                  gradient: widget.decoration.gradient,
+                  boxShadow: widget.decoration.boxShadow,
+                  backgroundBlendMode: widget.decoration.backgroundBlendMode,
+                ),
           child: TextSelectionGestureDetector(
             onTapDown: _handleTapDown,
             onForcePressStart: _handleForcePressStarted,

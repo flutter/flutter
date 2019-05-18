@@ -260,7 +260,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-        findsNothing,
+        findsOneWidget,
       );
     },
   );
