@@ -333,6 +333,10 @@ class Target {
           .replaceAll('{COPY_DIR}', environment.copyDir.absolute.uri.toString())
           .replaceAll('{platform}', getNameForTargetPlatform(environment.targetPlatform))
           .replaceAll('{mode}', getNameForBuildMode(environment.buildMode));
+        // TODO(jonahwilliams): lookup the right way to do this.
+        if (platform.isWindows) {
+         rawInput = rawInput.replaceAll('/', r'\');
+        }
         final String filePath = Uri.file(rawInput).toString().substring(10);
         if (rawInput.endsWith(platform.pathSeparator)) {
           files.add(fs.directory(fs.path.normalize(filePath)));
