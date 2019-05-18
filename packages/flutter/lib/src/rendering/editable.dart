@@ -99,15 +99,14 @@ class TextSelectionPoint {
 }
 
 @immutable
+/// TODO
 class ContextTapDetails {
+  /// TODO
   ContextTapDetails({
-    @required this.textPosition,
     @required this.globalPosition,
-  }) : assert(textPosition != null),
-       assert(globalPosition != null);
+  }) : assert(globalPosition != null);
 
-  final TextPosition textPosition;
-
+  /// TODO
   final Offset globalPosition;
 }
 
@@ -1345,12 +1344,8 @@ class RenderEditable extends RenderBox {
   /// When [ignorePointer] is true, an ancestor widget must respond to tap
   /// down events by calling this method.
   void handleSecondaryTapDown(TapDownDetails details) {
-    final TextPosition tapPosition = _textPainter.getPositionForOffset(
-      globalToLocal(details.globalPosition - _paintOffset)
-    );
     if (onContextTap != null)
       onContextTap(ContextTapDetails(
-        textPosition: tapPosition,
         globalPosition: details.globalPosition,
       ));
   }

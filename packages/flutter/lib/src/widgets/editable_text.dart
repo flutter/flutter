@@ -1215,8 +1215,11 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
 
     // Focus and select the clicked position
     final TextSelection selection = _value.selection;
-    final bool withinSelection = selection.start <= details.textPosition.offset
-      && selection.end > details.textPosition.offset;
+    final TextPosition textPosition = renderEditable.getPositionForPoint(
+      details.globalPosition,
+    );
+    final bool withinSelection = selection.start <= textPosition.offset
+      && selection.end > textPosition.offset;
     widget.focusNode.requestFocus();
     if (!withinSelection) {
       renderEditable.selectPositionAt(
