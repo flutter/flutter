@@ -2140,8 +2140,7 @@ void main() {
     );
 
     expect(getContainerColor(tester), equals(focusColor));
-    // TODO(gspencer): convert this to 15ms once reverseDuration for AnimationController lands.
-    await tester.pump(const Duration(milliseconds: 45));
+    await tester.pump(const Duration(milliseconds: 15));
     expect(getContainerColor(tester), equals(fillColor));
   });
 
