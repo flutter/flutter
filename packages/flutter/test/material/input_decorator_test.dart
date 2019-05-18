@@ -2045,103 +2045,155 @@ void main() {
   );
 
   testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {
-    const Color fillColor = Color(0xFF00FF00);
-    const Color hoverColor = Color(0xFF0000FF);
+    const Color fillColor = Color(0x0A000000);
+    const Color hoverColor = Color(0xFF00FF00);
+    const Color disabledColor = Color(0x05000000);
+    const Color enabledBorderColor = Color(0x1f000000);
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isHovering: false,
-        decoration: const InputDecoration(
-          filled: true,
-          fillColor: fillColor,
-          hoverColor: hoverColor,
+    Future<void> pumpDecorator({bool hovering, bool enabled = true, bool filled = true}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isHovering: hovering,
+          decoration: InputDecoration(
+            enabled: enabled,
+            filled: filled,
+            hoverColor: hoverColor,
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+          ),
         ),
-      ),
-    );
+      );
+    }
 
+    // Test filled text field.
+    await pumpDecorator(hovering: false);
     expect(getContainerColor(tester), equals(fillColor));
     await tester.pump(const Duration(seconds: 10));
     expect(getContainerColor(tester), equals(fillColor));
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isHovering: true,
-        decoration: const InputDecoration(
-          filled: true,
-          fillColor: fillColor,
-          hoverColor: hoverColor,
-        ),
-      ),
-    );
-
+    await pumpDecorator(hovering: true);
     expect(getContainerColor(tester), equals(fillColor));
     await tester.pump(const Duration(milliseconds: 15));
     expect(getContainerColor(tester), equals(hoverColor));
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isHovering: false,
-        decoration: const InputDecoration(
-          filled: true,
-          fillColor: fillColor,
-          hoverColor: hoverColor,
-        ),
-      ),
-    );
-
+    await pumpDecorator(hovering: false);
     expect(getContainerColor(tester), equals(hoverColor));
     await tester.pump(const Duration(milliseconds: 15));
     expect(getContainerColor(tester), equals(fillColor));
+
+    await pumpDecorator(hovering: false, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    await pumpDecorator(hovering: true, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    // Test outline text field.
+    const Color blendedHoverColor = Color(0x43009c00);
+    await pumpDecorator(hovering: false, filled: false);
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(hovering: true, filled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(blendedHoverColor));
+
+    await pumpDecorator(hovering: false, filled: false);
+    expect(getBorderColor(tester), equals(blendedHoverColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(hovering: false, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(disabledColor));
+
+    await pumpDecorator(hovering: true, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(disabledColor));
   });
 
   testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
-    const Color fillColor = Color(0xFF00FF00);
     const Color focusColor = Color(0xFF0000FF);
+    const Color fillColor = Color(0x0A000000);
+    const Color disabledColor = Color(0x05000000);
+    const Color enabledBorderColor = Color(0x1f000000);
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isFocused: false,
-        decoration: const InputDecoration(
-          filled: true,
-          fillColor: fillColor,
-          focusColor: focusColor,
+    Future<void> pumpDecorator({bool focused, bool enabled = true, bool filled = true}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: focused,
+          decoration: InputDecoration(
+            enabled: enabled,
+            filled: filled,
+            focusColor: focusColor,
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: focusColor)),
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+          ),
         ),
-      ),
-    );
+      );
+    }
 
+    // Test filled text field.
+    await pumpDecorator(focused: false);
     expect(getContainerColor(tester), equals(fillColor));
     await tester.pump(const Duration(seconds: 10));
     expect(getContainerColor(tester), equals(fillColor));
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isFocused: true,
-        decoration: const InputDecoration(
-          filled: true,
-          fillColor: fillColor,
-          focusColor: focusColor,
-        ),
-      ),
-    );
-
+    await pumpDecorator(focused: true);
     expect(getContainerColor(tester), equals(fillColor));
     await tester.pump(const Duration(milliseconds: 45));
     expect(getContainerColor(tester), equals(focusColor));
 
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isFocused: false,
-        decoration: const InputDecoration(
-          filled: true,
-          fillColor: fillColor,
-          focusColor: focusColor,
-        ),
-      ),
-    );
-
+    await pumpDecorator(focused: false);
     expect(getContainerColor(tester), equals(focusColor));
     await tester.pump(const Duration(milliseconds: 15));
     expect(getContainerColor(tester), equals(fillColor));
+
+    await pumpDecorator(focused: false, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    await pumpDecorator(focused: true, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    // Test outline text field.
+    await pumpDecorator(focused: false, filled: false);
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(focused: true, filled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(focusColor));
+
+    await pumpDecorator(focused: false, filled: false);
+    expect(getBorderColor(tester), equals(focusColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(focused: false, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(disabledColor));
+
+    await pumpDecorator(focused: true, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(disabledColor));
   });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
