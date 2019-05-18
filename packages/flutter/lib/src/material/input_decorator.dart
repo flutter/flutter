@@ -166,6 +166,7 @@ class _BorderContainer extends StatefulWidget {
 
 class _BorderContainerState extends State<_BorderContainer> with TickerProviderStateMixin {
   static const Duration _kFocusInDuration = Duration(milliseconds: 45);
+  static const Duration _kFocusOutDuration = Duration(milliseconds: 15);
   static const Duration _kHoverDuration = Duration(milliseconds: 15);
 
   AnimationController _controller;
@@ -183,7 +184,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     super.initState();
     _focusColorController = AnimationController(
       duration: _kFocusInDuration,
-      // TODO(gspencer): use reverseDuration set to 15ms, once available.
+      reverseDuration: _kFocusOutDuration,
       value: widget.isFocused ? 1.0 : 0.0,
       vsync: this,
     );
