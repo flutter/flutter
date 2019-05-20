@@ -2122,7 +2122,6 @@ void main() {
 
   testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
     const Color focusColor = Color(0xFF0000FF);
-    const Color fillColor = Color(0x0A000000);
     const Color disabledColor = Color(0x05000000);
     const Color enabledBorderColor = Color(0x1f000000);
 
@@ -2142,33 +2141,7 @@ void main() {
       );
     }
 
-    // Test filled text field.
-    await pumpDecorator(focused: false);
-    expect(getContainerColor(tester), equals(fillColor));
-    await tester.pump(const Duration(seconds: 10));
-    expect(getContainerColor(tester), equals(fillColor));
-
-    await pumpDecorator(focused: true);
-    expect(getContainerColor(tester), equals(fillColor));
-    await tester.pump(const Duration(milliseconds: 45));
-    expect(getContainerColor(tester), equals(focusColor));
-
-    await pumpDecorator(focused: false);
-    expect(getContainerColor(tester), equals(focusColor));
-    await tester.pump(const Duration(milliseconds: 15));
-    expect(getContainerColor(tester), equals(fillColor));
-
-    await pumpDecorator(focused: false, enabled: false);
-    expect(getContainerColor(tester), equals(disabledColor));
-    await tester.pump(const Duration(seconds: 10));
-    expect(getContainerColor(tester), equals(disabledColor));
-
-    await pumpDecorator(focused: true, enabled: false);
-    expect(getContainerColor(tester), equals(disabledColor));
-    await tester.pump(const Duration(seconds: 10));
-    expect(getContainerColor(tester), equals(disabledColor));
-
-    // Test outline text field.
+    // Test outline text field default border.
     await pumpDecorator(focused: false, filled: false);
     await tester.pumpAndSettle();
     expect(getBorderColor(tester), equals(enabledBorderColor));
