@@ -243,6 +243,7 @@ class _LeaveBehindListItem extends StatelessWidget {
             case DismissDirection.down:
               assert(false);
           }
+          return true;
         },
         background: Container(
           color: theme.primaryColor,
