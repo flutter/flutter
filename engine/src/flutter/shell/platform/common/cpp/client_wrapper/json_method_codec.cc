@@ -44,7 +44,12 @@ JsonMethodCodec::DecodeMethodCallInternal(const uint8_t* message,
     // Pull the arguments subtree up to the root of json_message. This is
     // destructive to json_message, but the full value is no longer needed, and
     // this avoids a subtree copy.
-    json_message->Swap(arguments_iter->value);
+    // Note: The static_cast is for compatibility with RapidJSON 1.1; master
+    // already allows swapping a Document with a Value directly. Once there is
+    // a new RapidJSON release (at which point clients can be expected to have
+    // that change in the version they depend on) remove the cast.
+    static_cast<rapidjson::Value*>(json_message.get())
+        ->Swap(arguments_iter->value);
     // Swap it into |arguments|. This moves the allocator ownership, so that
     // the data won't be deleted when json_message goes out of scope.
     arguments = std::make_unique<rapidjson::Document>();

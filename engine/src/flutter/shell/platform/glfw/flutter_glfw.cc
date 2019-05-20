@@ -19,7 +19,14 @@
 #include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
 #include "flutter/shell/platform/glfw/text_input_plugin.h"
 
-#ifdef __linux__
+// For compatibility with GTK-based plugins, special message loop setup is
+// required (e.g., for GTK modal windows). This can be disabled for cases where
+// a GTK dependency is undesirable by defining FLUTTER_DISABLE_GTK.
+#if defined(__linux__) && !defined(FLUTTER_DISABLE_GTK)
+#define FLUTTER_USE_GTK 1
+#endif
+
+#ifdef FLUTTER_USE_GTK
 // For plugin-compatible event handling (e.g., modal windows).
 #include <X11/Xlib.h>
 #include <gtk/gtk.h>
@@ -519,7 +526,7 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
     const char* icu_data_path,
     const char** arguments,
     size_t argument_count) {
-#ifdef __linux__
+#ifdef FLUTTER_USE_GTK
   gtk_init(0, nullptr);
 #endif
 
@@ -659,13 +666,13 @@ double FlutterDesktopWindowGetScaleFactor(
 
 void FlutterDesktopRunWindowLoop(FlutterDesktopWindowControllerRef controller) {
   GLFWwindow* window = controller->window.get();
-#ifdef __linux__
+#ifdef FLUTTER_USE_GTK
   // Necessary for GTK thread safety.
   XInitThreads();
 #endif
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
-#ifdef __linux__
+#ifdef FLUTTER_USE_GTK
     if (gtk_events_pending()) {
       gtk_main_iteration();
     }
