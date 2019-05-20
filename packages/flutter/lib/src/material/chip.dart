@@ -1740,13 +1740,21 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     // Only redirects hit detection which occurs above and below the render object.
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
-    return child.hitTest(result, position: Offset(position.dx, size.height / 2));
+    final Offset offset = Offset(position.dx, size.height / 2);
+    return result.addWithRawTransform(
+      transform: MatrixUtils.forceToPoint(offset),
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        assert(position == offset);
+        return child.hitTest(result, position: offset);
+      },
+    );
   }
 }
 
@@ -2269,7 +2277,7 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     RenderBox hitTestChild;
@@ -2287,7 +2295,18 @@ class _RenderChip extends RenderBox {
           hitTestChild = label ?? avatar;
         break;
     }
-    return hitTestChild?.hitTest(result, position: hitTestChild.size.center(Offset.zero)) ?? false;
+    if (hitTestChild != null) {
+      final Offset center = hitTestChild.size.center(Offset.zero);
+      return result.addWithRawTransform(
+        transform: MatrixUtils.forceToPoint(center),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          assert(position == center);
+          return hitTestChild.hitTest(result, position: center);
+        },
+      );
+    }
+    return false;
   }
 
   @override

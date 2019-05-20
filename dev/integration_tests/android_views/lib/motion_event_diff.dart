@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 
 // Android MotionEvent actions for which a pointer index is encoded in the
 // unmasked action code.
@@ -13,7 +14,7 @@ const List<int> kPointerActions = <int>[
   6, // POINTER_UP
 ];
 
-const double kDoubleErrorMargin = 0.0001;
+const double kDoubleErrorMargin = precisionErrorTolerance;
 
 String diffMotionEvents(
   Map<String, dynamic> originalEvent,

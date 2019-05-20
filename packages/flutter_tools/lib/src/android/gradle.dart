@@ -495,14 +495,6 @@ Future<void> _buildGradleProjectV2(
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)
       throwToolExit('Gradle build failed to produce an Android bundle package.');
-    // Copy the bundle to app.aab, so `flutter run`, `flutter install`, etc. can find it.
-    bundleFile.copySync(project.bundleDirectory
-        .childFile('app.aab')
-        .path);
-
-    printTrace('calculateSha: ${project.bundleDirectory}/app.aab');
-    final File bundleShaFile = project.bundleDirectory.childFile('app.aab.sha1');
-    bundleShaFile.writeAsStringSync(calculateSha(bundleFile));
 
     String appSize;
     if (buildInfo.mode == BuildMode.debug) {
@@ -539,12 +531,8 @@ File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
 
   if (bundleFileName == null)
     return null;
-  File bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, bundleFileName));
-  if (bundleFile.existsSync()) {
-    return bundleFile;
-  }
   final String modeName = camelCase(buildInfo.modeName);
-  bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, modeName, bundleFileName));
+  File bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, modeName, bundleFileName));
   if (bundleFile.existsSync())
     return bundleFile;
   if (buildInfo.flavor != null) {

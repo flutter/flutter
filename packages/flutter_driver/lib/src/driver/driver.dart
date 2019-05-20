@@ -19,6 +19,7 @@ import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
 import '../common/fuchsia_compat.dart';
+import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
 import '../common/message.dart';
@@ -464,6 +465,37 @@ class FlutterDriver {
   /// becomes "stable", for example, prior to taking a [screenshot].
   Future<void> waitUntilNoTransientCallbacks({ Duration timeout }) async {
     await _sendCommand(WaitUntilNoTransientCallbacks(timeout: timeout));
+  }
+
+  Future<DriverOffset> _getOffset(SerializableFinder finder, OffsetType type, { Duration timeout }) async {
+    final GetOffset command = GetOffset(finder, type, timeout: timeout);
+    final GetOffsetResult result = GetOffsetResult.fromJson(await _sendCommand(command));
+    return DriverOffset(result.dx, result.dy);
+  }
+
+  /// Returns the point at the top left of the widget identified by `finder`.
+  Future<DriverOffset> getTopLeft(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.topLeft, timeout: timeout);
+  }
+
+  /// Returns the point at the top right of the widget identified by `finder`.
+  Future<DriverOffset> getTopRight(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.topRight, timeout: timeout);
+  }
+
+  /// Returns the point at the bottom left of the widget identified by `finder`.
+  Future<DriverOffset> getBottomLeft(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.bottomLeft, timeout: timeout);
+  }
+
+  /// Returns the point at the bottom right of the widget identified by `finder`.
+  Future<DriverOffset> getBottomRight(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.bottomRight, timeout: timeout);
+  }
+
+  /// Returns the point at the center of the widget identified by `finder`.
+  Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
+    return _getOffset(finder, OffsetType.center, timeout: timeout);
   }
 
   /// Tell the driver to perform a scrolling action.
@@ -924,7 +956,35 @@ void restoreVmServiceConnectFunction() {
   vmServiceConnectFunction = _waitAndConnect;
 }
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+///
+/// For example, if the client sends a notification message to the server for
+/// 'streamNotify', but the server has not finished loading, it will throw an
+/// exception. Since the message is a notification, the server follows the
+/// specification and does not send a response back, but is left with an
+/// unhandled exception. That exception is safe for us to ignore - the client
+/// is signaling that it will try again later if it doesn't get what it wants
+/// here by sending a notification.
+// This may be ignoring too many exceptions. It would be best to rewrite
+// the client code to not use notifications so that it gets error replies back
+// and can decide what to do from there.
+// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+bool _ignoreRpcError(dynamic error) {
+  if (error is rpc.RpcException) {
+    final rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
   _log.trace('Unhandled RPC error:\n$error\n$stack');
   // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
   // assert(false);
@@ -984,5 +1044,53 @@ class CommonFinders {
   SerializableFinder byType(String type) => ByType(type);
 
   /// Finds the back button on a Material or Cupertino page's scaffold.
-  SerializableFinder pageBack() => PageBack();
+  SerializableFinder pageBack() => const PageBack();
+
+  /// Finds the widget that is an ancestor of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder ancestor({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
+
+  /// Finds the widget that is an descendant of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder descendant({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
+}
+
+/// An immutable 2D floating-point offset used by Flutter Driver.
+class DriverOffset {
+  /// Creates an offset.
+  const DriverOffset(this.dx, this.dy);
+
+  /// The x component of the offset.
+  final double dx;
+
+  /// The y component of the offset.
+  final double dy;
+
+  @override
+  String toString() => '$runtimeType($dx, $dy)';
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! DriverOffset)
+      return false;
+    final DriverOffset typedOther = other;
+    return dx == typedOther.dx && dy == typedOther.dy;
+  }
+
+  @override
+  int get hashCode => dx.hashCode + dy.hashCode;
 }

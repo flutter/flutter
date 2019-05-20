@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
@@ -222,6 +223,16 @@ class FuchsiaDevice extends Device {
 
   @override
   void clearLogs() {}
+
+  @override
+  OverrideArtifacts get artifactOverrides {
+    return _artifactOverrides ??= OverrideArtifacts(
+      parent: Artifacts.instance,
+      platformKernelDill: fuchsiaArtifacts.platformKernelDill,
+      flutterPatchedSdk: fuchsiaArtifacts.flutterPatchedSdk,
+    );
+  }
+  OverrideArtifacts _artifactOverrides;
 
   @override
   bool get supportsScreenshot => false;

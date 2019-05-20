@@ -558,7 +558,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
     return Semantics(
       container: _semanticLabel != null,
       image: true,
-      label: _semanticLabel == null ? '' : _semanticLabel,
+      label: _semanticLabel ?? '',
       child: image,
     );
   }
