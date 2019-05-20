@@ -22,6 +22,9 @@ class RequestData extends Command {
   String get kind => 'request_data';
 
   @override
+  bool get requiresRootWidgetAttached => false;
+
+  @override
   Map<String, String> serialize() => super.serialize()..addAll(<String, String>{
     'message': message,
   });
