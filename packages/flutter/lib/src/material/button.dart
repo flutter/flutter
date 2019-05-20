@@ -232,22 +232,18 @@ class RawMaterialButton extends StatefulWidget {
 }
 
 class _RawMaterialButtonState extends State<RawMaterialButton> {
-  Set<MaterialState> states = <MaterialState>{};
-
-  bool get _highlight => states.contains(MaterialState.pressed);
-  bool get _hovered => states.contains(MaterialState.hovered);
-  bool get _focused => states.contains(MaterialState.hovered);
+  final Set<MaterialState> _states = <MaterialState>{};
 
   void _updateState(bool value, MaterialState state) {
     if (value) {
-      states.add(state);
+      _states.add(state);
     } else {
-      states.remove(state);
+      _states.remove(state);
     }
   }
 
   void _handleHighlightChanged(bool value) {
-    if (_highlight != value) {
+    if (_states.contains(MaterialState.pressed) != value) {
       setState(() {
         _updateState(value, MaterialState.pressed);
         if (widget.onHighlightChanged != null) {
@@ -260,8 +256,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_highlight && !widget.enabled) {
-      states.remove(MaterialState.pressed);
+    if (_states.contains(MaterialState.pressed) && !widget.enabled) {
+      _states.remove(MaterialState.pressed);
       if (widget.onHighlightChanged != null) {
         widget.onHighlightChanged(false);
       }
@@ -272,13 +268,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
     if (widget.enabled) {
       // These conditionals are in order of precedence, so be careful about
       // reorganizing them.
-      if (_highlight) {
+      if (_states.contains(MaterialState.pressed)) {
         return widget.highlightElevation;
       }
-      if (_hovered) {
+      if (_states.contains(MaterialState.hovered)) {
         return widget.hoverElevation;
       }
-      if (_focused) {
+      if (_states.contains(MaterialState.focused)) {
         return widget.focusElevation;
       }
       return widget.elevation;
@@ -289,7 +285,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveTextColor = MaterialStateColor.getColorInStates(widget.textStyle?.color, states);
+    final Color effectiveTextColor = MaterialStateColor.getColorInStates(widget.textStyle?.color, _states);
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
