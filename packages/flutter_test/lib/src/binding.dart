@@ -764,6 +764,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
           return Future<ByteData>.value(encoded.buffer.asByteData());
         }
+        return null;
       });
     }
   }
