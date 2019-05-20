@@ -2,7 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
+
+import 'package:flutter/foundation.dart';
+
+typedef _MessageHandler = Future<ByteData> Function(ByteData message);
 
 /// A messenger which sends binary data across the Flutter platform barrier.
 ///
@@ -10,6 +16,14 @@ import 'dart:typed_data';
 abstract class BinaryMessenger {
   /// A const constructor to allow subclasses to be const.
   const BinaryMessenger();
+
+  /// Calls the handler registered for the given channel.
+  ///
+  /// Typically called by [ServicesBinding] to handle platform messages received
+  /// from [Window.onPlatformMessage].
+  ///
+  /// To register a handler for a given message channel, see [setMessageHandler].
+  Future<void> handlePlatformMessage(String channel, ByteData data, ui.PlatformMessageResponseCallback callback);
 
   /// Send a binary message to the platform plugins on the given channel.
   ///
@@ -40,3 +54,100 @@ abstract class BinaryMessenger {
   /// sent to platform plugins.
   void setMockMessageHandler(String channel, Future<ByteData> handler(ByteData message));
 }
+
+/// The default implementation of [BinaryMessenger].
+///
+/// This messenger sends messages from the app-side to the platform-side and
+/// dispatches incoming messages from the platform-side to the appropriate
+/// handler.
+class _DefaultBinaryMessenger extends BinaryMessenger {
+  const _DefaultBinaryMessenger._();
+
+  // Handlers for incoming messages from platform plugins.
+  // Note: This is static so that this class can have a const constructor.
+  static final Map<String, _MessageHandler> _handlers =
+      <String, _MessageHandler>{};
+
+  // Mock handlers that intercept and respond to outgoing messages.
+  // Note: This is static so that this class can have a const constructor.
+  static final Map<String, _MessageHandler> _mockHandlers =
+      <String, _MessageHandler>{};
+
+  Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
+    final Completer<ByteData> completer = Completer<ByteData>();
+    // ui.window is accessed directly instead of using ServicesBinding.instance.window
+    // because this method might be invoked before any binding is initialized.
+    // This issue was reported in #27541. It is not ideal to statically access
+    // ui.window because the Window may be dependency injected elsewhere with
+    // a different instance. However, static access at this location seems to be
+    // the least bad option.
+    ui.window.sendPlatformMessage(channel, message, (ByteData reply) {
+      try {
+        completer.complete(reply);
+      } catch (exception, stack) {
+        FlutterError.reportError(FlutterErrorDetails(
+          exception: exception,
+          stack: stack,
+          library: 'services library',
+          context: ErrorDescription('during a platform message response callback'),
+        ));
+      }
+    });
+    return completer.future;
+  }
+
+  @override
+  Future<void> handlePlatformMessage(
+    String channel,
+    ByteData data,
+    ui.PlatformMessageResponseCallback callback,
+  ) async {
+    ByteData response;
+    try {
+      final _MessageHandler handler = _handlers[channel];
+      if (handler != null)
+        response = await handler(data);
+    } catch (exception, stack) {
+      FlutterError.reportError(FlutterErrorDetails(
+        exception: exception,
+        stack: stack,
+        library: 'services library',
+        context: ErrorDescription('during a platform message callback'),
+      ));
+    } finally {
+      callback(response);
+    }
+  }
+
+
+  @override
+  Future<ByteData> send(String channel, ByteData message) {
+    final _MessageHandler handler = _mockHandlers[channel];
+    if (handler != null)
+      return handler(message);
+    return _sendPlatformMessage(channel, message);
+  }
+
+  @override
+  void setMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
+    if (handler == null)
+      _handlers.remove(channel);
+    else
+      _handlers[channel] = handler;
+  }
+
+  @override
+  void setMockMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
+    if (handler == null)
+      _mockHandlers.remove(channel);
+    else
+      _mockHandlers[channel] = handler;
+  }
+}
+
+/// The default instance of [BinaryMessenger].
+///
+/// This is used to send messages from the application to the platform, and
+/// keeps track of which handlers have been registered on each channel so
+/// it may dispatch incoming messages to the registered handler.
+const BinaryMessenger defaultBinaryMessenger = _DefaultBinaryMessenger._();

@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'binary_messenger.dart';
 import 'message_codec.dart';
 import 'message_codecs.dart';
-import 'platform_messages.dart';
 
 /// A named channel for communicating with platform plugins using asynchronous
 /// message passing.
@@ -33,7 +32,7 @@ class BasicMessageChannel<T> {
   /// Creates a [BasicMessageChannel] with the specified [name], [codec] and [binaryMessenger].
   ///
   /// None of [name], [codec], or [binaryMessenger] may be null.
-  const BasicMessageChannel(this.name, this.codec, [ this.binaryMessenger = const _ClientBinaryMessenger() ])
+  const BasicMessageChannel(this.name, this.codec, [ this.binaryMessenger = defaultBinaryMessenger ])
     : assert(name != null),
       assert(codec != null),
       assert(binaryMessenger != null);
@@ -120,7 +119,7 @@ class MethodChannel {
   /// specified.
   ///
   /// None of [name], [binaryMessenger], or [codec] may be null.
-  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger = const _ClientBinaryMessenger() ])
+  const MethodChannel(this.name, [this.codec = const StandardMethodCodec(), this.binaryMessenger = defaultBinaryMessenger ])
     : assert(name != null),
       assert(binaryMessenger != null),
       assert(codec != null);
@@ -489,7 +488,7 @@ class EventChannel {
     final MethodChannel methodChannel = MethodChannel(name, codec);
     StreamController<dynamic> controller;
     controller = StreamController<dynamic>.broadcast(onListen: () async {
-      BinaryMessages.setMessageHandler(name, (ByteData reply) async {
+      defaultBinaryMessenger.setMessageHandler(name, (ByteData reply) async {
         if (reply == null) {
           controller.close();
         } else {
@@ -512,7 +511,7 @@ class EventChannel {
         ));
       }
     }, onCancel: () async {
-      BinaryMessages.setMessageHandler(name, null);
+      defaultBinaryMessenger.setMessageHandler(name, null);
       try {
         await methodChannel.invokeMethod<void>('cancel', arguments);
       } catch (exception, stack) {
@@ -525,25 +524,5 @@ class EventChannel {
       }
     });
     return controller.stream;
-  }
-}
-
-/// A [BinaryMessenger] which uses [BinaryMessages] to send platform messages.
-///
-/// This messenger sends messages from the application side to platform plugins.
-class _ClientBinaryMessenger extends BinaryMessenger {
-  const _ClientBinaryMessenger();
-
-  @override
-  Future<ByteData> send(String channel, ByteData message) => BinaryMessages.send(channel, message);
-
-  @override
-  void setMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
-    BinaryMessages.setMessageHandler(channel, handler);
-  }
-
-  @override
-  void setMockMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
-    BinaryMessages.setMockMessageHandler(channel, handler);
   }
 }

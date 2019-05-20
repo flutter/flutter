@@ -757,7 +757,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _ensureInitialized(assetFolderPath);
 
     if (_allowedAssetKeys.isNotEmpty) {
-      BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
+      defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
         final String key = utf8.decode(message.buffer.asUint8List());
         if (_allowedAssetKeys.contains(key)) {
           final File asset = File(path.join(assetFolderPath, key));
