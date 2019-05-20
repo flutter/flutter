@@ -738,7 +738,7 @@ class EditableText extends StatefulWidget {
   /// {@template flutter.widgets.editableText.scrollController}
   /// The [ScrollController] to use when vertically scrolling the input.
   ///
-  /// If null, it will instantiate a new ScrollController
+  /// If null, it will instantiate a new ScrollController.
   ///
   /// See [Scrollable.controller].
   /// {@endtemplate}
@@ -778,6 +778,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
   }
 }
@@ -829,7 +830,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
     _floatingCursorResetController = AnimationController(vsync: this);
     _floatingCursorResetController.addListener(_onFloatingCursorResetTick);
-
   }
 
   @override
