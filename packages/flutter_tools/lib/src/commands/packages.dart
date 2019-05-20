@@ -174,7 +174,7 @@ class PackagesPassthroughCommand extends FlutterCommand {
   }
 
   @override
-  String get name => 'packages';
+  String get name => 'pub';
 
   @override
   String get description {

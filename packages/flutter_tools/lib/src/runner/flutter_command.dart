@@ -106,7 +106,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool get shouldRunPub => _usesPubOption && argResults['pub'];
+  bool get shouldRunPub => _usesPubOption && argResults['packages'];
 
   bool get shouldUpdateCache => true;
 
