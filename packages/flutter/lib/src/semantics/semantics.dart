@@ -2496,15 +2496,13 @@ class SemanticsOwner extends ChangeNotifier {
       visitedNodes.addAll(localDirtyNodes);
       for (SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
-        if (node.parent != null) {
-          assert(
-            !node.parent.isPartOfNodeMerging || node.isMergedIntoParent,
-            '$node cannot be merged because an ancestor SemanticsNode needs '
-            'to merge its descendants\' semantic information, but $node is '
-            'set to be explicit. See [SemanticsConfiguration.explicitChildNodes] '
-            'for more information.'
-          );
-        }
+        assert(
+          node.parent == null || !node.parent.isPartOfNodeMerging || node.isMergedIntoParent,
+          '$node cannot be merged because an ancestor SemanticsNode needs '
+          'to merge its descendants\' semantic information, but $node is '
+          'set to be explicit. See [SemanticsConfiguration.explicitChildNodes] '
+          'for more information.'
+        );
         if (node.isPartOfNodeMerging) {
           assert(node.mergeAllDescendantsIntoThisNode || node.parent != null);
           // if we're merged into our parent, make sure our parent is added to the dirty list
