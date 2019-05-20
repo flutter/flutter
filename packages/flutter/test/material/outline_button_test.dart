@@ -155,6 +155,138 @@ void main() {
     semanticsEnabled: true,
   );
 
+  testWidgets('OutlineButton uses stateful color for text color in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color pressedColor = Color(1);
+    const Color hoverColor = Color(2);
+    const Color focusedColor = Color(3);
+    const Color defaultColor = Color(4);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if(states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      if(states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if(states.contains(MaterialState.focused)) {
+        return focusedColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: OutlineButton(
+              child: const Text('OutlineButton'),
+              onPressed: () {},
+              focusNode: focusNode,
+              textColor: MaterialStateColor(getTextColor),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('OutlineButton')).text.style.color;
+    }
+
+    // Default, not disabled.
+    await expectLater(textColor(), equals(defaultColor));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(textColor(), focusedColor);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(OutlineButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(textColor(), hoverColor);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(textColor(), pressedColor);
+    await gesture.removePointer();
+  });
+
+  testWidgets('OutlineButton uses stateful color for icon color in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final Key buttonKey = UniqueKey();
+
+    const Color pressedColor = Color(1);
+    const Color hoverColor = Color(2);
+    const Color focusedColor = Color(3);
+    const Color defaultColor = Color(4);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if(states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      if(states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if(states.contains(MaterialState.focused)) {
+        return focusedColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: OutlineButton.icon(
+              key: buttonKey,
+              icon: Icon(Icons.add),
+              label: const Text('OutlineButton'),
+              onPressed: () {},
+              focusNode: focusNode,
+              textColor: MaterialStateColor(getTextColor),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color iconColor() => _iconStyle(tester, Icons.add).color;
+    // Default, not disabled.
+    await expectLater(iconColor(), equals(defaultColor));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(iconColor(), focusedColor);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byKey(buttonKey));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(iconColor(), hoverColor);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(iconColor(), pressedColor);
+    await gesture.removePointer();
+  });
+
   testWidgets('Outline button responds to tap when enabled', (WidgetTester tester) async {
     int pressedCount = 0;
 
@@ -540,4 +672,11 @@ void _checkPhysicalLayer(Element element, Color expectedColor, { Path clipPath, 
     expect(clipRect, isNotNull);
     expect(expectedLayer.clipPath, coversSameAreaAs(clipPath, areaToCompare: clipRect.inflate(10.0)));
   }
+}
+
+TextStyle _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }

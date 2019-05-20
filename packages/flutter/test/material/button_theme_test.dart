@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -325,4 +326,67 @@ void main() {
     expect(fooText, findsNWidgets(2));
     expect(tester.getRect(fooText.at(0)), tester.getRect(fooText.at(1)));
   });
+
+  testWidgets('button theme with stateful color changes color in states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    final ColorScheme colorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue);
+
+    Color getTextColor(Set<MaterialState> states) {
+      final Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if(states.any(interactiveStates.contains)) {
+        return Colors.blue[900];
+      }
+      return Colors.blue[800];
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ButtonTheme(
+              colorScheme: colorScheme.copyWith(primary: MaterialStateColor(getTextColor)),
+              textTheme: ButtonTextTheme.primary,
+              child: FlatButton(
+                child: const Text('FlatButton'),
+                onPressed: () {},
+                focusNode: focusNode,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Highlighted (pressed).
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    await tester.startGesture(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Hovered.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await gesture.removePointer();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
+    semanticsEnabled: true,
+  );
 }

@@ -78,6 +78,202 @@ void main() {
     semanticsEnabled: true,
   );
 
+  testWidgets('FlatButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    final ColorScheme colorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue);
+
+    Color getTextColor(Set<MaterialState> states) {
+      final Set<MaterialState> interactiveStates = <MaterialState>{
+        MaterialState.pressed,
+        MaterialState.hovered,
+        MaterialState.focused,
+      };
+      if(states.any(interactiveStates.contains)) {
+        return Colors.blue[900];
+      }
+      return Colors.blue[800];
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: ButtonTheme(
+              colorScheme: colorScheme,
+              textTheme: ButtonTextTheme.primary,
+              child: FlatButton(
+                child: const Text('FlatButton'),
+                onPressed: () {},
+                focusNode: focusNode,
+                textColor: MaterialStateColor(getTextColor),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Highlighted (pressed).
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    await tester.startGesture(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Hovered.
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await gesture.removePointer();
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
+    semanticsEnabled: true,
+  );
+
+  testWidgets('FlatButton uses stateful color for text color in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color pressedColor = Color(1);
+    const Color hoverColor = Color(2);
+    const Color focusedColor = Color(3);
+    const Color defaultColor = Color(4);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if(states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      if(states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if(states.contains(MaterialState.focused)) {
+        return focusedColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FlatButton(
+              child: const Text('FlatButton'),
+              onPressed: () {},
+              focusNode: focusNode,
+              textColor: MaterialStateColor(getTextColor),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style.color;
+    }
+
+    // Default, not disabled.
+    await expectLater(textColor(), equals(defaultColor));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(textColor(), focusedColor);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(textColor(), hoverColor);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(textColor(), pressedColor);
+    await gesture.removePointer();
+  });
+
+  testWidgets('FlatButton uses stateful color for icon color in different states', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+    final Key buttonKey = UniqueKey();
+
+    const Color pressedColor = Color(1);
+    const Color hoverColor = Color(2);
+    const Color focusedColor = Color(3);
+    const Color defaultColor = Color(4);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if(states.contains(MaterialState.pressed)) {
+        return pressedColor;
+      }
+      if(states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if(states.contains(MaterialState.focused)) {
+        return focusedColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FlatButton.icon(
+              key: buttonKey,
+              icon: Icon(Icons.add),
+              label: const Text('FlatButton'),
+              onPressed: () {},
+              focusNode: focusNode,
+              textColor: MaterialStateColor(getTextColor),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color iconColor() => _iconStyle(tester, Icons.add).color;
+    // Default, not disabled.
+    await expectLater(iconColor(), equals(defaultColor));
+
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    await expectLater(iconColor(), focusedColor);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byKey(buttonKey));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    await expectLater(iconColor(), hoverColor);
+
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(iconColor(), pressedColor);
+    await gesture.removePointer();
+  });
+
   testWidgets('FlatButton has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(
@@ -96,4 +292,11 @@ void main() {
         paintsExactlyCountTimes(#clipPath, 0),
     );
   });
+}
+
+TextStyle _iconStyle(WidgetTester tester, IconData icon) {
+  final RichText iconRichText = tester.widget<RichText>(
+    find.descendant(of: find.byIcon(icon), matching: find.byType(RichText)),
+  );
+  return iconRichText.text.style;
 }
