@@ -486,7 +486,7 @@ static void CommonInit(FLEViewController* controller) {
       }
     }
     double scaleFactor = self.view.layer.contentsScale;
-    flutterEvent.scroll_delta_x = event.scrollingDeltaX * pixelsPerLine * scaleFactor;
+    flutterEvent.scroll_delta_x = -event.scrollingDeltaX * pixelsPerLine * scaleFactor;
     flutterEvent.scroll_delta_y = -event.scrollingDeltaY * pixelsPerLine * scaleFactor;
   }
   FlutterEngineSendPointerEvent(_engine, &flutterEvent, 1);
