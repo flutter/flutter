@@ -200,7 +200,7 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   /// Therefore, when implementing a subclass of the [Layer] concept defined in
   /// the rendering layer of Flutter's framework, once this is called, there's
   /// no need to call [addToScene] for its children layers.
-  EngineLayer addRetained(EngineLayer retainedLayer) native 'SceneBuilder_addRetained';
+  void addRetained(EngineLayer retainedLayer) native 'SceneBuilder_addRetained';
 
   /// Adds an object to the scene that displays performance statistics.
   ///
