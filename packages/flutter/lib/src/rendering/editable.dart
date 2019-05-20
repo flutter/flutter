@@ -354,13 +354,12 @@ class RenderEditable extends RenderBox {
   // different from the existing selection.
   void _handlePotentialSelectionChange(
     TextSelection nextSelection,
-    RenderEditable renderObject,
     SelectionChangedCause cause,
   ) {
     if (nextSelection == selection) {
       return;
     }
-    onSelectionChanged(nextSelection, renderObject, cause);
+    onSelectionChanged(nextSelection, this, cause);
   }
 
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
@@ -502,7 +501,6 @@ class RenderEditable extends RenderBox {
             baseOffset: _baseOffset,
             extentOffset: newOffset,
           ),
-          this,
           SelectionChangedCause.keyboard,
         );
       } else {
@@ -511,7 +509,6 @@ class RenderEditable extends RenderBox {
             baseOffset: newOffset,
             extentOffset: _baseOffset,
           ),
-          this,
           SelectionChangedCause.keyboard,
         );
       }
@@ -530,7 +527,6 @@ class RenderEditable extends RenderBox {
             offset: newOffset
           )
         ),
-        this,
         SelectionChangedCause.keyboard,
       );
     }
@@ -582,7 +578,6 @@ class RenderEditable extends RenderBox {
             baseOffset: 0,
             extentOffset: textSelectionDelegate.textEditingValue.text.length,
           ),
-          this,
           SelectionChangedCause.keyboard,
         );
         break;
@@ -980,7 +975,7 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleSetSelection(TextSelection selection) {
-    _handlePotentialSelectionChange(selection, this, SelectionChangedCause.keyboard);
+    _handlePotentialSelectionChange(selection, SelectionChangedCause.keyboard);
   }
 
   void _handleMoveCursorForwardByCharacter(bool extentSelection) {
@@ -989,7 +984,7 @@ class RenderEditable extends RenderBox {
       return;
     final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
     _handlePotentialSelectionChange(
-      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), SelectionChangedCause.keyboard,
     );
   }
 
@@ -999,7 +994,7 @@ class RenderEditable extends RenderBox {
       return;
     final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
     _handlePotentialSelectionChange(
-      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), SelectionChangedCause.keyboard,
     );
   }
 
@@ -1016,7 +1011,6 @@ class RenderEditable extends RenderBox {
         baseOffset: baseOffset,
         extentOffset: nextWord.start,
       ),
-      this,
       SelectionChangedCause.keyboard,
     );
   }
@@ -1034,7 +1028,6 @@ class RenderEditable extends RenderBox {
         baseOffset: baseOffset,
         extentOffset: previousWord.start,
       ),
-      this,
       SelectionChangedCause.keyboard,
     );
   }
@@ -1413,7 +1406,7 @@ class RenderEditable extends RenderBox {
       );
       // Call [onSelectionChanged] only when the selection actually changed.
       if (newSelection != _selection) {
-        _handlePotentialSelectionChange(newSelection, this, cause);
+        _handlePotentialSelectionChange(newSelection, cause);
       }
     }
   }
@@ -1447,7 +1440,6 @@ class RenderEditable extends RenderBox {
           extentOffset: lastWord.extent.offset,
           affinity: firstWord.affinity,
         ),
-        this,
         cause,
       );
     }
@@ -1466,13 +1458,11 @@ class RenderEditable extends RenderBox {
       if (position.offset - word.start <= 1) {
         _handlePotentialSelectionChange(
           TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
-          this,
           cause,
         );
       } else {
         _handlePotentialSelectionChange(
           TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
-          this,
           cause,
         );
       }
