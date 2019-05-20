@@ -300,7 +300,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
         constraints: widget.constraints,
         child: Material(
           elevation: _effectiveElevation(),
-          textStyle: widget.textStyle.copyWith(color: effectiveTextColor),
+          textStyle: widget?.textStyle?.copyWith(color: effectiveTextColor),
           shape: widget.shape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
