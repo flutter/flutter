@@ -30,6 +30,8 @@ class MacOSDevice extends Device {
     return _deviceLogReader;
   }
   final DesktopLogReader _deviceLogReader = DesktopLogReader();
+  // The last build mode.
+  BuildMode _buildMode;
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -72,6 +74,7 @@ class MacOSDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
+    _buildMode = debuggingOptions?.buildInfo?.mode;
     // Stop any running applications with the same executable.
     if (!prebuiltApplication) {
       Cache.releaseLockEarly();
@@ -115,7 +118,7 @@ class MacOSDevice extends Device {
   @override
   Future<bool> stopApp(covariant MacOSApp app) async {
     // Assume debug for now.
-    return killProcess(app.executable(BuildMode.debug));
+    return killProcess(app.executable(_buildMode));
   }
 
   @override
