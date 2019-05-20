@@ -87,7 +87,8 @@ class ExpansionPanel {
   final ExpansionPanelHeaderBuilder headerBuilder;
 
   /// The widget builder that builds the expansion panels' indicator.
-  /// If null, use [ExpandIcon] for default
+  ///
+  /// If null, using [ExpandIcon] for default
   final ExpansionPanelIndicatorBuilder expansionIndicator;
 
   /// The body of the expansion panel that's displayed below the header.
