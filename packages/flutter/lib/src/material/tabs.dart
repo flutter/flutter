@@ -45,8 +45,10 @@ enum TabBarIndicatorSize {
   label,
 }
 
-/// A material design [TabBar] tab. If both [icon] and [text] are
-/// provided, the text is displayed below the icon.
+/// A material design [TabBar] tab.
+///
+/// If both [icon] and [text] are provided, the text is displayed below
+/// the icon.
 ///
 /// See also:
 ///
@@ -55,9 +57,10 @@ enum TabBarIndicatorSize {
 ///  * [TabController], which coordinates tab selection between a [TabBar] and a [TabBarView].
 ///  * <https://material.io/design/components/tabs.html>
 class Tab extends StatelessWidget {
-  /// Creates a material design [TabBar] tab. At least one of [text], [icon],
-  /// and [child] must be non-null. The [text] and [child] arguments must not be
-  /// used at the same time.
+  /// Creates a material design [TabBar] tab.
+  ///
+  /// At least one of [text], [icon], and [child] must be non-null. The [text]
+  /// and [child] arguments must not be used at the same time.
   const Tab({
     Key key,
     this.text,
@@ -445,6 +448,18 @@ class _ChangeAnimation extends Animation<double> with AnimationWithParentMixin<d
   Animation<double> get parent => controller.animation;
 
   @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    if (parent != null)
+      super.removeStatusListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    if (parent != null)
+      super.removeListener(listener);
+  }
+
+  @override
   double get value => _indexChangeProgress(controller);
 }
 
@@ -456,6 +471,18 @@ class _DragAnimation extends Animation<double> with AnimationWithParentMixin<dou
 
   @override
   Animation<double> get parent => controller.animation;
+
+  @override
+  void removeStatusListener(AnimationStatusListener listener) {
+    if (parent != null)
+      super.removeStatusListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    if (parent != null)
+      super.removeListener(listener);
+  }
 
   @override
   double get value {
@@ -595,26 +622,29 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
 
   /// Whether this tab bar can be scrolled horizontally.
   ///
-  /// If [isScrollable] is true then each tab is as wide as needed for its label
+  /// If [isScrollable] is true, then each tab is as wide as needed for its label
   /// and the entire [TabBar] is scrollable. Otherwise each tab gets an equal
   /// share of the available space.
   final bool isScrollable;
 
-  /// The color of the line that appears below the selected tab. If this parameter
-  /// is null then the value of the Theme's indicatorColor property is used.
+  /// The color of the line that appears below the selected tab.
+  ///
+  /// If this parameter is null, then the value of the Theme's indicatorColor
+  /// property is used.
   ///
   /// If [indicator] is specified, this property is ignored.
   final Color indicatorColor;
 
-  /// The thickness of the line that appears below the selected tab. The value
-  /// of this parameter must be greater than zero.
+  /// The thickness of the line that appears below the selected tab.
   ///
-  /// The default value of [indicatorWeight] is 2.0.
+  /// The value of this parameter must be greater than zero and its default
+  /// value is 2.0.
   ///
   /// If [indicator] is specified, this property is ignored.
   final double indicatorWeight;
 
   /// The horizontal padding for the line that appears below the selected tab.
+  ///
   /// For [isScrollable] tab bars, specifying [kTabLabelPadding] will align
   /// the indicator with the tab's text for [Tab] widgets and all but the
   /// shortest [Tab.text] values.
@@ -638,7 +668,7 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// The indicator's size is based on the tab's bounds. If [indicatorSize]
   /// is [TabBarIndicatorSize.tab] the tab's bounds are as wide as the space
   /// occupied by the tab in the tab bar. If [indicatorSize] is
-  /// [TabBarIndicatorSize.label] then the tab's bounds are only as wide as
+  /// [TabBarIndicatorSize.label], then the tab's bounds are only as wide as
   /// the tab widget itself.
   final Decoration indicator;
 
@@ -659,33 +689,34 @@ class TabBar extends StatefulWidget implements PreferredSizeWidget {
   /// Unselected tab labels are rendered with the same color rendered at 70%
   /// opacity unless [unselectedLabelColor] is non-null.
   ///
-  /// If this parameter is null then the color of the [ThemeData.primaryTextTheme]'s
+  /// If this parameter is null, then the color of the [ThemeData.primaryTextTheme]'s
   /// body2 text color is used.
   final Color labelColor;
 
   /// The color of unselected tab labels.
   ///
-  /// If this property is null, Unselected tab labels are rendered with the
-  /// [labelColor] rendered at 70% opacity.
+  /// If this property is null, unselected tab labels are rendered with the
+  /// [labelColor] with 70% opacity.
   final Color unselectedLabelColor;
 
-  /// The text style of the selected tab labels. If [unselectedLabelStyle] is
-  /// null then this text style will be used for both selected and unselected
-  /// label styles.
+  /// The text style of the selected tab labels.
   ///
-  /// If this property is null then the text style of the [ThemeData.primaryTextTheme]'s
-  /// body2 definition is used.
+  /// If [unselectedLabelStyle] is null, then this text style will be used for
+  /// both selected and unselected label styles.
+  ///
+  /// If this property is null, then the text style of the
+  /// [ThemeData.primaryTextTheme]'s body2 definition is used.
   final TextStyle labelStyle;
 
   /// The padding added to each of the tab labels.
   ///
-  /// If this property is null then kTabLabelPadding is used.
+  /// If this property is null, then kTabLabelPadding is used.
   final EdgeInsetsGeometry labelPadding;
 
   /// The text style of the unselected tab labels
   ///
-  /// If this property is null then the [labelStyle] value is used. If [labelStyle]
-  /// is null then the text style of the [ThemeData.primaryTextTheme]'s
+  /// If this property is null, then the [labelStyle] value is used. If [labelStyle]
+  /// is null, then the text style of the [ThemeData.primaryTextTheme]'s
   /// body2 definition is used.
   final TextStyle unselectedLabelStyle;
 
@@ -768,6 +799,11 @@ class _TabBarState extends State<TabBar> {
     );
   }
 
+  // If the TabBar is rebuilt with a new tab controller, the caller should
+  // dispose the old one. In that case the old controller's animation will be
+  // null and should not be accessed.
+  bool get _controllerIsValid => _controller?.animation != null;
+
   void _updateTabController() {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
@@ -786,7 +822,7 @@ class _TabBarState extends State<TabBar> {
     if (newController == _controller)
       return;
 
-    if (_controller != null) {
+    if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
     }
@@ -799,7 +835,7 @@ class _TabBarState extends State<TabBar> {
   }
 
   void _initIndicatorPainter() {
-    _indicatorPainter = _controller == null ? null : _IndicatorPainter(
+    _indicatorPainter = !_controllerIsValid ? null : _IndicatorPainter(
       controller: _controller,
       indicator: _indicator,
       indicatorSize: widget.indicatorSize ?? TabBarTheme.of(context).indicatorSize,
@@ -840,10 +876,11 @@ class _TabBarState extends State<TabBar> {
   @override
   void dispose() {
     _indicatorPainter.dispose();
-    if (_controller != null) {
+    if (_controllerIsValid) {
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
       _controller.removeListener(_handleTabControllerTick);
     }
+    _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1013,7 +1050,7 @@ class _TabBarState extends State<TabBar> {
       }
     }
 
-    // Add the tap handler to each tab. If the tab bar is not scrollable
+    // Add the tap handler to each tab. If the tab bar is not scrollable,
     // then give all of the tabs equal flexibility so that they each occupy
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
@@ -1068,7 +1105,9 @@ class _TabBarState extends State<TabBar> {
 }
 
 /// A page view that displays the widget which corresponds to the currently
-/// selected tab. Typically used in conjunction with a [TabBar].
+/// selected tab.
+///
+/// This widget is typically used in conjunction with a [TabBar].
 ///
 /// If a [TabController] is not provided, then there must be a [DefaultTabController]
 /// ancestor.
@@ -1097,7 +1136,9 @@ class TabBarView extends StatefulWidget {
   /// will be used.
   final TabController controller;
 
-  /// One widget per tab. Its length must match the length of the [TabBar.tabs]
+  /// One widget per tab.
+  ///
+  /// Its length must match the length of the [TabBar.tabs]
   /// list, as well as the [controller]'s [TabController.length].
   final List<Widget> children;
 
@@ -1129,6 +1170,11 @@ class _TabBarViewState extends State<TabBarView> {
   int _currentIndex;
   int _warpUnderwayCount = 0;
 
+  // If the TabBarView is rebuilt with a new tab controller, the caller should
+  // dispose the old one. In that case the old controller's animation will be
+  // null and should not be accessed.
+  bool get _controllerIsValid => _controller?.animation != null;
+
   void _updateTabController() {
     final TabController newController = widget.controller ?? DefaultTabController.of(context);
     assert(() {
@@ -1147,7 +1193,7 @@ class _TabBarViewState extends State<TabBarView> {
     if (newController == _controller)
       return;
 
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
     _controller = newController;
     if (_controller != null)
@@ -1179,8 +1225,9 @@ class _TabBarViewState extends State<TabBarView> {
 
   @override
   void dispose() {
-    if (_controller != null)
+    if (_controllerIsValid)
       _controller.animation.removeListener(_handleTabControllerAnimationTick);
+    _controller = null;
     // We don't own the _controller Animation, so it's not disposed here.
     super.dispose();
   }
@@ -1327,11 +1374,13 @@ class TabPageSelectorIndicator extends StatelessWidget {
   }
 }
 
-/// Displays a row of small circular indicators, one per tab. The selected
-/// tab's indicator is highlighted. Often used in conjunction with a [TabBarView].
+/// Displays a row of small circular indicators, one per tab.
 ///
-/// If a [TabController] is not provided, then there must be a [DefaultTabController]
-/// ancestor.
+/// The selected tab's indicator is highlighted. Often used in conjunction with
+/// a [TabBarView].
+///
+/// If a [TabController] is not provided, then there must be a
+/// [DefaultTabController] ancestor.
 class TabPageSelector extends StatelessWidget {
   /// Creates a compact widget that indicates which tab has been selected.
   const TabPageSelector({
@@ -1345,8 +1394,8 @@ class TabPageSelector extends StatelessWidget {
 
   /// This widget's selection and animation state.
   ///
-  /// If [TabController] is not provided, then the value of [DefaultTabController.of]
-  /// will be used.
+  /// If [TabController] is not provided, then the value of
+  /// [DefaultTabController.of] will be used.
   final TabController controller;
 
   /// The indicator circle's diameter (the default value is 12.0).
@@ -1354,13 +1403,13 @@ class TabPageSelector extends StatelessWidget {
 
   /// The indicator circle's fill color for unselected pages.
   ///
-  /// If this parameter is null then the indicator is filled with [Colors.transparent].
+  /// If this parameter is null, then the indicator is filled with [Colors.transparent].
   final Color color;
 
   /// The indicator circle's fill color for selected pages and border color
   /// for all indicator circles.
   ///
-  /// If this parameter is null then the indicator is filled with the theme's
+  /// If this parameter is null, then the indicator is filled with the theme's
   /// accent color, [ThemeData.accentColor].
   final Color selectedColor;
 

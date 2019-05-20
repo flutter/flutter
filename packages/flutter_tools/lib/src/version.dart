@@ -105,7 +105,7 @@ class FlutterVersion {
   @override
   String toString() {
     final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
-    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl == null ? 'unknown source' : repositoryUrl}';
+    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
     final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';

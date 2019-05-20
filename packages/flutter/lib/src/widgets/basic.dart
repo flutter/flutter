@@ -4253,6 +4253,8 @@ class Column extends Flex {
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=CI7x0mAZiY0}
+///
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
@@ -5402,6 +5404,9 @@ class Listener extends SingleChildRenderObjectWidget {
   final HitTestBehavior behavior;
 
   @override
+  _ListenerElement createElement() => _ListenerElement(this);
+
+  @override
   RenderPointerListener createRenderObject(BuildContext context) {
     return RenderPointerListener(
       onPointerDown: onPointerDown,
@@ -5452,6 +5457,24 @@ class Listener extends SingleChildRenderObjectWidget {
       listeners.add('signal');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(EnumProperty<HitTestBehavior>('behavior', behavior));
+  }
+}
+
+class _ListenerElement extends SingleChildRenderObjectElement {
+  _ListenerElement(SingleChildRenderObjectWidget widget) : super(widget);
+
+  @override
+  void activate() {
+    super.activate();
+    final RenderPointerListener renderPointerListener = renderObject;
+    renderPointerListener.postActivate();
+  }
+
+  @override
+  void deactivate() {
+    final RenderPointerListener renderPointerListener = renderObject;
+    renderPointerListener.preDeactivate();
+    super.deactivate();
   }
 }
 

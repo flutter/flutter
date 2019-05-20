@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -258,4 +259,261 @@ void main() {
     expect(unconstrained.size.width, equals(200.0), reason: 'unconstrained width');
     expect(unconstrained.size.height, equals(100.0), reason: 'constrained height');
   });
+
+  group('hit testing', () {
+    test('BoxHitTestResult wrapping HitTestResult', () {
+      final HitTestEntry entry1 = HitTestEntry(_DummyHitTestTarget());
+      final HitTestEntry entry2 = HitTestEntry(_DummyHitTestTarget());
+      final HitTestEntry entry3 = HitTestEntry(_DummyHitTestTarget());
+
+      final HitTestResult wrapped = HitTestResult();
+      wrapped.add(entry1);
+      expect(wrapped.path, equals(<HitTestEntry>[entry1]));
+
+      final BoxHitTestResult wrapping = BoxHitTestResult.wrap(wrapped);
+      expect(wrapping.path, equals(<HitTestEntry>[entry1]));
+      expect(wrapping.path, same(wrapped.path));
+
+      wrapping.add(entry2);
+      expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2]));
+      expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2]));
+
+      wrapped.add(entry3);
+      expect(wrapping.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
+      expect(wrapped.path, equals(<HitTestEntry>[entry1, entry2, entry3]));
+    });
+
+    test('addWithPaintTransform', () {
+      final BoxHitTestResult result = BoxHitTestResult();
+      final List<Offset> positions = <Offset>[];
+
+      bool isHit = result.addWithPaintTransform(
+        transform: null,
+        position: null,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, isNull);
+      positions.clear();
+
+      isHit = result.addWithPaintTransform(
+        transform: Matrix4.translationValues(20, 30, 0),
+        position: null,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, isNull);
+      positions.clear();
+
+      const Offset position = Offset(3, 4);
+      isHit = result.addWithPaintTransform(
+        transform: null,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return false;
+        },
+      );
+      expect(isHit, isFalse);
+      expect(positions.single, position);
+      positions.clear();
+
+      isHit = result.addWithPaintTransform(
+        transform: Matrix4.identity(),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, position);
+      positions.clear();
+
+      isHit = result.addWithPaintTransform(
+        transform: Matrix4.translationValues(20, 30, 0),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, position - const Offset(20, 30));
+      positions.clear();
+
+      isHit = result.addWithPaintTransform(
+        transform: MatrixUtils.forceToPoint(position), // cannot be inverted
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isFalse);
+      expect(positions, isEmpty);
+      positions.clear();
+    });
+
+    test('addWithPaintOffset', () {
+      final BoxHitTestResult result = BoxHitTestResult();
+      final List<Offset> positions = <Offset>[];
+
+      bool isHit = result.addWithPaintOffset(
+        offset: null,
+        position: null,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, isNull);
+      positions.clear();
+
+      isHit = result.addWithPaintOffset(
+        offset: const Offset(55, 32),
+        position: null,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, isNull);
+      positions.clear();
+
+      const Offset position = Offset(3, 4);
+      isHit = result.addWithPaintOffset(
+        offset: null,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return false;
+        },
+      );
+      expect(isHit, isFalse);
+      expect(positions.single, position);
+      positions.clear();
+
+      isHit = result.addWithPaintOffset(
+        offset: Offset.zero,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, position);
+      positions.clear();
+
+      isHit = result.addWithPaintOffset(
+        offset: const Offset(20, 30),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, position - const Offset(20, 30));
+      positions.clear();
+    });
+
+    test('addWithRawTransform', () {
+      final BoxHitTestResult result = BoxHitTestResult();
+      final List<Offset> positions = <Offset>[];
+
+      bool isHit = result.addWithRawTransform(
+        transform: null,
+        position: null,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, isNull);
+      positions.clear();
+
+      isHit = result.addWithRawTransform(
+        transform: Matrix4.translationValues(20, 30, 0),
+        position: null,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, isNull);
+      positions.clear();
+
+      const Offset position = Offset(3, 4);
+      isHit = result.addWithRawTransform(
+        transform: null,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return false;
+        },
+      );
+      expect(isHit, isFalse);
+      expect(positions.single, position);
+      positions.clear();
+
+      isHit = result.addWithRawTransform(
+        transform: Matrix4.identity(),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, position);
+      positions.clear();
+
+      isHit = result.addWithRawTransform(
+        transform: Matrix4.translationValues(20, 30, 0),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          expect(result, isNotNull);
+          positions.add(position);
+          return true;
+        },
+      );
+      expect(isHit, isTrue);
+      expect(positions.single, position + const Offset(20, 30));
+      positions.clear();
+    });
+  });
+}
+
+class _DummyHitTestTarget implements HitTestTarget {
+  @override
+  void handleEvent(PointerEvent event, HitTestEntry entry) {
+    // Nothing to do.
+  }
 }
