@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'binding.dart';
+import 'debug.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
 
@@ -510,7 +511,18 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     );
   }
 
-  static final HttpClient _httpClient = HttpClient();
+  // Do not access this field directly; use [_httpClient] instead.
+  static final HttpClient _sharedHttpClient = HttpClient();
+
+  static HttpClient get _httpClient {
+    HttpClient client = _sharedHttpClient;
+    assert(() {
+      if (debugNetworkImageHttpClientProvider != null)
+        client = debugNetworkImageHttpClientProvider();
+      return true;
+    }());
+    return client;
+  }
 
   Future<ui.Codec> _loadAsync(NetworkImage key) async {
     assert(key == this);
