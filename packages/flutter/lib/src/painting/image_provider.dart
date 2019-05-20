@@ -511,8 +511,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     );
   }
 
-  /// Do not access this field directly; use [_httpClient] instead.
-  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
+  // Do not access this field directly; use [_httpClient] instead.
+  static final HttpClient _sharedHttpClient = HttpClient();
 
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;

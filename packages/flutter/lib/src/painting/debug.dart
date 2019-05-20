@@ -13,27 +13,6 @@ import 'package:flutter/foundation.dart';
 /// version to version (or even from run to run).
 bool debugDisableShadows = false;
 
-/// Returns true if none of the painting library debug variables have been changed.
-///
-/// This function is used by the test framework to ensure that debug variables
-/// haven't been inadvertently changed.
-///
-/// See <https://docs.flutter.io/flutter/rendering/painting-library.html> for
-/// a complete list.
-///
-/// The `debugDisableShadowsOverride` argument can be provided to override
-/// the expected value for [debugDisableShadows]. (This exists because the
-/// test framework itself overrides this value in some cases.)
-bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
-  assert(() {
-    if (debugDisableShadows != debugDisableShadowsOverride) {
-      throw FlutterError(reason);
-    }
-    return true;
-  }());
-  return true;
-}
-
 /// Signature for a method that returns an [HttpClient].
 ///
 /// Used by [debugNetworkImageHttpClientProvider].
@@ -49,3 +28,25 @@ typedef HttpClientProvider = HttpClient Function();
 ///
 /// This value is ignored in non-debug builds.
 HttpClientProvider debugNetworkImageHttpClientProvider;
+
+/// Returns true if none of the painting library debug variables have been changed.
+///
+/// This function is used by the test framework to ensure that debug variables
+/// haven't been inadvertently changed.
+///
+/// See <https://docs.flutter.io/flutter/rendering/painting-library.html> for
+/// a complete list.
+///
+/// The `debugDisableShadowsOverride` argument can be provided to override
+/// the expected value for [debugDisableShadows]. (This exists because the
+/// test framework itself overrides this value in some cases.)
+bool debugAssertAllPaintingVarsUnset(String reason, { bool debugDisableShadowsOverride = false }) {
+  assert(() {
+    if (debugDisableShadows != debugDisableShadowsOverride ||
+        debugNetworkImageHttpClientProvider != null) {
+      throw FlutterError(reason);
+    }
+    return true;
+  }());
+  return true;
+}
