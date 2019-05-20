@@ -878,12 +878,12 @@ class RenderListWheelViewport
 
       // Clipping the part in the center.
       context.pushClipRect(
-          false,
+          needsCompositing,
           offset,
           centerRect,
           (PaintingContext context, Offset offset) {
             context.pushTransform(
-              false,
+              needsCompositing,
               offset,
               _magnifyTransform(),
               (PaintingContext context, Offset offset) {
@@ -895,7 +895,7 @@ class RenderListWheelViewport
 
       // Clipping the part in either the top-half or bottom-half of the wheel.
       context.pushClipRect(
-          false,
+          needsCompositing,
           offset,
           untransformedPaintingCoordinates.dy <= magnifierTopLinePosition
             ? topHalfRect
@@ -928,9 +928,7 @@ class RenderListWheelViewport
     Offset offsetToCenter,
   ) {
     context.pushTransform(
-      // Text with TransformLayers and no cullRects currently have an issue rendering
-      // https://github.com/flutter/flutter/issues/14224.
-      false,
+      needsCompositing,
       offset,
       _centerOriginTransform(cylindricalTransform),
       // Pre-transform painting function.
