@@ -8,14 +8,14 @@ import android.content.Context;
 import io.flutter.plugin.common.MessageCodec;
 
 public abstract class PlatformViewFactory {
-    private final MessageCodec<Object> mCreateArgsCodec;
+    private final MessageCodec<Object> createArgsCodec;
 
     /**
      *
      * @param createArgsCodec the codec used to decode the args parameter of {@link #create}.
      */
     public PlatformViewFactory(MessageCodec<Object> createArgsCodec) {
-        mCreateArgsCodec = createArgsCodec;
+        this.createArgsCodec = createArgsCodec;
     }
 
     /**
@@ -33,6 +33,6 @@ public abstract class PlatformViewFactory {
      * Returns the codec to be used for decoding the args parameter of {@link #create}.
      */
     public final MessageCodec<Object> getCreateArgsCodec() {
-        return mCreateArgsCodec;
+        return createArgsCodec;
     }
 }

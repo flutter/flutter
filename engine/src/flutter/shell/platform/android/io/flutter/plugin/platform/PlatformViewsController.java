@@ -41,26 +41,26 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
     // API level 20 is required for VirtualDisplay#setSurface which we use when resizing a platform view.
     private static final int MINIMAL_SDK = Build.VERSION_CODES.KITKAT_WATCH;
 
-    private final PlatformViewRegistryImpl mRegistry;
+    private final PlatformViewRegistryImpl registry;
 
     // The context of the Activity or Fragment hosting the render target for the Flutter engine.
-    private Context mContext;
+    private Context context;
 
     // The texture registry maintaining the textures into which the embedded views will be rendered.
-    private TextureRegistry mTextureRegistry;
+    private TextureRegistry textureRegistry;
 
     // The messenger used to communicate with the framework over the platform views channel.
-    private BinaryMessenger mMessenger;
+    private BinaryMessenger messenger;
 
     // The accessibility bridge to which accessibility events form the platform views will be dispatched.
-    private final AccessibilityEventsDelegate mAccessibilityEventsDelegate;
+    private final AccessibilityEventsDelegate accessibilityEventsDelegate;
 
     private final HashMap<Integer, VirtualDisplayController> vdControllers;
 
     public PlatformViewsController() {
-        mRegistry = new PlatformViewRegistryImpl();
+        registry = new PlatformViewRegistryImpl();
         vdControllers = new HashMap<>();
-        mAccessibilityEventsDelegate = new AccessibilityEventsDelegate();
+        accessibilityEventsDelegate = new AccessibilityEventsDelegate();
     }
 
     /**
@@ -73,15 +73,15 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
      * @param messenger The Flutter application on the other side of this messenger drives this platform views controller.
      */
     public void attach(Context context, TextureRegistry textureRegistry, BinaryMessenger messenger) {
-        if (mContext != null) {
+        if (this.context != null) {
             throw new AssertionError(
                     "A PlatformViewsController can only be attached to a single output target.\n" +
                             "attach was called while the PlatformViewsController was already attached."
             );
         }
-        mContext = context;
-        mTextureRegistry = textureRegistry;
-        mMessenger = messenger;
+        this.context = context;
+        this.textureRegistry = textureRegistry;
+        this.messenger = messenger;
         MethodChannel channel = new MethodChannel(messenger, CHANNEL_NAME, StandardMethodCodec.INSTANCE);
         channel.setMethodCallHandler(this);
     }
@@ -95,24 +95,24 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
      */
     @UiThread
     public void detach() {
-        mMessenger.setMessageHandler(CHANNEL_NAME, null);
-        mMessenger = null;
-        mContext = null;
-        mTextureRegistry = null;
+        messenger.setMessageHandler(CHANNEL_NAME, null);
+        messenger = null;
+        context = null;
+        textureRegistry = null;
     }
 
     @Override
     public void attachAccessibilityBridge(AccessibilityBridge accessibilityBridge) {
-        mAccessibilityEventsDelegate.setAccessibilityBridge(accessibilityBridge);
+        accessibilityEventsDelegate.setAccessibilityBridge(accessibilityBridge);
     }
 
     @Override
     public void detachAccessibiltyBridge() {
-        mAccessibilityEventsDelegate.setAccessibilityBridge(null);
+        accessibilityEventsDelegate.setAccessibilityBridge(null);
     }
 
     public PlatformViewRegistry getRegistry() {
-        return mRegistry;
+        return registry;
     }
 
     public void onFlutterViewDestroyed() {
@@ -186,7 +186,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
             return;
         }
 
-        PlatformViewFactory viewFactory = mRegistry.getFactory(viewType);
+        PlatformViewFactory viewFactory = registry.getFactory(viewType);
         if (viewFactory == null) {
             result.error(
                     "error",
@@ -205,10 +205,10 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
         int physicalHeight = toPhysicalPixels(logicalHeight);
         validateVirtualDisplayDimensions(physicalWidth, physicalHeight);
 
-        TextureRegistry.SurfaceTextureEntry textureEntry = mTextureRegistry.createSurfaceTexture();
+        TextureRegistry.SurfaceTextureEntry textureEntry = textureRegistry.createSurfaceTexture();
         VirtualDisplayController vdController = VirtualDisplayController.create(
-                mContext,
-                mAccessibilityEventsDelegate,
+                context,
+                accessibilityEventsDelegate,
                 viewFactory,
                 textureEntry,
                 physicalWidth,
@@ -287,7 +287,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
     private void onTouch(MethodCall call, MethodChannel.Result result) {
         List<Object> args = call.arguments();
 
-        float density = mContext.getResources().getDisplayMetrics().density;
+        float density = context.getResources().getDisplayMetrics().density;
 
         int id = (int) args.get(0);
         Number downTime = (Number) args.get(1);
@@ -420,7 +420,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
     // Creating a VirtualDisplay larger than the size of the device screen size
     // could cause the device to restart: https://github.com/flutter/flutter/issues/28978
     private void validateVirtualDisplayDimensions(int width, int height) {
-        DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         if (height > metrics.heightPixels || width > metrics.widthPixels) {
             String error = "Creating a virtual display of size: "
                 +  "[" + width + ", " + height + "]"
@@ -431,7 +431,7 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
     }
 
     private int toPhysicalPixels(double logicalPixels) {
-        float density = mContext.getResources().getDisplayMetrics().density;
+        float density = context.getResources().getDisplayMetrics().density;
         return (int) Math.round(logicalPixels * density);
     }
 

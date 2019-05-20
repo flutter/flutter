@@ -24,15 +24,15 @@ import static android.content.Context.WINDOW_SERVICE;
  * A presentation used for hosting a single Android view in a virtual display.
  *
  * This presentation overrides the WindowManager's addView/removeView/updateViewLayout methods, such that views added
- * directly to the WindowManager are added as part of the presentation's view hierarchy (to mFakeWindowRootView).
+ * directly to the WindowManager are added as part of the presentation's view hierarchy (to fakeWindowViewGroup).
  *
  * The view hierarchy for the presentation is as following:
  *
- *          mRootView
+ *          rootView
  *         /         \
  *        /           \
  *       /             \
- *   mContainer       mState.mFakeWindowRootView
+ *   container       state.fakeWindowViewGroup
  *      |
  *   EmbeddedView
  */
@@ -46,37 +46,37 @@ class SingleViewPresentation extends Presentation {
      */
     static class PresentationState {
         // The Android view we are embedding in the Flutter app.
-        private PlatformView mView;
+        private PlatformView platformView;
 
         // The InvocationHandler for a WindowManager proxy. This is essentially the custom window manager for the
         // presentation.
-        private WindowManagerHandler mWindowManagerHandler;
+        private WindowManagerHandler windowManagerHandler;
 
         // Contains views that were added directly to the window manager (e.g android.widget.PopupWindow).
-        private FakeWindowViewGroup mFakeWindowRootView;
+        private FakeWindowViewGroup fakeWindowViewGroup;
     }
 
-    private final PlatformViewFactory mViewFactory;
+    private final PlatformViewFactory viewFactory;
 
     // A reference to the current accessibility bridge to which accessibility events will be delegated.
-    private final AccessibilityEventsDelegate mAccessibilityEventsDelegate;
+    private final AccessibilityEventsDelegate accessibilityEventsDelegate;
 
     // This is the view id assigned by the Flutter framework to the embedded view, we keep it here
     // so when we create the platform view we can tell it its view id.
-    private int mViewId;
+    private int viewId;
 
     // This is the creation parameters for the platform view, we keep it here
     // so when we create the platform view we can tell it its view id.
-    private Object mCreateParams;
+    private Object createParams;
 
-    // The root view for the presentation, it has 2 childs: mContainer which contains the embedded view, and
-    // mFakeWindowRootView which contains views that were added directly to the presentation's window manager.
-    private AccessibilityDelegatingFrameLayout mRootView;
+    // The root view for the presentation, it has 2 childs: container which contains the embedded view, and
+    // fakeWindowViewGroup which contains views that were added directly to the presentation's window manager.
+    private AccessibilityDelegatingFrameLayout rootView;
 
-    // Contains the embedded platform view (mView.getView()) when it is attached to the presentation.
-    private FrameLayout mContainer;
+    // Contains the embedded platform view (platformView.getView()) when it is attached to the presentation.
+    private FrameLayout container;
 
-    private PresentationState mState;
+    private PresentationState state;
 
     /**
      * Creates a presentation that will use the view factory to create a new
@@ -91,11 +91,11 @@ class SingleViewPresentation extends Presentation {
             Object createParams
     ) {
         super(outerContext, display);
-        mViewFactory = viewFactory;
-        mAccessibilityEventsDelegate = accessibilityEventsDelegate;
-        mViewId = viewId;
-        mCreateParams = createParams;
-        mState = new PresentationState();
+        this.viewFactory = viewFactory;
+        this.accessibilityEventsDelegate = accessibilityEventsDelegate;
+        this.viewId = viewId;
+        this.createParams = createParams;
+        state = new PresentationState();
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -116,9 +116,9 @@ class SingleViewPresentation extends Presentation {
             PresentationState state
     ) {
         super(outerContext, display);
-        mAccessibilityEventsDelegate = accessibilityEventsDelegate;
-        mViewFactory = null;
-        mState = state;
+        this.accessibilityEventsDelegate = accessibilityEventsDelegate;
+        viewFactory = null;
+        this.state = state;
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
@@ -128,39 +128,39 @@ class SingleViewPresentation extends Presentation {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (mState.mFakeWindowRootView == null) {
-            mState.mFakeWindowRootView = new FakeWindowViewGroup(getContext());
+        if (state.fakeWindowViewGroup == null) {
+            state.fakeWindowViewGroup = new FakeWindowViewGroup(getContext());
         }
-        if (mState.mWindowManagerHandler == null) {
+        if (state.windowManagerHandler == null) {
             WindowManager windowManagerDelegate = (WindowManager) getContext().getSystemService(WINDOW_SERVICE);
-            mState.mWindowManagerHandler = new WindowManagerHandler(windowManagerDelegate, mState.mFakeWindowRootView);
+            state.windowManagerHandler = new WindowManagerHandler(windowManagerDelegate, state.fakeWindowViewGroup);
         }
 
-        mContainer = new FrameLayout(getContext());
-        PresentationContext context = new PresentationContext(getContext(), mState.mWindowManagerHandler);
+        container = new FrameLayout(getContext());
+        PresentationContext context = new PresentationContext(getContext(), state.windowManagerHandler);
 
-        if (mState.mView == null) {
-            mState.mView = mViewFactory.create(context, mViewId, mCreateParams);
+        if (state.platformView == null) {
+            state.platformView = viewFactory.create(context, viewId, createParams);
         }
 
-        View embeddedView = mState.mView.getView();
-        mContainer.addView(embeddedView);
-        mRootView = new AccessibilityDelegatingFrameLayout(getContext(), mAccessibilityEventsDelegate, embeddedView);
-        mRootView.addView(mContainer);
-        mRootView.addView(mState.mFakeWindowRootView);
-        setContentView(mRootView);
+        View embeddedView = state.platformView.getView();
+        container.addView(embeddedView);
+        rootView = new AccessibilityDelegatingFrameLayout(getContext(), accessibilityEventsDelegate, embeddedView);
+        rootView.addView(container);
+        rootView.addView(state.fakeWindowViewGroup);
+        setContentView(rootView);
     }
 
     public PresentationState detachState() {
-        mContainer.removeAllViews();
-        mRootView.removeAllViews();
-        return mState;
+        container.removeAllViews();
+        rootView.removeAllViews();
+        return state;
     }
 
     public PlatformView getView() {
-        if (mState.mView == null)
+        if (state.platformView == null)
             return null;
-        return mState.mView;
+        return state.platformView;
     }
 
     /*
@@ -172,16 +172,16 @@ class SingleViewPresentation extends Presentation {
     static class FakeWindowViewGroup extends ViewGroup {
         // Used in onLayout to keep the bounds of the current view.
         // We keep it as a member to avoid object allocations during onLayout which are discouraged.
-        private final Rect mViewBounds;
+        private final Rect viewBounds;
 
         // Used in onLayout to keep the bounds of the child views.
         // We keep it as a member to avoid object allocations during onLayout which are discouraged.
-        private final Rect mChildRect;
+        private final Rect childRect;
 
         public FakeWindowViewGroup(Context context) {
             super(context);
-            mViewBounds = new Rect();
-            mChildRect = new Rect();
+            viewBounds = new Rect();
+            childRect = new Rect();
         }
 
         @Override
@@ -189,10 +189,10 @@ class SingleViewPresentation extends Presentation {
             for(int i = 0; i < getChildCount(); i++) {
                 View child = getChildAt(i);
                 WindowManager.LayoutParams params = (WindowManager.LayoutParams) child.getLayoutParams();
-                mViewBounds.set(l, t, r, b);
-                Gravity.apply(params.gravity, child.getMeasuredWidth(), child.getMeasuredHeight(), mViewBounds, params.x,
-                        params.y, mChildRect);
-                child.layout(mChildRect.left, mChildRect.top, mChildRect.right, mChildRect.bottom);
+                viewBounds.set(l, t, r, b);
+                Gravity.apply(params.gravity, child.getMeasuredWidth(), child.getMeasuredHeight(), viewBounds, params.x,
+                        params.y, childRect);
+                child.layout(childRect.left, childRect.top, childRect.right, childRect.bottom);
             }
         }
 
@@ -214,12 +214,12 @@ class SingleViewPresentation extends Presentation {
      * Proxies a Context replacing the WindowManager with our custom instance.
      */
     static class PresentationContext extends ContextWrapper {
-        private WindowManager mWindowManager;
-        private final WindowManagerHandler mWindowManagerHandler;
+        private WindowManager windowManager;
+        private final WindowManagerHandler windowManagerHandler;
 
         PresentationContext(Context base, WindowManagerHandler windowManagerHandler) {
             super(base);
-            mWindowManagerHandler = windowManagerHandler;
+            this.windowManagerHandler = windowManagerHandler;
         }
 
         @Override
@@ -231,10 +231,10 @@ class SingleViewPresentation extends Presentation {
         }
 
         private WindowManager getWindowManager() {
-            if (mWindowManager == null) {
-                mWindowManager = mWindowManagerHandler.getWindowManager();
+            if (windowManager == null) {
+                windowManager = windowManagerHandler.getWindowManager();
             }
-            return mWindowManager;
+            return windowManager;
         }
     }
 
@@ -256,12 +256,12 @@ class SingleViewPresentation extends Presentation {
     static class WindowManagerHandler implements InvocationHandler {
         private static final String TAG = "PlatformViewsController";
 
-        private final WindowManager mDelegate;
-        FakeWindowViewGroup mFakeWindowRootView;
+        private final WindowManager delegate;
+        FakeWindowViewGroup fakeWindowRootView;
 
         WindowManagerHandler(WindowManager delegate, FakeWindowViewGroup fakeWindowViewGroup) {
-            mDelegate = delegate;
-            mFakeWindowRootView = fakeWindowViewGroup;
+            this.delegate = delegate;
+            fakeWindowRootView = fakeWindowViewGroup;
         }
 
         public WindowManager getWindowManager() {
@@ -289,69 +289,69 @@ class SingleViewPresentation extends Presentation {
                     return null;
             }
             try {
-                return method.invoke(mDelegate, args);
+                return method.invoke(delegate, args);
             } catch (InvocationTargetException e) {
                 throw e.getCause();
             }
         }
 
         private void addView(Object[] args) {
-            if (mFakeWindowRootView == null) {
+            if (fakeWindowRootView == null) {
                 Log.w(TAG, "Embedded view called addView while detached from presentation");
                 return;
             }
             View view = (View) args[0];
             WindowManager.LayoutParams layoutParams = (WindowManager.LayoutParams) args[1];
-            mFakeWindowRootView.addView(view, layoutParams);
+            fakeWindowRootView.addView(view, layoutParams);
         }
 
         private void removeView(Object[] args) {
-            if (mFakeWindowRootView == null) {
+            if (fakeWindowRootView == null) {
                 Log.w(TAG, "Embedded view called removeView while detached from presentation");
                 return;
             }
             View view = (View) args[0];
-            mFakeWindowRootView.removeView(view);
+            fakeWindowRootView.removeView(view);
         }
 
         private void removeViewImmediate(Object[] args) {
-            if (mFakeWindowRootView == null) {
+            if (fakeWindowRootView == null) {
                 Log.w(TAG, "Embedded view called removeViewImmediate while detached from presentation");
                 return;
             }
             View view = (View) args[0];
             view.clearAnimation();
-            mFakeWindowRootView.removeView(view);
+            fakeWindowRootView.removeView(view);
         }
 
         private void updateViewLayout(Object[] args) {
-            if (mFakeWindowRootView == null) {
+            if (fakeWindowRootView == null) {
                 Log.w(TAG, "Embedded view called updateViewLayout while detached from presentation");
                 return;
             }
             View view = (View) args[0];
             WindowManager.LayoutParams layoutParams = (WindowManager.LayoutParams) args[1];
-            mFakeWindowRootView.updateViewLayout(view, layoutParams);
+            fakeWindowRootView.updateViewLayout(view, layoutParams);
         }
     }
 
     private static class AccessibilityDelegatingFrameLayout extends FrameLayout {
-        private final AccessibilityEventsDelegate mAccessibilityEventsDelegate;
-        private final View mEmbeddedView;
+        private final AccessibilityEventsDelegate accessibilityEventsDelegate;
+        private final View embeddedView;
 
         public AccessibilityDelegatingFrameLayout(
                 Context context,
                 AccessibilityEventsDelegate accessibilityEventsDelegate,
-                View ebeddedView
+                View embeddedView
         ) {
             super(context);
-            mAccessibilityEventsDelegate = accessibilityEventsDelegate;
-            mEmbeddedView = ebeddedView;
+            this.accessibilityEventsDelegate = accessibilityEventsDelegate;
+            this.embeddedView = embeddedView;
         }
 
         @Override
         public boolean requestSendAccessibilityEvent(View child, AccessibilityEvent event) {
-            return mAccessibilityEventsDelegate.requestSendAccessibilityEvent(mEmbeddedView, child, event);
+            return accessibilityEventsDelegate.requestSendAccessibilityEvent(embeddedView, child, event);
         }
     }
 }
