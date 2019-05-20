@@ -490,6 +490,7 @@ Future<void> _buildGradleProjectV2(
       appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
     }
     printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
+
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)

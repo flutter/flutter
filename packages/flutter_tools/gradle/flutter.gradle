@@ -84,7 +84,7 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('target-platform')) {
             return project.property('target-platform')
         }
-        return null;
+        return 'android-arm-all';
     }
 
     private Boolean getBuildShareLibrary(Project project) {
@@ -129,8 +129,6 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
         }
-
-        String targetPlatform = getTargetPlatform(project)
 
         // Add custom build types
         project.android.buildTypes {
@@ -180,12 +178,15 @@ class FlutterPlugin implements Plugin<Project> {
 
             localEngine = engineOut.name
             localEngineSrcPath = engineOut.parentFile.parent
+            // The local engine is built for one of the build type.
+            // However, we use the same engine for each of the build types.
             debugFlutterJar = flutterJar
             profileFlutterJar = flutterJar
             releaseFlutterJar = flutterJar
             dynamicProfileFlutterJar = flutterJar
             dynamicReleaseFlutterJar = flutterJar
         } else {
+            String targetPlatform = getTargetPlatform(project)
             String targetArch = targetPlatform == 'android-arm64' ? 'arm64' : 'arm'
             baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
             debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
@@ -414,7 +415,7 @@ class FlutterPlugin implements Plugin<Project> {
             def flutterTasks = []
             def targetPlatforms = []
 
-            if (targetPlatformValue == null) {
+            if (targetPlatformValue == 'android-arm-all') {
                 if (flutterBuildMode == 'release') {
                     targetPlatforms.addAll(allArmPlatforms)
                 } else {
@@ -481,7 +482,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             // Include the snapshots and libflutter.so in `lib/`.
-            if (flutterBuildMode == 'release' && targetPlatformValue == null) {
+            if (flutterBuildMode == 'release' && targetPlatformValue == 'android-arm-all') {
                 project.dependencies {
                     String configuration;
                     if (project.getConfigurations().findByName("api")) {
@@ -511,7 +512,7 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.each { flutterTask -> 
                     with flutterTask.assets
                     // Include the snapshots in the assets directory.
-                    if (flutterBuildMode != 'release' || targetPlatformValue != null) {
+                    if (flutterBuildMode != 'release' || targetPlatformValue != 'android-arm-all') {
                         with flutterTask.snapshots
                     }
                 }
