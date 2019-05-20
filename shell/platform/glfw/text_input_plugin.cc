@@ -86,6 +86,7 @@ void TextInputPlugin::KeyboardHook(GLFWwindow* window,
         break;
       case GLFW_KEY_ENTER:
         EnterPressed(active_model_);
+        break;
       default:
         break;
     }
