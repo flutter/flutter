@@ -166,6 +166,7 @@ class _BorderContainer extends StatefulWidget {
 
 class _BorderContainerState extends State<_BorderContainer> with TickerProviderStateMixin {
   static const Duration _kFocusInDuration = Duration(milliseconds: 45);
+  static const Duration _kFocusOutDuration = Duration(milliseconds: 15);
   static const Duration _kHoverDuration = Duration(milliseconds: 15);
 
   AnimationController _controller;
@@ -183,7 +184,7 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
     super.initState();
     _focusColorController = AnimationController(
       duration: _kFocusInDuration,
-      // TODO(gspencer): use reverseDuration set to 15ms, once available.
+      reverseDuration: _kFocusOutDuration,
       value: widget.isFocused ? 1.0 : 0.0,
       vsync: this,
     );
@@ -1822,8 +1823,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextAlign get textAlign => widget.textAlign;
-  bool get isFocused => widget.isFocused;
-  bool get isHovering => widget.isHovering;
+  bool get isFocused => widget.isFocused && decoration.enabled;
+  bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
 
   @override
@@ -1874,11 +1875,9 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       return themeData.hintColor;
     }
     if (isHovering) {
-      // TODO(gspencer): Find out the actual value here from the spec writers.
       final Color hoverColor = decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
       return Color.alphaBlend(hoverColor.withOpacity(0.16), themeData.colorScheme.onSurface.withOpacity(0.12));
     }
-    // TODO(gspencer): Find out the actual value here from the spec writers.
     return themeData.colorScheme.onSurface.withOpacity(0.12);
   }
 
@@ -1905,13 +1904,13 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   Color _getFocusColor(ThemeData themeData) {
-    if (decoration.filled != true) // filled == null same as filled == false
+    if (decoration.filled == null || !decoration.filled || !decoration.enabled)
       return Colors.transparent;
     return decoration.focusColor ?? themeData.inputDecorationTheme?.focusColor ?? themeData.focusColor;
   }
 
   Color _getHoverColor(ThemeData themeData) {
-    if (isFocused || decoration.filled != true) // filled == null same as filled == false
+    if (decoration.filled == null || !decoration.filled || isFocused || !decoration.enabled)
       return Colors.transparent;
     return decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
   }
