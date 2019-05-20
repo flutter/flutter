@@ -12,7 +12,7 @@ import 'dart:typed_data';
 ///
 /// The `cumulative` parameter will contain the total number of bytes received
 /// thus far. If the response has been gzipped, this number will be the number
-/// of compressed bytes that have received _across the wire_.
+/// of compressed bytes that have been received _across the wire_.
 ///
 /// The `total` parameter will contain the _expected_ total number of bytes to
 /// be received across the wire (extracted from the value of the
@@ -28,20 +28,20 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// Efficiently converts the response body of an [HttpClientResponse] into a
 /// [Uint8List].
 ///
-/// The future returned will forward any error emitted by [response].
+/// The future returned will forward any error emitted by `response`.
 ///
-/// The [onBytesReceived] callback, if specified, will be invoked for every
+/// The `onBytesReceived` callback, if specified, will be invoked for every
 /// chunk of bytes that is received while consolidating the response bytes.
 /// If the callback throws an error, processing of the response will halt, and
 /// the returned future will complete with the error that was thrown by the
 /// callback. For more information on how to interpret the parameters to the
 /// callback, see the documentation on [BytesReceivedCallback].
 ///
-/// If the [response] is gzipped and the [autoUncompress] parameter is true,
+/// If the `response` is gzipped and the `autoUncompress` parameter is true,
 /// this will automatically un-compress the bytes in the returned list if it
 /// hasn't already been done via [HttpClient.autoUncompress]. To get compressed
 /// bytes from this method (assuming the response is sending compressed bytes),
-/// set both [HttpClient.autoUncompress] to false and the [autoUncompress]
+/// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
 /// parameter to false.
 // TODO(tvolkert): Remove the [client] param once https://github.com/dart-lang/sdk/issues/36971 is fixed.
 Future<Uint8List> consolidateHttpClientResponseBytes(
