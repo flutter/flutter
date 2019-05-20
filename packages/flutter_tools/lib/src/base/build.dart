@@ -39,8 +39,7 @@ class GenSnapshot {
   const GenSnapshot();
 
   static String getSnapshotterPath(SnapshotType snapshotType) {
-    return artifacts.getArtifactPath(Artifact.genSnapshot,
-        platform: snapshotType.platform, mode: snapshotType.mode);
+    return artifacts.getArtifactPath(Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
   }
 
   Future<int> run({
@@ -60,8 +59,7 @@ class GenSnapshot {
     // architecture.
     if (snapshotType.platform == TargetPlatform.ios) {
       final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
-      return runCommandAndStreamOutput(
-          <String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
+      return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
     }
     return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args));
   }
@@ -148,14 +146,9 @@ class AOTSnapshotter {
       final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');
       final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
       final String vmSnapshotInstructions = fs.path.join(outputDir.path, 'vm_snapshot_instr');
-      final String isolateSnapshotInstructions =
-          fs.path.join(outputDir.path, 'isolate_snapshot_instr');
-      outputPaths.addAll(<String>[
-        vmSnapshotData,
-        isolateSnapshotData,
-        vmSnapshotInstructions,
-        isolateSnapshotInstructions
-      ]);
+      final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
+      outputPaths
+          .addAll(<String>[vmSnapshotData, isolateSnapshotData, vmSnapshotInstructions, isolateSnapshotInstructions]);
       genSnapshotArgs.addAll(<String>[
         '--snapshot_kind=app-aot-blobs',
         '--vm_snapshot_data=$vmSnapshotData',
@@ -226,15 +219,13 @@ class AOTSnapshotter {
     // On iOS, we use Xcode to compile the snapshot into a dynamic library that the
     // end-developer can link into their app.
     if (platform == TargetPlatform.ios) {
-      final RunResult result = await _buildIosFramework(
-          iosArch: iosArch, assemblyPath: assembly, outputPath: outputDir.path);
+      final RunResult result =
+          await _buildIosFramework(iosArch: iosArch, assemblyPath: assembly, outputPath: outputDir.path);
       if (result.exitCode != 0) return result.exitCode;
     } else if (buildSharedLibrary) {
-      final RunResult result =
-          await _buildAndroidSharedLibrary(assemblyPath: assembly, outputPath: outputDir.path);
+      final RunResult result = await _buildAndroidSharedLibrary(assemblyPath: assembly, outputPath: outputDir.path);
       if (result.exitCode != 0) {
-        printError(
-            'Failed to build AOT snapshot. Compiler terminated with exit code ${result.exitCode}');
+        printError('Failed to build AOT snapshot. Compiler terminated with exit code ${result.exitCode}');
         return result.exitCode;
       }
     }
@@ -253,18 +244,13 @@ class AOTSnapshotter {
   }) async {
     final String targetArch = iosArch == IOSArch.armv7 ? 'armv7' : 'arm64';
     printStatus('Building App.framework for $targetArch...');
-    final List<String> commonBuildOptions = <String>[
-      '-arch',
-      targetArch,
-      '-miphoneos-version-min=8.0'
-    ];
+    final List<String> commonBuildOptions = <String>['-arch', targetArch, '-miphoneos-version-min=8.0'];
 
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
-    final RunResult compileResult = await xcode
-        .cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO]));
+    final RunResult compileResult =
+        await xcode.cc(commonBuildOptions.toList()..addAll(<String>['-c', assemblyPath, '-o', assemblyO]));
     if (compileResult.exitCode != 0) {
-      printError(
-          'Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
+      printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
     }
 
@@ -290,8 +276,7 @@ class AOTSnapshotter {
       ]);
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
-      printError(
-          'Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+      printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
     }
     return linkResult;
   }
@@ -357,12 +342,8 @@ class AOTSnapshotter {
             ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath =
-        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-    await fs
-        .directory(outputPath)
-        .childFile('frontend_server.d')
-        .writeAsString('frontend_server.d: $frontendPath\n');
+    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    await fs.directory(outputPath).childFile('frontend_server.d').writeAsString('frontend_server.d: $frontendPath\n');
 
     return compilerOutput?.outputFilename;
   }
@@ -415,13 +396,10 @@ class JITSnapshotter {
     final Directory outputDir = fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    final String engineVmSnapshotData =
-        artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-    final String engineIsolateSnapshotData =
-        artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
+    final String engineVmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
+    final String engineIsolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
     final String isolateSnapshotData = fs.path.join(outputDir.path, 'isolate_snapshot_data');
-    final String isolateSnapshotInstructions =
-        fs.path.join(outputDir.path, 'isolate_snapshot_instr');
+    final String isolateSnapshotInstructions = fs.path.join(outputDir.path, 'isolate_snapshot_instr');
 
     final List<String> inputPaths = <String>[
       mainPath,
@@ -449,8 +427,7 @@ class JITSnapshotter {
     // with only the data section, which only contains interpreted code.
     bool supportsAppJit = true;
 
-    if (platform == TargetPlatform.android_x64 &&
-        getCurrentHostPlatform() == HostPlatform.windows_x64) {
+    if (platform == TargetPlatform.android_x64 && getCurrentHostPlatform() == HostPlatform.windows_x64) {
       supportsAppJit = false;
       printStatus('Android x64 dynamic build on Windows x64 will use purely interpreted '
           'code for now (see  https://github.com/flutter/flutter/issues/17489).');

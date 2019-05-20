@@ -136,8 +136,7 @@ class IdeConfigCommand extends FlutterCommand {
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
-      if (_isChildDirectoryOf(_templateDirectory, srcFile) ||
-          _isChildDirectoryOf(_createTemplatesDirectory, srcFile)) {
+      if (_isChildDirectoryOf(_templateDirectory, srcFile) || _isChildDirectoryOf(_createTemplatesDirectory, srcFile)) {
         continue;
       }
 
@@ -146,17 +145,15 @@ class IdeConfigCommand extends FlutterCommand {
         r'(\.name|modules.xml|vcs.xml)$',
       );
       final bool isATrackedIdeaFile = _hasDirectoryInPath(srcFile, '.idea') &&
-          (_trackedIdeaFileRegExp.hasMatch(relativePath) ||
-              _hasDirectoryInPath(srcFile, 'runConfigurations'));
+          (_trackedIdeaFileRegExp.hasMatch(relativePath) || _hasDirectoryInPath(srcFile, 'runConfigurations'));
       final bool isAnImlOutsideIdea = !isATrackedIdeaFile && srcFile.path.endsWith('.iml');
       if (!isATrackedIdeaFile && !isAnImlOutsideIdea) {
         continue;
       }
 
-      final File finalDestinationFile = fs.file(fs.path.absolute(
-          _templateDirectory.absolute.path, '$relativePath${Template.copyTemplateExtension}'));
-      final String relativeDestination =
-          fs.path.relative(finalDestinationFile.path, from: _flutterRoot.absolute.path);
+      final File finalDestinationFile =
+          fs.file(fs.path.absolute(_templateDirectory.absolute.path, '$relativePath${Template.copyTemplateExtension}'));
+      final String relativeDestination = fs.path.relative(finalDestinationFile.path, from: _flutterRoot.absolute.path);
       if (finalDestinationFile.existsSync()) {
         if (_fileIsIdentical(srcFile, finalDestinationFile)) {
           printTrace('  $relativeDestination (identical)');
@@ -202,8 +199,7 @@ class IdeConfigCommand extends FlutterCommand {
       );
       if (!manifest.contains(relativePath)) {
         templateFile.deleteSync();
-        final String relativeDestination =
-            fs.path.relative(templateFile.path, from: _flutterRoot.absolute.path);
+        final String relativeDestination = fs.path.relative(templateFile.path, from: _flutterRoot.absolute.path);
         printStatus('  $relativeDestination (removed)');
       }
       // If the directory is now empty, then remove it, and do the same for its parent,

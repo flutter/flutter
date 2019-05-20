@@ -58,10 +58,8 @@ void main() {
           return mockLogReader;
         });
         when(device.portForwarder).thenReturn(portForwarder);
-        when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-            .thenAnswer((_) async => hostPort);
-        when(portForwarder.forwardedPorts)
-            .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+        when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort'))).thenAnswer((_) async => hostPort);
+        when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any)).thenAnswer((_) async => null);
 
         // We cannot add the device to a device manager because that is
@@ -78,8 +76,7 @@ void main() {
       testUsingContext('finds observatory port and forwards', () async {
         testDeviceManager.addDevice(device);
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription =
-            logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message == '[stdout] Done.') {
             // The "Done." message is output by the AttachCommand when it's done.
             completer.complete();
@@ -217,10 +214,8 @@ void main() {
       final MockHotRunner mockHotRunner = MockHotRunner();
       final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
       when(device.portForwarder).thenReturn(portForwarder);
-      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
-          .thenAnswer((_) async => hostPort);
-      when(portForwarder.forwardedPorts)
-          .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort'))).thenAnswer((_) async => hostPort);
+      when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
       when(portForwarder.unforward(any)).thenAnswer((_) async => null);
       when(mockHotRunner.attach()).thenAnswer((_) async => 0);
       when(mockHotRunnerFactory.build(
@@ -275,8 +270,7 @@ void main() {
 
         when(device.portForwarder).thenReturn(portForwarder);
         when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
-        when(portForwarder.forwardedPorts)
-            .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+        when(portForwarder.forwardedPorts).thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any)).thenAnswer((_) async => null);
       });
 
@@ -284,16 +278,15 @@ void main() {
         testDeviceManager.addDevice(device);
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription =
-            logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand())
-            .run(<String>['attach', '--debug-port', '$devicePort']);
+        final Future<void> task =
+            createTestCommandRunner(AttachCommand()).run(<String>['attach', '--debug-port', '$devicePort']);
         await completer.future;
         verify(portForwarder.forward(devicePort)).called(1);
 
@@ -308,16 +301,15 @@ void main() {
         testDeviceManager.addDevice(device);
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription =
-            logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
           }
         });
-        final Future<void> task = createTestCommandRunner(AttachCommand())
-            .run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
+        final Future<void> task =
+            createTestCommandRunner(AttachCommand()).run(<String>['attach', '--debug-port', '$devicePort', '--ipv6']);
         await completer.future;
         verify(portForwarder.forward(devicePort)).called(1);
 
@@ -332,8 +324,7 @@ void main() {
         testDeviceManager.addDevice(device);
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription =
-            logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -363,8 +354,7 @@ void main() {
         testDeviceManager.addDevice(device);
 
         final Completer<void> completer = Completer<void>();
-        final StreamSubscription<String> loggerSubscription =
-            logger.stream.listen((String message) {
+        final StreamSubscription<String> loggerSubscription = logger.stream.listen((String message) {
           if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
@@ -450,8 +440,7 @@ void main() {
     }
 
     testUsingContext('No ports available', () async {
-      final MDnsClient client =
-          getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+      final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;

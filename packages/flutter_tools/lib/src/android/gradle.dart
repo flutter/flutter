@@ -64,8 +64,8 @@ final RegExp androidXPluginWarningRegex = RegExp(r'\*{57}'
     r'|This warning prints for all Android build failures. The real root cause of the error may be unrelated.');
 
 FlutterPluginVersion getFlutterPluginVersion(AndroidProject project) {
-  final File plugin = project.hostAppGradleRoot
-      .childFile(fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
+  final File plugin =
+      project.hostAppGradleRoot.childFile(fs.path.join('buildSrc', 'src', 'main', 'groovy', 'FlutterPlugin.groovy'));
   if (plugin.existsSync()) {
     final String packageLine = plugin.readAsLinesSync().skip(4).first;
     if (packageLine == 'package io.flutter.gradle') {
@@ -129,8 +129,7 @@ Future<GradleProject> _readGradleProject() async {
   final FlutterProject flutterProject = FlutterProject.current();
   final String gradle = await _ensureGradle(flutterProject);
   updateLocalProperties(project: flutterProject);
-  final Status status = logger.startProgress('Resolving dependencies...',
-      timeout: timeoutConfiguration.slowOperation);
+  final Status status = logger.startProgress('Resolving dependencies...', timeout: timeoutConfiguration.slowOperation);
   GradleProject project;
   try {
     final RunResult propertiesRunResult = await runCheckedAsync(
@@ -170,8 +169,7 @@ void handleKnownGradleExceptions(String exceptionString) {
   // Handle Gradle error thrown when Gradle needs to download additional
   // Android SDK components (e.g. Platform Tools), and the license
   // for that component has not been accepted.
-  const String matcher =
-      r'You have not accepted the license agreements of the following SDK components:'
+  const String matcher = r'You have not accepted the license agreements of the following SDK components:'
       r'\s*\[(.+)\]';
   final RegExp licenseFailure = RegExp(matcher, multiLine: true);
   final Match licenseMatch = licenseFailure.firstMatch(exceptionString);
@@ -208,8 +206,7 @@ Future<String> _ensureGradle(FlutterProject project) async {
 // of validating the Gradle executable. This may take several seconds.
 Future<String> _initializeGradle(FlutterProject project) async {
   final Directory android = project.android.hostAppGradleRoot;
-  final Status status =
-      logger.startProgress('Initializing gradle...', timeout: timeoutConfiguration.slowOperation);
+  final Status status = logger.startProgress('Initializing gradle...', timeout: timeoutConfiguration.slowOperation);
   String gradle = _locateGradlewExecutable(android);
   if (gradle == null) {
     injectGradleWrapper(android);
@@ -228,8 +225,7 @@ Future<String> _initializeGradle(FlutterProject project) async {
 void injectGradleWrapper(Directory directory) {
   copyDirectorySync(cache.getArtifactDirectory('gradle_wrapper'), directory);
   _locateGradlewExecutable(directory);
-  final File propertiesFile =
-      directory.childFile(fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
+  final File propertiesFile = directory.childFile(fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
   if (!propertiesFile.existsSync()) {
     propertiesFile.writeAsStringSync(
       '''
@@ -288,11 +284,11 @@ void updateLocalProperties({
 
   if (buildInfo != null) {
     changeIfNecessary('flutter.buildMode', buildInfo.modeName);
-    final String buildName = validatedBuildNameForPlatform(
-        TargetPlatform.android_arm, buildInfo.buildName ?? manifest.buildName);
+    final String buildName =
+        validatedBuildNameForPlatform(TargetPlatform.android_arm, buildInfo.buildName ?? manifest.buildName);
     changeIfNecessary('flutter.versionName', buildName);
-    final String buildNumber = validatedBuildNumberForPlatform(
-        TargetPlatform.android_arm, buildInfo.buildNumber ?? manifest.buildNumber);
+    final String buildNumber =
+        validatedBuildNumberForPlatform(TargetPlatform.android_arm, buildInfo.buildNumber ?? manifest.buildNumber);
     changeIfNecessary('flutter.versionCode', buildNumber?.toString());
   }
 
@@ -388,15 +384,13 @@ Future<void> _buildGradleProjectV2(
     printError('');
     printError('The Gradle project does not define a task suitable for the requested build.');
     if (!project.buildTypes.contains(buildInfo.modeName)) {
-      printError(
-          'Review the android/app/build.gradle file and ensure it defines a ${buildInfo.modeName} build type.');
+      printError('Review the android/app/build.gradle file and ensure it defines a ${buildInfo.modeName} build type.');
     } else {
       if (project.productFlavors.isEmpty) {
         printError('The android/app/build.gradle file does not define any custom product flavors.');
         printError('You cannot use the --flavor option.');
       } else {
-        printError(
-            'The android/app/build.gradle file defines product flavors: ${project.productFlavors.join(', ')}');
+        printError('The android/app/build.gradle file defines product flavors: ${project.productFlavors.join(', ')}');
         printError('You must specify a --flavor option to select one of them.');
       }
       throwToolExit('Gradle build aborted.');
@@ -432,8 +426,7 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pextra-gen-snapshot-options=${buildInfo.extraGenSnapshotOptions}');
   if (buildInfo.fileSystemRoots != null && buildInfo.fileSystemRoots.isNotEmpty)
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
-  if (buildInfo.fileSystemScheme != null)
-    command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+  if (buildInfo.fileSystemScheme != null) command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
   if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
     command.add('-Pbuild-shared-library=true');
   }
@@ -469,14 +462,10 @@ Future<void> _buildGradleProjectV2(
 
   if (exitCode != 0) {
     if (potentialAndroidXFailure) {
-      printError(
-          '*******************************************************************************************');
-      printError(
-          'The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
-      printError(
-          'See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
-      printError(
-          '*******************************************************************************************');
+      printError('*******************************************************************************************');
+      printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
+      printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
+      printError('*******************************************************************************************');
     }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
   }
@@ -500,8 +489,7 @@ Future<void> _buildGradleProjectV2(
     printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
-    if (bundleFile == null)
-      throwToolExit('Gradle build failed to produce an Android bundle package.');
+    if (bundleFile == null) throwToolExit('Gradle build failed to produce an Android bundle package.');
 
     String appSize;
     if (buildInfo.mode == BuildMode.debug) {
@@ -523,8 +511,7 @@ File _findApkFile(GradleProject project, BuildInfo buildInfo) {
   if (apkFile.existsSync()) return apkFile;
   if (buildInfo.flavor != null) {
     // Android Studio Gradle plugin v3 adds flavor to path.
-    apkFile =
-        fs.file(fs.path.join(project.apkDirectory.path, buildInfo.flavor, modeName, apkFileName));
+    apkFile = fs.file(fs.path.join(project.apkDirectory.path, buildInfo.flavor, modeName, apkFileName));
     if (apkFile.existsSync()) return apkFile;
   }
   return null;
@@ -539,8 +526,7 @@ File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
   if (bundleFile.existsSync()) return bundleFile;
   if (buildInfo.flavor != null) {
     // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the folder name is the flavor plus the mode name.
-    bundleFile = fs.file(
-        fs.path.join(project.bundleDirectory.path, buildInfo.flavor + modeName, bundleFileName));
+    bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, buildInfo.flavor + modeName, bundleFileName));
     if (bundleFile.existsSync()) return bundleFile;
   }
   return null;

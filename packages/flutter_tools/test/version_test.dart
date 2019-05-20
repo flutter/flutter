@@ -65,8 +65,7 @@ void main() {
         Cache: () => mockCache,
       });
 
-      testUsingContext(
-          'prints nothing when Flutter installation looks out-of-date but is actually up-to-date',
+      testUsingContext('prints nothing when Flutter installation looks out-of-date but is actually up-to-date',
           () async {
         fakeData(
           mockProcessManager,
@@ -194,8 +193,7 @@ void main() {
         Cache: () => mockCache,
       });
 
-      testUsingContext('does not print warning when unable to connect to server if not out of date',
-          () async {
+      testUsingContext('does not print warning when unable to connect to server if not out of date', () async {
         fakeData(
           mockProcessManager,
           mockCache,
@@ -215,8 +213,7 @@ void main() {
         Cache: () => mockCache,
       });
 
-      testUsingContext('prints warning when unable to connect to server if really out of date',
-          () async {
+      testUsingContext('prints warning when unable to connect to server if really out of date', () async {
         fakeData(
           mockProcessManager,
           mockCache,
@@ -229,8 +226,8 @@ void main() {
         final FlutterVersion version = FlutterVersion.instance;
 
         await version.checkFlutterVersionFreshness();
-        _expectVersionMessage(FlutterVersion.versionOutOfDateMessage(
-            _testClock.now().difference(getChannelOutOfDateVersion())));
+        _expectVersionMessage(
+            FlutterVersion.versionOutOfDateMessage(_testClock.now().difference(getChannelOutOfDateVersion())));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => FlutterVersion(_testClock),
         ProcessManager: () => mockProcessManager,
@@ -399,14 +396,11 @@ void main() {
     expect(GitTagVersion.parse('v1.2.3-4-g$hash').frameworkVersionFor(hash), '1.2.4-pre.4');
     expect(GitTagVersion.parse('v98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55-pre.32');
     expect(GitTagVersion.parse('v10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
-    expect(GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash),
-        '1.2.3+hotfix.2-pre.4');
-    expect(GitTagVersion.parse('v7.2.4+hotfix.8-0-g$hash').frameworkVersionFor(hash),
-        '7.2.4+hotfix.8');
+    expect(GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '1.2.3+hotfix.2-pre.4');
+    expect(GitTagVersion.parse('v7.2.4+hotfix.8-0-g$hash').frameworkVersionFor(hash), '7.2.4+hotfix.8');
     expect(testLogger.traceText, '');
     expect(GitTagVersion.parse('x1.2.3-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
-    expect(
-        GitTagVersion.parse('v1.0.0-unknown-0-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
+    expect(GitTagVersion.parse('v1.0.0-unknown-0-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('beta-1-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('v1.2.3-4-gx$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(testLogger.statusText, '');
@@ -474,8 +468,7 @@ void fakeData(
   });
 
   final Answering<ProcessResult> syncAnswer = (Invocation invocation) {
-    bool argsAre(String a1,
-        [String a2, String a3, String a4, String a5, String a6, String a7, String a8]) {
+    bool argsAre(String a1, [String a2, String a3, String a4, String a5, String a6, String a7, String a8]) {
       const ListEquality<String> equality = ListEquality<String>();
       final List<String> args = invocation.positionalArguments.single;
       final List<String> expectedArgs =
@@ -487,8 +480,7 @@ void fakeData(
       return success(localCommitDate.toString());
     } else if (argsAre('git', 'remote')) {
       return success('');
-    } else if (argsAre('git', 'remote', 'add', '__flutter_version_check__',
-        'https://github.com/flutter/flutter.git')) {
+    } else if (argsAre('git', 'remote', 'add', '__flutter_version_check__', 'https://github.com/flutter/flutter.git')) {
       return success('');
     } else if (argsAre('git', 'fetch', '__flutter_version_check__', channel)) {
       if (!expectServerPing) {
@@ -496,8 +488,7 @@ void fakeData(
       }
       return errorOnFetch ? failure(128) : success('');
     } else if (remoteCommitDate != null &&
-        argsAre('git', 'log', '__flutter_version_check__/$channel', '-n', '1',
-            '--pretty=format:%ad', '--date=iso')) {
+        argsAre('git', 'log', '__flutter_version_check__/$channel', '-n', '1', '--pretty=format:%ad', '--date=iso')) {
       return success(remoteCommitDate.toString());
     }
 
@@ -506,8 +497,7 @@ void fakeData(
   };
 
   when(pm.runSync(any, workingDirectory: anyNamed('workingDirectory'))).thenAnswer(syncAnswer);
-  when(pm.run(any, workingDirectory: anyNamed('workingDirectory')))
-      .thenAnswer((Invocation invocation) async {
+  when(pm.run(any, workingDirectory: anyNamed('workingDirectory'))).thenAnswer((Invocation invocation) async {
     return syncAnswer(invocation);
   });
 

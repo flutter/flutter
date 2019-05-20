@@ -114,10 +114,9 @@ void main() {
           'Crash report sent (report ID: test-report-id)\n');
 
       // Verify that we've written the crash report to disk.
-      final List<String> writtenFiles =
-          (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
-              .map((FileSystemEntity e) => e.path)
-              .toList();
+      final List<String> writtenFiles = (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
+          .map((FileSystemEntity e) => e.path)
+          .toList();
       expect(writtenFiles, hasLength(1));
       expect(writtenFiles, contains('flutter_01.log'));
     }, overrides: <Type, Generator>{

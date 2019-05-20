@@ -78,8 +78,7 @@ class WindowsDevice extends Device {
       await buildWindows(FlutterProject.current().windows, debuggingOptions.buildInfo);
     }
     await stopApp(package);
-    final Process process =
-        await processManager.start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
+    final Process process = await processManager.start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
@@ -103,8 +102,7 @@ class WindowsDevice extends Device {
     if (process == null) {
       return false;
     }
-    final ProcessResult result =
-        await processManager.run(<String>['Taskkill', '/PID', process.first, '/F']);
+    final ProcessResult result = await processManager.run(<String>['Taskkill', '/PID', process.first, '/F']);
     return result.exitCode == 0;
   }
 

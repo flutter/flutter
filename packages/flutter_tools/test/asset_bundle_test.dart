@@ -27,8 +27,7 @@ void main() {
       testFileSystem = MemoryFileSystem(
         style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory =
-          testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
     testUsingContext('nonempty', () async {

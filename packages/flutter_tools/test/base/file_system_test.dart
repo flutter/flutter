@@ -34,8 +34,7 @@ void main() {
     test('test directory copy', () async {
       final MemoryFileSystem sourceMemoryFs = MemoryFileSystem();
       const String sourcePath = '/some/origin';
-      final Directory sourceDirectory =
-          await sourceMemoryFs.directory(sourcePath).create(recursive: true);
+      final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
       sourceMemoryFs.currentDirectory = sourcePath;
       final File sourceFile1 = sourceMemoryFs.file('some_file.txt')..writeAsStringSync('bleh');
       final DateTime writeTime = sourceFile1.lastModifiedSync();

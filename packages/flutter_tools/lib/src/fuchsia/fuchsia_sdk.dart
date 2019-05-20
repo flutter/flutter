@@ -52,21 +52,14 @@ class FuchsiaSdk {
         return null;
       }
       const String remoteCommand = 'log_listener --clock Local';
-      final List<String> cmd = <String>[
-        'ssh',
-        '-F',
-        fuchsiaArtifacts.sshConfig.absolute.path,
-        id,
-        remoteCommand
-      ];
+      final List<String> cmd = <String>['ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, remoteCommand];
       processManager.start(cmd).then((Process newProcess) {
         if (controller.isClosed) {
           return;
         }
         process = newProcess;
         process.exitCode.whenComplete(controller.close);
-        controller
-            .addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
+        controller.addStream(process.stdout.transform(utf8.decoder).transform(const LineSplitter()));
       });
       return controller.stream;
     } catch (exception) {
@@ -104,16 +97,14 @@ class FuchsiaArtifacts {
     // TODO(zra): Consider passing the ssh config path in with a flag.
     File sshConfig;
     if (platform.environment.containsKey(_kFuchsiaBuildDir)) {
-      sshConfig =
-          fs.file(fs.path.join(platform.environment[_kFuchsiaBuildDir], 'ssh-keys', 'ssh_config'));
+      sshConfig = fs.file(fs.path.join(platform.environment[_kFuchsiaBuildDir], 'ssh-keys', 'ssh_config'));
     } else if (platform.environment.containsKey(_kFuchsiaSshConfig)) {
       sshConfig = fs.file(platform.environment[_kFuchsiaSshConfig]);
     }
     return FuchsiaArtifacts(
       sshConfig: sshConfig,
       devFinder: fs.file(fs.path.join(tools, 'dev_finder')),
-      platformKernelDill:
-          fs.file(fs.path.join(dartPrebuilts, 'flutter_runner', 'platform_strong.dill')),
+      platformKernelDill: fs.file(fs.path.join(dartPrebuilts, 'flutter_runner', 'platform_strong.dill')),
       flutterPatchedSdk: fs.file(fs.path.join(dartPrebuilts, 'flutter_runner')),
       kernelCompiler: fs.file(fs.path.join(dartPrebuilts, 'kernel_compiler.snapshot')),
       pm: fs.file(fs.path.join(tools, 'pm')),

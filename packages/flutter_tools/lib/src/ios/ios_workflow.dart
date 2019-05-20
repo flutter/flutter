@@ -55,15 +55,11 @@ class IOSValidator extends DoctorValidator {
   List<String> get iosDeployBadVersions => <String>['2.0.0'];
 
   Future<String> get iosDeployVersionText async =>
-      (await runAsync(<String>['ios-deploy', '--version']))
-          .processResult
-          .stdout
-          .replaceAll('\n', '');
+      (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
 
   bool get hasHomebrew => os.which('brew') != null;
 
-  Future<String> get macDevMode async =>
-      (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
+  Future<String> get macDevMode async => (await runAsync(<String>['DevToolsSecurity', '-status'])).processResult.stdout;
 
   Future<bool> get _iosDeployIsInstalledAndMeetsVersionCheck async {
     if (!await hasIosDeploy) return false;
@@ -144,8 +140,7 @@ class IOSValidator extends DoctorValidator {
     if (!await _iosDeployIsInstalledAndMeetsVersionCheck) {
       packageManagerStatus = ValidationType.partial;
       if (iHasIosDeploy) {
-        messages
-            .add(ValidationMessage.error(userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
+        messages.add(ValidationMessage.error(userMessages.iOSDeployOutdated(iosDeployMinimumVersion)));
       } else {
         checksFailed += 1;
         messages.add(ValidationMessage.error(userMessages.iOSDeployMissing));
@@ -186,12 +181,10 @@ class CocoaPodsValidator extends DoctorValidator {
 
       if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
         if (await cocoaPods.isCocoaPodsInitialized) {
-          messages.add(ValidationMessage(
-              userMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
+          messages.add(ValidationMessage(userMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
         } else {
           status = ValidationType.partial;
-          messages.add(
-              ValidationMessage.error(userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
+          messages.add(ValidationMessage.error(userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
         }
       } else {
         if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
@@ -200,14 +193,12 @@ class CocoaPodsValidator extends DoctorValidator {
               userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
         } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
           status = ValidationType.partial;
-          messages.add(ValidationMessage.hint(userMessages.cocoaPodsUnknownVersion(
-              unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
+          messages.add(ValidationMessage.hint(
+              userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
         } else {
           status = ValidationType.partial;
           messages.add(ValidationMessage.hint(userMessages.cocoaPodsOutdated(
-              cocoaPods.cocoaPodsRecommendedVersion,
-              noCocoaPodsConsequence,
-              cocoaPodsUpgradeInstructions)));
+              cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
         }
       }
     } else {

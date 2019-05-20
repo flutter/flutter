@@ -81,8 +81,7 @@ class IOSDeploy {
       printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Your device is locked. Unlock your device first before running.
-═══════════════════════════════════════════════════════════════════════════════════''',
-          emphasis: true);
+═══════════════════════════════════════════════════════════════════════════════════''', emphasis: true);
     } else if (stdout.contains('Error 0xe8000022')) {
       printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
@@ -90,8 +89,7 @@ Error launching app. Try launching from within Xcode via:
     open ios/Runner.xcworkspace
 
 Your Xcode version may be too old for your iOS version.
-═══════════════════════════════════════════════════════════════════════════════════''',
-          emphasis: true);
+═══════════════════════════════════════════════════════════════════════════════════''', emphasis: true);
     }
 
     return stdout;
@@ -173,8 +171,7 @@ class IOSDevice extends Device {
       if (platform.isMacOS) {
         printError('$command not found. $macInstructions');
       } else {
-        printError(
-            'Cannot control iOS devices or simulators. $command is not available on your platform.');
+        printError('Cannot control iOS devices or simulators. $command is not available on your platform.');
       }
       return null;
     }
@@ -202,8 +199,7 @@ class IOSDevice extends Device {
     final IOSApp iosApp = app;
     final Directory bundle = fs.directory(iosApp.deviceBundlePath);
     if (!bundle.existsSync()) {
-      printError(
-          'Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
+      printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
 
@@ -278,8 +274,7 @@ class IOSDevice extends Device {
 
     if (debuggingOptions.startPaused) launchArguments.add('--start-paused');
 
-    if (debuggingOptions.disableServiceAuthCodes)
-      launchArguments.add('--disable-service-auth-codes');
+    if (debuggingOptions.disableServiceAuthCodes) launchArguments.add('--disable-service-auth-codes');
 
     if (debuggingOptions.useTestFonts) launchArguments.add('--use-test-fonts');
 
@@ -288,16 +283,13 @@ class IOSDevice extends Device {
       launchArguments.add('--verify-entry-points');
     }
 
-    if (debuggingOptions.enableSoftwareRendering)
-      launchArguments.add('--enable-software-rendering');
+    if (debuggingOptions.enableSoftwareRendering) launchArguments.add('--enable-software-rendering');
 
-    if (debuggingOptions.skiaDeterministicRendering)
-      launchArguments.add('--skia-deterministic-rendering');
+    if (debuggingOptions.skiaDeterministicRendering) launchArguments.add('--skia-deterministic-rendering');
 
     if (debuggingOptions.traceSkia) launchArguments.add('--trace-skia');
 
-    if (debuggingOptions.dumpSkpOnShaderCompilation)
-      launchArguments.add('--dump-skp-on-shader-compilation');
+    if (debuggingOptions.dumpSkpOnShaderCompilation) launchArguments.add('--dump-skp-on-shader-compilation');
 
     if (debuggingOptions.verboseSystemLogs) {
       launchArguments.add('--verbose-logging');
@@ -308,8 +300,8 @@ class IOSDevice extends Device {
     int installationResult = -1;
     Uri localObservatoryUri;
 
-    final Status installStatus = logger.startProgress('Installing and launching...',
-        timeout: timeoutConfiguration.slowOperation);
+    final Status installStatus =
+        logger.startProgress('Installing and launching...', timeout: timeoutConfiguration.slowOperation);
 
     if (!debuggingOptions.debuggingEnabled) {
       // If debugging is not enabled, just launch the application and continue.
@@ -503,14 +495,8 @@ class _IOSDeviceLogReader extends DeviceLogReader {
   void _start() {
     iMobileDevice.startLogger(device.id).then<void>((Process process) {
       _process = process;
-      _process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_newLineHandler());
-      _process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen(_newLineHandler());
+      _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
+      _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen(_newLineHandler());
       _process.exitCode.whenComplete(() {
         if (_linesController.hasListener) _linesController.close();
       });
@@ -583,8 +569,7 @@ class _IOSDevicePortForwarder extends DevicePortForwarder {
         device.id,
       ]);
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
-      connected =
-          !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
+      connected = !await process.stdout.isEmpty.timeout(_kiProxyPortForwardTimeout, onTimeout: () => false);
       if (!connected) {
         if (autoselect) {
           hostPort += 1;

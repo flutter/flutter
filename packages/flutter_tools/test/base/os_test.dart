@@ -25,8 +25,7 @@ void main() {
 
   group('which on POSIX', () {
     testUsingContext('returns null when executable does not exist', () async {
-      when(mockProcessManager.runSync(<String>['which', kExecutable]))
-          .thenReturn(ProcessResult(0, 1, null, null));
+      when(mockProcessManager.runSync(<String>['which', kExecutable])).thenReturn(ProcessResult(0, 1, null, null));
       final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable), isNull);
     }, overrides: <Type, Generator>{
@@ -35,8 +34,7 @@ void main() {
     });
 
     testUsingContext('returns exactly one result', () async {
-      when(mockProcessManager.runSync(<String>['which', 'foo']))
-          .thenReturn(ProcessResult(0, 0, kPath1, null));
+      when(mockProcessManager.runSync(<String>['which', 'foo'])).thenReturn(ProcessResult(0, 0, kPath1, null));
       final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable).path, kPath1);
     }, overrides: <Type, Generator>{
@@ -60,8 +58,7 @@ void main() {
 
   group('which on Windows', () {
     testUsingContext('returns null when executable does not exist', () async {
-      when(mockProcessManager.runSync(<String>['where', kExecutable]))
-          .thenReturn(ProcessResult(0, 1, null, null));
+      when(mockProcessManager.runSync(<String>['where', kExecutable])).thenReturn(ProcessResult(0, 1, null, null));
       final OperatingSystemUtils utils = OperatingSystemUtils();
       expect(utils.which(kExecutable), isNull);
     }, overrides: <Type, Generator>{

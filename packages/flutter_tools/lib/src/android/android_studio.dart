@@ -69,8 +69,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     Version version;
     if (versionString != null) version = Version.parse(versionString);
 
-    final String pathsSelectorValue =
-        extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
+    final String pathsSelectorValue = extractStudioPlistValueWithMatcher(plistValue, _pathsSelectorMatcher);
     final String presetPluginsPath = pathsSelectorValue == null
         ? null
         : fs.path.join(homeDirPath, 'Library', 'Application Support', '$pathsSelectorValue');
@@ -124,8 +123,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final int major = version?.major;
     final int minor = version?.minor;
     if (platform.isMacOS) {
-      return fs.path
-          .join(homeDirPath, 'Library', 'Application Support', 'AndroidStudio$major.$minor');
+      return fs.path.join(homeDirPath, 'Library', 'Application Support', 'AndroidStudio$major.$minor');
     } else {
       return fs.path.join(homeDirPath, '.$studioAppName$major.$minor', 'config', 'plugins');
     }
@@ -159,8 +157,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     return studios.lastWhere((AndroidStudio s) => s.isValid, orElse: () => null);
   }
 
-  static List<AndroidStudio> allInstalled() =>
-      platform.isMacOS ? _allMacOS() : _allLinuxOrWindows();
+  static List<AndroidStudio> allInstalled() => platform.isMacOS ? _allMacOS() : _allLinuxOrWindows();
 
   static List<AndroidStudio> _allMacOS() {
     final List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
@@ -168,8 +165,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     void _checkForStudio(String path) {
       if (!fs.isDirectorySync(path)) return;
       try {
-        final Iterable<Directory> directories =
-            fs.directory(path).listSync(followLinks: false).whereType<Directory>();
+        final Iterable<Directory> directories = fs.directory(path).listSync(followLinks: false).whereType<Directory>();
         for (Directory directory in directories) {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
@@ -270,9 +266,8 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       return;
     }
 
-    final String javaPath = platform.isMacOS
-        ? fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home')
-        : fs.path.join(directory, 'jre');
+    final String javaPath =
+        platform.isMacOS ? fs.path.join(directory, 'jre', 'jdk', 'Contents', 'Home') : fs.path.join(directory, 'jre');
     final String javaExecutable = fs.path.join(javaPath, 'bin', 'java');
     if (!processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');

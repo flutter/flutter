@@ -44,8 +44,7 @@ void main() {
 
     testUsingContext('getEmulatorsById', () async {
       final _MockEmulator emulator1 = _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
-      final _MockEmulator emulator2 =
-          _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
+      final _MockEmulator emulator2 = _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
       final _MockEmulator emulator3 = _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
       final List<Emulator> emulators = <Emulator>[
         emulator1,
@@ -93,8 +92,7 @@ void main() {
       AndroidSdk: () => mockSdk,
     });
 
-    testUsingContext('create emulator without a name but when default exists adds a suffix',
-        () async {
+    testUsingContext('create emulator without a name but when default exists adds a suffix', () async {
       // First will get default name.
       CreateEmulatorResult res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
@@ -124,10 +122,7 @@ void main() {
       when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
       when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
         final List<String> args = invocation.positionalArguments[0];
-        if (args.length >= 3 &&
-            args[0] == 'open' &&
-            args[1] == '-a' &&
-            args[2] == '/fake/simulator.app') {
+        if (args.length >= 3 && args[0] == 'open' && args[1] == '-a' && args[2] == '/fake/simulator.app') {
           didAttemptToRunSimulator = true;
         }
         return ProcessResult(101, 0, '', '');
@@ -228,8 +223,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       return ProcessResult(101, 1, '', mockCreateFailureOutput);
     }
     if (args.length == 8 &&
-        _equality
-            .equals(args, <String>['create', 'avd', '-n', args[3], '-k', args[5], '-d', args[7]])) {
+        _equality.equals(args, <String>['create', 'avd', '-n', args[3], '-k', args[5], '-d', args[7]])) {
       // In order to support testing auto generation of names we need to support
       // tracking any created emulators and reject when they already exist so this
       // mock will compare the name of the AVD being created with the fake existing

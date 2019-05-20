@@ -46,8 +46,7 @@ void main() {
     testUsingContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () async {
       Cache.checkLockAcquired();
     }, overrides: <Type, Generator>{
-      Platform: () =>
-          FakePlatform()..environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'},
+      Platform: () => FakePlatform()..environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'},
     });
   });
 
@@ -55,14 +54,12 @@ void main() {
     final MockCache mockCache = MockCache();
     final MemoryFileSystem fs = MemoryFileSystem();
 
-    testUsingContext(
-        'Gradle wrapper should not be up to date, if some cached artifact is not available', () {
+    testUsingContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
       final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
       final Directory directory = fs.directory('/Applications/flutter/bin/cache');
       directory.createSync(recursive: true);
       fs
-          .file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper',
-              'gradle-wrapper.jar'))
+          .file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper', 'gradle-wrapper.jar'))
           .createSync(recursive: true);
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper')))
           .thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
@@ -72,21 +69,15 @@ void main() {
       FileSystem: () => fs,
     });
 
-    testUsingContext(
-        'Gradle wrapper should be up to date, only if all cached artifact are available', () {
+    testUsingContext('Gradle wrapper should be up to date, only if all cached artifact are available', () {
       final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
       final Directory directory = fs.directory('/Applications/flutter/bin/cache');
       directory.createSync(recursive: true);
       fs
-          .file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper',
-              'gradle-wrapper.jar'))
+          .file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradle', 'wrapper', 'gradle-wrapper.jar'))
           .createSync(recursive: true);
-      fs
-          .file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew'))
-          .createSync(recursive: true);
-      fs
-          .file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew.bat'))
-          .createSync(recursive: true);
+      fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew')).createSync(recursive: true);
+      fs.file(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper', 'gradlew.bat')).createSync(recursive: true);
 
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper')))
           .thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
@@ -151,8 +142,7 @@ void main() {
 
   testUsingContext('flattenNameSubdirs', () {
     expect(flattenNameSubdirs(Uri.parse('http://flutter.dev/foo/bar')), 'flutter.dev/foo/bar');
-    expect(
-        flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
+    expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
     FileSystem: () => MockFileSystem(),

@@ -25,8 +25,7 @@ class BuildAppBundleCommand extends BuildSubCommand {
         negatable: false,
         help: 'Whether to prefer compiling to a *.so file (android only).',
       )
-      ..addOption('target-platform',
-          defaultsTo: 'android-arm', allowed: <String>['android-arm', 'android-arm64']);
+      ..addOption('target-platform', defaultsTo: 'android-arm', allowed: <String>['android-arm', 'android-arm64']);
   }
 
   @override

@@ -248,8 +248,7 @@ Future<RunResult> runCheckedAsync(
     environment: environment,
   );
   if (result.exitCode != 0) {
-    throw ProcessException(
-        cmd[0], cmd.sublist(1), 'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+    throw ProcessException(cmd[0], cmd.sublist(1), 'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
   }
   return result;
 }

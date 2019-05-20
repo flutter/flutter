@@ -13,12 +13,7 @@ import '../base/process_manager.dart';
 const List<String> _visualStudioVersions = <String>['2017', '2019'];
 
 /// The supported flavors of Visual Studio.
-const List<String> _visualStudioFlavors = <String>[
-  'Community',
-  'Professional',
-  'Enterprise',
-  'Preview'
-];
+const List<String> _visualStudioFlavors = <String>['Community', 'Professional', 'Enterprise', 'Preview'];
 
 /// Returns the path to an installed vcvars64.bat script if found, or null.
 Future<String> findVcvars() async {

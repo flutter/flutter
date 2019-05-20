@@ -262,8 +262,7 @@ final List<Directory> _tempDirs = <Directory>[];
 final Map<String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir(FileSystem fs) {
-  final Directory tempDir =
-      fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
   _tempDirs.add(tempDir);
   return tempDir;
 }
@@ -272,8 +271,7 @@ void _cleanupTempDirs() {
   while (_tempDirs.isNotEmpty) tryToDelete(_tempDirs.removeLast());
 }
 
-Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName,
-    {bool doubleSlash = false}) async {
+Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName, {bool doubleSlash = false}) async {
   final Directory pkgTempDir = _newTempDir(fs);
   String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {

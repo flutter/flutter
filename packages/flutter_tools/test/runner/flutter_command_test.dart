@@ -26,8 +26,7 @@ void main() {
       usage = MockitoUsage();
       clock = MockClock();
       when(usage.isFirstRun).thenReturn(false);
-      when(clock.now())
-          .thenAnswer((Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
+      when(clock.now()).thenAnswer((Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
@@ -55,9 +54,7 @@ void main() {
       verify(clock.now()).called(2);
 
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label')))
-            .captured,
+        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null],
       );
     }, overrides: <Type, Generator>{
@@ -89,14 +86,11 @@ void main() {
         endTimeOverride: DateTime.fromMillisecondsSinceEpoch(1500),
       );
 
-      final DummyFlutterCommand flutterCommand =
-          DummyFlutterCommand(commandFunction: () async => commandResult);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(commandFunction: () async => commandResult);
       await flutterCommand.run();
       verify(clock.now()).called(2);
       expect(
-        verify(usage.sendTiming(captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label')))
-            .captured,
+        verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>[
           'flutter',
           'dummy',
@@ -128,9 +122,7 @@ void main() {
         verify(clock.now()).called(2);
 
         expect(
-          verify(usage.sendTiming(captureAny, captureAny, captureAny,
-                  label: captureAnyNamed('label')))
-              .captured,
+          verify(usage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
           <dynamic>[
             'flutter',
             'dummy',

@@ -30,8 +30,7 @@ Future<void> buildFuchsia(
     outDir.createSync(recursive: true);
   }
 
-  await fuchsiaKernelCompiler.build(
-      fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo);
+  await fuchsiaKernelCompiler.build(fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo);
   await _buildAssets(fuchsiaProject, target, buildInfo);
   await _buildPackage(fuchsiaProject, target, buildInfo);
 }
@@ -88,8 +87,7 @@ Future<void> _buildPackage(
   final File manifestFile = fs.file(packageManifest);
   manifestFile.writeAsStringSync(fs.file(dilpmanifest).readAsStringSync());
   manifestFile.writeAsStringSync(fs.file(pkgassets).readAsStringSync(), mode: FileMode.append);
-  manifestFile.writeAsStringSync('meta/$appName.cmx=${fuchsiaProject.meta.path}/$appName.cmx\n',
-      mode: FileMode.append);
+  manifestFile.writeAsStringSync('meta/$appName.cmx=${fuchsiaProject.meta.path}/$appName.cmx\n', mode: FileMode.append);
   manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n', mode: FileMode.append);
 
   if (!await fuchsiaPM.init(pkgDir, appName)) {

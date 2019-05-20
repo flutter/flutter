@@ -78,8 +78,7 @@ Future<int> _handleToolError(
 ) async {
   if (error is UsageException) {
     printError('${error.message}\n');
-    printError(
-        "Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
+    printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
@@ -147,14 +146,12 @@ Future<int> _handleToolError(
 FileSystem crashFileSystem = const LocalFileSystem();
 
 /// Saves the crash report to a local file.
-Future<File> _createLocalCrashReport(
-    List<String> args, dynamic error, StackTrace stackTrace) async {
+Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace) async {
   File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
   final StringBuffer buffer = StringBuffer();
 
-  buffer
-      .writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
+  buffer.writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
   buffer.writeln('## command\n');
   buffer.writeln('flutter ${args.join(' ')}\n');

@@ -66,10 +66,8 @@ void ensureDirectoryExists(String filePath) {
 /// specified for each source/destination file pair.
 ///
 /// Creates `destDir` if needed.
-void copyDirectorySync(Directory srcDir, Directory destDir,
-    [void onFileCopied(File srcFile, File destFile)]) {
-  if (!srcDir.existsSync())
-    throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
+void copyDirectorySync(Directory srcDir, Directory destDir, [void onFileCopied(File srcFile, File destFile)]) {
+  if (!srcDir.existsSync()) throw Exception('Source directory "${srcDir.path}" does not exist, nothing to copy');
 
   if (!destDir.existsSync()) destDir.createSync(recursive: true);
 
@@ -123,8 +121,7 @@ Directory getRecordingSink(String dirname, String basename) {
 /// If the target directory does not exist, a [ToolExit] will be thrown.
 Directory getReplaySource(String dirname, String basename) {
   final Directory dir = _kLocalFs.directory(_kLocalFs.path.join(dirname, basename));
-  if (!dir.existsSync())
-    throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
+  if (!dir.existsSync()) throwToolExit('Invalid replay-from location: $dirname ("$basename" does not exist)');
   return dir;
 }
 
@@ -150,6 +147,5 @@ String escapePath(String path) => platform.isWindows ? path.replaceAll('\\', '\\
 /// Returns false, if [entity] exists, but [referenceFile] does not.
 bool isOlderThanReference({@required FileSystemEntity entity, @required File referenceFile}) {
   if (!entity.existsSync()) return true;
-  return referenceFile.existsSync() &&
-      referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
+  return referenceFile.existsSync() && referenceFile.lastModifiedSync().isAfter(entity.statSync().modified);
 }

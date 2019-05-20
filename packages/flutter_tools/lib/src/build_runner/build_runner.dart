@@ -41,8 +41,7 @@ class BuildRunner extends CodeGenerator {
   Future<void> generateBuildScript(FlutterProject flutterProject) async {
     final Directory entrypointDirectory =
         fs.directory(fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
-    final Directory generatedDirectory =
-        fs.directory(fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
+    final Directory generatedDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
     final File buildScript = entrypointDirectory.childFile('build.dart');
     final File buildSnapshot = entrypointDirectory.childFile('build.dart.snapshot');
     final File scriptIdFile = entrypointDirectory.childFile('id');
@@ -76,10 +75,7 @@ class BuildRunner extends CodeGenerator {
     try {
       generatedDirectory.createSync(recursive: true);
       entrypointDirectory.createSync(recursive: true);
-      flutterProject.dartTool
-          .childDirectory('build')
-          .childDirectory('generated')
-          .createSync(recursive: true);
+      flutterProject.dartTool.childDirectory('build').childDirectory('generated').createSync(recursive: true);
       final StringBuffer stringBuffer = StringBuffer();
 
       stringBuffer.writeln('name: flutter_tool');
@@ -134,10 +130,8 @@ class BuildRunner extends CodeGenerator {
   }) async {
     await generateBuildScript(flutterProject);
     final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final File buildSnapshot = flutterProject.dartTool
-        .childDirectory('build')
-        .childDirectory('entrypoint')
-        .childFile('build.dart.snapshot');
+    final File buildSnapshot =
+        flutterProject.dartTool.childDirectory('build').childDirectory('entrypoint').childFile('build.dart.snapshot');
     final String scriptPackagesPath =
         flutterProject.dartTool.childDirectory('flutter_tool').childFile('.packages').path;
     final Status status = logger.startProgress('starting build daemon...', timeout: null);
@@ -173,8 +167,7 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
   CodegenStatus _lastStatus;
 
   @override
-  Stream<CodegenStatus> get buildResults =>
-      buildDaemonClient.buildResults.map((build.BuildResults results) {
+  Stream<CodegenStatus> get buildResults => buildDaemonClient.buildResults.map((build.BuildResults results) {
         if (results.results.first.status == BuildStatus.failed) {
           return _lastStatus = CodegenStatus.Failed;
         }
@@ -200,7 +193,5 @@ List<int> _produceScriptId(YamlMap builders) {
     return md5.convert(platform.version.codeUnits).bytes;
   }
   final List<String> orderedBuilders = builders.keys.cast<String>().toList()..sort();
-  return md5
-      .convert(orderedBuilders.followedBy(<String>[platform.version]).join('').codeUnits)
-      .bytes;
+  return md5.convert(orderedBuilders.followedBy(<String>[platform.version]).join('').codeUnits).bytes;
 }

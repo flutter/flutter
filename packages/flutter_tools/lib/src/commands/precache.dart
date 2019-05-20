@@ -11,34 +11,21 @@ import '../version.dart';
 
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
-    argParser.addFlag('all-platforms',
-        abbr: 'a', negatable: false, help: 'Precache artifacts for all platforms.');
-    argParser.addFlag('force',
-        abbr: 'f', negatable: false, help: 'Force downloading of artifacts.');
-    argParser.addFlag('android',
-        negatable: true, defaultsTo: true, help: 'Precache artifacts for Android development');
-    argParser.addFlag('ios',
-        negatable: true, defaultsTo: true, help: 'Precache artifacts for iOS developemnt');
-    argParser.addFlag('web',
-        negatable: true, defaultsTo: false, help: 'Precache artifacts for web development');
+    argParser.addFlag('all-platforms', abbr: 'a', negatable: false, help: 'Precache artifacts for all platforms.');
+    argParser.addFlag('force', abbr: 'f', negatable: false, help: 'Force downloading of artifacts.');
+    argParser.addFlag('android', negatable: true, defaultsTo: true, help: 'Precache artifacts for Android development');
+    argParser.addFlag('ios', negatable: true, defaultsTo: true, help: 'Precache artifacts for iOS developemnt');
+    argParser.addFlag('web', negatable: true, defaultsTo: false, help: 'Precache artifacts for web development');
     argParser.addFlag('linux',
-        negatable: true,
-        defaultsTo: false,
-        help: 'Precache artifacts for linux desktop development');
+        negatable: true, defaultsTo: false, help: 'Precache artifacts for linux desktop development');
     argParser.addFlag('windows',
-        negatable: true,
-        defaultsTo: false,
-        help: 'Precache artifacts for windows desktop development');
+        negatable: true, defaultsTo: false, help: 'Precache artifacts for windows desktop development');
     argParser.addFlag('macos',
-        negatable: true,
-        defaultsTo: false,
-        help: 'Precache artifacts for macOS desktop development');
+        negatable: true, defaultsTo: false, help: 'Precache artifacts for macOS desktop development');
     argParser.addFlag('fuchsia',
         negatable: true, defaultsTo: false, help: 'Precache artifacts for Fuchsia development');
     argParser.addFlag('universal',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Precache artifacts required for all developments');
+        negatable: true, defaultsTo: true, help: 'Precache artifacts required for all developments');
   }
 
   @override

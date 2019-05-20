@@ -122,8 +122,8 @@ void main() {
   group('sdkMajorVersion', () {
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
     test('can be parsed from iOS-11-3', () async {
-      final IOSSimulator device = IOSSimulator('x',
-          name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
+      final IOSSimulator device =
+          IOSSimulator('x', name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
 
       expect(await device.sdkMajorVersion, 11);
     });
@@ -200,8 +200,8 @@ void main() {
       mockXcode = MockXcode();
       mockProcessManager = MockProcessManager();
       // Let everything else return exit code 0 so process.dart doesn't crash.
-      when(mockProcessManager.run(any, environment: null, workingDirectory: null)).thenAnswer(
-          (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(2, 0, '', '')));
+      when(mockProcessManager.run(any, environment: null, workingDirectory: null))
+          .thenAnswer((Invocation invocation) => Future<ProcessResult>.value(ProcessResult(2, 0, '', '')));
       // Doesn't matter what the device is.
       deviceUnderTest = IOSSimulator('x', name: 'iPhone SE');
     });
@@ -260,9 +260,7 @@ void main() {
       final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null))
-            .captured
-            .single,
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
       );
     }, overrides: <Type, Generator>{
@@ -273,9 +271,7 @@ void main() {
       final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null))
-            .captured
-            .single,
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('/usr/bin/log'),
       );
     }, overrides: <Type, Generator>{
@@ -296,9 +292,7 @@ void main() {
       final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchSystemLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null))
-            .captured
-            .single,
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null)).captured.single,
         contains('tail'),
       );
     }, overrides: <Type, Generator>{
@@ -336,11 +330,9 @@ void main() {
                 .codeUnits
           ]);
         });
-        when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+        when(mockProcess.stderr).thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-        when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+        when(mockProcess.exitCode).thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
         return Future<Process>.value(mockProcess);
       });
 
@@ -398,8 +390,7 @@ void main() {
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      when(mockProcessManager.runSync(any))
-          .thenReturn(ProcessResult(mockPid, 0, validSimControlOutput, ''));
+      when(mockProcessManager.runSync(any)).thenReturn(ProcessResult(mockPid, 0, validSimControlOutput, ''));
 
       simControl = SimControl();
     });
@@ -450,8 +441,7 @@ void main() {
         when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
 
         final Directory mockDir = fs.currentDirectory;
-        final IOSApp package =
-            PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+        final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
         const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
         final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
@@ -459,10 +449,7 @@ void main() {
 
         verify(simControl.launch(any, 'correct', any));
       },
-      overrides: <Type, Generator>{
-        SimControl: () => simControl,
-        IOSWorkflow: () => MockIOSWorkflow()
-      },
+      overrides: <Type, Generator>{SimControl: () => simControl, IOSWorkflow: () => MockIOSWorkflow()},
     );
   });
 
@@ -494,8 +481,7 @@ flutter:
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module',
-      () async {
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();

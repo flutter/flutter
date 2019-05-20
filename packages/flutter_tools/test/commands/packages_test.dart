@@ -128,17 +128,13 @@ void main() {
     ];
 
     const Map<String, String> pluginContentWitnesses = <String, String>{
-      'ios/Flutter/Debug.xcconfig':
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      'ios/Flutter/Release.xcconfig':
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+      'ios/Flutter/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      'ios/Flutter/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
     const Map<String, String> modulePluginContentWitnesses = <String, String>{
-      '.ios/Config/Debug.xcconfig':
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
-      '.ios/Config/Release.xcconfig':
-          '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
+      '.ios/Config/Debug.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"',
+      '.ios/Config/Release.xcconfig': '#include "Pods/Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"',
     };
 
     void expectDependenciesResolved(String projectPath) {
@@ -196,8 +192,7 @@ void main() {
     }
 
     testUsingContext('get fetches packages', () async {
-      final String projectPath =
-          await createProject(tempDir, arguments: <String>['--no-pub', '--template=module']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
@@ -207,8 +202,7 @@ void main() {
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get --offline fetches packages', () async {
-      final String projectPath =
-          await createProject(tempDir, arguments: <String>['--no-pub', '--template=module']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get', args: <String>['--offline']);
@@ -218,8 +212,7 @@ void main() {
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade fetches packages', () async {
-      final String projectPath =
-          await createProject(tempDir, arguments: <String>['--no-pub', '--template=module']);
+      final String projectPath = await createProject(tempDir, arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'upgrade');
@@ -229,8 +222,8 @@ void main() {
     }, timeout: allowForRemotePubInvocation);
 
     testUsingContext('get fetches packages and injects plugin', () async {
-      final String projectPath = await createProjectWithPlugin('path_provider',
-          arguments: <String>['--no-pub', '--template=module']);
+      final String projectPath =
+          await createProjectWithPlugin('path_provider', arguments: <String>['--no-pub', '--template=module']);
       removeGeneratedFiles(projectPath);
 
       await runCommandIn(projectPath, 'get');
@@ -314,8 +307,7 @@ void main() {
       mockProcessManager.processFactory = (List<String> commands) => process;
       final Future<void> runPackages =
           createTestCommandRunner(PackagesCommand()).run(<String>['packages', 'pub', 'publish']);
-      final Future<void> runPrompt =
-          process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
+      final Future<void> runPrompt = process.showPrompt('Proceed (y/n)? ', <String>['hello', 'world']);
       final Future<void> simulateUserInput = Future<void>(() {
         mockStdio.simulateStdin('y');
       });

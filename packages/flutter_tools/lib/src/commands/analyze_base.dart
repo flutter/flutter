@@ -26,8 +26,7 @@ abstract class AnalyzeBase {
   void dumpErrors(Iterable<String> errors) {
     if (argResults['write'] != null) {
       try {
-        final RandomAccessFile resultsFile =
-            fs.file(argResults['write']).openSync(mode: FileMode.write);
+        final RandomAccessFile resultsFile = fs.file(argResults['write']).openSync(mode: FileMode.write);
         try {
           resultsFile.lockSync();
           resultsFile.writeStringSync(errors.join('\n'));
@@ -107,8 +106,8 @@ class PackageDependency {
         if (source == canonicalSource) canonical = true;
       }
       if (canonical) {
-        result.writeln(
-            '    (This is the actual package definition, so it is considered the canonical "right answer".)');
+        result
+            .writeln('    (This is the actual package definition, so it is considered the canonical "right answer".)');
       }
     }
   }
@@ -134,10 +133,8 @@ class PackageDependencyTracker {
     final File dotPackages = fs.file(dotPackagesPath);
     if (dotPackages.existsSync()) {
       // this directory has opinions about what we should be using
-      final Iterable<String> lines = dotPackages
-          .readAsStringSync()
-          .split('\n')
-          .where((String line) => !line.startsWith(RegExp(r'^ *#')));
+      final Iterable<String> lines =
+          dotPackages.readAsStringSync().split('\n').where((String line) => !line.startsWith(RegExp(r'^ *#')));
       for (String line in lines) {
         final int colon = line.indexOf(':');
         if (colon > 0) {
@@ -147,8 +144,7 @@ class PackageDependencyTracker {
           // fs.path. directive). Analyzer package versions reached via transitive dependencies (e.g., via `test`) are ignored
           // since they would produce spurious conflicts.
           if (!_vendedSdkPackages.contains(packageName) || packagePath.startsWith('..'))
-            add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)),
-                dotPackagesPath);
+            add(packageName, fs.path.normalize(fs.path.absolute(directory.path, packagePath)), dotPackagesPath);
         }
       }
     }
@@ -162,8 +158,7 @@ class PackageDependencyTracker {
     getPackageDependency(packageName).add(packagePath, dotPackagesPath);
   }
 
-  void checkForConflictingDependencies(
-      Iterable<Directory> pubSpecDirectories, PackageDependencyTracker dependencies) {
+  void checkForConflictingDependencies(Iterable<Directory> pubSpecDirectories, PackageDependencyTracker dependencies) {
     for (Directory directory in pubSpecDirectories) {
       final String pubSpecYamlPath = fs.path.join(directory.path, 'pubspec.yaml');
       final File pubSpecYamlFile = fs.file(pubSpecYamlPath);
@@ -173,8 +168,7 @@ class PackageDependencyTracker {
         // pointing elsewhere somehow.
         final yaml.YamlMap pubSpecYaml = yaml.loadYaml(fs.file(pubSpecYamlPath).readAsStringSync());
         final String packageName = pubSpecYaml['name'];
-        final String packagePath =
-            fs.path.normalize(fs.path.absolute(fs.path.join(directory.path, 'lib')));
+        final String packagePath = fs.path.normalize(fs.path.absolute(fs.path.join(directory.path, 'lib')));
         dependencies.addCanonicalCase(packageName, packagePath, pubSpecYamlPath);
       }
       dependencies.addDependenciesFromPackagesFileIn(directory);
@@ -184,8 +178,7 @@ class PackageDependencyTracker {
     if (dependencies.hasConflicts) {
       final StringBuffer message = StringBuffer();
       message.writeln(dependencies.generateConflictReport());
-      message
-          .writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
+      message.writeln('Make sure you have run "pub upgrade" in all the directories mentioned above.');
       if (dependencies.hasConflictsAffectingFlutterRepo) {
         message.writeln(
             'For packages in the flutter repository, try using "flutter update-packages" to do all of them at once.\n'
@@ -203,8 +196,7 @@ class PackageDependencyTracker {
   }
 
   bool get hasConflictsAffectingFlutterRepo {
-    return packages.values
-        .any((PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo);
+    return packages.values.any((PackageDependency dependency) => dependency.hasConflictAffectingFlutterRepo);
   }
 
   String generateConflictReport() {

@@ -116,8 +116,8 @@ void main() {
 
       setUp(() {
         flutterRoot = fs.path.join('home', 'me', 'flutter');
-        flutterTesterPath = fs.path.join(
-            flutterRoot, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester');
+        flutterTesterPath =
+            fs.path.join(flutterRoot, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester');
 
         final File flutterTesterFile = fs.file(flutterTesterPath);
         flutterTesterFile.parent.createSync(recursive: true);
@@ -139,8 +139,7 @@ void main() {
 
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
-            mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
+            mainPath: mainPath, debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
         expect(result.started, isFalse);
       }, overrides: startOverrides);
 
@@ -148,8 +147,7 @@ void main() {
         fs.file(flutterTesterPath).deleteSync();
         expect(() async {
           await device.startApp(null,
-              mainPath: mainPath,
-              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
+              mainPath: mainPath, debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
         }, throwsToolExit());
       }, overrides: startOverrides);
 
@@ -181,8 +179,7 @@ Hello!
         });
 
         final LaunchResult result = await device.startApp(null,
-            mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
+            mainPath: mainPath, debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
         expect(logLines.last, 'Hello!');

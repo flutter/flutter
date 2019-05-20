@@ -21,8 +21,7 @@ final ArgParser parser = ArgParser()
   ..addOption('build-dir', help: 'The fuchsia build directory')
   ..addOption('dart-sdk', help: 'The prebuilt dart SDK')
   ..addOption('target', help: 'The GN target to attach to')
-  ..addOption('entrypoint',
-      defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
+  ..addOption('entrypoint', defaultsTo: 'main.dart', help: 'The filename of the main method. Defaults to main.dart')
   ..addOption('device', help: 'The device id to attach to')
   ..addOption('dev-finder', help: 'The location of the dev_finder binary')
   ..addFlag('verbose', negatable: true);
@@ -40,12 +39,11 @@ Future<void> main(List<String> args) async {
   final String name = targetParts[1];
   final File dartSdk = fs.file(argResults['dart-sdk']);
   final String buildDirectory = argResults['build-dir'];
-  final File frontendServer = fs.file(
-      '$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
+  final File frontendServer =
+      fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
   final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
   final File devFinder = fs.file(argResults['dev-finder']);
-  final File platformKernelDill =
-      fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
+  final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
   final File flutterPatchedSdk = fs.file('$buildDirectory/flutter_runner_patched_sdk');
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
   final String outputDill = '$buildDirectory/${name}_tmp.dill';

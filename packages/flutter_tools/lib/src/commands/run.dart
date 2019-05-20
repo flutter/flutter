@@ -57,13 +57,7 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addOption('target-platform',
           defaultsTo: 'default',
-          allowed: <String>[
-            'default',
-            'android-arm',
-            'android-arm64',
-            'android-x86',
-            'android-x64'
-          ],
+          allowed: <String>['default', 'android-arm', 'android-arm64', 'android-x86', 'android-x64'],
           help: 'Specify the target platform when building the app for an '
               'Android device.\nIgnored on iOS.');
     usesTargetOption();
@@ -180,8 +174,7 @@ class RunCommand extends RunCommandBase {
         negatable: true,
         defaultsTo: true,
         hide: !verboseHelp,
-        help:
-            'Stay resident after launching the application. Not available with "--trace-startup".',
+        help: 'Stay resident after launching the application. Not available with "--trace-startup".',
       )
       ..addOption(
         'pid-file',
@@ -235,9 +228,8 @@ class RunCommand extends RunCommandBase {
   @override
   Future<Map<String, String>> get usageValues async {
     final bool isEmulator = await devices[0].isLocalEmulator;
-    final String deviceType = devices.length == 1
-        ? getNameForTargetPlatform(await devices[0].targetPlatform)
-        : 'multiple';
+    final String deviceType =
+        devices.length == 1 ? getNameForTargetPlatform(await devices[0].targetPlatform) : 'multiple';
 
     return <String, String>{'cd3': '$isEmulator', 'cd4': deviceType};
   }
@@ -245,15 +237,12 @@ class RunCommand extends RunCommandBase {
   @override
   void printNoConnectedDevices() {
     super.printNoConnectedDevices();
-    if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
-        xcode.isInstalledAndMeetsVersionCheck) {
+    if (getCurrentHostPlatform() == HostPlatform.darwin_x64 && xcode.isInstalledAndMeetsVersionCheck) {
       printStatus('');
       printStatus("Run 'flutter emulators' to list and start any available device emulators.");
       printStatus('');
-      printStatus(
-          'If you expected your device to be detected, please run "flutter doctor" to diagnose');
-      printStatus(
-          'potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
+      printStatus('If you expected your device to be detected, please run "flutter doctor" to diagnose');
+      printStatus('potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
     }
   }
 
@@ -320,8 +309,8 @@ class RunCommand extends RunCommandBase {
 
     if (argResults['machine']) {
       if (devices.length > 1) throwToolExit('--machine does not support -d all.');
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon =
+          Daemon(stdinCommandStream, stdoutCommandResponse, notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
         final String applicationBinaryPath = argResults['use-application-binary'];
@@ -357,19 +346,16 @@ class RunCommand extends RunCommandBase {
         if (await device.supportsHardwareRendering) {
           final bool enableSoftwareRendering = argResults['enable-software-rendering'] == true;
           if (enableSoftwareRendering) {
-            printStatus(
-                'Using software rendering with device ${device.name}. You may get better performance '
+            printStatus('Using software rendering with device ${device.name}. You may get better performance '
                 'with hardware mode by configuring hardware rendering for your device.');
           } else {
-            printStatus(
-                'Using hardware rendering with device ${device.name}. If you get graphics artifacts, '
+            printStatus('Using hardware rendering with device ${device.name}. If you get graphics artifacts, '
                 'consider enabling software rendering with "--enable-software-rendering".');
           }
         }
 
         if (!isEmulatorBuildMode(getBuildMode())) {
-          throwToolExit(
-              '${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
+          throwToolExit('${toTitleCase(getFriendlyModeName(getBuildMode()))} mode is not supported for emulators.');
         }
       }
     }
@@ -381,9 +367,7 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['train'] &&
-        getBuildMode() != BuildMode.debug &&
-        getBuildMode() != BuildMode.dynamicProfile)
+    if (argResults['train'] && getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
       throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
 
@@ -462,9 +446,7 @@ class RunCommand extends RunCommandBase {
       timingLabelParts: <String>[
         hotMode ? 'hot' : 'cold',
         getModeName(getBuildMode()),
-        devices.length == 1
-            ? getNameForTargetPlatform(await devices[0].targetPlatform)
-            : 'multiple',
+        devices.length == 1 ? getNameForTargetPlatform(await devices[0].targetPlatform) : 'multiple',
         devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null,
       ],
       endTimeOverride: appStartedTime,

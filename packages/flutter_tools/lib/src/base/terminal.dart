@@ -14,9 +14,7 @@ import 'utils.dart';
 final AnsiTerminal _kAnsiTerminal = AnsiTerminal();
 
 AnsiTerminal get terminal {
-  return (context == null || context.get<AnsiTerminal>() == null)
-      ? _kAnsiTerminal
-      : context.get<AnsiTerminal>();
+  return (context == null || context.get<AnsiTerminal>() == null) ? _kAnsiTerminal : context.get<AnsiTerminal>();
 }
 
 enum TerminalColor {
@@ -31,10 +29,9 @@ enum TerminalColor {
 
 final OutputPreferences _kOutputPreferences = OutputPreferences();
 
-OutputPreferences get outputPreferences =>
-    (context == null || context.get<OutputPreferences>() == null)
-        ? _kOutputPreferences
-        : context.get<OutputPreferences>();
+OutputPreferences get outputPreferences => (context == null || context.get<OutputPreferences>() == null)
+    ? _kOutputPreferences
+    : context.get<OutputPreferences>();
 
 /// A class that contains the context settings for command text output to the
 /// console.
@@ -126,9 +123,7 @@ class AnsiTerminal {
     }
     final String result = buffer.toString();
     // avoid introducing a new newline to the emboldened text
-    return (!message.endsWith('\n') && result.endsWith('\n'))
-        ? result.substring(0, result.length - 1)
-        : result;
+    return (!message.endsWith('\n') && result.endsWith('\n')) ? result.substring(0, result.length - 1) : result;
   }
 
   String color(String message, TerminalColor color) {
@@ -145,9 +140,7 @@ class AnsiTerminal {
     }
     final String result = buffer.toString();
     // avoid introducing a new newline to the colored text
-    return (!message.endsWith('\n') && result.endsWith('\n'))
-        ? result.substring(0, result.length - 1)
-        : result;
+    return (!message.endsWith('\n') && result.endsWith('\n')) ? result.substring(0, result.length - 1) : result;
   }
 
   String clearScreen() => supportsColor ? clear : '\n\n';
@@ -172,8 +165,7 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes {
-    _broadcastStdInString ??=
-        io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
@@ -210,16 +202,14 @@ class AnsiTerminal {
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
         printStatus(prompt, emphasis: true, newline: false);
-        if (displayAcceptedCharacters)
-          printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
+        if (displayAcceptedCharacters) printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         printStatus(': ', emphasis: true, newline: false);
       }
       choice = await keystrokes.first;
       printStatus(choice);
     }
     singleCharMode = false;
-    if (defaultChoiceIndex != null && choice == '\n')
-      choice = acceptedCharacters[defaultChoiceIndex];
+    if (defaultChoiceIndex != null && choice == '\n') choice = acceptedCharacters[defaultChoiceIndex];
     return choice;
   }
 }

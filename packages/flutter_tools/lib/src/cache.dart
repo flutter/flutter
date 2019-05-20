@@ -131,9 +131,7 @@ class Cache {
   static Future<void> lock() async {
     if (!_lockEnabled) return;
     assert(_lock == null);
-    _lock = await fs
-        .file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile'))
-        .open(mode: FileMode.write);
+    _lock = await fs.file(fs.path.join(flutterRoot, 'bin', 'cache', 'lockfile')).open(mode: FileMode.write);
     bool locked = false;
     bool printed = false;
     while (!locked) {
@@ -142,8 +140,7 @@ class Cache {
         locked = true;
       } on FileSystemException {
         if (!printed) {
-          printTrace(
-              'Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock.path}');
+          printTrace('Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock.path}');
           printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
@@ -176,8 +173,7 @@ class Cache {
       // Make the version string more customer-friendly.
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
       final String justVersion = platform.version.split(' ')[0];
-      _dartSdkVersion =
-          justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+      _dartSdkVersion = justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
         final String noFlutter = match[2].replaceAll('.flutter-', ' ');
         return '${match[1]} (build ${match[1]}$noFlutter)';
       });
@@ -229,8 +225,8 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    final File versionFile = fs.file(fs.path
-        .join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
+    final File versionFile =
+        fs.file(fs.path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
@@ -368,9 +364,7 @@ abstract class CachedArtifact {
   void _removeDownloadedFiles() {
     for (File f in _downloadedFiles) {
       f.deleteSync();
-      for (Directory d = f.parent;
-          d.absolute.path != cache.getDownloadDir().absolute.path;
-          d = d.parent) {
+      for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
         if (d.listSync().isEmpty) {
           d.deleteSync();
         } else {
@@ -396,12 +390,11 @@ abstract class CachedArtifact {
   Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
 
   /// Download an archive from the given [url] and unzip it to [location].
-  Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f),
-      void extractor(File f, Directory d)) {
+  Future<void> _downloadArchive(
+      String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
     return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
-        final Status status =
-            logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
+        final Status status = logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
           await _downloadFile(url, tempFile);
           status.stop();
@@ -560,8 +553,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
-      await _downloadZipArchive(
-          'Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
+      await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
     for (List<String> toolsDir in getBinaryDirs()) {
@@ -576,8 +568,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       for (String frameworkName in frameworkNames) {
         final File frameworkZip = fs.file(fs.path.join(dir.path, '$frameworkName.framework.zip'));
         if (frameworkZip.existsSync()) {
-          final Directory framework =
-              fs.directory(fs.path.join(dir.path, '$frameworkName.framework'));
+          final Directory framework = fs.directory(fs.path.join(dir.path, '$frameworkName.framework'));
           framework.createSync();
           os.unzip(frameworkZip, framework);
         }
@@ -597,8 +588,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     bool exists = false;
     for (String pkgName in getPackageDirs()) {
-      exists = await _doesRemoteExist(
-          'Checking package $pkgName is available...', Uri.parse(url + pkgName + '.zip'));
+      exists = await _doesRemoteExist('Checking package $pkgName is available...', Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
         return false;
       }
@@ -607,8 +597,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     for (List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
-      exists = await _doesRemoteExist(
-          'Checking $cacheDir tools are available...', Uri.parse(url + urlPath));
+      exists = await _doesRemoteExist('Checking $cacheDir tools are available...', Uri.parse(url + urlPath));
       if (!exists) {
         return false;
       }
@@ -826,12 +815,9 @@ class GradleWrapper extends CachedArtifact {
   @override
   Future<void> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location)
-        .then<void>((_) {
+    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location).then<void>((_) {
       // Delete property file, allowing templates to provide it.
-      fs
-          .file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
-          .deleteSync();
+      fs.file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties')).deleteSync();
       // Remove NOTICE file. Should not be part of the template.
       fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
     });

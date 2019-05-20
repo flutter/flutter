@@ -35,8 +35,7 @@ void main() {
       cocoaPods = MockCocoaPods();
       fs = MemoryFileSystem();
 
-      when(cocoaPods.evaluateCocoaPodsInstallation)
-          .thenAnswer((_) async => CocoaPodsStatus.recommended);
+      when(cocoaPods.evaluateCocoaPodsInstallation).thenAnswer((_) async => CocoaPodsStatus.recommended);
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => true);
       when(cocoaPods.cocoaPodsVersionText).thenAnswer((_) async => '1.8.0');
     });
@@ -112,8 +111,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits installed status when homebrew not installed, but not needed',
-        () async {
+    testUsingContext('Emits installed status when homebrew not installed, but not needed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -143,8 +141,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when libimobiledevice is installed but not working',
-        () async {
+    testUsingContext('Emits partial status when libimobiledevice is installed but not working', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -159,8 +156,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when libimobiledevice is installed but not working',
-        () async {
+    testUsingContext('Emits partial status when libimobiledevice is installed but not working', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -224,8 +220,7 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when ios-deploy version is a known bad version',
-        () async {
+    testUsingContext('Emits partial status when ios-deploy version is a known bad version', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -262,8 +257,7 @@ Show information about a connected device.
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
 
-      ensureDirectoryExists(
-          fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
+      ensureDirectoryExists(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
 
       final ValidationResult result = await IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.installed);
@@ -281,8 +275,7 @@ Show information about a connected device.
 
     setUp(() {
       cocoaPods = MockCocoaPods();
-      when(cocoaPods.evaluateCocoaPodsInstallation)
-          .thenAnswer((_) async => CocoaPodsStatus.recommended);
+      when(cocoaPods.evaluateCocoaPodsInstallation).thenAnswer((_) async => CocoaPodsStatus.recommended);
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => true);
       when(cocoaPods.cocoaPodsVersionText).thenAnswer((_) async => '1.8.0');
     });
@@ -296,8 +289,7 @@ Show information about a connected device.
     });
 
     testUsingContext('Emits missing status when CocoaPods is not installed', () async {
-      when(cocoaPods.evaluateCocoaPodsInstallation)
-          .thenAnswer((_) async => CocoaPodsStatus.notInstalled);
+      when(cocoaPods.evaluateCocoaPodsInstallation).thenAnswer((_) async => CocoaPodsStatus.notInstalled);
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
@@ -305,10 +297,8 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when CocoaPods is installed with unknown version',
-        () async {
-      when(cocoaPods.evaluateCocoaPodsInstallation)
-          .thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
+    testUsingContext('Emits partial status when CocoaPods is installed with unknown version', () async {
+      when(cocoaPods.evaluateCocoaPodsInstallation).thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -326,8 +316,7 @@ Show information about a connected device.
     });
 
     testUsingContext('Emits partial status when CocoaPods version is too low', () async {
-      when(cocoaPods.evaluateCocoaPodsInstallation)
-          .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
+      when(cocoaPods.evaluateCocoaPodsInstallation).thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);

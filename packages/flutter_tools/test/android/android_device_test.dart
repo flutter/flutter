@@ -40,8 +40,7 @@ void main() {
       )).thenAnswer(
         (_) => throw ArgumentError(adbExe.path),
       );
-      expect(() => getAdbDevices(),
-          throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
+      expect(() => getAdbDevices(), throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => MockAndroidSdk(),
       FileSystem: () => MemoryFileSystem(),
@@ -115,8 +114,7 @@ Use the 'android' tool to install them:
       hardware = 'unknown';
       buildCharacteristics = 'unused';
       when(mockProcessManager.run(argThat(contains('getprop')),
-              stderrEncoding: anyNamed('stderrEncoding'),
-              stdoutEncoding: anyNamed('stdoutEncoding')))
+              stderrEncoding: anyNamed('stderrEncoding'), stdoutEncoding: anyNamed('stdoutEncoding')))
           .thenAnswer((_) {
         final StringBuffer buf = StringBuffer()
           ..writeln('[ro.hardware]: [$hardware]')
@@ -214,8 +212,7 @@ flutter:
     });
 
     testUsingContext('returns the supplied host port when stdout is empty', () async {
-      when(mockProcessManager.run(argThat(contains('forward'))))
-          .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
+      when(mockProcessManager.run(argThat(contains('forward')))).thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
       expect(await forwarder.forward(123, hostPort: 456), equals(456));
     }, overrides: <Type, Generator>{

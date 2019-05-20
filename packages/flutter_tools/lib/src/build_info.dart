@@ -119,15 +119,13 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
-    final List<String> segments =
-        tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
     if (segments.isEmpty) {
       segments.add('0');
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      printTrace(
-          'Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -145,8 +143,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      printTrace(
-          'Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -162,8 +159,7 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
-    final List<String> segments =
-        tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
+    final List<String> segments = tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
     while (segments.length < 3) {
       segments.add('0');
     }
@@ -197,9 +193,7 @@ bool isAotBuildMode(BuildMode mode) {
 
 // Returns true if the given build mode can be used on emulators / simulators.
 bool isEmulatorBuildMode(BuildMode mode) {
-  return mode == BuildMode.debug ||
-      mode == BuildMode.dynamicRelease ||
-      mode == BuildMode.dynamicProfile;
+  return mode == BuildMode.debug || mode == BuildMode.dynamicRelease || mode == BuildMode.dynamicProfile;
 }
 
 enum HostPlatform {

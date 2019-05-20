@@ -30,10 +30,7 @@ Future<void> main() async {
   daemon.stderr.listen((dynamic data) => stderr.add(data));
 
   stdout.write('> ');
-  stdin
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter())
-      .listen((String line) {
+  stdin.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
     final List<String> words = line.split(' ');
 
     if (line == 'version' || line == 'v') {

@@ -40,8 +40,7 @@ void main() {
 
     testUsingContext('No auto-sign if Xcode project settings are not available', () async {
       when(mockIosProject.buildSettings).thenReturn(null);
-      final Map<String, String> signingConfigs =
-          await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);
     });
 
@@ -49,8 +48,7 @@ void main() {
       when(mockIosProject.buildSettings).thenReturn(<String, String>{
         'DEVELOPMENT_TEAM': 'abc',
       });
-      final Map<String, String> signingConfigs =
-          await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);
       expect(
           testLogger.statusText,
@@ -62,8 +60,7 @@ void main() {
 
     testUsingContext('No auto-sign if security or openssl not available', () async {
       when(mockProcessManager.runSync(<String>['which', 'security'])).thenReturn(exitsFail);
-      final Map<String, String> signingConfigs =
-          await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
       expect(signingConfigs, isNull);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -128,15 +125,13 @@ void main() {
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockProcess));
 
       when(mockProcess.stdin).thenReturn(mockStdIn);
-      when(mockProcess.stdout).thenAnswer((Invocation invocation) => Stream<
-          List<
-              int>>.fromFuture(Future<List<int>>.value(utf8.encode(
-          'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'))));
+      when(mockProcess.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+          Future<List<int>>.value(
+              utf8.encode('subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=3333CCCC33/O=My Team/C=US'))));
       when(mockProcess.stderr).thenAnswer((Invocation invocation) => mockStdErr);
       when(mockProcess.exitCode).thenAnswer((_) async => 0);
 
-      final Map<String, String> signingConfigs =
-          await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(testLogger.statusText, contains('iPhone Developer: Profile 1 (1111AAAA11)'));
       expect(testLogger.errorText, isEmpty);
@@ -187,15 +182,13 @@ void main() {
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout).thenAnswer((Invocation invocation) => Stream<
-          List<
-              int>>.fromFuture(Future<List<int>>.value(utf8.encode(
-          'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'))));
+      when(mockOpenSslProcess.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+          Future<List<int>>.value(
+              utf8.encode('subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'))));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
 
-      final Map<String, String> signingConfigs =
-          await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(
         testLogger.statusText,
@@ -235,8 +228,7 @@ void main() {
     3 valid identities found''',
         '',
       ));
-      mockTerminalStdInStream =
-          Stream<String>.fromFuture(Future<String>.error(Exception('Cannot read from StdIn')));
+      mockTerminalStdInStream = Stream<String>.fromFuture(Future<String>.error(Exception('Cannot read from StdIn')));
       when(mockProcessManager.runSync(
         <String>['security', 'find-certificate', '-c', '1111AAAA11', '-p'],
         environment: anyNamed('environment'),
@@ -259,11 +251,10 @@ void main() {
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout)
-          .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
-                Future<List<int>>.value(utf8.encode(
-                    'subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US')),
-              ));
+      when(mockOpenSslProcess.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+            Future<List<int>>.value(
+                utf8.encode('subject= /CN=iPhone Developer: Profile 1 (1111AAAA11)/OU=5555EEEE55/O=My Team/C=US')),
+          ));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
 
@@ -324,17 +315,14 @@ void main() {
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout).thenAnswer((Invocation invocation) => Stream<
-          List<
-              int>>.fromFuture(Future<List<int>>.value(utf8.encode(
-          'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'))));
+      when(mockOpenSslProcess.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+          Future<List<int>>.value(
+              utf8.encode('subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'))));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert'))
-          .thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
+      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Profile 3 (3333CCCC33)');
 
-      final Map<String, String> signingConfigs =
-          await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(
         testLogger.statusText,
@@ -395,17 +383,14 @@ void main() {
       )).thenAnswer((Invocation invocation) => Future<Process>.value(mockOpenSslProcess));
 
       when(mockOpenSslProcess.stdin).thenReturn(mockOpenSslStdIn);
-      when(mockOpenSslProcess.stdout).thenAnswer((Invocation invocation) => Stream<
-          List<
-              int>>.fromFuture(Future<List<int>>.value(utf8.encode(
-          'subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'))));
+      when(mockOpenSslProcess.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
+          Future<List<int>>.value(
+              utf8.encode('subject= /CN=iPhone Developer: Profile 3 (3333CCCC33)/OU=4444DDDD44/O=My Team/C=US'))));
       when(mockOpenSslProcess.stderr).thenAnswer((Invocation invocation) => mockOpenSslStdErr);
       when(mockOpenSslProcess.exitCode).thenAnswer((_) => Future<int>.value(0));
-      when<String>(mockConfig.getValue('ios-signing-cert'))
-          .thenReturn('iPhone Developer: Invalid Profile');
+      when<String>(mockConfig.getValue('ios-signing-cert')).thenReturn('iPhone Developer: Invalid Profile');
 
-      final Map<String, String> signingConfigs =
-          await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
+      final Map<String, String> signingConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app);
 
       expect(
         testLogger.errorText,

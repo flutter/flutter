@@ -19,8 +19,7 @@ const Duration _kSlowOperation = Duration(minutes: 2);
 /// The [TimeoutConfiguration] instance.
 ///
 /// If not provided via injection, a default instance is provided.
-TimeoutConfiguration get timeoutConfiguration =>
-    context.get<TimeoutConfiguration>() ?? const TimeoutConfiguration();
+TimeoutConfiguration get timeoutConfiguration => context.get<TimeoutConfiguration>() ?? const TimeoutConfiguration();
 
 class TimeoutConfiguration {
   const TimeoutConfiguration();
@@ -298,11 +297,9 @@ class BufferLogger extends Logger {
     bool wrap,
   }) {
     if (newline != false)
-      _status.writeln(
-          wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+      _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
     else
-      _status
-          .write(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+      _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override
@@ -368,8 +365,7 @@ class VerboseLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _emit(_LogType.status,
-        wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+    _emit(_LogType.status, wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override
@@ -427,8 +423,7 @@ class VerboseLogger extends Logger {
 
     if (type == _LogType.error) {
       parent.printError(prefix + terminal.bolden(indentMessage));
-      if (stackTrace != null)
-        parent.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
+      if (stackTrace != null) parent.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
     } else if (type == _LogType.status) {
       parent.printStatus(prefix + terminal.bolden(indentMessage));
     } else {
@@ -472,9 +467,7 @@ abstract class Status {
     SlowWarningCallback slowWarningCallback,
   }) {
     if (terminal.supportsColor)
-      return AnsiSpinner(
-          timeout: timeout, onFinish: onFinish, slowWarningCallback: slowWarningCallback)
-        ..start();
+      return AnsiSpinner(timeout: timeout, onFinish: onFinish, slowWarningCallback: slowWarningCallback)..start();
     return SilentStatus(timeout: timeout, onFinish: onFinish)..start();
   }
 
@@ -490,8 +483,7 @@ abstract class Status {
 
   @protected
   String get elapsedTime {
-    if (timeout == null || timeout > timeoutConfiguration.fastOperation)
-      return getElapsedAsSeconds(_stopwatch.elapsed);
+    if (timeout == null || timeout > timeoutConfiguration.fastOperation) return getElapsedAsSeconds(_stopwatch.elapsed);
     return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
 
@@ -618,9 +610,8 @@ class AnsiSpinner extends Status {
   Timer timer;
 
   // Windows console font has a limited set of Unicode characters.
-  List<String> get _animation => platform.isWindows
-      ? <String>[r'-', r'\', r'|', r'/']
-      : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
+  List<String> get _animation =>
+      platform.isWindows ? <String>[r'-', r'\', r'|', r'/'] : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
   static const String _defaultSlowWarning = '(This is taking an unexpectedly long time.)';
   final SlowWarningCallback slowWarningCallback;

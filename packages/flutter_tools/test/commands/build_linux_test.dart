@@ -40,8 +40,7 @@ void main() {
   testUsingContext('Linux build fails when there is no linux project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    expect(createTestCommandRunner(command).run(const <String>['build', 'linux']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'linux']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -54,8 +53,7 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
-    expect(createTestCommandRunner(command).run(const <String>['build', 'linux']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'linux']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => MemoryFileSystem(),

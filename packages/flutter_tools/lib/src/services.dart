@@ -68,8 +68,7 @@ Future<void> parseServiceConfigs(
     }
 
     if (jars != null && serviceConfig['jars'] is Iterable) {
-      for (String jar in serviceConfig['jars'])
-        jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service)));
+      for (String jar in serviceConfig['jars']) jars.add(fs.file(await getServiceFromUrl(jar, serviceRoot, service)));
     }
   }
 }

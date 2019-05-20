@@ -77,12 +77,10 @@ Future<void> run(List<String> args) async {
   await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
-  await writeFuchsiaManifest(
-      assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
+  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
 }
 
-Future<void> writeFuchsiaManifest(
-    AssetBundle assets, String outputBase, String fileDest, String componentName) async {
+Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String fileDest, String componentName) async {
   final libfs.File destFile = libfs.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();

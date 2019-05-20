@@ -166,8 +166,7 @@ baz=qux
         await Future<void>.delayed(kShortDelay);
       }, kShortDelay);
       final Duration duration = await completer.future;
-      expect(
-          duration, greaterThanOrEqualTo(Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
+      expect(duration, greaterThanOrEqualTo(Duration(milliseconds: kShortDelay.inMilliseconds * 2)));
     });
   });
 
@@ -197,10 +196,9 @@ baz=qux
             '0123456789' * 3 +
             '${AnsiTerminal.green}0123456789${AnsiTerminal.resetAll}';
     const String _onlyAnsiSequences = '${AnsiTerminal.red}${AnsiTerminal.resetAll}';
-    final String _indentedLongLineWithNewlines =
-        '    This is an indented long line with newlines that\n'
-                'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
-            '0123456789' * 5;
+    final String _indentedLongLineWithNewlines = '    This is an indented long line with newlines that\n'
+            'needs to be wrapped.\n\tAnd preserves tabs.\n      \n  ' +
+        '0123456789' * 5;
     const String _shortLine = 'Short line.';
     const String _indentedLongLine = '    This is an indented long line that needs to be '
         'wrapped and indentation preserved.';
@@ -339,8 +337,7 @@ Short line.
           indentation preserved.'''));
     });
     testWrap('honors hangingIndent and indent parameters at the same time.', () {
-      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6, hangingIndent: 6),
-          equals('''
+      expect(wrapText(_indentedLongLine, columnWidth: _lineLength, indent: 6, hangingIndent: 6), equals('''
           This is an indented long line
                 that needs to be wrapped
                 and indentation
@@ -353,8 +350,7 @@ Short line.
           indentation preserved.'''));
     });
     testWrap('honors hangingIndent parameter on already indented line.', () {
-      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength, hangingIndent: 6),
-          equals('''
+      expect(wrapText(_indentedLongLineWithNewlines, columnWidth: _lineLength, hangingIndent: 6), equals('''
     This is an indented long line with
           newlines that
 needs to be wrapped.

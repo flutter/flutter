@@ -46,11 +46,9 @@ class TestCompiler {
     // Compiler maintains and updates single incremental dill file.
     // Incremental compilation requests done for each test copy that file away
     // for independent execution.
-    final Directory outputDillDirectory =
-        fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
+    final Directory outputDillDirectory = fs.systemTempDirectory.createTempSync('flutter_test_compiler.');
     outputDill = outputDillDirectory.childFile('output.dill');
-    printTrace(
-        'Compiler will use the following file as its incremental dill file: ${outputDill.path}');
+    printTrace('Compiler will use the following file as its incremental dill file: ${outputDill.path}');
     printTrace('Listening to compiler controller...');
     compilerController.stream.listen(_onCompilationRequest, onDone: () {
       printTrace('Deleting ${outputDillDirectory.path}...');
@@ -58,8 +56,7 @@ class TestCompiler {
     });
   }
 
-  final StreamController<_CompilationRequest> compilerController =
-      StreamController<_CompilationRequest>();
+  final StreamController<_CompilationRequest> compilerController = StreamController<_CompilationRequest>();
   final List<_CompilationRequest> compilationQueue = <_CompilationRequest>[];
   final FlutterProject flutterProject;
   final bool trackWidgetCreation;
@@ -151,9 +148,7 @@ class TestCompiler {
         final File outputFile = fs.file(outputPath);
         final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
         final File testCache = fs.file(testFilePath);
-        if (firstCompile ||
-            !testCache.existsSync() ||
-            (testCache.lengthSync() < outputFile.lengthSync())) {
+        if (firstCompile || !testCache.existsSync() || (testCache.lengthSync() < outputFile.lengthSync())) {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
           // possible.

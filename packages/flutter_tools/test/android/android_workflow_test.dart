@@ -42,8 +42,7 @@ void main() {
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
 
-  testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager',
-      () async {
+  testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager', () async {
     processManager.succeed = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();

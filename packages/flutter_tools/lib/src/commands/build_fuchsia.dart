@@ -56,8 +56,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     if (!cmxFile.existsSync()) {
       throwToolExit('Fuchsia build requires a .cmx file at $cmxPath for the app');
     }
-    await buildFuchsia(
-        fuchsiaProject: flutterProject.fuchsia, target: targetFile, buildInfo: buildInfo);
+    await buildFuchsia(fuchsiaProject: flutterProject.fuchsia, target: targetFile, buildInfo: buildInfo);
     return null;
   }
 }

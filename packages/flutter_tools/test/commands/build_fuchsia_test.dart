@@ -44,8 +44,7 @@ void main() {
   testUsingContext('Fuchsia build fails when there is no fuchsia project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => memoryFileSystem,
@@ -58,8 +57,7 @@ void main() {
     fs.file('.packages').createSync();
     fs.file('pubspec.yaml').createSync();
 
-    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => memoryFileSystem,
@@ -74,8 +72,7 @@ void main() {
     final File pubspecFile = fs.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync('name: $appName');
 
-    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => memoryFileSystem,

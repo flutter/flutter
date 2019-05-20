@@ -98,10 +98,8 @@ void main() {
       expect(device.artifactOverrides.flutterPatchedSdk, equals(patchedSdk));
       await context.run<void>(
         body: () {
-          expect(Artifacts.instance.getArtifactPath(Artifact.platformKernelDill),
-              equals(platformDill.path));
-          expect(Artifacts.instance.getArtifactPath(Artifact.flutterPatchedSdkPath),
-              equals(patchedSdk.path));
+          expect(Artifacts.instance.getArtifactPath(Artifact.platformKernelDill), equals(platformDill.path));
+          expect(Artifacts.instance.getArtifactPath(Artifact.flutterPatchedSdkPath), equals(patchedSdk.path));
         },
         overrides: <Type, Generator>{
           Artifacts: () => device.artifactOverrides,
@@ -145,8 +143,7 @@ void main() {
         any,
         environment: anyNamed('environment'),
         workingDirectory: anyNamed('workingDirectory'),
-      )).thenAnswer(
-          (Invocation invocation) => Future<ProcessResult>.value(emptyStdoutProcessResult));
+      )).thenAnswer((Invocation invocation) => Future<ProcessResult>.value(emptyStdoutProcessResult));
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
       when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
       when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
@@ -160,8 +157,7 @@ void main() {
       } on ToolExit catch (err) {
         toolExit = err;
       }
-      expect(toolExit.message,
-          contains('No Dart Observatories found. Are you running a debug build?'));
+      expect(toolExit.message, contains('No Dart Observatories found. Are you running a debug build?'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => emptyStdoutProcessManager,
       FuchsiaArtifacts: () => FuchsiaArtifacts(
@@ -194,8 +190,7 @@ void main() {
         stdout = StreamController<List<int>>(sync: true);
         stderr = StreamController<List<int>>(sync: true);
         exitCode = Completer<int>();
-        when(mockProcessManager.start(any))
-            .thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
+        when(mockProcessManager.start(any)).thenAnswer((Invocation _) => Future<Process>.value(mockProcess));
         when(mockProcess.exitCode).thenAnswer((Invocation _) => exitCode.future);
         when(mockProcess.stdout).thenAnswer((Invocation _) => stdout.stream);
         when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
@@ -211,8 +206,7 @@ void main() {
 
       testUsingContext('can be parsed for an app', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader =
-            device.getLogReader(app: FuchsiaModulePackage(name: 'example_app.cmx'));
+        final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app.cmx'));
         final List<String> logLines = <String>[];
         final Completer<void> lock = Completer<void>();
         reader.logLines.listen((String line) {
@@ -239,8 +233,7 @@ void main() {
 
       testUsingContext('cuts off prior logs', () async {
         final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
-        final DeviceLogReader reader =
-            device.getLogReader(app: FuchsiaModulePackage(name: 'example_app.cmx'));
+        final DeviceLogReader reader = device.getLogReader(app: FuchsiaModulePackage(name: 'example_app.cmx'));
         final List<String> logLines = <String>[];
         final Completer<void> lock = Completer<void>();
         reader.logLines.listen((String line) {
@@ -313,8 +306,7 @@ void main() {
       when(fuchsiaDevice.servicePorts()).thenAnswer((Invocation invocation) async => <int>[1]);
       when(portForwarder.forward(1)).thenAnswer((Invocation invocation) async => 2);
       when(vmService.getVM()).thenAnswer((Invocation invocation) => Future<void>.value(null));
-      when(vmService.refreshViews())
-          .thenAnswer((Invocation invocation) => Future<void>.value(null));
+      when(vmService.refreshViews()).thenAnswer((Invocation invocation) => Future<void>.value(null));
       when(vmService.httpAddress).thenReturn(Uri.parse('example'));
       return discoveryProtocol.uri;
     }

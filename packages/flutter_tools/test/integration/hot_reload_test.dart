@@ -76,8 +76,7 @@ void main() {
           }
         },
       );
-      await _flutter
-          .resume(); // we start paused so we can set up our TICK 1 listener before the app starts
+      await _flutter.resume(); // we start paused so we can set up our TICK 1 listener before the app starts
       unawaited(sawTick1.future.timeout(
         const Duration(seconds: 5),
         onTimeout: () {
@@ -129,8 +128,7 @@ void main() {
             expect(sawDebuggerPausedMessage1.isCompleted, isFalse);
             sawDebuggerPausedMessage1.complete();
           }
-          if (line.contains(
-              'The application is paused in the debugger on a breakpoint; interface might not update.')) {
+          if (line.contains('The application is paused in the debugger on a breakpoint; interface might not update.')) {
             expect(sawDebuggerPausedMessage2.isCompleted, isFalse);
             sawDebuggerPausedMessage2.complete();
           }
@@ -158,7 +156,5 @@ void main() {
       await _flutter.resume();
       await subscription.cancel();
     });
-  },
-      timeout: const Timeout.factor(
-          10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
 }

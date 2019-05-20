@@ -14,8 +14,7 @@ void main() {
       fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
       fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'kernel_builder.dart'),
     ];
-    bool _isNotWhitelisted(FileSystemEntity entity) =>
-        whitelistedPaths.every((String path) => path != entity.path);
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
     for (String dirName in <String>['lib', 'bin']) {
       final Iterable<File> files = fs
@@ -26,8 +25,7 @@ void main() {
           .map(_asFile);
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*dart:io')) &&
-              !line.contains('ignore: dart_io_import')) {
+          if (line.startsWith(RegExp(r'import.*dart:io')) && !line.contains('ignore: dart_io_import')) {
             final String relativePath = fs.path.relative(file.path, from: flutterTools);
             fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
           }
@@ -37,8 +35,7 @@ void main() {
   });
 
   test('no unauthorized imports of package:path', () {
-    final String whitelistedPath =
-        fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'kernel_builder.dart');
+    final String whitelistedPath = fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'kernel_builder.dart');
     for (String dirName in <String>['lib', 'bin', 'test']) {
       final Iterable<File> files = fs
           .directory(fs.path.join(flutterTools, dirName))
@@ -63,8 +60,7 @@ void main() {
       fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
       fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'kernel_builder.dart'),
     ];
-    bool _isNotWhitelisted(FileSystemEntity entity) =>
-        whitelistedPaths.every((String path) => path != entity.path);
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
     for (String dirName in <String>['lib']) {
       final Iterable<File> files = fs
@@ -75,8 +71,7 @@ void main() {
           .map(_asFile);
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
-          if (line.startsWith(RegExp(r'import.*dart:convert')) &&
-              !line.contains('ignore: dart_convert_import')) {
+          if (line.startsWith(RegExp(r'import.*dart:convert')) && !line.contains('ignore: dart_convert_import')) {
             final String relativePath = fs.path.relative(file.path, from: flutterTools);
             fail("$relativePath imports 'dart:convert'; import 'lib/src/convert.dart' instead");
           }
@@ -103,8 +98,7 @@ void main() {
           .map(_asFile);
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
-          if (line.startsWith(
-                  RegExp(r'import.*package:build_runner_core/build_runner_core.dart')) ||
+          if (line.startsWith(RegExp(r'import.*package:build_runner_core/build_runner_core.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||
               line.startsWith(RegExp(r'import.*build_runner/.*.dart'))) {

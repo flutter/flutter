@@ -58,8 +58,7 @@ class _FuchsiaLogReader extends DeviceLogReader {
     final DateTime startTime = systemClock.now();
     // Determine if line comes from flutter, and optionally whether it matches
     // the correct fuchsia module.
-    final RegExp matchRegExp =
-        _app == null ? _flutterLogOutput : RegExp('INFO: ${_app.name}\\(flutter\\): ');
+    final RegExp matchRegExp = _app == null ? _flutterLogOutput : RegExp('INFO: ${_app.name}\\(flutter\\): ');
     return Stream<String>.eventTransformed(
       lines,
       (Sink<String> outout) => _FuchsiaLogSink(outout, matchRegExp, startTime),
@@ -210,8 +209,7 @@ class FuchsiaDevice extends Device {
   Future<String> get sdkNameAndVersion async => 'Fuchsia';
 
   @override
-  DeviceLogReader getLogReader({ApplicationPackage app}) =>
-      _logReader ??= _FuchsiaLogReader(this, app);
+  DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader ??= _FuchsiaLogReader(this, app);
   _FuchsiaLogReader _logReader;
 
   @override
@@ -274,8 +272,8 @@ class FuchsiaDevice extends Device {
 
   /// Run `command` on the Fuchsia device shell.
   Future<String> shell(String command) async {
-    final RunResult result = await runAsync(
-        <String>['ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
+    final RunResult result =
+        await runAsync(<String>['ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
     if (result.exitCode != 0) {
       throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;

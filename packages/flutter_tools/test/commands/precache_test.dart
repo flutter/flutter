@@ -26,16 +26,8 @@ void main() {
     testUsingContext('Adds artifact flags to requested artifacts', () async {
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
-      await createTestCommandRunner(command).run(const <String>[
-        'precache',
-        '--ios',
-        '--android',
-        '--web',
-        '--macos',
-        '--linux',
-        '--windows',
-        '--fuchsia'
-      ]);
+      await createTestCommandRunner(command).run(
+          const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows', '--fuchsia']);
       expect(
           artifacts,
           unorderedEquals(<DevelopmentArtifact>{
@@ -60,16 +52,8 @@ void main() {
       Cache.releaseLockEarly();
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
-      await createTestCommandRunner(command).run(const <String>[
-        'precache',
-        '--ios',
-        '--android',
-        '--web',
-        '--macos',
-        '--linux',
-        '--windows',
-        '--fuchsia'
-      ]);
+      await createTestCommandRunner(command).run(
+          const <String>['precache', '--ios', '--android', '--web', '--macos', '--linux', '--windows', '--fuchsia']);
       expect(
           artifacts,
           unorderedEquals(<DevelopmentArtifact>{

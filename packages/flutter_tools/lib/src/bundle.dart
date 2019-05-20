@@ -69,8 +69,7 @@ Future<void> build({
   depfilePath ??= defaultDepfilePath;
   assetDirPath ??= getAssetBuildDirectory();
   packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-  applicationKernelFilePath ??=
-      getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
+  applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
   final FlutterProject flutterProject = FlutterProject.current();
 
   if (compilationTraceFilePath != null) {
@@ -83,8 +82,7 @@ Future<void> build({
       compilationTraceFilePath = null;
     } else if (!fs.file(compilationTraceFilePath).existsSync()) {
       // Be forgiving if compilation trace file is missing.
-      printStatus(
-          'No compilation trace available. To optimize performance, consider using --train.');
+      printStatus('No compilation trace available. To optimize performance, consider using --train.');
       final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
       compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
     } else {
@@ -100,9 +98,8 @@ Future<void> build({
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
-      incrementalCompilerByteStorePath: compilationTraceFilePath != null
-          ? null
-          : fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
+      incrementalCompilerByteStorePath:
+          compilationTraceFilePath != null ? null : fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
       mainPath: fs.file(mainPath).absolute.path,
       outputFilePath: applicationKernelFilePath,
       depFilePath: depfilePath,
@@ -191,22 +188,18 @@ Future<void> assemble({
   assetDirPath ??= getAssetBuildDirectory();
   printTrace('Building bundle');
 
-  final Map<String, DevFSContent> assetEntries =
-      Map<String, DevFSContent>.from(assetBundle.entries);
+  final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
   if (kernelContent != null) {
     if (compilationTraceFilePath != null) {
-      final String vmSnapshotData =
-          artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
       final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
       final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
       assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
       assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
     } else {
-      final String vmSnapshotData =
-          artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-      final String isolateSnapshotData =
-          artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
+      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
+      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
       assetEntries[_kKernelKey] = kernelContent;
       assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
       assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
@@ -227,8 +220,7 @@ Future<void> writeBundle(
   if (bundleDir.existsSync()) bundleDir.deleteSync(recursive: true);
   bundleDir.createSync(recursive: true);
 
-  await Future.wait<void>(
-      assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+  await Future.wait<void>(assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
     final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
     file.parent.createSync(recursive: true);
     await file.writeAsBytes(await entry.value.contentsAsBytes());

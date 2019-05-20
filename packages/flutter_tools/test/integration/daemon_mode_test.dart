@@ -35,8 +35,8 @@ void main() {
       final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
 
       const ProcessManager processManager = LocalProcessManager();
-      process = await processManager.start(<String>[flutterBin, '--show-test-device', 'daemon'],
-          workingDirectory: tempDir.path);
+      process = await processManager
+          .start(<String>[flutterBin, '--show-test-device', 'daemon'], workingDirectory: tempDir.path);
 
       final StreamController<String> stdout = StreamController<String>.broadcast();
 

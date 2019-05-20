@@ -33,8 +33,7 @@ class Usage {
   /// used for testing.
   Usage({String settingsName = 'flutter', String versionOverride, String configDirOverride}) {
     final FlutterVersion flutterVersion = FlutterVersion.instance;
-    final String version =
-        versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
+    final String version = versionOverride ?? flutterVersion.getVersionString(redactUnknownBranches: true);
     _analytics = AnalyticsIO(_kFlutterUA, settingsName, version,
         documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
@@ -120,8 +119,7 @@ class Usage {
   }
 
   void sendException(dynamic exception, StackTrace trace) {
-    if (!suppressAnalytics)
-      _analytics.sendException('${exception.runtimeType}\n${sanitizeStacktrace(trace)}');
+    if (!suppressAnalytics) _analytics.sendException('${exception.runtimeType}\n${sanitizeStacktrace(trace)}');
   }
 
   /// Fires whenever analytics data is sent over the network.

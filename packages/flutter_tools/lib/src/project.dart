@@ -78,9 +78,8 @@ class FlutterProject {
       example.android.applicationId,
       example.ios.productBundleIdentifier,
     ];
-    return Set<String>.from(candidates
-        .map<String>(_organizationNameFromPackageName)
-        .where((String name) => name != null));
+    return Set<String>.from(
+        candidates.map<String>(_organizationNameFromPackageName).where((String name) => name != null));
   }
 
   String _organizationNameFromPackageName(String packageName) {
@@ -213,8 +212,7 @@ class IosProject {
   /// The parent of this project.
   final FlutterProject parent;
 
-  static final RegExp _productBundleIdPattern =
-      RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
+  static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
@@ -245,8 +243,7 @@ class IosProject {
   bool get exists => hostAppRoot.existsSync();
 
   /// The xcode config file for [mode].
-  File xcodeConfigFor(String mode) =>
-      _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
+  File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
   /// The 'Podfile'.
   File get podfile => hostAppRoot.childFile('Podfile');
@@ -273,8 +270,7 @@ class IosProject {
   Directory get xcodeWorkspaceSharedData => xcodeWorkspace.childDirectory('xcshareddata');
 
   /// Xcode workspace shared workspace settings file for the host app.
-  File get xcodeWorkspaceSharedSettings =>
-      xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
+  File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
 
   /// Whether the current flutter project has an iOS subproject.
   bool existsSync() {
@@ -292,8 +288,7 @@ class IosProject {
       // Info.plist has no build variables in product bundle ID.
       return fromPlist;
     }
-    final String fromPbxproj =
-        _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
+    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
     if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
       // Common case. Avoids parsing build settings.
       return fromPbxproj;
@@ -334,19 +329,16 @@ class IosProject {
 
   void _regenerateFromTemplateIfNeeded() {
     if (!isModule) return;
-    final bool pubspecChanged =
-        isOlderThanReference(entity: _ephemeralDirectory, referenceFile: parent.pubspecFile);
+    final bool pubspecChanged = isOlderThanReference(entity: _ephemeralDirectory, referenceFile: parent.pubspecFile);
     final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(_ephemeralDirectory);
     if (!pubspecChanged && !toolingChanged) return;
     _deleteIfExistsSync(_ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
-      _overwriteFromTemplate(
-          fs.path.join('module', 'ios', 'host_app_ephemeral'), _ephemeralDirectory);
+      _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _ephemeralDirectory);
       if (hasPlugins(parent)) {
-        _overwriteFromTemplate(
-            fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _ephemeralDirectory);
       }
     }
   }
@@ -358,16 +350,13 @@ class IosProject {
     _deleteIfExistsSync(_ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), _ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
-    _overwriteFromTemplate(
-        fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
-    _overwriteFromTemplate(
-        fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
     await _updateGeneratedXcodeConfigIfNeeded();
     await injectPlugins(parent);
   }
 
-  File get generatedXcodePropertiesFile =>
-      _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
+  File get generatedXcodePropertiesFile => _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
 
   Directory get pluginRegistrantHost {
     return isModule
@@ -399,8 +388,7 @@ class AndroidProject {
   /// The parent of this project.
   final FlutterProject parent;
 
-  static final RegExp _applicationIdPattern =
-      RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -462,10 +450,8 @@ class AndroidProject {
       _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
-        _overwriteFromTemplate(
-            fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
-        _overwriteFromTemplate(
-            fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _ephemeralDirectory);
+        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), _ephemeralDirectory);
       }
     }
     if (!hostAppGradleRoot.existsSync()) {
@@ -482,13 +468,10 @@ class AndroidProject {
   Future<void> makeHostAppEditable() async {
     assert(isModule);
     if (_editableHostAppDirectory.existsSync())
-      throwToolExit(
-          'Android host app is already editable. To start fresh, delete the android/ folder.');
+      throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
     _regenerateLibrary();
-    _overwriteFromTemplate(
-        fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
-    _overwriteFromTemplate(
-        fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
+    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
     gradle.injectGradleWrapper(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
@@ -497,8 +480,7 @@ class AndroidProject {
 
   File get localPropertiesFile => _flutterLibGradleRoot.childFile('local.properties');
 
-  Directory get pluginRegistrantHost =>
-      _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
+  Directory get pluginRegistrantHost => _flutterLibGradleRoot.childDirectory(isModule ? 'Flutter' : 'app');
 
   void _regenerateLibrary() {
     _deleteIfExistsSync(_ephemeralDirectory);
@@ -646,8 +628,7 @@ class FuchsiaProject {
   final FlutterProject project;
 
   Directory _editableHostAppDirectory;
-  Directory get editableHostAppDirectory =>
-      _editableHostAppDirectory ??= project.directory.childDirectory('fuchsia');
+  Directory get editableHostAppDirectory => _editableHostAppDirectory ??= project.directory.childDirectory('fuchsia');
 
   bool existsSync() => editableHostAppDirectory.existsSync();
 

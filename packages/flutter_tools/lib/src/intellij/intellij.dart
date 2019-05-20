@@ -33,15 +33,13 @@ class IntelliJPlugins {
         messages.add(ValidationMessage.error(
             '$title plugin version $versionText - the recommended minimum version is $minVersion'));
       } else {
-        messages.add(ValidationMessage(
-            '$title plugin ${version != null ? "version $version" : "installed"}'));
+        messages.add(ValidationMessage('$title plugin ${version != null ? "version $version" : "installed"}'));
       }
 
       return;
     }
 
-    messages.add(ValidationMessage.error(
-        '$title plugin not installed; this adds $title specific functionality.'));
+    messages.add(ValidationMessage.error('$title plugin not installed; this adds $title specific functionality.'));
   }
 
   bool _hasPackage(String packageName) {

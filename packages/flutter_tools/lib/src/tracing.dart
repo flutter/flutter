@@ -89,8 +89,7 @@ Future<void> downloadStartupTrace(VMService observatory, {bool awaitFirstFrame =
   );
 
   int extractInstantEventTimestamp(String eventName) {
-    final List<Map<String, dynamic>> events =
-        List<Map<String, dynamic>>.from(timeline['traceEvents']);
+    final List<Map<String, dynamic>> events = List<Map<String, dynamic>>.from(timeline['traceEvents']);
     final Map<String, dynamic> event = events.firstWhere(
       (Map<String, dynamic> event) => event['name'] == eventName,
       orElse: () => null,
@@ -100,8 +99,7 @@ Future<void> downloadStartupTrace(VMService observatory, {bool awaitFirstFrame =
 
   String message = 'No useful metrics were gathered.';
 
-  final int engineEnterTimestampMicros =
-      extractInstantEventTimestamp(_kFlutterEngineMainEnterEventName);
+  final int engineEnterTimestampMicros = extractInstantEventTimestamp(_kFlutterEngineMainEnterEventName);
   final int frameworkInitTimestampMicros = extractInstantEventTimestamp(_kFrameworkInitEventName);
 
   if (engineEnterTimestampMicros == null) {
@@ -129,8 +127,7 @@ Future<void> downloadStartupTrace(VMService observatory, {bool awaitFirstFrame =
     traceInfo['timeToFirstFrameMicros'] = timeToFirstFrameMicros;
     message = 'Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.';
     if (frameworkInitTimestampMicros != null)
-      traceInfo['timeAfterFrameworkInitMicros'] =
-          firstFrameTimestampMicros - frameworkInitTimestampMicros;
+      traceInfo['timeAfterFrameworkInitMicros'] = firstFrameTimestampMicros - frameworkInitTimestampMicros;
   }
 
   traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));

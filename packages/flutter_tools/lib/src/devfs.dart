@@ -112,9 +112,7 @@ class DevFSFileContent extends DevFSContent {
     final FileStat _oldFileStat = _fileStat;
     _stat();
     if (_oldFileStat == null && _fileStat == null) return false;
-    return _oldFileStat == null ||
-        _fileStat == null ||
-        _fileStat.modified.isAfter(_oldFileStat.modified);
+    return _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(_oldFileStat.modified);
   }
 
   @override
@@ -122,10 +120,7 @@ class DevFSFileContent extends DevFSContent {
     final FileStat _oldFileStat = _fileStat;
     _stat();
     if (_oldFileStat == null && _fileStat == null) return false;
-    return time == null ||
-        _oldFileStat == null ||
-        _fileStat == null ||
-        _fileStat.modified.isAfter(time);
+    return time == null || _oldFileStat == null || _fileStat == null || _fileStat.modified.isAfter(time);
   }
 
   @override
@@ -260,8 +255,7 @@ class DevFSException implements Exception {
 }
 
 class _DevFSHttpWriter {
-  _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-      : httpAddress = serviceProtocol.httpAddress;
+  _DevFSHttpWriter(this.fsName, VMService serviceProtocol) : httpAddress = serviceProtocol.httpAddress;
 
   final String fsName;
   final Uri httpAddress;
@@ -477,8 +471,7 @@ class DevFS {
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
-      outputPath: dillOutputPath ??
-          getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      outputPath: dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath: _packagesFilePath,
     );
     if (compilerOutput == null) {
@@ -493,9 +486,7 @@ class DevFS {
       final String compiledBinary = compilerOutput?.outputFilename;
       if (compiledBinary != null && compiledBinary.isNotEmpty) {
         final Uri entryUri = fs.path.toUri(
-          projectRootPath != null
-              ? fs.path.relative(pathToReload, from: projectRootPath)
-              : pathToReload,
+          projectRootPath != null ? fs.path.relative(pathToReload, from: projectRootPath) : pathToReload,
         );
         final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
         syncedBytes += content.size;
@@ -515,8 +506,7 @@ class DevFS {
       }
     }
     printTrace('DevFS: Sync finished');
-    return UpdateFSReport(
-        success: true, syncedBytes: syncedBytes, invalidatedSourcesCount: invalidatedFiles.length);
+    return UpdateFSReport(success: true, syncedBytes: syncedBytes, invalidatedSourcesCount: invalidatedFiles.length);
   }
 }
 

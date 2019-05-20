@@ -22,8 +22,7 @@ void main() {
   final MockProcessManager mockProcessManager = MockProcessManager();
   final MemoryFileSystem memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
   final MockProcess mockProcess = MockProcess();
-  final MockPlatform windowsPlatform = MockPlatform()
-    ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
+  final MockPlatform windowsPlatform = MockPlatform()..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
   final MockPlatform notWindowsPlatform = MockPlatform();
   const String projectPath = r'windows\Runner.vcxproj';
   // A vcvars64.bat location that will be found by the lookup method.
@@ -46,8 +45,7 @@ void main() {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file(projectPath).createSync(recursive: true);
-    expect(createTestCommandRunner(command).run(const <String>['build', 'windows']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'windows']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => memoryFilesystem,
@@ -57,8 +55,7 @@ void main() {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file(vcvarsPath).createSync(recursive: true);
-    expect(createTestCommandRunner(command).run(const <String>['build', 'windows']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'windows']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => memoryFilesystem,
@@ -72,8 +69,7 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
-    expect(createTestCommandRunner(command).run(const <String>['build', 'windows']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'windows']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => memoryFilesystem,

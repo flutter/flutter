@@ -25,8 +25,7 @@ void main() {
 
     when(notWindows.isWindows).thenReturn(false);
     when(notWindows.environment).thenReturn(const <String, String>{});
-    when(mockProcessManager
-            .runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']))
+    when(mockProcessManager.runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']))
         .thenAnswer((Invocation invocation) {
       final MockProcessResult result = MockProcessResult();
       when(result.exitCode).thenReturn(0);

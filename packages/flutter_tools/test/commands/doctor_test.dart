@@ -38,8 +38,7 @@ void main() {
   group('doctor', () {
     testUsingContext('intellij validator', () async {
       const String installPath = '/path/to/intelliJ';
-      final ValidationResult result =
-          await IntelliJValidatorTestTarget('Test', installPath).validate();
+      final ValidationResult result = await IntelliJValidatorTestTarget('Test', installPath).validate();
       expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version test.test.test');
       expect(result.messages, hasLength(4));
@@ -51,60 +50,49 @@ void main() {
       message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
       expect(message.message, 'Dart plugin version 162.2485');
 
-      message =
-          result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, contains('Flutter plugin version 0.1.3'));
       expect(message.message, contains('recommended minimum version'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when both installed', () async {
-      final ValidationResult result =
-          await VsCodeValidatorTestTargets.installedWithExtension.validate();
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension.validate();
       expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
-      ValidationMessage message =
-          result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+      ValidationMessage message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
-      message =
-          result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
       expect(message.isError, isFalse);
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when 64bit installed', () async {
-      expect(
-          VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
-      final ValidationResult result =
-          await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
+      expect(VsCodeValidatorTestTargets.installedWithExtension64bit.title, 'VS Code, 64-bit edition');
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithExtension64bit.validate();
       expect(result.type, ValidationType.installed);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
-      ValidationMessage message =
-          result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+      ValidationMessage message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
-      message =
-          result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, 'Flutter extension version 4.5.6');
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('vs code validator when extension missing', () async {
-      final ValidationResult result =
-          await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
+      final ValidationResult result = await VsCodeValidatorTestTargets.installedWithoutExtension.validate();
       expect(result.type, ValidationType.partial);
       expect(result.statusInfo, 'version 1.2.3');
       expect(result.messages, hasLength(2));
 
-      ValidationMessage message =
-          result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
+      ValidationMessage message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('VS Code '));
       expect(message.message, 'VS Code at ${VsCodeValidatorTestTargets.validInstall}');
 
-      message =
-          result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
+      message = result.messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
       expect(message.message, startsWith('Flutter extension not installed'));
       expect(message.isError, isTrue);
     }, overrides: noColorTerminalOverride);
@@ -126,15 +114,13 @@ void main() {
     testUsingContext('shows when HTTP_PROXY is set', () {
       expect(ProxyValidator.shouldShow, isTrue);
     }, overrides: <Type, Generator>{
-      Platform: () =>
-          FakePlatform()..environment = <String, String>{'HTTP_PROXY': 'fakeproxy.local'},
+      Platform: () => FakePlatform()..environment = <String, String>{'HTTP_PROXY': 'fakeproxy.local'},
     });
 
     testUsingContext('shows when http_proxy is set', () {
       expect(ProxyValidator.shouldShow, isTrue);
     }, overrides: <Type, Generator>{
-      Platform: () =>
-          FakePlatform()..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
+      Platform: () => FakePlatform()..environment = <String, String>{'http_proxy': 'fakeproxy.local'},
     });
 
     testUsingContext('reports success when NO_PROXY is configured correctly', () async {

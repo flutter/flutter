@@ -89,8 +89,7 @@ class AppContext {
       final int index = _reentrantChecks.indexOf(type);
       if (index >= 0) {
         // We're already in the process of trying to generate this type.
-        throw ContextDependencyCycleException._(
-            UnmodifiableListView<Type>(_reentrantChecks.sublist(index)));
+        throw ContextDependencyCycleException._(UnmodifiableListView<Type>(_reentrantChecks.sublist(index)));
       }
 
       _reentrantChecks.add(type);
@@ -160,10 +159,8 @@ class AppContext {
     while (ctx != null) {
       buf.write('AppContext');
       if (ctx.name != null) buf.write('[${ctx.name}]');
-      if (ctx._overrides.isNotEmpty)
-        buf.write('\n$indent  overrides: [${ctx._overrides.keys.join(', ')}]');
-      if (ctx._fallbacks.isNotEmpty)
-        buf.write('\n$indent  fallbacks: [${ctx._fallbacks.keys.join(', ')}]');
+      if (ctx._overrides.isNotEmpty) buf.write('\n$indent  overrides: [${ctx._overrides.keys.join(', ')}]');
+      if (ctx._fallbacks.isNotEmpty) buf.write('\n$indent  fallbacks: [${ctx._fallbacks.keys.join(', ')}]');
       if (ctx._parent != null) buf.write('\n$indent  parent: ');
       ctx = ctx._parent;
       indent += '  ';

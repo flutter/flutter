@@ -36,8 +36,7 @@ class KernelCompilerFactory {
   }
 }
 
-typedef CompilerMessageConsumer = void Function(String message,
-    {bool emphasis, TerminalColor color});
+typedef CompilerMessageConsumer = void Function(String message, {bool emphasis, TerminalColor color});
 
 /// The target model describes the set of core libraries that are availible within
 /// the SDK.
@@ -116,10 +115,8 @@ class StdoutHandler {
         return;
       }
       final int spaceDelimiter = message.lastIndexOf(' ');
-      compilerOutput.complete(CompilerOutput(
-          message.substring(boundaryKey.length + 1, spaceDelimiter),
-          int.parse(message.substring(spaceDelimiter + 1).trim()),
-          sources));
+      compilerOutput.complete(CompilerOutput(message.substring(boundaryKey.length + 1, spaceDelimiter),
+          int.parse(message.substring(spaceDelimiter + 1).trim()), sources));
       return;
     }
     if (state == StdoutState.CollectDiagnostic) {
@@ -159,8 +156,7 @@ class StdoutHandler {
 
 /// Converts filesystem paths to package URIs.
 class PackageUriMapper {
-  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme,
-      List<String> fileSystemRoots) {
+  PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: platform.isWindows).toString();
 
@@ -172,9 +168,8 @@ class PackageUriMapper {
           fileSystemRoots.length > 1 &&
           prefix.contains(fileSystemScheme)) {
         _packageName = packageName;
-        _uriPrefixes = fileSystemRoots
-            .map((String name) => Uri.file(name, windows: platform.isWindows).toString())
-            .toList();
+        _uriPrefixes =
+            fileSystemRoots.map((String name) => Uri.file(name, windows: platform.isWindows).toString()).toList();
         return;
       }
       if (scriptUri.startsWith(prefix)) {
@@ -201,10 +196,8 @@ class PackageUriMapper {
     return null;
   }
 
-  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme,
-      List<String> fileSystemRoots) {
-    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots)
-        .map(scriptPath);
+  static Uri findUri(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
+    return PackageUriMapper(scriptPath, packagesPath, fileSystemScheme, fileSystemRoots).map(scriptPath);
   }
 }
 
@@ -228,8 +221,7 @@ class KernelCompiler {
     bool targetProductVm = false,
     String initializeFromDill,
   }) async {
-    final String frontendServer =
-        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    final String frontendServer = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
     FlutterProject flutterProject;
     if (fs.file('pubspec.yaml').existsSync()) {
       flutterProject = FlutterProject.current();
@@ -318,8 +310,7 @@ class KernelCompiler {
     command.add(mainUri?.toString() ?? mainPath);
 
     printTrace(command.join(' '));
-    final Process server =
-        await processManager.start(command).catchError((dynamic error, StackTrace stack) {
+    final Process server = await processManager.start(command).catchError((dynamic error, StackTrace stack) {
       printError('Failed to start frontend server $error, $stack');
     });
 
@@ -467,8 +458,7 @@ class ResidentCompiler {
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
-    _controller.add(
-        _RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath));
+    _controller.add(_RecompileRequest(completer, mainPath, invalidatedFiles, outputPath, packagesFilePath));
     return completer.future;
   }
 
@@ -500,8 +490,7 @@ class ResidentCompiler {
     }
 
     final String inputKey = Uuid().generateV4();
-    final String mainUri =
-        request.mainPath != null ? _mapFilename(request.mainPath, packageUriMapper) + ' ' : '';
+    final String mainUri = request.mainPath != null ? _mapFilename(request.mainPath, packageUriMapper) + ' ' : '';
     _server.stdin.writeln('recompile $mainUri$inputKey');
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
@@ -536,8 +525,7 @@ class ResidentCompiler {
     String outputPath,
     String packagesFilePath,
   ) async {
-    final String frontendServer =
-        artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    final String frontendServer = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
     final List<String> command = <String>[
       artifacts.getArtifactPath(Artifact.engineDartBinary),
       frontendServer,
@@ -589,10 +577,7 @@ class ResidentCompiler {
       }
     });
 
-    _server.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter())
-        .listen((String message) {
+    _server.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String message) {
       printError(message);
     });
 
@@ -615,8 +600,8 @@ class ResidentCompiler {
     }
 
     final Completer<CompilerOutput> completer = Completer<CompilerOutput>();
-    _controller.add(_CompileExpressionRequest(
-        completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic));
+    _controller.add(
+        _CompileExpressionRequest(completer, expression, definitions, typeDefinitions, libraryUri, klass, isStatic));
     return completer.future;
   }
 

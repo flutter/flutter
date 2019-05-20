@@ -160,8 +160,7 @@ class _ManifestAssetBundle implements AssetBundle {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = fs.path.fromUri(package.resolve('../pubspec.yaml'));
-        final FlutterManifest packageFlutterManifest =
-            FlutterManifest.createFromPath(packageManifestPath);
+        final FlutterManifest packageFlutterManifest = FlutterManifest.createFromPath(packageManifestPath);
         if (packageFlutterManifest == null) continue;
         // Skip the app itself
         if (packageFlutterManifest.appName == flutterManifest.appName) continue;
@@ -230,8 +229,7 @@ class _ManifestAssetBundle implements AssetBundle {
     entries[_fontManifestJson] = DevFSStringContent(json.encode(fonts));
 
     // TODO(ianh): Only do the following line if we've changed packages or if our LICENSE file changed
-    entries[_license] =
-        await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
+    entries[_license] = await _obtainLicenses(packageMap, assetBasePath, reportPackages: reportLicensedPackages);
 
     return 0;
   }
@@ -271,9 +269,7 @@ class _Asset {
     if (identical(other, this)) return true;
     if (other.runtimeType != runtimeType) return false;
     final _Asset otherAsset = other;
-    return otherAsset.baseDir == baseDir &&
-        otherAsset.relativeUri == relativeUri &&
-        otherAsset.entryUri == entryUri;
+    return otherAsset.baseDir == baseDir && otherAsset.relativeUri == relativeUri && otherAsset.entryUri == entryUri;
   }
 
   @override
@@ -283,8 +279,8 @@ class _Asset {
 }
 
 Map<String, dynamic> _readMaterialFontsManifest() {
-  final String fontsPath = fs.path.join(fs.path.absolute(Cache.flutterRoot), 'packages',
-      'flutter_tools', 'schema', 'material_fonts.yaml');
+  final String fontsPath =
+      fs.path.join(fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema', 'material_fonts.yaml');
 
   return castStringKeyedMap(loadYaml(fs.file(fontsPath).readAsStringSync()));
 }
@@ -433,8 +429,7 @@ List<Font> _parsePackageFonts(
     for (FontAsset fontAsset in font.fontAssets) {
       final Uri assetUri = fontAsset.assetUri;
       if (assetUri.pathSegments.first == 'packages' &&
-          !fs.isFileSync(
-              fs.path.fromUri(packageMap.map[packageName].resolve('../${assetUri.path}')))) {
+          !fs.isFileSync(fs.path.fromUri(packageMap.map[packageName].resolve('../${assetUri.path}')))) {
         packageFontAssets.add(FontAsset(
           fontAsset.assetUri,
           weight: fontAsset.weight,
@@ -484,8 +479,7 @@ class _AssetDirectoryCache {
       final List<String> paths = <String>[];
       for (FileSystemEntity entity in fs.directory(directory).listSync(recursive: true)) {
         final String path = entity.path;
-        if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude)))
-          paths.add(path);
+        if (fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude))) paths.add(path);
       }
 
       final Map<String, List<String>> variants = <String, List<String>>{};
@@ -580,8 +574,7 @@ void _parseAssetsFromFolder(
   List<String> excludeDirs = const <String>[],
   String packageName,
 }) {
-  final String directoryPath =
-      fs.path.join(assetBase, assetUri.toFilePath(windows: platform.isWindows));
+  final String directoryPath = fs.path.join(assetBase, assetUri.toFilePath(windows: platform.isWindows));
 
   if (!fs.directory(directoryPath).existsSync()) {
     printError('Error: unable to find directory entry in pubspec.yaml: $directoryPath');
@@ -596,8 +589,7 @@ void _parseAssetsFromFolder(
 
       final Uri uri = Uri.file(relativePath, windows: platform.isWindows);
 
-      _parseAssetFromFile(packageMap, flutterManifest, assetBase, cache, result, uri,
-          packageName: packageName);
+      _parseAssetFromFile(packageMap, flutterManifest, assetBase, cache, result, uri, packageName: packageName);
     }
   }
 }
@@ -622,9 +614,8 @@ void _parseAssetFromFile(
   for (String path in cache.variantsFor(asset.assetFile.path)) {
     final String relativePath = fs.path.relative(path, from: asset.baseDir);
     final Uri relativeUri = fs.path.toUri(relativePath);
-    final Uri entryUri = asset.symbolicPrefixUri == null
-        ? relativeUri
-        : asset.symbolicPrefixUri.resolveUri(relativeUri);
+    final Uri entryUri =
+        asset.symbolicPrefixUri == null ? relativeUri : asset.symbolicPrefixUri.resolveUri(relativeUri);
 
     variants.add(_Asset(
       baseDir: asset.baseDir,
@@ -643,8 +634,7 @@ _Asset _resolveAsset(
   String packageName,
 ) {
   final String assetPath = fs.path.fromUri(assetUri);
-  if (assetUri.pathSegments.first == 'packages' &&
-      !fs.isFileSync(fs.path.join(assetsBaseDir, assetPath))) {
+  if (assetUri.pathSegments.first == 'packages' && !fs.isFileSync(fs.path.join(assetsBaseDir, assetPath))) {
     // The asset is referenced in the pubspec.yaml as
     // 'packages/PACKAGE_NAME/PATH/TO/ASSET .
     final _Asset packageAsset = _resolvePackageAsset(assetUri, packageMap);

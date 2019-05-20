@@ -294,8 +294,7 @@ bool _validate(YamlMap manifest) {
           continue;
         }
         if (kvp.value is! YamlMap) {
-          errors
-              .add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+          errors.add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
         }
         _validateFlutter(kvp.value, errors);
         break;
@@ -320,49 +319,42 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
   }
   for (final MapEntry<dynamic, dynamic> kvp in yaml.entries) {
     if (kvp.key is! String) {
-      errors.add(
-          'Expected YAML key to be a a string, but got ${kvp.key} (${kvp.value.runtimeType}).');
+      errors.add('Expected YAML key to be a a string, but got ${kvp.key} (${kvp.value.runtimeType}).');
       continue;
     }
     switch (kvp.key) {
       case 'uses-material-design':
         if (kvp.value is! bool) {
-          errors.add(
-              'Expected "${kvp.key}" to be a bool, but got ${kvp.value} (${kvp.value.runtimeType}).');
+          errors.add('Expected "${kvp.key}" to be a bool, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
         break;
       case 'assets':
       case 'services':
         if (kvp.value is! YamlList || kvp.value[0] is! String) {
-          errors.add(
-              'Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
+          errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
         break;
       case 'fonts':
         if (kvp.value is! YamlList || kvp.value[0] is! YamlMap) {
-          errors.add(
-              'Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
+          errors.add('Expected "${kvp.key}" to be a list, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
         _validateFonts(kvp.value, errors);
         break;
       case 'module':
         if (kvp.value is! YamlMap) {
-          errors.add(
-              'Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
+          errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
 
         if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
           errors.add('The "androidPackage" value must be a string if set.');
         }
-        if (kvp.value['iosBundleIdentifier'] != null &&
-            kvp.value['iosBundleIdentifier'] is! String) {
+        if (kvp.value['iosBundleIdentifier'] != null && kvp.value['iosBundleIdentifier'] is! String) {
           errors.add('The "iosBundleIdentifier" section must be a string if set.');
         }
         break;
       case 'plugin':
         if (kvp.value is! YamlMap) {
-          errors.add(
-              'Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
+          errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
         if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
           errors.add('The "androidPackage" must either be null or a string.');
@@ -417,20 +409,17 @@ void _validateFonts(YamlList fonts, List<String> errors) {
         switch (kvp.key) {
           case 'asset':
             if (kvp.value is! String) {
-              errors.add(
-                  'Expected font asset ${kvp.value} ((${kvp.value.runtimeType})) to be a string.');
+              errors.add('Expected font asset ${kvp.value} ((${kvp.value.runtimeType})) to be a string.');
             }
             break;
           case 'weight':
             if (!fontWeights.contains(kvp.value)) {
-              errors.add(
-                  'Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> weight.');
+              errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> weight.');
             }
             break;
           case 'style':
             if (kvp.value != 'normal' && kvp.value != 'italic') {
-              errors.add(
-                  'Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> style.');
+              errors.add('Invalid value ${kvp.value} ((${kvp.value.runtimeType})) for font -> style.');
             }
             break;
           default:

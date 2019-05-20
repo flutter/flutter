@@ -17,8 +17,7 @@ void main() {
     });
     testUsingContext('flags emulators with config', () {
       const String emulatorID = '1234';
-      final AndroidEmulator emulator =
-          AndroidEmulator(emulatorID, <String, String>{'name': 'test'});
+      final AndroidEmulator emulator = AndroidEmulator(emulatorID, <String, String>{'name': 'test'});
       expect(emulator.id, emulatorID);
       expect(emulator.hasConfig, true);
     });

@@ -15,10 +15,8 @@ import '../runner/flutter_command.dart';
 class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand() {
     argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
-    argParser.addFlag('create',
-        help: 'Creates a new Android emulator based on a Pixel device.', negatable: false);
-    argParser.addOption('name',
-        help: 'Used with flag --create. Specifies a name for the emulator being created.');
+    argParser.addFlag('create', help: 'Creates a new Android emulator based on a Pixel device.', negatable: false);
+    argParser.addOption('name', help: 'Used with flag --create. Specifies a name for the emulator being created.');
   }
 
   @override
@@ -46,8 +44,7 @@ class EmulatorsCommand extends FlutterCommand {
     } else if (argResults.wasParsed('create')) {
       await _createEmulator(name: argResults['name']);
     } else {
-      final String searchText =
-          argResults.rest != null && argResults.rest.isNotEmpty ? argResults.rest.first : null;
+      final String searchText = argResults.rest != null && argResults.rest.isNotEmpty ? argResults.rest.first : null;
       await _listEmulators(searchText);
     }
 

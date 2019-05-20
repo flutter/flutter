@@ -21,8 +21,7 @@ void main() {
     });
 
     test('throws ToolExit with message and exit code', () {
-      expect(() => throwToolExit('message', exitCode: 42),
-          throwsToolExit(exitCode: 42, message: 'message'));
+      expect(() => throwToolExit('message', exitCode: 42), throwsToolExit(exitCode: 42, message: 'message'));
     });
   });
 }

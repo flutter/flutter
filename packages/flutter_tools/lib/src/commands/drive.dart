@@ -100,8 +100,7 @@ class DriveCommand extends RunCommandBase {
     _device = await targetDeviceFinder();
     if (device == null) throwToolExit(null);
 
-    if (await fs.type(testFile) != FileSystemEntityType.file)
-      throwToolExit('Test file not found: $testFile');
+    if (await fs.type(testFile) != FileSystemEntityType.file) throwToolExit('Test file not found: $testFile');
 
     String observatoryUri;
     if (argResults['use-existing-app'] == null) {
@@ -116,8 +115,7 @@ class DriveCommand extends RunCommandBase {
       }
 
       final LaunchResult result = await appStarter(this);
-      if (result == null)
-        throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
+      if (result == null) throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
@@ -175,8 +173,8 @@ class DriveCommand extends RunCommandBase {
     // Look for the test file inside `test_driver/` matching the sub-path, e.g.
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
-    final String pathWithNoExtension = fs.path.withoutExtension(
-        fs.path.joinAll(<String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
+    final String pathWithNoExtension =
+        fs.path.withoutExtension(fs.path.joinAll(<String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
     return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
   }
 }
@@ -197,8 +195,7 @@ Future<Device> findTargetDevice() async {
       return null;
     }
     if (devices.length > 1) {
-      printStatus(
-          "Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
+      printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
       await Device.printDevices(devices);
       return null;
     }
@@ -249,8 +246,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   printTrace('Starting application.');
 
   // Forward device log messages to the terminal window running the "drive" command.
-  command._deviceLogSubscription =
-      command.device.getLogReader(app: package).logLines.listen(printStatus);
+  command._deviceLogSubscription = command.device.getLogReader(app: package).logLines.listen(printStatus);
 
   final LaunchResult result = await command.device.startApp(
     package,
@@ -284,8 +280,7 @@ void restoreTestRunner() {
 Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
-  PackageMap.globalPackagesPath =
-      fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
+  PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
   final int result = await runCommandAndStreamOutput(
     <String>[dartVmPath]

@@ -17,8 +17,7 @@ class ShellCompletionCommand extends FlutterCommand {
       'overwrite',
       defaultsTo: false,
       negatable: true,
-      help:
-          'Causes the given shell completion setup script to be overwritten if it already exists.',
+      help: 'Causes the given shell completion setup script to be overwritten if it already exists.',
     );
   }
 

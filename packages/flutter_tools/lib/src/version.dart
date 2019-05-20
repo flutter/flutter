@@ -106,10 +106,8 @@ class FlutterVersion {
   @override
   String toString() {
     final String versionText = frameworkVersion == 'unknown' ? '' : ' $frameworkVersion';
-    final String flutterText =
-        'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
-    final String frameworkText =
-        'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
+    final String flutterText = 'Flutter$versionText • channel $channel • ${repositoryUrl ?? 'unknown source'}';
+    final String frameworkText = 'Framework • revision $frameworkRevisionShort ($frameworkAge) • $frameworkCommitDate';
     final String engineText = 'Engine • revision $engineRevisionShort';
     final String toolsText = 'Tools • Dart $dartSdkVersion';
 
@@ -177,8 +175,7 @@ class FlutterVersion {
         .split('\n')
         .map<String>((String name) => name.trim()) // to account for OS-specific line-breaks
         .toList();
-    if (remotes.contains(_versionCheckRemote))
-      await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
+    if (remotes.contains(_versionCheckRemote)) await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
   }
 
   static FlutterVersion get instance => context.get<FlutterVersion>();
@@ -201,8 +198,7 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
-        return '[user-branch]';
+      if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch)) return '[user-branch]';
     }
     return _branch;
   }
@@ -215,13 +211,7 @@ class FlutterVersion {
     String tentativeAncestorRevision,
   }) {
     final ProcessResult result = processManager.runSync(
-      <String>[
-        'git',
-        'merge-base',
-        '--is-ancestor',
-        tentativeAncestorRevision,
-        tentativeDescendantRevision
-      ],
+      <String>['git', 'merge-base', '--is-ancestor', tentativeAncestorRevision, tentativeDescendantRevision],
       workingDirectory: Cache.flutterRoot,
     );
     return result.exitCode == 0;
@@ -373,12 +363,10 @@ class FlutterVersion {
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
-      final Duration timeSinceLastCheck =
-          _clock.now().difference(versionCheckStamp.lastTimeVersionWasChecked);
+      final Duration timeSinceLastCheck = _clock.now().difference(versionCheckStamp.lastTimeVersionWasChecked);
 
       // Don't ping the server too often. Return cached value if it's fresh.
-      if (timeSinceLastCheck < checkAgeConsideredUpToDate)
-        return versionCheckStamp.lastKnownRemoteVersion;
+      if (timeSinceLastCheck < checkAgeConsideredUpToDate) return versionCheckStamp.lastKnownRemoteVersion;
     }
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
@@ -463,14 +451,11 @@ class VersionCheckStamp {
   }) async {
     final Map<String, String> jsonData = toJson();
 
-    if (newTimeVersionWasChecked != null)
-      jsonData['lastTimeVersionWasChecked'] = '$newTimeVersionWasChecked';
+    if (newTimeVersionWasChecked != null) jsonData['lastTimeVersionWasChecked'] = '$newTimeVersionWasChecked';
 
-    if (newKnownRemoteVersion != null)
-      jsonData['lastKnownRemoteVersion'] = '$newKnownRemoteVersion';
+    if (newKnownRemoteVersion != null) jsonData['lastKnownRemoteVersion'] = '$newKnownRemoteVersion';
 
-    if (newTimeWarningWasPrinted != null)
-      jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
+    if (newTimeWarningWasPrinted != null) jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
 
     const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
     Cache.instance.setStampFor(flutterVersionCheckStampFile, prettyJsonEncoder.convert(jsonData));
@@ -487,14 +472,11 @@ class VersionCheckStamp {
 
     final Map<String, String> jsonData = <String, String>{};
 
-    if (updateTimeVersionWasChecked != null)
-      jsonData['lastTimeVersionWasChecked'] = '$updateTimeVersionWasChecked';
+    if (updateTimeVersionWasChecked != null) jsonData['lastTimeVersionWasChecked'] = '$updateTimeVersionWasChecked';
 
-    if (updateKnownRemoteVersion != null)
-      jsonData['lastKnownRemoteVersion'] = '$updateKnownRemoteVersion';
+    if (updateKnownRemoteVersion != null) jsonData['lastKnownRemoteVersion'] = '$updateKnownRemoteVersion';
 
-    if (updateTimeWarningWasPrinted != null)
-      jsonData['lastTimeWarningWasPrinted'] = '$updateTimeWarningWasPrinted';
+    if (updateTimeWarningWasPrinted != null) jsonData['lastTimeWarningWasPrinted'] = '$updateTimeWarningWasPrinted';
 
     return jsonData;
   }
@@ -519,8 +501,7 @@ class VersionCheckError implements Exception {
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
 String _runSync(List<String> command, {bool lenient = true}) {
-  final ProcessResult results =
-      processManager.runSync(command, workingDirectory: Cache.flutterRoot);
+  final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) return results.stdout.trim();
 
@@ -541,8 +522,7 @@ String _runGit(String command) {
 ///
 /// If the command fails, throws a [ToolExit] exception.
 Future<String> _run(List<String> command) async {
-  final ProcessResult results =
-      await processManager.run(command, workingDirectory: Cache.flutterRoot);
+  final ProcessResult results = await processManager.run(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) return results.stdout.trim();
 
@@ -590,18 +570,14 @@ class GitTagVersion {
   static GitTagVersion parse(String version) {
     final RegExp versionPattern =
         RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
-    final List<String> parts =
-        versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
+    final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
       printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
-    final List<int> parsedParts = parts
-        .take(5)
-        .map<int>((String source) => source == null ? null : int.tryParse(source))
-        .toList();
-    return GitTagVersion(
-        parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parsedParts[4], parts[5]);
+    final List<int> parsedParts =
+        parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();
+    return GitTagVersion(parsedParts[0], parsedParts[1], parsedParts[2], parsedParts[3], parsedParts[4], parts[5]);
   }
 
   String frameworkVersionFor(String revision) {

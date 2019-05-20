@@ -131,8 +131,8 @@ class HotRunner extends ResidentRunner {
   ) async {
     for (FlutterDevice device in flutterDevices) {
       if (device.generator != null) {
-        final CompilerOutput compilerOutput = await device.generator.compileExpression(
-            expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
+        final CompilerOutput compilerOutput = await device.generator
+            .compileExpression(expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
         if (compilerOutput != null && compilerOutput.outputFilename != null) {
           return base64.encode(fs.file(compilerOutput.outputFilename).readAsBytesSync());
         }
@@ -234,8 +234,7 @@ class HotRunner extends ResidentRunner {
   }) async {
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
-      if (target == null)
-        message += '\nConsider using the -t option to specify the Dart file to start.';
+      if (target == null) message += '\nConsider using the -t option to specify the Dart file to start.';
       printError(message);
       return 1;
     }
@@ -343,10 +342,7 @@ class HotRunner extends ResidentRunner {
       if (device.devFS != null) {
         // Cleanup the devFS, but don't wait indefinitely.
         // We ignore any errors, because it's not clear what we would do anyway.
-        futures.add(device.devFS
-            .destroy()
-            .timeout(const Duration(milliseconds: 250))
-            .catchError((dynamic error) {
+        futures.add(device.devFS.destroy().timeout(const Duration(milliseconds: 250)).catchError((dynamic error) {
           printTrace('Ignored error while cleaning up DevFS: $error');
         }));
       }
@@ -362,8 +358,7 @@ class HotRunner extends ResidentRunner {
     Uri assetsDirectoryUri,
   ) {
     final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterView view in device.views)
-      futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
+    for (FlutterView view in device.views) futures.add(view.runFromSource(entryUri, packagesUri, assetsDirectoryUri));
     final Completer<void> completer = Completer<void>();
     Future.wait(futures).whenComplete(() {
       completer.complete(null);
@@ -377,10 +372,8 @@ class HotRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       final Uri deviceEntryUri = device.devFS.baseUri.resolveUri(fs.path.toUri(entryUri));
       final Uri devicePackagesUri = device.devFS.baseUri.resolve('.packages');
-      final Uri deviceAssetsDirectoryUri =
-          device.devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
-      futures
-          .add(_launchInView(device, deviceEntryUri, devicePackagesUri, deviceAssetsDirectoryUri));
+      final Uri deviceAssetsDirectoryUri = device.devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
+      futures.add(_launchInView(device, deviceEntryUri, devicePackagesUri, deviceAssetsDirectoryUri));
     }
     await Future.wait(futures);
     if (benchmarkMode) {
@@ -461,8 +454,7 @@ class HotRunner extends ResidentRunner {
           isolateNotifications.add(
             view.owner.vm.vmService.onIsolateEvent.then((Stream<ServiceEvent> serviceEvents) async {
               await for (ServiceEvent serviceEvent in serviceEvents) {
-                if (serviceEvent.owner.name.contains('_spawn') &&
-                    serviceEvent.kind == ServiceEvent.kIsolateExit) {
+                if (serviceEvent.owner.name.contains('_spawn') && serviceEvent.kind == ServiceEvent.kIsolateExit) {
                   return;
                 }
               }
@@ -491,16 +483,15 @@ class HotRunner extends ResidentRunner {
                 (reloadReport['details'] is Map<String, dynamic> &&
                     reloadReport['details']['notices'] is List<dynamic> &&
                     reloadReport['details']['notices'].isNotEmpty &&
-                    reloadReport['details']['notices'].every((dynamic item) =>
-                        item is Map<String, dynamic> && item['message'] is String)))))) {
+                    reloadReport['details']['notices']
+                        .every((dynamic item) => item is Map<String, dynamic> && item['message'] is String)))))) {
       if (printErrors) printError('Hot reload received invalid response: $reloadReport');
       return false;
     }
     if (!reloadReport['success']) {
       if (printErrors) {
         printError('Hot reload was rejected:');
-        for (Map<String, dynamic> notice in reloadReport['details']['notices'])
-          printError('${notice['message']}');
+        for (Map<String, dynamic> notice in reloadReport['details']['notices']) printError('${notice['message']}');
       }
       return false;
     }
@@ -512,10 +503,7 @@ class HotRunner extends ResidentRunner {
 
   @override
   Future<OperationResult> restart(
-      {bool fullRestart = false,
-      bool pauseAfterRestart = false,
-      String reason,
-      bool benchmarkMode = false}) async {
+      {bool fullRestart = false, bool pauseAfterRestart = false, String reason, bool benchmarkMode = false}) async {
     final Stopwatch timer = Stopwatch()..start();
     if (fullRestart) {
       if (!canHotRestart) {
@@ -527,8 +515,7 @@ class HotRunner extends ResidentRunner {
         progressId: 'hot.restart',
       );
       try {
-        if (!(await hotRunnerConfig.setupHotRestart()))
-          return OperationResult(1, 'setupHotRestart failed');
+        if (!(await hotRunnerConfig.setupHotRestart())) return OperationResult(1, 'setupHotRestart failed');
         final OperationResult result = await _restartFromSources(
           reason: reason,
           benchmarkMode: benchmarkMode,
@@ -657,17 +644,12 @@ class HotRunner extends ResidentRunner {
           // understand sync/transfer "overhead" of updating this number of source files.
           final Map<String, dynamic> details = reloadReport['details'];
           analyticsParameters[kEventReloadFinalLibraryCount] = "${details['finalLibraryCount']}";
-          analyticsParameters[kEventReloadSyncedLibraryCount] =
-              "${details['receivedLibraryCount']}";
-          analyticsParameters[kEventReloadSyncedClassesCount] =
-              "${details['receivedClassesCount']}";
-          analyticsParameters[kEventReloadSyncedProceduresCount] =
-              "${details['receivedProceduresCount']}";
+          analyticsParameters[kEventReloadSyncedLibraryCount] = "${details['receivedLibraryCount']}";
+          analyticsParameters[kEventReloadSyncedClassesCount] = "${details['receivedClassesCount']}";
+          analyticsParameters[kEventReloadSyncedProceduresCount] = "${details['receivedProceduresCount']}";
           analyticsParameters[kEventReloadSyncedBytes] = '${updatedDevFS.syncedBytes}';
-          analyticsParameters[kEventReloadInvalidatedSourcesCount] =
-              '${updatedDevFS.invalidatedSourcesCount}';
-          analyticsParameters[kEventReloadTransferTimeInMs] =
-              '${devFSTimer.elapsed.inMilliseconds}';
+          analyticsParameters[kEventReloadInvalidatedSourcesCount] = '${updatedDevFS.invalidatedSourcesCount}';
+          analyticsParameters[kEventReloadTransferTimeInMs] = '${devFSTimer.elapsed.inMilliseconds}';
           final int loadedLibraryCount = reloadReport['details']['loadedLibraryCount'];
           final int finalLibraryCount = reloadReport['details']['finalLibraryCount'];
           printTrace('reloaded $loadedLibraryCount of $finalLibraryCount libraries');
@@ -722,9 +704,7 @@ class HotRunner extends ResidentRunner {
         // Check if the isolate is paused, and if so, don't reassemble. Ignore the
         // PostPauseEvent event - the client requesting the pause will resume the app.
         final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
-        if (pauseEvent != null &&
-            pauseEvent.isPauseEvent &&
-            pauseEvent.kind != ServiceEvent.kPausePostRequest) {
+        if (pauseEvent != null && pauseEvent.isPauseEvent && pauseEvent.kind != ServiceEvent.kPausePostRequest) {
           pausedIsolatesFound += 1;
           if (serviceEventKind == null) {
             serviceEventKind = pauseEvent.kind;
@@ -738,8 +718,7 @@ class HotRunner extends ResidentRunner {
     }
     if (pausedIsolatesFound > 0) {
       if (onSlow != null)
-        onSlow(
-            '${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
+        onSlow('${_describePausedIsolates(pausedIsolatesFound, serviceEventKind)}; interface might not update.');
       if (reassembleViews.isEmpty) {
         printTrace('Skipping reassemble because all isolates are paused.');
         return OperationResult(OperationResult.ok.code, reloadMessage);
@@ -762,8 +741,7 @@ class HotRunner extends ResidentRunner {
         }
       }());
     }
-    final Future<void> reassembleFuture =
-        Future.wait<void>(futures).then<void>((List<void> values) {});
+    final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) {});
     await reassembleFuture.timeout(
       const Duration(seconds: 2),
       onTimeout: () async {
@@ -793,13 +771,11 @@ class HotRunner extends ResidentRunner {
           return;
         }
         shouldReportReloadTime = false;
-        if (onSlow != null)
-          onSlow('${_describePausedIsolates(postReloadPausedIsolatesFound, serviceEventKind)}.');
+        if (onSlow != null) onSlow('${_describePausedIsolates(postReloadPausedIsolatesFound, serviceEventKind)}.');
       },
     );
     // Record time it took for Flutter to reassemble the application.
-    _addBenchmarkData(
-        'hotReloadFlutterReassembleMilliseconds', reassembleTimer.elapsed.inMilliseconds);
+    _addBenchmarkData('hotReloadFlutterReassembleMilliseconds', reassembleTimer.elapsed.inMilliseconds);
 
     reloadTimer.stop();
     final Duration reloadDuration = reloadTimer.elapsed;
@@ -897,8 +873,7 @@ class HotRunner extends ResidentRunner {
       for (Uri uri in device.observatoryUris)
         printStatus('An Observatory debugger and profiler on $dname is available at: $uri');
     }
-    final String quitMessage =
-        _didAttach ? 'To detach, press "d"; to quit, press "q".' : 'To quit, press "q".';
+    final String quitMessage = _didAttach ? 'To detach, press "d"; to quit, press "q".' : 'To quit, press "q".';
     if (details) {
       printHelpDetails();
       printStatus('To repeat this help message, press "h". $quitMessage');

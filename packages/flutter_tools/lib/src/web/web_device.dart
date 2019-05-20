@@ -106,10 +106,8 @@ class WebDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    final Status status =
-        logger.startProgress('Compiling ${package.name} to JavaScript...', timeout: null);
-    final int result =
-        await webCompiler.compile(target: mainPath, minify: false, enabledAssertions: true);
+    final Status status = logger.startProgress('Compiling ${package.name} to JavaScript...', timeout: null);
+    final int result = await webCompiler.compile(target: mainPath, minify: false, enabledAssertions: true);
     status.stop();
     if (result != 0) {
       printError('Failed to compile ${package.name} to JavaScript');
@@ -208,8 +206,7 @@ class WebDevices extends PollingDeviceDiscovery {
 class ChromeLauncher {
   const ChromeLauncher();
 
-  static const String _kMacosLocation =
-      '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome';
+  static const String _kMacosLocation = '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome';
 
   Future<void> launch(String host) async {
     if (platform.isMacOS) {

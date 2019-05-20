@@ -61,8 +61,7 @@ abstract class FlutterTestDriver {
   String lastTime = '';
   void _debugPrint(String message, {String topic = ''}) {
     const int maxLength = 2500;
-    final String truncatedMessage =
-        message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
+    final String truncatedMessage = message.length > maxLength ? message.substring(0, maxLength) + '...' : message;
     final String line = '${topic.padRight(10)} $truncatedMessage';
     _allMessages.add(line);
     final int timeInSeconds = DateTime.now().difference(startTime).inSeconds;
@@ -205,8 +204,7 @@ abstract class FlutterTestDriver {
         final Completer<Event> pauseEvent = Completer<Event>();
 
         // Start listening for pause events.
-        final StreamSubscription<Event> pauseSubscription =
-            _vmService.onDebugEvent.where((Event event) {
+        final StreamSubscription<Event> pauseSubscription = _vmService.onDebugEvent.where((Event event) {
           return event.isolate.id == flutterIsolate && event.kind.startsWith('Pause');
         }).listen((Event event) {
           if (!pauseEvent.isCompleted) pauseEvent.complete(event);
@@ -233,14 +231,11 @@ abstract class FlutterTestDriver {
   }
 
   Future<Isolate> resume({bool waitForNextPause = false}) => _resume(null, waitForNextPause);
-  Future<Isolate> stepOver({bool waitForNextPause = true}) =>
-      _resume(StepOption.kOver, waitForNextPause);
+  Future<Isolate> stepOver({bool waitForNextPause = true}) => _resume(StepOption.kOver, waitForNextPause);
   Future<Isolate> stepOverAsync({bool waitForNextPause = true}) =>
       _resume(StepOption.kOverAsyncSuspension, waitForNextPause);
-  Future<Isolate> stepInto({bool waitForNextPause = true}) =>
-      _resume(StepOption.kInto, waitForNextPause);
-  Future<Isolate> stepOut({bool waitForNextPause = true}) =>
-      _resume(StepOption.kOut, waitForNextPause);
+  Future<Isolate> stepInto({bool waitForNextPause = true}) => _resume(StepOption.kInto, waitForNextPause);
+  Future<Isolate> stepOut({bool waitForNextPause = true}) => _resume(StepOption.kOut, waitForNextPause);
 
   Future<bool> isAtAsyncSuspension() async {
     final Isolate isolate = await _getFlutterIsolate();
@@ -474,12 +469,10 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
     // Set this up now, but we don't wait it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    final Future<Map<String, dynamic>> started =
-        _waitFor(event: 'app.started', timeout: appStartTimeout);
+    final Future<Map<String, dynamic>> started = _waitFor(event: 'app.started', timeout: appStartTimeout);
 
     if (withDebugger) {
-      final Map<String, dynamic> debugPort =
-          await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
+      final Map<String, dynamic> debugPort = await _waitFor(event: 'app.debugPort', timeout: appStartTimeout);
       final String wsUriString = debugPort['params']['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
       await connectToVmService(pauseOnExceptions: pauseOnExceptions);
@@ -497,8 +490,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<void> _restart({bool fullRestart = false, bool pause = false}) async {
     if (_currentRunningAppId == null) throw Exception('App has not started yet');
 
-    _debugPrint(
-        'Performing ${pause ? "paused " : ""}${fullRestart ? "hot restart" : "hot reload"}...');
+    _debugPrint('Performing ${pause ? "paused " : ""}${fullRestart ? "hot restart" : "hot reload"}...');
     final dynamic hotReloadResponse = await _sendRequest(
       'app.restart',
       <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
@@ -586,8 +578,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     _process.stdin.writeln(jsonEncoded);
     final Map<String, dynamic> response = await responseFuture;
 
-    if (response['error'] != null || response['result'] == null)
-      _throwErrorResponse('Unexpected error response');
+    if (response['error'] != null || response['result'] == null) _throwErrorResponse('Unexpected error response');
 
     return response['result'];
   }
@@ -598,8 +589,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 }
 
 class FlutterTestTestDriver extends FlutterTestDriver {
-  FlutterTestTestDriver(Directory _projectFolder, {String logPrefix})
-      : super(_projectFolder, logPrefix: logPrefix);
+  FlutterTestTestDriver(Directory _projectFolder, {String logPrefix}) : super(_projectFolder, logPrefix: logPrefix);
 
   Future<void> test({
     String testFile = 'test/test.dart',

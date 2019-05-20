@@ -260,8 +260,7 @@ class ArtifactUnpacker {
   void _copyMacOSFramework(String frameworkPath, String targetDirectory) {
     _deleteFrameworkIfPresent(fs.path.join(targetDirectory, fs.path.basename(frameworkPath)));
 
-    final ProcessResult result =
-        processManager.runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
+    final ProcessResult result = processManager.runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'

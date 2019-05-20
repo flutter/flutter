@@ -177,11 +177,10 @@ class AndroidApk extends ApplicationPackage {
     } on xml.XmlParserException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
-        manifestLocation = fs.path.join(
-            androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
-      } else {
         manifestLocation =
-            fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
+            fs.path.join(androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
+      } else {
+        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
       }
       printError('AndroidManifest.xml is not a valid XML document.');
       printError('Please check $manifestLocation for errors.');
@@ -248,8 +247,7 @@ class AndroidApk extends ApplicationPackage {
 }
 
 /// Tests whether a [FileSystemEntity] is an iOS bundle directory
-bool _isBundleDirectory(FileSystemEntity entity) =>
-    entity is Directory && entity.path.endsWith('.app');
+bool _isBundleDirectory(FileSystemEntity entity) => entity is Directory && entity.path.endsWith('.app');
 
 abstract class IOSApp extends ApplicationPackage {
   IOSApp({@required String projectBundleId}) : super(id: projectBundleId);
@@ -454,8 +452,7 @@ class _Attribute extends _Entry {
   _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const String attributePrefix = 'A: ';
-    final List<String> keyVal =
-        line.substring(line.indexOf(attributePrefix) + attributePrefix.length).split('=');
+    final List<String> keyVal = line.substring(line.indexOf(attributePrefix) + attributePrefix.length).split('=');
     key = keyVal[0];
     value = keyVal[1];
     level = line.length - line.trimLeft().length;
@@ -508,8 +505,7 @@ class ApkManifestData {
     _Element launchActivity;
     for (_Element activity in activities) {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
-      final Iterable<_Element> intentFilters =
-          activity.allElements('intent-filter').cast<_Element>();
+      final Iterable<_Element> intentFilters = activity.allElements('intent-filter').cast<_Element>();
       final bool isEnabledByDefault = enabled == null;
       final bool isExplicitlyEnabled = enabled != null && enabled.value.contains('0xffffffff');
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {
@@ -521,10 +517,10 @@ class ApkManifestData {
         final _Element category = element.firstElement('category');
         final String actionAttributeValue = action?.firstAttribute('android:name')?.value;
         final String categoryAttributeValue = category?.firstAttribute('android:name')?.value;
-        final bool isMainAction = actionAttributeValue != null &&
-            actionAttributeValue.startsWith('"android.intent.action.MAIN"');
-        final bool isLauncherCategory = categoryAttributeValue != null &&
-            categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
+        final bool isMainAction =
+            actionAttributeValue != null && actionAttributeValue.startsWith('"android.intent.action.MAIN"');
+        final bool isLauncherCategory =
+            categoryAttributeValue != null && categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
         if (isMainAction && isLauncherCategory) {
           launchActivity = activity;
           break;
@@ -575,8 +571,7 @@ class ApkManifestData {
   final Map<String, Map<String, String>> _data;
 
   @visibleForTesting
-  Map<String, Map<String, String>> get data =>
-      UnmodifiableMapView<String, Map<String, String>>(_data);
+  Map<String, Map<String, String>> get data => UnmodifiableMapView<String, Map<String, String>>(_data);
 
   String get packageName => _data['package'] == null ? null : _data['package']['name'];
 

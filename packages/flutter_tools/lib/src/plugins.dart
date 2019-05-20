@@ -88,8 +88,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   final String oldContents = _readFlutterPluginsList(project);
-  final String pluginManifest =
-      plugins.map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
+  final String pluginManifest = plugins.map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
   if (pluginManifest.isNotEmpty) {
     pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
   } else {
@@ -104,9 +103,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 /// Returns the contents of the `.flutter-plugins` file in [project], or
 /// null if that file does not exist.
 String _readFlutterPluginsList(FlutterProject project) {
-  return project.flutterPluginsFile.existsSync()
-      ? project.flutterPluginsFile.readAsStringSync()
-      : null;
+  return project.flutterPluginsFile.existsSync() ? project.flutterPluginsFile.readAsStringSync() : null;
 }
 
 const String _androidPluginRegistryTemplate = '''package io.flutter.plugins;
@@ -308,8 +305,7 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
   if ((checkProjects && project.ios.existsSync()) || !checkProjects) {
     await _writeIOSPluginRegistrant(project, plugins);
   }
-  if (!project.isModule &&
-      ((project.ios.hostAppRoot.existsSync() && checkProjects) || !checkProjects)) {
+  if (!project.isModule && ((project.ios.hostAppRoot.existsSync() && checkProjects) || !checkProjects)) {
     final CocoaPods cocoaPods = CocoaPods();
     if (plugins.isNotEmpty) {
       cocoaPods.setupPodfile(project.ios);

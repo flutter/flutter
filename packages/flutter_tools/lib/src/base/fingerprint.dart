@@ -21,8 +21,7 @@ typedef FingerprintPathFilter = bool Function(String path);
 /// This is done by always returning false from fingerprinter invocations. This
 /// is safe to do generally, because fingerprinting is only a performance
 /// improvement.
-bool get _disableBuildCache =>
-    platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
+bool get _disableBuildCache => platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -107,8 +106,7 @@ class Fingerprint {
   Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
     final Iterable<File> files = inputPaths.map<File>(fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
-    if (missingInputs.isNotEmpty)
-      throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
+    if (missingInputs.isNotEmpty) throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
 
     _checksums = <String, String>{};
     for (File file in files) {
@@ -146,8 +144,7 @@ class Fingerprint {
     if (identical(other, this)) return true;
     if (other.runtimeType != runtimeType) return false;
     final Fingerprint typedOther = other;
-    return _equalMaps(typedOther._checksums, _checksums) &&
-        _equalMaps(typedOther._properties, _properties);
+    return _equalMaps(typedOther._checksums, _checksums) && _equalMaps(typedOther._properties, _properties);
   }
 
   bool _equalMaps(Map<String, String> a, Map<String, String> b) {
@@ -184,8 +181,7 @@ Future<Set<String>> readDepfile(String depfilePath) async {
   return dependencies
       .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
       .split('\n')
-      .map<String>((String path) =>
-          path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
+      .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
       .where((String path) => path.isNotEmpty)
       .toSet();
 }

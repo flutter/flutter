@@ -22,8 +22,7 @@ class BuildMacosCommand extends BuildSubCommand {
       help: 'Build a debug version of your app.',
     );
     argParser.addFlag('profile',
-        negatable: false,
-        help: 'Build a version of your app specialized for performance profiling.');
+        negatable: false, help: 'Build a version of your app specialized for performance profiling.');
     argParser.addFlag(
       'release',
       negatable: false,

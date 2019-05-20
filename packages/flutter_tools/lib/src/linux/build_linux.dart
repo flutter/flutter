@@ -15,8 +15,7 @@ import '../globals.dart';
 import '../project.dart';
 
 /// Builds the Linux project through the Makefile.
-Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo,
-    {String target = 'lib/main.dart'}) async {
+Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
   final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
   final StringBuffer buffer = StringBuffer('''
 # Generated code do not commit.

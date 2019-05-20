@@ -56,8 +56,7 @@ class AnalyzeOnce extends AnalyzeBase {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
       directories.addAll(repoRoots);
-      if (argResults.wasParsed('current-package') && argResults['current-package'])
-        directories.add(currentDirectory);
+      if (argResults.wasParsed('current-package') && argResults['current-package']) directories.add(currentDirectory);
     } else {
       if (argResults['current-package']) directories.add(currentDirectory);
     }
@@ -115,8 +114,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final int undocumentedMembers = errors.where((AnalysisError error) {
       return error.code == 'public_member_api_docs';
     }).length;
-    if (!argResults['dartdocs'])
-      errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
+    if (!argResults['dartdocs']) errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
 
     // emit benchmarks
     if (isBenchmarking) writeBenchmark(timer, errors.length, undocumentedMembers);
@@ -143,8 +141,7 @@ class AnalyzeOnce extends AnalyzeBase {
       final int errorCount = errors.length;
       printStatus('');
       if (undocumentedMembers > 0) {
-        throwToolExit(
-            '$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
+        throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s; $dartdocMessage)');
       } else {
         throwToolExit('$errorCount ${pluralize('issue', errorCount)} found. (ran in ${seconds}s)');
       }

@@ -144,8 +144,7 @@ class TestCommand extends FastFlutterCommand {
       await _buildTestAsset();
     }
 
-    Iterable<String> files =
-        argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
+    Iterable<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
     final bool startPaused = argResults['start-paused'];
     if (startPaused && files.length != 1) {
@@ -157,8 +156,7 @@ class TestCommand extends FastFlutterCommand {
 
     final int jobs = int.tryParse(argResults['concurrency']);
     if (jobs == null || jobs <= 0 || !jobs.isFinite) {
-      throwToolExit(
-          'Could not parse -j/--concurrency argument. It must be an integer greater than zero.');
+      throwToolExit('Could not parse -j/--concurrency argument. It must be an integer greater than zero.');
     }
 
     Directory workDir;
@@ -169,8 +167,7 @@ class TestCommand extends FastFlutterCommand {
       if (!workDir.existsSync()) throwToolExit('Test directory "${workDir.path}" not found.');
       files = _findTests(workDir).toList();
       if (files.isEmpty) {
-        throwToolExit(
-            'Test directory "${workDir.path}" does not appear to contain any test files.\n'
+        throwToolExit('Test directory "${workDir.path}" does not appear to contain any test files.\n'
             'Test files must be in that directory and end with the pattern "_test.dart".');
       }
     }
@@ -246,8 +243,7 @@ class TestCommand extends FastFlutterCommand {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needRebuild(assetBundle.entries)) {
-      await writeBundle(
-          fs.directory(fs.path.join('build', 'unit_test_assets')), assetBundle.entries);
+      await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')), assetBundle.entries);
     }
   }
 
@@ -276,7 +272,6 @@ class TestCommand extends FastFlutterCommand {
 Iterable<String> _findTests(Directory directory) {
   return directory
       .listSync(recursive: true, followLinks: false)
-      .where((FileSystemEntity entity) =>
-          entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path))
+      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') && fs.isFileSync(entity.path))
       .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
 }

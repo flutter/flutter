@@ -50,8 +50,7 @@ class ColdRunner extends ResidentRunner {
     if (!prebuiltMode) {
       if (!fs.isFileSync(mainPath)) {
         String message = 'Tried to run $mainPath, but that file does not exist.';
-        if (target == null)
-          message += '\nConsider using the -t option to specify the Dart file to start.';
+        if (target == null) message += '\nConsider using the -t option to specify the Dart file to start.';
         printError(message);
         return 1;
       }
@@ -188,8 +187,7 @@ class ColdRunner extends ResidentRunner {
         haveAnything = true;
       }
     }
-    final String quitMessage =
-        _didAttach ? 'To detach, press "d"; to quit, press "q".' : 'To quit, press "q".';
+    final String quitMessage = _didAttach ? 'To detach, press "d"; to quit, press "q".' : 'To quit, press "q".';
     if (haveDetails && !details) {
       if (saveCompilationTrace) {
         printStatus('Compilation training data will be saved when flutter run quits...');
@@ -206,8 +204,7 @@ class ColdRunner extends ResidentRunner {
   Future<void> preStop() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
-      if (device.vmServices == null || device.vmServices.isEmpty)
-        await device.device.stopApp(device.package);
+      if (device.vmServices == null || device.vmServices.isEmpty) await device.device.stopApp(device.package);
     }
   }
 }

@@ -41,8 +41,7 @@ class BotDetector {
 
             // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
             ||
-            (platform.environment.containsKey('AWS_REGION') &&
-                platform.environment.containsKey('CODEBUILD_INITIATOR'))
+            (platform.environment.containsKey('AWS_REGION') && platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
             // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
             ||
@@ -74,9 +73,7 @@ String calculateSha(File file) {
 String camelCase(String str) {
   int index = str.indexOf('_');
   while (index != -1 && index < str.length - 2) {
-    str = str.substring(0, index) +
-        str.substring(index + 1, index + 2).toUpperCase() +
-        str.substring(index + 2);
+    str = str.substring(0, index) + str.substring(index + 1, index + 2).toUpperCase() + str.substring(index + 2);
     index = str.indexOf('_');
   }
   return str;
@@ -86,8 +83,7 @@ final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
 String snakeCase(String str, [String sep = '_']) {
-  return str.replaceAllMapped(
-      _upperRegex, (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
+  return str.replaceAllMapped(_upperRegex, (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
 }
 
 String toTitleCase(String str) {
@@ -236,8 +232,7 @@ class Uuid {
         '${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}${_bitsDigits(16, 4)}';
   }
 
-  String _bitsDigits(int bitCount, int digitCount) =>
-      _printDigits(_generateBits(bitCount), digitCount);
+  String _bitsDigits(int bitCount, int digitCount) => _printDigits(_generateBits(bitCount), digitCount);
 
   int _generateBits(int bitCount) => _random.nextInt(1 << bitCount);
 

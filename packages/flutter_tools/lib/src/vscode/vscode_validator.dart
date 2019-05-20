@@ -20,12 +20,10 @@ class VsCodeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final String vsCodeVersionText = _vsCode.version == Version.unknown
-        ? null
-        : userMessages.vsCodeVersion(_vsCode.version.toString());
+    final String vsCodeVersionText =
+        _vsCode.version == Version.unknown ? null : userMessages.vsCodeVersion(_vsCode.version.toString());
 
-    final ValidationType validationType =
-        _vsCode.isValid ? ValidationType.installed : ValidationType.partial;
+    final ValidationType validationType = _vsCode.isValid ? ValidationType.installed : ValidationType.partial;
 
     return ValidationResult(
       validationType,

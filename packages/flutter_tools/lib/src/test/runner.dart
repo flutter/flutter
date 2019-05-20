@@ -92,8 +92,7 @@ Future<int> runTests(
 
   // Make the global packages path absolute.
   // (Makes sure it still works after we change the current directory.)
-  PackageMap.globalPackagesPath =
-      fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
+  PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
 
   // Call package:test's main method in the appropriate directory.
   final Directory saved = fs.currentDirectory;

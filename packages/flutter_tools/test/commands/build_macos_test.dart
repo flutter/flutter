@@ -41,8 +41,7 @@ void main() {
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    expect(createTestCommandRunner(command).run(const <String>['build', 'macos']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'macos']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
   });
@@ -53,8 +52,7 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
-    expect(createTestCommandRunner(command).run(const <String>['build', 'macos']),
-        throwsA(isInstanceOf<ToolExit>()));
+    expect(createTestCommandRunner(command).run(const <String>['build', 'macos']), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => memoryFilesystem,

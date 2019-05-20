@@ -13,8 +13,7 @@ import '../src/context.dart';
 void main() {
   group(WindowsWorkflow, () {
     final MockPlatform windows = MockPlatform();
-    final MockPlatform windowsWithFde = MockPlatform()
-      ..environment['ENABLE_FLUTTER_DESKTOP'] = 'true';
+    final MockPlatform windowsWithFde = MockPlatform()..environment['ENABLE_FLUTTER_DESKTOP'] = 'true';
     final MockPlatform notWindows = MockPlatform();
     when(windows.isWindows).thenReturn(true);
     when(windowsWithFde.isWindows).thenReturn(true);

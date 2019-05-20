@@ -81,9 +81,7 @@ void main() {
       await breakInBuildMethod(_flutter);
       await evaluateComplexReturningExpressions(_flutter);
     });
-  },
-      timeout: const Timeout.factor(
-          10)); // The DevFS sync takes a really long time, so these tests can be slow.
+  }, timeout: const Timeout.factor(10)); // The DevFS sync takes a really long time, so these tests can be slow.
 
   group('flutter test expression evaluation', () {
     Directory tempDir;
@@ -148,8 +146,7 @@ Future<void> evaluateTrivialExpressions(FlutterTestDriver flutter) async {
 
 Future<void> evaluateComplexExpressions(FlutterTestDriver flutter) async {
   final InstanceRef res = await flutter.evaluateInFrame('new DateTime.now().year');
-  expect(
-      res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
+  expect(res.kind == InstanceKind.kInt && res.valueAsString == DateTime.now().year.toString(), isTrue);
 }
 
 Future<void> evaluateComplexReturningExpressions(FlutterTestDriver flutter) async {

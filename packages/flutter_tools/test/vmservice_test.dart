@@ -80,8 +80,7 @@ class MockPeer implements rpc.Peer {
         'architectureBits': 64,
         'targetCPU': 'x64',
         'hostCPU': '      Intel(R) Xeon(R) CPU    E5-1650 v2 @ 3.50GHz',
-        'version':
-            '2.1.0-dev.7.1.flutter-45f9462398 (Fri Oct 19 19:27:56 2018 +0000) on "linux_x64"',
+        'version': '2.1.0-dev.7.1.flutter-45f9462398 (Fri Oct 19 19:27:56 2018 +0000) on "linux_x64"',
         '_profilerMode': 'Dart',
         '_nativeZoneMemoryUsage': 0,
         'pid': 103707,
@@ -186,8 +185,8 @@ void main() {
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(),
       Stdio: () => mockStdio,
-      WebSocketConnector: () => (String url, {CompressionOptions compression}) async =>
-          throw const SocketException('test'),
+      WebSocketConnector: () =>
+          (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
     testUsingContext('refreshViews', () {
@@ -214,42 +213,36 @@ void main() {
         expect(mockPeer.returnedFromSendRequest, 1);
         time.elapse(Duration.zero); // this unblocks the listViews call which returns nothing
         expect(mockPeer.returnedFromSendRequest, 2);
-        time.elapse(const Duration(
-            milliseconds:
-                50)); // the last listViews had no views, so it waits 50ms, then calls getVM
+        time.elapse(
+            const Duration(milliseconds: 50)); // the last listViews had no views, so it waits 50ms, then calls getVM
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 2);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 2);
-        time.elapse(
-            Duration.zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 4);
         time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 4);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 4);
-        time.elapse(
-            Duration.zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 6);
         time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 6);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 6);
-        time.elapse(
-            Duration.zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 8);
         time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 8);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 8);
-        time.elapse(
-            Duration.zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 10);
-        const String message =
-            'Flutter is taking longer than expected to report its views. Still trying...\n';
+        const String message = 'Flutter is taking longer than expected to report its views. Still trying...\n';
         expect(mockStdio.writtenToStdout.join(''), message);
         expect(mockStdio.writtenToStderr.join(''), '');
         time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
@@ -258,8 +251,7 @@ void main() {
         mockPeer.isolatesEnabled = true;
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 10);
-        time.elapse(
-            Duration.zero); // now it returns an isolate and the listViews call returns views
+        time.elapse(Duration.zero); // now it returns an isolate and the listViews call returns views
         expect(mockPeer.returnedFromSendRequest, 13);
         expect(done, isTrue);
         expect(mockStdio.writtenToStdout.join(''), message);

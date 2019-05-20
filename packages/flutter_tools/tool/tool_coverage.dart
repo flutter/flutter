@@ -14,10 +14,8 @@ import 'package:pool/pool.dart';
 import 'package:path/path.dart' as path;
 
 final ArgParser argParser = ArgParser()
-  ..addOption('output-html',
-      defaultsTo: 'coverage/report.html', help: 'The output path for the genhtml report.')
-  ..addOption('output-lcov',
-      defaultsTo: 'coverage/lcov.info', help: 'The output path for the lcov data.')
+  ..addOption('output-html', defaultsTo: 'coverage/report.html', help: 'The output path for the genhtml report.')
+  ..addOption('output-lcov', defaultsTo: 'coverage/lcov.info', help: 'The output path for the lcov data.')
   ..addOption('test-directory', defaultsTo: 'test/', help: 'The path to the test directory.')
   ..addOption('packages', defaultsTo: '.packages', help: 'The path to the .packages file.')
   ..addOption('genhtml', defaultsTo: 'genhtml', help: 'The genhtml executable.');
@@ -35,11 +33,9 @@ Future<void> main(List<String> arguments) async {
     );
 
     /// A temp directory to create synthetic test files in.
-    final Directory tempDirectory = Directory.systemTemp.createTempSync('_flutter_coverage')
-      ..createSync();
+    final Directory tempDirectory = Directory.systemTemp.createTempSync('_flutter_coverage')..createSync();
     final String flutterRoot = File(Platform.script.toFilePath()).parent.parent.parent.parent.path;
-    await ToolCoverageRunner(tempDirectory, coverageCollector, flutterRoot, argResults)
-        .collectCoverage();
+    await ToolCoverageRunner(tempDirectory, coverageCollector, flutterRoot, argResults).collectCoverage();
   });
 }
 
@@ -77,8 +73,7 @@ class ToolCoverageRunner {
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(lcovData);
-    await Process.run(genHtmlExecutable, <String>[outputLcovPath, '-o', outputHtmlPath],
-        runInShell: true);
+    await Process.run(genHtmlExecutable, <String>[outputLcovPath, '-o', outputHtmlPath], runInShell: true);
   }
 
   // Creates a synthetic test file to wrap the test main in a group invocation.
@@ -119,10 +114,7 @@ void main() {
         environment: <String, String>{
           'FLUTTER_ROOT': flutterRoot,
         }).timeout(const Duration(seconds: 30));
-    testProcess.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen((String line) {
+    testProcess.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen((String line) {
       print(line);
       if (line.contains('All tests passed') || line.contains('Some tests failed')) {
         completer.complete(null);
@@ -130,9 +122,7 @@ void main() {
     });
     try {
       await completer.future;
-      await coverageCollector
-          .collectCoverage(testProcess, coverageUri)
-          .timeout(const Duration(seconds: 30));
+      await coverageCollector.collectCoverage(testProcess, coverageUri).timeout(const Duration(seconds: 30));
       testProcess?.kill();
     } on TimeoutException {
       print('Failed to collect coverage for ${testFile.path} after 30 seconds');

@@ -26,8 +26,7 @@ class AndroidEmulators extends EmulatorDiscovery {
 }
 
 class AndroidEmulator extends Emulator {
-  AndroidEmulator(String id, [this._properties])
-      : super(id, _properties != null && _properties.isNotEmpty);
+  AndroidEmulator(String id, [this._properties]) : super(id, _properties != null && _properties.isNotEmpty);
 
   Map<String, String> _properties;
 

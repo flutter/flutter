@@ -81,8 +81,7 @@ class Template {
         final String platform = match.group(1);
         final String language = context['${platform}Language'];
         if (language != match.group(2)) return null;
-        relativeDestinationPath =
-            relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
+        relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
       final String projectName = context['projectName'];
       final String androidIdentifier = context['androidIdentifier'];
@@ -95,13 +94,11 @@ class Template {
           .replaceAll(templateExtension, '');
 
       if (androidIdentifier != null) {
-        finalDestinationPath = finalDestinationPath.replaceAll(
-            'androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
+        finalDestinationPath =
+            finalDestinationPath.replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
-      if (projectName != null)
-        finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
-      if (pluginClass != null)
-        finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
+      if (projectName != null) finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
+      if (pluginClass != null) finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
       return finalDestinationPath;
     }
 
@@ -166,7 +163,6 @@ class Template {
 }
 
 Directory templateDirectoryInPackage(String name) {
-  final String templatesDir =
-      fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates');
+  final String templatesDir = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'templates');
   return fs.directory(fs.path.join(templatesDir, name));
 }

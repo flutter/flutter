@@ -56,8 +56,7 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators
-            .add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
+        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
 
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
@@ -165,8 +164,7 @@ class Doctor {
 
     if (!allGood) {
       buffer.writeln();
-      buffer
-          .writeln('Run "flutter doctor" for information about installing additional components.');
+      buffer.writeln('Run "flutter doctor" for information about installing additional components.');
     }
 
     return buffer.toString();
@@ -218,8 +216,7 @@ class Doctor {
         printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
       } else {
-        printStatus('${result.coloredLeadingBox} ${validator.title}',
-            hangingIndent: result.leadingBox.length + 1);
+        printStatus('${result.coloredLeadingBox} ${validator.title}', hangingIndent: result.leadingBox.length + 1);
       }
 
       for (ValidationMessage message in result.messages) {
@@ -446,10 +443,9 @@ class FlutterValidator extends DoctorValidator {
 
     final FlutterVersion version = FlutterVersion.instance;
 
+    messages.add(ValidationMessage(userMessages.flutterVersion(version.frameworkVersion, Cache.flutterRoot)));
     messages.add(ValidationMessage(
-        userMessages.flutterVersion(version.frameworkVersion, Cache.flutterRoot)));
-    messages.add(ValidationMessage(userMessages.flutterRevision(
-        version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
+        userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
     messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
     messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
     final String genSnapshotPath = artifacts.getArtifactPath(Artifact.genSnapshot);
@@ -468,8 +464,8 @@ class FlutterValidator extends DoctorValidator {
     return ValidationResult(
       valid,
       messages,
-      statusInfo: userMessages.flutterStatusInfo(
-          version.channel, version.frameworkVersion, os.name, platform.localeName),
+      statusInfo:
+          userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
 }
@@ -525,8 +521,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
 
     final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath);
-    plugins.validatePackage(
-        messages, <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
+    plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
         minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
     plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
@@ -536,8 +531,7 @@ abstract class IntelliJValidator extends DoctorValidator {
 
     _validateIntelliJVersion(messages, kMinIdeaVersion);
 
-    return ValidationResult(
-        _hasIssues(messages) ? ValidationType.partial : ValidationType.installed, messages,
+    return ValidationResult(_hasIssues(messages) ? ValidationType.partial : ValidationType.installed, messages,
         statusInfo: userMessages.intellijStatusInfo(version));
   }
 
@@ -553,15 +547,13 @@ abstract class IntelliJValidator extends DoctorValidator {
     if (installedVersion == null) return;
 
     if (installedVersion < minVersion) {
-      messages
-          .add(ValidationMessage.error(userMessages.intellijMinimumVersion(minVersion.toString())));
+      messages.add(ValidationMessage.error(userMessages.intellijMinimumVersion(minVersion.toString())));
     }
   }
 }
 
 class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
-  IntelliJValidatorOnLinuxAndWindows(
-      String title, this.version, String installPath, this.pluginsPath)
+  IntelliJValidatorOnLinuxAndWindows(String title, this.version, String installPath, this.pluginsPath)
       : super(title, installPath);
 
   @override
@@ -579,8 +571,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
           IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
       for (int index = 0; index < validators.length; ++index) {
         final DoctorValidator other = validators[index];
-        if (other is IntelliJValidatorOnLinuxAndWindows &&
-            validator.installPath == other.installPath) {
+        if (other is IntelliJValidatorOnLinuxAndWindows && validator.installPath == other.installPath) {
           if (validator.version.compareTo(other.version) > 0) validators[index] = validator;
           return;
         }
@@ -625,10 +616,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     final List<DoctorValidator> validators = <DoctorValidator>[];
-    final List<String> installPaths = <String>[
-      '/Applications',
-      fs.path.join(homeDirPath, 'Applications')
-    ];
+    final List<String> installPaths = <String>['/Applications', fs.path.join(homeDirPath, 'Applications')];
 
     void checkForIntelliJ(Directory dir) {
       final String name = fs.path.basename(dir.path);
@@ -643,8 +631,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     try {
       final Iterable<Directory> installDirs = installPaths
           .map<Directory>((String installPath) => fs.directory(installPath))
-          .map<List<FileSystemEntity>>(
-              (Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+          .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
           .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
           .whereType<Directory>();
       for (Directory dir in installDirs) {
@@ -705,16 +692,13 @@ class DeviceValidator extends DoctorValidator {
     if (devices.isEmpty) {
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
-        messages = diagnostics
-            .map<ValidationMessage>((String message) => ValidationMessage(message))
-            .toList();
+        messages = diagnostics.map<ValidationMessage>((String message) => ValidationMessage(message)).toList();
       } else {
         messages = <ValidationMessage>[ValidationMessage.hint(userMessages.devicesMissing)];
       }
     } else {
-      messages = await Device.descriptions(devices)
-          .map<ValidationMessage>((String msg) => ValidationMessage(msg))
-          .toList();
+      messages =
+          await Device.descriptions(devices).map<ValidationMessage>((String msg) => ValidationMessage(msg)).toList();
     }
 
     if (devices.isEmpty) {

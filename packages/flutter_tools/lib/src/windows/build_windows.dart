@@ -14,8 +14,7 @@ import '../project.dart';
 import 'msbuild_utils.dart';
 
 /// Builds the Windows project using msbuild.
-Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo,
-    {String target = 'lib/main.dart'}) async {
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     'FLUTTER_TARGET': target,

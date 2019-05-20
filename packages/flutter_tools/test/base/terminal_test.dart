@@ -62,8 +62,7 @@ void main() {
     testUsingContext('nesting bold within color works', () {
       expect(
         terminal.color(terminal.bolden('output'), TerminalColor.blue),
-        equals(
-            '${AnsiTerminal.blue}${AnsiTerminal.bold}output${AnsiTerminal.resetBold}${AnsiTerminal.resetColor}'),
+        equals('${AnsiTerminal.blue}${AnsiTerminal.bold}output${AnsiTerminal.resetBold}${AnsiTerminal.resetColor}'),
       );
       expect(
         terminal.color('non-bold ${terminal.bolden('output')} also non-bold', TerminalColor.blue),
@@ -78,8 +77,7 @@ void main() {
     testUsingContext('nesting color within bold works', () {
       expect(
         terminal.bolden(terminal.color('output', TerminalColor.blue)),
-        equals(
-            '${AnsiTerminal.bold}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.resetBold}'),
+        equals('${AnsiTerminal.bold}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.resetBold}'),
       );
       expect(
         terminal.bolden('non-color ${terminal.color('output', TerminalColor.blue)} also non-color'),
@@ -98,8 +96,7 @@ void main() {
             '${AnsiTerminal.magenta}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta}${AnsiTerminal.resetColor}'),
       );
       expect(
-        terminal.color('magenta ${terminal.color('output', TerminalColor.blue)} also magenta',
-            TerminalColor.magenta),
+        terminal.color('magenta ${terminal.color('output', TerminalColor.blue)} also magenta', TerminalColor.magenta),
         equals(
             '${AnsiTerminal.magenta}magenta ${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta} also magenta${AnsiTerminal.resetColor}'),
       );

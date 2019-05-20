@@ -15,14 +15,11 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('get', false));
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project',
-        requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dev',
-        requiresPubspec: true));
     addSubcommand(
-        PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
-    addSubcommand(
-        PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
+        PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dev', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
     addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
@@ -133,8 +130,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub(<String>['run', 'test']..addAll(argResults.rest),
-        context: PubContext.runTest, retry: false);
+    await pub(<String>['run', 'test']..addAll(argResults.rest), context: PubContext.runTest, retry: false);
     return null;
   }
 }
@@ -164,8 +160,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await pub(<String>[_commandName]..addAll(argResults.rest),
-        context: PubContext.pubForward, retry: false);
+    await pub(<String>[_commandName]..addAll(argResults.rest), context: PubContext.pubForward, retry: false);
     return null;
   }
 }

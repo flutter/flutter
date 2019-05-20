@@ -108,8 +108,7 @@ class CrashReportSender {
       req.fields['error_runtime_type'] = '${error.runtimeType}';
       req.fields['error_message'] = '$error';
 
-      final String stackTraceWithRelativePaths =
-          Chain.parse(stackTrace.toString()).terse.toString();
+      final String stackTraceWithRelativePaths = Chain.parse(stackTrace.toString()).terse.toString();
       req.files.add(http.MultipartFile.fromString(
         _kStackTraceFileField,
         stackTraceWithRelativePaths,
@@ -122,8 +121,7 @@ class CrashReportSender {
         final String reportId = await http.ByteStream(resp.stream).bytesToString();
         printStatus('Crash report sent (report ID: $reportId)');
       } else {
-        printError(
-            'Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
+        printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');
       }
     } catch (sendError, sendStackTrace) {
       if (sendError is SocketException) {

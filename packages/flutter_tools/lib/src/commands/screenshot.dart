@@ -46,8 +46,7 @@ class ScreenshotCommand extends FlutterCommand {
             'screenshots the entire screen currently being displayed (including content '
             'not rendered by Flutter, like the device status bar).',
         _kSkiaType: 'Render the Flutter app as a Skia picture. Requires --$_kObservatoryPort',
-        _kRasterizerType:
-            'Render the Flutter app using the rasterizer. Requires --$_kObservatoryPort',
+        _kRasterizerType: 'Render the Flutter app using the rasterizer. Requires --$_kObservatoryPort',
       },
       defaultsTo: _kDeviceType,
     );
@@ -126,8 +125,7 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<Map<String, dynamic>> _invokeVmServiceRpc(String method) async {
-    final Uri observatoryUri =
-        Uri(scheme: 'http', host: '127.0.0.1', port: int.parse(argResults[_kObservatoryPort]));
+    final Uri observatoryUri = Uri(scheme: 'http', host: '127.0.0.1', port: int.parse(argResults[_kObservatoryPort]));
     final VMService vmService = await VMService.connect(observatoryUri);
     return await vmService.vm.invokeRpcRaw(method);
   }
@@ -138,8 +136,7 @@ class ScreenshotCommand extends FlutterCommand {
         encoding: const AsciiCodec(allowInvalid: true),
       );
       if (content.startsWith('{"jsonrpc":"2.0", "error"'))
-        throwToolExit(
-            '\nIt appears the output file contains an error message, not valid skia output.');
+        throwToolExit('\nIt appears the output file contains an error message, not valid skia output.');
     }
   }
 

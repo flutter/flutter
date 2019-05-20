@@ -23,13 +23,13 @@ final RegExp _settingExpr = RegExp(r'(\w+)\s*=\s*(.*)$');
 final RegExp _varExpr = RegExp(r'\$\(([^)]*)\)');
 
 String flutterFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework,
-      platform: TargetPlatform.ios, mode: mode)));
+  return fs.path.normalize(
+      fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode)));
 }
 
 String flutterMacOSFrameworkDir(BuildMode mode) {
-  return fs.path.normalize(fs.path.dirname(artifacts.getArtifactPath(Artifact.flutterMacOSFramework,
-      platform: TargetPlatform.darwin_x64, mode: mode)));
+  return fs.path.normalize(fs.path.dirname(
+      artifacts.getArtifactPath(Artifact.flutterMacOSFramework, platform: TargetPlatform.darwin_x64, mode: mode)));
 }
 
 /// Writes or rewrites Xcode property files with the specified information.
@@ -73,20 +73,19 @@ Future<void> updateGeneratedXcodeProperties({
     // explicitly. Rather we rely on the xcode backend script and the Podfile
     // logic to derive it from FLUTTER_ROOT and FLUTTER_BUILD_MODE.
     // However, this is necessary for regular projects using Cocoapods.
-    final String frameworkDir = useMacOSConfig
-        ? flutterMacOSFrameworkDir(buildInfo.mode)
-        : flutterFrameworkDir(buildInfo.mode);
+    final String frameworkDir =
+        useMacOSConfig ? flutterMacOSFrameworkDir(buildInfo.mode) : flutterFrameworkDir(buildInfo.mode);
     localsBuffer.writeln('FLUTTER_FRAMEWORK_DIR=$frameworkDir');
   }
 
-  final String buildName = validatedBuildNameForPlatform(
-      TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
+  final String buildName =
+      validatedBuildNameForPlatform(TargetPlatform.ios, buildInfo?.buildName ?? project.manifest.buildName);
   if (buildName != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NAME=$buildName');
   }
 
-  final String buildNumber = validatedBuildNumberForPlatform(
-      TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
+  final String buildNumber =
+      validatedBuildNumberForPlatform(TargetPlatform.ios, buildInfo?.buildNumber ?? project.manifest.buildNumber);
   if (buildNumber != null) {
     localsBuffer.writeln('FLUTTER_BUILD_NUMBER=$buildNumber');
   }
@@ -115,9 +114,8 @@ Future<void> updateGeneratedXcodeProperties({
     localsBuffer.writeln('TRACK_WIDGET_CREATION=true');
   }
 
-  final File generatedXcodePropertiesFile = useMacOSConfig
-      ? project.macos.generatedXcodePropertiesFile
-      : project.ios.generatedXcodePropertiesFile;
+  final File generatedXcodePropertiesFile =
+      useMacOSConfig ? project.macos.generatedXcodePropertiesFile : project.ios.generatedXcodePropertiesFile;
   generatedXcodePropertiesFile.createSync(recursive: true);
   generatedXcodePropertiesFile.writeAsStringSync(localsBuffer.toString());
 }
@@ -300,8 +298,7 @@ class XcodeProjectInfo {
       if (buildInfo.flavor == null)
         return candidate == expectedConfiguration.toLowerCase();
       else
-        return candidate.contains(baseConfiguration.toLowerCase()) &&
-            candidate.contains(scheme.toLowerCase());
+        return candidate.contains(baseConfiguration.toLowerCase()) && candidate.contains(scheme.toLowerCase());
     });
   }
 

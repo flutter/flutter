@@ -15,8 +15,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
-final Generator _kNoAnsiPlatform =
-    () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Generator _kNoAnsiPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 void main() {
   final String red = RegExp.escape(AnsiTerminal.red);
@@ -38,8 +37,7 @@ void main() {
           matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Hey Hey Hey Hey\n'
               r'\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
-      expect(
-          mockLogger.errorText, matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
+      expect(mockLogger.errorText, matches(r'^\[ (?: {0,2}\+[0-9]{1,3} ms|       )\] Helpless!\n$'));
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: false),
       Platform: _kNoAnsiPlatform,
@@ -113,9 +111,7 @@ void main() {
           List<String> lines = outputStdout();
           expect(
             lines[0],
-            startsWith(platform.isWindows
-                ? ' \b\\\b|\b/\b-\b\\\b|\b/\b-'
-                : ' \b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽\b⣻'),
+            startsWith(platform.isWindows ? ' \b\\\b|\b/\b-\b\\\b|\b/\b-' : ' \b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽\b⣻'),
           );
           expect(lines[0].endsWith('\n'), isFalse);
           expect(lines.length, equals(1));
@@ -145,16 +141,14 @@ void main() {
         // taking longer to run than we'd like, since we are forced to start the timer before the actual
         // stopwatch that we're trying to test. This is an unfortunate possible race condition. If this
         // turns out to be flaky, we will need to find another solution.
-        final Future<void> tenMillisecondsLater =
-            Future<void>.delayed(const Duration(milliseconds: 15));
+        final Future<void> tenMillisecondsLater = Future<void>.delayed(const Duration(milliseconds: 15));
         await FakeAsync().run((FakeAsync time) async {
           final AnsiSpinner ansiSpinner = AnsiSpinner(
             timeout: const Duration(milliseconds: 10),
           )..start();
           doWhileAsync(time, () => ansiSpinner.ticks < 10); // one second
           expect(ansiSpinner.seemsSlow, isFalse);
-          expect(outputStdout().join('\n'),
-              isNot(contains('This is taking an unexpectedly long time.')));
+          expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
           await tenMillisecondsLater;
           doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
           expect(ansiSpinner.seemsSlow, isTrue);
@@ -183,11 +177,8 @@ void main() {
           expect(outputStderr().length, equals(1));
           expect(outputStderr().first, isEmpty);
           // the 5 below is the margin that is always included between the message and the time.
-          expect(
-              outputStdout().join('\n'),
-              matches(platform.isWindows
-                  ? r'^Hello {15} {5} {8}[\b]{8} {7}\\$'
-                  : r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'));
+          expect(outputStdout().join('\n'),
+              matches(platform.isWindows ? r'^Hello {15} {5} {8}[\b]{8} {7}\\$' : r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'));
           status.stop();
           expect(
               outputStdout().join('\n'),
@@ -252,8 +243,7 @@ void main() {
           mockStopwatch.elapsed = const Duration(seconds: 1);
           doWhileAsync(time, () => ansiStatus.ticks < 10); // one second
           expect(ansiStatus.seemsSlow, isFalse);
-          expect(outputStdout().join('\n'),
-              isNot(contains('This is taking an unexpectedly long time.')));
+          expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
           expect(outputStdout().join('\n'), isNot(contains('(!)')));
           mockStopwatch.elapsed = const Duration(seconds: 3);
           doWhileAsync(time, () => ansiStatus.ticks < 30); // three seconds
@@ -629,8 +619,7 @@ void main() {
         expect(outputStderr().length, equals(1));
         expect(outputStderr().first, isEmpty);
         // the 5 below is the margin that is always included between the message and the time.
-        expect(outputStdout().join('\n'),
-            matches(platform.isWindows ? r'^Hello {15} {5}$' : r'^Hello {15} {5}$'));
+        expect(outputStdout().join('\n'), matches(platform.isWindows ? r'^Hello {15} {5}$' : r'^Hello {15} {5}$'));
         status.stop();
         expect(
             outputStdout().join('\n'),
@@ -718,8 +707,7 @@ void main() {
       Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger',
-        () async {
+    testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
       final Logger logger = context.get<Logger>();
       logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
       logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();

@@ -22,8 +22,7 @@ class AndroidStudioValidator extends DoctorValidator {
     if (studios.isEmpty) {
       validators.add(NoAndroidStudioValidator());
     } else {
-      validators.addAll(
-          studios.map<DoctorValidator>((AndroidStudio studio) => AndroidStudioValidator(studio)));
+      validators.addAll(studios.map<DoctorValidator>((AndroidStudio studio) => AndroidStudioValidator(studio)));
     }
     return validators;
   }
@@ -33,25 +32,21 @@ class AndroidStudioValidator extends DoctorValidator {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType type = ValidationType.missing;
 
-    final String studioVersionText = _studio.version == Version.unknown
-        ? null
-        : userMessages.androidStudioVersion(_studio.version.toString());
+    final String studioVersionText =
+        _studio.version == Version.unknown ? null : userMessages.androidStudioVersion(_studio.version.toString());
     messages.add(ValidationMessage(userMessages.androidStudioLocation(_studio.directory)));
 
     final IntelliJPlugins plugins = IntelliJPlugins(_studio.pluginsPath);
-    plugins.validatePackage(
-        messages, <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
+    plugins.validatePackage(messages, <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
         minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
     plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
     if (_studio.isValid) {
       type = _hasIssues(messages) ? ValidationType.partial : ValidationType.installed;
-      messages.addAll(
-          _studio.validationMessages.map<ValidationMessage>((String m) => ValidationMessage(m)));
+      messages.addAll(_studio.validationMessages.map<ValidationMessage>((String m) => ValidationMessage(m)));
     } else {
       type = ValidationType.partial;
-      messages.addAll(_studio.validationMessages
-          .map<ValidationMessage>((String m) => ValidationMessage.error(m)));
+      messages.addAll(_studio.validationMessages.map<ValidationMessage>((String m) => ValidationMessage.error(m)));
       messages.add(ValidationMessage(userMessages.androidStudioNeedsUpdate));
       if (_studio.configured != null) {
         messages.add(ValidationMessage(userMessages.androidStudioResetDir));

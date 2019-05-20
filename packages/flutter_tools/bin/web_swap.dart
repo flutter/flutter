@@ -9,8 +9,7 @@ import 'package:flutter_tools/src/context_runner.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
-final ArgParser argParser = ArgParser()
-  ..addFlag('back', help: 'Swap back to dart:ui from web_ui', defaultsTo: false);
+final ArgParser argParser = ArgParser()..addFlag('back', help: 'Swap back to dart:ui from web_ui', defaultsTo: false);
 
 /// Swap the dart:ui imports with web_ui for local development.
 ///
@@ -23,8 +22,7 @@ Future<void> main(List<String> arguments) async {
     Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     printError('WARNING: This is only intended for use by flutter contributors.'
         ' Running this command will alter the code in your flutter checkout.');
-    final String engineDirectory =
-        fs.path.join(Cache.flutterRoot, '..', 'engine', 'src', 'flutter', 'lib', 'stub_ui');
+    final String engineDirectory = fs.path.join(Cache.flutterRoot, '..', 'engine', 'src', 'flutter', 'lib', 'stub_ui');
     final String flutterPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter');
     final String flutterTestPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_test');
     final List<List<Pattern>> codePatterns = <List<Pattern>>[
@@ -100,8 +98,7 @@ flutter_goldens:
 
     for (File file in searchFiles) {
       String contents = file.readAsStringSync();
-      final List<List<Pattern>> patterns =
-          file.path.endsWith('.dart') ? codePatterns : configPatterns;
+      final List<List<Pattern>> patterns = file.path.endsWith('.dart') ? codePatterns : configPatterns;
       if (file.path.endsWith('.dart')) {
         for (List<Pattern> patterns in patterns) {
           contents = results['back']

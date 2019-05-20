@@ -51,8 +51,7 @@ void main() {
 
     testUsingContext('returns no devices if none are attached', () async {
       when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
-          .thenAnswer((Invocation invocation) => Future<String>.value(''));
+      when(iMobileDevice.getAvailableDeviceIDs()).thenAnswer((Invocation invocation) => Future<String>.value(''));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, isEmpty);
     }, overrides: <Type, Generator>{
@@ -61,20 +60,17 @@ void main() {
 
     testUsingContext('returns attached devices', () async {
       when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
-          .thenAnswer((Invocation invocation) => Future<String>.value('''
+      when(iMobileDevice.getAvailableDeviceIDs()).thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
       when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('La tele me regarde'));
-      when(iMobileDevice.getInfoForDevice(
-              '98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('10.3.2'));
       when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
           .thenAnswer((_) => Future<String>.value('Puits sans fond'));
-      when(iMobileDevice.getInfoForDevice(
-              'f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
           .thenAnswer((_) => Future<String>.value('11.0'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(2));
@@ -86,12 +82,9 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       IMobileDevice: () => mockIMobileDevice,
     });
 
-    testUsingContext(
-        'returns attached devices and ignores devices that cannot be found by ideviceinfo',
-        () async {
+    testUsingContext('returns attached devices and ignores devices that cannot be found by ideviceinfo', () async {
       when(iMobileDevice.isInstalled).thenReturn(true);
-      when(iMobileDevice.getAvailableDeviceIDs())
-          .thenAnswer((Invocation invocation) => Future<String>.value('''
+      when(iMobileDevice.getAvailableDeviceIDs()).thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
@@ -110,8 +103,8 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
 
   group('decodeSyslog', () {
     test('decodes a syslog-encoded line', () {
-      final String decoded = decodeSyslog(
-          r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
+      final String decoded =
+          decodeSyslog(r'I \M-b\M^]\M-$\M-o\M-8\M^O syslog \M-B\M-/\134_(\M-c\M^C\M^D)_/\M-B\M-/ \M-l\M^F\240!');
       expect(decoded, r'I ❤️ syslog ¯\_(ツ)_/¯ 솠!');
     });
 
@@ -132,22 +125,19 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     testUsingContext('suppresses non-Flutter lines from output', () async {
       when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess();
-        when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) => Stream<List<int>>.fromIterable(<List<int>>[
-                  '''
+        when(mockProcess.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromIterable(<List<int>>[
+              '''
   Runner(Flutter)[297] <Notice>: A is for ari
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
   Runner(Flutter)[297] <Notice>: I is for ichigo
   Runner(UIKit)[297] <Notice>: E is for enpitsu"
   '''
-                      .codeUnits
-                ]));
-        when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+                  .codeUnits
+            ]));
+        when(mockProcess.stderr).thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-        when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+        when(mockProcess.exitCode).thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
         return Future<Process>.value(mockProcess);
       });
 
@@ -165,22 +155,19 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     testUsingContext('includes multi-line Flutter logs in the output', () async {
       when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess();
-        when(mockProcess.stdout)
-            .thenAnswer((Invocation invocation) => Stream<List<int>>.fromIterable(<List<int>>[
-                  '''
+        when(mockProcess.stdout).thenAnswer((Invocation invocation) => Stream<List<int>>.fromIterable(<List<int>>[
+              '''
   Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with another Flutter message following it.
   Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with a non-Flutter log message following it.
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
   '''
-                      .codeUnits
-                ]));
-        when(mockProcess.stderr)
-            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
+                  .codeUnits
+            ]));
+        when(mockProcess.stderr).thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-        when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+        when(mockProcess.exitCode).thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
         return Future<Process>.value(mockProcess);
       });
 
@@ -229,8 +216,7 @@ flutter:
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module',
-      () async {
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();

@@ -23,10 +23,9 @@ void main() {
     });
 
     testUsingContext('runCheckedAsync exceptions should be ProcessException objects', () async {
-      when(mockProcessManager.run(<String>['false'])).thenAnswer(
-          (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(0, 1, '', '')));
-      expect(() async => await runCheckedAsync(<String>['false']),
-          throwsA(isInstanceOf<ProcessException>()));
+      when(mockProcessManager.run(<String>['false']))
+          .thenAnswer((Invocation invocation) => Future<ProcessResult>.value(ProcessResult(0, 1, '', '')));
+      expect(() async => await runCheckedAsync(<String>['false']), throwsA(isInstanceOf<ProcessException>()));
     }, overrides: <Type, Generator>{ProcessManager: () => mockProcessManager});
   });
   group('shutdownHooks', () {

@@ -98,9 +98,7 @@ void main() {
     setUp(() async {
       fs = MemoryFileSystem();
       fs.file(kSnapshotDart).createSync();
-      fs
-          .file('.packages')
-          .writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
+      fs.file('.packages').writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
 
       skyEnginePath = fs.path.fromUri(Uri.file('/flutter/bin/cache/pkg/sky_engine'));
       fs.directory(fs.path.join(skyEnginePath, 'lib', 'ui')).createSync(recursive: true);
@@ -117,8 +115,7 @@ void main() {
       mockXcode = MockXcode();
       bufferLogger = BufferLogger();
       for (BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
-                platform: anyNamed('platform'), mode: mode))
+        when(mockArtifacts.getArtifactPath(Artifact.snapshotDart, platform: anyNamed('platform'), mode: mode))
             .thenReturn(kSnapshotDart);
       }
     });
@@ -184,8 +181,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -223,8 +219,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -263,8 +258,7 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -307,8 +301,7 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -346,8 +339,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -385,8 +377,7 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -443,8 +434,7 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -487,8 +477,7 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -529,8 +518,7 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult =
-          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
       when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
       when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
@@ -572,11 +560,9 @@ void main() {
       mockArtifacts = MockArtifacts();
 
       for (BuildMode mode in BuildMode.values) {
-        when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData,
-                platform: anyNamed('platform'), mode: mode))
+        when(mockArtifacts.getArtifactPath(Artifact.vmSnapshotData, platform: anyNamed('platform'), mode: mode))
             .thenReturn(kEngineVmSnapshotData);
-        when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData,
-                platform: anyNamed('platform'), mode: mode))
+        when(mockArtifacts.getArtifactPath(Artifact.isolateSnapshotData, platform: anyNamed('platform'), mode: mode))
             .thenReturn(kEngineIsolateSnapshotData);
       }
     });

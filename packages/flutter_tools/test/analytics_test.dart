@@ -91,14 +91,12 @@ void main() {
       when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = MockClock();
       mockDoctor = MockDoctor();
-      when(mockClock.now())
-          .thenAnswer((Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
+      when(mockClock.now()).thenAnswer((Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
     });
 
     testUsingContext('flutter commands send timing events', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false, verbose: false))
-          .thenAnswer((_) async => true);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => true);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -106,9 +104,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label')))
-            .captured,
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success'],
       );
     }, overrides: <Type, Generator>{
@@ -119,8 +115,7 @@ void main() {
 
     testUsingContext('doctor fail sends warning', () async {
       mockTimes = <int>[1000, 2000];
-      when(mockDoctor.diagnose(androidLicenses: false, verbose: false))
-          .thenAnswer((_) async => false);
+      when(mockDoctor.diagnose(androidLicenses: false, verbose: false)).thenAnswer((_) async => false);
       final DoctorCommand command = DoctorCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
       await runner.run(<String>['doctor']);
@@ -128,9 +123,7 @@ void main() {
       verify(mockClock.now()).called(2);
 
       expect(
-        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny,
-                label: captureAnyNamed('label')))
-            .captured,
+        verify(mockUsage.sendTiming(captureAny, captureAny, captureAny, label: captureAnyNamed('label'))).captured,
         <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning'],
       );
     }, overrides: <Type, Generator>{

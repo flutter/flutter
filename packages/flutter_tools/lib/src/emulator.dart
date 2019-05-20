@@ -46,15 +46,13 @@ class EmulatorManager {
   }
 
   Iterable<EmulatorDiscovery> get _platformDiscoverers {
-    return _emulatorDiscoverers
-        .where((EmulatorDiscovery discoverer) => discoverer.supportsPlatform);
+    return _emulatorDiscoverers.where((EmulatorDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
   /// Return the list of all available emulators.
   Future<List<Emulator>> getAllAvailableEmulators() async {
     final List<Emulator> emulators = <Emulator>[];
-    await Future.forEach<EmulatorDiscovery>(_platformDiscoverers,
-        (EmulatorDiscovery discoverer) async {
+    await Future.forEach<EmulatorDiscovery>(_platformDiscoverers, (EmulatorDiscovery discoverer) async {
       emulators.addAll(await discoverer.emulators);
     });
     return emulators;
@@ -68,10 +66,8 @@ class EmulatorManager {
       // if there's an exact match and we need all those with this prefix
       // so we can keep adding suffixes until we miss.
       final List<Emulator> all = await getAllAvailableEmulators();
-      final Set<String> takenNames = all
-          .map<String>((Emulator e) => e.id)
-          .where((String id) => id.startsWith(autoName))
-          .toSet();
+      final Set<String> takenNames =
+          all.map<String>((Emulator e) => e.id).where((String id) => id.startsWith(autoName)).toSet();
       int suffix = 1;
       name = autoName;
       while (takenNames.contains(name)) {
@@ -80,16 +76,13 @@ class EmulatorManager {
     }
 
     final String device = await _getPreferredAvailableDevice();
-    if (device == null)
-      return CreateEmulatorResult(name,
-          success: false, error: 'No device definitions are available');
+    if (device == null) return CreateEmulatorResult(name, success: false, error: 'No device definitions are available');
 
     final String sdkId = await _getPreferredSdkId();
     if (sdkId == null)
       return CreateEmulatorResult(name,
           success: false,
-          error:
-              'No suitable Android AVD system images are available. You may need to install these'
+          error: 'No suitable Android AVD system images are available. You may need to install these'
               ' using sdkmanager, for example:\n'
               '  sdkmanager "system-images;android-27;google_apis_playstore;x86"');
 
@@ -118,8 +111,7 @@ class EmulatorManager {
       '-d',
       device,
     ];
-    final ProcessResult runResult =
-        processManager.runSync(args, environment: androidSdk?.sdkManagerEnv);
+    final ProcessResult runResult = processManager.runSync(args, environment: androidSdk?.sdkManagerEnv);
     return CreateEmulatorResult(
       name,
       success: runResult.exitCode == 0,
@@ -139,14 +131,11 @@ class EmulatorManager {
       'device',
       '-c',
     ];
-    final ProcessResult runResult =
-        processManager.runSync(args, environment: androidSdk?.sdkManagerEnv);
+    final ProcessResult runResult = processManager.runSync(args, environment: androidSdk?.sdkManagerEnv);
     if (runResult.exitCode != 0) return null;
 
-    final List<String> availableDevices = runResult.stdout
-        .split('\n')
-        .where((String l) => preferredDevices.contains(l.trim()))
-        .toList();
+    final List<String> availableDevices =
+        runResult.stdout.split('\n').where((String l) => preferredDevices.contains(l.trim())).toList();
 
     return preferredDevices.firstWhere(
       (String d) => availableDevices.contains(d),
@@ -165,8 +154,7 @@ class EmulatorManager {
       '-n',
       'temp',
     ];
-    final ProcessResult runResult =
-        processManager.runSync(args, environment: androidSdk?.sdkManagerEnv);
+    final ProcessResult runResult = processManager.runSync(args, environment: androidSdk?.sdkManagerEnv);
 
     // Get the list of IDs that match our criteria
     final List<String> availableIDs = runResult.stderr
@@ -182,9 +170,8 @@ class EmulatorManager {
         .toList();
 
     // Get the highest Android API version or whats left
-    final int apiVersion = availableApiVersions.isNotEmpty
-        ? availableApiVersions.reduce(math.max)
-        : -1; // Don't match below
+    final int apiVersion =
+        availableApiVersions.isNotEmpty ? availableApiVersions.reduce(math.max) : -1; // Don't match below
 
     // We're out of preferences, we just have to return the first one with the high
     // API version.
@@ -260,8 +247,7 @@ abstract class Emulator {
     final RegExp whiteSpaceAndDots = RegExp(r'[•\s]+$');
     return table
         .map<String>((List<String> row) {
-          return indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') +
-              ' • ${row.last}';
+          return indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
         })
         .map<String>((String line) => line.replaceAll(whiteSpaceAndDots, ''))
         .toList();

@@ -12,8 +12,7 @@ import '../ios/plist_utils.dart' as plist;
 import '../project.dart';
 
 /// Tests whether a [FileSystemEntity] is an macOS bundle directory
-bool _isBundleDirectory(FileSystemEntity entity) =>
-    entity is Directory && entity.path.endsWith('.app');
+bool _isBundleDirectory(FileSystemEntity entity) => entity is Directory && entity.path.endsWith('.app');
 
 abstract class MacOSApp extends ApplicationPackage {
   MacOSApp({@required String projectBundleId}) : super(id: projectBundleId);
@@ -126,12 +125,8 @@ class BuildableMacOSApp extends MacOSApp {
       printError('Unable to find app name. ${appBundleNameFile.path} does not exist');
       return null;
     }
-    return fs.path.join(
-        getMacOSBuildDirectory(),
-        'Build',
-        'Products',
-        buildMode == BuildMode.debug ? 'Debug' : 'Release',
-        appBundleNameFile.readAsStringSync().trim());
+    return fs.path.join(getMacOSBuildDirectory(), 'Build', 'Products',
+        buildMode == BuildMode.debug ? 'Debug' : 'Release', appBundleNameFile.readAsStringSync().trim());
   }
 
   @override
@@ -140,8 +135,7 @@ class BuildableMacOSApp extends MacOSApp {
     if (directory == null) {
       return null;
     }
-    final _ExecutableAndId executableAndId =
-        MacOSApp._executableFromBundle(fs.directory(directory));
+    final _ExecutableAndId executableAndId = MacOSApp._executableFromBundle(fs.directory(directory));
     return executableAndId.executable;
   }
 }

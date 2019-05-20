@@ -22,8 +22,7 @@ void main() {
     when(devFinder.absolute).thenReturn(devFinder);
     when(sshConfig.absolute).thenReturn(sshConfig);
 
-    testUsingContext('can not list and launch devices if there is not ssh config and dev finder',
-        () {
+    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
       expect(fuchsiaWorkflow.canLaunchDevices, false);
       expect(fuchsiaWorkflow.canListDevices, false);
       expect(fuchsiaWorkflow.canListEmulators, false);
@@ -31,8 +30,7 @@ void main() {
       FuchsiaArtifacts: () => FuchsiaArtifacts(devFinder: null, sshConfig: null),
     });
 
-    testUsingContext('can not list and launch devices if there is not ssh config and dev finder',
-        () {
+    testUsingContext('can not list and launch devices if there is not ssh config and dev finder', () {
       expect(fuchsiaWorkflow.canLaunchDevices, false);
       expect(fuchsiaWorkflow.canListDevices, true);
       expect(fuchsiaWorkflow.canListEmulators, false);

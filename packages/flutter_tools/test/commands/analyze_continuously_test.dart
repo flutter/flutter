@@ -37,8 +37,7 @@ void main() {
       server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
       int errorCount = 0;
-      final Future<bool> onDone =
-          server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+      final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
       server.onErrors.listen((FileAnalysisErrors errors) => errorCount += errors.errors.length);
 
       await server.start();
@@ -58,8 +57,7 @@ void main() {
     server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
     int errorCount = 0;
-    final Future<bool> onDone =
-        server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });
@@ -78,8 +76,7 @@ void main() {
     server = AnalysisServer(dartSdkPath, <String>[tempDir.path]);
 
     int errorCount = 0;
-    final Future<bool> onDone =
-        server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
+    final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
     server.onErrors.listen((FileAnalysisErrors errors) {
       errorCount += errors.errors.length;
     });

@@ -25,8 +25,7 @@ class WebCompiler {
   ///
   /// `minify` controls whether minifaction of the source is enabled. Defaults to `true`.
   /// `enabledAssertions` controls whether assertions are enabled. Defaults to `false`.
-  Future<int> compile(
-      {@required String target, bool minify = true, bool enabledAssertions = false}) async {
+  Future<int> compile({@required String target, bool minify = true, bool enabledAssertions = false}) async {
     final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
     final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
     final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);

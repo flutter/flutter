@@ -74,8 +74,7 @@ class ChannelCommand extends FlutterCommand {
         }
         seenChannels.add(branchName);
         if (branchName == currentBranch) return '* $branchName';
-        if (!branchName.startsWith('HEAD ') &&
-            (showAll || FlutterVersion.officialChannels.contains(branchName)))
+        if (!branchName.startsWith('HEAD ') && (showAll || FlutterVersion.officialChannels.contains(branchName)))
           return '  $branchName';
         return null;
       },
@@ -90,11 +89,9 @@ class ChannelCommand extends FlutterCommand {
     printStatus("Switching to flutter channel '$branchName'...");
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
-      printStatus(
-          "This channel is obsolete. Consider switching to the '$alternative' channel instead.");
+      printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
     } else if (!FlutterVersion.officialChannels.contains(branchName)) {
-      printStatus(
-          'This is not an official channel. For a list of available channels, try "flutter channel".');
+      printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     return _checkout(branchName);
   }

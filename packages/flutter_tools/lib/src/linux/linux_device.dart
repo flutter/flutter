@@ -77,8 +77,7 @@ class LinuxDevice extends Device {
       await buildLinux(FlutterProject.current().linux, debuggingOptions.buildInfo);
     }
     await stopApp(package);
-    final Process process =
-        await processManager.start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
+    final Process process = await processManager.start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }

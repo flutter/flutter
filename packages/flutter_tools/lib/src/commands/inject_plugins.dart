@@ -35,8 +35,7 @@ class InjectPluginsCommand extends FlutterCommand {
     if (result) {
       printStatus('GeneratedPluginRegistrants successfully written.');
     } else {
-      printStatus(
-          'This project does not use plugins, no GeneratedPluginRegistrants have been created.');
+      printStatus('This project does not use plugins, no GeneratedPluginRegistrants have been created.');
     }
 
     return null;

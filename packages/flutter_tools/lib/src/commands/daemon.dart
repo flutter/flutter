@@ -56,12 +56,11 @@ class DaemonCommand extends FlutterCommand {
 
     await context.run<void>(
       body: () async {
-        final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-            daemonCommand: this, notifyingLogger: notifyingLogger);
+        final Daemon daemon =
+            Daemon(stdinCommandStream, stdoutCommandResponse, daemonCommand: this, notifyingLogger: notifyingLogger);
 
         final int code = await daemon.onExit;
-        if (code != 0)
-          throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
+        if (code != 0) throwToolExit('Daemon exited with non-zero exit code: $code', exitCode: code);
       },
       overrides: <Type, Generator>{
         Logger: () => notifyingLogger,
@@ -398,8 +397,7 @@ class AppDomain extends Domain {
     Directory cwd,
     LaunchMode launchMode,
   ) async {
-    final AppInstance app =
-        AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
+    final AppInstance app = AppInstance(_getNewAppId(), runner: runner, logToStdout: daemon.logToStdout);
     _apps.add(app);
     _sendAppEvent(app, 'start', <String, dynamic>{
       'deviceId': device.id,
@@ -452,8 +450,7 @@ class AppDomain extends Domain {
     return app;
   }
 
-  bool isRestartSupported(bool enableHotReload, Device device) =>
-      enableHotReload && device.supportsHotRestart;
+  bool isRestartSupported(bool enableHotReload, Device device) => enableHotReload && device.supportsHotRestart;
 
   Future<OperationResult> _inProgressHotReload;
 
@@ -469,8 +466,7 @@ class AppDomain extends Domain {
     if (_inProgressHotReload != null) throw 'hot restart already in progress';
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.restart(
-          fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
+      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
     });
     return _inProgressHotReload.whenComplete(() {
       _inProgressHotReload = null;
@@ -496,8 +492,7 @@ class AppDomain extends Domain {
     if (app == null) throw "app '$appId' not found";
 
     final Isolate isolate = app.runner.flutterDevices.first.views.first.uiIsolate;
-    final Map<String, dynamic> result =
-        await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
+    final Map<String, dynamic> result = await isolate.invokeFlutterExtensionRpcRaw(methodName, params: params);
     if (result == null) throw 'method not available: $methodName';
 
     if (result.containsKey('error')) throw result['error'];
@@ -651,8 +646,8 @@ class DeviceDomain extends Domain {
   /// Return the device matching the deviceId field in the args.
   Future<Device> _getDevice(String deviceId) async {
     for (PollingDeviceDiscovery discoverer in _discoverers) {
-      final Device device = (await discoverer.devices)
-          .firstWhere((Device device) => device.id == deviceId, orElse: () => null);
+      final Device device =
+          (await discoverer.devices).firstWhere((Device device) => device.id == deviceId, orElse: () => null);
       if (device != null) return device;
     }
     return null;
@@ -705,12 +700,8 @@ Map<String, dynamic> _operationResultToMap(OperationResult result) {
 }
 
 dynamic _toJsonable(dynamic obj) {
-  if (obj is String ||
-      obj is int ||
-      obj is bool ||
-      obj is Map<dynamic, dynamic> ||
-      obj is List<dynamic> ||
-      obj == null) return obj;
+  if (obj is String || obj is int || obj is bool || obj is Map<dynamic, dynamic> || obj is List<dynamic> || obj == null)
+    return obj;
   if (obj is OperationResult) return obj;
   if (obj is ToolExit) return obj.message;
   return '$obj';
@@ -780,10 +771,8 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<OperationResult> restart(
-      {bool fullRestart = false, bool pauseAfterRestart = false, String reason}) {
-    return runner.restart(
-        fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
+  Future<OperationResult> restart({bool fullRestart = false, bool pauseAfterRestart = false, String reason}) {
+    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
   }
 
   Future<void> stop() => runner.stop();

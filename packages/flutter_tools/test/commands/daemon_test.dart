@@ -31,10 +31,8 @@ void main() {
     });
 
     testUsingContext('daemon.version command should succeed', () async {
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -50,18 +48,15 @@ void main() {
     });
 
     testUsingContext('printError should send daemon.logMessage event', () async {
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
       );
       printError('daemon.logMessage test');
-      final Map<String, dynamic> response =
-          await responses.stream.firstWhere((Map<String, dynamic> map) {
+      final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
         return map['event'] == 'daemon.logMessage' && map['params']['level'] == 'error';
       });
       expect(response['id'], isNull);
@@ -79,10 +74,8 @@ void main() {
       final StringBuffer buffer = StringBuffer();
 
       await runZoned<Future<void>>(() async {
-        final StreamController<Map<String, dynamic>> commands =
-            StreamController<Map<String, dynamic>>();
-        final StreamController<Map<String, dynamic>> responses =
-            StreamController<Map<String, dynamic>>();
+        final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+        final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
         daemon = Daemon(
           commands.stream,
           responses.add,
@@ -92,8 +85,7 @@ void main() {
         printStatus('daemon.logMessage test');
         // Service the event loop.
         await Future<void>.value();
-      }, zoneSpecification:
-          ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
+      }, zoneSpecification: ZoneSpecification(print: (Zone self, ZoneDelegate parent, Zone zone, String line) {
         buffer.writeln(line);
       }));
 
@@ -103,10 +95,8 @@ void main() {
     });
 
     testUsingContext('daemon.shutdown command should stop daemon', () async {
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -123,10 +113,8 @@ void main() {
       final DaemonCommand command = DaemonCommand();
       applyMocksToCommand(command);
 
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -142,16 +130,12 @@ void main() {
       await commands.close();
     });
 
-    testUsingContext(
-        'ext.flutter.debugPaint via service extension without an appId should report an error',
-        () async {
+    testUsingContext('ext.flutter.debugPaint via service extension without an appId should report an error', () async {
       final DaemonCommand command = DaemonCommand();
       applyMocksToCommand(command);
 
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -177,10 +161,8 @@ void main() {
       final DaemonCommand command = DaemonCommand();
       applyMocksToCommand(command);
 
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -197,10 +179,8 @@ void main() {
     });
 
     testUsingContext('device.getDevices should respond with list', () async {
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -215,10 +195,8 @@ void main() {
     });
 
     testUsingContext('device.getDevices reports avaiable devices', () async {
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -238,10 +216,8 @@ void main() {
     });
 
     testUsingContext('should send device.added event when device is discovered', () async {
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -275,10 +251,8 @@ void main() {
       final DaemonCommand command = DaemonCommand();
       applyMocksToCommand(command);
 
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
@@ -295,10 +269,8 @@ void main() {
     });
 
     testUsingContext('emulator.getEmulators should respond with list', () async {
-      final StreamController<Map<String, dynamic>> commands =
-          StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> responses =
-          StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
+      final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,

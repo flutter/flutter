@@ -79,8 +79,7 @@ class VersionCommand extends FlutterCommand {
 
     final FlutterVersion flutterVersion = FlutterVersion();
 
-    printStatus(
-        'Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
+    printStatus('Switching Flutter to version ${flutterVersion.frameworkVersion}${withForce ? ' with force' : ''}');
 
     // Check for and download any engine and pkg/ updates.
     // We run the 'flutter' shell script re-entrantly here

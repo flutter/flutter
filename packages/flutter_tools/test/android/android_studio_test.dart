@@ -98,19 +98,16 @@ void main() {
 
   group('pluginsPath on Mac', () {
     testUsingContext('extracts custom paths for directly downloaded Android Studio on Mac', () {
-      final String studioInApplicationPlistFolder =
-          fs.path.join('/', 'Application', 'Android Studio.app', 'Contents');
+      final String studioInApplicationPlistFolder = fs.path.join('/', 'Application', 'Android Studio.app', 'Contents');
       fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
 
       final String plistFilePath = fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       fs.file(plistFilePath).writeAsStringSync(macStudioInfoPlistValue);
-      when(iosWorkflow.getPlistValueFromFile(plistFilePath, null))
-          .thenReturn(macStudioInfoPlistDefaultsResult);
+      when(iosWorkflow.getPlistValueFromFile(plistFilePath, null)).thenReturn(macStudioInfoPlistDefaultsResult);
       final AndroidStudio studio =
           AndroidStudio.fromMacOSBundle(fs.directory(studioInApplicationPlistFolder)?.parent?.path);
       expect(studio, isNotNull);
-      expect(studio.pluginsPath,
-          equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
+      expect(studio.pluginsPath, equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       // Custom home paths are not supported on macOS nor Windows yet,
@@ -119,10 +116,9 @@ void main() {
       IOSWorkflow: () => iosWorkflow,
     });
 
-    testUsingContext(
-        'extracts custom paths for Android Studio downloaded by JetBrainsToolbox on Mac', () {
-      final String jetbrainsStudioInApplicationPlistFolder = fs.path
-          .join(homeMac, 'Application', 'JetBrains Toolbox', 'Android Studio.app', 'Contents');
+    testUsingContext('extracts custom paths for Android Studio downloaded by JetBrainsToolbox on Mac', () {
+      final String jetbrainsStudioInApplicationPlistFolder =
+          fs.path.join(homeMac, 'Application', 'JetBrains Toolbox', 'Android Studio.app', 'Contents');
       fs.directory(jetbrainsStudioInApplicationPlistFolder).createSync(recursive: true);
       const String jetbrainsInfoPlistValue = '''
 <?xml version='1.0' encoding='UTF-8'?>
@@ -148,8 +144,7 @@ void main() {
     JetBrainsToolboxApp = "$homeMac/Library/Application Support/JetBrains/Toolbox/apps/AndroidStudio/ch-0/183.5256920/Android Studio 3.3.app";
 }
 ''';
-      final String jetbrainsPlistFilePath =
-          fs.path.join(jetbrainsStudioInApplicationPlistFolder, 'Info.plist');
+      final String jetbrainsPlistFilePath = fs.path.join(jetbrainsStudioInApplicationPlistFolder, 'Info.plist');
       fs.file(jetbrainsPlistFilePath).writeAsStringSync(jetbrainsInfoPlistValue);
       when(iosWorkflow.getPlistValueFromFile(jetbrainsPlistFilePath, null))
           .thenReturn(jetbrainsInfoPlistDefaultsResult);
@@ -166,14 +161,12 @@ void main() {
       fs.directory(studioInApplicationPlistFolder).createSync(recursive: true);
       final String studioPlistFilePath = fs.path.join(studioInApplicationPlistFolder, 'Info.plist');
       fs.file(studioPlistFilePath).writeAsStringSync(macStudioInfoPlistValue);
-      when(iosWorkflow.getPlistValueFromFile(studioPlistFilePath, null))
-          .thenReturn(macStudioInfoPlistDefaultsResult);
+      when(iosWorkflow.getPlistValueFromFile(studioPlistFilePath, null)).thenReturn(macStudioInfoPlistDefaultsResult);
 
-      final AndroidStudio studio = AndroidStudio.fromMacOSBundle(
-          fs.directory(jetbrainsStudioInApplicationPlistFolder)?.parent?.path);
+      final AndroidStudio studio =
+          AndroidStudio.fromMacOSBundle(fs.directory(jetbrainsStudioInApplicationPlistFolder)?.parent?.path);
       expect(studio, isNotNull);
-      expect(studio.pluginsPath,
-          equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
+      expect(studio.pluginsPath, equals(fs.path.join(homeMac, 'Library', 'Application Support', 'AndroidStudio3.3')));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       // Custom home paths are not supported on macOS nor Windows yet,

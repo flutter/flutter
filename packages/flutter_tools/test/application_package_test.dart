@@ -71,8 +71,7 @@ void main() {
         ..createSync(recursive: true);
     });
 
-    testUsingContext('Licenses not available, platform and buildtools available, apk exists',
-        () async {
+    testUsingContext('Licenses not available, platform and buildtools available, apk exists', () async {
       const String aaptPath = 'aaptPath';
       final File apkFile = fs.file('app.apk');
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
@@ -94,8 +93,7 @@ void main() {
         ),
       ).thenReturn(ProcessResult(0, 0, _aaptDataWithDefaultEnabledAndMainLauncherActivity, null));
 
-      final ApplicationPackage applicationPackage =
-          await ApplicationPackageFactory.instance.getPackageForPlatform(
+      final ApplicationPackage applicationPackage = await ApplicationPackageFactory.instance.getPackageForPlatform(
         TargetPlatform.android_arm,
         applicationBinary: apkFile,
       );
@@ -122,8 +120,7 @@ void main() {
       ).called(1);
     }, overrides: overrides);
 
-    testUsingContext('Licenses available, build tools available, does not call gradle dependencies',
-        () async {
+    testUsingContext('Licenses available, build tools available, does not call gradle dependencies', () async {
       final AndroidSdkVersion sdkVersion = MockitoAndroidSdkVersion();
       when(sdk.latestVersion).thenReturn(sdkVersion);
 
@@ -153,8 +150,7 @@ void main() {
     testUsingContext(
         'Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER',
         () {
-      final ApkManifestData data =
-          ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
@@ -165,27 +161,21 @@ void main() {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
       final BufferLogger logger = context.get<Logger>();
-      expect(logger.errorText,
-          'Error running io.flutter.examples.hello_world. Default activity not found\n');
+      expect(logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
-    testUsingContext(
-        'Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN',
+    testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN',
         () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
       expect(data, isNull);
       final BufferLogger logger = context.get<Logger>();
-      expect(logger.errorText,
-          'Error running io.flutter.examples.hello_world. Default activity not found\n');
+      expect(logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
     testUsingContext(
-        'Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER',
-        () {
-      final ApkManifestData data =
-          ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
+        'Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
+      final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
       expect(data, isNull);
       final BufferLogger logger = context.get<Logger>();
-      expect(logger.errorText,
-          'Error running io.flutter.examples.hello_world. Default activity not found\n');
+      expect(logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
   });
 
@@ -279,8 +269,7 @@ void main() {
           return null;
         }
         final Directory targetDirectory = invocation.positionalArguments[1];
-        final Directory bundleAppDir =
-            fs.directory(fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'));
+        final Directory bundleAppDir = fs.directory(fs.path.join(targetDirectory.path, 'Payload', 'bundle.app'));
         bundleAppDir.createSync(recursive: true);
         fs.file(fs.path.join(bundleAppDir.path, 'Info.plist')).writeAsStringSync(plistData);
       });
@@ -295,8 +284,7 @@ void main() {
     testUsingContext('returns null when there is no ios or .ios directory', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
-      final BuildableIOSApp iosApp =
-          IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
+      final BuildableIOSApp iosApp = IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -305,8 +293,7 @@ void main() {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       fs.file('ios/FooBar.xcodeproj').createSync(recursive: true);
-      final BuildableIOSApp iosApp =
-          IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
+      final BuildableIOSApp iosApp = IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -315,8 +302,7 @@ void main() {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       fs.file('ios/Runner.xcodeproj').createSync(recursive: true);
-      final BuildableIOSApp iosApp =
-          IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
+      final BuildableIOSApp iosApp = IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
 
       expect(iosApp, null);
     }, overrides: overrides);
@@ -402,8 +388,7 @@ const String _aaptDataWithDefaultEnabledAndMainLauncherActivity =
           E: category (line=56)
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
-const String _aaptDataWithNoEnabledActivity =
-    '''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithNoEnabledActivity = '''N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
     A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")
@@ -459,8 +444,7 @@ const String _aaptDataWithNoMainActivity = '''N: android=http://schemas.android.
           E: category (line=43)
             A: android:name(0x01010003)="android.intent.category.LAUNCHER" (Raw: "android.intent.category.LAUNCHER")''';
 
-const String _aaptDataWithNoLauncherActivity =
-    '''N: android=http://schemas.android.com/apk/res/android
+const String _aaptDataWithNoLauncherActivity = '''N: android=http://schemas.android.com/apk/res/android
   E: manifest (line=7)
     A: android:versionCode(0x0101021b)=(type 0x10)0x1
     A: android:versionName(0x0101021c)="0.0.1" (Raw: "0.0.1")

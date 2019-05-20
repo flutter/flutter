@@ -24,8 +24,7 @@ class AnalysisServer {
 
   Process _process;
   final StreamController<bool> _analyzingController = StreamController<bool>.broadcast();
-  final StreamController<FileAnalysisErrors> _errorsController =
-      StreamController<FileAnalysisErrors>.broadcast();
+  final StreamController<FileAnalysisErrors> _errorsController = StreamController<FileAnalysisErrors>.broadcast();
   bool _didServerErrorOccur = false;
 
   int _id = 0;
@@ -56,8 +55,7 @@ class AnalysisServer {
       'subscriptions': <String>['STATUS'],
     });
 
-    _sendCommand('analysis.setAnalysisRoots',
-        <String, dynamic>{'included': directories, 'excluded': <String>[]});
+    _sendCommand('analysis.setAnalysisRoots', <String, dynamic>{'included': directories, 'excluded': <String>[]});
   }
 
   bool get didServerErrorOccur => _didServerErrorOccur;

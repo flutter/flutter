@@ -49,8 +49,8 @@ import 'src/runner/flutter_command.dart';
 Future<void> main(List<String> args) async {
   final bool verbose = args.contains('-v') || args.contains('--verbose');
 
-  final bool doctor = (args.isNotEmpty && args.first == 'doctor') ||
-      (args.length == 2 && verbose && args.last == 'doctor');
+  final bool doctor =
+      (args.isNotEmpty && args.first == 'doctor') || (args.length == 2 && verbose && args.last == 'doctor');
   final bool help = args.contains('-h') ||
       args.contains('--help') ||
       (args.isNotEmpty && args.first == 'help') ||

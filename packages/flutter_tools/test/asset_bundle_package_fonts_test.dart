@@ -108,12 +108,10 @@ $fontsSection
       testFileSystem = MemoryFileSystem(
         style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory =
-          testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
-    testUsingContext('App includes neither font manifest nor fonts when no defines fonts',
-        () async {
+    testUsingContext('App includes neither font manifest nor fonts when no defines fonts', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -145,8 +143,7 @@ $fontsSection
       const String font = 'bar';
       writeFontAsset('p/p/lib/', font);
 
-      const String expectedFontManifest =
-          '[{"fonts":[{"asset":"packages/test_package/bar"}],"family":"foo"}]';
+      const String expectedFontManifest = '[{"fonts":[{"asset":"packages/test_package/bar"}],"family":"foo"}]';
       await buildAndVerifyFonts(
         <String>[],
         <String>[font],
@@ -176,8 +173,7 @@ $fontsSection
       const String localFont = 'a/bar';
       writeFontAsset('', localFont);
 
-      const String expectedFontManifest =
-          '[{"fonts":[{"asset":"packages/test_package/bar"},{"asset":"a/bar"}],'
+      const String expectedFontManifest = '[{"fonts":[{"asset":"packages/test_package/bar"},{"asset":"a/bar"}],'
           '"family":"foo"}]';
       await buildAndVerifyFonts(
         <String>[localFont],

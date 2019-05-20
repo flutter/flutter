@@ -20,8 +20,7 @@ void main() {
     FlutterProject flutterProject;
 
     setUp(() async {
-      flutterProject = FlutterProject.fromPath(
-          fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'web'));
+      flutterProject = FlutterProject.fromPath(fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'web'));
       when(mockWebCompiler.compile(
         target: anyNamed('target'),
         minify: anyNamed('minify'),

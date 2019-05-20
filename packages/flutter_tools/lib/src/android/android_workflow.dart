@@ -101,11 +101,9 @@ class AndroidValidator extends DoctorValidator {
       // No Android SDK found.
       if (platform.environment.containsKey(kAndroidHome)) {
         final String androidHomeDir = platform.environment[kAndroidHome];
-        messages.add(
-            ValidationMessage.error(userMessages.androidBadSdkDir(kAndroidHome, androidHomeDir)));
+        messages.add(ValidationMessage.error(userMessages.androidBadSdkDir(kAndroidHome, androidHomeDir)));
       } else {
-        messages
-            .add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
+        messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
       }
       return ValidationResult(ValidationType.missing, messages);
     }
@@ -127,20 +125,16 @@ class AndroidValidator extends DoctorValidator {
           androidSdk.latestVersion.buildToolsVersion < kAndroidSdkBuildToolsMinVersion) {
         messages.add(
           ValidationMessage.error(userMessages.androidSdkBuildToolsOutdated(
-              androidSdk.sdkManagerPath,
-              kAndroidSdkMinVersion,
-              kAndroidSdkBuildToolsMinVersion.toString())),
+              androidSdk.sdkManagerPath, kAndroidSdkMinVersion, kAndroidSdkBuildToolsMinVersion.toString())),
         );
         return ValidationResult(ValidationType.missing, messages);
       }
-      sdkVersionText =
-          userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
+      sdkVersionText = userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
 
       messages.add(ValidationMessage(userMessages.androidSdkPlatformToolsVersion(
           androidSdk.latestVersion.platformName, androidSdk.latestVersion.buildToolsVersionName)));
     } else {
-      messages
-          .add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
+      messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
     }
 
     if (platform.environment.containsKey(kAndroidHome)) {
@@ -202,8 +196,7 @@ class AndroidLicenseValidator extends DoctorValidator {
       return ValidationResult(ValidationType.missing, messages);
     }
 
-    final String sdkVersionText =
-        userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
+    final String sdkVersionText = userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
 
     // Check for licenses.
     switch (await licensesAccepted) {

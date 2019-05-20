@@ -55,8 +55,7 @@ class CoverageCollector extends TestWatcher {
 
     Map<String, dynamic> data;
     final Future<void> processComplete = process.exitCode.then<void>((int code) {
-      throw Exception(
-          'Failed to collect coverage, process terminated prematurely with exit code $code.');
+      throw Exception('Failed to collect coverage, process terminated prematurely with exit code $code.');
     });
     final Future<void> collectionComplete = collect(observatoryUri, (String libraryName) {
       // If we have a specified coverage directory or could not find the package name, then
@@ -94,12 +93,10 @@ class CoverageCollector extends TestWatcher {
       return null;
     }
     if (formatter == null) {
-      final coverage.Resolver resolver =
-          coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
+      final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
       final String packagePath = fs.currentDirectory.path;
-      final List<String> reportOn = coverageDirectory == null
-          ? <String>[fs.path.join(packagePath, 'lib')]
-          : <String>[coverageDirectory.path];
+      final List<String> reportOn =
+          coverageDirectory == null ? <String>[fs.path.join(packagePath, 'lib')] : <String>[coverageDirectory.path];
       formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
     final String result = await formatter.format(_globalHitmap);
@@ -109,8 +106,8 @@ class CoverageCollector extends TestWatcher {
 
   Future<bool> collectCoverageData(String coveragePath,
       {bool mergeCoverageData = false, Directory coverageDirectory}) async {
-    final Status status = logger.startProgress('Collecting coverage information...',
-        timeout: timeoutConfiguration.fastOperation);
+    final Status status =
+        logger.startProgress('Collecting coverage information...', timeout: timeoutConfiguration.fastOperation);
     final String coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
@@ -139,11 +136,9 @@ class CoverageCollector extends TestWatcher {
         return false;
       }
 
-      final Directory tempDir =
-          fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
-        final File sourceFile =
-            coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
+        final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
         final ProcessResult result = processManager.runSync(<String>[
           'lcov',
           '--add-tracefile',
@@ -163,20 +158,18 @@ class CoverageCollector extends TestWatcher {
 }
 
 Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libraryPredicate) async {
-  final VMService vmService =
-      await VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
+  final VMService vmService = await VMService.connect(serviceUri, compression: CompressionOptions.compressionOff);
   await vmService.getVM();
   return _getAllCoverage(vmService, libraryPredicate);
 }
 
-Future<Map<String, dynamic>> _getAllCoverage(
-    VMService service, bool Function(String) libraryPredicate) async {
+Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
   await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
   for (Isolate isolateRef in service.vm.isolates) {
     await isolateRef.load();
-    final Map<String, dynamic> scriptList = await isolateRef
-        .invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
+    final Map<String, dynamic> scriptList =
+        await isolateRef.invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
     final List<Future<void>> futures = <Future<void>>[];
 
     final Map<String, Map<String, dynamic>> scripts = <String, Map<String, dynamic>>{};

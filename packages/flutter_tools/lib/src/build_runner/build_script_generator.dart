@@ -36,20 +36,15 @@ class BuildScriptGenerator {
   /// Requires the project to have a pubspec.yaml.
   Future<void> generateBuildScript() async {
     final Iterable<Expression> builders = await _findBuilderApplications();
-    final Library library =
-        Library((LibraryBuilder libraryBuilder) => libraryBuilder.body.addAll(<Spec>[
-              literalList(
-                      builders,
-                      refer(
-                          'BuilderApplication', 'package:build_runner_core/build_runner_core.dart'))
-                  .assignFinal('_builders')
-                  .statement,
-              _createMain(),
-            ]));
+    final Library library = Library((LibraryBuilder libraryBuilder) => libraryBuilder.body.addAll(<Spec>[
+          literalList(builders, refer('BuilderApplication', 'package:build_runner_core/build_runner_core.dart'))
+              .assignFinal('_builders')
+              .statement,
+          _createMain(),
+        ]));
     final DartEmitter emitter = DartEmitter(Allocator.simplePrefixing());
     try {
-      final String location =
-          fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
+      final String location = fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint', 'build.dart');
       final String result = DartFormatter().format('''
         // ignore_for_file: directives_ordering
         ${library.accept(emitter)}''');
@@ -81,13 +76,11 @@ class BuildScriptGenerator {
             package.name, package.dependencies.map((PackageNode node) => node.name), package.path);
       } on ArgumentError catch (_) {
         // During the build an error will be logged.
-        return BuildConfig.useDefault(
-            package.name, package.dependencies.map((PackageNode node) => node.name));
+        return BuildConfig.useDefault(package.name, package.dependencies.map((PackageNode node) => node.name));
       }
     }
 
-    final Iterable<BuildConfig> orderedConfigs =
-        await Future.wait(orderedPackages.map(_packageBuildConfig));
+    final Iterable<BuildConfig> orderedConfigs = await Future.wait(orderedPackages.map(_packageBuildConfig));
     final List<BuilderDefinition> builderDefinitions = orderedConfigs
         .expand((BuildConfig buildConfig) => buildConfig.builderDefinitions.values)
         .where((BuilderDefinition builderDefinition) {
@@ -155,8 +148,8 @@ class BuildScriptGenerator {
       if (definition.defaults.generateFor.exclude != null) {
         inputSetArgs['exclude'] = literalConstList(definition.defaults.generateFor.exclude);
       }
-      namedArgs['defaultGenerateFor'] = refer('InputSet', 'package:build_config/build_config.dart')
-          .constInstance(<Expression>[], inputSetArgs);
+      namedArgs['defaultGenerateFor'] =
+          refer('InputSet', 'package:build_config/build_config.dart').constInstance(<Expression>[], inputSetArgs);
     }
     if (!identical(definition.defaults?.options, BuilderOptions.empty)) {
       namedArgs['defaultOptions'] = _constructBuilderOptions(definition.defaults.options);
@@ -165,8 +158,7 @@ class BuildScriptGenerator {
       namedArgs['defaultDevOptions'] = _constructBuilderOptions(definition.defaults.devOptions);
     }
     if (!identical(definition.defaults?.releaseOptions, BuilderOptions.empty)) {
-      namedArgs['defaultReleaseOptions'] =
-          _constructBuilderOptions(definition.defaults.releaseOptions);
+      namedArgs['defaultReleaseOptions'] = _constructBuilderOptions(definition.defaults.releaseOptions);
     }
     if (definition.appliesBuilders.isNotEmpty) {
       namedArgs['appliesBuilders'] = literalList(definition.appliesBuilders);
@@ -198,15 +190,13 @@ class BuildScriptGenerator {
         namedArgs['defaultDevOptions'] = _constructBuilderOptions(definition.defaults.devOptions);
       }
       if (!identical(definition.defaults?.releaseOptions, BuilderOptions.empty)) {
-        namedArgs['defaultReleaseOptions'] =
-            _constructBuilderOptions(definition.defaults.releaseOptions);
+        namedArgs['defaultReleaseOptions'] = _constructBuilderOptions(definition.defaults.releaseOptions);
       }
-      namedArgs['defaultGenerateFor'] = refer('InputSet', 'package:build_config/build_config.dart')
-          .constInstance(<Expression>[], inputSetArgs);
+      namedArgs['defaultGenerateFor'] =
+          refer('InputSet', 'package:build_config/build_config.dart').constInstance(<Expression>[], inputSetArgs);
     }
     final String import = _buildScriptImport(definition.import);
-    return refer('applyPostProcess', 'package:build_runner_core/build_runner_core.dart')
-        .call(<Expression>[
+    return refer('applyPostProcess', 'package:build_runner_core/build_runner_core.dart').call(<Expression>[
       literalString(definition.key),
       refer(definition.builderFactory, import),
     ], namedArgs);
@@ -225,28 +215,24 @@ class BuildScriptGenerator {
   Expression _findToExpression(BuilderDefinition definition) {
     switch (definition.autoApply) {
       case AutoApply.none:
-        return refer('toNoneByDefault', 'package:build_runner_core/build_runner_core.dart')
-            .call(<Expression>[]);
+        return refer('toNoneByDefault', 'package:build_runner_core/build_runner_core.dart').call(<Expression>[]);
       // TODO(jonahwilliams): re-enabled when we have the builders strategy fleshed out.
       // case AutoApply.dependents:
       //   return refer('toDependentsOf',
       //           'package:build_runner_core/build_runner_core.dart')
       //       .call(<Expression>[literalString(definition.package)]);
       case AutoApply.allPackages:
-        return refer('toAllPackages', 'package:build_runner_core/build_runner_core.dart')
-            .call(<Expression>[]);
+        return refer('toAllPackages', 'package:build_runner_core/build_runner_core.dart').call(<Expression>[]);
       case AutoApply.dependents:
       case AutoApply.rootPackage:
-        return refer('toRoot', 'package:build_runner_core/build_runner_core.dart')
-            .call(<Expression>[]);
+        return refer('toRoot', 'package:build_runner_core/build_runner_core.dart').call(<Expression>[]);
     }
     throw ArgumentError('Unhandled AutoApply type: ${definition.autoApply}');
   }
 
   /// An expression creating a [BuilderOptions] from a json string.
   Expression _constructBuilderOptions(Map<String, dynamic> options) {
-    return refer('BuilderOptions', 'package:build/build.dart')
-        .newInstance(<Expression>[literalMap(options)]);
+    return refer('BuilderOptions', 'package:build/build.dart').newInstance(<Expression>[literalMap(options)]);
   }
 
   /// Put [builders] into an order such that any builder which specifies
@@ -257,8 +243,8 @@ class BuildScriptGenerator {
   /// constraints are met, but the rest of the ordering is arbitrary.
   Iterable<BuilderDefinition> _findBuilderOrder(Iterable<BuilderDefinition> builders) {
     Iterable<BuilderDefinition> dependencies(BuilderDefinition parent) {
-      return builders.where((BuilderDefinition child) =>
-          _hasInputDependency(parent, child) || _mustRunBefore(parent, child));
+      return builders
+          .where((BuilderDefinition child) => _hasInputDependency(parent, child) || _mustRunBefore(parent, child));
     }
 
     final List<List<BuilderDefinition>> components = stronglyConnectedComponents<BuilderDefinition>(
@@ -278,13 +264,10 @@ class BuildScriptGenerator {
   /// Whether [parent] has a `required_input` that wants to read outputs produced
   /// by [child].
   bool _hasInputDependency(BuilderDefinition parent, BuilderDefinition child) {
-    final Set<String> childOutputs =
-        child.buildExtensions.values.expand((List<String> values) => values).toSet();
-    return parent.requiredInputs
-        .any((String input) => childOutputs.any((String output) => output.endsWith(input)));
+    final Set<String> childOutputs = child.buildExtensions.values.expand((List<String> values) => values).toSet();
+    return parent.requiredInputs.any((String input) => childOutputs.any((String output) => output.endsWith(input)));
   }
 
   /// Whether [child] specifies that it wants to run before [parent].
-  bool _mustRunBefore(BuilderDefinition parent, BuilderDefinition child) =>
-      child.runsBefore.contains(parent.key);
+  bool _mustRunBefore(BuilderDefinition parent, BuilderDefinition child) => child.runsBefore.contains(parent.key);
 }

@@ -32,16 +32,15 @@ class DeviceManager {
   /// Constructing DeviceManagers is cheap; they only do expensive work if some
   /// of their methods are called.
   List<DeviceDiscovery> get deviceDiscoverers => _deviceDiscoverers;
-  final List<DeviceDiscovery> _deviceDiscoverers =
-      List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
-            AndroidDevices(),
-            IOSDevices(),
-            IOSSimulators(),
-            FuchsiaDevices(),
-            FlutterTesterDevices(),
-          ] +
-          _conditionalDesktopDevices +
-          _conditionalWebDevices);
+  final List<DeviceDiscovery> _deviceDiscoverers = List<DeviceDiscovery>.unmodifiable(<DeviceDiscovery>[
+        AndroidDevices(),
+        IOSDevices(),
+        IOSSimulators(),
+        FuchsiaDevices(),
+        FlutterTesterDevices(),
+      ] +
+      _conditionalDesktopDevices +
+      _conditionalWebDevices);
 
   /// Only add desktop devices if the flag is enabled.
   static List<DeviceDiscovery> get _conditionalDesktopDevices {
@@ -88,8 +87,7 @@ class DeviceManager {
     bool exactlyMatchesDeviceId(Device device) =>
         device.id.toLowerCase() == deviceId || device.name.toLowerCase() == deviceId;
     bool startsWithDeviceId(Device device) =>
-        device.id.toLowerCase().startsWith(deviceId) ||
-        device.name.toLowerCase().startsWith(deviceId);
+        device.id.toLowerCase().startsWith(deviceId) || device.name.toLowerCase().startsWith(deviceId);
 
     final Device exactMatch = devices.firstWhere(exactlyMatchesDeviceId, orElse: () => null);
     if (exactMatch != null) {
@@ -358,8 +356,7 @@ abstract class Device {
 
     // Join columns into lines of text
     for (List<String> row in table) {
-      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') +
-          ' • ${row.last}';
+      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
     }
   }
 

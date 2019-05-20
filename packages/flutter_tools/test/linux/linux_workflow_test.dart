@@ -12,8 +12,7 @@ import '../src/context.dart';
 void main() {
   group(LinuxWorkflow, () {
     final MockPlatform linux = MockPlatform();
-    final MockPlatform linuxWithFde = MockPlatform()
-      ..environment['ENABLE_FLUTTER_DESKTOP'] = 'true';
+    final MockPlatform linuxWithFde = MockPlatform()..environment['ENABLE_FLUTTER_DESKTOP'] = 'true';
     final MockPlatform notLinux = MockPlatform();
     when(linux.isLinux).thenReturn(true);
     when(linuxWithFde.isLinux).thenReturn(true);

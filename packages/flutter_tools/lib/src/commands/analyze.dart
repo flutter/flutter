@@ -16,8 +16,7 @@ class AnalyzeCommand extends FlutterCommand {
         help: 'Include all the examples and tests from the Flutter repository.',
         defaultsTo: false,
         hide: !verboseHelp);
-    argParser.addFlag('current-package',
-        help: 'Analyze the current project, if applicable.', defaultsTo: true);
+    argParser.addFlag('current-package', help: 'Analyze the current project, if applicable.', defaultsTo: true);
     argParser.addFlag('dartdocs',
         negatable: false,
         help: 'List every public member that is lacking documentation. '
@@ -29,12 +28,10 @@ class AnalyzeCommand extends FlutterCommand {
         valueHelp: 'file',
         help: 'Also output the results to a file. This is useful with --watch '
             'if you want a file to always contain the latest results.');
-    argParser.addOption('dart-sdk',
-        valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
+    argParser.addOption('dart-sdk', valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
-    argParser.addFlag('benchmark',
-        negatable: false, hide: !verboseHelp, help: 'Also output the analysis time.');
+    argParser.addFlag('benchmark', negatable: false, hide: !verboseHelp, help: 'Also output the analysis time.');
 
     usesPubOption();
 

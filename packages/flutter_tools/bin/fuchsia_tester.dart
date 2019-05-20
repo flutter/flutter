@@ -55,10 +55,8 @@ Future<void> run(List<String> args) async {
     ..addOption(_kOptionTestDirectory, help: 'Directory containing the tests')
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
-    ..addOption(_kOptionTests,
-        help: 'Path to json file that maps Dart test files to precompiled dill files')
-    ..addOption(_kOptionCoverageDirectory,
-        help: 'The path to the directory that will have coverage collected')
+    ..addOption(_kOptionTests, help: 'Path to json file that maps Dart test files to precompiled dill files')
+    ..addOption(_kOptionCoverageDirectory, help: 'The path to the directory that will have coverage collected')
     ..addFlag(
       _kOptionCoverage,
       defaultsTo: false,
@@ -102,8 +100,7 @@ Future<void> run(List<String> args) async {
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(fs.path.absolute(shellPath));
 
-    final Directory sdkRootDest =
-        fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
+    final Directory sdkRootDest = fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
     for (FileSystemEntity artifact in sdkRootSrc.listSync()) {
       fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
@@ -111,8 +108,7 @@ Future<void> run(List<String> args) async {
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
     fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
-    PackageMap.globalPackagesPath =
-        fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
+    PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
 
     Directory testDirectory;
     CoverageCollector collector;
@@ -128,8 +124,8 @@ Future<void> run(List<String> args) async {
     }
 
     final Map<String, String> tests = <String, String>{};
-    final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
-        json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()));
+    final List<Map<String, dynamic>> jsonList =
+        List<Map<String, dynamic>>.from(json.decode(fs.file(argResults[_kOptionTests]).readAsStringSync()));
     for (Map<String, dynamic> map in jsonList) {
       final String source = fs.file(map['source']).resolveSymbolicLinksSync();
       final String dill = fs.file(map['dill']).resolveSymbolicLinksSync();
@@ -157,8 +153,8 @@ Future<void> run(List<String> args) async {
       } else {
         fs.currentDirectory = testDirectory;
       }
-      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath],
-          coverageDirectory: coverageDirectory)) throwToolExit('Failed to collect coverage data');
+      if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath], coverageDirectory: coverageDirectory))
+        throwToolExit('Failed to collect coverage data');
     }
   } finally {
     tempDir.deleteSync(recursive: true);

@@ -209,11 +209,10 @@ class FlutterDevice {
   }
 
   Future<void> resetAssetDirectory() async {
-    final Uri deviceAssetsDirectoryUri =
-        devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
+    final Uri deviceAssetsDirectoryUri = devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
-    await Future.wait<void>(views
-        .map<Future<void>>((FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)));
+    await Future.wait<void>(
+        views.map<Future<void>>((FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)));
   }
 
   // Lists program elements changed in the most recent reload that have not
@@ -224,8 +223,8 @@ class FlutterDevice {
     final List<ProgramElement> elements = <ProgramElement>[];
     for (Future<List<ProgramElement>> report in reports) {
       for (ProgramElement element in await report)
-        elements.add(ProgramElement(element.qualifiedName, devFS.deviceUriToHostUri(element.uri),
-            element.line, element.column));
+        elements.add(
+            ProgramElement(element.qualifiedName, devFS.deviceUriToHostUri(element.uri), element.line, element.column));
     }
     return elements;
   }
@@ -243,13 +242,11 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterDebugDumpSemanticsTreeInTraversalOrder();
+    for (FlutterView view in views) await view.uiIsolate.flutterDebugDumpSemanticsTreeInTraversalOrder();
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterDebugDumpSemanticsTreeInInverseHitTestOrder();
+    for (FlutterView view in views) await view.uiIsolate.flutterDebugDumpSemanticsTreeInInverseHitTestOrder();
   }
 
   Future<void> toggleDebugPaintSizeEnabled() async {
@@ -313,8 +310,7 @@ class FlutterDevice {
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
-    printStatus(
-        'Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
+    printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
@@ -378,8 +374,7 @@ class FlutterDevice {
       assert(prebuiltMode);
       printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
     } else {
-      printStatus(
-          'Launching ${getDisplayPath(coldRunner.mainPath)} on ${device.name} in $modeName mode...');
+      printStatus('Launching ${getDisplayPath(coldRunner.mainPath)} on ${device.name} in $modeName mode...');
     }
 
     if (package == null) {
@@ -502,8 +497,7 @@ abstract class ResidentRunner {
   String get projectRootPath => _projectRootPath;
   String _mainPath;
   String get mainPath => _mainPath;
-  String getReloadPath({bool fullRestart}) =>
-      mainPath + (fullRestart ? '' : '.incremental') + '.dill';
+  String getReloadPath({bool fullRestart}) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
   AssetBundle _assetBundle;
   AssetBundle get assetBundle => _assetBundle;
@@ -542,8 +536,7 @@ abstract class ResidentRunner {
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart(
-      {bool fullRestart = false, bool pauseAfterRestart = false, String reason}) {
+  Future<OperationResult> restart({bool fullRestart = false, bool pauseAfterRestart = false, String reason}) {
     final String mode = isRunningProfile ? 'profile' : isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
@@ -585,14 +578,12 @@ abstract class ResidentRunner {
 
   Future<void> _debugDumpSemanticsTreeInTraversalOrder() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.debugDumpSemanticsTreeInTraversalOrder();
+    for (FlutterDevice device in flutterDevices) await device.debugDumpSemanticsTreeInTraversalOrder();
   }
 
   Future<void> _debugDumpSemanticsTreeInInverseHitTestOrder() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.debugDumpSemanticsTreeInInverseHitTestOrder();
+    for (FlutterDevice device in flutterDevices) await device.debugDumpSemanticsTreeInInverseHitTestOrder();
   }
 
   Future<void> _debugToggleDebugPaintSizeEnabled() async {
@@ -607,8 +598,7 @@ abstract class ResidentRunner {
 
   Future<void> _debugTogglePerformanceOverlayOverride() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.debugTogglePerformanceOverlayOverride();
+    for (FlutterDevice device in flutterDevices) await device.debugTogglePerformanceOverlayOverride();
   }
 
   Future<void> _debugToggleWidgetInspector() async {
@@ -631,8 +621,7 @@ abstract class ResidentRunner {
       if (supportsServiceProtocol && isRunningDebug) {
         await device.refreshViews();
         try {
-          for (FlutterView view in device.views)
-            await view.uiIsolate.flutterDebugAllowBanner(false);
+          for (FlutterView view in device.views) await view.uiIsolate.flutterDebugAllowBanner(false);
         } catch (error) {
           status.cancel();
           printError('Error communicating with Flutter on the device: $error');
@@ -644,8 +633,7 @@ abstract class ResidentRunner {
       } finally {
         if (supportsServiceProtocol && isRunningDebug) {
           try {
-            for (FlutterView view in device.views)
-              await view.uiIsolate.flutterDebugAllowBanner(true);
+            for (FlutterView view in device.views) await view.uiIsolate.flutterDebugAllowBanner(true);
           } catch (error) {
             status.cancel();
             printError('Error communicating with Flutter on the device: $error');
@@ -668,8 +656,7 @@ abstract class ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         final int index = device.views.indexOf(view);
-        final File outputFile =
-            fs.currentDirectory.childFile('compilation${index == 0 ? '' : index}.txt');
+        final File outputFile = fs.currentDirectory.childFile('compilation${index == 0 ? '' : index}.txt');
 
         printStatus('Saving compilation training data '
             'for ${device.device.name}${index == 0 ? '' : '/Isolate$index'} '
@@ -731,8 +718,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> stopEchoingDeviceLog() async {
-    await Future.wait<void>(
-        flutterDevices.map<Future<void>>((FlutterDevice device) => device.stopEchoingDeviceLog()));
+    await Future.wait<void>(flutterDevices.map<Future<void>>((FlutterDevice device) => device.stopEchoingDeviceLog()));
   }
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
@@ -760,8 +746,7 @@ abstract class ResidentRunner {
       if (device.views.isNotEmpty) viewFound = true;
     }
     if (!viewFound) {
-      if (flutterDevices.length == 1)
-        throw 'No Flutter view is available on ${flutterDevices.first.device.name}.';
+      if (flutterDevices.length == 1) throw 'No Flutter view is available on ${flutterDevices.first.device.name}.';
       throw 'No Flutter view is available on any device '
           '(${flutterDevices.map<String>((FlutterDevice device) => device.device.name).join(', ')}).';
     }
@@ -949,20 +934,16 @@ abstract class ResidentRunner {
       if (isRunningDebug) {
         printStatus(
             'For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for traversal order) or "U" (for inverse hit test order).');
-        printStatus(
-            'To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
-        printStatus(
-            'To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+        printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
+        printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
         printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
         printStatus('To toggle the elevation checker, press "z".');
       } else {
         printStatus(
             'To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
       }
-      printStatus(
-          'To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
-      printStatus(
-          'To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
+      printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
+      printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
       printStatus('To save a screenshot to flutter.png, press "s".');

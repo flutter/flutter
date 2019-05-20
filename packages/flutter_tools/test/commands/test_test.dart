@@ -24,56 +24,38 @@ void main() {
 
     testUsingContext('not have extraneous error messages', () async {
       Cache.flutterRoot = '../..';
-      return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory,
-          exitCode: isZero);
-    },
-        skip: io.Platform
-            .isLinux); // Flutter on Linux sometimes has problems with font resolution (#7224)
+      return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
+    }, skip: io.Platform.isLinux); // Flutter on Linux sometimes has problems with font resolution (#7224)
 
     testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
-    },
-        skip:
-            io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
-    testUsingContext('report a nice error when a guarded function was called without await',
-        () async {
+    testUsingContext('report a nice error when a guarded function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
-    },
-        skip:
-            io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
-    testUsingContext('report a nice error when an async function was called without await',
-        () async {
+    testUsingContext('report a nice error when an async function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
-    },
-        skip:
-            io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
     testUsingContext('report a nice error when a Ticker is left running', () async {
       Cache.flutterRoot = '../..';
       return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
-    },
-        skip:
-            io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
-    testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency',
-        () async {
-      final String missingDependencyTests =
-          fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
+    testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
+      final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
       return _testFile('trivial', missingDependencyTests, missingDependencyTests);
-    },
-        skip:
-            io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
+    }, skip: io.Platform.isWindows); // Dart on Windows has trouble with unicode characters in output
 
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest(
-          'filtering', automatedTestsDirectory, flutterTestDirectory,
+      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
           extraArgs: const <String>['--name', 'inc.*de']);
       if (!result.stdout.contains('+1: All tests passed'))
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
@@ -82,8 +64,7 @@ void main() {
 
     testUsingContext('run a test when its name contains a string', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest(
-          'filtering', automatedTestsDirectory, flutterTestDirectory,
+      final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
           extraArgs: const <String>['--plain-name', 'include']);
       if (!result.stdout.contains('+1: All tests passed'))
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
@@ -92,8 +73,7 @@ void main() {
 
     testUsingContext('test runs to completion', () async {
       Cache.flutterRoot = '../..';
-      final ProcessResult result = await _runFlutterTest(
-          'trivial', automatedTestsDirectory, flutterTestDirectory,
+      final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
           extraArgs: const <String>['--verbose']);
       if ((!result.stdout.contains('+1: All tests passed')) ||
           (!result.stdout.contains('test 0: starting shell process')) ||
@@ -108,8 +88,7 @@ void main() {
   });
 }
 
-Future<void> _testFile(String testName, String workingDirectory, String testDirectory,
-    {Matcher exitCode}) async {
+Future<void> _testFile(String testName, String workingDirectory, String testDirectory, {Matcher exitCode}) async {
   exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
@@ -121,8 +100,7 @@ Future<void> _testFile(String testName, String workingDirectory, String testDire
 
   expect(exec.exitCode, exitCode);
   final List<String> output = exec.stdout.split('\n');
-  if (output.first == 'Waiting for another flutter command to release the startup lock...')
-    output.removeAt(0);
+  if (output.first == 'Waiting for another flutter command to release the startup lock...') output.removeAt(0);
   if (output.first.startsWith('Running "flutter packages get" in')) output.removeAt(0);
   output.add('<<stderr>>');
   output.addAll(exec.stderr.split('\n'));
@@ -168,8 +146,7 @@ Future<void> _testFile(String testName, String workingDirectory, String testDire
     }
 
     expect(outputLine, matches(expectationLine),
-        reason:
-            'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
+        reason: 'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
     expectationLineNumber += 1;
     outputLineNumber += 1;
   }

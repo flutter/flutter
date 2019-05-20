@@ -47,8 +47,7 @@ or
       exit(1);
   }
 
-  final String flutterExecutable =
-      path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
+  final String flutterExecutable = path.join(flutterRoot, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter');
   final ProcessResult unpackResult = await Process.run(flutterExecutable, <String>[
     '--suppress-analytics',
     if (verbose) '--verbose',

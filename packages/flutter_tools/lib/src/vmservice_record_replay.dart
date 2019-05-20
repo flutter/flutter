@@ -55,9 +55,7 @@ abstract class _Message implements Comparable<_Message> {
   _Message(this.type, this.data);
 
   factory _Message.fromRecording(Map<String, dynamic> recordingData) {
-    return recordingData[_kType] == _kRequest
-        ? _Request(recordingData[_kData])
-        : _Response(recordingData[_kData]);
+    return recordingData[_kType] == _kRequest ? _Request(recordingData[_kData]) : _Response(recordingData[_kData]);
   }
 
   final String type;
@@ -116,8 +114,7 @@ class _Transaction {
 class _RecordingStream {
   _RecordingStream(Stream<String> stream, this._recording)
       : _delegate = stream,
-        _controller =
-            stream.isBroadcast ? StreamController<String>.broadcast() : StreamController<String>() {
+        _controller = stream.isBroadcast ? StreamController<String>.broadcast() : StreamController<String>() {
     _controller.onListen = () {
       assert(_subscription == null);
       _subscription = _listenToStream();

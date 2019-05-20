@@ -135,8 +135,7 @@ void main() {
     }, timeout: allowForSlowAnalyzeTests, overrides: noColorTerminalOverride);
 
     testUsingContext('no duplicate issues', () async {
-      final Directory tempDir =
-          fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
 
       try {
         final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
@@ -173,8 +172,7 @@ void bar() {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir =
-          fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
@@ -192,8 +190,7 @@ StringBuffer bar = StringBuffer('baz');
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir =
-          fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(

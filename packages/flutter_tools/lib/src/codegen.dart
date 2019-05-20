@@ -51,8 +51,7 @@ abstract class CodeGenerator {
     final String appName = flutterProject.manifest.appName;
     final String newPackagesContents =
         oldPackagesContents.replaceFirst('$appName:lib/', '$appName:$kMultiRootScheme:/');
-    final String generatedPackagesPath =
-        fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
+    final String generatedPackagesPath = fs.path.setExtension(PackageMap.globalPackagesPath, '.generated');
     fs.file(generatedPackagesPath).writeAsStringSync(newPackagesContents);
   }
 }
@@ -161,8 +160,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
 /// An implementation of a [ResidentCompiler] which runs a [BuildRunner] before
 /// talking to the CFE.
 class CodeGeneratingResidentCompiler implements ResidentCompiler {
-  CodeGeneratingResidentCompiler._(
-      this._residentCompiler, this._codegenDaemon, this._flutterProject);
+  CodeGeneratingResidentCompiler._(this._residentCompiler, this._codegenDaemon, this._flutterProject);
 
   /// Creates a new [ResidentCompiler] and configures a [BuildDaemonClient] to
   /// run builds.
@@ -198,8 +196,7 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
     }
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
-    final CodegenStatus status =
-        await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
+    final CodegenStatus status = await codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
       return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
     });
     if (status == CodegenStatus.Failed) {
@@ -218,17 +215,15 @@ class CodeGeneratingResidentCompiler implements ResidentCompiler {
   }
 
   @override
-  Future<CompilerOutput> compileExpression(String expression, List<String> definitions,
-      List<String> typeDefinitions, String libraryUri, String klass, bool isStatic) {
-    return _residentCompiler.compileExpression(
-        expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
+  Future<CompilerOutput> compileExpression(String expression, List<String> definitions, List<String> typeDefinitions,
+      String libraryUri, String klass, bool isStatic) {
+    return _residentCompiler.compileExpression(expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
   }
 
   @override
   Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles,
       {String outputPath, String packagesFilePath}) async {
-    if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded &&
-        _codegenDaemon.lastStatus != CodegenStatus.Failed) {
+    if (_codegenDaemon.lastStatus != CodegenStatus.Succeeded && _codegenDaemon.lastStatus != CodegenStatus.Failed) {
       await _codegenDaemon.buildResults.firstWhere((CodegenStatus status) {
         return status == CodegenStatus.Succeeded || status == CodegenStatus.Failed;
       });

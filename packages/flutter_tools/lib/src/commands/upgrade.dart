@@ -44,8 +44,7 @@ class UpgradeCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final UpgradeCommandRunner upgradeCommandRunner = UpgradeCommandRunner();
-    await upgradeCommandRunner.runCommand(
-        argResults['force'], GitTagVersion.determine(), FlutterVersion.instance);
+    await upgradeCommandRunner.runCommand(argResults['force'], GitTagVersion.determine(), FlutterVersion.instance);
     return null;
   }
 }
@@ -58,8 +57,7 @@ class UpgradeCommandRunner {
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.
-      if (flutterVersion.channel != 'master' &&
-          FlutterVersion.officialChannels.contains(flutterVersion.channel)) {
+      if (flutterVersion.channel != 'master' && FlutterVersion.officialChannels.contains(flutterVersion.channel)) {
         throwToolExit('Unknown flutter tag. Abandoning upgrade to avoid destroying local '
             'changes. It is recommended to use git directly if not working on '
             'an official channel.');
@@ -90,8 +88,8 @@ class UpgradeCommandRunner {
 
   Future<bool> hasUncomittedChanges() async {
     try {
-      final RunResult result = await runCheckedAsync(<String>['git', 'status', '-s'],
-          workingDirectory: Cache.flutterRoot);
+      final RunResult result =
+          await runCheckedAsync(<String>['git', 'status', '-s'], workingDirectory: Cache.flutterRoot);
       return result.stdout.trim().isNotEmpty;
     } catch (e) {
       throwToolExit('git status failed: $e');
@@ -194,11 +192,7 @@ class UpgradeCommandRunner {
     final String projectRoot = findProjectRoot();
     if (projectRoot != null) {
       printStatus('');
-      await pubGet(
-          context: PubContext.pubUpgrade,
-          directory: projectRoot,
-          upgrade: true,
-          checkLastModified: false);
+      await pubGet(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
     }
   }
 
@@ -226,8 +220,6 @@ class UpgradeCommandRunner {
   static final RegExp _gitChangedRegex = RegExp(r' (rename|delete mode|create mode) .+');
 
   static bool matchesGitLine(String line) {
-    return _gitDiffRegex.hasMatch(line) ||
-        _gitChangedRegex.hasMatch(line) ||
-        line == 'Fast-forward';
+    return _gitDiffRegex.hasMatch(line) || _gitChangedRegex.hasMatch(line) || line == 'Fast-forward';
   }
 }

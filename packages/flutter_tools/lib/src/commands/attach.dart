@@ -154,9 +154,7 @@ class AttachCommand extends FlutterCommand {
         'the value of --ipv6 on its own.',
       );
     }
-    if (debugPort == null &&
-        debugUri == null &&
-        argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
+    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.observatoryPortOption)) {
       throwToolExit(
         'When the --debug-port or --debug-uri is unknown, this command does not use '
         'the value of --observatory-port.',
@@ -201,8 +199,7 @@ class AttachCommand extends FlutterCommand {
     final int devicePort = await getDevicePort();
 
     final Daemon daemon = argResults['machine']
-        ? Daemon(stdinCommandStream, stdoutCommandResponse,
-            notifyingLogger: NotifyingLogger(), logToStdout: true)
+        ? Daemon(stdinCommandStream, stdoutCommandResponse, notifyingLogger: NotifyingLogger(), logToStdout: true)
         : null;
 
     Uri observatoryUri;
@@ -216,8 +213,7 @@ class AttachCommand extends FlutterCommand {
       if (device is FuchsiaDevice) {
         attachLogger = true;
         final String module = argResults['module'];
-        if (module == null)
-          throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
+        if (module == null) throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
@@ -233,11 +229,9 @@ class AttachCommand extends FlutterCommand {
           rethrow;
         }
       } else if ((device is IOSDevice) || (device is IOSSimulator)) {
-        final MDnsObservatoryDiscoveryResult result =
-            await MDnsObservatoryDiscovery().query(applicationId: appId);
+        final MDnsObservatoryDiscoveryResult result = await MDnsObservatoryDiscovery().query(applicationId: appId);
         if (result != null) {
-          observatoryUri =
-              await _buildObservatoryUri(device, hostname, result.port, result.authCode);
+          observatoryUri = await _buildObservatoryUri(device, hostname, result.port, result.authCode);
         }
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
@@ -258,8 +252,8 @@ class AttachCommand extends FlutterCommand {
         }
       }
     } else {
-      observatoryUri = await _buildObservatoryUri(
-          device, debugUri?.host ?? hostname, devicePort ?? debugUri.port, debugUri?.path);
+      observatoryUri =
+          await _buildObservatoryUri(device, debugUri?.host ?? hostname, devicePort ?? debugUri.port, debugUri?.path);
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
@@ -333,8 +327,7 @@ class AttachCommand extends FlutterCommand {
 
   Future<void> _validateArguments() async {}
 
-  Future<Uri> _buildObservatoryUri(Device device, String host, int devicePort,
-      [String authCode]) async {
+  Future<Uri> _buildObservatoryUri(Device device, String host, int devicePort, [String authCode]) async {
     String path = '/';
     if (authCode != null) {
       path = authCode;
@@ -434,10 +427,8 @@ class MDnsObservatoryDiscovery {
       }
       // We have no guarantee that we won't get multiple hits from the same
       // service on this.
-      final List<String> uniqueDomainNames = pointerRecords
-          .map<String>((PtrResourceRecord record) => record.domainName)
-          .toSet()
-          .toList();
+      final List<String> uniqueDomainNames =
+          pointerRecords.map<String>((PtrResourceRecord record) => record.domainName).toSet().toList();
 
       String domainName;
       if (applicationId != null) {
@@ -456,8 +447,7 @@ class MDnsObservatoryDiscovery {
         buffer.writeln('Rerun this command with one of the following passed in as the appId:');
         buffer.writeln('');
         for (final String uniqueDomainName in uniqueDomainNames) {
-          buffer.writeln(
-              '  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
+          buffer.writeln('  flutter attach --app-id ${uniqueDomainName.replaceAll('.$dartObservatoryName', '')}');
         }
         throwToolExit(buffer.toString());
       } else {

@@ -22,8 +22,7 @@ void main() {
 
     Map<String, String> _getFilesystemContents([Directory root]) {
       final String tempPath = tempDir.absolute.path;
-      final List<String> paths =
-          (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
+      final List<String> paths = (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
         final String relativePath = fs.path.relative(entity.path, from: tempPath);
         return relativePath;
       }).toList();
@@ -48,8 +47,7 @@ void main() {
         fs.path.join(basePath, '.idea', 'vcs.xml$suffix'): 'vcs $marker',
         fs.path.join(basePath, '.idea', '.name$suffix'): 'codeStyleSettings $marker',
         fs.path.join(basePath, '.idea', 'runConfigurations'): 'dir',
-        fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'):
-            'hello_world $marker',
+        fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'): 'hello_world $marker',
         fs.path.join(basePath, 'flutter.iml$suffix'): 'flutter $marker',
         fs.path.join(basePath, 'packages', 'new', 'deep.iml$suffix'): 'deep $marker',
       };
@@ -84,17 +82,13 @@ void main() {
       dir ??= tempDir;
       final IdeConfigCommand command = IdeConfigCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
-      final List<String> finalArgs = <String>[
-        '--flutter-root=${tempDir.absolute.path}',
-        'ide-config'
-      ];
+      final List<String> finalArgs = <String>['--flutter-root=${tempDir.absolute.path}', 'ide-config'];
       finalArgs.addAll(args);
       await runner.run(finalArgs);
 
       for (String path in expectedContents.keys) {
         final String absPath = fs.path.join(tempDir.absolute.path, path);
-        expect(_fileOrDirectoryExists(fs.path.join(dir.path, path)), true,
-            reason: "$path doesn't exist");
+        expect(_fileOrDirectoryExists(fs.path.join(dir.path, path)), true, reason: "$path doesn't exist");
         if (fs.file(absPath).existsSync()) {
           expect(fs.file(absPath).readAsStringSync(), equals(expectedContents[path]),
               reason: "$path contents don't match");
@@ -269,8 +263,7 @@ void main() {
       );
     }, timeout: const Timeout.factor(2.0));
 
-    testUsingContext('removes deleted imls with --overwrite, including empty parent dirs',
-        () async {
+    testUsingContext('removes deleted imls with --overwrite, including empty parent dirs', () async {
       final Map<String, String> templateManifest = _getManifest(
         intellijDir,
         'template',

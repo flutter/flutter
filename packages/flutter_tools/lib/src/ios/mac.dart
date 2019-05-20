@@ -105,8 +105,7 @@ class IMobileDevice {
     if (!isInstalled) return false;
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final ProcessResult ideviceResult =
-        (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
+    final ProcessResult ideviceResult = (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
     if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
       return false;
     }
@@ -131,11 +130,8 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result =
-          await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
-      if (result.exitCode == 255 &&
-          result.stdout != null &&
-          result.stdout.contains('No device found'))
+      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
+      if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0) throw ToolExit('ideviceinfo returned an error:\n${result.stderr}');
       return result.stdout.trim();
@@ -145,8 +141,7 @@ class IMobileDevice {
   }
 
   /// Starts `idevicesyslog` and returns the running process.
-  Future<Process> startLogger(String deviceID) =>
-      runCommand(<String>['idevicesyslog', '-u', deviceID]);
+  Future<Process> startLogger(String deviceID) => runCommand(<String>['idevicesyslog', '-u', deviceID]);
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
@@ -161,8 +156,7 @@ class Xcode {
   String get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath =
-            processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
+        _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
       } on ProcessException {
         // Ignored, return null below.
       }
@@ -209,8 +203,7 @@ class Xcode {
       try {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
-        final ProcessResult result =
-            processManager.runSync(<String>['/usr/bin/xcrun', 'simctl', 'list']);
+        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'simctl', 'list']);
         _isSimctlInstalled = result.stderr == null || result.stderr == '';
       } on ProcessException {
         _isSimctlInstalled = false;
@@ -222,8 +215,7 @@ class Xcode {
   bool get isVersionSatisfactory {
     if (!xcodeProjectInterpreter.isInstalled) return false;
     if (majorVersion > kXcodeRequiredVersionMajor) return true;
-    if (majorVersion == kXcodeRequiredVersionMajor)
-      return minorVersion >= kXcodeRequiredVersionMinor;
+    if (majorVersion == kXcodeRequiredVersionMajor) return minorVersion >= kXcodeRequiredVersionMinor;
     return false;
   }
 
@@ -307,11 +299,9 @@ Future<XcodeBuildResult> buildXcodeProject({
     modern: false,
   );
 
-  final XcodeProjectInfo projectInfo =
-      await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
+  final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(app.project.hostAppRoot.path);
   if (!projectInfo.targets.contains('Runner')) {
-    printError(
-        'The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
+    printError('The Xcode project does not define target "Runner" which is needed by Flutter tooling.');
     printError('Open Xcode to fix the problem:');
     printError('  open ios/Runner.xcworkspace');
     return XcodeBuildResult(success: false);
@@ -331,8 +321,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   final String configuration = projectInfo.buildConfigurationFor(buildInfo, scheme);
   if (configuration == null) {
     printError('');
-    printError(
-        'The Xcode project defines build configurations: ${projectInfo.buildConfigurations.join(', ')}');
+    printError('The Xcode project defines build configurations: ${projectInfo.buildConfigurations.join(', ')}');
     printError(
         'Flutter expects a build configuration named ${XcodeProjectInfo.expectedBuildConfigurationFor(buildInfo, scheme)} or similar.');
     printError('Open Xcode to fix the problem:');
@@ -347,8 +336,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     printError('');
     printError('   If this option is disabled, it is likely you have the target selected instead');
     printError('   of the project; see:');
-    printError(
-        '   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
+    printError('   https://stackoverflow.com/questions/19842746/adding-a-build-configuration-in-xcode');
     printError('');
     printError('   If you have created a completely custom set of build configurations,');
     printError('   you can set the FLUTTER_BUILD_MODE=${buildInfo.modeName.toLowerCase()}');
@@ -361,8 +349,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   Map<String, String> autoSigningConfigs;
   if (codesign && buildForDevice)
-    autoSigningConfigs =
-        await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
+    autoSigningConfigs = await getCodeSigningIdentityDevelopmentTeam(iosApp: app, usesTerminalUi: usesTerminalUi);
 
   // Before the build, all service definitions must be updated and the dylibs
   // copied over to a location that is suitable for Xcodebuild to find them.
@@ -499,8 +486,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final Stopwatch buildStopwatch = Stopwatch()..start();
-  initialBuildStatus =
-      logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
+  initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
     workingDirectory: app.project.hostAppRoot.path,
@@ -579,8 +565,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 }
 
 String readGeneratedXcconfig(String appPath) {
-  final String generatedXcconfigPath =
-      fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
+  final String generatedXcconfigPath = fs.path.join(fs.currentDirectory.path, appPath, 'Flutter', 'Generated.xcconfig');
   final File generatedXcconfigFile = fs.file(generatedXcconfigPath);
   if (!generatedXcconfigFile.existsSync()) return null;
   return generatedXcconfigFile.readAsStringSync();
@@ -600,16 +585,13 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   // * PROVISIONING_PROFILE (manual signing)
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE']
-          .any(result.xcodeBuildExecution.buildSettings.containsKey)) {
+      !<String>['DEVELOPMENT_TEAM', 'PROVISIONING_PROFILE'].any(result.xcodeBuildExecution.buildSettings.containsKey)) {
     printError(noDevelopmentTeamInstruction, emphasis: true);
     return;
   }
   if (result.xcodeBuildExecution != null &&
       result.xcodeBuildExecution.buildForPhysicalDevice &&
-      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']
-              ?.contains('com.example') ==
-          true) {
+      result.xcodeBuildExecution.buildSettings['PRODUCT_BUNDLE_IDENTIFIER']?.contains('com.example') == true) {
     printError('');
     printError('It appears that your application still contains the default signing identifier.');
     printError("Try replacing 'com.example' with your signing id in Xcode:");
@@ -618,8 +600,7 @@ Future<void> diagnoseXcodeBuildFailure(XcodeBuildResult result) async {
   }
   if (result.stdout?.contains('Code Sign error') == true) {
     printError('');
-    printError(
-        'It appears that there was a problem signing your application prior to installation on the device.');
+    printError('It appears that there was a problem signing your application prior to installation on the device.');
     printError('');
     printError('Verify that the Bundle Identifier in your project is your signing id in Xcode');
     printError('  open ios/Runner.xcworkspace');
@@ -700,13 +681,11 @@ Future<void> _addServicesToBundle(Directory bundle) async {
   _copyServiceDefinitionsManifest(services, manifestFile);
 }
 
-Future<void> _copyServiceFrameworks(
-    List<Map<String, String>> services, Directory frameworksDirectory) async {
+Future<void> _copyServiceFrameworks(List<Map<String, String>> services, Directory frameworksDirectory) async {
   printTrace("Copying service frameworks to '${fs.path.absolute(frameworksDirectory.path)}'.");
   frameworksDirectory.createSync(recursive: true);
   for (Map<String, String> service in services) {
-    final String dylibPath =
-        await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
+    final String dylibPath = await getServiceFromUrl(service['ios-framework'], service['root'], service['name']);
     final File dylib = fs.file(dylibPath);
     printTrace('Copying ${dylib.path} into bundle.');
     if (!dylib.existsSync()) {
@@ -745,8 +724,7 @@ Future<bool> upgradePbxProjWithFlutterAssets(IosProject project) async {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
       if (printedStatuses.add(match.group(1)))
-        printStatus(
-            'Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+        printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
     } else {
       buffer.writeln(line);
     }

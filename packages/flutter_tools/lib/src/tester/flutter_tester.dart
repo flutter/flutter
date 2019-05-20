@@ -119,8 +119,7 @@ class FlutterTesterDevice extends Device {
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.startPaused) command.add('--start-paused');
       if (debuggingOptions.disableServiceAuthCodes) command.add('--disable-service-auth-codes');
-      if (debuggingOptions.hasObservatoryPort)
-        command.add('--observatory-port=${debuggingOptions.observatoryPort}');
+      if (debuggingOptions.hasObservatoryPort) command.add('--observatory-port=${debuggingOptions.observatoryPort}');
     }
 
     // Build assets and perform initial compilation.
@@ -152,16 +151,10 @@ class FlutterTesterDevice extends Device {
       );
       // Setting a bool can't fail in the callback.
       unawaited(_process.exitCode.then<void>((_) => _isRunning = false));
-      _process.stdout
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
+      _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
         _logReader.addLine(line);
       });
-      _process.stderr
-          .transform<String>(utf8.decoder)
-          .transform<String>(const LineSplitter())
-          .listen((String line) {
+      _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter()).listen((String line) {
         _logReader.addLine(line);
       });
 

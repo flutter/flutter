@@ -8,8 +8,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import '../src/common.dart';
 
 const String xcodeBackendPath = 'bin/xcode_backend.sh';
-const String xcodeBackendErrorHeader =
-    '========================================================================';
+const String xcodeBackendErrorHeader = '========================================================================';
 
 // Acceptable $CONFIGURATION/$FLUTTER_BUILD_MODE values should be debug, profile, or release
 const Map<String, String> unknownConfiguration = <String, String>{

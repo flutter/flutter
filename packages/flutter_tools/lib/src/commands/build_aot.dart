@@ -115,8 +115,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         // Determine which iOS architectures to build for.
         final Iterable<IOSArch> buildArchs = argResults['ios-arch'].map<IOSArch>(getIOSArchForName);
         final Map<IOSArch, String> iosBuilds = <IOSArch, String>{};
-        for (IOSArch arch in buildArchs)
-          iosBuilds[arch] = fs.path.join(outputPath, getNameForIOSArch(arch));
+        for (IOSArch arch in buildArchs) iosBuilds[arch] = fs.path.join(outputPath, getNameForIOSArch(arch));
 
         // Generate AOT snapshot and compile to arch-specific App.framework.
         final Map<IOSArch, Future<int>> exitCodes = <IOSArch, Future<int>>{};
@@ -138,16 +137,14 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         });
 
         // Merge arch-specific App.frameworks into a multi-arch App.framework.
-        if ((await Future.wait<int>(exitCodes.values))
-            .every((int buildExitCode) => buildExitCode == 0)) {
-          final Iterable<String> dylibs = iosBuilds.values
-              .map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
+        if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
+          final Iterable<String> dylibs =
+              iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
           fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
           await runCheckedAsync(
             <String>['lipo']
               ..addAll(dylibs)
-              ..addAll(
-                  <String>['-create', '-output', fs.path.join(outputPath, 'App.framework', 'App')]),
+              ..addAll(<String>['-create', '-output', fs.path.join(outputPath, 'App.framework', 'App')]),
           );
         } else {
           status?.cancel();

@@ -59,8 +59,8 @@ bool _shouldRunPubGet({File pubSpecYaml, File dotPackages}) {
   final DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) return true;
   final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
-  if (flutterToolsStamp.existsSync() &&
-      flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified)) return true;
+  if (flutterToolsStamp.existsSync() && flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
+    return true;
   return false;
 }
 
@@ -92,8 +92,7 @@ Future<void> pubGet({
       timeout: timeoutConfiguration.slowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
-    if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
-      args.add('--verbose');
+    if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose']) args.add('--verbose');
     args.addAll(<String>[command, '--no-precompile']);
     if (offline) args.add('--offline');
     try {
@@ -115,8 +114,7 @@ Future<void> pubGet({
   if (!dotPackages.existsSync()) throwToolExit('$directory: pub did not create .packages file');
 
   if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync()))
-    throwToolExit(
-        '$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
+    throwToolExit('$directory: pub did not update .packages file (pubspec.yaml file has a newer timestamp)');
 }
 
 typedef MessageFilter = String Function(String message);
@@ -154,8 +152,7 @@ Future<void> pub(
       mapFunction: filter,
       environment: _createPubEnvironment(context),
     );
-    if (code !=
-        69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
+    if (code != 69) // UNAVAILABLE in https://github.com/dart-lang/pub/blob/master/lib/src/exit_codes.dart
       break;
     printStatus(
         '$failureMessage ($code) -- attempting retry $attempts in $duration second${duration == 1 ? "" : "s"}...');
@@ -203,8 +200,7 @@ Map<String, String> _createPubEnvironment(PubContext context) {
   return environment;
 }
 
-final RegExp _analyzerWarning =
-    RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
+final RegExp _analyzerWarning = RegExp(r'^! \w+ [^ ]+ from path \.\./\.\./bin/cache/dart-sdk/lib/\w+$');
 
 /// The console environment key used by the pub tool.
 const String _pubEnvironmentKey = 'PUB_ENVIRONMENT';

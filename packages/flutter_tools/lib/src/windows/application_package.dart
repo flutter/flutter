@@ -63,11 +63,7 @@ class BuildableWindowsApp extends WindowsApp {
     if (!exeNameFile.existsSync()) {
       throwToolExit('Failed to find Windows executable name');
     }
-    return fs.path.join(
-        getWindowsBuildDirectory(),
-        'x64',
-        buildMode == BuildMode.debug ? 'Debug' : 'Release',
-        'Runner',
+    return fs.path.join(getWindowsBuildDirectory(), 'x64', buildMode == BuildMode.debug ? 'Debug' : 'Release', 'Runner',
         exeNameFile.readAsStringSync().trim());
   }
 
