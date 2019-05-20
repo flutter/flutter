@@ -46,8 +46,7 @@ class Flags {
   bool contains(String key) {
     final ArgResults commandResults = _globalResults.command;
     final Iterable<String> options = commandResults?.options;
-    return (options != null && options.contains(key)) ||
-        _globalResults.options.contains(key);
+    return (options != null && options.contains(key)) || _globalResults.options.contains(key);
   }
 }
 

@@ -27,16 +27,14 @@ class DevicesCommand extends FlutterCommand {
           exitCode: 1);
     }
 
-    final List<Device> devices =
-        await deviceManager.getAllConnectedDevices().toList();
+    final List<Device> devices = await deviceManager.getAllConnectedDevices().toList();
 
     if (devices.isEmpty) {
       printStatus('No devices detected.\n\n'
           "Run 'flutter emulators' to list and start any available device emulators.\n\n"
           'Or, if you expected your device to be detected, please run "flutter doctor" to diagnose '
           'potential issues, or visit https://flutter.dev/setup/ for troubleshooting tips.');
-      final List<String> diagnostics =
-          await deviceManager.getDeviceDiagnostics();
+      final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
         printStatus('');
         for (String diagnostic in diagnostics) {
@@ -44,8 +42,7 @@ class DevicesCommand extends FlutterCommand {
         }
       }
     } else {
-      printStatus(
-          '${devices.length} connected ${pluralize('device', devices.length)}:\n');
+      printStatus('${devices.length} connected ${pluralize('device', devices.length)}:\n');
       await Device.printDevices(devices);
     }
 

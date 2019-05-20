@@ -21,8 +21,7 @@ void main() {
       mockProcessManager = MockProcessManager();
       testBed = Testbed(
           setup: () async {
-            final String engineDartPath =
-                artifacts.getArtifactPath(Artifact.engineDartBinary);
+            final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
             when(mockProcessManager.start(any))
                 .thenAnswer((Invocation invocation) async => FakeProcess());
             when(mockProcessManager.canRun(engineDartPath)).thenReturn(true);

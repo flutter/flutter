@@ -18,9 +18,8 @@ import '../src/context.dart';
 /// Test case timeout for tests involving project analysis.
 const Timeout allowForSlowAnalyzeTests = Timeout.factor(5.0);
 
-final Generator _kNoColorTerminalPlatform = () =>
-    FakePlatform.fromPlatform(const LocalPlatform())
-      ..stdoutSupportsAnsi = false;
+final Generator _kNoColorTerminalPlatform =
+    () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
@@ -35,9 +34,7 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      tempDir = fs.systemTempDirectory
-          .createTempSync('flutter_analyze_once_test_1.')
-          .absolute;
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
       projectPath = fs.path.join(tempDir.path, 'flutter_project');
       libMain = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
     });
@@ -114,8 +111,7 @@ void main() {
     testUsingContext('working directory with local options', () async {
       // Insert an analysis_options.yaml file in the project
       // which will trigger a lint for broken code that was inserted earlier
-      final File optionsFile =
-          fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
+      final File optionsFile = fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
       await optionsFile.writeAsString('''
   include: package:flutter/analysis_options_user.yaml
   linter:
@@ -139,9 +135,8 @@ void main() {
     }, timeout: allowForSlowAnalyzeTests, overrides: noColorTerminalOverride);
 
     testUsingContext('no duplicate issues', () async {
-      final Directory tempDir = fs.systemTempDirectory
-          .createTempSync('flutter_analyze_once_test_2.')
-          .absolute;
+      final Directory tempDir =
+          fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
 
       try {
         final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));

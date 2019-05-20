@@ -44,9 +44,8 @@ class AndroidEmulator extends Emulator {
 
   @override
   Future<void> launch() async {
-    final Future<void> launchResult = processManager
-        .run(<String>[getEmulatorPath(), '-avd', id]).then(
-            (ProcessResult runResult) {
+    final Future<void> launchResult =
+        processManager.run(<String>[getEmulatorPath(), '-avd', id]).then((ProcessResult runResult) {
       if (runResult.exitCode != 0) {
         throw '${runResult.stdout}\n${runResult.stderr}'.trimRight();
       }
@@ -69,8 +68,7 @@ List<AndroidEmulator> getEmulatorAvds() {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput =
-      processManager.runSync(<String>[emulatorPath, '-list-avds']).stdout;
+  final String listAvdsOutput = processManager.runSync(<String>[emulatorPath, '-list-avds']).stdout;
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];
   if (listAvdsOutput != null) {
@@ -95,11 +93,9 @@ AndroidEmulator _loadEmulatorInfo(String id) {
     if (iniFile.existsSync()) {
       final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
       if (ini['path'] != null) {
-        final File configFile =
-            fs.file(fs.path.join(ini['path'], 'config.ini'));
+        final File configFile = fs.file(fs.path.join(ini['path'], 'config.ini'));
         if (configFile.existsSync()) {
-          final Map<String, String> properties =
-              parseIniLines(configFile.readAsLinesSync());
+          final Map<String, String> properties = parseIniLines(configFile.readAsLinesSync());
           return AndroidEmulator(id, properties);
         }
       }

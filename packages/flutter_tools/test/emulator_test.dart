@@ -38,25 +38,21 @@ void main() {
   group('EmulatorManager', () {
     testUsingContext('getEmulators', () async {
       // Test that EmulatorManager.getEmulators() doesn't throw.
-      final List<Emulator> emulators =
-          await emulatorManager.getAllAvailableEmulators();
+      final List<Emulator> emulators = await emulatorManager.getAllAvailableEmulators();
       expect(emulators, isList);
     });
 
     testUsingContext('getEmulatorsById', () async {
-      final _MockEmulator emulator1 =
-          _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
+      final _MockEmulator emulator1 = _MockEmulator('Nexus_5', 'Nexus 5', 'Google', '');
       final _MockEmulator emulator2 =
           _MockEmulator('Nexus_5X_API_27_x86', 'Nexus 5X', 'Google', '');
-      final _MockEmulator emulator3 =
-          _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
+      final _MockEmulator emulator3 = _MockEmulator('iOS Simulator', 'iOS Simulator', 'Apple', '');
       final List<Emulator> emulators = <Emulator>[
         emulator1,
         emulator2,
         emulator3,
       ];
-      final TestEmulatorManager testEmulatorManager =
-          TestEmulatorManager(emulators);
+      final TestEmulatorManager testEmulatorManager = TestEmulatorManager(emulators);
 
       Future<void> expectEmulator(String id, List<Emulator> expected) async {
         expect(await testEmulatorManager.getEmulatorsMatching(id), expected);
@@ -70,8 +66,7 @@ void main() {
       await expectEmulator('ios', <Emulator>[emulator3]);
     });
 
-    testUsingContext('create emulator with an empty name does not fail',
-        () async {
+    testUsingContext('create emulator with an empty name does not fail', () async {
       final CreateEmulatorResult res = await emulatorManager.createEmulator();
       expect(res.success, equals(true));
     }, overrides: <Type, Generator>{
@@ -80,10 +75,8 @@ void main() {
       AndroidSdk: () => mockSdk,
     });
 
-    testUsingContext('create emulator with a unique name does not throw',
-        () async {
-      final CreateEmulatorResult res =
-          await emulatorManager.createEmulator(name: 'test');
+    testUsingContext('create emulator with a unique name does not throw', () async {
+      final CreateEmulatorResult res = await emulatorManager.createEmulator(name: 'test');
       expect(res.success, equals(true));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -92,8 +85,7 @@ void main() {
     });
 
     testUsingContext('create emulator with an existing name errors', () async {
-      final CreateEmulatorResult res =
-          await emulatorManager.createEmulator(name: 'existing-avd-1');
+      final CreateEmulatorResult res = await emulatorManager.createEmulator(name: 'existing-avd-1');
       expect(res.success, equals(false));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
@@ -101,8 +93,7 @@ void main() {
       AndroidSdk: () => mockSdk,
     });
 
-    testUsingContext(
-        'create emulator without a name but when default exists adds a suffix',
+    testUsingContext('create emulator without a name but when default exists adds a suffix',
         () async {
       // First will get default name.
       CreateEmulatorResult res = await emulatorManager.createEmulator();
@@ -129,12 +120,9 @@ void main() {
   group('ios_emulators', () {
     bool didAttemptToRunSimulator = false;
     setUp(() {
-      when(mockXcode.xcodeSelectPath)
-          .thenReturn('/fake/Xcode.app/Contents/Developer');
-      when(mockXcode.getSimulatorPath())
-          .thenAnswer((_) => '/fake/simulator.app');
-      when(mockProcessManager.run(any))
-          .thenAnswer((Invocation invocation) async {
+      when(mockXcode.xcodeSelectPath).thenReturn('/fake/Xcode.app/Contents/Developer');
+      when(mockXcode.getSimulatorPath()).thenAnswer((_) => '/fake/simulator.app');
+      when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
         final List<String> args = invocation.positionalArguments[0];
         if (args.length >= 3 &&
             args[0] == 'open' &&
@@ -169,8 +157,7 @@ class TestEmulatorManager extends EmulatorManager {
 }
 
 class _MockEmulator extends Emulator {
-  _MockEmulator(String id, this.name, this.manufacturer, this.label)
-      : super(id, true);
+  _MockEmulator(String id, this.name, this.manufacturer, this.label) : super(id, true);
 
   @override
   final String name;
@@ -241,16 +228,8 @@ class MockProcessManager extends Mock implements ProcessManager {
       return ProcessResult(101, 1, '', mockCreateFailureOutput);
     }
     if (args.length == 8 &&
-        _equality.equals(args, <String>[
-          'create',
-          'avd',
-          '-n',
-          args[3],
-          '-k',
-          args[5],
-          '-d',
-          args[7]
-        ])) {
+        _equality
+            .equals(args, <String>['create', 'avd', '-n', args[3], '-k', args[5], '-d', args[7]])) {
       // In order to support testing auto generation of names we need to support
       // tracking any created emulators and reject when they already exist so this
       // mock will compare the name of the AVD being created with the fake existing

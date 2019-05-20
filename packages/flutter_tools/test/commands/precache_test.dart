@@ -55,8 +55,7 @@ void main() {
     final MockFlutterVersion flutterVersion = MockFlutterVersion();
     when(flutterVersion.isStable).thenReturn(true);
 
-    testUsingContext('Adds artifact flags to requested artifacts on stable',
-        () async {
+    testUsingContext('Adds artifact flags to requested artifacts on stable', () async {
       // Release lock between test cases.
       Cache.releaseLockEarly();
       final PrecacheCommand command = PrecacheCommand();
@@ -89,8 +88,7 @@ void main() {
       Cache.releaseLockEarly();
       final PrecacheCommand command = PrecacheCommand();
       applyMocksToCommand(command);
-      await createTestCommandRunner(command)
-          .run(const <String>['precache', '--force']);
+      await createTestCommandRunner(command).run(const <String>['precache', '--force']);
       expect(
           artifacts,
           unorderedEquals(<DevelopmentArtifact>{

@@ -27,8 +27,7 @@ void main() {
   final StreamLogger logger = StreamLogger();
   group('attach', () {
     final FileSystem testFileSystem = MemoryFileSystem(
-      style:
-          platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+      style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
     );
 
     setUp(() {
@@ -53,8 +52,7 @@ void main() {
           // Now that the reader is used, start writing messages to it.
           Timer.run(() {
             mockLogReader.addLine('Foo');
-            mockLogReader.addLine(
-                'Observatory listening on http://127.0.0.1:$devicePort');
+            mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
           });
 
           return mockLogReader;
@@ -87,8 +85,7 @@ void main() {
             completer.complete();
           }
         });
-        final Future<void> task =
-            createTestCommandRunner(AttachCommand()).run(<String>['attach']);
+        final Future<void> task = createTestCommandRunner(AttachCommand()).run(<String>['attach']);
         await completer.future;
         verify(
           portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')),
@@ -111,8 +108,7 @@ void main() {
         final MockHotRunner mockHotRunner = MockHotRunner();
         when(mockHotRunner.attach()).thenAnswer((_) async => 0);
 
-        final MockHotRunnerFactory mockHotRunnerFactory =
-            MockHotRunnerFactory();
+        final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
         when(
           mockHotRunnerFactory.build(
             any,
@@ -159,8 +155,7 @@ void main() {
           ),
         )..called(1);
 
-        final List<FlutterDevice> flutterDevices =
-            verificationResult.captured.first;
+        final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
         expect(flutterDevices, hasLength(1));
 
         // Validate that the attach call built a flutter device with the right
@@ -183,8 +178,7 @@ void main() {
           await expectLater(
             createTestCommandRunner(command).run(<String>['attach', '--ipv6']),
             throwsToolExit(
-              message:
-                  'When the --debug-port or --debug-uri is unknown, this command determines '
+              message: 'When the --debug-port or --debug-uri is unknown, this command determines '
                   'the value of --ipv6 on its own.',
             ),
           );
@@ -201,11 +195,9 @@ void main() {
 
           final AttachCommand command = AttachCommand();
           await expectLater(
-            createTestCommandRunner(command)
-                .run(<String>['attach', '--observatory-port', '100']),
+            createTestCommandRunner(command).run(<String>['attach', '--observatory-port', '100']),
             throwsToolExit(
-              message:
-                  'When the --debug-port or --debug-uri is unknown, this command does not use '
+              message: 'When the --debug-port or --debug-uri is unknown, this command does not use '
                   'the value of --observatory-port.',
             ),
           );
@@ -246,8 +238,7 @@ void main() {
         // Now that the reader is used, start writing messages to it.
         Timer.run(() {
           mockLogReader.addLine('Foo');
-          mockLogReader
-              .addLine('Observatory listening on http://127.0.0.1:$devicePort');
+          mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
         });
         return mockLogReader;
       });
@@ -256,10 +247,8 @@ void main() {
       // Delete the main.dart file to be sure that attach works without it.
       fs.file('lib/main.dart').deleteSync();
 
-      final AttachCommand command =
-          AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
-      await createTestCommandRunner(command)
-          .run(<String>['attach', '-t', foo.path, '-v']);
+      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
 
       verify(mockHotRunnerFactory.build(
         any,
@@ -285,8 +274,7 @@ void main() {
         device = MockAndroidDevice();
 
         when(device.portForwarder).thenReturn(portForwarder);
-        when(portForwarder.forward(devicePort))
-            .thenAnswer((_) async => hostPort);
+        when(portForwarder.forward(devicePort)).thenAnswer((_) async => hostPort);
         when(portForwarder.forwardedPorts)
             .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
         when(portForwarder.unforward(any)).thenAnswer((_) async => null);
@@ -298,8 +286,7 @@ void main() {
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription =
             logger.stream.listen((String message) {
-          if (message ==
-              '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -323,8 +310,7 @@ void main() {
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription =
             logger.stream.listen((String message) {
-          if (message ==
-              '[verbose] Connecting to service protocol: http://[::1]:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -342,15 +328,13 @@ void main() {
         Logger: () => logger,
       });
 
-      testUsingContext('skips in ipv4 mode with a provided observatory port',
-          () async {
+      testUsingContext('skips in ipv4 mode with a provided observatory port', () async {
         testDeviceManager.addDevice(device);
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription =
             logger.stream.listen((String message) {
-          if (message ==
-              '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://127.0.0.1:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -375,15 +359,13 @@ void main() {
         Logger: () => logger,
       });
 
-      testUsingContext('skips in ipv6 mode with a provided observatory port',
-          () async {
+      testUsingContext('skips in ipv6 mode with a provided observatory port', () async {
         testDeviceManager.addDevice(device);
 
         final Completer<void> completer = Completer<void>();
         final StreamSubscription<String> loggerSubscription =
             logger.stream.listen((String message) {
-          if (message ==
-              '[verbose] Connecting to service protocol: http://[::1]:42/') {
+          if (message == '[verbose] Connecting to service protocol: http://[::1]:42/') {
             // Wait until resident_runner.dart tries to connect.
             // There's nothing to connect _to_, so that's as far as we care to go.
             completer.complete();
@@ -456,26 +438,22 @@ void main() {
       final MDnsClient client = MockMDnsClient();
 
       when(client.lookup<PtrResourceRecord>(
-        ResourceRecordQuery.serverPointer(
-            MDnsObservatoryDiscovery.dartObservatoryName),
+        ResourceRecordQuery.serverPointer(MDnsObservatoryDiscovery.dartObservatoryName),
       )).thenAnswer((_) => Stream<PtrResourceRecord>.fromIterable(ptrRecords));
 
-      for (final MapEntry<String, List<SrvResourceRecord>> entry
-          in srvResponse.entries) {
+      for (final MapEntry<String, List<SrvResourceRecord>> entry in srvResponse.entries) {
         when(client.lookup<SrvResourceRecord>(
           ResourceRecordQuery.service(entry.key),
-        )).thenAnswer(
-            (_) => Stream<SrvResourceRecord>.fromIterable(entry.value));
+        )).thenAnswer((_) => Stream<SrvResourceRecord>.fromIterable(entry.value));
       }
       return client;
     }
 
     testUsingContext('No ports available', () async {
-      final MDnsClient client = getMockClient(
-          <PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+      final MDnsClient client =
+          getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
 
-      final MDnsObservatoryDiscovery portDiscovery =
-          MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
     });
@@ -487,14 +465,12 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000,
-                port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery =
-          MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;
       expect(port, 123);
     });
@@ -507,18 +483,15 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000,
-                port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
           'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000,
-                port: 321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
           ],
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery =
-          MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       expect(() => portDiscovery.query(), throwsToolExit());
     });
 
@@ -530,24 +503,20 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000,
-                port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
           'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000,
-                port: 321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
           ],
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery =
-          MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query(applicationId: 'fiz'))?.port;
       expect(port, 321);
     });
 
-    testUsingContext('Multiple ports available per process, with appId',
-        () async {
+    testUsingContext('Multiple ports available per process, with appId', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -555,22 +524,17 @@ void main() {
         ],
         <String, List<SrvResourceRecord>>{
           'bar': <SrvResourceRecord>[
-            SrvResourceRecord('bar', year3000,
-                port: 1234, weight: 1, priority: 1, target: 'appId'),
-            SrvResourceRecord('bar', year3000,
-                port: 123, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000, port: 1234, weight: 1, priority: 1, target: 'appId'),
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
           'fiz': <SrvResourceRecord>[
-            SrvResourceRecord('fiz', year3000,
-                port: 4321, weight: 1, priority: 1, target: 'local'),
-            SrvResourceRecord('fiz', year3000,
-                port: 321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000, port: 4321, weight: 1, priority: 1, target: 'local'),
+            SrvResourceRecord('fiz', year3000, port: 321, weight: 1, priority: 1, target: 'local'),
           ],
         },
       );
 
-      final MDnsObservatoryDiscovery portDiscovery =
-          MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, 1234);
     });
@@ -581,8 +545,7 @@ void main() {
         <String, List<SrvResourceRecord>>{},
       );
 
-      final MDnsObservatoryDiscovery portDiscovery =
-          MDnsObservatoryDiscovery(mdnsClient: client);
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, isNull);
     });
@@ -650,8 +613,7 @@ class StreamLogger extends Logger {
     _interrupt = true;
   }
 
-  final StreamController<String> _controller =
-      StreamController<String>.broadcast();
+  final StreamController<String> _controller = StreamController<String>.broadcast();
 
   void _log(String message) {
     _controller.add(message);
@@ -668,8 +630,7 @@ class LoggerInterrupted implements Exception {
   const LoggerInterrupted();
 }
 
-Future<void> expectLoggerInterruptEndsTask(
-    Future<void> task, StreamLogger logger) async {
+Future<void> expectLoggerInterruptEndsTask(Future<void> task, StreamLogger logger) async {
   logger.interrupt(); // an exception during the task should cause it to fail...
   try {
     await task;

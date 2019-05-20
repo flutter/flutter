@@ -25,12 +25,10 @@ Future<String> findVcvars() async {
   final String programDir = platform.environment['PROGRAMFILES(X86)'];
   final String pathPrefix = fs.path.join(programDir, 'Microsoft Visual Studio');
   const String vcvarsScriptName = 'vcvars64.bat';
-  final String pathSuffix =
-      fs.path.join('VC', 'Auxiliary', 'Build', vcvarsScriptName);
+  final String pathSuffix = fs.path.join('VC', 'Auxiliary', 'Build', vcvarsScriptName);
   for (final String version in _visualStudioVersions) {
     for (final String flavor in _visualStudioFlavors) {
-      final String testPath =
-          fs.path.join(pathPrefix, version, flavor, pathSuffix);
+      final String testPath = fs.path.join(pathPrefix, version, flavor, pathSuffix);
       if (fs.file(testPath).existsSync()) {
         return testPath;
       }
@@ -56,8 +54,7 @@ void writePropertySheet(File propertySheetFile, Map<String, String> variables) {
   builder.processing('xml', 'version="1.0" encoding="utf-8"');
   builder.element('Project', nest: () {
     builder.attribute('ToolsVersion', '4.0');
-    builder.attribute(
-        'xmlns', 'http://schemas.microsoft.com/developer/msbuild/2003');
+    builder.attribute('xmlns', 'http://schemas.microsoft.com/developer/msbuild/2003');
     builder.element('ImportGroup', nest: () {
       builder.attribute('Label', 'PropertySheets');
     });
@@ -68,8 +65,7 @@ void writePropertySheet(File propertySheetFile, Map<String, String> variables) {
   });
 
   propertySheetFile.createSync(recursive: true);
-  propertySheetFile.writeAsStringSync(
-      builder.build().toXmlString(pretty: true, indent: '  '));
+  propertySheetFile.writeAsStringSync(builder.build().toXmlString(pretty: true, indent: '  '));
 }
 
 /// Adds the UserMacros PropertyGroup that defines [variables] to [builder].

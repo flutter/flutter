@@ -57,8 +57,7 @@ class IntelliJPlugins {
     // TODO(danrubel): look for a better way to extract a single 2K file from the zip
     // rather than reading the entire file into memory.
     try {
-      final Archive archive =
-          ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
+      final Archive archive = ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
       final String content = utf8.decode(file.content);
       const String versionStartTag = '<version>';

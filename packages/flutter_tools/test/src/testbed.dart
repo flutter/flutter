@@ -61,8 +61,7 @@ class Testbed {
 
   /// Runs `test` within a tool zone.
   FutureOr<T> run<T>(FutureOr<T> Function() test) {
-    final Map<Type, Generator> testOverrides =
-        Map<Type, Generator>.from(_testbedDefaults);
+    final Map<Type, Generator> testOverrides = Map<Type, Generator>.from(_testbedDefaults);
     if (_overrides != null) {
       testOverrides.addAll(_overrides);
     }

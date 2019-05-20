@@ -16,8 +16,7 @@ import '../project.dart';
 /// Builds the macOS project through xcode build.
 // TODO(jonahwilliams): support target option.
 // TODO(jonahwilliams): refactor to share code with the existing iOS code.
-Future<void> buildMacOS(
-    FlutterProject flutterProject, BuildInfo buildInfo) async {
+Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) async {
   final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
@@ -56,14 +55,8 @@ Future<void> buildMacOS(
   );
   int result;
   try {
-    process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printError);
-    process.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printTrace);
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(printError);
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(printTrace);
     result = await process.exitCode;
   } finally {
     status.cancel();

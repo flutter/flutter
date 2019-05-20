@@ -5,8 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test_core/src/executable.dart'
-    as test; // ignore: implementation_imports
+import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -69,11 +68,9 @@ Future<int> runTests(
 
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!processManager.canRun(shellPath))
-    throwToolExit('Cannot find Flutter shell at $shellPath');
+  if (!processManager.canRun(shellPath)) throwToolExit('Cannot find Flutter shell at $shellPath');
 
-  final InternetAddressType serverType =
-      ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
+  final InternetAddressType serverType = ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
   loader.installHook(
     shellPath: shellPath,

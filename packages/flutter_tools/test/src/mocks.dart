@@ -48,8 +48,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     bool withPlatformTools = true,
     bool withBuildTools = true,
   }) {
-    final Directory dir =
-        fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
     final String exe = platform.isWindows ? '.exe' : '';
     final String bat = platform.isWindows ? '.bat' : '';
 
@@ -63,16 +62,14 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
       _createSdkFile(dir, 'build-tools/19.1.0/aapt$exe');
       _createSdkFile(dir, 'build-tools/22.0.1/aapt$exe');
       _createSdkFile(dir, 'build-tools/23.0.2/aapt$exe');
-      if (withAndroidN)
-        _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt$exe');
+      if (withAndroidN) _createSdkFile(dir, 'build-tools/24.0.0-preview/aapt$exe');
     }
 
     _createSdkFile(dir, 'platforms/android-22/android.jar');
     _createSdkFile(dir, 'platforms/android-23/android.jar');
     if (withAndroidN) {
       _createSdkFile(dir, 'platforms/android-N/android.jar');
-      _createSdkFile(dir, 'platforms/android-N/build.prop',
-          contents: _buildProp);
+      _createSdkFile(dir, 'platforms/android-N/build.prop', contents: _buildProp);
     }
 
     if (withSdkManager) _createSdkFile(dir, 'tools/bin/sdkmanager$bat');
@@ -96,8 +93,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
       );
       _createSdkFile(dir, ndkCompiler);
       _createSdkFile(dir, ndkLinker);
-      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'),
-          contents: '''
+      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'), contents: '''
 Pkg.Desc = Android NDK[]
 Pkg.Revision = $ndkVersion.1.5063045
 
@@ -116,8 +112,7 @@ Pkg.Revision = $ndkVersion.1.5063045
     return dir;
   }
 
-  static void _createSdkFile(Directory dir, String filePath,
-      {String contents}) {
+  static void _createSdkFile(Directory dir, String filePath, {String contents}) {
     final File file = dir.childFile(filePath);
     file.createSync(recursive: true);
     if (contents != null) {
@@ -160,8 +155,7 @@ class MockProcessManager implements ProcessManager {
   }) {
     if (!succeed) {
       final String executable = command[0];
-      final List<String> arguments =
-          command.length > 1 ? command.sublist(1) : <String>[];
+      final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
     }
 
@@ -241,14 +235,12 @@ class PromptingProcess implements Process {
     // Echo stdin to stdout.
     _stdoutController.add(bytesOnStdin);
     if (bytesOnStdin[0] == utf8.encode('y')[0]) {
-      for (final String line in outputLines)
-        _stdoutController.add(utf8.encode('$line\n'));
+      for (final String line in outputLines) _stdoutController.add(utf8.encode('$line\n'));
     }
     await _stdoutController.close();
   }
 
-  final StreamController<List<int>> _stdoutController =
-      StreamController<List<int>>();
+  final StreamController<List<int>> _stdoutController = StreamController<List<int>>();
   final CompleterIOSink _stdin = CompleterIOSink();
 
   @override
@@ -365,20 +357,16 @@ class MockStdio extends Stdio {
     _stdin.add(utf8.encode('$line\n'));
   }
 
-  List<String> get writtenToStdout =>
-      _stdout.writes.map<String>(_stdout.encoding.decode).toList();
-  List<String> get writtenToStderr =>
-      _stderr.writes.map<String>(_stderr.encoding.decode).toList();
+  List<String> get writtenToStdout => _stdout.writes.map<String>(_stdout.encoding.decode).toList();
+  List<String> get writtenToStderr => _stderr.writes.map<String>(_stderr.encoding.decode).toList();
 }
 
 class MockPollingDeviceDiscovery extends PollingDeviceDiscovery {
   MockPollingDeviceDiscovery() : super('mock');
 
   final List<Device> _devices = <Device>[];
-  final StreamController<Device> _onAddedController =
-      StreamController<Device>.broadcast();
-  final StreamController<Device> _onRemovedController =
-      StreamController<Device>.broadcast();
+  final StreamController<Device> _onAddedController = StreamController<Device>.broadcast();
+  final StreamController<Device> _onRemovedController = StreamController<Device>.broadcast();
 
   @override
   Future<List<Device>> pollingGetDevices() async => _devices;
@@ -450,8 +438,7 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesController =
-      StreamController<String>.broadcast();
+  final StreamController<String> _linesController = StreamController<String>.broadcast();
 
   @override
   Stream<String> get logLines => _linesController.stream;
@@ -501,8 +488,7 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(
-      String fsName, Uri deviceUri, DevFSContent content) async {
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
     String message = 'writeFile $fsName $deviceUri';
     if (content is DevFSFileContent) {
       message += ' ${content.file.path}';

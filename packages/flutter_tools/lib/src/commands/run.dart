@@ -21,8 +21,7 @@ import '../runner/flutter_command.dart';
 import '../tracing.dart';
 import 'daemon.dart';
 
-abstract class RunCommandBase extends FlutterCommand
-    with DeviceBasedDevelopmentArtifacts {
+abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   // Used by run and drive commands.
   RunCommandBase({bool verboseHelp = false}) {
     addBuildModeFlags(defaultToRelease: false, verboseHelp: verboseHelp);
@@ -32,8 +31,7 @@ abstract class RunCommandBase extends FlutterCommand
       ..addFlag(
         'trace-startup',
         negatable: false,
-        help:
-            'Trace application startup, then exit, saving the trace to a file.',
+        help: 'Trace application startup, then exit, saving the trace to a file.',
       )
       ..addFlag(
         'verbose-system-logs',
@@ -120,8 +118,7 @@ class RunCommand extends RunCommandBase {
       ..addFlag(
         'dump-skp-on-shader-compilation',
         negatable: false,
-        help:
-            'Automatically dump the skp that triggers new shader compilations. '
+        help: 'Automatically dump the skp that triggers new shader compilations. '
             'This is useful for wrting custom ShaderWarmUp to reduce jank. '
             'By default, this is not enabled to reduce the overhead. '
             'This is only available in profile or debug build. ',
@@ -129,8 +126,7 @@ class RunCommand extends RunCommandBase {
       ..addFlag(
         'await-first-frame-when-tracing',
         defaultsTo: true,
-        help:
-            'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
+        help: 'Whether to wait for the first frame when tracing startup ("--trace-startup"), '
             'or just dump the trace as soon as the application is running. The first frame '
             'is detected by looking for a Timeline event with the name '
             '"${Tracing.firstUsefulFrameEventName}". '
@@ -197,8 +193,7 @@ class RunCommand extends RunCommandBase {
         'benchmark',
         negatable: false,
         hide: !verboseHelp,
-        help:
-            'Enable a benchmarking mode. This will run the given application, '
+        help: 'Enable a benchmarking mode. This will run the given application, '
             'measure the startup time and the app restart time, write the '
             'results out to "refresh_benchmark.json", and exit. This flag is '
             'intended for use in generating automated flutter benchmarks.',
@@ -253,8 +248,7 @@ class RunCommand extends RunCommandBase {
     if (getCurrentHostPlatform() == HostPlatform.darwin_x64 &&
         xcode.isInstalledAndMeetsVersionCheck) {
       printStatus('');
-      printStatus(
-          "Run 'flutter emulators' to list and start any available device emulators.");
+      printStatus("Run 'flutter emulators' to list and start any available device emulators.");
       printStatus('');
       printStatus(
           'If you expected your device to be detected, please run "flutter doctor" to diagnose');
@@ -277,12 +271,10 @@ class RunCommand extends RunCommandBase {
     return getBuildInfo().isDebug && shouldUseHotMode;
   }
 
-  bool get runningWithPrebuiltApplication =>
-      argResults['use-application-binary'] != null;
+  bool get runningWithPrebuiltApplication => argResults['use-application-binary'] != null;
 
   bool get stayResident => argResults['resident'];
-  bool get awaitFirstFrameWhenTracing =>
-      argResults['await-first-frame-when-tracing'];
+  bool get awaitFirstFrameWhenTracing => argResults['await-first-frame-when-tracing'];
 
   @override
   Future<void> validateCommand() async {
@@ -292,8 +284,7 @@ class RunCommand extends RunCommandBase {
     devices = await findAllTargetDevices();
     if (devices == null) throwToolExit(null);
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication)
-      throwToolExit(
-          'Using -d all with --use-application-binary is not supported');
+      throwToolExit('Using -d all with --use-application-binary is not supported');
   }
 
   DebuggingOptions _createDebuggingOptions() {
@@ -310,8 +301,7 @@ class RunCommand extends RunCommandBase {
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
         traceSkia: argResults['trace-skia'],
         traceSystrace: argResults['trace-systrace'],
-        dumpSkpOnShaderCompilation:
-            argResults['dump-skp-on-shader-compilation'],
+        dumpSkpOnShaderCompilation: argResults['dump-skp-on-shader-compilation'],
         observatoryPort: observatoryPort,
         verboseSystemLogs: argResults['verbose-system-logs'],
       );
@@ -329,14 +319,12 @@ class RunCommand extends RunCommandBase {
     writePidFile(argResults['pid-file']);
 
     if (argResults['machine']) {
-      if (devices.length > 1)
-        throwToolExit('--machine does not support -d all.');
+      if (devices.length > 1) throwToolExit('--machine does not support -d all.');
       final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
           notifyingLogger: NotifyingLogger(), logToStdout: true);
       AppInstance app;
       try {
-        final String applicationBinaryPath =
-            argResults['use-application-binary'];
+        final String applicationBinaryPath = argResults['use-application-binary'];
         app = await daemon.appDomain.startApp(
           devices.first,
           fs.currentDirectory.path,
@@ -344,9 +332,7 @@ class RunCommand extends RunCommandBase {
           route,
           _createDebuggingOptions(),
           hotMode,
-          applicationBinary: applicationBinaryPath == null
-              ? null
-              : fs.file(applicationBinaryPath),
+          applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
           trackWidgetCreation: argResults['track-widget-creation'],
           projectRootPath: argResults['project-root'],
           packagesFilePath: globalResults['packages'],
@@ -369,8 +355,7 @@ class RunCommand extends RunCommandBase {
     for (Device device in devices) {
       if (await device.isLocalEmulator) {
         if (await device.supportsHardwareRendering) {
-          final bool enableSoftwareRendering =
-              argResults['enable-software-rendering'] == true;
+          final bool enableSoftwareRendering = argResults['enable-software-rendering'] == true;
           if (enableSoftwareRendering) {
             printStatus(
                 'Using software rendering with device ${device.name}. You may get better performance '
@@ -392,16 +377,14 @@ class RunCommand extends RunCommandBase {
     if (hotMode) {
       for (Device device in devices) {
         if (!device.supportsHotReload)
-          throwToolExit(
-              'Hot reload is not supported by ${device.name}. Run with --no-hot.');
+          throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
       }
     }
 
     if (argResults['train'] &&
         getBuildMode() != BuildMode.debug &&
         getBuildMode() != BuildMode.dynamicProfile)
-      throwToolExit(
-          'Error: --train is only allowed when running as --dynamic --profile '
+      throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
           '(recommended) or --debug (may include unwanted debug symbols).');
 
     List<String> expFlags;
@@ -435,9 +418,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         debuggingOptions: _createDebuggingOptions(),
         benchmarkMode: argResults['benchmark'],
-        applicationBinary: applicationBinaryPath == null
-            ? null
-            : fs.file(applicationBinaryPath),
+        applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
@@ -452,9 +433,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         traceStartup: traceStartup,
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
-        applicationBinary: applicationBinaryPath == null
-            ? null
-            : fs.file(applicationBinaryPath),
+        applicationBinary: applicationBinaryPath == null ? null : fs.file(applicationBinaryPath),
         saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
@@ -486,9 +465,7 @@ class RunCommand extends RunCommandBase {
         devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple',
-        devices.length == 1 && await devices[0].isLocalEmulator
-            ? 'emulator'
-            : null,
+        devices.length == 1 && await devices[0].isLocalEmulator ? 'emulator' : null,
       ],
       endTimeOverride: appStartedTime,
     );

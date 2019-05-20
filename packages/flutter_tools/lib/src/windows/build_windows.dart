@@ -20,8 +20,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo,
     'FLUTTER_ROOT': Cache.flutterRoot,
     'FLUTTER_TARGET': target,
     'PROJECT_DIR': windowsProject.project.directory.path,
-    'TRACK_WIDGET_CREATION':
-        (buildInfo?.trackWidgetCreation == true).toString(),
+    'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
   };
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
@@ -44,14 +43,8 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo,
   );
   int result;
   try {
-    process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printError);
-    process.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printTrace);
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(printError);
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(printTrace);
     result = await process.exitCode;
   } finally {
     status.cancel();

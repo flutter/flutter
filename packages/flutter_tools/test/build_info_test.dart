@@ -14,23 +14,18 @@ void main() {
     setUp(() async {});
 
     testUsingContext('CFBundleVersion for iOS', () async {
-      String buildName =
-          validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz');
+      String buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, 'xyz');
       expect(buildName, '0');
-      buildName =
-          validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.xyz');
       expect(buildName, '123');
-      buildName =
-          validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.ios, '123.456.xyz');
       expect(buildName, '123.456');
     });
 
     testUsingContext('versionCode for Android', () async {
-      String buildName = validatedBuildNumberForPlatform(
-          TargetPlatform.android_arm, '123.abc+-');
+      String buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, '123.abc+-');
       expect(buildName, '123');
-      buildName =
-          validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc');
+      buildName = validatedBuildNumberForPlatform(TargetPlatform.android_arm, 'abc');
       expect(buildName, '1');
     });
   });
@@ -39,22 +34,18 @@ void main() {
     setUp(() async {});
 
     testUsingContext('CFBundleShortVersionString for iOS', () async {
-      String buildName =
-          validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz');
+      String buildName = validatedBuildNameForPlatform(TargetPlatform.ios, 'xyz');
       expect(buildName, '0.0.0');
-      buildName =
-          validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz');
+      buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.456.xyz');
       expect(buildName, '123.456.0');
       buildName = validatedBuildNameForPlatform(TargetPlatform.ios, '123.xyz');
       expect(buildName, '123.0.0');
     });
 
     testUsingContext('versionName for Android', () async {
-      String buildName = validatedBuildNameForPlatform(
-          TargetPlatform.android_arm, '123.abc+-');
+      String buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, '123.abc+-');
       expect(buildName, '123.abc+-');
-      buildName =
-          validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-');
+      buildName = validatedBuildNameForPlatform(TargetPlatform.android_arm, 'abc+-');
       expect(buildName, 'abc+-');
     });
   });

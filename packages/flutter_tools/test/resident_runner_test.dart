@@ -56,8 +56,7 @@ void main() {
     // well as the default flags.
     return TestRunner(
       <FlutterDevice>[
-        FlutterDevice(MockDevice(),
-            trackWidgetCreation: false, buildMode: BuildMode.debug)
+        FlutterDevice(MockDevice(), trackWidgetCreation: false, buildMode: BuildMode.debug)
       ],
     );
   }

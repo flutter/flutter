@@ -33,8 +33,7 @@ Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
 }
 
 /// Check if the given URL points to a valid endpoint.
-Future<bool> doesRemoteFileExist(Uri url) async =>
-    (await _attempt(url, onlyHeaders: true)) != null;
+Future<bool> doesRemoteFileExist(Uri url) async => (await _attempt(url, onlyHeaders: true)) != null;
 
 Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
   printTrace('Downloading: $url');
@@ -79,8 +78,7 @@ Future<List<int>> _attempt(Uri url, {bool onlyHeaders = false}) async {
       );
     }
     // 5xx errors are server errors and we can try again
-    printTrace(
-        'Download error: ${response.statusCode} ${response.reasonPhrase}');
+    printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
     return null;
   }
   printTrace('Received response from server, collecting bytes...');

@@ -40,9 +40,7 @@ void main() {
       expect(_flutter.hasExited, equals(false));
     });
 
-    test(
-        'does not terminate when a debugger is attached and pause-on-exceptions',
-        () async {
+    test('does not terminate when a debugger is attached and pause-on-exceptions', () async {
       await _flutter.run(withDebugger: true, pauseOnExceptions: true);
       await Future<void>.delayed(requiredLifespan);
       expect(_flutter.hasExited, equals(false));

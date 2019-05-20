@@ -43,8 +43,7 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  })  : wrapText =
-            wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
+  })  : wrapText = wrapText ?? io.stdio?.hasTerminal ?? const io.Stdio().hasTerminal,
         _overrideWrapColumn = wrapColumn,
         showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
 
@@ -112,8 +111,7 @@ class AnsiTerminal {
   static String colorCode(TerminalColor color) => _colorMap[color];
 
   bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
-  final RegExp _boldControls =
-      RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
+  final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   String bolden(String message) {
     assert(message != null);
@@ -174,9 +172,8 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes {
-    _broadcastStdInString ??= io.stdin
-        .transform<String>(const AsciiDecoder(allowInvalid: true))
-        .asBroadcastStream();
+    _broadcastStdInString ??=
+        io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
@@ -203,18 +200,14 @@ class AnsiTerminal {
     assert(displayAcceptedCharacters != null);
     List<String> charactersToDisplay = acceptedCharacters;
     if (defaultChoiceIndex != null) {
-      assert(defaultChoiceIndex >= 0 &&
-          defaultChoiceIndex < acceptedCharacters.length);
+      assert(defaultChoiceIndex >= 0 && defaultChoiceIndex < acceptedCharacters.length);
       charactersToDisplay = List<String>.from(charactersToDisplay);
-      charactersToDisplay[defaultChoiceIndex] =
-          bolden(charactersToDisplay[defaultChoiceIndex]);
+      charactersToDisplay[defaultChoiceIndex] = bolden(charactersToDisplay[defaultChoiceIndex]);
       acceptedCharacters.add('\n');
     }
     String choice;
     singleCharMode = true;
-    while (choice == null ||
-        choice.length > 1 ||
-        !acceptedCharacters.contains(choice)) {
+    while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
         printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters)

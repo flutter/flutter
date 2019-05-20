@@ -10,8 +10,7 @@ import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 final ArgParser argParser = ArgParser()
-  ..addFlag('back',
-      help: 'Swap back to dart:ui from web_ui', defaultsTo: false);
+  ..addFlag('back', help: 'Swap back to dart:ui from web_ui', defaultsTo: false);
 
 /// Swap the dart:ui imports with web_ui for local development.
 ///
@@ -24,21 +23,13 @@ Future<void> main(List<String> arguments) async {
     Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     printError('WARNING: This is only intended for use by flutter contributors.'
         ' Running this command will alter the code in your flutter checkout.');
-    final String engineDirectory = fs.path.join(
-        Cache.flutterRoot, '..', 'engine', 'src', 'flutter', 'lib', 'stub_ui');
-    final String flutterPath =
-        fs.path.join(Cache.flutterRoot, 'packages', 'flutter');
-    final String flutterTestPath =
-        fs.path.join(Cache.flutterRoot, 'packages', 'flutter_test');
+    final String engineDirectory =
+        fs.path.join(Cache.flutterRoot, '..', 'engine', 'src', 'flutter', 'lib', 'stub_ui');
+    final String flutterPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter');
+    final String flutterTestPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_test');
     final List<List<Pattern>> codePatterns = <List<Pattern>>[
-      <Pattern>[
-        'import \'dart:ui\'',
-        'import \'package:flutter_web_ui/ui.dart\''
-      ],
-      <Pattern>[
-        'export \'dart:ui\'',
-        'export \'package:flutter_web_ui/ui.dart\''
-      ],
+      <Pattern>['import \'dart:ui\'', 'import \'package:flutter_web_ui/ui.dart\''],
+      <Pattern>['export \'dart:ui\'', 'export \'package:flutter_web_ui/ui.dart\''],
       <Pattern>[
         'export \'bitfield.dart\' if (dart.library.html) \'bitfield_unsupported.dart\';',
         'export \'bitfield_unsupported.dart\';'
@@ -105,8 +96,7 @@ flutter_goldens:
     ]
         .expand((Directory directory) => directory.listSync(recursive: true))
         .whereType<File>()
-        .where((File file) =>
-            file.path.endsWith('.dart') || file.path.endsWith('pubspec.yaml'));
+        .where((File file) => file.path.endsWith('.dart') || file.path.endsWith('pubspec.yaml'));
 
     for (File file in searchFiles) {
       String contents = file.readAsStringSync();

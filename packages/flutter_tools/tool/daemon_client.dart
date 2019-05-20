@@ -20,8 +20,7 @@ Process daemon;
 //   launch: launch an emulator
 
 Future<void> main() async {
-  daemon =
-      await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
+  daemon = await Process.start('dart', <String>['bin/flutter_tools.dart', 'daemon']);
   print('daemon process started, pid: ${daemon.pid}');
 
   daemon.stdout

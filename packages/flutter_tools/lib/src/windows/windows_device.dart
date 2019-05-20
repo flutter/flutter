@@ -75,18 +75,16 @@ class WindowsDevice extends Device {
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
-      await buildWindows(
-          FlutterProject.current().windows, debuggingOptions.buildInfo);
+      await buildWindows(FlutterProject.current().windows, debuggingOptions.buildInfo);
     }
     await stopApp(package);
-    final Process process = await processManager
-        .start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
+    final Process process =
+        await processManager.start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
     _logReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery =
-        ProtocolDiscovery.observatory(_logReader);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -101,13 +99,12 @@ class WindowsDevice extends Device {
   @override
   Future<bool> stopApp(covariant WindowsApp app) async {
     // Assume debug for now.
-    final List<String> process =
-        runningProcess(app.executable(BuildMode.debug));
+    final List<String> process = runningProcess(app.executable(BuildMode.debug));
     if (process == null) {
       return false;
     }
-    final ProcessResult result = await processManager
-        .run(<String>['Taskkill', '/PID', process.first, '/F']);
+    final ProcessResult result =
+        await processManager.run(<String>['Taskkill', '/PID', process.first, '/F']);
     return result.exitCode == 0;
   }
 
@@ -156,8 +153,8 @@ final RegExp _whitespace = RegExp(r'\w+');
 @visibleForTesting
 List<String> runningProcess(String processName) {
   // TODO(jonahwilliams): find a way to do this without powershell.
-  final ProcessResult result = processManager.runSync(
-      <String>['powershell', '-script="Get-CimInstance Win32_Process"']);
+  final ProcessResult result =
+      processManager.runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']);
   if (result.exitCode != 0) {
     return null;
   }

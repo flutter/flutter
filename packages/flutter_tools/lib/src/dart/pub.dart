@@ -26,8 +26,7 @@ class PubContext {
   PubContext._(this._values) {
     for (String item in _values) {
       if (!_validContext.hasMatch(item)) {
-        throw ArgumentError.value(
-            _values, 'value', 'Must match RegExp ${_validContext.pattern}');
+        throw ArgumentError.value(_values, 'value', 'Must match RegExp ${_validContext.pattern}');
       }
     }
   }
@@ -37,18 +36,15 @@ class PubContext {
 
   static final PubContext create = PubContext._(<String>['create']);
   static final PubContext createPackage = PubContext._(<String>['create_pkg']);
-  static final PubContext createPlugin =
-      PubContext._(<String>['create_plugin']);
+  static final PubContext createPlugin = PubContext._(<String>['create_plugin']);
   static final PubContext interactive = PubContext._(<String>['interactive']);
   static final PubContext pubGet = PubContext._(<String>['get']);
   static final PubContext pubUpgrade = PubContext._(<String>['upgrade']);
   static final PubContext pubForward = PubContext._(<String>['forward']);
   static final PubContext runTest = PubContext._(<String>['run_test']);
 
-  static final PubContext flutterTests =
-      PubContext._(<String>['flutter_tests']);
-  static final PubContext updatePackages =
-      PubContext._(<String>['update_packages']);
+  static final PubContext flutterTests = PubContext._(<String>['flutter_tests']);
+  static final PubContext updatePackages = PubContext._(<String>['update_packages']);
 
   final List<String> _values;
 
@@ -61,13 +57,10 @@ class PubContext {
 bool _shouldRunPubGet({File pubSpecYaml, File dotPackages}) {
   if (!dotPackages.existsSync()) return true;
   final DateTime dotPackagesLastModified = dotPackages.lastModifiedSync();
-  if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified))
-    return true;
-  final File flutterToolsStamp =
-      Cache.instance.getStampFileFor('flutter_tools');
+  if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) return true;
+  final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.existsSync() &&
-      flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified))
-    return true;
+      flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified)) return true;
   return false;
 }
 
@@ -92,16 +85,15 @@ Future<void> pubGet({
     return;
   }
 
-  if (!checkLastModified ||
-      _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
+  if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
       'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
       timeout: timeoutConfiguration.slowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
-    if (FlutterCommand.current != null &&
-        FlutterCommand.current.globalResults['verbose']) args.add('--verbose');
+    if (FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'])
+      args.add('--verbose');
     args.addAll(<String>[command, '--no-precompile']);
     if (offline) args.add('--offline');
     try {
@@ -120,8 +112,7 @@ Future<void> pubGet({
     }
   }
 
-  if (!dotPackages.existsSync())
-    throwToolExit('$directory: pub did not create .packages file');
+  if (!dotPackages.existsSync()) throwToolExit('$directory: pub did not create .packages file');
 
   if (dotPackages.lastModifiedSync().isBefore(pubSpecYaml.lastModifiedSync()))
     throwToolExit(
@@ -188,8 +179,7 @@ Future<void> pubInteractively(
     workingDirectory: directory,
     environment: _createPubEnvironment(PubContext.interactive),
   );
-  if (code != 0)
-    throwToolExit('pub finished with exit code $code', exitCode: code);
+  if (code != 0) throwToolExit('pub finished with exit code $code', exitCode: code);
 }
 
 /// The command used for running pub.
@@ -269,8 +259,7 @@ String _filterOverrideWarnings(String message) {
   //   Warning: You are using these overridden dependencies:
   //   ! analyzer 0.29.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/analyzer
   //   ! front_end 0.1.0-alpha.0 from path ../../bin/cache/dart-sdk/lib/front_end
-  if (message == 'Warning: You are using these overridden dependencies:')
-    return null;
+  if (message == 'Warning: You are using these overridden dependencies:') return null;
   if (message.contains(_analyzerWarning)) return null;
   return message;
 }

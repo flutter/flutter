@@ -48,16 +48,14 @@ void main() {
   group('logFilePath', () {
     testUsingContext('defaults to rooted from HOME', () {
       osx.environment['HOME'] = '/foo/bar';
-      expect(IOSSimulator('123').logFilePath,
-          '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
+      expect(IOSSimulator('123').logFilePath, '/foo/bar/Library/Logs/CoreSimulator/123/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
     }, testOn: 'posix');
 
     testUsingContext('respects IOS_SIMULATOR_LOG_FILE_PATH', () {
       osx.environment['HOME'] = '/foo/bar';
-      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] =
-          '/baz/qux/%{id}/system.log';
+      osx.environment['IOS_SIMULATOR_LOG_FILE_PATH'] = '/baz/qux/%{id}/system.log';
       expect(IOSSimulator('456').logFilePath, '/baz/qux/456/system.log');
     }, overrides: <Type, Generator>{
       Platform: () => osx,
@@ -115,8 +113,7 @@ void main() {
       for (int i = 0; i < testList.length - 1; i++) {
         for (int j = i + 1; j < testList.length; j++) {
           expect(compareIphoneVersions(testList[i], testList[j]), lessThan(0));
-          expect(
-              compareIphoneVersions(testList[j], testList[i]), greaterThan(0));
+          expect(compareIphoneVersions(testList[j], testList[i]), greaterThan(0));
         }
       }
     });
@@ -126,15 +123,13 @@ void main() {
     // This new version string appears in SimulatorApp-850 CoreSimulator-518.16 beta.
     test('can be parsed from iOS-11-3', () async {
       final IOSSimulator device = IOSSimulator('x',
-          name: 'iPhone SE',
-          category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
+          name: 'iPhone SE', category: 'com.apple.CoreSimulator.SimRuntime.iOS-11-3');
 
       expect(await device.sdkMajorVersion, 11);
     });
 
     test('can be parsed from iOS 11.2', () async {
-      final IOSSimulator device =
-          IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
 
       expect(await device.sdkMajorVersion, 11);
     });
@@ -205,10 +200,8 @@ void main() {
       mockXcode = MockXcode();
       mockProcessManager = MockProcessManager();
       // Let everything else return exit code 0 so process.dart doesn't crash.
-      when(mockProcessManager.run(any,
-              environment: null, workingDirectory: null))
-          .thenAnswer((Invocation invocation) =>
-              Future<ProcessResult>.value(ProcessResult(2, 0, '', '')));
+      when(mockProcessManager.run(any, environment: null, workingDirectory: null)).thenAnswer(
+          (Invocation invocation) => Future<ProcessResult>.value(ProcessResult(2, 0, '', '')));
       // Doesn't matter what the device is.
       deviceUnderTest = IOSSimulator('x', name: 'iPhone SE');
     });
@@ -230,8 +223,7 @@ void main() {
         when(mockXcode.minorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
         final MockFile mockFile = MockFile();
-        when(mockFile.path)
-            .thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
+        when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
         await deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.run(
           <String>[
@@ -260,19 +252,15 @@ void main() {
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      when(mockProcessManager.start(any,
-              environment: null, workingDirectory: null))
-          .thenAnswer(
-              (Invocation invocation) => Future<Process>.value(MockProcess()));
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+          .thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
-      final IOSSimulator device =
-          IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny,
-                environment: null, workingDirectory: null))
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null))
             .captured
             .single,
         contains('tail'),
@@ -282,12 +270,10 @@ void main() {
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
-      final IOSSimulator device =
-          IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
       await launchDeviceLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny,
-                environment: null, workingDirectory: null))
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null))
             .captured
             .single,
         contains('/usr/bin/log'),
@@ -302,19 +288,15 @@ void main() {
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      when(mockProcessManager.start(any,
-              environment: null, workingDirectory: null))
-          .thenAnswer(
-              (Invocation invocation) => Future<Process>.value(MockProcess()));
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
+          .thenAnswer((Invocation invocation) => Future<Process>.value(MockProcess()));
     });
 
     testUsingContext('uses tail on iOS versions prior to iOS 11', () async {
-      final IOSSimulator device =
-          IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 9.3');
       await launchSystemLogTool(device);
       expect(
-        verify(mockProcessManager.start(captureAny,
-                environment: null, workingDirectory: null))
+        verify(mockProcessManager.start(captureAny, environment: null, workingDirectory: null))
             .captured
             .single,
         contains('tail'),
@@ -324,11 +306,9 @@ void main() {
     });
 
     testUsingContext('uses /usr/bin/log on iOS 11 and above', () async {
-      final IOSSimulator device =
-          IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.0');
       await launchSystemLogTool(device);
-      verifyNever(mockProcessManager.start(any,
-          environment: null, workingDirectory: null));
+      verifyNever(mockProcessManager.start(any, environment: null, workingDirectory: null));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
@@ -344,8 +324,7 @@ void main() {
     });
 
     testUsingContext('simulator can output `)`', () async {
-      when(mockProcessManager.start(any,
-              environment: null, workingDirectory: null))
+      when(mockProcessManager.start(any, environment: null, workingDirectory: null))
           .thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess();
         when(mockProcess.stdout).thenAnswer((Invocation invocation) {
@@ -357,11 +336,11 @@ void main() {
                 .codeUnits
           ]);
         });
-        when(mockProcess.stderr).thenAnswer(
-            (Invocation invocation) => const Stream<List<int>>.empty());
+        when(mockProcess.stderr)
+            .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
-        when(mockProcess.exitCode).thenAnswer((Invocation invocation) =>
-            Future<int>.delayed(Duration.zero, () => 0));
+        when(mockProcess.exitCode)
+            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
         return Future<Process>.value(mockProcess);
       });
 
@@ -467,21 +446,16 @@ void main() {
     testUsingContext(
       "startApp uses compiled app's Info.plist to find CFBundleIdentifier",
       () async {
-        final IOSSimulator device =
-            IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
+        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', category: 'iOS 11.2');
         when(iosWorkflow.getPlistValueFromFile(any, any)).thenReturn('correct');
 
         final Directory mockDir = fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(
-            projectBundleId: 'incorrect',
-            bundleName: 'name',
-            bundleDir: mockDir);
+        final IOSApp package =
+            PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
         const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
-        final DebuggingOptions mockOptions =
-            DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package,
-            prebuiltApplication: true, debuggingOptions: mockOptions);
+        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
         verify(simControl.launch(any, 'correct', any));
       },
@@ -492,8 +466,7 @@ void main() {
     );
   });
 
-  testUsingContext('IOSDevice.isSupportedForProject is true on module project',
-      () async {
+  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
     fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
@@ -510,9 +483,7 @@ flutter:
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext(
-      'IOSDevice.isSupportedForProject is true with editable host app',
-      () async {
+  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('ios').createSync();
@@ -523,8 +494,7 @@ flutter:
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext(
-      'IOSDevice.isSupportedForProject is false with no host app and no module',
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module',
       () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();

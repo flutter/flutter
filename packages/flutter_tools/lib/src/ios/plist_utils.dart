@@ -21,8 +21,7 @@ String getValueFromFile(String plistFilePath, String key) {
   if (!fs.isFileSync(executable)) return null;
   if (!fs.isFileSync(plistFilePath)) return null;
 
-  final String normalizedPlistPath =
-      fs.path.withoutExtension(fs.path.absolute(plistFilePath));
+  final String normalizedPlistPath = fs.path.withoutExtension(fs.path.absolute(plistFilePath));
 
   try {
     final List<String> args = <String>[

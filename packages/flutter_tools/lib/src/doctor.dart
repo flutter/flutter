@@ -37,11 +37,9 @@ Doctor get doctor => context.get<Doctor>();
 
 abstract class DoctorValidatorsProvider {
   /// The singleton instance, pulled from the [AppContext].
-  static DoctorValidatorsProvider get instance =>
-      context.get<DoctorValidatorsProvider>();
+  static DoctorValidatorsProvider get instance => context.get<DoctorValidatorsProvider>();
 
-  static final DoctorValidatorsProvider defaultInstance =
-      _DefaultDoctorValidatorsProvider();
+  static final DoctorValidatorsProvider defaultInstance = _DefaultDoctorValidatorsProvider();
 
   List<DoctorValidator> get validators;
   List<Workflow> get workflows;
@@ -58,12 +56,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(
-            <DoctorValidator>[androidValidator, androidLicenseValidator]));
+        _validators
+            .add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
 
       if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(
-            <DoctorValidator>[iosValidator, cocoapodsValidator]));
+        _validators.add(GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -88,18 +85,15 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
       if (iosWorkflow.appliesToHostPlatform) _workflows.add(iosWorkflow);
 
-      if (androidWorkflow.appliesToHostPlatform)
-        _workflows.add(androidWorkflow);
+      if (androidWorkflow.appliesToHostPlatform) _workflows.add(androidWorkflow);
 
-      if (fuchsiaWorkflow.appliesToHostPlatform)
-        _workflows.add(fuchsiaWorkflow);
+      if (fuchsiaWorkflow.appliesToHostPlatform) _workflows.add(fuchsiaWorkflow);
 
       if (linuxWorkflow.appliesToHostPlatform) _workflows.add(linuxWorkflow);
 
       if (macOSWorkflow.appliesToHostPlatform) _workflows.add(macOSWorkflow);
 
-      if (windowsWorkflow.appliesToHostPlatform)
-        _workflows.add(windowsWorkflow);
+      if (windowsWorkflow.appliesToHostPlatform) _workflows.add(windowsWorkflow);
     }
     return _workflows;
   }
@@ -151,8 +145,7 @@ class Doctor {
           lineBuffer.write('not installed.');
           break;
         case ValidationType.partial:
-          lineBuffer
-              .write('partially installed; more components are available.');
+          lineBuffer.write('partially installed; more components are available.');
           break;
         case ValidationType.notAvailable:
           lineBuffer.write('not available.');
@@ -162,11 +155,9 @@ class Doctor {
           break;
       }
 
-      if (result.statusInfo != null)
-        lineBuffer.write(' (${result.statusInfo})');
+      if (result.statusInfo != null) lineBuffer.write(' (${result.statusInfo})');
 
-      buffer.write(wrapText(lineBuffer.toString(),
-          hangingIndent: result.leadingBox.length + 1));
+      buffer.write(wrapText(lineBuffer.toString(), hangingIndent: result.leadingBox.length + 1));
       buffer.writeln();
 
       if (result.type != ValidationType.installed) allGood = false;
@@ -174,26 +165,23 @@ class Doctor {
 
     if (!allGood) {
       buffer.writeln();
-      buffer.writeln(
-          'Run "flutter doctor" for information about installing additional components.');
+      buffer
+          .writeln('Run "flutter doctor" for information about installing additional components.');
     }
 
     return buffer.toString();
   }
 
   Future<bool> checkRemoteArtifacts(String engineRevision) async {
-    return Cache.instance
-        .areRemoteArtifactsAvailable(engineVersion: engineRevision);
+    return Cache.instance.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
   /// Print information about the state of installed tooling.
-  Future<bool> diagnose(
-      {bool androidLicenses = false, bool verbose = true}) async {
+  Future<bool> diagnose({bool androidLicenses = false, bool verbose = true}) async {
     if (androidLicenses) return AndroidLicenseValidator.runLicenseManager();
 
     if (!verbose) {
-      printStatus(
-          'Doctor summary (to see all details, run flutter doctor -v):');
+      printStatus('Doctor summary (to see all details, run flutter doctor -v):');
     }
     bool doctorResult = true;
     int issues = 0;
@@ -227,8 +215,7 @@ class Doctor {
       }
 
       if (result.statusInfo != null) {
-        printStatus(
-            '${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
+        printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
       } else {
         printStatus('${result.coloredLeadingBox} ${validator.title}',
@@ -236,14 +223,11 @@ class Doctor {
       }
 
       for (ValidationMessage message in result.messages) {
-        if (message.type != ValidationMessageType.information ||
-            verbose == true) {
+        if (message.type != ValidationMessageType.information || verbose == true) {
           int hangingIndent = 2;
           int indent = 4;
-          for (String line
-              in '${message.coloredIndicator} ${message.message}'.split('\n')) {
-            printStatus(line,
-                hangingIndent: hangingIndent, indent: indent, emphasis: true);
+          for (String line in '${message.coloredIndicator} ${message.message}'.split('\n')) {
+            printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
             indent = 6;
@@ -261,16 +245,13 @@ class Doctor {
           '${terminal.color('!', TerminalColor.yellow)} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.',
           hangingIndent: 2);
     } else {
-      printStatus(
-          '${terminal.color('•', TerminalColor.green)} No issues found!',
-          hangingIndent: 2);
+      printStatus('${terminal.color('•', TerminalColor.green)} No issues found!', hangingIndent: 2);
     }
 
     return doctorResult;
   }
 
-  bool get canListAnything =>
-      workflows.any((Workflow workflow) => workflow.canListDevices);
+  bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
 
   bool get canLaunchAnything {
     if (FlutterTesterDevices.showFlutterTesterDevice) return true;
@@ -465,18 +446,13 @@ class FlutterValidator extends DoctorValidator {
 
     final FlutterVersion version = FlutterVersion.instance;
 
-    messages.add(ValidationMessage(userMessages.flutterVersion(
-        version.frameworkVersion, Cache.flutterRoot)));
-    messages.add(ValidationMessage(userMessages.flutterRevision(
-        version.frameworkRevisionShort,
-        version.frameworkAge,
-        version.frameworkDate)));
     messages.add(ValidationMessage(
-        userMessages.engineRevision(version.engineRevisionShort)));
-    messages.add(
-        ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
-    final String genSnapshotPath =
-        artifacts.getArtifactPath(Artifact.genSnapshot);
+        userMessages.flutterVersion(version.frameworkVersion, Cache.flutterRoot)));
+    messages.add(ValidationMessage(userMessages.flutterRevision(
+        version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
+    messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
+    messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
+    final String genSnapshotPath = artifacts.getArtifactPath(Artifact.genSnapshot);
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
@@ -492,8 +468,8 @@ class FlutterValidator extends DoctorValidator {
     return ValidationResult(
       valid,
       messages,
-      statusInfo: userMessages.flutterStatusInfo(version.channel,
-          version.frameworkVersion, os.name, platform.localeName),
+      statusInfo: userMessages.flutterStatusInfo(
+          version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
 }
@@ -501,8 +477,7 @@ class FlutterValidator extends DoctorValidator {
 bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
-    return processManager.runSync(<String>[genSnapshotPath]).exitCode ==
-        kExpectedExitCode;
+    return processManager.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
   } catch (error) {
     return false;
   }
@@ -538,8 +513,7 @@ abstract class IntelliJValidator extends DoctorValidator {
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
-    if (platform.isLinux || platform.isWindows)
-      return IntelliJValidatorOnLinuxAndWindows.installed;
+    if (platform.isLinux || platform.isWindows) return IntelliJValidatorOnLinuxAndWindows.installed;
     if (platform.isMacOS) return IntelliJValidatorOnMac.installed;
     return <DoctorValidator>[];
   }
@@ -551,8 +525,8 @@ abstract class IntelliJValidator extends DoctorValidator {
     messages.add(ValidationMessage(userMessages.intellijLocation(installPath)));
 
     final IntelliJPlugins plugins = IntelliJPlugins(pluginsPath);
-    plugins.validatePackage(messages,
-        <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
+    plugins.validatePackage(
+        messages, <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
         minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
     plugins.validatePackage(messages, <String>['Dart'], 'Dart');
 
@@ -563,10 +537,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return ValidationResult(
-        _hasIssues(messages)
-            ? ValidationType.partial
-            : ValidationType.installed,
-        messages,
+        _hasIssues(messages) ? ValidationType.partial : ValidationType.installed, messages,
         statusInfo: userMessages.intellijStatusInfo(version));
   }
 
@@ -574,8 +545,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     return messages.any((ValidationMessage message) => message.isError);
   }
 
-  void _validateIntelliJVersion(
-      List<ValidationMessage> messages, Version minVersion) {
+  void _validateIntelliJVersion(List<ValidationMessage> messages, Version minVersion) {
     // Ignore unknown versions.
     if (minVersion == Version.unknown) return;
 
@@ -583,8 +553,8 @@ abstract class IntelliJValidator extends DoctorValidator {
     if (installedVersion == null) return;
 
     if (installedVersion < minVersion) {
-      messages.add(ValidationMessage.error(
-          userMessages.intellijMinimumVersion(minVersion.toString())));
+      messages
+          .add(ValidationMessage.error(userMessages.intellijMinimumVersion(minVersion.toString())));
     }
   }
 }
@@ -604,17 +574,14 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
     final List<DoctorValidator> validators = <DoctorValidator>[];
     if (homeDirPath == null) return validators;
 
-    void addValidator(
-        String title, String version, String installPath, String pluginsPath) {
+    void addValidator(String title, String version, String installPath, String pluginsPath) {
       final IntelliJValidatorOnLinuxAndWindows validator =
-          IntelliJValidatorOnLinuxAndWindows(
-              title, version, installPath, pluginsPath);
+          IntelliJValidatorOnLinuxAndWindows(title, version, installPath, pluginsPath);
       for (int index = 0; index < validators.length; ++index) {
         final DoctorValidator other = validators[index];
         if (other is IntelliJValidatorOnLinuxAndWindows &&
             validator.installPath == other.installPath) {
-          if (validator.version.compareTo(other.version) > 0)
-            validators[index] = validator;
+          if (validator.version.compareTo(other.version) > 0) validators[index] = validator;
           return;
         }
       }
@@ -629,15 +596,12 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
             final String version = name.substring(id.length + 1);
             String installPath;
             try {
-              installPath = fs
-                  .file(fs.path.join(dir.path, 'system', '.home'))
-                  .readAsStringSync();
+              installPath = fs.file(fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
             } catch (e) {
               // ignored
             }
             if (installPath != null && fs.isDirectorySync(installPath)) {
-              final String pluginsPath =
-                  fs.path.join(dir.path, 'config', 'plugins');
+              final String pluginsPath = fs.path.join(dir.path, 'config', 'plugins');
               addValidator(title, version, installPath, pluginsPath);
             }
           }
@@ -649,8 +613,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
 }
 
 class IntelliJValidatorOnMac extends IntelliJValidator {
-  IntelliJValidatorOnMac(String title, this.id, String installPath)
-      : super(title, installPath);
+  IntelliJValidatorOnMac(String title, this.id, String installPath) : super(title, installPath);
 
   final String id;
 
@@ -680,10 +643,9 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     try {
       final Iterable<Directory> installDirs = installPaths
           .map<Directory>((String installPath) => fs.directory(installPath))
-          .map<List<FileSystemEntity>>((Directory dir) =>
-              dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
-          .expand<FileSystemEntity>(
-              (List<FileSystemEntity> mappedDirs) => mappedDirs)
+          .map<List<FileSystemEntity>>(
+              (Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
+          .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
           .whereType<Directory>();
       for (Directory dir in installDirs) {
         checkForIntelliJ(dir);
@@ -709,8 +671,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   @override
   String get version {
     if (_version == null) {
-      final String plistFile =
-          fs.path.join(installPath, 'Contents', 'Info.plist');
+      final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
       _version = iosWorkflow.getPlistValueFromFile(
             plistFile,
             kCFBundleShortVersionStringKey,
@@ -727,8 +688,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     final List<String> split = version.split('.');
     final String major = split[0];
     final String minor = split[1];
-    return fs.path.join(
-        homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
+    return fs.path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
   }
 }
 
@@ -740,21 +700,16 @@ class DeviceValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    final List<Device> devices =
-        await deviceManager.getAllConnectedDevices().toList();
+    final List<Device> devices = await deviceManager.getAllConnectedDevices().toList();
     List<ValidationMessage> messages;
     if (devices.isEmpty) {
-      final List<String> diagnostics =
-          await deviceManager.getDeviceDiagnostics();
+      final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
         messages = diagnostics
-            .map<ValidationMessage>(
-                (String message) => ValidationMessage(message))
+            .map<ValidationMessage>((String message) => ValidationMessage(message))
             .toList();
       } else {
-        messages = <ValidationMessage>[
-          ValidationMessage.hint(userMessages.devicesMissing)
-        ];
+        messages = <ValidationMessage>[ValidationMessage.hint(userMessages.devicesMissing)];
       }
     } else {
       messages = await Device.descriptions(devices)

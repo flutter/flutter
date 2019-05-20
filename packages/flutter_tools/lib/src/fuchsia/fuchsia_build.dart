@@ -48,8 +48,7 @@ Future<void> _buildAssets(
     includeDefaultFonts: false,
   );
 
-  final Map<String, DevFSContent> assetEntries =
-      Map<String, DevFSContent>.from(assets.entries);
+  final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assets.entries);
   await writeBundle(fs.directory(assetDir), assetEntries);
 
   final String appName = fuchsiaProject.project.manifest.appName;
@@ -88,13 +87,10 @@ Future<void> _buildPackage(
   // Concatenate dilpmanifest and pkgassets into package_manifest.
   final File manifestFile = fs.file(packageManifest);
   manifestFile.writeAsStringSync(fs.file(dilpmanifest).readAsStringSync());
-  manifestFile.writeAsStringSync(fs.file(pkgassets).readAsStringSync(),
+  manifestFile.writeAsStringSync(fs.file(pkgassets).readAsStringSync(), mode: FileMode.append);
+  manifestFile.writeAsStringSync('meta/$appName.cmx=${fuchsiaProject.meta.path}/$appName.cmx\n',
       mode: FileMode.append);
-  manifestFile.writeAsStringSync(
-      'meta/$appName.cmx=${fuchsiaProject.meta.path}/$appName.cmx\n',
-      mode: FileMode.append);
-  manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n',
-      mode: FileMode.append);
+  manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n', mode: FileMode.append);
 
   if (!await fuchsiaPM.init(pkgDir, appName)) {
     return;

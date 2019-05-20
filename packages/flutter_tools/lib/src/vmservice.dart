@@ -65,8 +65,7 @@ typedef CompileExpression = Future<String> Function(
 const String _kRecordingType = 'vmservice';
 
 Future<StreamChannel<String>> _defaultOpenChannel(Uri uri,
-    {io.CompressionOptions compression =
-        io.CompressionOptions.compressionDefault}) async {
+    {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
   io.WebSocket socket;
@@ -84,8 +83,7 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri,
     if (delay < const Duration(seconds: 1)) delay *= 2;
   }
 
-  final WebSocketConnector constructor =
-      context.get<WebSocketConnector>() ?? io.WebSocket.connect;
+  final WebSocketConnector constructor = context.get<WebSocketConnector>() ?? io.WebSocket.connect;
   while (socket == null) {
     attempts += 1;
     try {
@@ -124,12 +122,9 @@ class VMService {
         final bool pause = params.asMap['pause'] ?? false;
 
         if (isolateId is! String || isolateId.isEmpty)
-          throw rpc.RpcException.invalidParams(
-              'Invalid \'isolateId\': $isolateId');
-        if (force is! bool)
-          throw rpc.RpcException.invalidParams('Invalid \'force\': $force');
-        if (pause is! bool)
-          throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
+          throw rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
+        if (force is! bool) throw rpc.RpcException.invalidParams('Invalid \'force\': $force');
+        if (pause is! bool) throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
 
         try {
           await reloadSources(isolateId, force: force, pause: pause);
@@ -137,8 +132,8 @@ class VMService {
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
-          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
-              'Error during Sources Reload: $e\n$st');
+          throw rpc.RpcException(
+              rpc_error_code.SERVER_ERROR, 'Error during Sources Reload: $e\n$st');
         }
       });
 
@@ -154,8 +149,7 @@ class VMService {
       _peer.registerMethod('hotRestart', (rpc.Parameters params) async {
         final bool pause = params.asMap['pause'] ?? false;
 
-        if (pause is! bool)
-          throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
+        if (pause is! bool) throw rpc.RpcException.invalidParams('Invalid \'pause\': $pause');
 
         try {
           await restart(pause: pause);
@@ -163,8 +157,7 @@ class VMService {
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
-          throw rpc.RpcException(
-              rpc_error_code.SERVER_ERROR, 'Error during Hot Restart: $e\n$st');
+          throw rpc.RpcException(rpc_error_code.SERVER_ERROR, 'Error during Hot Restart: $e\n$st');
         }
       });
 
@@ -180,30 +173,19 @@ class VMService {
       _peer.registerMethod('compileExpression', (rpc.Parameters params) async {
         final String isolateId = params['isolateId'].asString;
         if (isolateId is! String || isolateId.isEmpty)
-          throw rpc.RpcException.invalidParams(
-              'Invalid \'isolateId\': $isolateId');
+          throw rpc.RpcException.invalidParams('Invalid \'isolateId\': $isolateId');
         final String expression = params['expression'].asString;
         if (expression is! String || expression.isEmpty)
-          throw rpc.RpcException.invalidParams(
-              'Invalid \'expression\': $expression');
-        final List<String> definitions =
-            List<String>.from(params['definitions'].asList);
-        final List<String> typeDefinitions =
-            List<String>.from(params['typeDefinitions'].asList);
+          throw rpc.RpcException.invalidParams('Invalid \'expression\': $expression');
+        final List<String> definitions = List<String>.from(params['definitions'].asList);
+        final List<String> typeDefinitions = List<String>.from(params['typeDefinitions'].asList);
         final String libraryUri = params['libraryUri'].asString;
-        final String klass =
-            params['klass'].exists ? params['klass'].asString : null;
+        final String klass = params['klass'].exists ? params['klass'].asString : null;
         final bool isStatic = params['isStatic'].asBoolOr(false);
 
         try {
           final String kernelBytesBase64 = await compileExpression(
-              isolateId,
-              expression,
-              definitions,
-              typeDefinitions,
-              libraryUri,
-              klass,
-              isStatic);
+              isolateId, expression, definitions, typeDefinitions, libraryUri, klass, isStatic);
           return <String, dynamic>{
             'type': 'Success',
             'result': <String, dynamic>{'kernelBytes': kernelBytesBase64}
@@ -211,8 +193,8 @@ class VMService {
         } on rpc.RpcException {
           rethrow;
         } catch (e, st) {
-          throw rpc.RpcException(rpc_error_code.SERVER_ERROR,
-              'Error during expression compilation: $e\n$st');
+          throw rpc.RpcException(
+              rpc_error_code.SERVER_ERROR, 'Error during expression compilation: $e\n$st');
         }
       });
 
@@ -245,13 +227,12 @@ class VMService {
   /// passed to [enableRecordingConnection]), or a [ToolExit] will be thrown.
   static void enableReplayConnection(String location) {
     final Directory dir = getReplaySource(location, _kRecordingType);
-    _openChannel = (Uri uri, {io.CompressionOptions compression}) async =>
-        ReplayVMServiceChannel(dir);
+    _openChannel =
+        (Uri uri, {io.CompressionOptions compression}) async => ReplayVMServiceChannel(dir);
   }
 
   static void _unhandledError(dynamic error, dynamic stack) {
-    logger.printTrace(
-        'Error in internal implementation of JSON RPC.\n$error\n$stack');
+    logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
     assert(false);
   }
 
@@ -268,17 +249,14 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    io.CompressionOptions compression =
-        io.CompressionOptions.compressionDefault,
+    io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
   }) async {
-    final Uri wsUri =
-        httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
-    final StreamChannel<String> channel =
-        await _openChannel(wsUri, compression: compression);
-    final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel),
-        onUnhandledError: _unhandledError);
-    final VMService service = VMService(
-        peer, httpUri, wsUri, reloadSources, restart, compileExpression);
+    final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
+    final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
+    final rpc.Peer peer =
+        rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
+    final VMService service =
+        VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression);
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});
@@ -288,8 +266,7 @@ class VMService {
   final Uri httpAddress;
   final Uri wsAddress;
   final rpc.Peer _peer;
-  final Completer<Map<String, dynamic>> _connectionError =
-      Completer<Map<String, dynamic>>();
+  final Completer<Map<String, dynamic>> _connectionError = Completer<Map<String, dynamic>>();
 
   VM _vm;
 
@@ -334,9 +311,7 @@ class VMService {
     Map<String, dynamic> params,
   ) {
     return Future.any<Map<String, dynamic>>(<Future<Map<String, dynamic>>>[
-      _peer
-          .sendRequest(method, params)
-          .then<Map<String, dynamic>>(castStringKeyedMap),
+      _peer.sendRequest(method, params).then<Map<String, dynamic>>(castStringKeyedMap),
       _connectionError.future,
     ]);
   }
@@ -381,8 +356,7 @@ class VMService {
   Future<void> _streamListen(String streamId) async {
     if (!_listeningFor.contains(streamId)) {
       _listeningFor.add(streamId);
-      await _sendRequest(
-          'streamListen', <String, dynamic>{'streamId': streamId});
+      await _sendRequest('streamListen', <String, dynamic>{'streamId': streamId});
     }
   }
 
@@ -461,8 +435,7 @@ abstract class ServiceObject {
   ) {
     if (map == null) return null;
 
-    if (!_isServiceMap(map))
-      throw VMServiceObjectLoadError('Expected a service map', map);
+    if (!_isServiceMap(map)) throw VMServiceObjectLoadError('Expected a service map', map);
 
     final String type = _stripRef(map['type']);
 
@@ -572,8 +545,7 @@ abstract class ServiceObject {
     final String mapType = _stripRef(map['type']);
 
     if ((_type != null) && (_type != mapType)) {
-      throw VMServiceObjectLoadError(
-          'ServiceObject types must not change', map);
+      throw VMServiceObjectLoadError('ServiceObject types must not change', map);
     }
     _type = mapType;
     _vmType = map.containsKey('_vmType') ? _stripRef(map['_vmType']) : _type;
@@ -870,16 +842,14 @@ class VM extends ServiceObjectOwner {
     printTrace('Sending to VM service: $method($params)');
     assert(params != null);
     try {
-      final Map<String, dynamic> result =
-          await _vmService._sendRequest(method, params);
+      final Map<String, dynamic> result = await _vmService._sendRequest(method, params);
       printTrace('Result: ${_truncate(result.toString(), 250, '...')}');
       return result;
     } on WebSocketChannelException catch (error) {
       throwToolExit('Error connecting to observatory: $error');
       return null;
     } on rpc.RpcException catch (error) {
-      printError(
-          'Error ${error.code} received from application: ${error.message}');
+      printError('Error ${error.code} received from application: ${error.message}');
       printTrace('${error.data}');
       rethrow;
     }
@@ -904,8 +874,7 @@ class VM extends ServiceObjectOwner {
 
   /// Create a new development file system on the device.
   Future<Map<String, dynamic>> createDevFS(String fsName) {
-    return invokeRpcRaw('_createDevFS',
-        params: <String, dynamic>{'fsName': fsName});
+    return invokeRpcRaw('_createDevFS', params: <String, dynamic>{'fsName': fsName});
   }
 
   /// List the development file system son the device.
@@ -951,8 +920,7 @@ class VM extends ServiceObjectOwner {
 
   /// Delete an existing file system.
   Future<Map<String, dynamic>> deleteDevFS(String fsName) {
-    return invokeRpcRaw('_deleteDevFS',
-        params: <String, dynamic>{'fsName': fsName});
+    return invokeRpcRaw('_deleteDevFS', params: <String, dynamic>{'fsName': fsName});
   }
 
   Future<ServiceMap> runInView(
@@ -961,21 +929,19 @@ class VM extends ServiceObjectOwner {
     Uri packages,
     Uri assetsDirectory,
   ) {
-    return invokeRpc<ServiceMap>('_flutter.runInView',
-        params: <String, dynamic>{
-          'viewId': viewId,
-          'mainScript': main.toString(),
-          'packagesFile': packages.toString(),
-          'assetDirectory': assetsDirectory.toString(),
-        });
+    return invokeRpc<ServiceMap>('_flutter.runInView', params: <String, dynamic>{
+      'viewId': viewId,
+      'mainScript': main.toString(),
+      'packagesFile': packages.toString(),
+      'assetDirectory': assetsDirectory.toString(),
+    });
   }
 
   Future<Map<String, dynamic>> clearVMTimeline() {
     return invokeRpcRaw('_clearVMTimeline');
   }
 
-  Future<Map<String, dynamic>> setVMTimelineFlags(
-      List<String> recordedStreams) {
+  Future<Map<String, dynamic>> setVMTimelineFlags(List<String> recordedStreams) {
     assert(recordedStreams != null);
     return invokeRpcRaw(
       '_setVMTimelineFlags',
@@ -1003,8 +969,7 @@ class VM extends ServiceObjectOwner {
       if (_viewCache.values.isNotEmpty || !waitForViews) return;
       failCount += 1;
       if (failCount == 5) // waited 200ms
-        printStatus(
-            'Flutter is taking longer than expected to report its views. Still trying...');
+        printStatus('Flutter is taking longer than expected to report its views. Still trying...');
       await Future<void>.delayed(const Duration(milliseconds: 50));
       await reload();
     }
@@ -1039,15 +1004,13 @@ class HeapSpace extends ServiceObject {
   int get external => _external;
 
   Duration get avgCollectionTime {
-    final double mcs = _totalCollectionTimeInSeconds *
-        Duration.microsecondsPerSecond /
-        math.max(_collections, 1);
+    final double mcs =
+        _totalCollectionTimeInSeconds * Duration.microsecondsPerSecond / math.max(_collections, 1);
     return Duration(microseconds: mcs.ceil());
   }
 
   Duration get avgCollectionPeriod {
-    final double mcs =
-        _averageCollectionPeriodInMillis * Duration.microsecondsPerMillisecond;
+    final double mcs = _averageCollectionPeriodInMillis * Duration.microsecondsPerMillisecond;
     return Duration(microseconds: mcs.ceil());
   }
 
@@ -1125,8 +1088,7 @@ class Isolate extends ServiceObjectOwner {
     }
     // Build the object from the map directly.
     serviceObject = ServiceObject._fromMap(this, map);
-    if ((serviceObject != null) && serviceObject.canCache)
-      _cache[mapId] = serviceObject;
+    if ((serviceObject != null) && serviceObject.canCache) _cache[mapId] = serviceObject;
     return serviceObject;
   }
 
@@ -1150,8 +1112,7 @@ class Isolate extends ServiceObjectOwner {
   }
 
   /// Invoke the RPC and return a ServiceObject response.
-  Future<ServiceObject> invokeRpc(
-      String method, Map<String, dynamic> params) async {
+  Future<ServiceObject> invokeRpc(String method, Map<String, dynamic> params) async {
     return getFromMap(await invokeRpcRaw(method, params: params));
   }
 
@@ -1194,8 +1155,7 @@ class Isolate extends ServiceObjectOwner {
       if (packagesUri != null) {
         arguments['packagesUri'] = packagesUri.toString();
       }
-      final Map<String, dynamic> response =
-          await invokeRpcRaw('_reloadSources', params: arguments);
+      final Map<String, dynamic> response = await invokeRpcRaw('_reloadSources', params: arguments);
       return response;
     } on rpc.RpcException catch (e) {
       return Future<Map<String, dynamic>>.error(<String, dynamic>{
@@ -1207,12 +1167,10 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> getObject(Map<String, dynamic> objectRef) {
-    return invokeRpcRaw('getObject',
-        params: <String, dynamic>{'objectId': objectRef['id']});
+    return invokeRpcRaw('getObject', params: <String, dynamic>{'objectId': objectRef['id']});
   }
 
-  Future<ProgramElement> _describeElement(
-      Map<String, dynamic> elementRef) async {
+  Future<ProgramElement> _describeElement(Map<String, dynamic> elementRef) async {
     String name = elementRef['name'];
     Map<String, dynamic> owner = elementRef['owner'];
     while (owner != null) {
@@ -1248,10 +1206,8 @@ class Isolate extends ServiceObjectOwner {
   // Lists program elements changed in the most recent reload that have not
   // since executed.
   Future<List<ProgramElement>> getUnusedChangesInLastReload() async {
-    final Map<String, dynamic> response =
-        await invokeRpcRaw('_getUnusedChangesInLastReload');
-    final List<Future<ProgramElement>> unusedElements =
-        <Future<ProgramElement>>[];
+    final Map<String, dynamic> response = await invokeRpcRaw('_getUnusedChangesInLastReload');
+    final List<Future<ProgramElement>> unusedElements = <Future<ProgramElement>>[];
     for (Map<String, dynamic> element in response['unused'])
       unusedElements.add(_describeElement(element));
     return Future.wait<ProgramElement>(unusedElements);
@@ -1292,34 +1248,25 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInTraversalOrder() {
-    return invokeFlutterExtensionRpcRaw(
-        'ext.flutter.debugDumpSemanticsTreeInTraversalOrder');
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInTraversalOrder');
   }
 
-  Future<Map<String, dynamic>>
-      flutterDebugDumpSemanticsTreeInInverseHitTestOrder() {
-    return invokeFlutterExtensionRpcRaw(
-        'ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder');
+  Future<Map<String, dynamic>> flutterDebugDumpSemanticsTreeInInverseHitTestOrder() {
+    return invokeFlutterExtensionRpcRaw('ext.flutter.debugDumpSemanticsTreeInInverseHitTestOrder');
   }
 
   Future<Map<String, dynamic>> _flutterToggle(String name) async {
-    Map<String, dynamic> state =
-        await invokeFlutterExtensionRpcRaw('ext.flutter.$name');
-    if (state != null &&
-        state.containsKey('enabled') &&
-        state['enabled'] is String) {
+    Map<String, dynamic> state = await invokeFlutterExtensionRpcRaw('ext.flutter.$name');
+    if (state != null && state.containsKey('enabled') && state['enabled'] is String) {
       state = await invokeFlutterExtensionRpcRaw(
         'ext.flutter.$name',
-        params: <String, dynamic>{
-          'enabled': state['enabled'] == 'true' ? 'false' : 'true'
-        },
+        params: <String, dynamic>{'enabled': state['enabled'] == 'true' ? 'false' : 'true'},
       );
     }
     return state;
   }
 
-  Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() =>
-      _flutterToggle('debugPaint');
+  Future<Map<String, dynamic>> flutterToggleDebugPaintSizeEnabled() => _flutterToggle('debugPaint');
 
   Future<Map<String, dynamic>> flutterToggleDebugCheckElevationsEnabled() =>
       _flutterToggle('debugCheckElevationsEnabled');
@@ -1327,8 +1274,7 @@ class Isolate extends ServiceObjectOwner {
   Future<Map<String, dynamic>> flutterTogglePerformanceOverlayOverride() =>
       _flutterToggle('showPerformanceOverlay');
 
-  Future<Map<String, dynamic>> flutterToggleWidgetInspector() =>
-      _flutterToggle('inspector.show');
+  Future<Map<String, dynamic>> flutterToggleWidgetInspector() => _flutterToggle('inspector.show');
 
   Future<Map<String, dynamic>> flutterToggleProfileWidgetBuilds() =>
       _flutterToggle('profileWidgetBuilds');
@@ -1345,8 +1291,8 @@ class Isolate extends ServiceObjectOwner {
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {
-    final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
-        'ext.flutter.didSendFirstFrameEvent');
+    final Map<String, dynamic> result =
+        await invokeFlutterExtensionRpcRaw('ext.flutter.didSendFirstFrameEvent');
     // result might be null when the service extension is not initialized
     return result != null && result['enabled'] == 'true';
   }
@@ -1367,8 +1313,7 @@ class Isolate extends ServiceObjectOwner {
   Future<List<int>> flutterDebugSaveCompilationTrace() async {
     final Map<String, dynamic> result =
         await invokeFlutterExtensionRpcRaw('ext.flutter.saveCompilationTrace');
-    if (result != null && result['value'] is List<dynamic>)
-      return result['value'].cast<int>();
+    if (result != null && result['value'] is List<dynamic>) return result['value'].cast<int>();
     return null;
   }
 
@@ -1380,9 +1325,7 @@ class Isolate extends ServiceObjectOwner {
   Future<String> flutterPlatformOverride([String platform]) async {
     final Map<String, dynamic> result = await invokeFlutterExtensionRpcRaw(
       'ext.flutter.platformOverride',
-      params: platform != null
-          ? <String, dynamic>{'value': platform}
-          : <String, String>{},
+      params: platform != null ? <String, dynamic>{'value': platform} : <String, String>{},
     );
     if (result != null && result['value'] is String) return result['value'];
     return 'unknown';
@@ -1417,8 +1360,7 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   void forEach(void f(String key, dynamic value)) => _map.forEach(f);
   @override
-  dynamic putIfAbsent(String key, dynamic ifAbsent()) =>
-      _map.putIfAbsent(key, ifAbsent);
+  dynamic putIfAbsent(String key, dynamic ifAbsent()) => _map.putIfAbsent(key, ifAbsent);
   @override
   void remove(Object key) => _map.remove(key);
   @override
@@ -1438,26 +1380,21 @@ class ServiceMap extends ServiceObject implements Map<String, dynamic> {
   @override
   String toString() => _map.toString();
   @override
-  void addEntries(Iterable<MapEntry<String, dynamic>> entries) =>
-      _map.addEntries(entries);
+  void addEntries(Iterable<MapEntry<String, dynamic>> entries) => _map.addEntries(entries);
   @override
   Map<RK, RV> cast<RK, RV>() => _map.cast<RK, RV>();
   @override
-  void removeWhere(bool test(String key, dynamic value)) =>
-      _map.removeWhere(test);
+  void removeWhere(bool test(String key, dynamic value)) => _map.removeWhere(test);
   @override
-  Map<K2, V2> map<K2, V2>(
-          MapEntry<K2, V2> transform(String key, dynamic value)) =>
+  Map<K2, V2> map<K2, V2>(MapEntry<K2, V2> transform(String key, dynamic value)) =>
       _map.map<K2, V2>(transform);
   @override
   Iterable<MapEntry<String, dynamic>> get entries => _map.entries;
   @override
-  void updateAll(dynamic update(String key, dynamic value)) =>
-      _map.updateAll(update);
+  void updateAll(dynamic update(String key, dynamic value)) => _map.updateAll(update);
   Map<RK, RV> retype<RK, RV>() => _map.cast<RK, RV>();
   @override
-  dynamic update(String key, dynamic update(dynamic value),
-          {dynamic ifAbsent()}) =>
+  dynamic update(String key, dynamic update(dynamic value), {dynamic ifAbsent()}) =>
       _map.update(key, update, ifAbsent: ifAbsent);
 }
 
@@ -1501,13 +1438,12 @@ class FlutterView extends ServiceObject {
 
   Future<void> setAssetDirectory(Uri assetsDirectory) async {
     assert(assetsDirectory != null);
-    await owner.vmService.vm.invokeRpc<ServiceObject>(
-        '_flutter.setAssetBundlePath',
-        params: <String, dynamic>{
-          'isolateId': _uiIsolate.id,
-          'viewId': id,
-          'assetDirectory': assetsDirectory.toFilePath(windows: false),
-        });
+    await owner.vmService.vm
+        .invokeRpc<ServiceObject>('_flutter.setAssetBundlePath', params: <String, dynamic>{
+      'isolateId': _uiIsolate.id,
+      'viewId': id,
+      'assetDirectory': assetsDirectory.toFilePath(windows: false),
+    });
   }
 
   bool get hasIsolate => _uiIsolate != null;

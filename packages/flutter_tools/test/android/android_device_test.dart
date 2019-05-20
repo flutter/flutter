@@ -40,10 +40,8 @@ void main() {
       )).thenAnswer(
         (_) => throw ArgumentError(adbExe.path),
       );
-      expect(
-          () => getAdbDevices(),
-          throwsToolExit(
-              message: RegExp('Unable to run "adb".*${adbExe.path}')));
+      expect(() => getAdbDevices(),
+          throwsToolExit(message: RegExp('Unable to run "adb".*${adbExe.path}')));
     }, overrides: <Type, Generator>{
       AndroidSdk: () => MockAndroidSdk(),
       FileSystem: () => MemoryFileSystem(),
@@ -100,8 +98,7 @@ Use the 'android' tool to install them:
 
   group('parseAdbDeviceProperties', () {
     test('parse adb shell output', () {
-      final Map<String, String> properties =
-          parseAdbDeviceProperties(kAdbShellGetprop);
+      final Map<String, String> properties = parseAdbDeviceProperties(kAdbShellGetprop);
       expect(properties, isNotNull);
       expect(properties['ro.build.characteristics'], 'emulator');
       expect(properties['ro.product.cpu.abi'], 'x86_64');
@@ -181,8 +178,7 @@ flutter:
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext('isSupportedForProject is true with editable host app',
-      () async {
+  testUsingContext('isSupportedForProject is true with editable host app', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('android').createSync();
@@ -193,9 +189,7 @@ flutter:
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext(
-      'isSupportedForProject is false with no host app and no module',
-      () async {
+  testUsingContext('isSupportedForProject is false with no host app and no module', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
@@ -219,8 +213,7 @@ flutter:
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('returns the supplied host port when stdout is empty',
-        () async {
+    testUsingContext('returns the supplied host port when stdout is empty', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '', ''));
 
@@ -229,9 +222,7 @@ flutter:
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext(
-        'returns the supplied host port when stdout is the host port',
-        () async {
+    testUsingContext('returns the supplied host port when stdout is the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '456', ''));
 
@@ -240,13 +231,11 @@ flutter:
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext(
-        'throws an error when stdout is not blank nor the host port', () async {
+    testUsingContext('throws an error when stdout is not blank nor the host port', () async {
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
-      expect(forwarder.forward(123, hostPort: 456),
-          throwsA(isInstanceOf<ProcessException>()));
+      expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

@@ -66,8 +66,7 @@ void main() {
       file.parent.createSync(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3], flush: true);
 
-      final DateTime fiveSecondsAgo =
-          DateTime.now().subtract(const Duration(seconds: 5));
+      final DateTime fiveSecondsAgo = DateTime.now().subtract(const Duration(seconds: 5));
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(fiveSecondsAgo), isTrue);
       expect(content.isModifiedAfter(null), isTrue);
@@ -161,8 +160,7 @@ void main() {
 
       // Try to create again.
       await devFS.create();
-      vmService.expectMessages(
-          <String>['create test', 'destroy test', 'create test']);
+      vmService.expectMessages(<String>['create test', 'destroy test', 'create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
 
       // Really destroy.
@@ -201,8 +199,7 @@ class MockVMService extends BasicMock implements VMService {
     }
     _server.listen((HttpRequest request) {
       final String fsName = request.headers.value('dev_fs_name');
-      final String devicePath =
-          utf8.decode(base64.decode(request.headers.value('dev_fs_uri_b64')));
+      final String devicePath = utf8.decode(base64.decode(request.headers.value('dev_fs_uri_b64')));
       messages.add('writeFile $fsName $devicePath');
       request.drain<List<int>>().then<void>((List<int> value) {
         request.response
@@ -233,8 +230,7 @@ class MockVM implements VM {
   Future<Map<String, dynamic>> createDevFS(String fsName) async {
     _service.messages.add('create $fsName');
     if (_devFSExists) {
-      throw rpc.RpcException(
-          kFileSystemAlreadyExists, 'File system already exists');
+      throw rpc.RpcException(kFileSystemAlreadyExists, 'File system already exists');
     }
     _devFSExists = true;
     return <String, dynamic>{'uri': '$_baseUri'};
@@ -266,8 +262,8 @@ final List<Directory> _tempDirs = <Directory>[];
 final Map<String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir(FileSystem fs) {
-  final Directory tempDir = fs.systemTempDirectory
-      .createTempSync('flutter_devfs${_tempDirs.length}_test.');
+  final Directory tempDir =
+      fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
   _tempDirs.add(tempDir);
   return tempDir;
 }
@@ -279,14 +275,11 @@ void _cleanupTempDirs() {
 Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName,
     {bool doubleSlash = false}) async {
   final Directory pkgTempDir = _newTempDir(fs);
-  String pkgFilePath =
-      fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
+  String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {
     // Force two separators into the path.
     final String doubleSlash = fs.path.separator + fs.path.separator;
-    pkgFilePath = pkgTempDir.path +
-        doubleSlash +
-        fs.path.join(pkgName, 'lib', pkgFileName);
+    pkgFilePath = pkgTempDir.path + doubleSlash + fs.path.join(pkgName, 'lib', pkgFileName);
   }
   final File pkgFile = fs.file(pkgFilePath);
   await pkgFile.parent.create(recursive: true);
@@ -296,7 +289,5 @@ Future<void> _createPackage(FileSystem fs, String pkgName, String pkgFileName,
   _packages.forEach((String pkgName, Uri pkgUri) {
     sb.writeln('$pkgName:$pkgUri');
   });
-  fs
-      .file(fs.path.join(_tempDirs[0].path, '.packages'))
-      .writeAsStringSync(sb.toString());
+  fs.file(fs.path.join(_tempDirs[0].path, '.packages')).writeAsStringSync(sb.toString());
 }

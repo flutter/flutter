@@ -15,8 +15,7 @@ import '../src/common.dart';
 /// underlying path to avoid issues with breakpoints/hot reload.
 /// https://github.com/flutter/flutter/pull/21741
 Directory createResolvedTempDirectorySync(String prefix) {
-  final Directory tempDir =
-      fs.systemTempDirectory.createTempSync('flutter_$prefix');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_$prefix');
   return fs.directory(tempDir.resolveSymbolicLinksSync());
 }
 
@@ -47,11 +46,9 @@ Future<void> getPackages(String folder) async {
     'packages',
     'get',
   ];
-  final Process process =
-      await processManager.start(command, workingDirectory: folder);
+  final Process process = await processManager.start(command, workingDirectory: folder);
   final StringBuffer errorOutput = StringBuffer();
   process.stderr.transform(utf8.decoder).listen(errorOutput.write);
   final int exitCode = await process.exitCode;
-  if (exitCode != 0)
-    throw Exception('flutter packages get failed: ${errorOutput.toString()}');
+  if (exitCode != 0) throw Exception('flutter packages get failed: ${errorOutput.toString()}');
 }

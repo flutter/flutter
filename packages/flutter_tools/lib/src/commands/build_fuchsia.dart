@@ -31,8 +31,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   bool hidden = true;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
         DevelopmentArtifact.fuchsia,
         DevelopmentArtifact.universal,
       };
@@ -52,17 +51,13 @@ class BuildFuchsiaCommand extends BuildSubCommand {
       throwToolExit('No Fuchsia project configured.');
     }
     final String appName = flutterProject.fuchsia.project.manifest.appName;
-    final String cmxPath =
-        fs.path.join(flutterProject.fuchsia.meta.path, '$appName.cmx');
+    final String cmxPath = fs.path.join(flutterProject.fuchsia.meta.path, '$appName.cmx');
     final File cmxFile = fs.file(cmxPath);
     if (!cmxFile.existsSync()) {
-      throwToolExit(
-          'Fuchsia build requires a .cmx file at $cmxPath for the app');
+      throwToolExit('Fuchsia build requires a .cmx file at $cmxPath for the app');
     }
     await buildFuchsia(
-        fuchsiaProject: flutterProject.fuchsia,
-        target: targetFile,
-        buildInfo: buildInfo);
+        fuchsiaProject: flutterProject.fuchsia, target: targetFile, buildInfo: buildInfo);
     return null;
   }
 }

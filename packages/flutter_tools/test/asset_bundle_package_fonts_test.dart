@@ -90,8 +90,7 @@ $fontsSection
     }
 
     expect(
-      json.decode(utf8
-          .decode(await bundle.entries['FontManifest.json'].contentsAsBytes())),
+      json.decode(utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes())),
       json.decode(expectedAssetManifest),
     );
   }
@@ -107,16 +106,13 @@ $fontsSection
 
     setUp(() async {
       testFileSystem = MemoryFileSystem(
-        style: platform.isWindows
-            ? FileSystemStyle.windows
-            : FileSystemStyle.posix,
+        style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
       );
-      testFileSystem.currentDirectory = testFileSystem.systemTempDirectory
-          .createTempSync('flutter_asset_bundle_test.');
+      testFileSystem.currentDirectory =
+          testFileSystem.systemTempDirectory.createTempSync('flutter_asset_bundle_test.');
     });
 
-    testUsingContext(
-        'App includes neither font manifest nor fonts when no defines fonts',
+    testUsingContext('App includes neither font manifest nor fonts when no defines fonts',
         () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
@@ -161,8 +157,7 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('App font uses local font file and package font file',
-        () async {
+    testUsingContext('App font uses local font file and package font file', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -214,8 +209,7 @@ $fontsSection
       const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
-      const String expectedFontManifest =
-          '[{"family":"packages/test_package/foo",'
+      const String expectedFontManifest = '[{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
@@ -227,8 +221,7 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext(
-        'App uses package font with font file from another package', () async {
+    testUsingContext('App uses package font with font file from another package', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -249,8 +242,7 @@ $fontsSection
       const String font = 'bar';
       writeFontAsset('p2/p/lib/', font);
 
-      const String expectedFontManifest =
-          '[{"family":"packages/test_package/foo",'
+      const String expectedFontManifest = '[{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package2/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
@@ -262,8 +254,7 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('App uses package font with properties and own font file',
-        () async {
+    testUsingContext('App uses package font with properties and own font file', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -285,8 +276,7 @@ $fontsSection
       const String font = 'a/bar';
       writeFontAsset('p/p/', font);
 
-      const String expectedFontManifest =
-          '[{"family":"packages/test_package/foo",'
+      const String expectedFontManifest = '[{"family":"packages/test_package/foo",'
           '"fonts":[{"weight":400,"style":"italic","asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(
         <String>[],
@@ -298,8 +288,7 @@ $fontsSection
       FileSystem: () => testFileSystem,
     });
 
-    testUsingContext('App uses local font and package font with own font file.',
-        () async {
+    testUsingContext('App uses local font and package font with own font file.', () async {
       establishFlutterRoot();
       writeEmptySchemaFile(fs);
 
@@ -324,8 +313,7 @@ $fontsSection
       writeFontAsset('', font);
       writeFontAsset('p/p/', font);
 
-      const String expectedFontManifest =
-          '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
+      const String expectedFontManifest = '[{"fonts":[{"asset":"a/bar"}],"family":"foo"},'
           '{"family":"packages/test_package/foo",'
           '"fonts":[{"asset":"packages/test_package/a/bar"}]}]';
       await buildAndVerifyFonts(

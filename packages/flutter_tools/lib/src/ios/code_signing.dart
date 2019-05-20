@@ -81,10 +81,8 @@ const String fixWithDevelopmentTeamInstruction = '''
 
 final RegExp _securityFindIdentityDeveloperIdentityExtractionPattern =
     RegExp(r'^\s*\d+\).+"(.+Developer.+)"$');
-final RegExp _securityFindIdentityCertificateCnExtractionPattern =
-    RegExp(r'.*\(([a-zA-Z0-9]+)\)');
-final RegExp _certificateOrganizationalUnitExtractionPattern =
-    RegExp(r'OU=([a-zA-Z0-9]+)');
+final RegExp _securityFindIdentityCertificateCnExtractionPattern = RegExp(r'.*\(([a-zA-Z0-9]+)\)');
+final RegExp _certificateOrganizationalUnitExtractionPattern = RegExp(r'OU=([a-zA-Z0-9]+)');
 
 /// Given a [BuildableIOSApp], this will try to find valid development code
 /// signing identities in the user's keychain prompting a choice if multiple
@@ -105,8 +103,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   // If the user already has it set in the project build settings itself,
   // continue with that.
   if (isNotEmpty(buildSettings['DEVELOPMENT_TEAM'])) {
-    printStatus(
-        'Automatically signing iOS for device deployment using specified development '
+    printStatus('Automatically signing iOS for device deployment using specified development '
         'team in Xcode project: ${buildSettings['DEVELOPMENT_TEAM']}');
     return null;
   }
@@ -125,17 +122,16 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
     'codesigning',
     '-v'
   ];
-  final List<String> validCodeSigningIdentities =
-      runCheckedSync(findIdentityCommand)
-          .split('\n')
-          .map<String>((String outputLine) {
-            return _securityFindIdentityDeveloperIdentityExtractionPattern
-                .firstMatch(outputLine)
-                ?.group(1);
-          })
-          .where(isNotEmpty)
-          .toSet() // Unique.
-          .toList();
+  final List<String> validCodeSigningIdentities = runCheckedSync(findIdentityCommand)
+      .split('\n')
+      .map<String>((String outputLine) {
+        return _securityFindIdentityDeveloperIdentityExtractionPattern
+            .firstMatch(outputLine)
+            ?.group(1);
+      })
+      .where(isNotEmpty)
+      .toSet() // Unique.
+      .toList();
 
   final String signingIdentity =
       await _chooseSigningIdentity(validCodeSigningIdentities, usesTerminalUi);
@@ -143,27 +139,18 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   // If none are chosen, return null.
   if (signingIdentity == null) return null;
 
-  printStatus(
-      'Signing iOS app for device deployment using developer identity: "$signingIdentity"');
+  printStatus('Signing iOS app for device deployment using developer identity: "$signingIdentity"');
 
   final String signingCertificateId =
-      _securityFindIdentityCertificateCnExtractionPattern
-          .firstMatch(signingIdentity)
-          ?.group(1);
+      _securityFindIdentityCertificateCnExtractionPattern.firstMatch(signingIdentity)?.group(1);
 
   // If `security`'s output format changes, we'd have to update the above regex.
   if (signingCertificateId == null) return null;
 
-  final String signingCertificate = runCheckedSync(<String>[
-    'security',
-    'find-certificate',
-    '-c',
-    signingCertificateId,
-    '-p'
-  ]);
+  final String signingCertificate =
+      runCheckedSync(<String>['security', 'find-certificate', '-c', signingCertificateId, '-p']);
 
-  final Process opensslProcess =
-      await runCommand(const <String>['openssl', 'x509', '-subject']);
+  final Process opensslProcess = await runCommand(const <String>['openssl', 'x509', '-subject']);
   await (opensslProcess.stdin..write(signingCertificate)).close();
 
   final String opensslOutput = await utf8.decodeStream(opensslProcess.stdout);
@@ -174,9 +161,8 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
   if (await opensslProcess.exitCode != 0) return null;
 
   return <String, String>{
-    'DEVELOPMENT_TEAM': _certificateOrganizationalUnitExtractionPattern
-        .firstMatch(opensslOutput)
-        ?.group(1),
+    'DEVELOPMENT_TEAM':
+        _certificateOrganizationalUnitExtractionPattern.firstMatch(opensslOutput)?.group(1),
   };
 }
 
@@ -185,12 +171,10 @@ Future<String> _chooseSigningIdentity(
   // The user has no valid code signing identities.
   if (validCodeSigningIdentities.isEmpty) {
     printError(noCertificatesInstruction, emphasis: true);
-    throwToolExit(
-        'No development certificates available to code sign app for device deployment');
+    throwToolExit('No development certificates available to code sign app for device deployment');
   }
 
-  if (validCodeSigningIdentities.length == 1)
-    return validCodeSigningIdentities.first;
+  if (validCodeSigningIdentities.length == 1) return validCodeSigningIdentities.first;
 
   if (validCodeSigningIdentities.length > 1) {
     final String savedCertChoice = config.getValue('ios-signing-cert');
@@ -216,8 +200,7 @@ Future<String> _chooseSigningIdentity(
       emphasis: true,
     );
     for (int i = 0; i < count; i++) {
-      printStatus('  ${i + 1}) ${validCodeSigningIdentities[i]}',
-          emphasis: true);
+      printStatus('  ${i + 1}) ${validCodeSigningIdentities[i]}', emphasis: true);
     }
     printStatus('  a) Abort', emphasis: true);
 
@@ -229,11 +212,9 @@ Future<String> _chooseSigningIdentity(
     );
 
     if (choice == 'a') {
-      throwToolExit(
-          'Aborted. Code signing is required to build a deployable iOS app.');
+      throwToolExit('Aborted. Code signing is required to build a deployable iOS app.');
     } else {
-      final String selectedCert =
-          validCodeSigningIdentities[int.parse(choice) - 1];
+      final String selectedCert = validCodeSigningIdentities[int.parse(choice) - 1];
       printStatus('Certificate choice "$selectedCert" saved');
       config.setValue('ios-signing-cert', selectedCert);
       return selectedCert;

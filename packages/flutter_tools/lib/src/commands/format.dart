@@ -43,8 +43,7 @@ class FormatCommand extends FlutterCommand {
   final String description = 'Format one or more dart files.';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
         DevelopmentArtifact.universal,
       };
 
@@ -82,8 +81,7 @@ class FormatCommand extends FlutterCommand {
     command..addAll(argResults.rest);
 
     final int result = await runCommandAndStreamOutput(command);
-    if (result != 0)
-      throwToolExit('Formatting failed: $result', exitCode: result);
+    if (result != 0) throwToolExit('Formatting failed: $result', exitCode: result);
 
     return null;
   }

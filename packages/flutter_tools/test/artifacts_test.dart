@@ -17,8 +17,7 @@ void main() {
     CachedArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory
-          .createTempSync('flutter_tools_artifacts_test_cached.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_cached.');
       artifacts = CachedArtifacts();
     });
 
@@ -30,27 +29,25 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.flutterFramework,
             platform: TargetPlatform.ios, mode: BuildMode.release),
-        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine',
-            'ios-release', 'Flutter.framework'),
+        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'ios-release',
+            'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
-        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine',
-            'linux-x64', 'flutter_tester'),
+        fs.path.join(
+            tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.genSnapshot,
-            platform: TargetPlatform.android_arm64,
-            mode: BuildMode.dynamicRelease),
+            platform: TargetPlatform.android_arm64, mode: BuildMode.dynamicRelease),
         fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine',
             'android-arm64-dynamic-release', 'linux-x64', 'gen_snapshot'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.vmSnapshotData,
-            platform: TargetPlatform.darwin_x64,
-            mode: BuildMode.dynamicRelease),
-        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine',
-            'darwin-x64', 'product_vm_isolate_snapshot.bin'),
+            platform: TargetPlatform.darwin_x64, mode: BuildMode.dynamicRelease),
+        fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'darwin-x64',
+            'product_vm_isolate_snapshot.bin'),
       );
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
@@ -63,8 +60,7 @@ void main() {
         'android-arm',
       );
       expect(
-        artifacts.getEngineType(
-            TargetPlatform.android_arm64, BuildMode.dynamicProfile),
+        artifacts.getEngineType(TargetPlatform.android_arm64, BuildMode.dynamicProfile),
         'android-arm64-dynamic-profile',
       );
       expect(
@@ -86,8 +82,7 @@ void main() {
     LocalEngineArtifacts artifacts;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory
-          .createTempSync('flutter_tools_artifacts_test_local.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_artifacts_test_local.');
       artifacts = LocalEngineArtifacts(
         tempDir.path,
         fs.path.join(tempDir.path, 'out', 'android_debug_unopt'),
@@ -103,13 +98,11 @@ void main() {
       expect(
         artifacts.getArtifactPath(Artifact.flutterFramework,
             platform: TargetPlatform.ios, mode: BuildMode.release),
-        fs.path.join(
-            tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework'),
+        fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'Flutter.framework'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.flutterTester),
-        fs.path
-            .join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester'),
+        fs.path.join(tempDir.path, 'out', 'android_debug_unopt', 'flutter_tester'),
       );
       expect(
         artifacts.getArtifactPath(Artifact.engineDartSdkPath),

@@ -20,8 +20,7 @@ class VersionCommand extends FlutterCommand {
     argParser.addFlag(
       'force',
       abbr: 'f',
-      help:
-          'Force switch to older Flutter versions that do not include a version command',
+      help: 'Force switch to older Flutter versions that do not include a version command',
     );
   }
 

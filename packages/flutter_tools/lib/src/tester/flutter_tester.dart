@@ -68,8 +68,7 @@ class FlutterTesterDevice extends Device {
   @override
   void clearLogs() {}
 
-  final _FlutterTesterDeviceLogReader _logReader =
-      _FlutterTesterDeviceLogReader();
+  final _FlutterTesterDeviceLogReader _logReader = _FlutterTesterDeviceLogReader();
 
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) => _logReader;
@@ -108,8 +107,7 @@ class FlutterTesterDevice extends Device {
     }
 
     final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!fs.isFileSync(shellPath))
-      throwToolExit('Cannot find Flutter shell at $shellPath');
+    if (!fs.isFileSync(shellPath)) throwToolExit('Cannot find Flutter shell at $shellPath');
 
     final List<String> command = <String>[
       shellPath,
@@ -120,16 +118,14 @@ class FlutterTesterDevice extends Device {
     ];
     if (debuggingOptions.debuggingEnabled) {
       if (debuggingOptions.startPaused) command.add('--start-paused');
-      if (debuggingOptions.disableServiceAuthCodes)
-        command.add('--disable-service-auth-codes');
+      if (debuggingOptions.disableServiceAuthCodes) command.add('--disable-service-auth-codes');
       if (debuggingOptions.hasObservatoryPort)
         command.add('--observatory-port=${debuggingOptions.observatoryPort}');
     }
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath =
-        bundle.getKernelPathForTransformerOptions(
+    final String applicationKernelFilePath = bundle.getKernelPathForTransformerOptions(
       fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
@@ -171,8 +167,7 @@ class FlutterTesterDevice extends Device {
 
       if (!debuggingOptions.debuggingEnabled) return LaunchResult.succeeded();
 
-      final ProtocolDiscovery observatoryDiscovery =
-          ProtocolDiscovery.observatory(
+      final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(
         getLogReader(),
         hostPort: debuggingOptions.observatoryPort,
       );
@@ -206,8 +201,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
 
   static bool showFlutterTesterDevice = false;
 
-  final FlutterTesterDevice _testerDevice =
-      FlutterTesterDevice(kTesterDeviceId);
+  final FlutterTesterDevice _testerDevice = FlutterTesterDevice(kTesterDeviceId);
 
   @override
   bool get canListAnything => true;
@@ -222,8 +216,7 @@ class FlutterTesterDevices extends PollingDeviceDiscovery {
 }
 
 class _FlutterTesterDeviceLogReader extends DeviceLogReader {
-  final StreamController<String> _logLinesController =
-      StreamController<String>.broadcast();
+  final StreamController<String> _logLinesController = StreamController<String>.broadcast();
 
   @override
   int get appPid => 0;

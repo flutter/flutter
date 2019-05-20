@@ -35,28 +35,22 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact iOS = DevelopmentArtifact._('ios');
 
   /// Artifacts required for web development,
-  static const DevelopmentArtifact web =
-      DevelopmentArtifact._('web', unstable: true);
+  static const DevelopmentArtifact web = DevelopmentArtifact._('web', unstable: true);
 
   /// Artifacts required for desktop macOS.
-  static const DevelopmentArtifact macOS =
-      DevelopmentArtifact._('macos', unstable: true);
+  static const DevelopmentArtifact macOS = DevelopmentArtifact._('macos', unstable: true);
 
   /// Artifacts required for desktop Windows.
-  static const DevelopmentArtifact windows =
-      DevelopmentArtifact._('windows', unstable: true);
+  static const DevelopmentArtifact windows = DevelopmentArtifact._('windows', unstable: true);
 
   /// Artifacts required for desktop linux.
-  static const DevelopmentArtifact linux =
-      DevelopmentArtifact._('linux', unstable: true);
+  static const DevelopmentArtifact linux = DevelopmentArtifact._('linux', unstable: true);
 
   /// Artifacts required for Fuchsia.
-  static const DevelopmentArtifact fuchsia =
-      DevelopmentArtifact._('fuchsia', unstable: true);
+  static const DevelopmentArtifact fuchsia = DevelopmentArtifact._('fuchsia', unstable: true);
 
   /// Artifacts required by all developments.
-  static const DevelopmentArtifact universal =
-      DevelopmentArtifact._('universal');
+  static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The vaulues of DevelopmentArtifacts.
   static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
@@ -75,8 +69,7 @@ class DevelopmentArtifact {
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
-  Cache({Directory rootOverride, List<CachedArtifact> artifacts})
-      : _rootOverride = rootOverride {
+  Cache({Directory rootOverride, List<CachedArtifact> artifacts}) : _rootOverride = rootOverride {
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
       _artifacts.add(AndroidEngineArtifacts(this));
@@ -151,8 +144,7 @@ class Cache {
         if (!printed) {
           printTrace(
               'Waiting to be able to obtain lock of Flutter binary artifacts directory: ${_lock.path}');
-          printStatus(
-              'Waiting for another flutter command to release the startup lock...');
+          printStatus('Waiting for another flutter command to release the startup lock...');
           printed = true;
         }
         await Future<void>.delayed(const Duration(milliseconds: 50));
@@ -170,9 +162,7 @@ class Cache {
   /// Checks if the current process owns the lock for the cache directory at
   /// this very moment; throws a [StateError] if it doesn't.
   static void checkLockAcquired() {
-    if (_lockEnabled &&
-        _lock == null &&
-        platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
+    if (_lockEnabled && _lock == null && platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
       throw StateError(
         'The current process does not own the lock for the cache directory. This is a bug in Flutter CLI tools.',
       );
@@ -186,8 +176,8 @@ class Cache {
       // Make the version string more customer-friendly.
       // Changes '2.1.0-dev.8.0.flutter-4312ae32' to '2.1.0 (build 2.1.0-dev.8.0 4312ae32)'
       final String justVersion = platform.version.split(' ')[0];
-      _dartSdkVersion = justVersion
-          .replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
+      _dartSdkVersion =
+          justVersion.replaceFirstMapped(RegExp(r'(\d+\.\d+\.\d+)(.+)'), (Match match) {
         final String noFlutter = match[2].replaceAll('.flutter-', ' ');
         return '${match[1]} (build ${match[1]}$noFlutter)';
       });
@@ -239,14 +229,9 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    final File versionFile = fs.file(fs.path.join(
-        _rootOverride?.path ?? flutterRoot,
-        'bin',
-        'internal',
-        '$artifactName.version'));
-    return versionFile.existsSync()
-        ? versionFile.readAsStringSync().trim()
-        : null;
+    final File versionFile = fs.file(fs.path
+        .join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
+    return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
   String getStampFor(String artifactName) {
@@ -266,23 +251,19 @@ class Cache {
   /// [entity] doesn't exist.
   bool isOlderThanToolsStamp(FileSystemEntity entity) {
     final File flutterToolsStamp = getStampFileFor('flutter_tools');
-    return isOlderThanReference(
-        entity: entity, referenceFile: flutterToolsStamp);
+    return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
   }
 
-  bool isUpToDate() =>
-      _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
+  bool isUpToDate() => _artifacts.every((CachedArtifact artifact) => artifact.isUpToDate());
 
   Future<String> getThirdPartyFile(String urlStr, String serviceName) async {
     final Uri url = Uri.parse(urlStr);
     final Directory thirdPartyDir = getArtifactDirectory('third_party');
 
-    final Directory serviceDir =
-        fs.directory(fs.path.join(thirdPartyDir.path, serviceName));
+    final Directory serviceDir = fs.directory(fs.path.join(thirdPartyDir.path, serviceName));
     if (!serviceDir.existsSync()) serviceDir.createSync(recursive: true);
 
-    final File cachedFile =
-        fs.file(fs.path.join(serviceDir.path, url.pathSegments.last));
+    final File cachedFile = fs.file(fs.path.join(serviceDir.path, url.pathSegments.last));
     if (!cachedFile.existsSync()) {
       try {
         await _downloadFile(url, cachedFile);
@@ -415,13 +396,12 @@ abstract class CachedArtifact {
   Uri _toStorageUri(String path) => Uri.parse('$_storageBaseUrl/$path');
 
   /// Download an archive from the given [url] and unzip it to [location].
-  Future<void> _downloadArchive(String message, Uri url, Directory location,
-      bool verifier(File f), void extractor(File f, Directory d)) {
-    return _withDownloadFile('${flattenNameSubdirs(url)}',
-        (File tempFile) async {
+  Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f),
+      void extractor(File f, Directory d)) {
+    return _withDownloadFile('${flattenNameSubdirs(url)}', (File tempFile) async {
       if (!verifier(tempFile)) {
-        final Status status = logger.startProgress(message,
-            timeout: timeoutConfiguration.slowOperation);
+        final Status status =
+            logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
         try {
           await _downloadFile(url, tempFile);
           status.stop();
@@ -438,23 +418,19 @@ abstract class CachedArtifact {
   }
 
   /// Download a zip archive from the given [url] and unzip it to [location].
-  Future<void> _downloadZipArchive(
-      String message, Uri url, Directory location) {
+  Future<void> _downloadZipArchive(String message, Uri url, Directory location) {
     return _downloadArchive(message, url, location, os.verifyZip, os.unzip);
   }
 
   /// Download a gzipped tarball from the given [url] and unpack it to [location].
-  Future<void> _downloadZippedTarball(
-      String message, Uri url, Directory location) {
+  Future<void> _downloadZippedTarball(String message, Uri url, Directory location) {
     return _downloadArchive(message, url, location, os.verifyGzip, os.unpack);
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
   /// argument, then add the temporary file to the [_downloadedFiles].
-  Future<void> _withDownloadFile(
-      String name, Future<void> onTemporaryFile(File file)) async {
-    final File tempFile =
-        fs.file(fs.path.join(cache.getDownloadDir().path, name));
+  Future<void> _withDownloadFile(String name, Future<void> onTemporaryFile(File file)) async {
+    final File tempFile = fs.file(fs.path.join(cache.getDownloadDir().path, name));
     _downloadedFiles.add(tempFile);
     await onTemporaryFile(tempFile);
   }
@@ -483,8 +459,7 @@ class MaterialFonts extends CachedArtifact {
   @override
   Future<void> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZipArchive(
-        'Downloading Material fonts...', archiveUri, location);
+    return _downloadZipArchive('Downloading Material fonts...', archiveUri, location);
   }
 }
 
@@ -516,8 +491,7 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (platform.isWindows) {
       platformName += 'windows-x64';
     }
-    final Uri url = Uri.parse(
-        '$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
+    final Uri url = Uri.parse('$_storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
     await _downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
     for (FileSystemEntity entity in location.listSync(recursive: true)) {
@@ -565,16 +539,14 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     }
 
     for (List<String> toolsDir in getBinaryDirs()) {
-      final Directory dir =
-          fs.directory(fs.path.join(location.path, toolsDir[0]));
+      final Directory dir = fs.directory(fs.path.join(location.path, toolsDir[0]));
       if (!dir.existsSync()) {
         return false;
       }
     }
 
     for (String licenseDir in getLicenseDirs()) {
-      final File file =
-          fs.file(fs.path.join(location.path, licenseDir, 'LICENSE'));
+      final File file = fs.file(fs.path.join(location.path, licenseDir, 'LICENSE'));
       if (!file.existsSync()) {
         return false;
       }
@@ -588,23 +560,21 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
-      await _downloadZipArchive('Downloading package $pkgName...',
-          Uri.parse(url + pkgName + '.zip'), pkgDir);
+      await _downloadZipArchive(
+          'Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
     for (List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = fs.directory(fs.path.join(location.path, cacheDir));
-      await _downloadZipArchive(
-          'Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
+      await _downloadZipArchive('Downloading $cacheDir tools...', Uri.parse(url + urlPath), dir);
 
       _makeFilesExecutable(dir);
 
       const List<String> frameworkNames = <String>['Flutter', 'FlutterMacOS'];
       for (String frameworkName in frameworkNames) {
-        final File frameworkZip =
-            fs.file(fs.path.join(dir.path, '$frameworkName.framework.zip'));
+        final File frameworkZip = fs.file(fs.path.join(dir.path, '$frameworkName.framework.zip'));
         if (frameworkZip.existsSync()) {
           final Directory framework =
               fs.directory(fs.path.join(dir.path, '$frameworkName.framework'));
@@ -614,11 +584,9 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       }
     }
 
-    final File licenseSource =
-        fs.file(fs.path.join(Cache.flutterRoot, 'LICENSE'));
+    final File licenseSource = fs.file(fs.path.join(Cache.flutterRoot, 'LICENSE'));
     for (String licenseDir in getLicenseDirs()) {
-      final String licenseDestinationPath =
-          fs.path.join(location.path, licenseDir, 'LICENSE');
+      final String licenseDestinationPath = fs.path.join(location.path, licenseDir, 'LICENSE');
       await licenseSource.copy(licenseDestinationPath);
     }
   }
@@ -630,8 +598,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     bool exists = false;
     for (String pkgName in getPackageDirs()) {
       exists = await _doesRemoteExist(
-          'Checking package $pkgName is available...',
-          Uri.parse(url + pkgName + '.zip'));
+          'Checking package $pkgName is available...', Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
         return false;
       }
@@ -641,8 +608,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       exists = await _doesRemoteExist(
-          'Checking $cacheDir tools are available...',
-          Uri.parse(url + urlPath));
+          'Checking $cacheDir tools are available...', Uri.parse(url + urlPath));
       if (!exists) {
         return false;
       }
@@ -855,19 +821,16 @@ class GradleWrapper extends CachedArtifact {
 
   List<String> get _gradleScripts => <String>['gradlew', 'gradlew.bat'];
 
-  String get _gradleWrapper =>
-      fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
+  String get _gradleWrapper => fs.path.join('gradle', 'wrapper', 'gradle-wrapper.jar');
 
   @override
   Future<void> updateInner() {
     final Uri archiveUri = _toStorageUri(version);
-    return _downloadZippedTarball(
-            'Downloading Gradle Wrapper...', archiveUri, location)
+    return _downloadZippedTarball('Downloading Gradle Wrapper...', archiveUri, location)
         .then<void>((_) {
       // Delete property file, allowing templates to provide it.
       fs
-          .file(fs.path.join(
-              location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
+          .file(fs.path.join(location.path, 'gradle', 'wrapper', 'gradle-wrapper.properties'))
           .deleteSync();
       // Remove NOTICE file. Should not be part of the template.
       fs.file(fs.path.join(location.path, 'NOTICE')).deleteSync();
@@ -876,18 +839,15 @@ class GradleWrapper extends CachedArtifact {
 
   @override
   bool isUpToDateInner() {
-    final Directory wrapperDir =
-        cache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'));
+    final Directory wrapperDir = cache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'));
     if (!fs.directory(wrapperDir).existsSync()) {
       return false;
     }
     for (String scriptName in _gradleScripts) {
-      final File scriptFile =
-          fs.file(fs.path.join(wrapperDir.path, scriptName));
+      final File scriptFile = fs.file(fs.path.join(wrapperDir.path, scriptName));
       if (!scriptFile.existsSync()) return false;
     }
-    final File gradleWrapperJar =
-        fs.file(fs.path.join(wrapperDir.path, _gradleWrapper));
+    final File gradleWrapperJar = fs.file(fs.path.join(wrapperDir.path, _gradleWrapper));
     if (!gradleWrapperJar.existsSync()) return false;
     return true;
   }
@@ -901,8 +861,7 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
           DevelopmentArtifact.fuchsia,
         });
 
-  static const String _cipdBaseUrl =
-      'https://chrome-infra-packages.appspot.com/dl';
+  static const String _cipdBaseUrl = 'https://chrome-infra-packages.appspot.com/dl';
 
   final String _path;
 
@@ -911,8 +870,7 @@ abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
 
   Future<void> _doUpdate() {
     final String url = '$_cipdBaseUrl/$_path/+/$version';
-    return _downloadZipArchive(
-        'Downloading package fuchsia SDK...', Uri.parse(url), location);
+    return _downloadZipArchive('Downloading package fuchsia SDK...', Uri.parse(url), location);
   }
 }
 
@@ -962,8 +920,7 @@ final Map<int, List<int>> _flattenNameSubstitutions = <int, List<int>>{
 String _flattenNameNoSubdirs(String fileName) {
   final List<int> replacedCodeUnits = <int>[];
   for (int codeUnit in fileName.codeUnits) {
-    replacedCodeUnits
-        .addAll(_flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit]);
+    replacedCodeUnits.addAll(_flattenNameSubstitutions[codeUnit] ?? <int>[codeUnit]);
   }
   return String.fromCharCodes(replacedCodeUnits);
 }
@@ -971,8 +928,7 @@ String _flattenNameNoSubdirs(String fileName) {
 @visibleForTesting
 String flattenNameSubdirs(Uri url) {
   final List<String> pieces = <String>[url.host]..addAll(url.pathSegments);
-  final Iterable<String> convertedPieces =
-      pieces.map<String>(_flattenNameNoSubdirs);
+  final Iterable<String> convertedPieces = pieces.map<String>(_flattenNameNoSubdirs);
   return fs.path.joinAll(convertedPieces);
 }
 
@@ -984,8 +940,7 @@ Future<void> _downloadFile(Uri url, File location) async {
 }
 
 Future<bool> _doesRemoteExist(String message, Uri url) async {
-  final Status status = logger.startProgress(message,
-      timeout: timeoutConfiguration.slowOperation);
+  final Status status = logger.startProgress(message, timeout: timeoutConfiguration.slowOperation);
   final bool exists = await doesRemoteFileExist(url);
   status.stop();
   return exists;
@@ -1013,60 +968,24 @@ const List<List<String>> _macOSDesktopBinaryDirs = <List<String>>[
 ];
 
 const List<List<String>> _osxBinaryDirs = <List<String>>[
-  <String>[
-    'android-arm-profile/darwin-x64',
-    'android-arm-profile/darwin-x64.zip'
-  ],
-  <String>[
-    'android-arm-release/darwin-x64',
-    'android-arm-release/darwin-x64.zip'
-  ],
-  <String>[
-    'android-arm64-profile/darwin-x64',
-    'android-arm64-profile/darwin-x64.zip'
-  ],
-  <String>[
-    'android-arm64-release/darwin-x64',
-    'android-arm64-release/darwin-x64.zip'
-  ],
+  <String>['android-arm-profile/darwin-x64', 'android-arm-profile/darwin-x64.zip'],
+  <String>['android-arm-release/darwin-x64', 'android-arm-release/darwin-x64.zip'],
+  <String>['android-arm64-profile/darwin-x64', 'android-arm64-profile/darwin-x64.zip'],
+  <String>['android-arm64-release/darwin-x64', 'android-arm64-release/darwin-x64.zip'],
 ];
 
 const List<List<String>> _linuxBinaryDirs = <List<String>>[
-  <String>[
-    'android-arm-profile/linux-x64',
-    'android-arm-profile/linux-x64.zip'
-  ],
-  <String>[
-    'android-arm-release/linux-x64',
-    'android-arm-release/linux-x64.zip'
-  ],
-  <String>[
-    'android-arm64-profile/linux-x64',
-    'android-arm64-profile/linux-x64.zip'
-  ],
-  <String>[
-    'android-arm64-release/linux-x64',
-    'android-arm64-release/linux-x64.zip'
-  ],
+  <String>['android-arm-profile/linux-x64', 'android-arm-profile/linux-x64.zip'],
+  <String>['android-arm-release/linux-x64', 'android-arm-release/linux-x64.zip'],
+  <String>['android-arm64-profile/linux-x64', 'android-arm64-profile/linux-x64.zip'],
+  <String>['android-arm64-release/linux-x64', 'android-arm64-release/linux-x64.zip'],
 ];
 
 const List<List<String>> _windowsBinaryDirs = <List<String>>[
-  <String>[
-    'android-arm-profile/windows-x64',
-    'android-arm-profile/windows-x64.zip'
-  ],
-  <String>[
-    'android-arm-release/windows-x64',
-    'android-arm-release/windows-x64.zip'
-  ],
-  <String>[
-    'android-arm64-profile/windows-x64',
-    'android-arm64-profile/windows-x64.zip'
-  ],
-  <String>[
-    'android-arm64-release/windows-x64',
-    'android-arm64-release/windows-x64.zip'
-  ],
+  <String>['android-arm-profile/windows-x64', 'android-arm-profile/windows-x64.zip'],
+  <String>['android-arm-release/windows-x64', 'android-arm-release/windows-x64.zip'],
+  <String>['android-arm64-profile/windows-x64', 'android-arm64-profile/windows-x64.zip'],
+  <String>['android-arm64-release/windows-x64', 'android-arm64-release/windows-x64.zip'],
 ];
 
 const List<List<String>> _androidBinaryDirs = <List<String>>[

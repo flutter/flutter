@@ -42,8 +42,7 @@ class FlutterDevice {
   })  : assert(trackWidgetCreation != null),
         generator = generator ??
             ResidentCompiler(
-              artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath,
-                  mode: buildMode),
+              artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
               trackWidgetCreation: trackWidgetCreation,
               fileSystemRoots: fileSystemRoots,
               fileSystemScheme: fileSystemScheme,
@@ -73,8 +72,7 @@ class FlutterDevice {
       );
     } else {
       generator = ResidentCompiler(
-        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath,
-            mode: buildMode),
+        artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
         trackWidgetCreation: trackWidgetCreation,
         fileSystemRoots: fileSystemRoots,
         fileSystemScheme: fileSystemScheme,
@@ -124,8 +122,7 @@ class FlutterDevice {
     CompileExpression compileExpression,
   }) async {
     if (vmServices != null) return;
-    final List<VMService> localVmServices =
-        List<VMService>(observatoryUris.length);
+    final List<VMService> localVmServices = List<VMService>(observatoryUris.length);
     for (int i = 0; i < observatoryUris.length; i += 1) {
       printTrace('Connecting to service protocol: ${observatoryUris[i]}');
       localVmServices[i] = await VMService.connect(
@@ -134,31 +131,24 @@ class FlutterDevice {
         restart: restart,
         compileExpression: compileExpression,
       );
-      printTrace(
-          'Successfully connected to service protocol: ${observatoryUris[i]}');
+      printTrace('Successfully connected to service protocol: ${observatoryUris[i]}');
     }
     vmServices = localVmServices;
   }
 
   Future<void> refreshViews() async {
-    if (vmServices == null || vmServices.isEmpty)
-      return Future<void>.value(null);
+    if (vmServices == null || vmServices.isEmpty) return Future<void>.value(null);
     final List<Future<void>> futures = <Future<void>>[];
-    for (VMService service in vmServices)
-      futures.add(service.vm.refreshViews(waitForViews: true));
+    for (VMService service in vmServices) futures.add(service.vm.refreshViews(waitForViews: true));
     await Future.wait(futures);
   }
 
   List<FlutterView> get views {
     if (vmServices == null) return <FlutterView>[];
 
-    return vmServices
-        .where((VMService service) => !service.isClosed)
-        .expand<FlutterView>(
+    return vmServices.where((VMService service) => !service.isClosed).expand<FlutterView>(
       (VMService service) {
-        return viewFilter != null
-            ? service.vm.allViewsWithName(viewFilter)
-            : service.vm.views;
+        return viewFilter != null ? service.vm.allViewsWithName(viewFilter) : service.vm.views;
       },
     ).toList();
   }
@@ -182,8 +172,7 @@ class FlutterDevice {
     // The flutterExit message only returns if it fails, so just wait a few
     // seconds then assume it worked.
     // TODO(ianh): We should make this return once the VM service disconnects.
-    await Future.wait(futures)
-        .timeout(const Duration(seconds: 2), onTimeout: () => <void>[]);
+    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () => <void>[]);
   }
 
   Future<Uri> setupDevFS(
@@ -205,11 +194,9 @@ class FlutterDevice {
     String entryPath, {
     bool pause = false,
   }) {
-    final Uri deviceEntryUri =
-        devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
+    final Uri deviceEntryUri = devFS.baseUri.resolveUri(fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
-    final List<Future<Map<String, dynamic>>> reports =
-        <Future<Map<String, dynamic>>>[];
+    final List<Future<Map<String, dynamic>>> reports = <Future<Map<String, dynamic>>>[];
     for (FlutterView view in views) {
       final Future<Map<String, dynamic>> report = view.uiIsolate.reloadSources(
         pause: pause,
@@ -225,25 +212,20 @@ class FlutterDevice {
     final Uri deviceAssetsDirectoryUri =
         devFS.baseUri.resolveUri(fs.path.toUri(getAssetBuildDirectory()));
     assert(deviceAssetsDirectoryUri != null);
-    await Future.wait<void>(views.map<Future<void>>((FlutterView view) =>
-        view.setAssetDirectory(deviceAssetsDirectoryUri)));
+    await Future.wait<void>(views
+        .map<Future<void>>((FlutterView view) => view.setAssetDirectory(deviceAssetsDirectoryUri)));
   }
 
   // Lists program elements changed in the most recent reload that have not
   // since executed.
   Future<List<ProgramElement>> unusedChangesInLastReload() async {
-    final List<Future<List<ProgramElement>>> reports =
-        <Future<List<ProgramElement>>>[];
-    for (FlutterView view in views)
-      reports.add(view.uiIsolate.getUnusedChangesInLastReload());
+    final List<Future<List<ProgramElement>>> reports = <Future<List<ProgramElement>>>[];
+    for (FlutterView view in views) reports.add(view.uiIsolate.getUnusedChangesInLastReload());
     final List<ProgramElement> elements = <ProgramElement>[];
     for (Future<List<ProgramElement>> report in reports) {
       for (ProgramElement element in await report)
-        elements.add(ProgramElement(
-            element.qualifiedName,
-            devFS.deviceUriToHostUri(element.uri),
-            element.line,
-            element.column));
+        elements.add(ProgramElement(element.qualifiedName, devFS.deviceUriToHostUri(element.uri),
+            element.line, element.column));
     }
     return elements;
   }
@@ -253,13 +235,11 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpRenderTree() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterDebugDumpRenderTree();
+    for (FlutterView view in views) await view.uiIsolate.flutterDebugDumpRenderTree();
   }
 
   Future<void> debugDumpLayerTree() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterDebugDumpLayerTree();
+    for (FlutterView view in views) await view.uiIsolate.flutterDebugDumpLayerTree();
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
@@ -273,23 +253,19 @@ class FlutterDevice {
   }
 
   Future<void> toggleDebugPaintSizeEnabled() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
+    for (FlutterView view in views) await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
   }
 
   Future<void> toggleDebugCheckElevationsEnabled() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterToggleDebugCheckElevationsEnabled();
+    for (FlutterView view in views) await view.uiIsolate.flutterToggleDebugCheckElevationsEnabled();
   }
 
   Future<void> debugTogglePerformanceOverlayOverride() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
+    for (FlutterView view in views) await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
   }
 
   Future<void> toggleWidgetInspector() async {
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterToggleWidgetInspector();
+    for (FlutterView view in views) await view.uiIsolate.flutterToggleWidgetInspector();
   }
 
   Future<void> toggleProfileWidgetBuilds() async {
@@ -309,17 +285,14 @@ class FlutterDevice {
         to = 'iOS';
         break;
     }
-    for (FlutterView view in views)
-      await view.uiIsolate.flutterPlatformOverride(to);
+    for (FlutterView view in views) await view.uiIsolate.flutterPlatformOverride(to);
     return to;
   }
 
   void startEchoingDeviceLog() {
     if (_loggingSubscription != null) return;
-    _loggingSubscription =
-        device.getLogReader(app: package).logLines.listen((String line) {
-      if (!line.contains('Observatory listening on http'))
-        printStatus(line, wrap: false);
+    _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
+      if (!line.contains('Observatory listening on http')) printStatus(line, wrap: false);
     });
   }
 
@@ -339,8 +312,7 @@ class FlutterDevice {
     bool shouldBuild,
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
-    final String modeName =
-        hotRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
     printStatus(
         'Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
 
@@ -352,8 +324,7 @@ class FlutterDevice {
 
     if (package == null) {
       String message = 'No application found for $targetPlatform.';
-      final String hint =
-          await getMissingPackageHintForPlatform(targetPlatform);
+      final String hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null) message += '\n$hint';
       printError(message);
       return 1;
@@ -401,13 +372,11 @@ class FlutterDevice {
       applicationBinary: coldRunner.applicationBinary,
     );
 
-    final String modeName =
-        coldRunner.debuggingOptions.buildInfo.friendlyModeName;
+    final String modeName = coldRunner.debuggingOptions.buildInfo.friendlyModeName;
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
-      printStatus(
-          'Launching ${package.displayName} on ${device.name} in $modeName mode...');
+      printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
     } else {
       printStatus(
           'Launching ${getDisplayPath(coldRunner.mainPath)} on ${device.name} in $modeName mode...');
@@ -415,16 +384,14 @@ class FlutterDevice {
 
     if (package == null) {
       String message = 'No application found for $targetPlatform.';
-      final String hint =
-          await getMissingPackageHintForPlatform(targetPlatform);
+      final String hint = await getMissingPackageHintForPlatform(targetPlatform);
       if (hint != null) message += '\n$hint';
       printError(message);
       return 1;
     }
 
     final Map<String, dynamic> platformArgs = <String, dynamic>{};
-    if (coldRunner.traceStartup != null)
-      platformArgs['trace-startup'] = coldRunner.traceStartup;
+    if (coldRunner.traceStartup != null) platformArgs['trace-startup'] = coldRunner.traceStartup;
 
     startEchoingDeviceLog();
 
@@ -516,8 +483,7 @@ abstract class ResidentRunner {
   }) {
     _mainPath = findMainDartFile(target);
     _projectRootPath = projectRootPath ?? fs.currentDirectory.path;
-    _packagesFilePath =
-        packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
+    _packagesFilePath = packagesFilePath ?? fs.path.absolute(PackageMap.globalPackagesPath);
     _assetBundle = AssetBundleFactory.instance.createBundle();
   }
 
@@ -577,11 +543,8 @@ abstract class ResidentRunner {
   bool get supportsRestart => false;
 
   Future<OperationResult> restart(
-      {bool fullRestart = false,
-      bool pauseAfterRestart = false,
-      String reason}) {
-    final String mode =
-        isRunningProfile ? 'profile' : isRunningRelease ? 'release' : 'this';
+      {bool fullRestart = false, bool pauseAfterRestart = false, String reason}) {
+    final String mode = isRunningProfile ? 'profile' : isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
@@ -601,8 +564,7 @@ abstract class ResidentRunner {
 
   Future<void> refreshViews() async {
     final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterDevice device in flutterDevices)
-      futures.add(device.refreshViews());
+    for (FlutterDevice device in flutterDevices) futures.add(device.refreshViews());
     await Future.wait(futures);
   }
 
@@ -613,14 +575,12 @@ abstract class ResidentRunner {
 
   Future<void> _debugDumpRenderTree() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.debugDumpRenderTree();
+    for (FlutterDevice device in flutterDevices) await device.debugDumpRenderTree();
   }
 
   Future<void> _debugDumpLayerTree() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.debugDumpLayerTree();
+    for (FlutterDevice device in flutterDevices) await device.debugDumpLayerTree();
   }
 
   Future<void> _debugDumpSemanticsTreeInTraversalOrder() async {
@@ -637,14 +597,12 @@ abstract class ResidentRunner {
 
   Future<void> _debugToggleDebugPaintSizeEnabled() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.toggleDebugPaintSizeEnabled();
+    for (FlutterDevice device in flutterDevices) await device.toggleDebugPaintSizeEnabled();
   }
 
   Future<void> _debugToggleDebugCheckElevationsEnabled() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.toggleDebugCheckElevationsEnabled();
+    for (FlutterDevice device in flutterDevices) await device.toggleDebugCheckElevationsEnabled();
   }
 
   Future<void> _debugTogglePerformanceOverlayOverride() async {
@@ -655,8 +613,7 @@ abstract class ResidentRunner {
 
   Future<void> _debugToggleWidgetInspector() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices)
-      await device.toggleWidgetInspector();
+    for (FlutterDevice device in flutterDevices) await device.toggleWidgetInspector();
   }
 
   Future<void> _debugToggleProfileWidgetBuilds() async {
@@ -667,11 +624,9 @@ abstract class ResidentRunner {
   }
 
   Future<void> _screenshot(FlutterDevice device) async {
-    final Status status = logger.startProgress(
-        'Taking screenshot for ${device.device.name}...',
+    final Status status = logger.startProgress('Taking screenshot for ${device.device.name}...',
         timeout: timeoutConfiguration.fastOperation);
-    final File outputFile =
-        getUniqueFile(fs.currentDirectory, 'flutter', 'png');
+    final File outputFile = getUniqueFile(fs.currentDirectory, 'flutter', 'png');
     try {
       if (supportsServiceProtocol && isRunningDebug) {
         await device.refreshViews();
@@ -693,16 +648,14 @@ abstract class ResidentRunner {
               await view.uiIsolate.flutterDebugAllowBanner(true);
           } catch (error) {
             status.cancel();
-            printError(
-                'Error communicating with Flutter on the device: $error');
+            printError('Error communicating with Flutter on the device: $error');
             return;
           }
         }
       }
       final int sizeKB = (await outputFile.length()) ~/ 1024;
       status.stop();
-      printStatus(
-          'Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
+      printStatus('Screenshot written to ${fs.path.relative(outputFile.path)} (${sizeKB}kB).');
     } catch (error) {
       status.cancel();
       printError('Error taking screenshot: $error');
@@ -715,8 +668,8 @@ abstract class ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
         final int index = device.views.indexOf(view);
-        final File outputFile = fs.currentDirectory
-            .childFile('compilation${index == 0 ? '' : index}.txt');
+        final File outputFile =
+            fs.currentDirectory.childFile('compilation${index == 0 ? '' : index}.txt');
 
         printStatus('Saving compilation training data '
             'for ${device.device.name}${index == 0 ? '' : '/Isolate$index'} '
@@ -739,11 +692,9 @@ abstract class ResidentRunner {
 
   Future<void> _debugTogglePlatform() async {
     await refreshViews();
-    final String from =
-        await flutterDevices[0].views[0].uiIsolate.flutterPlatformOverride();
+    final String from = await flutterDevices[0].views[0].uiIsolate.flutterPlatformOverride();
     String to;
-    for (FlutterDevice device in flutterDevices)
-      to = await device.togglePlatform(from: from);
+    for (FlutterDevice device in flutterDevices) to = await device.togglePlatform(from: from);
     printStatus('Switched operating system to $to');
   }
 
@@ -780,8 +731,8 @@ abstract class ResidentRunner {
   }
 
   Future<void> stopEchoingDeviceLog() async {
-    await Future.wait<void>(flutterDevices.map<Future<void>>(
-        (FlutterDevice device) => device.stopEchoingDeviceLog()));
+    await Future.wait<void>(
+        flutterDevices.map<Future<void>>((FlutterDevice device) => device.stopEchoingDeviceLog()));
   }
 
   /// If the [reloadSources] parameter is not null the 'reloadSources' service
@@ -795,8 +746,7 @@ abstract class ResidentRunner {
     Restart restart,
     CompileExpression compileExpression,
   }) async {
-    if (!debuggingOptions.debuggingEnabled)
-      throw 'The service protocol is not enabled.';
+    if (!debuggingOptions.debuggingEnabled) throw 'The service protocol is not enabled.';
 
     bool viewFound = false;
     for (FlutterDevice device in flutterDevices) {
@@ -838,8 +788,7 @@ abstract class ResidentRunner {
   }
 
   Future<void> _serviceProtocolError(dynamic error, StackTrace stack) {
-    printTrace(
-        'Service protocol connection closed with an error: $error\n$stack');
+    printTrace('Service protocol connection closed with an error: $error\n$stack');
     return Future<void>.error(error, stack);
   }
 
@@ -995,10 +944,8 @@ abstract class ResidentRunner {
 
   void printHelpDetails() {
     if (supportsServiceProtocol) {
-      printStatus(
-          'You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
-      printStatus(
-          'To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+      printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
+      printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
       if (isRunningDebug) {
         printStatus(
             'For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for traversal order) or "U" (for inverse hit test order).');
@@ -1006,8 +953,7 @@ abstract class ResidentRunner {
             'To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
         printStatus(
             'To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
-        printStatus(
-            'To simulate different operating systems, (defaultTargetPlatform), press "o".');
+        printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
         printStatus('To toggle the elevation checker, press "z".');
       } else {
         printStatus(
@@ -1065,8 +1011,7 @@ Future<String> getMissingPackageHintForPlatform(TargetPlatform platform) async {
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       final FlutterProject project = FlutterProject.current();
-      final String manifestPath =
-          fs.path.relative(project.android.appManifestFile.path);
+      final String manifestPath = fs.path.relative(project.android.appManifestFile.path);
       return 'Is your project missing an $manifestPath?\nConsider running "flutter create ." to create one.';
     case TargetPlatform.ios:
       return 'Is your project missing an ios/Runner/Info.plist?\nConsider running "flutter create ." to create one.';

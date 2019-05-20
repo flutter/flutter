@@ -26,16 +26,14 @@ class BuildAppBundleCommand extends BuildSubCommand {
         help: 'Whether to prefer compiling to a *.so file (android only).',
       )
       ..addOption('target-platform',
-          defaultsTo: 'android-arm',
-          allowed: <String>['android-arm', 'android-arm64']);
+          defaultsTo: 'android-arm', allowed: <String>['android-arm', 'android-arm64']);
   }
 
   @override
   final String name = 'appbundle';
 
   @override
-  final String description =
-      'Build an Android App Bundle file from your app.\n\n'
+  final String description = 'Build an Android App Bundle file from your app.\n\n'
       'This command can build debug and release versions of an app bundle for your application. \'debug\' builds support '
       'debugging and a quick development cycle. \'release\' builds don\'t support debugging and are '
       'suitable for deploying to app stores. \n app bundle improves your app size';

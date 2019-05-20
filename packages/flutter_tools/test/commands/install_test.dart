@@ -11,9 +11,7 @@ import '../src/mocks.dart';
 
 void main() {
   group('install', () {
-    testUsingContext(
-        'returns 0 when Android is connected and ready for an install',
-        () async {
+    testUsingContext('returns 0 when Android is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
       applyMocksToCommand(command);
 
@@ -25,8 +23,7 @@ void main() {
       await createTestCommandRunner(command).run(<String>['install']);
     });
 
-    testUsingContext('returns 0 when iOS is connected and ready for an install',
-        () async {
+    testUsingContext('returns 0 when iOS is connected and ready for an install', () async {
       final InstallCommand command = InstallCommand();
       applyMocksToCommand(command);
 

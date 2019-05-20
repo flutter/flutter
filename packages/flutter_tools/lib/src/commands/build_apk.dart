@@ -6,8 +6,7 @@ import 'dart:async';
 
 import '../android/apk.dart';
 import '../project.dart';
-import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
 
 class BuildApkCommand extends BuildSubCommand {
@@ -29,20 +28,14 @@ class BuildApkCommand extends BuildSubCommand {
       )
       ..addOption('target-platform',
           defaultsTo: 'android-arm',
-          allowed: <String>[
-            'android-arm',
-            'android-arm64',
-            'android-x86',
-            'android-x64'
-          ]);
+          allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64']);
   }
 
   @override
   final String name = 'apk';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
         DevelopmentArtifact.universal,
         DevelopmentArtifact.android,
       };

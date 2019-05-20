@@ -16,8 +16,7 @@ void main() {
 
     setUp(() {
       Cache.disableLocking();
-      tempDir =
-          fs.systemTempDirectory.createTempSync('flutter_tools_format_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_format_test.');
     });
 
     tearDown(() {
@@ -27,8 +26,7 @@ void main() {
     testUsingContext('a file', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile =
-          fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
+      final File srcFile = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
       final String original = srcFile.readAsStringSync();
       srcFile.writeAsStringSync(original.replaceFirst('main()', 'main(  )'));
 
@@ -43,10 +41,8 @@ void main() {
     testUsingContext('dry-run', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile =
-          fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
-      final String nonFormatted =
-          srcFile.readAsStringSync().replaceFirst('main()', 'main(  )');
+      final File srcFile = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted = srcFile.readAsStringSync().replaceFirst('main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
       final FormatCommand command = FormatCommand();
@@ -60,10 +56,8 @@ void main() {
     testUsingContext('dry-run with set-exit-if-changed', () async {
       final String projectPath = await createProject(tempDir);
 
-      final File srcFile =
-          fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
-      final String nonFormatted =
-          srcFile.readAsStringSync().replaceFirst('main()', 'main(  )');
+      final File srcFile = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
+      final String nonFormatted = srcFile.readAsStringSync().replaceFirst('main()', 'main(  )');
       srcFile.writeAsStringSync(nonFormatted);
 
       final FormatCommand command = FormatCommand();

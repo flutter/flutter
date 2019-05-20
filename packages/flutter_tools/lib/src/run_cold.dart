@@ -49,11 +49,9 @@ class ColdRunner extends ResidentRunner {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
       if (!fs.isFileSync(mainPath)) {
-        String message =
-            'Tried to run $mainPath, but that file does not exist.';
+        String message = 'Tried to run $mainPath, but that file does not exist.';
         if (target == null)
-          message +=
-              '\nConsider using the -t option to specify the Dart file to start.';
+          message += '\nConsider using the -t option to specify the Dart file to start.';
         printError(message);
         return 1;
       }
@@ -178,8 +176,7 @@ class ColdRunner extends ResidentRunner {
       final String dname = device.device.name;
       if (device.observatoryUris != null) {
         for (Uri uri in device.observatoryUris) {
-          printStatus(
-              'An Observatory debugger and profiler on $dname is available at $uri');
+          printStatus('An Observatory debugger and profiler on $dname is available at $uri');
           haveAnything = true;
         }
       }
@@ -191,13 +188,11 @@ class ColdRunner extends ResidentRunner {
         haveAnything = true;
       }
     }
-    final String quitMessage = _didAttach
-        ? 'To detach, press "d"; to quit, press "q".'
-        : 'To quit, press "q".';
+    final String quitMessage =
+        _didAttach ? 'To detach, press "d"; to quit, press "q".' : 'To quit, press "q".';
     if (haveDetails && !details) {
       if (saveCompilationTrace) {
-        printStatus(
-            'Compilation training data will be saved when flutter run quits...');
+        printStatus('Compilation training data will be saved when flutter run quits...');
       }
       printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {

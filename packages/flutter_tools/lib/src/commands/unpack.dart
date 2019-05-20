@@ -13,8 +13,7 @@ import '../globals.dart';
 import '../runner/flutter_command.dart';
 
 /// The directory in the Flutter cache for each platform's artifacts.
-const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
-    <TargetPlatform, String>{
+const Map<TargetPlatform, String> flutterArtifactPlatformDirectory = <TargetPlatform, String>{
   TargetPlatform.linux_x64: 'linux-x64',
   TargetPlatform.darwin_x64: 'darwin-x64',
   TargetPlatform.windows_x64: 'windows-x64',
@@ -22,8 +21,7 @@ const Map<TargetPlatform, String> flutterArtifactPlatformDirectory =
 
 // TODO(jonahwilliams): this should come from a configuration in each build
 // directory.
-const Map<TargetPlatform, List<String>> artifactFilesByPlatform =
-    <TargetPlatform, List<String>>{
+const Map<TargetPlatform, List<String>> artifactFilesByPlatform = <TargetPlatform, List<String>>{
   TargetPlatform.linux_x64: <String>[
     'libflutter_linux.so',
     'flutter_export.h',
@@ -57,8 +55,7 @@ class UnpackCommand extends FlutterCommand {
       'target-platform',
       allowed: <String>['darwin-x64', 'linux-x64', 'windows-x64'],
     );
-    argParser.addOption('cache-dir',
-        help: 'Location to output platform specific artifacts.');
+    argParser.addOption('cache-dir', help: 'Location to output platform specific artifacts.');
   }
 
   @override
@@ -81,8 +78,7 @@ class UnpackCommand extends FlutterCommand {
       fs.directory(targetDirectory).createSync(recursive: true);
     }
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetName);
-    final ArtifactUnpacker flutterArtifactFetcher =
-        ArtifactUnpacker(targetPlatform);
+    final ArtifactUnpacker flutterArtifactFetcher = ArtifactUnpacker(targetPlatform);
     bool success = true;
     if (artifacts is LocalEngineArtifacts) {
       final LocalEngineArtifacts localEngineArtifacts = artifacts;
@@ -132,8 +128,7 @@ class ArtifactUnpacker {
       default:
         throwToolExit('Unsupported target platform: $platform');
     }
-    final String targetHash =
-        readHashFileIfPossible(Cache.instance.getStampFileFor(cacheStamp));
+    final String targetHash = readHashFileIfPossible(Cache.instance.getStampFileFor(cacheStamp));
     if (targetHash == null) {
       printError('Failed to find engine stamp file');
       return false;
@@ -200,8 +195,7 @@ class ArtifactUnpacker {
       // are just individual files, this isn't necessary since copying over
       // existing files will do the right thing.
       if (platform == TargetPlatform.darwin_x64) {
-        _copyMacOSFramework(
-            fs.path.join(sourceDirectory, artifactFiles[0]), targetDirectory);
+        _copyMacOSFramework(fs.path.join(sourceDirectory, artifactFiles[0]), targetDirectory);
       } else {
         for (final String entityName in artifactFiles) {
           final String sourcePath = fs.path.join(sourceDirectory, entityName);
@@ -212,9 +206,7 @@ class ArtifactUnpacker {
               fs.directory(targetPath),
             );
           } else {
-            fs
-                .file(sourcePath)
-                .copySync(fs.path.join(targetDirectory, entityName));
+            fs.file(sourcePath).copySync(fs.path.join(targetDirectory, entityName));
           }
         }
       }
@@ -266,11 +258,10 @@ class ArtifactUnpacker {
   /// Removes any previous version of the framework that already exists in the
   /// target directory.
   void _copyMacOSFramework(String frameworkPath, String targetDirectory) {
-    _deleteFrameworkIfPresent(
-        fs.path.join(targetDirectory, fs.path.basename(frameworkPath)));
+    _deleteFrameworkIfPresent(fs.path.join(targetDirectory, fs.path.basename(frameworkPath)));
 
-    final ProcessResult result = processManager
-        .runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
+    final ProcessResult result =
+        processManager.runSync(<String>['cp', '-R', frameworkPath, targetDirectory]);
     if (result.exitCode != 0) {
       throw Exception(
         'Failed to copy framework (exit ${result.exitCode}:\n'
@@ -284,8 +275,7 @@ class ArtifactUnpacker {
     // Ensure that the path is a framework, to minimize the potential for
     // catastrophic deletion bugs with bad arguments.
     if (fs.path.extension(frameworkPath) != '.framework') {
-      throw Exception(
-          'Attempted to delete a non-framework directory: $frameworkPath');
+      throw Exception('Attempted to delete a non-framework directory: $frameworkPath');
     }
 
     final Directory directory = fs.directory(frameworkPath);

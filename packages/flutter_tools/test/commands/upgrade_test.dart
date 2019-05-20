@@ -60,8 +60,7 @@ void main() {
       expect(result, throwsA(isA<ToolExit>()));
     });
 
-    test('does not throw tool exit with uncommited changes and force',
-        () async {
+    test('does not throw tool exit with uncommited changes and force', () async {
       fakeCommandRunner.willHaveUncomittedChanges = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         true,
@@ -82,8 +81,7 @@ void main() {
 
     testUsingContext('verifyUpstreamConfigured', () async {
       when(processManager.run(<String>['git', 'rev-parse', '@{u}'],
-              environment: anyNamed('environment'),
-              workingDirectory: anyNamed('workingDirectory')))
+              environment: anyNamed('environment'), workingDirectory: anyNamed('workingDirectory')))
           .thenAnswer((Invocation invocation) async {
         return FakeProcessResult()..exitCode = 0;
       });
@@ -101,39 +99,26 @@ void main() {
     bool _match(String line) => UpgradeCommandRunner.matchesGitLine(line);
 
     test('regex match', () {
-      expect(
-          _match(' .../flutter_gallery/lib/demo/buttons_demo.dart    | 10 +--'),
-          true);
-      expect(
-          _match(
-              ' dev/benchmarks/complex_layout/lib/main.dart        |  24 +-'),
-          true);
+      expect(_match(' .../flutter_gallery/lib/demo/buttons_demo.dart    | 10 +--'), true);
+      expect(_match(' dev/benchmarks/complex_layout/lib/main.dart        |  24 +-'), true);
 
-      expect(
-          _match(
-              ' rename {packages/flutter/doc => dev/docs}/styles.html (92%)'),
-          true);
+      expect(_match(' rename {packages/flutter/doc => dev/docs}/styles.html (92%)'), true);
       expect(_match(' delete mode 100644 doc/index.html'), true);
-      expect(
-          _match(
-              ' create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart'),
-          true);
+      expect(_match(' create mode 100644 examples/flutter_gallery/lib/gallery/demo.dart'), true);
 
       expect(_match('Fast-forward'), true);
     });
 
     test('regex doesn\'t match', () {
       expect(_match('Updating 79cfe1e..5046107'), false);
-      expect(_match('229 files changed, 6179 insertions(+), 3065 deletions(-)'),
-          false);
+      expect(_match('229 files changed, 6179 insertions(+), 3065 deletions(-)'), false);
     });
 
     group('findProjectRoot', () {
       Directory tempDir;
 
       setUp(() async {
-        tempDir = fs.systemTempDirectory
-            .createTempSync('flutter_tools_upgrade_test.');
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_upgrade_test.');
       });
 
       tearDown(() {
@@ -145,8 +130,7 @@ void main() {
         expect(findProjectRoot(projectPath), projectPath);
         expect(findProjectRoot(fs.path.join(projectPath, 'lib')), projectPath);
 
-        final String hello =
-            fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
+        final String hello = fs.path.join(Cache.flutterRoot, 'examples', 'hello_world');
         expect(findProjectRoot(hello), hello);
         expect(findProjectRoot(fs.path.join(hello, 'lib')), hello);
       });

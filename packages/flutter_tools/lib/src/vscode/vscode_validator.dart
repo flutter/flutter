@@ -15,8 +15,7 @@ class VsCodeValidator extends DoctorValidator {
   final VsCode _vsCode;
 
   static Iterable<DoctorValidator> get installedValidators {
-    return VsCode.allInstalled()
-        .map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
+    return VsCode.allInstalled().map<DoctorValidator>((VsCode vsCode) => VsCodeValidator(vsCode));
   }
 
   @override

@@ -26,17 +26,11 @@ class WebCompiler {
   /// `minify` controls whether minifaction of the source is enabled. Defaults to `true`.
   /// `enabledAssertions` controls whether assertions are enabled. Defaults to `false`.
   Future<int> compile(
-      {@required String target,
-      bool minify = true,
-      bool enabledAssertions = false}) async {
-    final String engineDartPath =
-        artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final String dart2jsPath =
-        artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
-    final String flutterWebSdkPath =
-        artifacts.getArtifactPath(Artifact.flutterWebSdk);
-    final String librariesPath =
-        fs.path.join(flutterWebSdkPath, 'libraries.json');
+      {@required String target, bool minify = true, bool enabledAssertions = false}) async {
+    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
+    final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+    final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
     final Directory outputDir = fs.directory(getWebBuildDirectory());
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
@@ -63,14 +57,8 @@ class WebCompiler {
     }
     printTrace(command.join(' '));
     final Process result = await processManager.start(command);
-    result.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printStatus);
-    result.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printError);
+    result.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(printStatus);
+    result.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(printError);
     return result.exitCode;
   }
 }

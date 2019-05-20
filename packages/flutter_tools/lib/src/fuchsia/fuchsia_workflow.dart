@@ -25,8 +25,7 @@ class FuchsiaWorkflow implements Workflow {
 
   @override
   bool get canLaunchDevices {
-    return fuchsiaArtifacts.devFinder != null &&
-        fuchsiaArtifacts.sshConfig != null;
+    return fuchsiaArtifacts.devFinder != null && fuchsiaArtifacts.sshConfig != null;
   }
 
   @override

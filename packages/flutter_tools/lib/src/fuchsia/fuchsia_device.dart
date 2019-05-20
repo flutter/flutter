@@ -58,9 +58,8 @@ class _FuchsiaLogReader extends DeviceLogReader {
     final DateTime startTime = systemClock.now();
     // Determine if line comes from flutter, and optionally whether it matches
     // the correct fuchsia module.
-    final RegExp matchRegExp = _app == null
-        ? _flutterLogOutput
-        : RegExp('INFO: ${_app.name}\\(flutter\\): ');
+    final RegExp matchRegExp =
+        _app == null ? _flutterLogOutput : RegExp('INFO: ${_app.name}\\(flutter\\): ');
     return Stream<String>.eventTransformed(
       lines,
       (Sink<String> outout) => _FuchsiaLogSink(outout, matchRegExp, startTime),
@@ -92,8 +91,7 @@ class _FuchsiaLogSink implements EventSink<String> {
     if (logTime.millisecondsSinceEpoch < _startTime.millisecondsSinceEpoch) {
       return;
     }
-    _outputSink.add(
-        '[${logTime.toLocal()}] Flutter: ${line.split(_matchRegExp).last}');
+    _outputSink.add('[${logTime.toLocal()}] Flutter: ${line.split(_matchRegExp).last}');
   }
 
   @override
@@ -217,8 +215,7 @@ class FuchsiaDevice extends Device {
   _FuchsiaLogReader _logReader;
 
   @override
-  DevicePortForwarder get portForwarder =>
-      _portForwarder ??= _FuchsiaPortForwarder(this);
+  DevicePortForwarder get portForwarder => _portForwarder ??= _FuchsiaPortForwarder(this);
   _FuchsiaPortForwarder _portForwarder;
 
   @override
@@ -253,8 +250,7 @@ class FuchsiaDevice extends Device {
   Future<List<int>> servicePorts() async {
     final String findOutput = await shell('find /hub -name vmservice-port');
     if (findOutput.trim() == '') {
-      throwToolExit(
-          'No Dart Observatories found. Are you running a debug build?');
+      throwToolExit('No Dart Observatories found. Are you running a debug build?');
       return null;
     }
     final List<int> ports = <int>[];
@@ -278,16 +274,10 @@ class FuchsiaDevice extends Device {
 
   /// Run `command` on the Fuchsia device shell.
   Future<String> shell(String command) async {
-    final RunResult result = await runAsync(<String>[
-      'ssh',
-      '-F',
-      fuchsiaArtifacts.sshConfig.absolute.path,
-      id,
-      command
-    ]);
+    final RunResult result = await runAsync(
+        <String>['ssh', '-F', fuchsiaArtifacts.sshConfig.absolute.path, id, command]);
     if (result.exitCode != 0) {
-      throwToolExit(
-          'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
+      throwToolExit('Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
       return null;
     }
     return result.stdout;
@@ -328,8 +318,7 @@ class FuchsiaDevice extends Device {
     return null;
   }
 
-  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(
-          String isolateName) =>
+  FuchsiaIsolateDiscoveryProtocol getIsolateDiscoveryProtocol(String isolateName) =>
       FuchsiaIsolateDiscoveryProtocol(this, isolateName);
 
   @override

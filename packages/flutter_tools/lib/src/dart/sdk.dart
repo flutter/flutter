@@ -18,6 +18,6 @@ const List<String> dartVmFlags = <String>[];
 /// ==> `pub.bat`. The default SDK location can be overridden with a specified
 /// [sdkLocation].
 String sdkBinaryName(String name, {String sdkLocation}) {
-  return fs.path.absolute(fs.path.join(sdkLocation ?? dartSdkPath, 'bin',
-      platform.isWindows ? '$name.bat' : name));
+  return fs.path.absolute(
+      fs.path.join(sdkLocation ?? dartSdkPath, 'bin', platform.isWindows ? '$name.bat' : name));
 }

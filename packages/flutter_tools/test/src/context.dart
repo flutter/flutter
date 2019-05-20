@@ -58,10 +58,8 @@ void testUsingContext(
     }
   });
   Config buildConfig(FileSystem fs) {
-    configDir =
-        fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
-    final File settingsFile =
-        fs.file(fs.path.join(configDir.path, '.flutter_settings'));
+    configDir = fs.systemTempDirectory.createTempSync('flutter_config_dir_test.');
+    final File settingsFile = fs.file(fs.path.join(configDir.path, '.flutter_settings'));
     return Config(settingsFile);
   }
 
@@ -122,10 +120,7 @@ void testUsingContext(
         },
       );
     });
-  },
-      timeout: timeout ?? const Timeout(Duration(seconds: 60)),
-      testOn: testOn,
-      skip: skip);
+  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)), testOn: testOn, skip: skip);
 }
 
 void _printBufferedErrors(AppContext testContext) {
@@ -161,20 +156,16 @@ class MockDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() =>
-      Stream<Device>.fromIterable(devices);
+  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
 
   @override
   Stream<Device> getDevicesById(String deviceId) {
-    return Stream<Device>.fromIterable(
-        devices.where((Device device) => device.id == deviceId));
+    return Stream<Device>.fromIterable(devices.where((Device device) => device.id == deviceId));
   }
 
   @override
   Stream<Device> getDevices() {
-    return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId)
-        : getAllConnectedDevices();
+    return hasSpecifiedDeviceId ? getDevicesById(specifiedDeviceId) : getAllConnectedDevices();
   }
 
   void addDevice(Device device) => devices.add(device);
@@ -261,12 +252,10 @@ class MockUsage implements Usage {
   void sendCommand(String command, {Map<String, String> parameters}) {}
 
   @override
-  void sendEvent(String category, String parameter,
-      {Map<String, String> parameters}) {}
+  void sendEvent(String category, String parameter, {Map<String, String> parameters}) {}
 
   @override
-  void sendTiming(String category, String variableName, Duration duration,
-      {String label}) {}
+  void sendTiming(String category, String variableName, Duration duration, {String label}) {}
 
   @override
   void sendException(dynamic exception, StackTrace trace) {}

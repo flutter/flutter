@@ -167,12 +167,10 @@ void main() {
       mockStdio = MockStdio();
     });
 
-    testUsingContext('fails connection eagerly in the connect() method',
-        () async {
+    testUsingContext('fails connection eagerly in the connect() method', () async {
       FakeAsync().run((FakeAsync time) {
         bool failed = false;
-        final Future<VMService> future =
-            VMService.connect(Uri.parse('http://host.invalid:9999/'));
+        final Future<VMService> future = VMService.connect(Uri.parse('http://host.invalid:9999/'));
         future.whenComplete(() {
           failed = true;
         });
@@ -182,15 +180,13 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
         time.elapse(const Duration(seconds: 5));
         expect(failed, isFalse);
-        expect(mockStdio.writtenToStdout.join(''),
-            'This is taking longer than expected...\n');
+        expect(mockStdio.writtenToStdout.join(''), 'This is taking longer than expected...\n');
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
       Logger: () => StdoutLogger(),
       Stdio: () => mockStdio,
-      WebSocketConnector: () => (String url,
-              {CompressionOptions compression}) async =>
+      WebSocketConnector: () => (String url, {CompressionOptions compression}) async =>
           throw const SocketException('test'),
     });
 
@@ -199,8 +195,7 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService =
-            VMService(mockPeer, null, null, null, null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null);
         vmService.getVM().then((void value) {
           done = true;
         });
@@ -217,8 +212,7 @@ void main() {
           done = true;
         });
         expect(mockPeer.returnedFromSendRequest, 1);
-        time.elapse(Duration
-            .zero); // this unblocks the listViews call which returns nothing
+        time.elapse(Duration.zero); // this unblocks the listViews call which returns nothing
         expect(mockPeer.returnedFromSendRequest, 2);
         time.elapse(const Duration(
             milliseconds:
@@ -227,49 +221,45 @@ void main() {
         expect(mockPeer.returnedFromSendRequest, 2);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 2);
-        time.elapse(Duration
-            .zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(
+            Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 4);
-        time.elapse(const Duration(
-            milliseconds: 50)); // so refreshViews waits another 50ms
+        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 4);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 4);
-        time.elapse(Duration
-            .zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(
+            Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 6);
-        time.elapse(const Duration(
-            milliseconds: 50)); // so refreshViews waits another 50ms
+        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 6);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 6);
-        time.elapse(Duration
-            .zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(
+            Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 8);
-        time.elapse(const Duration(
-            milliseconds: 50)); // so refreshViews waits another 50ms
+        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 8);
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 8);
-        time.elapse(Duration
-            .zero); // here getVM returns with no isolates and listViews returns no views
+        time.elapse(
+            Duration.zero); // here getVM returns with no isolates and listViews returns no views
         expect(mockPeer.returnedFromSendRequest, 10);
         const String message =
             'Flutter is taking longer than expected to report its views. Still trying...\n';
         expect(mockStdio.writtenToStdout.join(''), message);
         expect(mockStdio.writtenToStderr.join(''), '');
-        time.elapse(const Duration(
-            milliseconds: 50)); // so refreshViews waits another 50ms
+        time.elapse(const Duration(milliseconds: 50)); // so refreshViews waits another 50ms
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 10);
         mockPeer.isolatesEnabled = true;
         mockPeer.tripGetVMLatch(); // this unblocks the getVM call
         expect(mockPeer.returnedFromSendRequest, 10);
-        time.elapse(Duration
-            .zero); // now it returns an isolate and the listViews call returns views
+        time.elapse(
+            Duration.zero); // now it returns an isolate and the listViews call returns views
         expect(mockPeer.returnedFromSendRequest, 13);
         expect(done, isTrue);
         expect(mockStdio.writtenToStdout.join(''), message);

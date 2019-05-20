@@ -23,9 +23,8 @@ import '../src/context.dart';
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
-final Generator _kNoColorTerminalPlatform = () =>
-    FakePlatform.fromPlatform(const LocalPlatform())
-      ..stdoutSupportsAnsi = false;
+final Generator _kNoColorTerminalPlatform =
+    () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorTerminalPlatform,
 };
@@ -46,8 +45,7 @@ void main() {
 
   setUp(() {
     loggingProcessManager = LoggingProcessManager();
-    tempDir =
-        fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
     projectDir = tempDir.childDirectory('flutter_project');
     mockFlutterVersion = MockFlutterVersion();
   });
@@ -75,8 +73,7 @@ void main() {
     return _runFlutterTest(projectDir);
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('can create a default project if empty directory exists',
-      () async {
+  testUsingContext('can create a default project if empty directory exists', () async {
     await projectDir.create(recursive: true);
     await _createAndAnalyzeProject(
       projectDir,
@@ -112,23 +109,18 @@ void main() {
   }, timeout: allowForRemotePubInvocation);
 
   testUsingContext(
-      'cannot create a project if non-empty non-project directory exists with .metadata',
-      () async {
+      'cannot create a project if non-empty non-project directory exists with .metadata', () async {
     await projectDir.absolute.childDirectory('blag').create(recursive: true);
-    await projectDir.absolute
-        .childFile('.metadata')
-        .writeAsString('project_type: blag\n');
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: blag\n');
     expect(
-        () async => await _createAndAnalyzeProject(
-                projectDir, <String>[], <String>[], unexpectedPaths: <String>[
-              'android/',
-              'ios/',
-              '.android/',
-              '.ios/',
-            ]),
-        throwsToolExit(
-            message:
-                'Sorry, unable to detect the type of project to recreate'));
+        () async => await _createAndAnalyzeProject(projectDir, <String>[], <String>[],
+                unexpectedPaths: <String>[
+                  'android/',
+                  'ios/',
+                  '.android/',
+                  '.ios/',
+                ]),
+        throwsToolExit(message: 'Sorry, unable to detect the type of project to recreate'));
   }, timeout: allowForRemotePubInvocation, overrides: noColorTerminalOverride);
 
   testUsingContext(
@@ -165,12 +157,9 @@ void main() {
     ]);
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('detects and recreates a plugin project correctly',
-      () async {
+  testUsingContext('detects and recreates a plugin project correctly', () async {
     await projectDir.create(recursive: true);
-    await projectDir.absolute
-        .childFile('.metadata')
-        .writeAsString('project_type: plugin\n');
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: plugin\n');
     return _createAndAnalyzeProject(
       projectDir,
       <String>[],
@@ -189,12 +178,9 @@ void main() {
     );
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('detects and recreates a package project correctly',
-      () async {
+  testUsingContext('detects and recreates a package project correctly', () async {
     await projectDir.create(recursive: true);
-    await projectDir.absolute
-        .childFile('.metadata')
-        .writeAsString('project_type: package\n');
+    await projectDir.absolute.childFile('.metadata').writeAsString('project_type: package\n');
     return _createAndAnalyzeProject(
       projectDir,
       <String>[],
@@ -224,12 +210,7 @@ void main() {
   testUsingContext('kotlin/swift legacy app project', () async {
     return _createProject(
       projectDir,
-      <String>[
-        '--no-pub',
-        '--template=app',
-        '--android-language=kotlin',
-        '--ios-language=swift'
-      ],
+      <String>['--no-pub', '--template=app', '--android-language=kotlin', '--ios-language=swift'],
       <String>[
         'android/app/src/main/kotlin/com/example/flutter_project/MainActivity.kt',
         'ios/Runner/AppDelegate.swift',
@@ -297,14 +278,7 @@ void main() {
   testUsingContext('kotlin/swift plugin project', () async {
     return _createProject(
       projectDir,
-      <String>[
-        '--no-pub',
-        '--template=plugin',
-        '-a',
-        'kotlin',
-        '--ios-language',
-        'swift'
-      ],
+      <String>['--no-pub', '--template=plugin', '-a', 'kotlin', '--ios-language', 'swift'],
       <String>[
         'android/src/main/kotlin/com/example/flutter_project/FlutterProjectPlugin.kt',
         'example/android/app/src/main/kotlin/com/example/flutter_project_example/MainActivity.kt',
@@ -360,12 +334,7 @@ void main() {
     expect(
       () => _createProject(
             projectDir,
-            <String>[
-              '--no-pub',
-              '--template=plugin',
-              '--project-name',
-              'xyz.xyz'
-            ],
+            <String>['--no-pub', '--template=plugin', '--project-name', 'xyz.xyz'],
             <String>[],
           ),
       throwsToolExit(message: '"xyz.xyz" is not a valid Dart package name.'),
@@ -412,8 +381,7 @@ void main() {
     ]);
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('has correct content and formatting with module template',
-      () async {
+  testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -437,9 +405,8 @@ void main() {
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
-    final String actualContents = await fs
-        .file(projectDir.path + '/test/widget_test.dart')
-        .readAsString();
+    final String actualContents =
+        await fs.file(projectDir.path + '/test/widget_test.dart').readAsString();
 
     expect(actualContents.contains('flutter_test.dart'), true);
 
@@ -452,8 +419,7 @@ void main() {
           <String>[file.path],
           workingDirectory: projectDir.path,
         );
-        final String formatted =
-            await process.stdout.transform(utf8.decoder).join();
+        final String formatted = await process.stdout.transform(utf8.decoder).join();
 
         expect(original, formatted, reason: file.path);
       }
@@ -463,36 +429,29 @@ void main() {
         target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
 
     // Generated Xcode settings
-    final String xcodeConfigPath =
-        fs.path.join('.ios', 'Flutter', 'Generated.xcconfig');
+    final String xcodeConfigPath = fs.path.join('.ios', 'Flutter', 'Generated.xcconfig');
     expectExists(xcodeConfigPath);
-    final File xcodeConfigFile =
-        fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
+    final File xcodeConfigFile = fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     expect(xcodeConfig, contains('FLUTTER_TARGET='));
     // App identification
-    final String xcodeProjectPath =
-        fs.path.join('.ios', 'Runner.xcodeproj', 'project.pbxproj');
+    final String xcodeProjectPath = fs.path.join('.ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
-    final File xcodeProjectFile =
-        fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
+    final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
-    expect(xcodeProject,
-        contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
 
     final String versionPath = fs.path.join('.metadata');
     expectExists(versionPath);
-    final String version =
-        fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+    final String version = fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
     expect(version, contains('revision: 12345678'));
     expect(version, contains('channel: omega'));
 
     // IntelliJ metadata
-    final String intelliJSdkMetadataPath =
-        fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
+    final String intelliJSdkMetadataPath = fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
     expectExists(intelliJSdkMetadataPath);
     final String sdkMetaContents = fs
         .file(fs.path.join(
@@ -507,8 +466,7 @@ void main() {
     Platform: _kNoColorTerminalPlatform,
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('has correct content and formatting with app template',
-      () async {
+  testUsingContext('has correct content and formatting with app template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -516,14 +474,8 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>[
-      'create',
-      '--template=app',
-      '--no-pub',
-      '--org',
-      'com.foo.bar',
-      projectDir.path
-    ]);
+    await runner.run(
+        <String>['create', '--template=app', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
     void expectExists(String relPath) {
       expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
@@ -541,8 +493,7 @@ void main() {
           <String>[file.path],
           workingDirectory: projectDir.path,
         );
-        final String formatted =
-            await process.stdout.transform(utf8.decoder).join();
+        final String formatted = await process.stdout.transform(utf8.decoder).join();
 
         expect(original, formatted, reason: file.path);
       }
@@ -552,35 +503,28 @@ void main() {
         target: fs.path.join(projectDir.path, 'test', 'widget_test.dart'));
 
     // Generated Xcode settings
-    final String xcodeConfigPath =
-        fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
+    final String xcodeConfigPath = fs.path.join('ios', 'Flutter', 'Generated.xcconfig');
     expectExists(xcodeConfigPath);
-    final File xcodeConfigFile =
-        fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
+    final File xcodeConfigFile = fs.file(fs.path.join(projectDir.path, xcodeConfigPath));
     final String xcodeConfig = xcodeConfigFile.readAsStringSync();
     expect(xcodeConfig, contains('FLUTTER_ROOT='));
     expect(xcodeConfig, contains('FLUTTER_APPLICATION_PATH='));
     // App identification
-    final String xcodeProjectPath =
-        fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
+    final String xcodeProjectPath = fs.path.join('ios', 'Runner.xcodeproj', 'project.pbxproj');
     expectExists(xcodeProjectPath);
-    final File xcodeProjectFile =
-        fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
+    final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
-    expect(xcodeProject,
-        contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
 
     final String versionPath = fs.path.join('.metadata');
     expectExists(versionPath);
-    final String version =
-        fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
+    final String version = fs.file(fs.path.join(projectDir.path, versionPath)).readAsStringSync();
     expect(version, contains('version:'));
     expect(version, contains('revision: 12345678'));
     expect(version, contains('channel: omega'));
 
     // IntelliJ metadata
-    final String intelliJSdkMetadataPath =
-        fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
+    final String intelliJSdkMetadataPath = fs.path.join('.idea', 'libraries', 'Dart_SDK.xml');
     expectExists(intelliJSdkMetadataPath);
     final String sdkMetaContents = fs
         .file(fs.path.join(
@@ -595,8 +539,7 @@ void main() {
     Platform: _kNoColorTerminalPlatform,
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext(
-      'has correct application id for android and bundle id for ios', () async {
+  testUsingContext('has correct application id for android and bundle id for ios', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
     when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
@@ -605,16 +548,9 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
     String tmpProjectDir = fs.path.join(tempDir.path, 'hello_flutter');
-    await runner.run(<String>[
-      'create',
-      '--template=app',
-      '--no-pub',
-      '--org',
-      'com.example',
-      tmpProjectDir
-    ]);
-    FlutterProject project =
-        FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
+    await runner.run(
+        <String>['create', '--template=app', '--no-pub', '--org', 'com.example', tmpProjectDir]);
+    FlutterProject project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
       project.ios.productBundleIdentifier,
       'com.example.helloFlutter',
@@ -625,14 +561,8 @@ void main() {
     );
 
     tmpProjectDir = fs.path.join(tempDir.path, 'test_abc');
-    await runner.run(<String>[
-      'create',
-      '--template=app',
-      '--no-pub',
-      '--org',
-      'abc^*.1#@',
-      tmpProjectDir
-    ]);
+    await runner
+        .run(<String>['create', '--template=app', '--no-pub', '--org', 'abc^*.1#@', tmpProjectDir]);
     project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
       project.ios.productBundleIdentifier,
@@ -644,14 +574,8 @@ void main() {
     );
 
     tmpProjectDir = fs.path.join(tempDir.path, 'flutter_project');
-    await runner.run(<String>[
-      'create',
-      '--template=app',
-      '--no-pub',
-      '--org',
-      '#+^%',
-      tmpProjectDir
-    ]);
+    await runner
+        .run(<String>['create', '--template=app', '--no-pub', '--org', '#+^%', tmpProjectDir]);
     project = FlutterProject.fromDirectory(fs.directory(tmpProjectDir));
     expect(
       project.ios.productBundleIdentifier,
@@ -666,8 +590,7 @@ void main() {
     Platform: _kNoColorTerminalPlatform,
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('can re-gen default template over existing project',
-      () async {
+  testUsingContext('can re-gen default template over existing project', () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
@@ -677,8 +600,7 @@ void main() {
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata =
-        fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
   }, timeout: allowForCreateFlutterProject);
 
@@ -690,93 +612,78 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner
-        .run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
 
     // Remove the .metadata to simulate an older instantiation that didn't generate those.
     fs.file(fs.path.join(projectDir.path, '.metadata')).deleteSync();
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata =
-        fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext(
-      'can re-gen app template over existing app project and detect the type',
+  testUsingContext('can re-gen app template over existing app project and detect the type',
       () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner
-        .run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata =
-        fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: app\n'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext(
-      'can re-gen template over existing module project and detect the type',
+  testUsingContext('can re-gen template over existing module project and detect the type',
       () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(
-        <String>['create', '--no-pub', '--template=module', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=module', projectDir.path]);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata =
-        fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: module\n'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext(
-      'can re-gen default template over existing plugin project and detect the type',
+  testUsingContext('can re-gen default template over existing plugin project and detect the type',
       () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(
-        <String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata =
-        fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: plugin'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext(
-      'can re-gen default template over existing package project and detect the type',
+  testUsingContext('can re-gen default template over existing package project and detect the type',
       () async {
     Cache.flutterRoot = '../..';
 
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(
-        <String>['create', '--no-pub', '--template=package', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
 
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
-    final String metadata =
-        fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
+    final String metadata = fs.file(fs.path.join(projectDir.path, '.metadata')).readAsStringSync();
     expect(metadata, contains('project_type: package'));
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext('can re-gen module .android/ folder, reusing custom org',
-      () async {
+  testUsingContext('can re-gen module .android/ folder, reusing custom org', () async {
     await _createProject(
       projectDir,
       <String>['--template=module', '--org', 'com.bar.foo'],
@@ -792,8 +699,7 @@ void main() {
     );
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('can re-gen module .ios/ folder, reusing custom org',
-      () async {
+  testUsingContext('can re-gen module .ios/ folder, reusing custom org', () async {
     await _createProject(
       projectDir,
       <String>['--template=module', '--org', 'com.bar.foo'],
@@ -808,8 +714,7 @@ void main() {
     );
   }, timeout: allowForRemotePubInvocation);
 
-  testUsingContext('can re-gen app android/ folder, reusing custom org',
-      () async {
+  testUsingContext('can re-gen app android/ folder, reusing custom org', () async {
     await _createProject(
       projectDir,
       <String>['--no-pub', '--template=app', '--org', 'com.bar.foo'],
@@ -843,9 +748,7 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext(
-      'can re-gen plugin ios/ and example/ folders, reusing custom org',
-      () async {
+  testUsingContext('can re-gen plugin ios/ and example/ folders, reusing custom org', () async {
     await _createProject(
       projectDir,
       <String>['--no-pub', '--template=plugin', '--org', 'com.bar.foo'],
@@ -872,16 +775,13 @@ void main() {
     );
   }, timeout: allowForCreateFlutterProject);
 
-  testUsingContext(
-      'fails to re-gen without specified org when org is ambiguous', () async {
+  testUsingContext('fails to re-gen without specified org when org is ambiguous', () async {
     await _createProject(
       projectDir,
       <String>['--no-pub', '--template=app', '--org', 'com.bar.foo'],
       <String>[],
     );
-    fs
-        .directory(fs.path.join(projectDir.path, 'ios'))
-        .deleteSync(recursive: true);
+    fs.directory(fs.path.join(projectDir.path, 'ios')).deleteSync(recursive: true);
     await _createProject(
       projectDir,
       <String>['--no-pub', '--template=app', '--org', 'com.bar.baz'],
@@ -906,8 +806,7 @@ void main() {
     );
   });
 
-  testUsingContext('fails when file exists where output directory should be',
-      () async {
+  testUsingContext('fails when file exists where output directory should be', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -921,9 +820,7 @@ void main() {
     );
   });
 
-  testUsingContext(
-      'fails overwrite when file exists where output directory should be',
-      () async {
+  testUsingContext('fails overwrite when file exists where output directory should be', () async {
     Cache.flutterRoot = '../..';
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
@@ -939,13 +836,11 @@ void main() {
 
   testUsingContext('overwrites existing directory when requested', () async {
     Cache.flutterRoot = '../..';
-    final Directory existingDirectory =
-        fs.directory(fs.path.join(projectDir.path, 'bad'));
+    final Directory existingDirectory = fs.directory(fs.path.join(projectDir.path, 'bad'));
     if (!existingDirectory.existsSync()) {
       existingDirectory.createSync(recursive: true);
     }
-    final File existingFile =
-        fs.file(fs.path.join(existingDirectory.path, 'lib', 'main.dart'));
+    final File existingFile = fs.file(fs.path.join(existingDirectory.path, 'lib', 'main.dart'));
     existingFile.createSync(recursive: true);
     await _createProject(
       fs.directory(existingDirectory.path),
@@ -965,10 +860,8 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     expect(
-      runner.run(
-          <String>['create', fs.path.join(projectDir.path, 'invalidName')]),
-      throwsToolExit(
-          message: '"invalidName" is not a valid Dart package name.'),
+      runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
+      throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
     );
   });
 
@@ -980,10 +873,8 @@ void main() {
       final CreateCommand command = CreateCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
-      await runner
-          .run(<String>['create', '--pub', '--offline', projectDir.path]);
-      expect(loggingProcessManager.commands.first,
-          contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      await runner.run(<String>['create', '--pub', '--offline', projectDir.path]);
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
       expect(loggingProcessManager.commands.first, contains('--offline'));
     },
     timeout: allowForCreateFlutterProject,
@@ -1001,10 +892,8 @@ void main() {
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       await runner.run(<String>['create', '--pub', projectDir.path]);
-      expect(loggingProcessManager.commands.first,
-          contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
-      expect(
-          loggingProcessManager.commands.first, isNot(contains('--offline')));
+      expect(loggingProcessManager.commands.first, contains(matches(r'dart-sdk[\\/]bin[\\/]pub')));
+      expect(loggingProcessManager.commands.first, isNot(contains('--offline')));
     },
     timeout: allowForCreateFlutterProject,
     overrides: <Type, Generator>{
@@ -1024,20 +913,14 @@ void main() {
       ],
       unexpectedPaths: <String>['test'],
     );
-    expect(
-        projectDir
-            .childDirectory('lib')
-            .childFile('main.dart')
-            .readAsStringSync(),
+    expect(projectDir.childDirectory('lib').childFile('main.dart').readAsStringSync(),
         contains('void main() {}'));
   }, timeout: allowForRemotePubInvocation, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: 'void main() {}'),
+    HttpClientFactory: () => () => MockHttpClient(200, result: 'void main() {}'),
   });
 
   testUsingContext('can write samples index to disk', () async {
-    final String outputFile =
-        fs.path.join(tempDir.path, 'flutter_samples.json');
+    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final List<String> args = <String>[
@@ -1051,13 +934,10 @@ void main() {
     expect(expectedFile.existsSync(), isTrue);
     expect(expectedFile.readAsStringSync(), equals(samplesIndexJson));
   }, overrides: <Type, Generator>{
-    HttpClientFactory: () =>
-        () => MockHttpClient(200, result: samplesIndexJson),
+    HttpClientFactory: () => () => MockHttpClient(200, result: samplesIndexJson),
   });
-  testUsingContext(
-      'provides an error to the user if samples json download fails', () async {
-    final String outputFile =
-        fs.path.join(tempDir.path, 'flutter_samples.json');
+  testUsingContext('provides an error to the user if samples json download fails', () async {
+    final String outputFile = fs.path.join(tempDir.path, 'flutter_samples.json');
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
     final List<String> args = <String>[
@@ -1066,8 +946,8 @@ void main() {
       outputFile,
     ];
 
-    await expectLater(runner.run(args),
-        throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
+    await expectLater(
+        runner.run(args), throwsToolExit(exitCode: 2, message: 'Failed to write samples'));
     expect(fs.file(outputFile).existsSync(), isFalse);
   }, overrides: <Type, Generator>{
     HttpClientFactory: () => () => MockHttpClient(404, result: 'not found'),
@@ -1113,8 +993,7 @@ Future<void> _createAndAnalyzeProject(
   List<String> expectedPaths, {
   List<String> unexpectedPaths = const <String>[],
 }) async {
-  await _createProject(dir, createArgs, expectedPaths,
-      unexpectedPaths: unexpectedPaths);
+  await _createProject(dir, createArgs, expectedPaths, unexpectedPaths: unexpectedPaths);
   await _analyzeProject(dir.path);
 }
 
@@ -1241,8 +1120,7 @@ class MockHttpClientRequest implements HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse extends Stream<List<int>>
-    implements HttpClientResponse {
+class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResponse {
   MockHttpClientResponse(this.statusCode, {this.result});
 
   @override
@@ -1260,11 +1138,8 @@ class MockHttpClientResponse extends Stream<List<int>>
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits]).listen(
-        onData,
-        onError: onError,
-        onDone: onDone,
-        cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
+        .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override

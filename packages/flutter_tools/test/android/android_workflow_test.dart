@@ -18,8 +18,7 @@ import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
-import '../src/mocks.dart'
-    show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
+import '../src/mocks.dart' show MockAndroidSdk, MockProcess, MockProcessManager, MockStdio;
 
 class MockAndroidSdkVersion extends Mock implements AndroidSdkVersion {}
 
@@ -38,25 +37,22 @@ void main() {
   });
 
   MockProcess Function(List<String>) processMetaFactory(List<String> stdout) {
-    final Stream<List<int>> stdoutStream = Stream<List<int>>.fromIterable(
-        stdout.map<List<int>>((String s) => s.codeUnits));
+    final Stream<List<int>> stdoutStream =
+        Stream<List<int>>.fromIterable(stdout.map<List<int>>((String s) => s.codeUnits));
     return (List<String> command) => MockProcess(stdout: stdoutStream);
   }
 
-  testUsingContext(
-      'licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager',
+  testUsingContext('licensesAccepted returns LicensesAccepted.unknown if cannot run sdkmanager',
       () async {
     processManager.succeed = false;
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     final AndroidLicenseValidator licenseValidator = AndroidLicenseValidator();
-    final LicensesAccepted licenseStatus =
-        await licenseValidator.licensesAccepted;
+    final LicensesAccepted licenseStatus = await licenseValidator.licensesAccepted;
     expect(licenseStatus, LicensesAccepted.unknown);
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
@@ -71,14 +67,12 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
-  testUsingContext('licensesAccepted works for all licenses accepted',
-      () async {
+  testUsingContext('licensesAccepted works for all licenses accepted', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
       '[=======================================] 100% Computing updates...             ',
@@ -91,14 +85,12 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
-  testUsingContext('licensesAccepted works for some licenses accepted',
-      () async {
+  testUsingContext('licensesAccepted works for some licenses accepted', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.processFactory = processMetaFactory(<String>[
       '[=======================================] 100% Computing updates...             ',
@@ -112,8 +104,7 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
@@ -132,8 +123,7 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
@@ -146,8 +136,7 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
@@ -156,35 +145,29 @@ void main() {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn('25.0.0');
 
-    expect(AndroidLicenseValidator.runLicenseManager(),
-        throwsToolExit(message: 'To update, run'));
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
-  testUsingContext('runLicenseManager errors correctly for null version',
-      () async {
+  testUsingContext('runLicenseManager errors correctly for null version', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     when(sdk.sdkManagerVersion).thenReturn(null);
 
-    expect(AndroidLicenseValidator.runLicenseManager(),
-        throwsToolExit(message: 'To update, run'));
+    expect(AndroidLicenseValidator.runLicenseManager(), throwsToolExit(message: 'To update, run'));
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
 
-  testUsingContext('runLicenseManager errors when sdkmanager is not found',
-      () async {
+  testUsingContext('runLicenseManager errors when sdkmanager is not found', () async {
     when(sdk.sdkManagerPath).thenReturn('/foo/bar/sdkmanager');
     processManager.succeed = false;
 
@@ -192,8 +175,7 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
@@ -201,8 +183,7 @@ void main() {
   testUsingContext('detects license-only SDK installation', () async {
     when(sdk.licensesAvailable).thenReturn(true);
     when(sdk.platformToolsAvailable).thenReturn(false);
-    final ValidationResult validationResult =
-        await AndroidValidator().validate();
+    final ValidationResult validationResult = await AndroidValidator().validate();
     expect(validationResult.type, ValidationType.partial);
     expect(
       validationResult.messages.last.message,
@@ -211,8 +192,7 @@ void main() {
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });
@@ -255,21 +235,18 @@ void main() {
     // Test with valid SDK and valid build tools
     // Will still be partial because AnroidSdk.findJavaBinary is static :(
     when(mockSdkVersion.sdkLevel).thenReturn(kAndroidSdkMinVersion);
-    when(mockSdkVersion.buildToolsVersion)
-        .thenReturn(kAndroidSdkBuildToolsMinVersion);
+    when(mockSdkVersion.buildToolsVersion).thenReturn(kAndroidSdkBuildToolsMinVersion);
 
     validationResult = await AndroidValidator().validate();
     expect(validationResult.type, ValidationType.partial); // No Java binary
     expect(
-      validationResult.messages
-          .any((ValidationMessage message) => message.message == errorMessage),
+      validationResult.messages.any((ValidationMessage message) => message.message == errorMessage),
       isFalse,
     );
   }, overrides: <Type, Generator>{
     AndroidSdk: () => sdk,
     FileSystem: () => fs,
-    Platform: () =>
-        FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
     ProcessManager: () => processManager,
     Stdio: () => stdio,
   });

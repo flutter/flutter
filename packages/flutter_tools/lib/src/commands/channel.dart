@@ -16,8 +16,7 @@ class ChannelCommand extends FlutterCommand {
     argParser.addFlag(
       'all',
       abbr: 'a',
-      help:
-          'Include all the available branches (including local branches) when listing channels.',
+      help: 'Include all the available branches (including local branches) when listing channels.',
       defaultsTo: false,
       hide: !verboseHelp,
     );
@@ -33,8 +32,7 @@ class ChannelCommand extends FlutterCommand {
   String get invocation => '${runner.executableName} $name [<channel-name>]';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -120,13 +118,7 @@ class ChannelCommand extends FlutterCommand {
 
     if (result == 0) {
       result = await runCommandAndStreamOutput(
-        <String>[
-          'git',
-          'show-ref',
-          '--verify',
-          '--quiet',
-          'refs/heads/$branchName'
-        ],
+        <String>['git', 'show-ref', '--verify', '--quiet', 'refs/heads/$branchName'],
         workingDirectory: Cache.flutterRoot,
         prefix: 'git: ',
       );
@@ -140,22 +132,14 @@ class ChannelCommand extends FlutterCommand {
       } else {
         // branch does not exist, we have to create it
         result = await runCommandAndStreamOutput(
-          <String>[
-            'git',
-            'checkout',
-            '--track',
-            '-b',
-            branchName,
-            'origin/$branchName'
-          ],
+          <String>['git', 'checkout', '--track', '-b', branchName, 'origin/$branchName'],
           workingDirectory: Cache.flutterRoot,
           prefix: 'git: ',
         );
       }
     }
     if (result != 0) {
-      throwToolExit('Switching channels failed with error code $result.',
-          exitCode: result);
+      throwToolExit('Switching channels failed with error code $result.', exitCode: result);
     } else {
       // Remove the version check stamp, since it could contain out-of-date
       // information that pertains to the previous channel.

@@ -98,22 +98,16 @@ void main() {
     setUp(() async {
       fs = MemoryFileSystem();
       fs.file(kSnapshotDart).createSync();
-      fs.file('.packages').writeAsStringSync(
-          'sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
+      fs
+          .file('.packages')
+          .writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
 
-      skyEnginePath =
-          fs.path.fromUri(Uri.file('/flutter/bin/cache/pkg/sky_engine'));
-      fs
-          .directory(fs.path.join(skyEnginePath, 'lib', 'ui'))
-          .createSync(recursive: true);
-      fs
-          .directory(fs.path.join(skyEnginePath, 'sdk_ext'))
-          .createSync(recursive: true);
+      skyEnginePath = fs.path.fromUri(Uri.file('/flutter/bin/cache/pkg/sky_engine'));
+      fs.directory(fs.path.join(skyEnginePath, 'lib', 'ui')).createSync(recursive: true);
+      fs.directory(fs.path.join(skyEnginePath, 'sdk_ext')).createSync(recursive: true);
       fs.file(fs.path.join(skyEnginePath, '.packages')).createSync();
       fs.file(fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')).createSync();
-      fs
-          .file(fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart'))
-          .createSync();
+      fs.file(fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')).createSync();
 
       genSnapshot = _FakeGenSnapshot();
       snapshotter = AOTSnapshotter();
@@ -190,12 +184,10 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -231,12 +223,10 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -273,12 +263,10 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm,
@@ -319,12 +307,10 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm64,
@@ -360,12 +346,10 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -401,12 +385,10 @@ void main() {
         fs.path.join(outputPath, 'snapshot_assembly.S'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.ios,
@@ -430,9 +412,7 @@ void main() {
       ]);
     }, overrides: contextOverrides);
 
-    testUsingContext(
-        'returns failure if buildSharedLibrary is true but no NDK is found',
-        () async {
+    testUsingContext('returns failure if buildSharedLibrary is true but no NDK is found', () async {
       final String outputPath = fs.path.join('build', 'foo');
 
       when(mockAndroidSdk.ndk).thenReturn(null);
@@ -463,12 +443,10 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm,
@@ -509,12 +487,10 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm64,
@@ -553,12 +529,10 @@ void main() {
         fs.path.join(outputPath, 'isolate_snapshot_instr'): '',
       };
 
-      final RunResult successResult = RunResult(ProcessResult(1, 0, '', ''),
-          <String>['command name', 'arguments...']);
-      when(xcode.cc(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
-      when(xcode.clang(any))
-          .thenAnswer((_) => Future<RunResult>.value(successResult));
+      final RunResult successResult =
+          RunResult(ProcessResult(1, 0, '', ''), <String>['command name', 'arguments...']);
+      when(xcode.cc(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
+      when(xcode.clang(any)).thenAnswer((_) => Future<RunResult>.value(successResult));
 
       final int genSnapshotExitCode = await snapshotterWithTimings.build(
         platform: TargetPlatform.android_arm,
@@ -571,8 +545,7 @@ void main() {
 
       expect(genSnapshotExitCode, 0);
       expect(genSnapshot.callCount, 1);
-      expect(bufferLogger.statusText,
-          matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
+      expect(bufferLogger.statusText, matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
     }, overrides: contextOverrides);
   });
 

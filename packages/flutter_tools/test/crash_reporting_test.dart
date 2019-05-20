@@ -52,10 +52,7 @@ void main() {
         String boundary = request.headers['Content-Type'];
         boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
         fields = Map<String, String>.fromIterable(
-          utf8
-              .decode(request.bodyBytes)
-              .split('--$boundary')
-              .map<List<String>>((String part) {
+          utf8.decode(request.bodyBytes).split('--$boundary').map<List<String>>((String part) {
             final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
             if (nameMatch == null) return null;
             final String name = nameMatch[1];
@@ -117,12 +114,10 @@ void main() {
           'Crash report sent (report ID: test-report-id)\n');
 
       // Verify that we've written the crash report to disk.
-      final List<String> writtenFiles = (await tools.crashFileSystem
-              .directory('/')
-              .list(recursive: true)
-              .toList())
-          .map((FileSystemEntity e) => e.path)
-          .toList();
+      final List<String> writtenFiles =
+          (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
+              .map((FileSystemEntity e) => e.path)
+              .toList();
       expect(writtenFiles, hasLength(1));
       expect(writtenFiles, contains('flutter_01.log'));
     }, overrides: <Type, Generator>{
@@ -164,8 +159,7 @@ void main() {
             operatingSystem: 'linux',
             environment: <String, String>{
               'HOME': '/',
-              'FLUTTER_CRASH_SERVER_BASE_URL':
-                  'https://localhost:12345/fake_server',
+              'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
             },
             script: Uri(scheme: 'data'),
           ),

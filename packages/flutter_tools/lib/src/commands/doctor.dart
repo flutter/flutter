@@ -50,9 +50,8 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
-    final bool success = await doctor.diagnose(
-        androidLicenses: argResults['android-licenses'], verbose: verbose);
-    return FlutterCommandResult(
-        success ? ExitStatus.success : ExitStatus.warning);
+    final bool success =
+        await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
+    return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
   }
 }

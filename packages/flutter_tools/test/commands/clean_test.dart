@@ -25,12 +25,10 @@ void main() {
   when(currentDirectory.childFile('pubspec.yaml')).thenReturn(pubspec);
   when(pubspec.path).thenReturn('/test/pubspec.yaml');
   when(exampleDirectory.childFile('pubspec.yaml')).thenReturn(examplePubspec);
-  when(currentDirectory.childDirectory('.dart_tool'))
-      .thenReturn(dartToolDirectory);
+  when(currentDirectory.childDirectory('.dart_tool')).thenReturn(dartToolDirectory);
   when(examplePubspec.path).thenReturn('/test/example/pubspec.yaml');
   when(mockFileSystem.isFileSync('/test/pubspec.yaml')).thenReturn(false);
-  when(mockFileSystem.isFileSync('/test/example/pubspec.yaml'))
-      .thenReturn(false);
+  when(mockFileSystem.isFileSync('/test/example/pubspec.yaml')).thenReturn(false);
   when(mockFileSystem.directory('build')).thenReturn(buildDirectory);
   when(mockFileSystem.path).thenReturn(fs.path);
   when(buildDirectory.existsSync()).thenReturn(true);

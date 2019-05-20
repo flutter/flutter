@@ -29,8 +29,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   if (artifacts is LocalEngineArtifacts) {
     final LocalEngineArtifacts localEngineArtifacts = artifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    buffer.writeln(
-        'export FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    buffer.writeln('export FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
     buffer.writeln('export LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
   }
 
@@ -50,14 +49,8 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   );
   int result;
   try {
-    process.stderr
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printError);
-    process.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .listen(printTrace);
+    process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(printError);
+    process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(printTrace);
     result = await process.exitCode;
   } finally {
     status.cancel();

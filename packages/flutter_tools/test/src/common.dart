@@ -40,8 +40,7 @@ void tryToDelete(Directory directory) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  if (platform.environment.containsKey('FLUTTER_ROOT'))
-    return platform.environment['FLUTTER_ROOT'];
+  if (platform.environment.containsKey('FLUTTER_ROOT')) return platform.environment['FLUTTER_ROOT'];
 
   Error invalidScript() => StateError('Invalid script: ${platform.script}');
 
@@ -51,11 +50,9 @@ String getFlutterRoot() {
       scriptUri = platform.script;
       break;
     case 'data':
-      final RegExp flutterTools = RegExp(
-          r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)',
-          multiLine: true);
-      final Match match =
-          flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
+      final RegExp flutterTools =
+          RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
       if (match == null) throw invalidScript();
       scriptUri = Uri.parse(match.group(1));
       break;
@@ -89,10 +86,8 @@ void updateFileModificationTime(
 /// Matcher for functions that throw [ToolExit].
 Matcher throwsToolExit({int exitCode, Pattern message}) {
   Matcher matcher = isToolExit;
-  if (exitCode != null)
-    matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
-  if (message != null)
-    matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
+  if (exitCode != null) matcher = allOf(matcher, (ToolExit e) => e.exitCode == exitCode);
+  if (message != null) matcher = allOf(matcher, (ToolExit e) => e.message.contains(message));
   return throwsA(matcher);
 }
 
@@ -103,8 +98,7 @@ final Matcher isToolExit = isInstanceOf<ToolExit>();
 Matcher throwsProcessExit([dynamic exitCode]) {
   return exitCode == null
       ? throwsA(isProcessExit)
-      : throwsA(
-          allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
+      : throwsA(allOf(isProcessExit, (ProcessExit e) => e.exitCode == exitCode));
 }
 
 /// Matcher for [ProcessExit]s.

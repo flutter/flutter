@@ -26,8 +26,7 @@ class ShellCompletionCommand extends FlutterCommand {
   final String name = 'bash-completion';
 
   @override
-  final String description =
-      'Output command line shell completion setup scripts.\n\n'
+  final String description = 'Output command line shell completion setup scripts.\n\n'
       'This command prints the flutter command line completion setup script for Bash and Zsh. To '
       'use it, specify an output file and follow the instructions in the generated output file to '
       'install it in your shell environment. Once it is sourced, your shell will be able to '
@@ -46,8 +45,7 @@ class ShellCompletionCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults.rest.length > 1) {
-      throwToolExit('Too many arguments given to bash-completion command.',
-          exitCode: 1);
+      throwToolExit('Too many arguments given to bash-completion command.', exitCode: 1);
     }
 
     if (argResults.rest.isEmpty || argResults.rest.first == '-') {
@@ -64,11 +62,9 @@ class ShellCompletionCommand extends FlutterCommand {
       );
     }
     try {
-      outputFile
-          .writeAsStringSync(generateCompletionScript(<String>['flutter']));
+      outputFile.writeAsStringSync(generateCompletionScript(<String>['flutter']));
     } on FileSystemException catch (error) {
-      throwToolExit('Unable to write shell completion setup script.\n$error',
-          exitCode: 1);
+      throwToolExit('Unable to write shell completion setup script.\n$error', exitCode: 1);
     }
 
     return null;

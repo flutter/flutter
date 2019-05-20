@@ -24,29 +24,23 @@ class AnalyzeCommand extends FlutterCommand {
             '(The public_member_api_docs lint must be enabled in analysis_options.yaml)',
         hide: !verboseHelp);
     argParser.addFlag('watch',
-        help: 'Run analysis continuously, watching the filesystem for changes.',
-        negatable: false);
+        help: 'Run analysis continuously, watching the filesystem for changes.', negatable: false);
     argParser.addOption('write',
         valueHelp: 'file',
         help: 'Also output the results to a file. This is useful with --watch '
             'if you want a file to always contain the latest results.');
     argParser.addOption('dart-sdk',
-        valueHelp: 'path-to-sdk',
-        help: 'The path to the Dart SDK.',
-        hide: !verboseHelp);
+        valueHelp: 'path-to-sdk', help: 'The path to the Dart SDK.', hide: !verboseHelp);
 
     // Hidden option to enable a benchmarking mode.
     argParser.addFlag('benchmark',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Also output the analysis time.');
+        negatable: false, hide: !verboseHelp, help: 'Also output the analysis time.');
 
     usesPubOption();
 
     // Not used by analyze --watch
     argParser.addFlag('congratulate',
-        help:
-            'Show output even when there are no errors, warnings, hints, or lints. '
+        help: 'Show output even when there are no errors, warnings, hints, or lints. '
             'Ignored if --watch is specified.',
         defaultsTo: true);
     argParser.addFlag('preamble',
@@ -66,8 +60,7 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => "Analyze the project's Dart code.";
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
         DevelopmentArtifact.universal,
       };
 

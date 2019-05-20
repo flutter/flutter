@@ -40,8 +40,7 @@ class TestCompiler {
     this.trackWidgetCreation,
     this.flutterProject,
   ) : testFilePath = getKernelPathForTransformerOptions(
-          fs.path.join(flutterProject.directory.path, getBuildDirectory(),
-              'testfile.dill'),
+          fs.path.join(flutterProject.directory.path, getBuildDirectory(), 'testfile.dill'),
           trackWidgetCreation: trackWidgetCreation,
         ) {
     // Compiler maintains and updates single incremental dill file.
@@ -150,8 +149,7 @@ class TestCompiler {
         await _shutdown();
       } else {
         final File outputFile = fs.file(outputPath);
-        final File kernelReadyToRun =
-            await outputFile.copy('${request.path}.dill');
+        final File kernelReadyToRun = await outputFile.copy('${request.path}.dill');
         final File testCache = fs.file(testFilePath);
         if (firstCompile ||
             !testCache.existsSync() ||
@@ -166,20 +164,17 @@ class TestCompiler {
         compiler.accept();
         compiler.reset();
       }
-      printTrace(
-          'Compiling ${request.path} took ${compilerTime.elapsedMilliseconds}ms');
+      printTrace('Compiling ${request.path} took ${compilerTime.elapsedMilliseconds}ms');
       // Only remove now when we finished processing the element
       compilationQueue.removeAt(0);
     }
   }
 
-  void _reportCompilerMessage(String message,
-      {bool emphasis, TerminalColor color}) {
+  void _reportCompilerMessage(String message, {bool emphasis, TerminalColor color}) {
     if (_suppressOutput) {
       return;
     }
-    if (message
-        .startsWith('Error: Could not resolve the package \'flutter_test\'')) {
+    if (message.startsWith('Error: Could not resolve the package \'flutter_test\'')) {
       printTrace(message);
       printError(
         '\n\nFailed to load test harness. Are you missing a dependency on flutter_test?\n',

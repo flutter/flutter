@@ -12,23 +12,15 @@ import '../version.dart';
 class PrecacheCommand extends FlutterCommand {
   PrecacheCommand() {
     argParser.addFlag('all-platforms',
-        abbr: 'a',
-        negatable: false,
-        help: 'Precache artifacts for all platforms.');
+        abbr: 'a', negatable: false, help: 'Precache artifacts for all platforms.');
     argParser.addFlag('force',
         abbr: 'f', negatable: false, help: 'Force downloading of artifacts.');
     argParser.addFlag('android',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Precache artifacts for Android development');
+        negatable: true, defaultsTo: true, help: 'Precache artifacts for Android development');
     argParser.addFlag('ios',
-        negatable: true,
-        defaultsTo: true,
-        help: 'Precache artifacts for iOS developemnt');
+        negatable: true, defaultsTo: true, help: 'Precache artifacts for iOS developemnt');
     argParser.addFlag('web',
-        negatable: true,
-        defaultsTo: false,
-        help: 'Precache artifacts for web development');
+        negatable: true, defaultsTo: false, help: 'Precache artifacts for web development');
     argParser.addFlag('linux',
         negatable: true,
         defaultsTo: false,
@@ -42,9 +34,7 @@ class PrecacheCommand extends FlutterCommand {
         defaultsTo: false,
         help: 'Precache artifacts for macOS desktop development');
     argParser.addFlag('fuchsia',
-        negatable: true,
-        defaultsTo: false,
-        help: 'Precache artifacts for Fuchsia development');
+        negatable: true, defaultsTo: false, help: 'Precache artifacts for Fuchsia development');
     argParser.addFlag('universal',
         negatable: true,
         defaultsTo: true,
@@ -55,8 +45,7 @@ class PrecacheCommand extends FlutterCommand {
   final String name = 'precache';
 
   @override
-  final String description =
-      'Populates the Flutter tool\'s cache of binary artifacts.';
+  final String description = 'Populates the Flutter tool\'s cache of binary artifacts.';
 
   @override
   bool get shouldUpdateCache => false;

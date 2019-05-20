@@ -76,8 +76,7 @@ class AttachCommand extends FlutterCommand {
       )
       ..addOption(
         'app-id',
-        help:
-            'The package name (Android) or bundle identifier (iOS) for the application. '
+        help: 'The package name (Android) or bundle identifier (iOS) for the application. '
             'This can be specified to avoid being prompted if multiple observatory ports '
             'are advertised.\n'
             'If you have multiple devices or emulators running, you should include the '
@@ -149,9 +148,7 @@ class AttachCommand extends FlutterCommand {
     await super.validateCommand();
     if (await findTargetDevice() == null) throwToolExit(null);
     debugPort;
-    if (debugPort == null &&
-        debugUri == null &&
-        argResults.wasParsed(FlutterCommand.ipv6Flag)) {
+    if (debugPort == null && debugUri == null && argResults.wasParsed(FlutterCommand.ipv6Flag)) {
       throwToolExit(
         'When the --debug-port or --debug-uri is unknown, this command determines '
         'the value of --ipv6 on its own.',
@@ -166,8 +163,7 @@ class AttachCommand extends FlutterCommand {
       );
     }
     if (debugPort != null && debugUri != null) {
-      throwToolExit(
-          'Either --debugPort or --debugUri can be provided, not both.');
+      throwToolExit('Either --debugPort or --debugUri can be provided, not both.');
     }
   }
 
@@ -182,11 +178,9 @@ class AttachCommand extends FlutterCommand {
     final Device device = await findTargetDevice();
 
     final Artifacts artifacts = device.artifactOverrides ?? Artifacts.instance;
-    await context.run<void>(
-        body: () => _attachToDevice(device),
-        overrides: <Type, Generator>{
-          Artifacts: () => artifacts,
-        });
+    await context.run<void>(body: () => _attachToDevice(device), overrides: <Type, Generator>{
+      Artifacts: () => artifacts,
+    });
 
     return null;
   }
@@ -223,19 +217,16 @@ class AttachCommand extends FlutterCommand {
         attachLogger = true;
         final String module = argResults['module'];
         if (module == null)
-          throwToolExit(
-              '\'--module\' is required for attaching to a Fuchsia device');
+          throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
           observatoryUri = await isolateDiscoveryProtocol.uri;
-          printStatus(
-              'Done.'); // FYI, this message is used as a sentinel in tests.
+          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
         } catch (_) {
           isolateDiscoveryProtocol?.dispose();
-          final List<ForwardedPort> ports =
-              device.portForwarder.forwardedPorts.toList();
+          final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
           for (ForwardedPort port in ports) {
             await device.portForwarder.unforward(port);
           }
@@ -245,8 +236,8 @@ class AttachCommand extends FlutterCommand {
         final MDnsObservatoryDiscoveryResult result =
             await MDnsObservatoryDiscovery().query(applicationId: appId);
         if (result != null) {
-          observatoryUri = await _buildObservatoryUri(
-              device, hostname, result.port, result.authCode);
+          observatoryUri =
+              await _buildObservatoryUri(device, hostname, result.port, result.authCode);
         }
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
@@ -257,23 +248,18 @@ class AttachCommand extends FlutterCommand {
             device.getLogReader(),
             portForwarder: device.portForwarder,
           );
-          printStatus(
-              'Waiting for a connection from Flutter on ${device.name}...');
+          printStatus('Waiting for a connection from Flutter on ${device.name}...');
           observatoryUri = await observatoryDiscovery.uri;
           // Determine ipv6 status from the scanned logs.
           usesIpv6 = observatoryDiscovery.ipv6;
-          printStatus(
-              'Done.'); // FYI, this message is used as a sentinel in tests.
+          printStatus('Done.'); // FYI, this message is used as a sentinel in tests.
         } finally {
           await observatoryDiscovery?.cancel();
         }
       }
     } else {
       observatoryUri = await _buildObservatoryUri(
-          device,
-          debugUri?.host ?? hostname,
-          devicePort ?? debugUri.port,
-          debugUri?.path);
+          device, debugUri?.host ?? hostname, devicePort ?? debugUri.port, debugUri?.path);
     }
     try {
       final bool useHot = getBuildInfo().isDebug;
@@ -291,8 +277,7 @@ class AttachCommand extends FlutterCommand {
       );
       flutterDevice.observatoryUris = <Uri>[observatoryUri];
       final List<FlutterDevice> flutterDevices = <FlutterDevice>[flutterDevice];
-      final DebuggingOptions debuggingOptions =
-          DebuggingOptions.enabled(getBuildInfo());
+      final DebuggingOptions debuggingOptions = DebuggingOptions.enabled(getBuildInfo());
       final ResidentRunner runner = useHot
           ? hotRunnerFactory.build(
               flutterDevices,
@@ -339,8 +324,7 @@ class AttachCommand extends FlutterCommand {
       }
       if (result != 0) throwToolExit(null, exitCode: result);
     } finally {
-      final List<ForwardedPort> ports =
-          device.portForwarder.forwardedPorts.toList();
+      final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       for (ForwardedPort port in ports) {
         await device.portForwarder.unforward(port);
       }
@@ -360,8 +344,7 @@ class AttachCommand extends FlutterCommand {
     if (!path.endsWith('/')) {
       path += '/';
     }
-    final int localPort =
-        observatoryPort ?? await device.portForwarder.forward(devicePort);
+    final int localPort = observatoryPort ?? await device.portForwarder.forward(devicePort);
     return Uri(scheme: 'http', host: host, port: localPort, path: path);
   }
 }
@@ -412,8 +395,7 @@ class MDnsObservatoryDiscovery {
   /// The [applicationId] parameter may be null, and can be used to
   /// automatically select which application to use if multiple are advertising
   /// Dart observatory ports.
-  MDnsObservatoryDiscovery({MDnsClient mdnsClient})
-      : client = mdnsClient ?? MDnsClient();
+  MDnsObservatoryDiscovery({MDnsClient mdnsClient}) : client = mdnsClient ?? MDnsClient();
 
   /// The [MDnsClient] used to do a lookup.
   final MDnsClient client;
@@ -466,14 +448,12 @@ class MDnsObservatoryDiscovery {
           }
         }
         if (domainName == null) {
-          throwToolExit(
-              'Did not find a observatory port advertised for $applicationId.');
+          throwToolExit('Did not find a observatory port advertised for $applicationId.');
         }
       } else if (uniqueDomainNames.length > 1) {
         final StringBuffer buffer = StringBuffer();
         buffer.writeln('There are multiple observatory ports available.');
-        buffer.writeln(
-            'Rerun this command with one of the following passed in as the appId:');
+        buffer.writeln('Rerun this command with one of the following passed in as the appId:');
         buffer.writeln('');
         for (final String uniqueDomainName in uniqueDomainNames) {
           buffer.writeln(
@@ -494,8 +474,7 @@ class MDnsObservatoryDiscovery {
         return null;
       }
       if (srv.length > 1) {
-        printError(
-            'Unexpectedly found more than one observatory report for $domainName '
+        printError('Unexpectedly found more than one observatory report for $domainName '
             '- using first one (${srv.first.port}).');
       }
       printStatus('Checking for authentication code for $domainName');

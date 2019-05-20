@@ -79,8 +79,7 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
     final List<String> command = <String>[
       fuchsiaArtifacts.pm.path,
       '-o',
@@ -109,8 +108,7 @@ class FuchsiaPM {
   ///
   /// [buildPath] should be the same path passed to [init], and [manfiestPath]
   /// should be the same manifest passed to [build].
-  Future<bool> archive(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
     final List<String> command = <String>[
       fuchsiaArtifacts.pm.path,
       '-o',

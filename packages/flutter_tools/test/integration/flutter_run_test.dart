@@ -34,8 +34,7 @@ void main() {
       // like https://github.com/flutter/flutter/issues/21418 which were skipped
       // over because other integration tests run using flutter-tester which short-cuts
       // some of the checks for devices.
-      final String flutterBin =
-          fs.path.join(getFlutterRoot(), 'bin', 'flutter');
+      final String flutterBin = fs.path.join(getFlutterRoot(), 'bin', 'flutter');
 
       const ProcessManager _processManager = LocalProcessManager();
       final ProcessResult _proc = await _processManager.run(
@@ -46,11 +45,8 @@ void main() {
       expect(_proc.stdout, isNot(contains('flutter has exited unexpectedly')));
       expect(_proc.stderr, isNot(contains('flutter has exited unexpectedly')));
       if (!_proc.stderr.toString().contains('Unable to locate a development') &&
-          !_proc.stdout
-              .toString()
-              .contains('No devices found with name or id matching')) {
-        fail(
-            "'flutter run -d invalid-device-id' did not produce the expected error");
+          !_proc.stdout.toString().contains('No devices found with name or id matching')) {
+        fail("'flutter run -d invalid-device-id' did not produce the expected error");
       }
     });
 

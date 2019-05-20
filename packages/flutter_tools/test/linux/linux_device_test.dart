@@ -63,9 +63,7 @@ void main() {
     });
   });
 
-  testUsingContext(
-      'LinuxDevice.isSupportedForProject is true with editable host app',
-      () async {
+  testUsingContext('LinuxDevice.isSupportedForProject is true with editable host app', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     fs.directory('linux').createSync();
@@ -76,8 +74,7 @@ void main() {
     FileSystem: () => MemoryFileSystem(),
   });
 
-  testUsingContext(
-      'LinuxDevice.isSupportedForProject is false with no host app', () async {
+  testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();

@@ -24,16 +24,14 @@ ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 /// Only launch or display web devices if `FLUTTER_WEB`
 /// environment variable is set to true.
 bool get flutterWebEnabled {
-  _flutterWebEnabled =
-      platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
+  _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
   return _flutterWebEnabled && !FlutterVersion.instance.isStable;
 }
 
 bool _flutterWebEnabled;
 
 class WebApplicationPackage extends ApplicationPackage {
-  WebApplicationPackage(this._flutterProject)
-      : super(id: _flutterProject.manifest.appName);
+  WebApplicationPackage(this._flutterProject) : super(id: _flutterProject.manifest.appName);
 
   final FlutterProject _flutterProject;
 
@@ -41,8 +39,7 @@ class WebApplicationPackage extends ApplicationPackage {
   String get name => _flutterProject.manifest.appName;
 
   /// The location of the web source assets.
-  Directory get webSourcePath =>
-      _flutterProject.directory.childDirectory('web');
+  Directory get webSourcePath => _flutterProject.directory.childDirectory('web');
 }
 
 class WebDevice extends Device {
@@ -109,11 +106,10 @@ class WebDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    final Status status = logger.startProgress(
-        'Compiling ${package.name} to JavaScript...',
-        timeout: null);
-    final int result = await webCompiler.compile(
-        target: mainPath, minify: false, enabledAssertions: true);
+    final Status status =
+        logger.startProgress('Compiling ${package.name} to JavaScript...', timeout: null);
+    final int result =
+        await webCompiler.compile(target: mainPath, minify: false, enabledAssertions: true);
     status.stop();
     if (result != 0) {
       printError('Failed to compile ${package.name} to JavaScript');
@@ -124,8 +120,7 @@ class WebDevice extends Device {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    await writeBundle(
-        fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     _package = package;
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
@@ -168,8 +163,7 @@ class WebDevice extends Device {
       file = fs.file(fs.path.join(getWebBuildDirectory(), 'main.dart.js'));
       contentType = 'text/javascript';
     } else {
-      file = fs.file(fs.path.join(
-          getAssetBuildDirectory(), uri.path.replaceFirst('/assets/', '')));
+      file = fs.file(fs.path.join(getAssetBuildDirectory(), uri.path.replaceFirst('/assets/', '')));
     }
 
     if (!file.existsSync()) {

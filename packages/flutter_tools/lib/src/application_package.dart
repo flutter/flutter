@@ -28,8 +28,7 @@ import 'web/web_device.dart';
 import 'windows/application_package.dart';
 
 class ApplicationPackageFactory {
-  static ApplicationPackageFactory get instance =>
-      context.get<ApplicationPackageFactory>();
+  static ApplicationPackageFactory get instance => context.get<ApplicationPackageFactory>();
 
   Future<ApplicationPackage> getPackageForPlatform(
     TargetPlatform platform, {
@@ -40,13 +39,11 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (androidSdk?.licensesAvailable == true &&
-            androidSdk.latestVersion == null) {
+        if (androidSdk?.licensesAvailable == true && androidSdk.latestVersion == null) {
           await checkGradleDependencies();
         }
         return applicationBinary == null
-            ? await AndroidApk.fromAndroidProject(
-                FlutterProject.current().android)
+            ? await AndroidApk.fromAndroidProject(FlutterProject.current().android)
             : AndroidApk.fromApk(applicationBinary);
       case TargetPlatform.ios:
         return applicationBinary == null
@@ -118,8 +115,7 @@ class AndroidApk extends ApplicationPackage {
       'AndroidManifest.xml',
     ];
 
-    final ApkManifestData data =
-        ApkManifestData.parseFromXmlDump(runCheckedSync(aaptArgs));
+    final ApkManifestData data = ApkManifestData.parseFromXmlDump(runCheckedSync(aaptArgs));
 
     if (data == null) {
       printError('Unable to read manifest info from ${apk.path}.');
@@ -149,8 +145,7 @@ class AndroidApk extends ApplicationPackage {
   final int versionCode;
 
   /// Creates a new AndroidApk based on the information in the Android manifest.
-  static Future<AndroidApk> fromAndroidProject(
-      AndroidProject androidProject) async {
+  static Future<AndroidApk> fromAndroidProject(AndroidProject androidProject) async {
     File apkFile;
 
     if (androidProject.isUsingGradle) {
@@ -182,19 +177,18 @@ class AndroidApk extends ApplicationPackage {
     } on xml.XmlParserException catch (exception) {
       String manifestLocation;
       if (androidProject.isUsingGradle) {
-        manifestLocation = fs.path.join(androidProject.hostAppGradleRoot.path,
-            'app', 'src', 'main', 'AndroidManifest.xml');
+        manifestLocation = fs.path.join(
+            androidProject.hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml');
       } else {
-        manifestLocation = fs.path
-            .join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
+        manifestLocation =
+            fs.path.join(androidProject.hostAppGradleRoot.path, 'AndroidManifest.xml');
       }
       printError('AndroidManifest.xml is not a valid XML document.');
       printError('Please check $manifestLocation for errors.');
       throwToolExit('XML Parser error message: ${exception.toString()}');
     }
 
-    final Iterable<xml.XmlElement> manifests =
-        document.findElements('manifest');
+    final Iterable<xml.XmlElement> manifests = document.findElements('manifest');
     if (manifests.isEmpty) {
       printError('AndroidManifest.xml has no manifest element.');
       printError('Please check ${manifest.path} for errors.');
@@ -264,8 +258,7 @@ abstract class IOSApp extends ApplicationPackage {
   factory IOSApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
     if (entityType == FileSystemEntityType.notFound) {
-      printError(
-          'File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.');
+      printError('File "${applicationBinary.path}" does not exist. Use an app bundle or an ipa.');
       return null;
     }
     Directory bundleDir;
@@ -278,8 +271,7 @@ abstract class IOSApp extends ApplicationPackage {
       bundleDir = fs.directory(applicationBinary);
     } else {
       // Try to unpack as an ipa.
-      final Directory tempDir =
-          fs.systemTempDirectory.createTempSync('flutter_app.');
+      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_app.');
       addShutdownHook(() async {
         await tempDir.delete(recursive: true);
       }, ShutdownStage.STILL_RECORDING);
@@ -288,15 +280,13 @@ abstract class IOSApp extends ApplicationPackage {
         fs.path.join(tempDir.path, 'Payload'),
       );
       if (!payloadDir.existsSync()) {
-        printError(
-            'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
+        printError('Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.');
         return null;
       }
       try {
         bundleDir = payloadDir.listSync().singleWhere(_isBundleDirectory);
       } on StateError {
-        printError(
-            'Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
+        printError('Invalid prebuilt iOS ipa. Does not contain a single app bundle.');
         return null;
       }
     }
@@ -310,8 +300,7 @@ abstract class IOSApp extends ApplicationPackage {
       plist.kCFBundleIdentifierKey,
     );
     if (id == null) {
-      printError(
-          'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
+      printError('Invalid prebuilt iOS app. Info.plist does not contain bundle identifier');
       return null;
     }
 
@@ -336,8 +325,7 @@ abstract class IOSApp extends ApplicationPackage {
       return null;
     }
     if (!project.xcodeProjectInfoFile.existsSync()) {
-      printError(
-          'Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
+      printError('Expected ios/Runner.xcodeproj/project.pbxproj but this file is missing.');
       return null;
     }
     return BuildableIOSApp(project);
@@ -352,8 +340,7 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project)
-      : super(projectBundleId: project.productBundleIdentifier);
+  BuildableIOSApp(this.project) : super(projectBundleId: project.productBundleIdentifier);
 
   final IosProject project;
 
@@ -399,15 +386,13 @@ class ApplicationPackageStore {
   AndroidApk android;
   IOSApp iOS;
 
-  Future<ApplicationPackage> getPackageForPlatform(
-      TargetPlatform platform) async {
+  Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        android ??= await AndroidApk.fromAndroidProject(
-            FlutterProject.current().android);
+        android ??= await AndroidApk.fromAndroidProject(FlutterProject.current().android);
         return android;
       case TargetPlatform.ios:
         iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
@@ -461,8 +446,7 @@ class _Element extends _Entry {
   }
 
   Iterable<_Entry> allElements(String name) {
-    return children
-        .where((_Entry e) => e is _Element && e.name.startsWith(name));
+    return children.where((_Entry e) => e is _Element && e.name.startsWith(name));
   }
 }
 
@@ -470,9 +454,8 @@ class _Attribute extends _Entry {
   _Attribute.fromLine(String line, _Element parent) {
     //     A: android:label(0x01010001)="hello_world" (Raw: "hello_world")
     const String attributePrefix = 'A: ';
-    final List<String> keyVal = line
-        .substring(line.indexOf(attributePrefix) + attributePrefix.length)
-        .split('=');
+    final List<String> keyVal =
+        line.substring(line.indexOf(attributePrefix) + attributePrefix.length).split('=');
     key = keyVal[0];
     value = keyVal[1];
     level = line.length - line.trimLeft().length;
@@ -528,8 +511,7 @@ class ApkManifestData {
       final Iterable<_Element> intentFilters =
           activity.allElements('intent-filter').cast<_Element>();
       final bool isEnabledByDefault = enabled == null;
-      final bool isExplicitlyEnabled =
-          enabled != null && enabled.value.contains('0xffffffff');
+      final bool isExplicitlyEnabled = enabled != null && enabled.value.contains('0xffffffff');
       if (!(isEnabledByDefault || isExplicitlyEnabled)) {
         continue;
       }
@@ -537,15 +519,12 @@ class ApkManifestData {
       for (_Element element in intentFilters) {
         final _Element action = element.firstElement('action');
         final _Element category = element.firstElement('category');
-        final String actionAttributeValue =
-            action?.firstAttribute('android:name')?.value;
-        final String categoryAttributeValue =
-            category?.firstAttribute('android:name')?.value;
+        final String actionAttributeValue = action?.firstAttribute('android:name')?.value;
+        final String categoryAttributeValue = category?.firstAttribute('android:name')?.value;
         final bool isMainAction = actionAttributeValue != null &&
             actionAttributeValue.startsWith('"android.intent.action.MAIN"');
         final bool isLauncherCategory = categoryAttributeValue != null &&
-            categoryAttributeValue
-                .startsWith('"android.intent.category.LAUNCHER"');
+            categoryAttributeValue.startsWith('"android.intent.category.LAUNCHER"');
         if (isMainAction && isLauncherCategory) {
           launchActivity = activity;
           break;
@@ -558,23 +537,19 @@ class ApkManifestData {
 
     final _Attribute package = manifest.firstAttribute('package');
     // "io.flutter.examples.hello_world" (Raw: "io.flutter.examples.hello_world")
-    final String packageName =
-        package.value.substring(1, package.value.indexOf('" '));
+    final String packageName = package.value.substring(1, package.value.indexOf('" '));
 
     if (launchActivity == null) {
       printError('Error running $packageName. Default activity not found');
       return null;
     }
 
-    final _Attribute nameAttribute =
-        launchActivity.firstAttribute('android:name');
+    final _Attribute nameAttribute = launchActivity.firstAttribute('android:name');
     // "io.flutter.examples.hello_world.MainActivity" (Raw: "io.flutter.examples.hello_world.MainActivity")
-    final String activityName =
-        nameAttribute.value.substring(1, nameAttribute.value.indexOf('" '));
+    final String activityName = nameAttribute.value.substring(1, nameAttribute.value.indexOf('" '));
 
     // Example format: (type 0x10)0x1
-    final _Attribute versionCodeAttr =
-        manifest.firstAttribute('android:versionCode');
+    final _Attribute versionCodeAttr = manifest.firstAttribute('android:versionCode');
     if (versionCodeAttr == null) {
       printError('Error running $packageName. Manifest versionCode not found');
       return null;
@@ -589,8 +564,7 @@ class ApkManifestData {
       return null;
     }
 
-    final Map<String, Map<String, String>> map =
-        <String, Map<String, String>>{};
+    final Map<String, Map<String, String>> map = <String, Map<String, String>>{};
     map['package'] = <String, String>{'name': packageName};
     map['version-code'] = <String, String>{'name': versionCode.toString()};
     map['launchable-activity'] = <String, String>{'name': activityName};
@@ -604,16 +578,12 @@ class ApkManifestData {
   Map<String, Map<String, String>> get data =>
       UnmodifiableMapView<String, Map<String, String>>(_data);
 
-  String get packageName =>
-      _data['package'] == null ? null : _data['package']['name'];
+  String get packageName => _data['package'] == null ? null : _data['package']['name'];
 
-  String get versionCode =>
-      _data['version-code'] == null ? null : _data['version-code']['name'];
+  String get versionCode => _data['version-code'] == null ? null : _data['version-code']['name'];
 
   String get launchableActivityName {
-    return _data['launchable-activity'] == null
-        ? null
-        : _data['launchable-activity']['name'];
+    return _data['launchable-activity'] == null ? null : _data['launchable-activity']['name'];
   }
 
   @override

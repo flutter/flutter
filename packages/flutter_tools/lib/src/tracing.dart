@@ -14,8 +14,7 @@ import 'vmservice.dart';
 // Names of some of the Timeline events we care about.
 const String _kFlutterEngineMainEnterEventName = 'FlutterEngineMainEnter';
 const String _kFrameworkInitEventName = 'Framework initialization';
-const String _kFirstUsefulFrameEventName =
-    'Widgets completed first useful frame';
+const String _kFirstUsefulFrameEventName = 'Widgets completed first useful frame';
 
 class Tracing {
   Tracing(this.vmService);
@@ -30,8 +29,7 @@ class Tracing {
   final VMService vmService;
 
   Future<void> startTracing() async {
-    await vmService.vm
-        .setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
+    await vmService.vm.setVMTimelineFlags(<String>['Compiler', 'Dart', 'Embedder', 'GC']);
     await vmService.vm.clearVMTimeline();
   }
 
@@ -47,11 +45,9 @@ class Tracing {
       try {
         final Completer<void> whenFirstFrameRendered = Completer<void>();
         (await vmService.onTimelineEvent).listen((ServiceEvent timelineEvent) {
-          final List<Map<String, dynamic>> events =
-              timelineEvent.timelineEvents;
+          final List<Map<String, dynamic>> events = timelineEvent.timelineEvents;
           for (Map<String, dynamic> event in events) {
-            if (event['name'] == _kFirstUsefulFrameEventName)
-              whenFirstFrameRendered.complete();
+            if (event['name'] == _kFirstUsefulFrameEventName) whenFirstFrameRendered.complete();
           }
         });
         bool done = false;
@@ -76,23 +72,19 @@ class Tracing {
 
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
-Future<void> downloadStartupTrace(VMService observatory,
-    {bool awaitFirstFrame = true}) async {
-  final String traceInfoFilePath =
-      fs.path.join(getBuildDirectory(), 'start_up_info.json');
+Future<void> downloadStartupTrace(VMService observatory, {bool awaitFirstFrame = true}) async {
+  final String traceInfoFilePath = fs.path.join(getBuildDirectory(), 'start_up_info.json');
   final File traceInfoFile = fs.file(traceInfoFilePath);
 
   // Delete old startup data, if any.
   if (await traceInfoFile.exists()) await traceInfoFile.delete();
 
   // Create "build" directory, if missing.
-  if (!(await traceInfoFile.parent.exists()))
-    await traceInfoFile.parent.create();
+  if (!(await traceInfoFile.parent.exists())) await traceInfoFile.parent.create();
 
   final Tracing tracing = Tracing(observatory);
 
-  final Map<String, dynamic> timeline =
-      await tracing.stopTracingAndDownloadTimeline(
+  final Map<String, dynamic> timeline = await tracing.stopTracingAndDownloadTimeline(
     awaitFirstFrame: awaitFirstFrame,
   );
 
@@ -110,8 +102,7 @@ Future<void> downloadStartupTrace(VMService observatory,
 
   final int engineEnterTimestampMicros =
       extractInstantEventTimestamp(_kFlutterEngineMainEnterEventName);
-  final int frameworkInitTimestampMicros =
-      extractInstantEventTimestamp(_kFrameworkInitEventName);
+  final int frameworkInitTimestampMicros = extractInstantEventTimestamp(_kFrameworkInitEventName);
 
   if (engineEnterTimestampMicros == null) {
     printTrace('Engine start event is missing in the timeline: $timeline');
@@ -123,21 +114,18 @@ Future<void> downloadStartupTrace(VMService observatory,
   };
 
   if (frameworkInitTimestampMicros != null) {
-    final int timeToFrameworkInitMicros =
-        frameworkInitTimestampMicros - engineEnterTimestampMicros;
+    final int timeToFrameworkInitMicros = frameworkInitTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFrameworkInitMicros'] = timeToFrameworkInitMicros;
     message = 'Time to framework init: ${timeToFrameworkInitMicros ~/ 1000}ms.';
   }
 
   if (awaitFirstFrame) {
-    final int firstFrameTimestampMicros =
-        extractInstantEventTimestamp(_kFirstUsefulFrameEventName);
+    final int firstFrameTimestampMicros = extractInstantEventTimestamp(_kFirstUsefulFrameEventName);
     if (firstFrameTimestampMicros == null) {
       printTrace('First frame event is missing in the timeline: $timeline');
       throw 'First frame event is missing in the timeline. Cannot compute startup time.';
     }
-    final int timeToFirstFrameMicros =
-        firstFrameTimestampMicros - engineEnterTimestampMicros;
+    final int timeToFirstFrameMicros = firstFrameTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFirstFrameMicros'] = timeToFirstFrameMicros;
     message = 'Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.';
     if (frameworkInitTimestampMicros != null)

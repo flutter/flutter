@@ -36,8 +36,7 @@ void main() {
       final Future<void> runCommand =
           createTestCommandRunner(command).run(<String>['version', version]);
       await Future.wait<void>(<Future<void>>[runCommand]);
-      expect(testLogger.statusText,
-          contains('Switching Flutter to version $version'));
+      expect(testLogger.statusText, contains('Switching Flutter to version $version'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
@@ -48,8 +47,7 @@ void main() {
       final Future<void> runCommand =
           createTestCommandRunner(command).run(<String>['version', version]);
       await Future.wait<void>(<Future<void>>[runCommand]);
-      expect(testLogger.errorText,
-          contains('Version command is not supported in'));
+      expect(testLogger.errorText, contains('Version command is not supported in'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
@@ -57,11 +55,10 @@ void main() {
     testUsingContext('switch to not supported version with force', () async {
       const String version = '1.1.5';
       final VersionCommand command = VersionCommand();
-      final Future<void> runCommand = createTestCommandRunner(command)
-          .run(<String>['version', '--force', version]);
+      final Future<void> runCommand =
+          createTestCommandRunner(command).run(<String>['version', '--force', version]);
       await Future.wait<void>(<Future<void>>[runCommand]);
-      expect(testLogger.statusText,
-          contains('Switching Flutter to version $version with force'));
+      expect(testLogger.statusText, contains('Switching Flutter to version $version with force'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),
     });
@@ -104,8 +101,7 @@ class MockProcessManager extends Mock implements ProcessManager {
     if (commandStr == 'git log -n 1 --pretty=format:%H') {
       return ProcessResult(0, 0, '000000000000000000000', '');
     }
-    if (commandStr ==
-        'git describe --match v*.*.* --first-parent --long --tags') {
+    if (commandStr == 'git describe --match v*.*.* --first-parent --long --tags') {
       if (version.isNotEmpty) {
         return ProcessResult(0, 0, '$version-0-g00000000', '');
       }

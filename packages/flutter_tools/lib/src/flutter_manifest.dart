@@ -86,8 +86,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        printStatus(userMessages.invalidVersionSettingHintMessage(verStr),
-            emphasis: true);
+        printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
@@ -169,11 +168,7 @@ class FlutterManifest {
     if (assets == null) {
       return const <Uri>[];
     }
-    return assets
-        .cast<String>()
-        .map<String>(Uri.encodeFull)
-        ?.map<Uri>(Uri.parse)
-        ?.toList();
+    return assets.cast<String>().map<String>(Uri.encodeFull)?.map<Uri>(Uri.parse)?.toList();
   }
 
   List<Font> _fonts;
@@ -195,8 +190,7 @@ class FlutterManifest {
         continue;
       }
       if (fontFiles == null) {
-        printError('Warning: No fonts specified for font $familyName',
-            emphasis: true);
+        printError('Warning: No fonts specified for font $familyName', emphasis: true);
         continue;
       }
 
@@ -204,8 +198,7 @@ class FlutterManifest {
       for (Map<dynamic, dynamic> fontFile in fontFiles) {
         final String asset = fontFile['asset'];
         if (asset == null) {
-          printError('Warning: Missing asset in fonts for $familyName',
-              emphasis: true);
+          printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
         }
 
@@ -215,8 +208,7 @@ class FlutterManifest {
           style: fontFile['style'],
         ));
       }
-      if (fontAssets.isNotEmpty)
-        fonts.add(Font(fontFamily['family'], fontAssets));
+      if (fontAssets.isNotEmpty) fonts.add(Font(fontFamily['family'], fontAssets));
     }
     return fonts;
   }
@@ -234,9 +226,7 @@ class Font {
   Map<String, dynamic> get descriptor {
     return <String, dynamic>{
       'family': familyName,
-      'fonts': fontAssets
-          .map<Map<String, dynamic>>((FontAsset a) => a.descriptor)
-          .toList(),
+      'fonts': fontAssets.map<Map<String, dynamic>>((FontAsset a) => a.descriptor).toList(),
     };
   }
 
@@ -245,8 +235,7 @@ class Font {
 }
 
 class FontAsset {
-  FontAsset(this.assetUri, {this.weight, this.style})
-      : assert(assetUri != null);
+  FontAsset(this.assetUri, {this.weight, this.style}) : assert(assetUri != null);
 
   final Uri assetUri;
   final int weight;
@@ -263,8 +252,7 @@ class FontAsset {
   }
 
   @override
-  String toString() =>
-      '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
+  String toString() => '$runtimeType(asset: ${assetUri.path}, weight; $weight, style: $style)';
 }
 
 @visibleForTesting
@@ -298,8 +286,7 @@ bool _validate(YamlMap manifest) {
     switch (kvp.key) {
       case 'name':
         if (kvp.value is! String) {
-          errors.add(
-              'Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
+          errors.add('Expected "${kvp.key}" to be a string, but got ${kvp.value}.');
         }
         break;
       case 'flutter':
@@ -307,8 +294,8 @@ bool _validate(YamlMap manifest) {
           continue;
         }
         if (kvp.value is! YamlMap) {
-          errors.add(
-              'Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
+          errors
+              .add('Expected "${kvp.key}" section to be an object or null, but got ${kvp.value}.');
         }
         _validateFlutter(kvp.value, errors);
         break;
@@ -364,14 +351,12 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
               'Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
 
-        if (kvp.value['androidPackage'] != null &&
-            kvp.value['androidPackage'] is! String) {
+        if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
           errors.add('The "androidPackage" value must be a string if set.');
         }
         if (kvp.value['iosBundleIdentifier'] != null &&
             kvp.value['iosBundleIdentifier'] is! String) {
-          errors.add(
-              'The "iosBundleIdentifier" section must be a string if set.');
+          errors.add('The "iosBundleIdentifier" section must be a string if set.');
         }
         break;
       case 'plugin':
@@ -379,16 +364,13 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
           errors.add(
               'Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
-        if (kvp.value['androidPackage'] != null &&
-            kvp.value['androidPackage'] is! String) {
+        if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
           errors.add('The "androidPackage" must either be null or a string.');
         }
-        if (kvp.value['iosPrefix'] != null &&
-            kvp.value['iosPrefix'] is! String) {
+        if (kvp.value['iosPrefix'] != null && kvp.value['iosPrefix'] is! String) {
           errors.add('The "iosPrefix" must eithe rbe null or a string.');
         }
-        if (kvp.value['pluginClass'] != null &&
-            kvp.value['pluginClass'] is! String) {
+        if (kvp.value['pluginClass'] != null && kvp.value['pluginClass'] is! String) {
           errors.add('The "pluginClass" must either be null or a string..');
         }
         break;
@@ -415,8 +397,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
     900,
   };
   for (final YamlMap fontMap in fonts) {
-    for (dynamic key in fontMap.keys
-        .where((dynamic key) => key != 'family' && key != 'fonts')) {
+    for (dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
       errors.add('Unexpected child "$key" found under "fonts".');
     }
     if (fontMap['family'] != null && fontMap['family'] is! String) {
@@ -453,8 +434,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
             }
             break;
           default:
-            errors.add(
-                'Unexpected key ${kvp.key} ((${kvp.value.runtimeType})) under font.');
+            errors.add('Unexpected key ${kvp.key} ((${kvp.value.runtimeType})) under font.');
             break;
         }
       }

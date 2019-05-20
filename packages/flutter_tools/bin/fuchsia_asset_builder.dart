@@ -45,14 +45,12 @@ Future<void> writeFile(libfs.File outputFile, DevFSContent content) async {
 Future<void> run(List<String> args) async {
   final ArgParser parser = ArgParser()
     ..addOption(_kOptionPackages, help: 'The .packages file')
-    ..addOption(_kOptionAsset,
-        help: 'The directory where to put temporary files')
+    ..addOption(_kOptionAsset, help: 'The directory where to put temporary files')
     ..addOption(_kOptionManifest, help: 'The manifest file')
     ..addOption(_kOptionAssetManifestOut)
     ..addOption(_kOptionComponentName);
   final ArgResults argResults = parser.parse(args);
-  if (_kRequiredOptions
-      .any((String option) => !argResults.options.contains(option))) {
+  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
     printError('Missing option! All options must be specified.');
     exit(1);
   }
@@ -73,19 +71,18 @@ Future<void> run(List<String> args) async {
 
   final List<Future<void>> calls = <Future<void>>[];
   assets.entries.forEach((String fileName, DevFSContent content) {
-    final libfs.File outputFile =
-        libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
+    final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
     calls.add(writeFile(outputFile, content));
   });
   await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
-  await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan,
-      argResults[_kOptionComponentName]);
+  await writeFuchsiaManifest(
+      assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);
 }
 
-Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase,
-    String fileDest, String componentName) async {
+Future<void> writeFuchsiaManifest(
+    AssetBundle assets, String outputBase, String fileDest, String componentName) async {
   final libfs.File destFile = libfs.fs.file(fileDest);
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();

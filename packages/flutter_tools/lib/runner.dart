@@ -42,12 +42,10 @@ Future<int> run(
     // Remove the verbose option; for help and doctor, users don't need to see
     // verbose logs.
     args = List<String>.from(args);
-    args.removeWhere(
-        (String option) => option == '-v' || option == '--verbose');
+    args.removeWhere((String option) => option == '-v' || option == '--verbose');
   }
 
-  final FlutterCommandRunner runner =
-      FlutterCommandRunner(verboseHelp: verboseHelp);
+  final FlutterCommandRunner runner = FlutterCommandRunner(verboseHelp: verboseHelp);
   commands.forEach(runner.addCommand);
 
   return runInContext<int>(() async {
@@ -63,10 +61,8 @@ Future<int> run(
       await runner.run(args);
       await _exit(0);
     } catch (error, stackTrace) {
-      String getVersion() =>
-          flutterVersion ?? FlutterVersion.instance.getVersionString();
-      return await _handleToolError(
-          error, stackTrace, verbose, args, reportCrashes, getVersion);
+      String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString();
+      return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
     }
     return 0;
   }, overrides: overrides);
@@ -121,8 +117,7 @@ Future<int> _handleToolError(
         getFlutterVersion: getFlutterVersion,
       );
       try {
-        final File file =
-            await _createLocalCrashReport(args, error, stackTrace);
+        final File file = await _createLocalCrashReport(args, error, stackTrace);
         stderr.writeln(
           'Crash report written to ${file.path};\n'
           'please let us know at https://github.com/flutter/flutter/issues.',
@@ -154,13 +149,12 @@ FileSystem crashFileSystem = const LocalFileSystem();
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(
     List<String> args, dynamic error, StackTrace stackTrace) async {
-  File crashFile =
-      getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
+  File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
   final StringBuffer buffer = StringBuffer();
 
-  buffer.writeln(
-      'Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
+  buffer
+      .writeln('Flutter crash report; please file at https://github.com/flutter/flutter/issues.\n');
 
   buffer.writeln('## command\n');
   buffer.writeln('flutter ${args.join(' ')}\n');
@@ -176,8 +170,7 @@ Future<File> _createLocalCrashReport(
     await crashFile.writeAsString(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
-    crashFile =
-        getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
+    crashFile = getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
     try {
       await crashFile.writeAsString(buffer.toString());
     } on FileSystemException catch (e) {

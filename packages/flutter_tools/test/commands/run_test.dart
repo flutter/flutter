@@ -21,17 +21,14 @@ void main() {
       final RunCommand command = RunCommand();
       applyMocksToCommand(command);
       try {
-        await createTestCommandRunner(command)
-            .run(<String>['run', '-t', 'abc123']);
+        await createTestCommandRunner(command).run(<String>['run', '-t', 'abc123']);
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
       }
     });
 
-    testUsingContext(
-        'should only request artifacts corresponding to connected devices',
-        () async {
+    testUsingContext('should only request artifacts corresponding to connected devices', () async {
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.fromIterable(<Device>[
           MockDevice(TargetPlatform.android_arm),

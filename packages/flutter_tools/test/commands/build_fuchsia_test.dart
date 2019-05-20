@@ -41,13 +41,10 @@ void main() {
     when(windowsPlatform.isMacOS).thenReturn(false);
   });
 
-  testUsingContext('Fuchsia build fails when there is no fuchsia project',
-      () async {
+  testUsingContext('Fuchsia build fails when there is no fuchsia project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
@@ -61,9 +58,7 @@ void main() {
     fs.file('.packages').createSync();
     fs.file('pubspec.yaml').createSync();
 
-    expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
@@ -74,16 +69,12 @@ void main() {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     const String appName = 'app_name';
-    fs
-        .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-        .createSync(recursive: true);
+    fs.file(fs.path.join('fuchsia', 'meta', '$appName.cmx')).createSync(recursive: true);
     fs.file('.packages').createSync();
     final File pubspecFile = fs.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync('name: $appName');
 
-    expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
+    expect(createTestCommandRunner(command).run(const <String>['build', 'fuchsia']),
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
@@ -94,18 +85,14 @@ void main() {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     const String appName = 'app_name';
-    fs
-        .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-        .createSync(recursive: true);
+    fs.file(fs.path.join('fuchsia', 'meta', '$appName.cmx')).createSync(recursive: true);
     fs.file('.packages').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     final File pubspecFile = fs.file('pubspec.yaml')..createSync();
     pubspecFile.writeAsStringSync('name: $appName');
 
-    await createTestCommandRunner(command)
-        .run(const <String>['build', 'fuchsia']);
-    final String farPath =
-        fs.path.join(getFuchsiaBuildDirectory(), 'pkg', 'app_name-0.far');
+    await createTestCommandRunner(command).run(const <String>['build', 'fuchsia']);
+    final String farPath = fs.path.join(getFuchsiaBuildDirectory(), 'pkg', 'app_name-0.far');
     expect(fs.file(farPath).existsSync(), isTrue);
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
@@ -130,9 +117,7 @@ class MockFuchsiaPM extends Mock implements FuchsiaPM {
     if (!fs.directory(buildPath).existsSync()) {
       return false;
     }
-    fs
-        .file(fs.path.join(buildPath, 'meta', 'package'))
-        .createSync(recursive: true);
+    fs.file(fs.path.join(buildPath, 'meta', 'package')).createSync(recursive: true);
     _appName = appName;
     return true;
   }
@@ -147,8 +132,7 @@ class MockFuchsiaPM extends Mock implements FuchsiaPM {
   }
 
   @override
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
     if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fs.file(keyPath).existsSync() ||
         !fs.file(manifestPath).existsSync()) {
@@ -159,8 +143,7 @@ class MockFuchsiaPM extends Mock implements FuchsiaPM {
   }
 
   @override
-  Future<bool> archive(
-      String buildPath, String keyPath, String manifestPath) async {
+  Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
     if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
         !fs.file(keyPath).existsSync() ||
         !fs.file(manifestPath).existsSync()) {
@@ -169,9 +152,7 @@ class MockFuchsiaPM extends Mock implements FuchsiaPM {
     if (_appName == null) {
       return false;
     }
-    fs
-        .file(fs.path.join(buildPath, '$_appName-0.far'))
-        .createSync(recursive: true);
+    fs.file(fs.path.join(buildPath, '$_appName-0.far')).createSync(recursive: true);
     return true;
   }
 }

@@ -11,15 +11,13 @@ const String kPackagesFileName = '.packages';
 
 Map<String, Uri> _parse(String packagesPath) {
   final List<int> source = fs.file(packagesPath).readAsBytesSync();
-  return packages_file.parse(
-      source, Uri.file(packagesPath, windows: platform.isWindows));
+  return packages_file.parse(source, Uri.file(packagesPath, windows: platform.isWindows));
 }
 
 class PackageMap {
   PackageMap(this.packagesPath);
 
-  static String get globalPackagesPath =>
-      _globalPackagesPath ?? kPackagesFileName;
+  static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
   static String get globalGeneratedPackagesPath =>
       fs.path.setExtension(globalPackagesPath, '.generated');
@@ -63,13 +61,11 @@ class PackageMap {
   String checkValid() {
     if (fs.isFileSync(packagesPath)) return null;
     String message = '$packagesPath does not exist.';
-    final String pubspecPath =
-        fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
+    final String pubspecPath = fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
     if (fs.isFileSync(pubspecPath))
       message += '\nDid you run "flutter packages get" in this directory?';
     else
-      message +=
-          '\nDid you run this command from the same directory as your pubspec.yaml file?';
+      message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
     return message;
   }
 }

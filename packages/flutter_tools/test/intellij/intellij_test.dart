@@ -31,40 +31,35 @@ void main() {
       testUsingContext('found', () async {
         final IntelliJPlugins plugins = IntelliJPlugins(_kPluginsPath);
 
-        final Archive dartJarArchive =
-            buildSingleFileArchive('META-INF/plugin.xml', r'''
+        final Archive dartJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
 <idea-plugin version="2">
   <name>Dart</name>
   <version>162.2485</version>
 </idea-plugin>
 ''');
-        writeFileCreatingDirectories(
-            fs.path.join(_kPluginsPath, 'Dart', 'lib', 'Dart.jar'),
+        writeFileCreatingDirectories(fs.path.join(_kPluginsPath, 'Dart', 'lib', 'Dart.jar'),
             ZipEncoder().encode(dartJarArchive));
 
-        final Archive flutterJarArchive =
-            buildSingleFileArchive('META-INF/plugin.xml', r'''
+        final Archive flutterJarArchive = buildSingleFileArchive('META-INF/plugin.xml', r'''
 <idea-plugin version="2">
   <name>Flutter</name>
   <version>0.1.3</version>
 </idea-plugin>
 ''');
-        writeFileCreatingDirectories(
-            fs.path.join(_kPluginsPath, 'flutter-intellij.jar'),
+        writeFileCreatingDirectories(fs.path.join(_kPluginsPath, 'flutter-intellij.jar'),
             ZipEncoder().encode(flutterJarArchive));
 
         final List<ValidationMessage> messages = <ValidationMessage>[];
         plugins.validatePackage(messages, <String>['Dart'], 'Dart');
-        plugins.validatePackage(messages,
-            <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
+        plugins.validatePackage(
+            messages, <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
             minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
 
-        ValidationMessage message = messages
-            .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
+        ValidationMessage message =
+            messages.firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
         expect(message.message, 'Dart plugin version 162.2485');
 
-        message = messages.firstWhere(
-            (ValidationMessage m) => m.message.startsWith('Flutter '));
+        message = messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
         expect(message.message, contains('Flutter plugin version 0.1.3'));
         expect(message.message, contains('recommended minimum version'));
       }, overrides: <Type, Generator>{
@@ -76,16 +71,15 @@ void main() {
 
         final List<ValidationMessage> messages = <ValidationMessage>[];
         plugins.validatePackage(messages, <String>['Dart'], 'Dart');
-        plugins.validatePackage(messages,
-            <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
+        plugins.validatePackage(
+            messages, <String>['flutter-intellij', 'flutter-intellij.jar'], 'Flutter',
             minVersion: IntelliJPlugins.kMinFlutterPluginVersion);
 
-        ValidationMessage message = messages
-            .firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
+        ValidationMessage message =
+            messages.firstWhere((ValidationMessage m) => m.message.startsWith('Dart '));
         expect(message.message, contains('Dart plugin not installed'));
 
-        message = messages.firstWhere(
-            (ValidationMessage m) => m.message.startsWith('Flutter '));
+        message = messages.firstWhere((ValidationMessage m) => m.message.startsWith('Flutter '));
         expect(message.message, contains('Flutter plugin not installed'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

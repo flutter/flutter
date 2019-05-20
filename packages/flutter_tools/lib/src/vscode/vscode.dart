@@ -17,12 +17,10 @@ const String extensionMarketplaceUrl =
     'https://marketplace.visualstudio.com/items?itemName=$extensionIdentifier';
 
 class VsCode {
-  VsCode._(this.directory, this.extensionDirectory,
-      {Version version, this.edition})
+  VsCode._(this.directory, this.extensionDirectory, {Version version, this.edition})
       : version = version ?? Version.unknown {
     if (!fs.isDirectorySync(directory)) {
-      _validationMessages
-          .add(ValidationMessage.error('VS Code not found at $directory'));
+      _validationMessages.add(ValidationMessage.error('VS Code not found at $directory'));
       return;
     } else {
       _validationMessages.add(ValidationMessage('VS Code at $directory'));
@@ -43,17 +41,15 @@ class VsCode {
         .directory(extensionDirectory)
         .listSync()
         .whereType<Directory>()
-        .where((Directory d) =>
-            d.basename.toLowerCase().startsWith(extensionIdentifierLower));
+        .where((Directory d) => d.basename.toLowerCase().startsWith(extensionIdentifierLower));
 
     if (extensionDirs.isNotEmpty) {
       final FileSystemEntity extensionDir = extensionDirs.first;
 
       _isValid = true;
-      _extensionVersion = Version.parse(
-          extensionDir.basename.substring('$extensionIdentifier-'.length));
-      _validationMessages.add(
-          ValidationMessage('Flutter extension version $_extensionVersion'));
+      _extensionVersion =
+          Version.parse(extensionDir.basename.substring('$extensionIdentifier-'.length));
+      _validationMessages.add(ValidationMessage('Flutter extension version $_extensionVersion'));
     } else {
       _validationMessages.add(notInstalledMessage);
     }
@@ -64,13 +60,11 @@ class VsCode {
     String extensionDirectory, {
     String edition,
   }) {
-    final String packageJsonPath =
-        fs.path.join(installPath, 'resources', 'app', 'package.json');
+    final String packageJsonPath = fs.path.join(installPath, 'resources', 'app', 'package.json');
     final String versionString = _getVersionFromPackageJson(packageJsonPath);
     Version version;
     if (versionString != null) version = Version.parse(versionString);
-    return VsCode._(installPath, extensionDirectory,
-        version: version, edition: edition);
+    return VsCode._(installPath, extensionDirectory, version: version, edition: edition);
   }
 
   final String directory;
@@ -114,19 +108,16 @@ class VsCode {
         '.vscode',
       ),
       _VsCodeInstallLocation(
-        fs.path.join(
-            homeDirPath, 'Applications', 'Visual Studio Code.app', 'Contents'),
+        fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code.app', 'Contents'),
         '.vscode',
       ),
       _VsCodeInstallLocation(
-        fs.path.join(
-            '/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
+        fs.path.join('/Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
       ),
       _VsCodeInstallLocation(
-        fs.path.join(homeDirPath, 'Applications',
-            'Visual Studio Code - Insiders.app', 'Contents'),
+        fs.path.join(homeDirPath, 'Applications', 'Visual Studio Code - Insiders.app', 'Contents'),
         '.vscode-insiders',
         isInsiders: true,
       ),
@@ -150,13 +141,11 @@ class VsCode {
     final String progFiles = platform.environment['programfiles'];
     final String localAppData = platform.environment['localappdata'];
 
-    final List<_VsCodeInstallLocation> searchLocations =
-        <_VsCodeInstallLocation>[];
+    final List<_VsCodeInstallLocation> searchLocations = <_VsCodeInstallLocation>[];
 
     if (localAppData != null) {
       searchLocations.add(_VsCodeInstallLocation(
-          fs.path.join(localAppData, 'Programs\\Microsoft VS Code'),
-          '.vscode'));
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code'), '.vscode'));
     }
     searchLocations.add(_VsCodeInstallLocation(
         fs.path.join(progFiles86, 'Microsoft VS Code'), '.vscode',
@@ -166,20 +155,15 @@ class VsCode {
         edition: '64-bit edition'));
     if (localAppData != null) {
       searchLocations.add(_VsCodeInstallLocation(
-          fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'),
-          '.vscode-insiders',
+          fs.path.join(localAppData, 'Programs\\Microsoft VS Code Insiders'), '.vscode-insiders',
           isInsiders: true));
     }
     searchLocations.add(_VsCodeInstallLocation(
-        fs.path.join(progFiles86, 'Microsoft VS Code Insiders'),
-        '.vscode-insiders',
-        edition: '32-bit edition',
-        isInsiders: true));
+        fs.path.join(progFiles86, 'Microsoft VS Code Insiders'), '.vscode-insiders',
+        edition: '32-bit edition', isInsiders: true));
     searchLocations.add(_VsCodeInstallLocation(
-        fs.path.join(progFiles, 'Microsoft VS Code Insiders'),
-        '.vscode-insiders',
-        edition: '64-bit edition',
-        isInsiders: true));
+        fs.path.join(progFiles, 'Microsoft VS Code Insiders'), '.vscode-insiders',
+        edition: '64-bit edition', isInsiders: true));
 
     return _findInstalled(searchLocations);
   }
@@ -193,27 +177,23 @@ class VsCode {
   static List<VsCode> _installedLinux() {
     return _findInstalled(<_VsCodeInstallLocation>[
       const _VsCodeInstallLocation('/usr/share/code', '.vscode'),
-      const _VsCodeInstallLocation(
-          '/usr/share/code-insiders', '.vscode-insiders',
+      const _VsCodeInstallLocation('/usr/share/code-insiders', '.vscode-insiders',
           isInsiders: true),
     ]);
   }
 
-  static List<VsCode> _findInstalled(
-      List<_VsCodeInstallLocation> allLocations) {
+  static List<VsCode> _findInstalled(List<_VsCodeInstallLocation> allLocations) {
     final Iterable<_VsCodeInstallLocation> searchLocations = _includeInsiders
         ? allLocations
-        : allLocations
-            .where((_VsCodeInstallLocation p) => p.isInsiders != true);
+        : allLocations.where((_VsCodeInstallLocation p) => p.isInsiders != true);
 
     final List<VsCode> results = <VsCode>[];
 
     for (_VsCodeInstallLocation searchLocation in searchLocations) {
       if (fs.isDirectorySync(searchLocation.installPath)) {
-        final String extensionDirectory = fs.path
-            .join(homeDirPath, searchLocation.extensionsFolder, 'extensions');
-        results.add(VsCode.fromDirectory(
-            searchLocation.installPath, extensionDirectory,
+        final String extensionDirectory =
+            fs.path.join(homeDirPath, searchLocation.extensionsFolder, 'extensions');
+        results.add(VsCode.fromDirectory(searchLocation.installPath, extensionDirectory,
             edition: searchLocation.edition));
       }
     }

@@ -30,8 +30,7 @@ class Template {
       return;
     }
 
-    final List<FileSystemEntity> templateFiles =
-        templateSource.listSync(recursive: true);
+    final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
 
     for (FileSystemEntity entity in templateFiles) {
       if (entity is! File) {
@@ -39,8 +38,7 @@ class Template {
         continue;
       }
 
-      final String relativePath =
-          fs.path.relative(entity.path, from: baseDir.absolute.path);
+      final String relativePath = fs.path.relative(entity.path, from: baseDir.absolute.path);
 
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
@@ -78,14 +76,13 @@ class Template {
     ///
     /// Returns null if the given raw destination path has been filtered.
     String renderPath(String relativeDestinationPath) {
-      final Match match =
-          _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
+      final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1);
         final String language = context['${platform}Language'];
         if (language != match.group(2)) return null;
-        relativeDestinationPath = relativeDestinationPath.replaceAll(
-            '$platform-$language.tmpl', platform);
+        relativeDestinationPath =
+            relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
       final String projectName = context['projectName'];
       final String androidIdentifier = context['androidIdentifier'];
@@ -99,46 +96,37 @@ class Template {
 
       if (androidIdentifier != null) {
         finalDestinationPath = finalDestinationPath.replaceAll(
-            'androidIdentifier',
-            androidIdentifier.replaceAll('.', pathSeparator));
+            'androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
       if (projectName != null)
-        finalDestinationPath =
-            finalDestinationPath.replaceAll('projectName', projectName);
+        finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
       if (pluginClass != null)
-        finalDestinationPath =
-            finalDestinationPath.replaceAll('pluginClass', pluginClass);
+        finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
       return finalDestinationPath;
     }
 
-    _templateFilePaths
-        .forEach((String relativeDestinationPath, String absoluteSourcePath) {
+    _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
       final bool withRootModule = context['withRootModule'] ?? false;
-      if (!withRootModule && absoluteSourcePath.contains('flutter_root'))
-        return;
+      if (!withRootModule && absoluteSourcePath.contains('flutter_root')) return;
 
       final String finalDestinationPath = renderPath(relativeDestinationPath);
       if (finalDestinationPath == null) return;
       final File finalDestinationFile = fs.file(finalDestinationPath);
-      final String relativePathForLogging =
-          fs.path.relative(finalDestinationFile.path);
+      final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
       if (finalDestinationFile.existsSync()) {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
-          if (printStatusWhenWriting)
-            printStatus('  $relativePathForLogging (overwritten)');
+          if (printStatusWhenWriting) printStatus('  $relativePathForLogging (overwritten)');
         } else {
           // The file exists but we cannot overwrite it, move on.
-          if (printStatusWhenWriting)
-            printTrace('  $relativePathForLogging (existing - skipped)');
+          if (printStatusWhenWriting) printTrace('  $relativePathForLogging (existing - skipped)');
           return;
         }
       } else {
-        if (printStatusWhenWriting)
-          printStatus('  $relativePathForLogging (created)');
+        if (printStatusWhenWriting) printStatus('  $relativePathForLogging (created)');
       }
 
       fileCount++;
@@ -160,8 +148,7 @@ class Template {
 
       if (sourceFile.path.endsWith(templateExtension)) {
         final String templateContents = sourceFile.readAsStringSync();
-        final String renderedContents =
-            mustache.Template(templateContents).renderString(context);
+        final String renderedContents = mustache.Template(templateContents).renderString(context);
 
         finalDestinationFile.writeAsStringSync(renderedContents);
 

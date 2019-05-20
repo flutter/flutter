@@ -63,8 +63,7 @@ void main() {
       Config.instance.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      expect(sdk.sdkManagerPath,
-          fs.path.join(sdk.directory, 'tools', 'bin', 'sdkmanager'));
+      expect(sdk.sdkManagerPath, fs.path.join(sdk.directory, 'tools', 'bin', 'sdkmanager'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
@@ -118,8 +117,7 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext(
-        'throws on sdkmanager version check if sdkmanager not found', () {
+    testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
       sdkDir = MockAndroidSdk.createSdkDirectory(withSdkManager: false);
       Config.instance.setValue('android-sdk', sdkDir.path);
 
@@ -143,14 +141,8 @@ void main() {
 
           final String realSdkDir = sdkDir.path;
           final String realNdkDir = fs.path.join(realSdkDir, 'ndk-bundle');
-          final String realNdkCompiler = fs.path.join(
-              realNdkDir,
-              'toolchains',
-              'arm-linux-androideabi-4.9',
-              'prebuilt',
-              osDir,
-              'bin',
-              'arm-linux-androideabi-gcc');
+          final String realNdkCompiler = fs.path.join(realNdkDir, 'toolchains',
+              'arm-linux-androideabi-4.9', 'prebuilt', osDir, 'bin', 'arm-linux-androideabi-gcc');
           final String realNdkSysroot =
               fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
 
@@ -167,21 +159,13 @@ void main() {
 
         testUsingContext('newer NDK require explicit -fuse-ld on $os', () {
           sdkDir = MockAndroidSdk.createSdkDirectory(
-              withAndroidN: true,
-              withNdkDir: osDir,
-              withNdkSysroot: true,
-              ndkVersion: 18);
+              withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true, ndkVersion: 18);
           Config.instance.setValue('android-sdk', sdkDir.path);
 
           final String realSdkDir = sdkDir.path;
           final String realNdkDir = fs.path.join(realSdkDir, 'ndk-bundle');
           final String realNdkToolchainBin = fs.path.join(
-              realNdkDir,
-              'toolchains',
-              'arm-linux-androideabi-4.9',
-              'prebuilt',
-              osDir,
-              'bin');
+              realNdkDir, 'toolchains', 'arm-linux-androideabi-4.9', 'prebuilt', osDir, 'bin');
           final String realNdkCompiler =
               fs.path.join(realNdkToolchainBin, 'arm-linux-androideabi-gcc');
           final String realNdkLinker =
@@ -211,8 +195,7 @@ void main() {
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
           expect(sdk.directory, realSdkDir);
           expect(sdk.ndk, isNull);
-          final String explanation =
-              AndroidNdk.explainMissingNdk(sdk.directory);
+          final String explanation = AndroidNdk.explainMissingNdk(sdk.directory);
           expect(explanation, contains('Can not locate ndk-bundle'));
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
@@ -231,8 +214,7 @@ class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
     bool withNdkSysroot = false,
     bool withSdkManager = true,
   }) {
-    final Directory dir =
-        fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
     final String exe = platform.isWindows ? '.exe' : '';
     _createSdkFile(dir, 'licenses/dummy');
     _createSdkFile(dir, 'platform-tools/adb$exe');
@@ -247,8 +229,7 @@ class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
     return dir;
   }
 
-  static void _createSdkFile(Directory dir, String filePath,
-      {String contents}) {
+  static void _createSdkFile(Directory dir, String filePath, {String contents}) {
     final File file = dir.childFile(filePath);
     file.createSync(recursive: true);
     if (contents != null) {

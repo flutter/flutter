@@ -31,14 +31,12 @@ class EmulatorManager {
     final List<Emulator> emulators = await getAllAvailableEmulators();
     searchText = searchText.toLowerCase();
     bool exactlyMatchesEmulatorId(Emulator emulator) =>
-        emulator.id?.toLowerCase() == searchText ||
-        emulator.name?.toLowerCase() == searchText;
+        emulator.id?.toLowerCase() == searchText || emulator.name?.toLowerCase() == searchText;
     bool startsWithEmulatorId(Emulator emulator) =>
         emulator.id?.toLowerCase()?.startsWith(searchText) == true ||
         emulator.name?.toLowerCase()?.startsWith(searchText) == true;
 
-    final Emulator exactMatch =
-        emulators.firstWhere(exactlyMatchesEmulatorId, orElse: () => null);
+    final Emulator exactMatch = emulators.firstWhere(exactlyMatchesEmulatorId, orElse: () => null);
     if (exactMatch != null) {
       return <Emulator>[exactMatch];
     }
@@ -104,8 +102,7 @@ class EmulatorManager {
       return error
           .split('\n')
           .where((String l) => l.trim() != 'null')
-          .where((String l) =>
-              l.trim() != 'Use --force if you want to replace it.')
+          .where((String l) => l.trim() != 'Use --force if you want to replace it.')
           .join('\n')
           .trim();
     }
@@ -199,8 +196,7 @@ class EmulatorManager {
 
   /// Whether we're capable of listing any emulators given the current environment configuration.
   bool get canListAnything {
-    return _platformDiscoverers
-        .any((EmulatorDiscovery discoverer) => discoverer.canListAnything);
+    return _platformDiscoverers.any((EmulatorDiscovery discoverer) => discoverer.canListAnything);
   }
 }
 
@@ -254,22 +250,17 @@ abstract class Emulator {
     }
 
     // Calculate column widths
-    final List<int> indices =
-        List<int>.generate(table[0].length - 1, (int i) => i);
+    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
     for (List<String> row in table) {
-      widths = indices
-          .map<int>((int i) => math.max(widths[i], row[i].length))
-          .toList();
+      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
     final RegExp whiteSpaceAndDots = RegExp(r'[•\s]+$');
     return table
         .map<String>((List<String> row) {
-          return indices
-                  .map<String>((int i) => row[i].padRight(widths[i]))
-                  .join(' • ') +
+          return indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') +
               ' • ${row.last}';
         })
         .map<String>((String line) => line.replaceAll(whiteSpaceAndDots, ''))
@@ -282,8 +273,7 @@ abstract class Emulator {
 }
 
 class CreateEmulatorResult {
-  CreateEmulatorResult(this.emulatorName,
-      {this.success, this.output, this.error});
+  CreateEmulatorResult(this.emulatorName, {this.success, this.output, this.error});
 
   final bool success;
   final String emulatorName;

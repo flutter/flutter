@@ -29,8 +29,7 @@ class TestCommand extends FastFlutterCommand {
     argParser
       ..addMultiOption(
         'name',
-        help:
-            'A regular expression matching substrings of the names of tests to run.',
+        help: 'A regular expression matching substrings of the names of tests to run.',
         valueHelp: 'regexp',
         splitCommas: false,
       )
@@ -96,14 +95,12 @@ class TestCommand extends FastFlutterCommand {
       ..addFlag(
         'update-goldens',
         negatable: false,
-        help:
-            'Whether matchesGoldenFile() calls within your test methods should '
+        help: 'Whether matchesGoldenFile() calls within your test methods should '
             'update the golden files rather than test for an existing match.',
       )
       ..addOption('concurrency',
           abbr: 'j',
-          defaultsTo:
-              math.max<int>(1, platform.numberOfProcessors - 2).toString(),
+          defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
           help: 'The number of concurrent test processes to run.',
           valueHelp: 'jobs')
       ..addFlag(
@@ -116,8 +113,7 @@ class TestCommand extends FastFlutterCommand {
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
         DevelopmentArtifact.universal,
       };
 
@@ -131,16 +127,13 @@ class TestCommand extends FastFlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     await cache.updateAll(await requiredArtifacts);
     if (!fs.isFileSync('pubspec.yaml')) {
-      throwToolExit(
-          'Error: No pubspec.yaml file found in the current working directory.\n'
+      throwToolExit('Error: No pubspec.yaml file found in the current working directory.\n'
           'Run this command from the root of your project. Test files must be '
           'called *_test.dart and must reside in the package\'s \'test\' '
           'directory (or one of its subdirectories).');
     }
     if (shouldRunPub) {
-      await pubGet(
-          context: PubContext.getVerifyContext(name),
-          skipPubspecYamlCheck: true);
+      await pubGet(context: PubContext.getVerifyContext(name), skipPubspecYamlCheck: true);
     }
     final bool buildTestAssets = argResults['test-assets'];
     final List<String> names = argResults['name'];
@@ -151,9 +144,8 @@ class TestCommand extends FastFlutterCommand {
       await _buildTestAsset();
     }
 
-    Iterable<String> files = argResults.rest
-        .map<String>((String testPath) => fs.path.absolute(testPath))
-        .toList();
+    Iterable<String> files =
+        argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
 
     final bool startPaused = argResults['start-paused'];
     if (startPaused && files.length != 1) {
@@ -174,8 +166,7 @@ class TestCommand extends FastFlutterCommand {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
       workDir = fs.directory('test');
-      if (!workDir.existsSync())
-        throwToolExit('Test directory "${workDir.path}" not found.');
+      if (!workDir.existsSync()) throwToolExit('Test directory "${workDir.path}" not found.');
       files = _findTests(workDir).toList();
       if (files.isEmpty) {
         throwToolExit(
@@ -193,8 +184,7 @@ class TestCommand extends FastFlutterCommand {
 
     final bool machine = argResults['machine'];
     if (collector != null && machine) {
-      throwToolExit(
-          "The test command doesn't support --machine and coverage together");
+      throwToolExit("The test command doesn't support --machine and coverage together");
     }
 
     TestWatcher watcher;
@@ -208,8 +198,7 @@ class TestCommand extends FastFlutterCommand {
 
     // Run builders once before all tests.
     if (flutterProject.hasBuilders) {
-      final CodegenDaemon codegenDaemon =
-          await codeGenerator.daemon(flutterProject);
+      final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
       codegenDaemon.startBuild();
       await for (CodegenStatus status in codegenDaemon.buildResults) {
         if (status == CodegenStatus.Succeeded) {
@@ -221,8 +210,7 @@ class TestCommand extends FastFlutterCommand {
       }
     }
 
-    final bool disableServiceAuthCodes =
-        argResults['disable-service-auth-codes'];
+    final bool disableServiceAuthCodes = argResults['disable-service-auth-codes'];
 
     final int result = await runTests(
       files,
@@ -258,14 +246,13 @@ class TestCommand extends FastFlutterCommand {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needRebuild(assetBundle.entries)) {
-      await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
-          assetBundle.entries);
+      await writeBundle(
+          fs.directory(fs.path.join('build', 'unit_test_assets')), assetBundle.entries);
     }
   }
 
   bool _needRebuild(Map<String, DevFSContent> entries) {
-    final File manifest = fs
-        .file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     if (!manifest.existsSync()) {
       return true;
     }
@@ -275,8 +262,7 @@ class TestCommand extends FastFlutterCommand {
       return true;
     }
 
-    for (DevFSFileContent entry
-        in entries.values.whereType<DevFSFileContent>()) {
+    for (DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {

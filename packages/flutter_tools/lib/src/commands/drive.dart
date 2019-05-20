@@ -53,16 +53,14 @@ class DriveCommand extends RunCommandBase {
       )
       ..addOption(
         'use-existing-app',
-        help:
-            'Connect to an already running instance via the given observatory URL. '
+        help: 'Connect to an already running instance via the given observatory URL. '
             'If this option is given, the application will not be automatically started, '
             'and it will only be stopped if --no-keep-app-running is explicitly set.',
         valueHelp: 'url',
       )
       ..addOption(
         'driver',
-        help:
-            'The test file to run on the host (as opposed to the target file to run on '
+        help: 'The test file to run on the host (as opposed to the target file to run on '
             'the device).\n'
             'By default, this file has the same base name as the target file, but in the '
             '"test_driver/" directory instead, and with "_test" inserted just before the '
@@ -81,8 +79,7 @@ class DriveCommand extends RunCommandBase {
   final String name = 'drive';
 
   @override
-  final String description =
-      'Runs Flutter Driver tests for the current project.';
+  final String description = 'Runs Flutter Driver tests for the current project.';
 
   @override
   final List<String> aliases = <String>['driver'];
@@ -112,8 +109,7 @@ class DriveCommand extends RunCommandBase {
 
       if (getBuildInfo().isRelease) {
         // This is because we need VM service to be able to drive the app.
-        throwToolExit(
-            'Flutter Driver does not support running in release mode.\n'
+        throwToolExit('Flutter Driver does not support running in release mode.\n'
             '\n'
             'Use --profile mode for testing application performance.\n'
             'Use --debug (default) mode for testing correctness (with assertions).');
@@ -121,9 +117,7 @@ class DriveCommand extends RunCommandBase {
 
       final LaunchResult result = await appStarter(this);
       if (result == null)
-        throwToolExit(
-            'Application failed to start. Will not run test. Quitting.',
-            exitCode: 1);
+        throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
@@ -138,8 +132,7 @@ class DriveCommand extends RunCommandBase {
       if (error is ToolExit) rethrow;
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (argResults['keep-app-running'] ??
-          (argResults['use-existing-app'] != null)) {
+      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
         printStatus('Leaving the application running.');
       } else {
         printStatus('Stopping application instance.');
@@ -164,8 +157,7 @@ class DriveCommand extends RunCommandBase {
     // for the corresponding test file relative to it.
     if (!fs.path.isRelative(appFile)) {
       if (!fs.path.isWithin(packageDir, appFile)) {
-        printError(
-            'Application file $appFile is outside the package directory $packageDir');
+        printError('Application file $appFile is outside the package directory $packageDir');
         return null;
       }
 
@@ -175,8 +167,7 @@ class DriveCommand extends RunCommandBase {
     final List<String> parts = fs.path.split(appFile);
 
     if (parts.length < 2) {
-      printError(
-          'Application file $appFile must reside in one of the sub-directories '
+      printError('Application file $appFile must reside in one of the sub-directories '
           'of the package structure, not in the root directory.');
       return null;
     }
@@ -184,8 +175,8 @@ class DriveCommand extends RunCommandBase {
     // Look for the test file inside `test_driver/` matching the sub-path, e.g.
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
-    final String pathWithNoExtension = fs.path.withoutExtension(fs.path
-        .joinAll(<String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
+    final String pathWithNoExtension = fs.path.withoutExtension(
+        fs.path.joinAll(<String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
     return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
   }
 }
@@ -202,8 +193,7 @@ Future<Device> findTargetDevice() async {
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
-      printStatus(
-          "No devices found with name or id matching '${deviceManager.specifiedDeviceId}'");
+      printStatus("No devices found with name or id matching '${deviceManager.specifiedDeviceId}'");
       return null;
     }
     if (devices.length > 1) {
@@ -244,19 +234,17 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
   printTrace('Stopping previously running application, if any.');
   await appStopper(command);
 
-  final ApplicationPackage package = await command.applicationPackages
-      .getPackageForPlatform(await command.device.targetPlatform);
+  final ApplicationPackage package =
+      await command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
 
   if (command.shouldBuild) {
     printTrace('Installing application package.');
-    if (await command.device.isAppInstalled(package))
-      await command.device.uninstallApp(package);
+    if (await command.device.isAppInstalled(package)) await command.device.uninstallApp(package);
     await command.device.installApp(package);
   }
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
-  if (command.traceStartup)
-    platformArgs['trace-startup'] = command.traceStartup;
+  if (command.traceStartup) platformArgs['trace-startup'] = command.traceStartup;
 
   printTrace('Starting application.');
 
@@ -287,8 +275,7 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<void> Function(
-    List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
@@ -310,8 +297,7 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
       ]),
     environment: <String, String>{'VM_SERVICE_URL': observatoryUri},
   );
-  if (result != 0)
-    throwToolExit('Driver tests failed: $result', exitCode: result);
+  if (result != 0) throwToolExit('Driver tests failed: $result', exitCode: result);
 }
 
 /// Stops the application.
@@ -323,8 +309,8 @@ void restoreAppStopper() {
 
 Future<bool> _stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
-  final ApplicationPackage package = await command.applicationPackages
-      .getPackageForPlatform(await command.device.targetPlatform);
+  final ApplicationPackage package =
+      await command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;

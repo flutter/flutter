@@ -38,12 +38,10 @@ void main() {
   when(macosPlatform.isMacOS).thenReturn(true);
   when(notMacosPlatform.isMacOS).thenReturn(false);
 
-  testUsingContext('macOS build fails when there is no macos project',
-      () async {
+  testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    expect(
-        createTestCommandRunner(command).run(const <String>['build', 'macos']),
+    expect(createTestCommandRunner(command).run(const <String>['build', 'macos']),
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
@@ -55,8 +53,7 @@ void main() {
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
-    expect(
-        createTestCommandRunner(command).run(const <String>['build', 'macos']),
+    expect(createTestCommandRunner(command).run(const <String>['build', 'macos']),
         throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
@@ -69,8 +66,7 @@ void main() {
     fs.directory('macos').createSync();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    final FlutterProject flutterProject =
-        FlutterProject.fromDirectory(fs.currentDirectory);
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
     final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
 
     when(mockProcessManager.start(<String>[
@@ -92,8 +88,7 @@ void main() {
       return mockProcess;
     });
 
-    await createTestCommandRunner(command)
-        .run(const <String>['build', 'macos']);
+    await createTestCommandRunner(command).run(const <String>['build', 'macos']);
   }, overrides: <Type, Generator>{
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,

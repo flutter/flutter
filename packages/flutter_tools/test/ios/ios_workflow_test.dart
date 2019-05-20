@@ -58,8 +58,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when Xcode is not installed',
-        () async {
+    testUsingContext('Emits partial status when Xcode is not installed', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn(null);
       final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
@@ -71,11 +70,9 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when Xcode is partially installed',
-        () async {
+    testUsingContext('Emits partial status when Xcode is partially installed', () async {
       when(xcode.isInstalled).thenReturn(false);
-      when(xcode.xcodeSelectPath)
-          .thenReturn('/Library/Developer/CommandLineTools');
+      when(xcode.xcodeSelectPath).thenReturn('/Library/Developer/CommandLineTools');
       final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
@@ -85,8 +82,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when Xcode version too low',
-        () async {
+    testUsingContext('Emits partial status when Xcode version too low', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 7.0.1\nBuild version 7C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
@@ -101,8 +97,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when Xcode EULA not signed',
-        () async {
+    testUsingContext('Emits partial status when Xcode EULA not signed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -117,16 +112,14 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext(
-        'Emits installed status when homebrew not installed, but not needed',
+    testUsingContext('Emits installed status when homebrew not installed, but not needed',
         () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow =
-          IOSWorkflowTestTarget(hasHomebrew: false);
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
@@ -135,9 +128,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext(
-        'Emits partial status when libimobiledevice is not installed',
-        () async {
+    testUsingContext('Emits partial status when libimobiledevice is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -147,14 +138,12 @@ void main() {
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
-      IMobileDevice: () =>
-          MockIMobileDevice(isInstalled: false, isWorking: false),
+      IMobileDevice: () => MockIMobileDevice(isInstalled: false, isWorking: false),
       Xcode: () => xcode,
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext(
-        'Emits partial status when libimobiledevice is installed but not working',
+    testUsingContext('Emits partial status when libimobiledevice is installed but not working',
         () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
@@ -170,8 +159,7 @@ void main() {
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext(
-        'Emits partial status when libimobiledevice is installed but not working',
+    testUsingContext('Emits partial status when libimobiledevice is installed but not working',
         () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
@@ -179,10 +167,8 @@ void main() {
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
       when(
-        processManager.run(
-            <String>['ideviceinfo', '-u', '00008020-001C2D903C42002E'],
-            workingDirectory: anyNamed('workingDirectory'),
-            environment: anyNamed('environment')),
+        processManager.run(<String>['ideviceinfo', '-u', '00008020-001C2D903C42002E'],
+            workingDirectory: anyNamed('workingDirectory'), environment: anyNamed('environment')),
       ).thenAnswer((Invocation _) async {
         final MockProcessResult result = MockProcessResult();
         when<String>(result.stdout).thenReturn(r'''
@@ -208,15 +194,13 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when ios-deploy is not installed',
-        () async {
+    testUsingContext('Emits partial status when ios-deploy is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
-      final IOSWorkflowTestTarget workflow =
-          IOSWorkflowTestTarget(hasIosDeploy: false);
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(hasIosDeploy: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -225,15 +209,13 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when ios-deploy version is too low',
-        () async {
+    testUsingContext('Emits partial status when ios-deploy version is too low', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow =
-          IOSWorkflowTestTarget(iosDeployVersionText: '1.8.0');
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(iosDeployVersionText: '1.8.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -242,16 +224,14 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext(
-        'Emits partial status when ios-deploy version is a known bad version',
+    testUsingContext('Emits partial status when ios-deploy version is a known bad version',
         () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
-      final IOSWorkflowTestTarget workflow =
-          IOSWorkflowTestTarget(iosDeployVersionText: '2.0.0');
+      final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget(iosDeployVersionText: '2.0.0');
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.partial);
     }, overrides: <Type, Generator>{
@@ -260,8 +240,7 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when simctl is not installed',
-        () async {
+    testUsingContext('Emits partial status when simctl is not installed', () async {
       when(xcode.isInstalled).thenReturn(true);
       when(xcode.versionText).thenReturn('Xcode 8.2.1\nBuild version 8C1002\n');
       when(xcode.isInstalledAndMeetsVersionCheck).thenReturn(true);
@@ -283,8 +262,8 @@ Show information about a connected device.
       when(xcode.eulaSigned).thenReturn(true);
       when(xcode.isSimctlInstalled).thenReturn(true);
 
-      ensureDirectoryExists(fs.path
-          .join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
+      ensureDirectoryExists(
+          fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master', 'README.md'));
 
       final ValidationResult result = await IOSWorkflowTestTarget().validate();
       expect(result.type, ValidationType.installed);
@@ -308,8 +287,7 @@ Show information about a connected device.
       when(cocoaPods.cocoaPodsVersionText).thenAnswer((_) async => '1.8.0');
     });
 
-    testUsingContext('Emits installed status when CocoaPods is installed',
-        () async {
+    testUsingContext('Emits installed status when CocoaPods is installed', () async {
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.installed);
@@ -317,8 +295,7 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits missing status when CocoaPods is not installed',
-        () async {
+    testUsingContext('Emits missing status when CocoaPods is not installed', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.notInstalled);
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
@@ -328,8 +305,7 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext(
-        'Emits partial status when CocoaPods is installed with unknown version',
+    testUsingContext('Emits partial status when CocoaPods is installed with unknown version',
         () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.unknownVersion);
@@ -340,8 +316,7 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when CocoaPods is not initialized',
-        () async {
+    testUsingContext('Emits partial status when CocoaPods is not initialized', () async {
       when(cocoaPods.isCocoaPodsInitialized).thenAnswer((_) async => false);
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
       final ValidationResult result = await workflow.validate();
@@ -350,8 +325,7 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits partial status when CocoaPods version is too low',
-        () async {
+    testUsingContext('Emits partial status when CocoaPods version is too low', () async {
       when(cocoaPods.evaluateCocoaPodsInstallation)
           .thenAnswer((_) async => CocoaPodsStatus.belowRecommendedVersion);
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget();
@@ -361,10 +335,8 @@ Show information about a connected device.
       CocoaPods: () => cocoaPods,
     });
 
-    testUsingContext('Emits missing status when homebrew is not installed',
-        () async {
-      final CocoaPodsTestTarget workflow =
-          CocoaPodsTestTarget(hasHomebrew: false);
+    testUsingContext('Emits missing status when homebrew is not installed', () async {
+      final CocoaPodsTestTarget workflow = CocoaPodsTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
       expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{

@@ -32,8 +32,7 @@ void main() {
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
       expect(testLogger.statusText, '');
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then(
-          (void value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -44,8 +43,7 @@ void main() {
         'Running "flutter packages get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n',
       );
-      expect(processMock.lastPubEnvironment,
-          contains('flutter_cli:flutter_tests'));
+      expect(processMock.lastPubEnvironment, contains('flutter_cli:flutter_tests'));
       expect(processMock.lastPubCache, isNull);
       time.elapse(const Duration(milliseconds: 500));
       expect(
@@ -102,23 +100,20 @@ void main() {
   testUsingContext('pub cache in root is used', () async {
     String error;
 
-    final MockProcessManager processMock =
-        context.get<ProcessManager>() as MockProcessManager;
+    final MockProcessManager processMock = context.get<ProcessManager>() as MockProcessManager;
     final MockFileSystem fsMock = context.get<FileSystem>() as MockFileSystem;
 
     FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then(
-          (void value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
       });
       time.elapse(const Duration(milliseconds: 500));
-      expect(processMock.lastPubCache,
-          equals(fsMock.path.join(Cache.flutterRoot, '.pub-cache')));
+      expect(processMock.lastPubCache, equals(fsMock.path.join(Cache.flutterRoot, '.pub-cache')));
       expect(error, isNull);
     });
   }, overrides: <Type, Generator>{
@@ -138,8 +133,7 @@ void main() {
       MockDirectory.findCache = true;
       expect(processMock.lastPubEnvironment, isNull);
       expect(processMock.lastPubCache, isNull);
-      pubGet(context: PubContext.flutterTests, checkLastModified: false).then(
-          (void value) {
+      pubGet(context: PubContext.flutterTests, checkLastModified: false).then((void value) {
         error = 'test completed unexpectedly';
       }, onError: (dynamic thrownError) {
         error = 'test failed unexpectedly: $thrownError';
@@ -205,8 +199,7 @@ class MockProcess implements Process {
 
 class MockStream<T> implements Stream<T> {
   @override
-  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) =>
-      MockStream<S>();
+  Stream<S> transform<S>(StreamTransformer<T, S> streamTransformer) => MockStream<S>();
 
   @override
   Stream<T> where(bool test(T event)) => MockStream<T>();

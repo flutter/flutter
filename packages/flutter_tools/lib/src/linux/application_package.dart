@@ -51,8 +51,7 @@ class PrebuiltLinuxApp extends LinuxApp {
 }
 
 class BuildableLinuxApp extends LinuxApp {
-  BuildableLinuxApp({this.project})
-      : super(projectBundleId: project.project.manifest.appName);
+  BuildableLinuxApp({this.project}) : super(projectBundleId: project.project.manifest.appName);
 
   final LinuxProject project;
 

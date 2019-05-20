@@ -17,8 +17,7 @@ void main() {
       printStatus('0123456789' * 8);
       expect(testLogger.statusText, equals(('0123456789' * 4 + '\n') * 2));
     }, overrides: <Type, Generator>{
-      OutputPreferences: () =>
-          OutputPreferences(wrapText: true, wrapColumn: 40),
+      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
     });
 
     testUsingContext('can turn off wrapping', () async {
@@ -42,8 +41,7 @@ void main() {
       for (TerminalColor color in TerminalColor.values) {
         expect(
           terminal.color('output', color),
-          equals(
-              '${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
+          equals('${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
         );
       }
     }, overrides: <Type, Generator>{
@@ -68,8 +66,7 @@ void main() {
             '${AnsiTerminal.blue}${AnsiTerminal.bold}output${AnsiTerminal.resetBold}${AnsiTerminal.resetColor}'),
       );
       expect(
-        terminal.color('non-bold ${terminal.bolden('output')} also non-bold',
-            TerminalColor.blue),
+        terminal.color('non-bold ${terminal.bolden('output')} also non-bold', TerminalColor.blue),
         equals(
             '${AnsiTerminal.blue}non-bold ${AnsiTerminal.bold}output${AnsiTerminal.resetBold} also non-bold${AnsiTerminal.resetColor}'),
       );
@@ -85,8 +82,7 @@ void main() {
             '${AnsiTerminal.bold}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.resetBold}'),
       );
       expect(
-        terminal.bolden(
-            'non-color ${terminal.color('output', TerminalColor.blue)} also non-color'),
+        terminal.bolden('non-color ${terminal.color('output', TerminalColor.blue)} also non-color'),
         equals(
             '${AnsiTerminal.bold}non-color ${AnsiTerminal.blue}output${AnsiTerminal.resetColor} also non-color${AnsiTerminal.resetBold}'),
       );
@@ -97,14 +93,12 @@ void main() {
 
     testUsingContext('nesting color within color works', () {
       expect(
-        terminal.color(terminal.color('output', TerminalColor.blue),
-            TerminalColor.magenta),
+        terminal.color(terminal.color('output', TerminalColor.blue), TerminalColor.magenta),
         equals(
             '${AnsiTerminal.magenta}${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta}${AnsiTerminal.resetColor}'),
       );
       expect(
-        terminal.color(
-            'magenta ${terminal.color('output', TerminalColor.blue)} also magenta',
+        terminal.color('magenta ${terminal.color('output', TerminalColor.blue)} also magenta',
             TerminalColor.magenta),
         equals(
             '${AnsiTerminal.magenta}magenta ${AnsiTerminal.blue}output${AnsiTerminal.resetColor}${AnsiTerminal.magenta} also magenta${AnsiTerminal.resetColor}'),
@@ -121,8 +115,7 @@ void main() {
       );
       expect(
         terminal.bolden('bold ${terminal.bolden('output')} still bold'),
-        equals(
-            '${AnsiTerminal.bold}bold output still bold${AnsiTerminal.resetBold}'),
+        equals('${AnsiTerminal.bold}bold output still bold${AnsiTerminal.resetBold}'),
       );
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(showColor: true),
@@ -156,8 +149,7 @@ void main() {
           'Please choose something [a|b|c]: b\n');
     });
 
-    testUsingContext(
-        'default character choice without displayAcceptedCharacters', () async {
+    testUsingContext('default character choice without displayAcceptedCharacters', () async {
       mockStdInStream = Stream<String>.fromFutures(<Future<String>>[
         Future<String>.value('\n'), // Not in accepted list
       ]).asBroadcastStream();

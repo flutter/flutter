@@ -28,8 +28,7 @@ Future<void> buildApk({
 
   // Validate that we can find an android sdk.
   if (androidSdk == null)
-    throwToolExit(
-        'No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
+    throwToolExit('No Android SDK found. Try setting the ANDROID_SDK_ROOT environment variable.');
 
   await buildGradleProject(
     project: project,

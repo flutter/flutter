@@ -111,8 +111,7 @@ void main() {
     String error;
     List<int> actualResult;
     FakeAsync().run((FakeAsync time) {
-      fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then(
-          (List<int> value) {
+      fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then((List<int> value) {
         actualResult = value;
       }, onError: (dynamic exception) {
         error = 'test failed unexpectedly: $exception';
@@ -211,8 +210,7 @@ class MockHttpClientRequest implements io.HttpClientRequest {
   }
 }
 
-class MockHttpClientResponse extends Stream<List<int>>
-    implements io.HttpClientResponse {
+class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientResponse {
   MockHttpClientResponse(this.statusCode);
 
   @override
@@ -228,10 +226,8 @@ class MockHttpClientResponse extends Stream<List<int>>
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromFuture(
-            Future<List<int>>.error(const io.SocketException('test')))
-        .listen(onData,
-            onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    return Stream<List<int>>.fromFuture(Future<List<int>>.error(const io.SocketException('test')))
+        .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
   @override

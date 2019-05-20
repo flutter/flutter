@@ -15,24 +15,18 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('get', false));
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
-    addSubcommand(PackagesForwardCommand(
-        'downgrade', 'Downgrade packages in a Flutter project',
+    addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project',
         requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand(
-        'publish', 'Publish the current package to pub.dev',
-        requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies',
-        requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand(
-        'run', 'Run an executable from a package',
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dev',
         requiresPubspec: true));
     addSubcommand(
-        PackagesForwardCommand('cache', 'Work with the Pub system cache'));
+        PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
+    addSubcommand(
+        PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
-    addSubcommand(PackagesForwardCommand(
-        'uploader', 'Manage uploaders for a package on pub.dev'));
-    addSubcommand(
-        PackagesForwardCommand('global', 'Work with Pub global packages'));
+    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
+    addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
     addSubcommand(PackagesPassthroughCommand());
   }
 
@@ -46,8 +40,7 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
         DevelopmentArtifact.universal,
       };
 
@@ -92,11 +85,9 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults.rest.length > 1)
-      throwToolExit('Too many arguments.\n$usage');
+    if (argResults.rest.length > 1) throwToolExit('Too many arguments.\n$usage');
 
-    final String target = findProjectRoot(
-        argResults.rest.length == 1 ? argResults.rest[0] : null);
+    final String target = findProjectRoot(argResults.rest.length == 1 ? argResults.rest[0] : null);
     if (target == null) {
       throwToolExit('Expected to find project root in '
           '${argResults.rest.length == 1 ? argResults.rest[0] : "current working directory"}.');
@@ -104,15 +95,13 @@ class PackagesGetCommand extends FlutterCommand {
 
     await _runPubGet(target);
     final FlutterProject rootProject = FlutterProject.fromPath(target);
-    await rootProject.ensureReadyForPlatformSpecificTooling(
-        checkProjects: true);
+    await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
       final FlutterProject exampleProject = rootProject.example;
       await _runPubGet(exampleProject.directory.path);
-      await exampleProject.ensureReadyForPlatformSpecificTooling(
-          checkProjects: true);
+      await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 
     return null;
@@ -151,8 +140,7 @@ class PackagesTestCommand extends FlutterCommand {
 }
 
 class PackagesForwardCommand extends FlutterCommand {
-  PackagesForwardCommand(this._commandName, this._description,
-      {bool requiresPubspec = false}) {
+  PackagesForwardCommand(this._commandName, this._description, {bool requiresPubspec = false}) {
     if (requiresPubspec) {
       requiresPubspecYaml();
     }

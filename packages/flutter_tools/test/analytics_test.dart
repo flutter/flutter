@@ -29,8 +29,7 @@ void main() {
 
     setUp(() {
       Cache.flutterRoot = '../..';
-      tempDir = fs.systemTempDirectory
-          .createTempSync('flutter_tools_analytics_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_test.');
     });
 
     tearDown(() {
@@ -92,8 +91,8 @@ void main() {
       when(mockUsage.isFirstRun).thenReturn(false);
       mockClock = MockClock();
       mockDoctor = MockDoctor();
-      when(mockClock.now()).thenAnswer((Invocation _) =>
-          DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
+      when(mockClock.now())
+          .thenAnswer((Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
     });
 
     testUsingContext('flutter commands send timing events', () async {
@@ -110,12 +109,7 @@ void main() {
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label')))
             .captured,
-        <dynamic>[
-          'flutter',
-          'doctor',
-          const Duration(milliseconds: 1000),
-          'success'
-        ],
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'success'],
       );
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,
@@ -137,12 +131,7 @@ void main() {
         verify(mockUsage.sendTiming(captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label')))
             .captured,
-        <dynamic>[
-          'flutter',
-          'doctor',
-          const Duration(milliseconds: 1000),
-          'warning'
-        ],
+        <dynamic>['flutter', 'doctor', const Duration(milliseconds: 1000), 'warning'],
       );
     }, overrides: <Type, Generator>{
       SystemClock: () => mockClock,
@@ -170,8 +159,7 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory
-          .createTempSync('flutter_tools_analytics_bots_test.');
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_analytics_bots_test.');
     });
 
     tearDown(() {

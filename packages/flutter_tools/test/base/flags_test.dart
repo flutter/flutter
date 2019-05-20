@@ -16,8 +16,7 @@ typedef _TestMethod = FutureOr<void> Function();
 void main() {
   Cache.disableLocking();
 
-  Future<void> runCommand(
-      Iterable<String> flags, _TestMethod testMethod) async {
+  Future<void> runCommand(Iterable<String> flags, _TestMethod testMethod) async {
     final List<String> args = <String>['test']..addAll(flags);
     final _TestCommand command = _TestCommand(testMethod);
     await createTestCommandRunner(command).run(args);

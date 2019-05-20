@@ -45,8 +45,7 @@ void main() {
                 return const CompilerOutput('abc.dill', 0, <Uri>[]);
               });
 
-              expect(await testCompiler.compile('test/foo.dart'),
-                  'test/foo.dart.dill');
+              expect(await testCompiler.compile('test/foo.dart'), 'test/foo.dart.dill');
               expect(fs.file('test/foo.dart.dill').existsSync(), true);
             }));
 

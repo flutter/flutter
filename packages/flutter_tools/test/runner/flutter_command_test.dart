@@ -26,13 +26,12 @@ void main() {
       usage = MockitoUsage();
       clock = MockClock();
       when(usage.isFirstRun).thenReturn(false);
-      when(clock.now()).thenAnswer((Invocation _) =>
-          DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
+      when(clock.now())
+          .thenAnswer((Invocation _) => DateTime.fromMillisecondsSinceEpoch(mockTimes.removeAt(0)));
     });
 
     testUsingContext('honors shouldUpdateCache false', () async {
-      final DummyFlutterCommand flutterCommand =
-          DummyFlutterCommand(shouldUpdateCache: false);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: false);
       await flutterCommand.run();
       verifyZeroInteractions(cache);
     }, overrides: <Type, Generator>{
@@ -40,8 +39,7 @@ void main() {
     });
 
     testUsingContext('honors shouldUpdateCache true', () async {
-      final DummyFlutterCommand flutterCommand =
-          DummyFlutterCommand(shouldUpdateCache: true);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
       verify(cache.updateAll(any)).called(1);
     }, overrides: <Type, Generator>{
@@ -71,8 +69,7 @@ void main() {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand =
-          DummyFlutterCommand(noUsagePath: true);
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(noUsagePath: true);
       await flutterCommand.run();
       verify(clock.now()).called(2);
       verifyNever(usage.sendTiming(any, any, any, label: anyNamed('label')));
@@ -103,9 +100,7 @@ void main() {
         <dynamic>[
           'flutter',
           'dummy',
-          const Duration(
-              milliseconds:
-                  500), // FlutterCommandResult's end time used instead.
+          const Duration(milliseconds: 500), // FlutterCommandResult's end time used instead.
           'success-blah1-blah2-blah3',
         ],
       );

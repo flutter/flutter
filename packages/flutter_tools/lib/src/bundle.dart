@@ -21,8 +21,7 @@ import 'project.dart';
 const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath =>
-    fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
 String getDefaultApplicationKernelPath({@required bool trackWidgetCreation}) {
   return getKernelPathForTransformerOptions(
@@ -75,8 +74,7 @@ Future<void> build({
   final FlutterProject flutterProject = FlutterProject.current();
 
   if (compilationTraceFilePath != null) {
-    if (buildMode != BuildMode.dynamicProfile &&
-        buildMode != BuildMode.dynamicRelease) {
+    if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
       // Silently ignore JIT snapshotting for those builds that don't support it.
       compilationTraceFilePath = null;
     } else if (compilationTraceFilePath.isEmpty) {
@@ -87,12 +85,10 @@ Future<void> build({
       // Be forgiving if compilation trace file is missing.
       printStatus(
           'No compilation trace available. To optimize performance, consider using --train.');
-      final File tmp =
-          fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
+      final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
       compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
     } else {
-      printStatus(
-          'Code snapshot will use compilation training file $compilationTraceFilePath.');
+      printStatus('Code snapshot will use compilation training file $compilationTraceFilePath.');
     }
   }
 
@@ -101,11 +97,9 @@ Future<void> build({
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
       printTrace('Extra front-end options: $extraFrontEndOptions');
     ensureDirectoryExists(applicationKernelFilePath);
-    final KernelCompiler kernelCompiler =
-        await kernelCompilerFactory.create(flutterProject);
+    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath,
-          mode: buildMode),
+      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       incrementalCompilerByteStorePath: compilationTraceFilePath != null
           ? null
           : fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
@@ -124,11 +118,8 @@ Future<void> build({
     }
     kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
 
-    await fs
-        .directory(getBuildDirectory())
-        .childFile('frontend_server.d')
-        .writeAsString(
-            'frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
+    await fs.directory(getBuildDirectory()).childFile('frontend_server.d').writeAsString(
+        'frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
 
     if (compilationTraceFilePath != null) {
       final JITSnapshotter snapshotter = JITSnapshotter();
@@ -142,8 +133,7 @@ Future<void> build({
         extraGenSnapshotOptions: extraGenSnapshotOptions,
       );
       if (snapshotExitCode != 0) {
-        throwToolExit(
-            'Snapshotting exited with non-zero exit code: $snapshotExitCode');
+        throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
       }
     }
   }
@@ -207,26 +197,19 @@ Future<void> assemble({
     if (compilationTraceFilePath != null) {
       final String vmSnapshotData =
           artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-      final String isolateSnapshotData =
-          fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
-      final String isolateSnapshotInstr =
-          fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
-      assetEntries[_kVMSnapshotData] =
-          DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kIsolateSnapshotData] =
-          DevFSFileContent(fs.file(isolateSnapshotData));
-      assetEntries[_kIsolateSnapshotInstr] =
-          DevFSFileContent(fs.file(isolateSnapshotInstr));
+      final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
+      final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
+      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
+      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
+      assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
     } else {
       final String vmSnapshotData =
           artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-      final String isolateSnapshotData = artifacts
-          .getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
+      final String isolateSnapshotData =
+          artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
       assetEntries[_kKernelKey] = kernelContent;
-      assetEntries[_kVMSnapshotData] =
-          DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kIsolateSnapshotData] =
-          DevFSFileContent(fs.file(isolateSnapshotData));
+      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
+      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
     }
   }
 
@@ -244,8 +227,8 @@ Future<void> writeBundle(
   if (bundleDir.existsSync()) bundleDir.deleteSync(recursive: true);
   bundleDir.createSync(recursive: true);
 
-  await Future.wait<void>(assetEntries.entries
-      .map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
+  await Future.wait<void>(
+      assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
     final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
     file.parent.createSync(recursive: true);
     await file.writeAsBytes(await entry.value.contentsAsBytes());

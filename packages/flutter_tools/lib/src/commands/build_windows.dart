@@ -23,13 +23,11 @@ class BuildWindowsCommand extends BuildSubCommand {
     );
     argParser.addFlag('profile',
         negatable: false,
-        help:
-            'Build a version of your app specialized for performance profiling.');
+        help: 'Build a version of your app specialized for performance profiling.');
     argParser.addFlag(
       'release',
       negatable: false,
-      help:
-          'Build a version of your app specialized for performance profiling.',
+      help: 'Build a version of your app specialized for performance profiling.',
     );
   }
 
@@ -43,8 +41,7 @@ class BuildWindowsCommand extends BuildSubCommand {
   bool hidden = true;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      <DevelopmentArtifact>{
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
         DevelopmentArtifact.windows,
         DevelopmentArtifact.universal,
       };

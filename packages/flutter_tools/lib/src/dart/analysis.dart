@@ -23,8 +23,7 @@ class AnalysisServer {
   final List<String> directories;
 
   Process _process;
-  final StreamController<bool> _analyzingController =
-      StreamController<bool>.broadcast();
+  final StreamController<bool> _analyzingController = StreamController<bool>.broadcast();
   final StreamController<FileAnalysisErrors> _errorsController =
       StreamController<FileAnalysisErrors>.broadcast();
   bool _didServerErrorOccur = false;
@@ -32,8 +31,7 @@ class AnalysisServer {
   int _id = 0;
 
   Future<void> start() async {
-    final String snapshot =
-        fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
+    final String snapshot = fs.path.join(sdkPath, 'bin/snapshots/analysis_server.dart.snapshot');
     final List<String> command = <String>[
       fs.path.join(sdkPath, 'bin', 'dart'),
       snapshot,
@@ -46,14 +44,12 @@ class AnalysisServer {
     // This callback hookup can't throw.
     unawaited(_process.exitCode.whenComplete(() => _process = null));
 
-    final Stream<String> errorStream = _process.stderr
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter());
+    final Stream<String> errorStream =
+        _process.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     errorStream.listen(printError);
 
-    final Stream<String> inStream = _process.stdout
-        .transform<String>(utf8.decoder)
-        .transform<String>(const LineSplitter());
+    final Stream<String> inStream =
+        _process.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter());
     inStream.listen(_handleServerResponse);
 
     _sendCommand('server.setSubscriptions', <String, dynamic>{
@@ -95,14 +91,12 @@ class AnalysisServer {
             _handleStatus(response['params']);
           else if (event == 'analysis.errors')
             _handleAnalysisIssues(response['params']);
-          else if (event == 'server.error')
-            _handleServerError(response['params']);
+          else if (event == 'server.error') _handleServerError(response['params']);
         }
       } else if (response['error'] != null) {
         // Fields are 'code', 'message', and 'stackTrace'.
         final Map<String, dynamic> error = response['error'];
-        printError(
-            'Error response from the server: ${error['code']} ${error['message']}');
+        printError('Error response from the server: ${error['code']} ${error['message']}');
         if (error['stackTrace'] != null) {
           printError(error['stackTrace']);
         }
@@ -135,8 +129,7 @@ class AnalysisServer {
         .map<Map<String, dynamic>>(castStringKeyedMap)
         .map<AnalysisError>((Map<String, dynamic> json) => AnalysisError(json))
         .toList();
-    if (!_errorsController.isClosed)
-      _errorsController.add(FileAnalysisErrors(file, errors));
+    if (!_errorsController.isClosed) _errorsController.add(FileAnalysisErrors(file, errors));
   }
 
   Future<bool> dispose() async {
@@ -156,8 +149,7 @@ enum _AnalysisSeverity {
 class AnalysisError implements Comparable<AnalysisError> {
   AnalysisError(this.json);
 
-  static final Map<String, _AnalysisSeverity> _severityMap =
-      <String, _AnalysisSeverity>{
+  static final Map<String, _AnalysisSeverity> _severityMap = <String, _AnalysisSeverity>{
     'INFO': _AnalysisSeverity.info,
     'WARNING': _AnalysisSeverity.warning,
     'ERROR': _AnalysisSeverity.error,
@@ -184,8 +176,7 @@ class AnalysisError implements Comparable<AnalysisError> {
     return null;
   }
 
-  _AnalysisSeverity get _severityLevel =>
-      _severityMap[severity] ?? _AnalysisSeverity.none;
+  _AnalysisSeverity get _severityLevel => _severityMap[severity] ?? _AnalysisSeverity.none;
   String get type => json['type'];
   String get message => json['message'];
   String get code => json['code'];

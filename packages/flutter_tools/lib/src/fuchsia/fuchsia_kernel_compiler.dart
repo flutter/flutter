@@ -19,8 +19,7 @@ import '../project.dart';
 import 'fuchsia_sdk.dart';
 
 /// The [FuchsiaKernelCompiler] instance.
-FuchsiaKernelCompiler get fuchsiaKernelCompiler =>
-    context.get<FuchsiaKernelCompiler>();
+FuchsiaKernelCompiler get fuchsiaKernelCompiler => context.get<FuchsiaKernelCompiler>();
 
 class FuchsiaKernelCompiler {
   /// Compiles the [fuchsiaProject] with entrypoint [target] to a collection of
@@ -38,8 +37,7 @@ class FuchsiaKernelCompiler {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
     final String fsRoot = fuchsiaProject.project.directory.path;
-    final String relativePackagesFile =
-        fs.path.relative(packagesFile, from: fsRoot);
+    final String relativePackagesFile = fs.path.relative(packagesFile, from: fsRoot);
     final String manifestPath = fs.path.join(outDir, '$appName.dilpmanifest');
     List<String> flags = <String>[
       // https://github.com/dart-lang/sdk/issues/36639:
@@ -95,14 +93,8 @@ class FuchsiaKernelCompiler {
     );
     int result;
     try {
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printError);
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printTrace);
+      process.stderr.transform(utf8.decoder).transform(const LineSplitter()).listen(printError);
+      process.stdout.transform(utf8.decoder).transform(const LineSplitter()).listen(printTrace);
       result = await process.exitCode;
     } finally {
       status.cancel();

@@ -25,8 +25,8 @@ void main() {
 
     when(notWindows.isWindows).thenReturn(false);
     when(notWindows.environment).thenReturn(const <String, String>{});
-    when(mockProcessManager.runSync(
-            <String>['powershell', '-script="Get-CimInstance Win32_Process"']))
+    when(mockProcessManager
+            .runSync(<String>['powershell', '-script="Get-CimInstance Win32_Process"']))
         .thenAnswer((Invocation invocation) {
       final MockProcessResult result = MockProcessResult();
       when(result.exitCode).thenReturn(0);
@@ -35,8 +35,7 @@ void main() {
     });
 
     testUsingContext('defaults', () async {
-      final PrebuiltWindowsApp windowsApp =
-          PrebuiltWindowsApp(executable: 'foo');
+      final PrebuiltWindowsApp windowsApp = PrebuiltWindowsApp(executable: 'foo');
       expect(await device.targetPlatform, TargetPlatform.windows_x64);
       expect(device.name, 'Windows');
       expect(await device.installApp(windowsApp), true);
@@ -62,8 +61,7 @@ void main() {
       Platform: () => notWindows,
     });
 
-    testUsingContext('isSupportedForProject is true with editable host app',
-        () async {
+    testUsingContext('isSupportedForProject is true with editable host app', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       fs.directory('windows').createSync();
@@ -74,8 +72,7 @@ void main() {
       FileSystem: () => MemoryFileSystem(),
     });
 
-    testUsingContext('isSupportedForProject is false with no host app',
-        () async {
+    testUsingContext('isSupportedForProject is false with no host app', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
       final FlutterProject flutterProject = FlutterProject.current();

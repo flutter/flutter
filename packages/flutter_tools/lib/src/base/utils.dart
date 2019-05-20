@@ -62,8 +62,7 @@ bool get isRunningOnBot {
 
 String hex(List<int> bytes) {
   final StringBuffer result = StringBuffer();
-  for (int part in bytes)
-    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+  for (int part in bytes) result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
   return result.toString();
 }
 
@@ -87,8 +86,8 @@ final RegExp _upperRegex = RegExp(r'[A-Z]');
 
 /// Convert `fooBar` to `foo_bar`.
 String snakeCase(String str, [String sep = '_']) {
-  return str.replaceAllMapped(_upperRegex,
-      (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
+  return str.replaceAllMapped(
+      _upperRegex, (Match m) => '${m.start == 0 ? '' : sep}${m[0].toLowerCase()}');
 }
 
 String toTitleCase(String str) {
@@ -131,8 +130,7 @@ final NumberFormat kSecondsFormat = NumberFormat('0.0');
 final NumberFormat kMillisecondsFormat = NumberFormat.decimalPattern();
 
 String getElapsedAsSeconds(Duration duration) {
-  final double seconds =
-      duration.inMilliseconds / Duration.millisecondsPerSecond;
+  final double seconds = duration.inMilliseconds / Duration.millisecondsPerSecond;
   return '${kSecondsFormat.format(seconds)}s';
 }
 
@@ -162,8 +160,7 @@ class ItemListNotifier<T> {
   Set<T> _items;
 
   final StreamController<T> _addedController = StreamController<T>.broadcast();
-  final StreamController<T> _removedController =
-      StreamController<T>.broadcast();
+  final StreamController<T> _removedController = StreamController<T>.broadcast();
 
   Stream<T> get onAdded => _addedController.stream;
   Stream<T> get onRemoved => _removedController.stream;
@@ -197,8 +194,7 @@ class SettingsFile {
       line = line.trim();
       if (line.startsWith('#') || line.isEmpty) continue;
       final int index = line.indexOf('=');
-      if (index != -1)
-        values[line.substring(0, index)] = line.substring(index + 1);
+      if (index != -1) values[line.substring(0, index)] = line.substring(index + 1);
     }
   }
 
@@ -245,8 +241,7 @@ class Uuid {
 
   int _generateBits(int bitCount) => _random.nextInt(1 << bitCount);
 
-  String _printDigits(int value, int count) =>
-      value.toRadixString(16).padLeft(count, '0');
+  String _printDigits(int value, int count) => value.toRadixString(16).padLeft(count, '0');
 }
 
 /// Given a data structure which is a Map of String to dynamic values, return
@@ -262,8 +257,7 @@ typedef AsyncCallback = Future<void> Function();
 ///   - has a different initial value for the first callback delay
 ///   - waits for a callback to be complete before it starts the next timer
 class Poller {
-  Poller(this.callback, this.pollingInterval,
-      {this.initialDelay = Duration.zero}) {
+  Poller(this.callback, this.pollingInterval, {this.initialDelay = Duration.zero}) {
     Future<void>.delayed(initialDelay, _handleCallback);
   }
 
@@ -348,8 +342,7 @@ const int kMinColumnWidth = 10;
 ///
 /// The [indent] and [hangingIndent] must be smaller than [columnWidth] when
 /// added together.
-String wrapText(String text,
-    {int columnWidth, int hangingIndent, int indent, bool shouldWrap}) {
+String wrapText(String text, {int columnWidth, int hangingIndent, int indent, bool shouldWrap}) {
   if (text == null || text.isEmpty) {
     return '';
   }
@@ -363,8 +356,7 @@ String wrapText(String text,
   final List<String> result = <String>[];
   for (String line in splitText) {
     String trimmedText = line.trimLeft();
-    final String leadingWhitespace =
-        line.substring(0, line.length - trimmedText.length);
+    final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
     if (hangingIndent != 0) {
       // When we have a hanging indent, we want to wrap the first line at one
@@ -399,8 +391,7 @@ String wrapText(String text,
         if (line.isEmpty) {
           return '';
         }
-        final String result =
-            '$indentString${hangingIndentString ?? ''}$leadingWhitespace$line';
+        final String result = '$indentString${hangingIndentString ?? ''}$leadingWhitespace$line';
         hangingIndentString ??= ' ' * hangingIndent;
         return result;
       },
@@ -439,8 +430,7 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text,
-    {int start = 0, int columnWidth, bool shouldWrap}) {
+List<String> _wrapTextAsLines(String text, {int start = 0, int columnWidth, bool shouldWrap}) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }
@@ -454,8 +444,7 @@ List<String> _wrapTextAsLines(String text,
   ///
   /// Based on: https://en.wikipedia.org/wiki/Whitespace_character#Unicode
   bool isWhitespace(_AnsiRun run) {
-    final int rune =
-        run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
+    final int rune = run.character.isNotEmpty ? run.character.codeUnitAt(0) : 0x0;
     return rune >= 0x0009 && rune <= 0x000D ||
         rune == 0x0020 ||
         rune == 0x0085 ||
@@ -476,8 +465,7 @@ List<String> _wrapTextAsLines(String text,
   // reconstitute the original string. This is useful for manipulating "visible"
   // characters in the presence of ANSI control codes.
   List<_AnsiRun> splitWithCodes(String input) {
-    final RegExp characterOrCode =
-        RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
+    final RegExp characterOrCode = RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
     List<_AnsiRun> result = <_AnsiRun>[];
     final StringBuffer current = StringBuffer();
     for (Match match in characterOrCode.allMatches(input)) {
@@ -503,11 +491,7 @@ List<String> _wrapTextAsLines(String text,
   }
 
   String joinRun(List<_AnsiRun> list, int start, [int end]) {
-    return list
-        .sublist(start, end)
-        .map<String>((_AnsiRun run) => run.original)
-        .join()
-        .trim();
+    return list.sublist(start, end).map<String>((_AnsiRun run) => run.original).join().trim();
   }
 
   final List<String> result = <String>[];
@@ -529,8 +513,7 @@ List<String> _wrapTextAsLines(String text,
     int lastWhitespace;
     // Find the start of the current line.
     for (int index = 0; index < splitLine.length; ++index) {
-      if (splitLine[index].character.isNotEmpty &&
-          isWhitespace(splitLine[index])) {
+      if (splitLine[index].character.isNotEmpty && isWhitespace(splitLine[index])) {
         lastWhitespace = index;
       }
 

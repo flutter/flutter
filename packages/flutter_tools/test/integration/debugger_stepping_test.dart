@@ -29,13 +29,11 @@ void main() {
 
     test('can step over statements', () async {
       await _flutter.run(withDebugger: true, startPaused: true);
-      await _flutter.addBreakpoint(
-          _project.breakpointUri, _project.breakpointLine);
+      await _flutter.addBreakpoint(_project.breakpointUri, _project.breakpointLine);
       await _flutter.resume();
       await _flutter.waitForPause(); // Now we should be on the breakpoint.
 
-      expect((await _flutter.getSourceLocation()).line,
-          equals(_project.breakpointLine));
+      expect((await _flutter.getSourceLocation()).line, equals(_project.breakpointLine));
 
       // Issue 5 steps, ensuring that we end up on the annotated lines each time.
       for (int i = 1; i <= _project.numberOfSteps; i += 1) {

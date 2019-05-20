@@ -110,15 +110,14 @@ void main() {
         FileSystem: () => fs,
         Cache: () => Cache(rootOverride: fs.directory(flutterRoot)),
         ProcessManager: () => mockProcessManager,
-        KernelCompilerFactory: () =>
-            FakeKernelCompilerFactory(mockKernelCompiler),
+        KernelCompilerFactory: () => FakeKernelCompilerFactory(mockKernelCompiler),
         Artifacts: () => mockArtifacts,
       };
 
       setUp(() {
         flutterRoot = fs.path.join('home', 'me', 'flutter');
-        flutterTesterPath = fs.path.join(flutterRoot, 'bin', 'cache',
-            'artifacts', 'engine', 'linux-x64', 'flutter_tester');
+        flutterTesterPath = fs.path.join(
+            flutterRoot, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester');
 
         final File flutterTesterFile = fs.file(flutterTesterPath);
         flutterTesterFile.parent.createSync(recursive: true);
@@ -128,8 +127,7 @@ void main() {
         mainPath = fs.path.join(projectPath, 'lin', 'main.dart');
 
         mockProcessManager = MockProcessManager();
-        mockProcessManager.processFactory =
-            (List<String> commands) => mockProcess;
+        mockProcessManager.processFactory = (List<String> commands) => mockProcess;
 
         mockArtifacts = MockArtifacts();
         final String artifactPath = fs.path.join(flutterRoot, 'artifact');
@@ -142,8 +140,7 @@ void main() {
       testUsingContext('not debug', () async {
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.disabled(
-                const BuildInfo(BuildMode.release, null)));
+            debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.release, null)));
         expect(result.started, isFalse);
       }, overrides: startOverrides);
 
@@ -152,8 +149,7 @@ void main() {
         expect(() async {
           await device.startApp(null,
               mainPath: mainPath,
-              debuggingOptions: DebuggingOptions.disabled(
-                  const BuildInfo(BuildMode.debug, null)));
+              debuggingOptions: DebuggingOptions.disabled(const BuildInfo(BuildMode.debug, null)));
         }, throwsToolExit());
       }, overrides: startOverrides);
 
@@ -170,8 +166,7 @@ Hello!
 
         when(mockKernelCompiler.compile(
           sdkRoot: anyNamed('sdkRoot'),
-          incrementalCompilerByteStorePath:
-              anyNamed('incrementalCompilerByteStorePath'),
+          incrementalCompilerByteStorePath: anyNamed('incrementalCompilerByteStorePath'),
           mainPath: anyNamed('mainPath'),
           outputFilePath: anyNamed('outputFilePath'),
           depFilePath: anyNamed('depFilePath'),
@@ -187,8 +182,7 @@ Hello!
 
         final LaunchResult result = await device.startApp(null,
             mainPath: mainPath,
-            debuggingOptions: DebuggingOptions.enabled(
-                const BuildInfo(BuildMode.debug, null)));
+            debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)));
         expect(result.started, isTrue);
         expect(result.observatoryUri, observatoryUri);
         expect(logLines.last, 'Hello!');

@@ -72,10 +72,8 @@ class BuildInfo {
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
-  static const BuildInfo dynamicProfile =
-      BuildInfo(BuildMode.dynamicProfile, null);
-  static const BuildInfo dynamicRelease =
-      BuildInfo(BuildMode.dynamicRelease, null);
+  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
+  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -85,18 +83,15 @@ class BuildInfo {
   /// Returns whether a profile build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile =>
-      mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
+  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
 
   /// Returns whether a release build is requested.
   ///
   /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease =>
-      mode == BuildMode.release || mode == BuildMode.dynamicRelease;
+  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
 
   /// Returns whether a dynamic build is requested.
-  bool get isDynamic =>
-      mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
+  bool get isDynamic => mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
@@ -104,33 +99,28 @@ class BuildInfo {
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
 
-  BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
-      BuildInfo(mode, flavor,
-          trackWidgetCreation: trackWidgetCreation,
-          compilationTraceFilePath: compilationTraceFilePath,
-          extraFrontEndOptions: extraFrontEndOptions,
-          extraGenSnapshotOptions: extraGenSnapshotOptions,
-          buildSharedLibrary: buildSharedLibrary,
-          targetPlatform: targetPlatform);
+  BuildInfo withTargetPlatform(TargetPlatform targetPlatform) => BuildInfo(mode, flavor,
+      trackWidgetCreation: trackWidgetCreation,
+      compilationTraceFilePath: compilationTraceFilePath,
+      extraFrontEndOptions: extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
+      buildSharedLibrary: buildSharedLibrary,
+      targetPlatform: targetPlatform);
 }
 
 /// The type of build.
 enum BuildMode { debug, profile, release, dynamicProfile, dynamicRelease }
 
-String validatedBuildNumberForPlatform(
-    TargetPlatform targetPlatform, String buildNumber) {
+String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
   if (buildNumber == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin_x64) {
+  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin_x64) {
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
-    final List<String> segments = tmpBuildNumber
-        .split('.')
-        .where((String segment) => segment.isNotEmpty)
-        .toList();
+    final List<String> segments =
+        tmpBuildNumber.split('.').where((String segment) => segment.isNotEmpty).toList();
     if (segments.isEmpty) {
       segments.add('0');
     }
@@ -164,27 +154,22 @@ String validatedBuildNumberForPlatform(
   return buildNumber;
 }
 
-String validatedBuildNameForPlatform(
-    TargetPlatform targetPlatform, String buildName) {
+String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String buildName) {
   if (buildName == null) {
     return null;
   }
-  if (targetPlatform == TargetPlatform.ios ||
-      targetPlatform == TargetPlatform.darwin_x64) {
+  if (targetPlatform == TargetPlatform.ios || targetPlatform == TargetPlatform.darwin_x64) {
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
-    final List<String> segments = tmpBuildName
-        .split('.')
-        .where((String segment) => segment.isNotEmpty)
-        .toList();
+    final List<String> segments =
+        tmpBuildName.split('.').where((String segment) => segment.isNotEmpty).toList();
     while (segments.length < 3) {
       segments.add('0');
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      printTrace(
-          'Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
@@ -357,8 +342,7 @@ String getBuildDirectory() {
 
   final String buildDir = config.getValue('build-dir') ?? 'build';
   if (fs.path.isAbsolute(buildDir)) {
-    throw Exception(
-        'build-dir config setting in ${config.configPath} must be relative');
+    throw Exception('build-dir config setting in ${config.configPath} must be relative');
   }
   return buildDir;
 }

@@ -85,8 +85,7 @@ class ProtocolDiscovery {
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
-      final int actualHostPort =
-          await portForwarder.forward(actualDevicePort, hostPort: hostPort);
+      final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
       printTrace(
           'Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);

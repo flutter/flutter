@@ -11,8 +11,7 @@ import '../device.dart';
 import '../globals.dart';
 import '../runner/flutter_command.dart';
 
-class InstallCommand extends FlutterCommand
-    with DeviceBasedDevelopmentArtifacts {
+class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
   InstallCommand() {
     requiresPubspecYaml();
   }
@@ -34,8 +33,8 @@ class InstallCommand extends FlutterCommand
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final ApplicationPackage package = await applicationPackages
-        .getPackageForPlatform(await device.targetPlatform);
+    final ApplicationPackage package =
+        await applicationPackages.getPackageForPlatform(await device.targetPlatform);
 
     Cache.releaseLockEarly();
 
@@ -47,14 +46,12 @@ class InstallCommand extends FlutterCommand
   }
 }
 
-Future<bool> installApp(Device device, ApplicationPackage package,
-    {bool uninstall = true}) async {
+Future<bool> installApp(Device device, ApplicationPackage package, {bool uninstall = true}) async {
   if (package == null) return false;
 
   if (uninstall && await device.isAppInstalled(package)) {
     printStatus('Uninstalling old version...');
-    if (!await device.uninstallApp(package))
-      printError('Warning: uninstalling old version failed');
+    if (!await device.uninstallApp(package)) printError('Warning: uninstalling old version failed');
   }
 
   return device.installApp(package);

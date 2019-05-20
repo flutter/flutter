@@ -22,8 +22,7 @@ const String _kData = 'data';
 /// A [StreamChannel] that expects VM service (JSON-rpc) protocol messages and
 /// serializes all such messages to the file system for later playback.
 class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
-  RecordingVMServiceChannel(StreamChannel<String> delegate, Directory location)
-      : super(delegate) {
+  RecordingVMServiceChannel(StreamChannel<String> delegate, Directory location) : super(delegate) {
     addShutdownHook(() async {
       // Sort the messages such that they are ordered
       // `[request1, response1, request2, response2, ...]`. This serves no
@@ -48,8 +47,7 @@ class RecordingVMServiceChannel extends DelegatingStreamChannel<String> {
   }
 
   @override
-  StreamSink<String> get sink =>
-      _sinkRecorder ??= _RecordingSink(super.sink, _messages);
+  StreamSink<String> get sink => _sinkRecorder ??= _RecordingSink(super.sink, _messages);
 }
 
 /// Base class for request and response JSON-rpc messages.
@@ -118,9 +116,8 @@ class _Transaction {
 class _RecordingStream {
   _RecordingStream(Stream<String> stream, this._recording)
       : _delegate = stream,
-        _controller = stream.isBroadcast
-            ? StreamController<String>.broadcast()
-            : StreamController<String>() {
+        _controller =
+            stream.isBroadcast ? StreamController<String>.broadcast() : StreamController<String>() {
     _controller.onListen = () {
       assert(_subscription == null);
       _subscription = _listenToStream();
@@ -151,8 +148,7 @@ class _RecordingStream {
         _recording.add(_Response.fromString(element));
         _controller.add(element);
       },
-      onError: _controller
-          .addError, // We currently don't support recording of errors.
+      onError: _controller.addError, // We currently don't support recording of errors.
       onDone: _controller.close,
     );
   }
@@ -196,8 +192,7 @@ class _RecordingSink implements StreamSink<String> {
 /// to its [StreamChannel.sink], looks up those requests in a recording, and
 /// replays the corresponding responses back from the recording.
 class ReplayVMServiceChannel extends StreamChannelMixin<String> {
-  ReplayVMServiceChannel(Directory location)
-      : _transactions = _loadTransactions(location);
+  ReplayVMServiceChannel(Directory location) : _transactions = _loadTransactions(location);
 
   final Map<int, _Transaction> _transactions;
   final StreamController<String> _controller = StreamController<String>();
@@ -206,12 +201,10 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   static Map<int, _Transaction> _loadTransactions(Directory location) {
     final File file = _getManifest(location);
     final String jsonData = file.readAsStringSync();
-    final Iterable<_Message> messages =
-        json.decoder.convert(jsonData).map<_Message>(_toMessage);
+    final Iterable<_Message> messages = json.decoder.convert(jsonData).map<_Message>(_toMessage);
     final Map<int, _Transaction> transactions = <int, _Transaction>{};
     for (_Message message in messages) {
-      final _Transaction transaction =
-          transactions.putIfAbsent(message.id, () => _Transaction());
+      final _Transaction transaction = transactions.putIfAbsent(message.id, () => _Transaction());
       if (message.type == _kRequest) {
         assert(transaction.request == null);
         transaction.request = message;
@@ -228,8 +221,7 @@ class ReplayVMServiceChannel extends StreamChannelMixin<String> {
   }
 
   void send(_Request request) {
-    if (!_transactions.containsKey(request.id))
-      throw ArgumentError('No matching invocation found');
+    if (!_transactions.containsKey(request.id)) throw ArgumentError('No matching invocation found');
     final _Transaction transaction = _transactions.remove(request.id);
     // TODO(tvolkert): validate that `transaction.request` matches `request`
     if (transaction.response == null) {

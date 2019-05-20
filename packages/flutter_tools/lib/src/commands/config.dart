@@ -15,20 +15,16 @@ class ConfigCommand extends FlutterCommand {
   ConfigCommand({bool verboseHelp = false}) {
     argParser.addFlag('analytics',
         negatable: true,
-        help:
-            'Enable or disable reporting anonymously tool usage statistics and crash reports.');
+        help: 'Enable or disable reporting anonymously tool usage statistics and crash reports.');
     argParser.addFlag('clear-ios-signing-cert',
         negatable: false,
         help:
             'Clear the saved development certificate choice used to sign apps for iOS device deployment.');
     argParser.addOption('gradle-dir', help: 'The gradle install directory.');
     argParser.addOption('android-sdk', help: 'The Android SDK directory.');
-    argParser.addOption('android-studio-dir',
-        help: 'The Android Studio install directory.');
+    argParser.addOption('android-studio-dir', help: 'The Android Studio install directory.');
     argParser.addFlag('machine',
-        negatable: false,
-        hide: !verboseHelp,
-        help: 'Print config values as json.');
+        negatable: false, hide: !verboseHelp, help: 'Print config values as json.');
   }
 
   @override
@@ -47,8 +43,7 @@ class ConfigCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{};
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   @override
   String get usageFooter {
@@ -78,8 +73,7 @@ class ConfigCommand extends FlutterCommand {
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
-    if (argResults.wasParsed('gradle-dir'))
-      _updateConfig('gradle-dir', argResults['gradle-dir']);
+    if (argResults.wasParsed('gradle-dir')) _updateConfig('gradle-dir', argResults['gradle-dir']);
 
     if (argResults.wasParsed('android-sdk'))
       _updateConfig('android-sdk', argResults['android-sdk']);
@@ -87,8 +81,7 @@ class ConfigCommand extends FlutterCommand {
     if (argResults.wasParsed('android-studio-dir'))
       _updateConfig('android-studio-dir', argResults['android-studio-dir']);
 
-    if (argResults.wasParsed('clear-ios-signing-cert'))
-      _updateConfig('ios-signing-cert', '');
+    if (argResults.wasParsed('clear-ios-signing-cert')) _updateConfig('ios-signing-cert', '');
 
     if (argResults.arguments.isEmpty) printStatus(usage);
 

@@ -52,8 +52,7 @@ class ShutdownStage implements Comparable<ShutdownStage> {
   int compareTo(ShutdownStage other) => priority.compareTo(other.priority);
 }
 
-Map<ShutdownStage, List<ShutdownHook>> _shutdownHooks =
-    <ShutdownStage, List<ShutdownHook>>{};
+Map<ShutdownStage, List<ShutdownHook>> _shutdownHooks = <ShutdownStage, List<ShutdownHook>>{};
 bool _shutdownHooksRunning = false;
 
 /// Registers a [ShutdownHook] to be executed before the VM exits.
@@ -94,8 +93,7 @@ Future<void> runShutdownHooks() async {
   printTrace('Shutdown hooks complete');
 }
 
-Map<String, String> _environment(bool allowReentrantFlutter,
-    [Map<String, String> environment]) {
+Map<String, String> _environment(bool allowReentrantFlutter, [Map<String, String> environment]) {
   if (allowReentrantFlutter) {
     if (environment == null)
       environment = <String, String>{'FLUTTER_ALREADY_LOCKED': 'true'};
@@ -250,8 +248,8 @@ Future<RunResult> runCheckedAsync(
     environment: environment,
   );
   if (result.exitCode != 0) {
-    throw ProcessException(cmd[0], cmd.sublist(1),
-        'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+    throw ProcessException(
+        cmd[0], cmd.sublist(1), 'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
   }
   return result;
 }

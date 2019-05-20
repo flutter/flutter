@@ -56,8 +56,7 @@ Future<void> run(List<String> args) async {
     ..addOption(_kOptionSdkRoot, help: 'Path to the SDK platform files')
     ..addOption(_kOptionIcudtl, help: 'Path to the ICU data file')
     ..addOption(_kOptionTests,
-        help:
-            'Path to json file that maps Dart test files to precompiled dill files')
+        help: 'Path to json file that maps Dart test files to precompiled dill files')
     ..addOption(_kOptionCoverageDirectory,
         help: 'The path to the directory that will have coverage collected')
     ..addFlag(
@@ -72,17 +71,14 @@ Future<void> run(List<String> args) async {
       help: 'Where to store coverage information (if coverage is enabled).',
     );
   final ArgResults argResults = parser.parse(args);
-  if (_kRequiredOptions
-      .any((String option) => !argResults.options.contains(option))) {
+  if (_kRequiredOptions.any((String option) => !argResults.options.contains(option))) {
     throwToolExit('Missing option! All options must be specified.');
   }
-  final Directory tempDir =
-      fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_fuchsia_tester.');
   try {
     Cache.flutterRoot = tempDir.path;
 
-    final String shellPath =
-        fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
+    final String shellPath = fs.file(argResults[_kOptionShell]).resolveSymbolicLinksSync();
     if (!fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
@@ -95,16 +91,14 @@ Future<void> run(List<String> args) async {
     final String coverageDirectoryPath = argResults[_kOptionCoverageDirectory];
     if (coverageDirectoryPath != null) {
       if (!fs.isDirectorySync(coverageDirectoryPath)) {
-        throwToolExit(
-            'Cannot find coverage directory at $coverageDirectoryPath');
+        throwToolExit('Cannot find coverage directory at $coverageDirectoryPath');
       }
       coverageDirectory = fs.directory(coverageDirectoryPath);
     }
 
     // Put the tester shell where runTests expects it.
     // TODO(garymm): Switch to a Fuchsia-specific Artifacts impl.
-    final Link testerDestLink =
-        fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
+    final Link testerDestLink = fs.link(artifacts.getArtifactPath(Artifact.flutterTester));
     testerDestLink.parent.createSync(recursive: true);
     testerDestLink.createSync(fs.path.absolute(shellPath));
 
@@ -112,14 +106,10 @@ Future<void> run(List<String> args) async {
         fs.directory(artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
     for (FileSystemEntity artifact in sdkRootSrc.listSync()) {
-      fs
-          .link(sdkRootDest.childFile(artifact.basename).path)
-          .createSync(artifact.path);
+      fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
     }
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
-    fs
-        .link(sdkRootDest.childFile('platform.dill').path)
-        .createSync('platform_strong.dill');
+    fs.link(sdkRootDest.childFile('platform.dill').path).createSync('platform_strong.dill');
 
     PackageMap.globalPackagesPath =
         fs.path.normalize(fs.path.absolute(argResults[_kOptionPackages]));
@@ -168,8 +158,7 @@ Future<void> run(List<String> args) async {
         fs.currentDirectory = testDirectory;
       }
       if (!await collector.collectCoverageData(argResults[_kOptionCoveragePath],
-          coverageDirectory: coverageDirectory))
-        throwToolExit('Failed to collect coverage data');
+          coverageDirectory: coverageDirectory)) throwToolExit('Failed to collect coverage data');
     }
   } finally {
     tempDir.deleteSync(recursive: true);

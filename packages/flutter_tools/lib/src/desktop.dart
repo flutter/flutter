@@ -57,8 +57,7 @@ Future<bool> killProcess(String executable) async {
 }
 
 class DesktopLogReader extends DeviceLogReader {
-  final StreamController<List<int>> _inputController =
-      StreamController<List<int>>.broadcast();
+  final StreamController<List<int>> _inputController = StreamController<List<int>>.broadcast();
 
   void initializeProcess(Process process) {
     process.stdout.listen(_inputController.add);
@@ -70,9 +69,7 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   Stream<String> get logLines {
-    return _inputController.stream
-        .transform(utf8.decoder)
-        .transform(const LineSplitter());
+    return _inputController.stream.transform(utf8.decoder).transform(const LineSplitter());
   }
 
   @override

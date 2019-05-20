@@ -86,14 +86,12 @@ class DeviceManager {
     final List<Device> devices = await getAllConnectedDevices().toList();
     deviceId = deviceId.toLowerCase();
     bool exactlyMatchesDeviceId(Device device) =>
-        device.id.toLowerCase() == deviceId ||
-        device.name.toLowerCase() == deviceId;
+        device.id.toLowerCase() == deviceId || device.name.toLowerCase() == deviceId;
     bool startsWithDeviceId(Device device) =>
         device.id.toLowerCase().startsWith(deviceId) ||
         device.name.toLowerCase().startsWith(deviceId);
 
-    final Device exactMatch =
-        devices.firstWhere(exactlyMatchesDeviceId, orElse: () => null);
+    final Device exactMatch = devices.firstWhere(exactlyMatchesDeviceId, orElse: () => null);
     if (exactMatch != null) {
       yield exactMatch;
       return;
@@ -105,14 +103,11 @@ class DeviceManager {
 
   /// Return the list of connected devices, filtered by any user-specified device id.
   Stream<Device> getDevices() {
-    return hasSpecifiedDeviceId
-        ? getDevicesById(specifiedDeviceId)
-        : getAllConnectedDevices();
+    return hasSpecifiedDeviceId ? getDevicesById(specifiedDeviceId) : getAllConnectedDevices();
   }
 
   Iterable<DeviceDiscovery> get _platformDiscoverers {
-    return deviceDiscoverers
-        .where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
+    return deviceDiscoverers.where((DeviceDiscovery discoverer) => discoverer.supportsPlatform);
   }
 
   /// Return the list of all connected devices.
@@ -126,8 +121,7 @@ class DeviceManager {
 
   /// Whether we're capable of listing any devices given the current environment configuration.
   bool get canListAnything {
-    return _platformDiscoverers
-        .any((DeviceDiscovery discoverer) => discoverer.canListAnything);
+    return _platformDiscoverers.any((DeviceDiscovery discoverer) => discoverer.canListAnything);
   }
 
   /// Get diagnostics about issues with any connected devices.
@@ -152,8 +146,7 @@ abstract class DeviceDiscovery {
 
   /// Gets a list of diagnostic messages pertaining to issues with any connected
   /// devices (will be an empty list if there are no issues).
-  Future<List<String>> getDiagnostics() =>
-      Future<List<String>>.value(<String>[]);
+  Future<List<String>> getDiagnostics() => Future<List<String>>.value(<String>[]);
 }
 
 /// A [DeviceDiscovery] implementation that uses polling to discover device adds
@@ -176,8 +169,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
       _poller = Poller(() async {
         try {
-          final List<Device> devices =
-              await pollingGetDevices().timeout(_pollingTimeout);
+          final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
           _items.updateWithNewList(devices);
         } on TimeoutException {
           printTrace('Device poll timed out. Will retry.');
@@ -322,8 +314,7 @@ abstract class Device {
   /// Stop an app package on the current device.
   Future<bool> stopApp(ApplicationPackage app);
 
-  Future<void> takeScreenshot(File outputFile) =>
-      Future<void>.error('unimplemented');
+  Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
   @override
   int get hashCode => id.hashCode;
@@ -347,8 +338,7 @@ abstract class Device {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
-        final String type =
-            targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
+        final String type = targetPlatform == TargetPlatform.ios ? 'simulator' : 'emulator';
         supportIndicator += ' ($type)';
       }
       table.add(<String>[
@@ -360,20 +350,15 @@ abstract class Device {
     }
 
     // Calculate column widths
-    final List<int> indices =
-        List<int>.generate(table[0].length - 1, (int i) => i);
+    final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
     for (List<String> row in table) {
-      widths = indices
-          .map<int>((int i) => math.max(widths[i], row[i].length))
-          .toList();
+      widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
     for (List<String> row in table) {
-      yield indices
-              .map<String>((int i) => row[i].padRight(widths[i]))
-              .join(' • ') +
+      yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') +
           ' • ${row.last}';
     }
   }

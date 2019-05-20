@@ -74,18 +74,16 @@ class LinuxDevice extends Device {
   }) async {
     _lastBuiltMode = debuggingOptions.buildInfo.mode;
     if (!prebuiltApplication) {
-      await buildLinux(
-          FlutterProject.current().linux, debuggingOptions.buildInfo);
+      await buildLinux(FlutterProject.current().linux, debuggingOptions.buildInfo);
     }
     await stopApp(package);
-    final Process process = await processManager
-        .start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
+    final Process process =
+        await processManager.start(<String>[package.executable(debuggingOptions?.buildInfo?.mode)]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
     _logReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery =
-        ProtocolDiscovery.observatory(_logReader);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);

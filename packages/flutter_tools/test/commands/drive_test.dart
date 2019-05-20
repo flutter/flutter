@@ -75,8 +75,7 @@ void main() {
       withMockDevice();
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-      final String testFile =
-          fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
       fs.file(testApp).createSync(recursive: true);
 
       final List<String> args = <String>[
@@ -98,10 +97,8 @@ void main() {
       withMockDevice();
       appStarter = expectAsync1((DriveCommand command) async => null);
 
-      final String testApp =
-          fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
-      final String testFile =
-          fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       final MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() { }');
@@ -116,18 +113,14 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode, 1);
-        expect(
-            e.message,
-            contains(
-                'Application failed to start. Will not run test. Quitting.'));
+        expect(e.message, contains('Application failed to start. Will not run test. Quitting.'));
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
-      final String appFile =
-          fs.path.join(tempDir.dirname, 'other_app', 'app.dart');
+      final String appFile = fs.path.join(tempDir.dirname, 'other_app', 'app.dart');
       fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
         '--no-wrap',
@@ -177,14 +170,12 @@ void main() {
       withMockDevice();
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-      final String testFile =
-          fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
       });
-      testRunner =
-          expectAsync2((List<String> testArgs, String observatoryUri) async {
+      testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
         expect(testArgs, <String>[testFile]);
         return null;
       });
@@ -210,8 +201,7 @@ void main() {
       withMockDevice();
 
       final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-      final String testFile =
-          fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
@@ -329,8 +319,7 @@ void main() {
           prebuiltApplication: anyNamed('prebuiltApplication'),
           usesTerminalUi: false,
         )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
-        when(mockDevice.isAppInstalled(any))
-            .thenAnswer((_) => Future<bool>.value(false));
+        when(mockDevice.isAppInstalled(any)).thenAnswer((_) => Future<bool>.value(false));
 
         testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
@@ -350,8 +339,7 @@ void main() {
         await memFs.file(testFile).writeAsString('main() {}');
       }
 
-      testUsingContext('does not use pre-built app if no build arg provided',
-          () async {
+      testUsingContext('does not use pre-built app if no build arg provided', () async {
         await appStarterSetup();
 
         final List<String> args = <String>[
@@ -377,8 +365,7 @@ void main() {
         FileSystem: () => fs,
       });
 
-      testUsingContext('does not use pre-built app if --build arg provided',
-          () async {
+      testUsingContext('does not use pre-built app if --build arg provided', () async {
         await appStarterSetup();
 
         final List<String> args = <String>[
@@ -405,8 +392,7 @@ void main() {
         FileSystem: () => fs,
       });
 
-      testUsingContext('uses prebuilt app if --no-build arg provided',
-          () async {
+      testUsingContext('uses prebuilt app if --no-build arg provided', () async {
         await appStarterSetup();
 
         final List<String> args = <String>[

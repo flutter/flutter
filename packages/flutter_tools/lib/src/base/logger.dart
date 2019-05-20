@@ -167,8 +167,7 @@ class StdoutLogger extends Logger {
   }) {
     _status?.pause();
     message ??= '';
-    message = wrapText(message,
-        indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     if (emphasis == true) message = terminal.bolden(message);
     message = terminal.color(message, color ?? TerminalColor.red);
     stderr.writeln(message);
@@ -188,8 +187,7 @@ class StdoutLogger extends Logger {
   }) {
     _status?.pause();
     message ??= '';
-    message = wrapText(message,
-        indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
+    message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     if (emphasis == true) message = terminal.bolden(message);
     if (color != null) message = terminal.color(message, color);
     if (newline != false) message = '$message\n';
@@ -284,8 +282,7 @@ class BufferLogger extends Logger {
     bool wrap,
   }) {
     _error.writeln(terminal.color(
-      wrapText(message,
-          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
+      wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
       color ?? TerminalColor.red,
     ));
   }
@@ -301,11 +298,11 @@ class BufferLogger extends Logger {
     bool wrap,
   }) {
     if (newline != false)
-      _status.writeln(wrapText(message,
-          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+      _status.writeln(
+          wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
     else
-      _status.write(wrapText(message,
-          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+      _status
+          .write(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override
@@ -356,8 +353,7 @@ class VerboseLogger extends Logger {
   }) {
     _emit(
       _LogType.error,
-      wrapText(message,
-          indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
+      wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
       stackTrace,
     );
   }
@@ -372,10 +368,8 @@ class VerboseLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _emit(
-        _LogType.status,
-        wrapText(message,
-            indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+    _emit(_LogType.status,
+        wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
   }
 
   @override
@@ -434,8 +428,7 @@ class VerboseLogger extends Logger {
     if (type == _LogType.error) {
       parent.printError(prefix + terminal.bolden(indentMessage));
       if (stackTrace != null)
-        parent.printError(
-            indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
+        parent.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
     } else if (type == _LogType.status) {
       parent.printStatus(prefix + terminal.bolden(indentMessage));
     } else {
@@ -480,9 +473,7 @@ abstract class Status {
   }) {
     if (terminal.supportsColor)
       return AnsiSpinner(
-          timeout: timeout,
-          onFinish: onFinish,
-          slowWarningCallback: slowWarningCallback)
+          timeout: timeout, onFinish: onFinish, slowWarningCallback: slowWarningCallback)
         ..start();
     return SilentStatus(timeout: timeout, onFinish: onFinish)..start();
   }
@@ -631,8 +622,7 @@ class AnsiSpinner extends Status {
       ? <String>[r'-', r'\', r'|', r'/']
       : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 
-  static const String _defaultSlowWarning =
-      '(This is taking an unexpectedly long time.)';
+  static const String _defaultSlowWarning = '(This is taking an unexpectedly long time.)';
   final SlowWarningCallback slowWarningCallback;
 
   String _slowWarning = '';
@@ -772,8 +762,7 @@ class AnsiStatus extends AnsiSpinner {
   /// If [multilineOutput] is true, then it prints the message again on a new
   /// line before writing the elapsed time.
   void writeSummaryInformation() {
-    if (multilineOutput)
-      stdout.write('\n${'$message Done'.padRight(padding)}$_margin');
+    if (multilineOutput) stdout.write('\n${'$message Done'.padRight(padding)}$_margin');
     stdout.write(elapsedTime.padLeft(_kTimePadding));
     if (seemsSlow) stdout.write(' (!)');
   }

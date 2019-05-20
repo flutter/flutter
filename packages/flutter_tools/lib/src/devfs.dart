@@ -85,8 +85,7 @@ class DevFSFileContent extends DevFSContent {
       }
     }
     final FileStat fileStat = file.statSync();
-    _fileStat =
-        fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
+    _fileStat = fileStat.type == FileSystemEntityType.notFound ? null : fileStat;
     if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
@@ -101,8 +100,7 @@ class DevFSFileContent extends DevFSContent {
       }
     }
     if (_fileStat == null) {
-      printError(
-          'Unable to get status of file "${file.path}": file not found.');
+      printError('Unable to get status of file "${file.path}": file not found.');
     }
   }
 
@@ -181,8 +179,7 @@ class DevFSByteContent extends DevFSContent {
   Future<List<int>> contentsAsBytes() async => _bytes;
 
   @override
-  Stream<List<int>> contentsAsStream() =>
-      Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
+  Stream<List<int>> contentsAsStream() => Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
 }
 
 /// String content to be copied to the device.
@@ -222,8 +219,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
 
   @override
   Future<Uri> create(String fsName) async {
-    final Map<String, dynamic> response =
-        await vmService.vm.createDevFS(fsName);
+    final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
     return Uri.parse(response['uri']);
   }
 
@@ -233,8 +229,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   }
 
   @override
-  Future<dynamic> writeFile(
-      String fsName, Uri deviceUri, DevFSContent content) async {
+  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
     List<int> bytes;
     try {
       bytes = await content.contentsAsBytes();
@@ -309,16 +304,14 @@ class _DevFSHttpWriter {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
       request.headers.add('dev_fs_name', fsName);
-      request.headers.add(
-          'dev_fs_uri_b64', base64.encode(utf8.encode(deviceUri.toString())));
+      request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
       await response.drain<void>();
     } on SocketException catch (socketException, stackTrace) {
       // We have one completer and can get up to kMaxInFlight errors.
-      if (!_completer.isCompleted)
-        _completer.completeError(socketException, stackTrace);
+      if (!_completer.isCompleted) _completer.completeError(socketException, stackTrace);
       return;
     } catch (e) {
       if (retry < kMaxRetries) {
@@ -377,8 +370,7 @@ class DevFS {
     String packagesFilePath,
   })  : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
         _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
-        _packagesFilePath = packagesFilePath ??
-            fs.path.join(rootDirectory.path, kPackagesFileName);
+        _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
     this._operations,
@@ -386,8 +378,7 @@ class DevFS {
     this.rootDirectory, {
     String packagesFilePath,
   })  : _httpWriter = null,
-        _packagesFilePath = packagesFilePath ??
-            fs.path.join(rootDirectory.path, kPackagesFileName);
+        _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   final DevFSOperations _operations;
   final _DevFSHttpWriter _httpWriter;
@@ -405,8 +396,7 @@ class DevFS {
     final String deviceUriString = deviceUri.toString();
     final String baseUriString = baseUri.toString();
     if (deviceUriString.startsWith(baseUriString)) {
-      final String deviceUriSuffix =
-          deviceUriString.substring(baseUriString.length);
+      final String deviceUriSuffix = deviceUriString.substring(baseUriString.length);
       return rootDirectory.uri.resolve(deviceUriSuffix);
     }
     return deviceUri;
@@ -464,8 +454,7 @@ class DevFS {
       // are in the same location in DevFS and the iOS simulator.
       final String assetDirectory = getAssetBuildDirectory();
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri =
-            fs.path.toUri(fs.path.join(assetDirectory, archivePath));
+        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
         if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
           archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
         }
@@ -483,15 +472,13 @@ class DevFS {
     if (fullRestart) {
       generator.reset();
     }
-    printTrace(
-        'Compiling dart to kernel with ${invalidatedFiles.length} updated files');
+    printTrace('Compiling dart to kernel with ${invalidatedFiles.length} updated files');
     lastCompiled = DateTime.now();
     final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
       outputPath: dillOutputPath ??
-          getDefaultApplicationKernelPath(
-              trackWidgetCreation: trackWidgetCreation),
+          getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
       packagesFilePath: _packagesFilePath,
     );
     if (compilerOutput == null) {
@@ -510,8 +497,7 @@ class DevFS {
               ? fs.path.relative(pathToReload, from: projectRootPath)
               : pathToReload,
         );
-        final DevFSFileContent content =
-            DevFSFileContent(fs.file(compiledBinary));
+        final DevFSFileContent content = DevFSFileContent(fs.file(compiledBinary));
         syncedBytes += content.size;
         dirtyEntries[entryUri] = content;
       }
@@ -521,10 +507,8 @@ class DevFS {
       try {
         await _httpWriter.write(dirtyEntries);
       } on SocketException catch (socketException, stackTrace) {
-        printTrace(
-            'DevFS sync failed. Lost connection to device: $socketException');
-        throw DevFSException(
-            'Lost connection to device.', socketException, stackTrace);
+        printTrace('DevFS sync failed. Lost connection to device: $socketException');
+        throw DevFSException('Lost connection to device.', socketException, stackTrace);
       } catch (exception, stackTrace) {
         printError('Could not update files on device: $exception');
         throw DevFSException('Sync failed', exception, stackTrace);
@@ -532,9 +516,7 @@ class DevFS {
     }
     printTrace('DevFS: Sync finished');
     return UpdateFSReport(
-        success: true,
-        syncedBytes: syncedBytes,
-        invalidatedSourcesCount: invalidatedFiles.length);
+        success: true, syncedBytes: syncedBytes, invalidatedSourcesCount: invalidatedFiles.length);
   }
 }
 

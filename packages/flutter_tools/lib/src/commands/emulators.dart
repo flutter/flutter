@@ -14,14 +14,11 @@ import '../runner/flutter_command.dart';
 
 class EmulatorsCommand extends FlutterCommand {
   EmulatorsCommand() {
-    argParser.addOption('launch',
-        help: 'The full or partial ID of the emulator to launch.');
+    argParser.addOption('launch', help: 'The full or partial ID of the emulator to launch.');
     argParser.addFlag('create',
-        help: 'Creates a new Android emulator based on a Pixel device.',
-        negatable: false);
+        help: 'Creates a new Android emulator based on a Pixel device.', negatable: false);
     argParser.addOption('name',
-        help:
-            'Used with flag --create. Specifies a name for the emulator being created.');
+        help: 'Used with flag --create. Specifies a name for the emulator being created.');
   }
 
   @override
@@ -50,9 +47,7 @@ class EmulatorsCommand extends FlutterCommand {
       await _createEmulator(name: argResults['name']);
     } else {
       final String searchText =
-          argResults.rest != null && argResults.rest.isNotEmpty
-              ? argResults.rest.first
-              : null;
+          argResults.rest != null && argResults.rest.isNotEmpty ? argResults.rest.first : null;
       await _listEmulators(searchText);
     }
 
@@ -60,8 +55,7 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<void> _launchEmulator(String id) async {
-    final List<Emulator> emulators =
-        await emulatorManager.getEmulatorsMatching(id);
+    final List<Emulator> emulators = await emulatorManager.getEmulatorsMatching(id);
 
     if (emulators.isEmpty) {
       printStatus("No emulator found that matches '$id'.");
@@ -84,15 +78,12 @@ class EmulatorsCommand extends FlutterCommand {
   }
 
   Future<void> _createEmulator({String name}) async {
-    final CreateEmulatorResult createResult =
-        await emulatorManager.createEmulator(name: name);
+    final CreateEmulatorResult createResult = await emulatorManager.createEmulator(name: name);
 
     if (createResult.success) {
-      printStatus(
-          "Emulator '${createResult.emulatorName}' created successfully.");
+      printStatus("Emulator '${createResult.emulatorName}' created successfully.");
     } else {
-      printStatus(
-          "Failed to create emulator '${createResult.emulatorName}'.\n");
+      printStatus("Failed to create emulator '${createResult.emulatorName}'.\n");
       printStatus(createResult.error.trim());
       _printAdditionalInfo();
     }
@@ -126,12 +117,10 @@ class EmulatorsCommand extends FlutterCommand {
   }) {
     printStatus('');
     if (showRunInstruction) {
-      printStatus(
-          "To run an emulator, run 'flutter emulators --launch <emulator id>'.");
+      printStatus("To run an emulator, run 'flutter emulators --launch <emulator id>'.");
     }
     if (showCreateInstruction) {
-      printStatus(
-          "To create a new emulator, run 'flutter emulators --create [--name xyz]'.");
+      printStatus("To create a new emulator, run 'flutter emulators --create [--name xyz]'.");
     }
 
     if (showRunInstruction || showCreateInstruction) {
@@ -139,8 +128,7 @@ class EmulatorsCommand extends FlutterCommand {
     }
     // TODO(dantup): Update this link to flutter.dev if/when we have a better page.
     // That page can then link out to these places if required.
-    printStatus(
-        'You can find more information on managing emulators at the links below:\n'
+    printStatus('You can find more information on managing emulators at the links below:\n'
         '  https://developer.android.com/studio/run/managing-avds\n'
         '  https://developer.android.com/studio/command-line/avdmanager');
   }

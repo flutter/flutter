@@ -80,8 +80,7 @@ class MacOSDevice extends Device {
     }
 
     // Ensure that the executable is locatable.
-    final String executable =
-        package.executable(debuggingOptions?.buildInfo?.mode);
+    final String executable = package.executable(debuggingOptions?.buildInfo?.mode);
     if (executable == null) {
       printError('Unable to find executable to run');
       return LaunchResult.failed();
@@ -94,8 +93,7 @@ class MacOSDevice extends Device {
       return LaunchResult.succeeded();
     }
     _deviceLogReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery =
-        ProtocolDiscovery.observatory(_deviceLogReader);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       // Bring app to foreground.

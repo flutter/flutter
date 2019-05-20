@@ -15,9 +15,7 @@ void main() {
     testUsingContext('Empty project', () async {
       expect(
           ProjectFileInvalidator.findInvalidated(
-              lastCompiled: DateTime.now(),
-              urisToMonitor: <Uri>[],
-              packagesPath: ''),
+              lastCompiled: DateTime.now(), urisToMonitor: <Uri>[], packagesPath: ''),
           isEmpty);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
