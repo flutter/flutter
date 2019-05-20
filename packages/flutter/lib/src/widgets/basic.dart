@@ -4253,6 +4253,8 @@ class Column extends Flex {
 /// [Flex] must contain only [StatelessWidget]s or [StatefulWidget]s (not other
 /// kinds of widgets, like [RenderObjectWidget]s).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=CI7x0mAZiY0}
+///
 /// See also:
 ///
 ///  * [Expanded], which forces the child to expand to fill the available space.
