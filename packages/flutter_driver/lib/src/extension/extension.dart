@@ -175,8 +175,6 @@ class FlutterDriverExtension {
   /// the result into a subclass of [Result], but that's not strictly required.
   @visibleForTesting
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
-    assert(WidgetsBinding.instance.isRootWidgetAttached,
-        'No root widget is attached; have you remembered to call runApp()?');
     final String commandKind = params['command'];
     try {
       final CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
