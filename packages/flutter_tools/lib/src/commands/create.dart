@@ -56,11 +56,11 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "flutter packages get" after the project has been created.',
+      help: 'Whether to run "flutter pub get" after the project has been created.',
     );
     argParser.addFlag('offline',
       defaultsTo: false,
-      help: 'When "flutter packages get" is run by the create command, this indicates '
+      help: 'When "flutter pub get" is run by the create command, this indicates '
         'whether to run it in offline mode or not. In offline mode, it will need to '
         'have all dependencies already available in the pub cache to succeed.',
     );

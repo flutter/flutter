@@ -139,7 +139,7 @@ abstract class FlutterCommand extends Command<void> {
   void usesPubOption() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "flutter packages get" before executing this command.');
+      help: 'Whether to run "flutter pub get" before executing this command.');
     _usesPubOption = true;
   }
 
