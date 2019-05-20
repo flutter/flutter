@@ -1548,8 +1548,8 @@ void main() {
     SliverAppBar getSliverAppBarWidget(Finder finder) => tester.widget<SliverAppBar>(finder);
     expect(getSliverAppBarWidget(sliverAppBarFinder).shape, null);
 
-    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
     final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
     expect(getMaterialWidget(materialFinder).shape, null);
   });
 
@@ -1576,8 +1576,8 @@ void main() {
     SliverAppBar getSliverAppBarWidget(Finder finder) => tester.widget<SliverAppBar>(finder);
     expect(getSliverAppBarWidget(sliverAppBarFinder).shape, roundedRectangleBorder);
 
-    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
     final Finder materialFinder = find.byType(Material);
+    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 }
