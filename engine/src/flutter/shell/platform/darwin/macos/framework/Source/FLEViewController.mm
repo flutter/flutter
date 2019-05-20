@@ -101,6 +101,11 @@ static const int kDefaultWindowFramebuffer = 0;
  */
 - (void)onSettingsChanged:(NSNotification*)notification;
 
+/**
+ * Handles messages received from the Flutter engine on the _*Channel channels.
+ */
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+
 @end
 
 #pragma mark - Static methods provided to engine configuration
@@ -194,6 +199,9 @@ static bool HeadlessOnMakeResourceCurrent(FLEViewController* controller) {
 
   // A message channel for sending user settings to the flutter engine.
   FlutterBasicMessageChannel* _settingsChannel;
+
+  // A method channel for miscellaneous platform functionality.
+  FlutterMethodChannel* _platformChannel;
 }
 
 @dynamic view;
@@ -316,6 +324,14 @@ static void CommonInit(FLEViewController* controller) {
       [FlutterBasicMessageChannel messageChannelWithName:@"flutter/settings"
                                          binaryMessenger:self
                                                    codec:[FlutterJSONMessageCodec sharedInstance]];
+  _platformChannel =
+      [FlutterMethodChannel methodChannelWithName:@"flutter/platform"
+                                  binaryMessenger:self
+                                            codec:[FlutterJSONMethodCodec sharedInstance]];
+  __weak FLEViewController* weakSelf = self;
+  [_platformChannel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
+    [weakSelf handleMethodCall:call result:result];
+  }];
 }
 
 - (BOOL)launchEngineInternalWithAssetsPath:(NSURL*)assets
@@ -513,6 +529,15 @@ static void CommonInit(FLEViewController* controller) {
              name:@"AppleInterfaceThemeChangedNotification"
            object:nil];
   [self onSettingsChanged:nil];
+}
+
+- (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result {
+  if ([call.method isEqualToString:@"SystemNavigator.pop"]) {
+    [NSApp terminate:self];
+    result(nil);
+  } else {
+    result(FlutterMethodNotImplemented);
+  }
 }
 
 #pragma mark - FLEReshapeListener
