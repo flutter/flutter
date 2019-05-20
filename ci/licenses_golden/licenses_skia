@@ -1,4 +1,4 @@
-Signature: c9641b16573a65d0dc1a5602bda8f488
+Signature: 5ce009dade753e3e007e865b0fb2037b
 
 UNUSED LICENSES:
 
@@ -3336,6 +3336,8 @@ FILE: ../../../third_party/skia/src/core/SkFontMgr.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.cpp
 FILE: ../../../third_party/skia/src/core/SkLatticeIter.h
 FILE: ../../../third_party/skia/src/core/SkLocalMatrixImageFilter.cpp
+FILE: ../../../third_party/skia/src/core/SkMiniRecorder.cpp
+FILE: ../../../third_party/skia/src/core/SkMiniRecorder.h
 FILE: ../../../third_party/skia/src/core/SkNextID.h
 FILE: ../../../third_party/skia/src/core/SkOpts.cpp
 FILE: ../../../third_party/skia/src/core/SkOpts.h
