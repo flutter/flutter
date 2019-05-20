@@ -12,6 +12,9 @@ import 'platform_channel.dart';
 
 /// Sends binary messages to and receives binary messages from platform plugins.
 ///
+/// This class has been deprecated in favor of [defaultBinaryMessenger]. New
+/// code should not use [BinaryMessages].
+///
 /// See also:
 ///
 ///  * [BinaryMessenger], the interface which has replaced this class.
@@ -23,7 +26,7 @@ import 'platform_channel.dart';
 ///  * [EventChannel], which provides platform communication using event streams.
 ///  * <https://flutter.dev/platform-channels/>
 @Deprecated('This class, which was just a collection of static methods, has been '
-            'deprecated in favor of BinaryMessenger, and it\'s default '
+            'deprecated in favor of BinaryMessenger, and its default '
             'implementation, defaultBinaryMessenger.')
 class BinaryMessages {
   BinaryMessages._();

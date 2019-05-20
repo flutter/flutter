@@ -8,7 +8,8 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-typedef _MessageHandler = Future<ByteData> Function(ByteData message);
+/// A function which takes a platform message and asynchronously returns an encoded response.
+typedef MessageHandler = Future<ByteData> Function(ByteData message);
 
 /// A messenger which sends binary data across the Flutter platform barrier.
 ///
@@ -64,14 +65,14 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   const _DefaultBinaryMessenger._();
 
   // Handlers for incoming messages from platform plugins.
-  // Note: This is static so that this class can have a const constructor.
-  static final Map<String, _MessageHandler> _handlers =
-      <String, _MessageHandler>{};
+  // This is static so that this class can have a const constructor.
+  static final Map<String, MessageHandler> _handlers =
+      <String, MessageHandler>{};
 
   // Mock handlers that intercept and respond to outgoing messages.
-  // Note: This is static so that this class can have a const constructor.
-  static final Map<String, _MessageHandler> _mockHandlers =
-      <String, _MessageHandler>{};
+  // This is static so that this class can have a const constructor.
+  static final Map<String, MessageHandler> _mockHandlers =
+      <String, MessageHandler>{};
 
   Future<ByteData> _sendPlatformMessage(String channel, ByteData message) {
     final Completer<ByteData> completer = Completer<ByteData>();
@@ -104,7 +105,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   ) async {
     ByteData response;
     try {
-      final _MessageHandler handler = _handlers[channel];
+      final MessageHandler handler = _handlers[channel];
       if (handler != null)
         response = await handler(data);
     } catch (exception, stack) {
@@ -122,14 +123,14 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
 
   @override
   Future<ByteData> send(String channel, ByteData message) {
-    final _MessageHandler handler = _mockHandlers[channel];
+    final MessageHandler handler = _mockHandlers[channel];
     if (handler != null)
       return handler(message);
     return _sendPlatformMessage(channel, message);
   }
 
   @override
-  void setMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
+  void setMessageHandler(String channel, MessageHandler handler) {
     if (handler == null)
       _handlers.remove(channel);
     else
@@ -137,7 +138,7 @@ class _DefaultBinaryMessenger extends BinaryMessenger {
   }
 
   @override
-  void setMockMessageHandler(String channel, Future<ByteData> Function(ByteData message) handler) {
+  void setMockMessageHandler(String channel, MessageHandler handler) {
     if (handler == null)
       _mockHandlers.remove(channel);
     else
