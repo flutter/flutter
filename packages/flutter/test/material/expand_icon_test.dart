@@ -45,7 +45,7 @@ void main() {
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.black54));
 
-    // Dark Mode tests
+    // Dark mode tests
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         onPressed: (bool isExpanded) {
@@ -169,8 +169,89 @@ void main() {
     handle.dispose();
   });
 
-  // expandIcon color passed in
-    // enabled
-    // disabled
-    // expanded
+  testWidgets('ExpandIcon uses custom icon color and expanded icon color', (WidgetTester tester) async {
+    bool expanded = false;
+    IconTheme iconTheme;
+
+    await tester.pumpWidget(wrap(
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+        return ExpandIcon(
+          isExpanded: expanded,
+          onPressed: (bool isExpanded) {
+            setState(() {
+              expanded = !isExpanded;
+            });
+          },
+          color: Colors.indigo,
+        );
+      }),
+    ));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.indigo));
+
+    await tester.tap(find.byType(ExpandIcon));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.indigo));
+
+    expanded = false;
+
+    await tester.pumpWidget(wrap(
+      child: StatefulBuilder(
+        builder: (BuildContext context, StateSetter setState) {
+        return ExpandIcon(
+          isExpanded: expanded,
+          onPressed: (bool isExpanded) {
+            setState(() {
+              expanded = !isExpanded;
+            });
+          },
+          color: Colors.indigo,
+          expandedColor: Colors.teal,
+        );
+      }),
+    ));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.indigo));
+
+    await tester.tap(find.byType(ExpandIcon));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.teal));
+
+    await tester.tap(find.byType(ExpandIcon));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.indigo));
+  });
+
+  testWidgets('ExpandIcon uses custom disabled icon color', (WidgetTester tester) async {
+    bool expanded = false;
+    IconTheme iconTheme;
+
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: true,
+        onPressed: null,
+        disabledColor: Colors.cyan,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.cyan));
+
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: false,
+        onPressed: null,
+        disabledColor: Colors.cyan,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.cyan));
+  });
 }

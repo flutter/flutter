@@ -135,7 +135,9 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   Color get _iconColor {
     if (widget.isExpanded && widget.expandedColor != null) {
       return widget.expandedColor;
-    } else if (!widget.isExpanded && widget.color != null) {
+    }
+
+    if (widget.color != null) {
       return widget.color;
     }
 
