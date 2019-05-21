@@ -5,8 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-Widget wrap({ Widget child }) {
+Widget wrap({ Widget child, ThemeData theme }) {
   return MaterialApp(
+    theme: theme,
     home: Center(
       child: Material(child: child),
     ),
@@ -16,6 +17,7 @@ Widget wrap({ Widget child }) {
 void main() {
   testWidgets('ExpandIcon test', (WidgetTester tester) async {
     bool expanded = false;
+    IconTheme iconTheme;
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         onPressed: (bool isExpanded) {
@@ -25,22 +27,39 @@ void main() {
     ));
 
     expect(expanded, isFalse);
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.black87));
+
     await tester.tap(find.byType(ExpandIcon));
-    expect(expanded, isTrue);
     await tester.pumpAndSettle();
+    expect(expanded, isTrue);
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.black87));
+
     await tester.tap(find.byType(ExpandIcon));
+    await tester.pumpAndSettle();
     expect(expanded, isFalse);
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.black87));
   });
 
   testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
+    IconTheme iconTheme;
     await tester.pumpWidget(wrap(
-      child: const ExpandIcon(
-        onPressed: null,
-      ),
+      child: const ExpandIcon(onPressed: null),
     ));
 
-    final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.black38));
+
+    await tester.pumpWidget(wrap(
+      child: const ExpandIcon(onPressed: null),
+      theme: ThemeData(brightness: Brightness.dark),
+    ));
+    await tester.pumpAndSettle();
+
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.white50));
   });
 
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
@@ -116,4 +135,9 @@ void main() {
     ));
     handle.dispose();
   });
+
+  // expandIcon color passed in
+    // enabled
+    // disabled
+    // expanded
 }

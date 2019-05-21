@@ -133,30 +133,33 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
   // Default icon colors and opacities are based on the
   // [Material Design specifications](https://material.io/design/iconography/system-icons.html#color).
   Color get _iconColor {
-    if (widget.onPressed == null) {
-      if (widget.disabledColor != null) {
-        return widget.disabledColor;
-      }
+    if (widget.isExpanded && widget.expandedColor != null) {
+      return widget.expandedColor;
+    } else if (!widget.isExpanded && widget.color != null) {
+      return widget.color;
+    }
 
-      switch(Theme.of(context).brightness) {
-        case Brightness.light:
-          return Colors.black38;
-        case Brightness.dark:
-          return Colors.white50;
-      }
-    } else {
-      if (widget.isExpanded && widget.expandedColor != null) {
-        return widget.expandedColor;
-      } else if (!widget.isExpanded && widget.color != null) {
-        return widget.color;
-      }
+    switch(Theme.of(context).brightness) {
+      case Brightness.light:
+        return Colors.black87;
+      case Brightness.dark:
+        return Colors.white;
+    }
 
-      switch(Theme.of(context).brightness) {
-        case Brightness.light:
-          return Colors.black87;
-        case Brightness.dark:
-          return Colors.white;
-      }
+    assert(false);
+    return null;
+  }
+
+  Color get _disabledIconColor {
+    if (widget.disabledColor != null) {
+      return widget.disabledColor;
+    }
+
+    switch(Theme.of(context).brightness) {
+      case Brightness.light:
+        return Colors.black38;
+      case Brightness.dark:
+        return Colors.white50;
     }
 
     assert(false);
@@ -175,6 +178,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       child: IconButton(
         padding: widget.padding,
         color: _iconColor,
+        disabledColor: _disabledIconColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,
