@@ -53,7 +53,7 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 // A GestureDetector used by ModalBarrier. It only has one callback,
 // `onAnyTapDown`, which recognizes tap down unconditionally.
 class _ModalBarrierGestureDetector extends StatelessWidget {
-  _ModalBarrierGestureDetector({
+  const _ModalBarrierGestureDetector({
     Key key,
     this.child,
     this.onAnyTapDown,
