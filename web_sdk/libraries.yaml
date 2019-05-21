@@ -123,7 +123,10 @@ dartdevc:
       uri: "../../third_party/dart/sdk/lib/web_sql/dart2js/web_sql_dart2js.dart"
 
     ui:
-      uri: "../lib/ui/ui.dart"
+      uri: "lib/ui/ui.dart"
+
+  _engine:
+      uri: "lib/_engine/engine.dart"
 
 dart2js:
   libraries:
