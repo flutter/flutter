@@ -207,9 +207,9 @@ void main() {
 
         expect(records, <int>[
           gzippedChunkOne.length,
-          -1,
+          null,
           gzipped.length,
-          -1,
+          null,
         ]);
       });
     });
