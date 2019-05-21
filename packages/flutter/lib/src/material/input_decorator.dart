@@ -1830,11 +1830,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled) {
       return themeData.hintColor;
     }
+    final Color enabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
     if (isHovering) {
       final Color hoverColor = decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
-      return Color.alphaBlend(hoverColor.withOpacity(0.16), themeData.colorScheme.onSurface.withOpacity(0.12));
+      return Color.alphaBlend(hoverColor.withOpacity(0.12), enabledColor);
     }
-    return themeData.colorScheme.onSurface.withOpacity(0.12);
+    return enabledColor;
   }
 
   Color _getFillColor(ThemeData themeData) {
