@@ -6,7 +6,7 @@ import("//third_party/dart/build/dart/dart_action.gni")
 import("//third_party/dart/utils/compile_platform.gni")
 
 sdk_dill = "$root_out_dir/flutter_web_sdk/kernel/flutter_ddc_sdk.dill"
-sdk_libraries_json = "$flutter_root/web_sdk/libraries.json"
+sdk_libraries_json = "$root_out_dir/flutter_web_sdk/libraries.json"
 
 web_ui_sources = [
   "$flutter_root/lib/stub_ui/lib/ui.dart",

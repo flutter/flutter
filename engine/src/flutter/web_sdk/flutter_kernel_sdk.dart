@@ -26,7 +26,6 @@ Future main(List<String> args) async {
     ..addOption('libraries',
         defaultsTo: path.join(ddcPath, '../../sdk/lib/libraries.json'));
   var parserOptions = parser.parse(args);
-
   var outputPath = parserOptions['output'] as String;
   if (outputPath == null) {
     var sdkRoot = path.absolute(path.dirname(path.dirname(ddcPath)));
