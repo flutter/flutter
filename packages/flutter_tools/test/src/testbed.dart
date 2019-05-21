@@ -79,6 +79,7 @@ class Testbed {
           }
           await test();
           Cache.flutterRoot = originalFlutterRoot;
+          return null;
         }
       );
     });

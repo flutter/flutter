@@ -2280,9 +2280,11 @@ class RenderFittedBox extends RenderProxyBox {
       final Rect sourceRect = _resolvedAlignment.inscribe(sizes.source, Offset.zero & childSize);
       final Rect destinationRect = _resolvedAlignment.inscribe(sizes.destination, Offset.zero & size);
       _hasVisualOverflow = sourceRect.width < childSize.width || sourceRect.height < childSize.height;
+      assert(scaleX.isFinite && scaleY.isFinite);
       _transform = Matrix4.translationValues(destinationRect.left, destinationRect.top, 0.0)
         ..scale(scaleX, scaleY, 1.0)
         ..translate(-sourceRect.left, -sourceRect.top);
+      assert(_transform.storage.every((double value) => value.isFinite));
     }
   }
 
@@ -2296,7 +2298,7 @@ class RenderFittedBox extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (size.isEmpty)
+    if (size.isEmpty || child.size.isEmpty)
       return;
     _updatePaintData();
     if (child != null) {
@@ -2493,6 +2495,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
         onExit: _onPointerExit,
       );
     }
+    _mouseIsConnected = RendererBinding.instance.mouseTracker.mouseIsConnected;
   }
 
   /// Called when a pointer comes into contact with the screen (for touch
@@ -2564,6 +2567,8 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
 
   void _updateAnnotations() {
+    assert(_hoverAnnotation == null || _onPointerEnter != _hoverAnnotation.onEnter || _onPointerHover != _hoverAnnotation.onHover || _onPointerExit != _hoverAnnotation.onExit,
+      "Shouldn't call _updateAnnotations if nothing has changed.");
     bool changed = false;
     final bool hadHoverAnnotation = _hoverAnnotation != null;
     if (_hoverAnnotation != null && attached) {
@@ -2592,9 +2597,16 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     }
   }
 
+  bool _mouseIsConnected;
   void _handleMouseTrackerChanged() {
-    if (attached)
-      markNeedsPaint();
+    final bool newState = RendererBinding.instance.mouseTracker.mouseIsConnected;
+    if (newState != _mouseIsConnected) {
+      _mouseIsConnected = newState;
+      if (_hoverAnnotation != null) {
+        markNeedsCompositingBitsUpdate();
+        markNeedsPaint();
+      }
+    }
   }
 
   @override
@@ -2607,7 +2619,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
 
   /// Attaches the annotation for this render object, if any.
   ///
-  /// This is called by [attach] to attach and new annotations.
+  /// This is called by [attach] to attach any new annotations.
   ///
   /// This is also called by the [Listener]'s [Element] to tell this
   /// [RenderPointerListener] that it will shortly be attached. That way,
@@ -2639,13 +2651,10 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
     super.detach();
   }
 
-  bool get _hasActiveAnnotation {
-    return _hoverAnnotation != null
-      && RendererBinding.instance.mouseTracker.mouseIsConnected;
-  }
+  bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
 
   @override
-  bool get needsCompositing => _hasActiveAnnotation;
+  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -2956,7 +2965,7 @@ class RenderIgnorePointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
@@ -3162,7 +3171,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? absorbing;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {

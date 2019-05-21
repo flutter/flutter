@@ -101,7 +101,7 @@ Future<T> _warnIfSlow<T>({
   assert(future != null);
   assert(timeout != null);
   assert(message != null);
-  return future..timeout(timeout, onTimeout: () { _log.warning(message); });
+  return future..timeout(timeout, onTimeout: () { _log.warning(message); return null; });
 }
 
 /// A convenient accessor to frequently used finders.
@@ -956,7 +956,35 @@ void restoreVmServiceConnectFunction() {
   vmServiceConnectFunction = _waitAndConnect;
 }
 
+/// The JSON RPC 2 spec says that a notification from a client must not respond
+/// to the client. It's possible the client sent a notification as a "ping", but
+/// the service isn't set up yet to respond.
+///
+/// For example, if the client sends a notification message to the server for
+/// 'streamNotify', but the server has not finished loading, it will throw an
+/// exception. Since the message is a notification, the server follows the
+/// specification and does not send a response back, but is left with an
+/// unhandled exception. That exception is safe for us to ignore - the client
+/// is signaling that it will try again later if it doesn't get what it wants
+/// here by sending a notification.
+// This may be ignoring too many exceptions. It would be best to rewrite
+// the client code to not use notifications so that it gets error replies back
+// and can decide what to do from there.
+// TODO(dnfield): https://github.com/flutter/flutter/issues/31813
+bool _ignoreRpcError(dynamic error) {
+  if (error is rpc.RpcException) {
+    final rpc.RpcException exception = error;
+    return exception.data == null || exception.data['id'] == null;
+  } else if (error is String && error.startsWith('JSON-RPC error -32601')) {
+    return true;
+  }
+  return false;
+}
+
 void _unhandledJsonRpcError(dynamic error, dynamic stack) {
+  if (_ignoreRpcError(error)) {
+    return;
+  }
   _log.trace('Unhandled RPC error:\n$error\n$stack');
   // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
   // assert(false);
@@ -1016,7 +1044,29 @@ class CommonFinders {
   SerializableFinder byType(String type) => ByType(type);
 
   /// Finds the back button on a Material or Cupertino page's scaffold.
-  SerializableFinder pageBack() => PageBack();
+  SerializableFinder pageBack() => const PageBack();
+
+  /// Finds the widget that is an ancestor of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder ancestor({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Ancestor(of: of, matching: matching, matchRoot: matchRoot);
+
+  /// Finds the widget that is an descendant of the `of` parameter and that
+  /// matches the `matching` parameter.
+  ///
+  /// If the `matchRoot` argument is true then the widget specified by `of` will
+  /// be considered for a match. The argument defaults to false.
+  SerializableFinder descendant({
+    @required SerializableFinder of,
+    @required SerializableFinder matching,
+    bool matchRoot = false,
+  }) => Descendant(of: of, matching: matching, matchRoot: matchRoot);
 }
 
 /// An immutable 2D floating-point offset used by Flutter Driver.
