@@ -1095,44 +1095,17 @@ class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
     Object debugOwner,
   }) : super(debugOwner: debugOwner);
 
-  bool _exceededLongpressDeadline = false;
-  Timer _longpressTimer;
-
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    _exceededLongpressDeadline = false;
-    _disposeLongpressTimer();
-    _longpressTimer = Timer(kLongPressTimeout, () {
-      _exceededLongpressDeadline = true;
-      _longpressTimer = null;
-    });
-    super.addAllowedPointer(event);
-  }
-
   @override
   void rejectGesture(int pointer) {
-    // Accept gestures that another recognizer has already won. However, don't
-    // do this for longpress gestures, in order to allow longpress-to-select.
-    // This longpress timer prevents a tap from being received after the
-    // conclusion of a longpress, which interferes with the effects of the
-    // longpress.
-    if (!_exceededLongpressDeadline) {
+    // Accept new gestures that another recognizer has already won.
+    // Specifically, this needs to accept taps on the text selection handle on
+    // behalf of the text field in order to handle double tap to select. It must
+    // not accept other gestures like longpresses and drags that end outside of
+    // the text field.
+    if (state == GestureRecognizerState.ready) {
       acceptGesture(pointer);
     } else {
       super.rejectGesture(pointer);
-    }
-  }
-
-  @override
-  void dispose() {
-    _disposeLongpressTimer();
-    super.dispose();
-  }
-
-  void _disposeLongpressTimer() {
-    if (_longpressTimer != null) {
-      _longpressTimer.cancel();
-      _longpressTimer = null;
     }
   }
 }
