@@ -94,8 +94,15 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// based on a given set of states.
 typedef ColorFunction = Color Function(Set<MaterialState> states);
 
-/// Defines a type of color that can potentially change depending on given
-/// states.
+/// Defines a [Color] that can react to changes in the state of a Material
+/// component, based on a given set of [MaterialState]s.
+///
+/// This is useful for preserving the accessibility of text in different states
+/// of a component. For example, in a [TextButton] with blue text, the text will
+/// become more difficult to read when the button is hovered, focused, or pressed,
+/// because the contrast ratio between the button and the text will dip. To solve
+/// this, you can use [MaterialStateColor] to make the text darker when the
+/// [TextButton] is hovered, focused, or pressed.
 ///
 /// The [colorFunction] member is the callback that will be used to get the color
 /// in a given context.
@@ -126,17 +133,17 @@ class MaterialStateColor extends Color {
   /// Creates a [MaterialStateColor], a color that can return different values
   /// depending on a given [MaterialState].
   ///
-  /// The callback must return a non null color in the default state (empty set).
+  /// The callback must return a non-null color in the default state (empty set).
   MaterialStateColor(this.colorFunction) :
     assert(colorFunction(_defaultState) != null),
     super(colorFunction(_defaultState).value);
 
   /// The callback that returns a [Color] for a given state.
   ///
-  /// The callback must return a non null color in the default state (empty set).
+  /// The callback must return a non-null color in the default state (empty set).
   final ColorFunction colorFunction;
 
-  /// The default state. This is useful
+  /// The default state for a Material component, the empty set of interaction states.
   static const Set<MaterialState> _defaultState = <MaterialState>{};
 
   /// Returns the color for the given set of states if `color` is a

@@ -86,6 +86,13 @@ class RawMaterialButton extends StatefulWidget {
 
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
+  ///
+  /// If [textStyle.color] is a [MaterialStateColor], [MaterialStateColor.getColorInStates]
+  /// will be used for the following [MaterialState]s:
+  ///
+  ///  * [MaterialState.pressed].
+  ///  * [MaterialState.hovered].
+  ///  * [MaterialState.focused].
   final TextStyle textStyle;
 
   /// The color of the button's [Material].
