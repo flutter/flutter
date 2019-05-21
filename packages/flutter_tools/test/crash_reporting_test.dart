@@ -147,8 +147,8 @@ void main() {
       expect(exitCode, 1);
 
       // Verify that the report wasn't sent
-      expect(method, isNull);
-      expect(uri, isNull);
+      expect(method, null);
+      expect(uri, null);
 
       final BufferLogger logger = context.get<Logger>();
       expect(logger.statusText, '');
