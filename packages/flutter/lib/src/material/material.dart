@@ -14,30 +14,30 @@ import 'theme.dart';
 /// Used by [InkHighlight] and [InkSplash], for example.
 typedef RectCallback = Rect Function();
 
-/// Interactive states that some of the Material component widgets can take on when
+/// Interactive states that some of the Material widgets can take on when
 /// receiving input from the user.
 ///
 /// States are defined by https://material.io/design/interaction/states.html#usage.
 ///
-/// Some Material component widgets track their current state in a `Set<MaterialState>`.
+/// Some Material widgets track their current state in a `Set<MaterialState>`.
 ///
 /// See also:
 ///  * [MaterialStateColor], a color that takes a callback function that can
-///    return a different color depending on the state of the component that it
+///    return a different color depending on the state of the widget that it
 ///    is used in.
 enum MaterialState {
-  /// The state when the user drags their mouse cursor over the given component.
+  /// The state when the user drags their mouse cursor over the given widget.
   ///
   /// See: https://material.io/design/interaction/states.html#hover.
   hovered,
-  /// The state when the user navigates with the keyboard to a given component.
+  /// The state when the user navigates with the keyboard to a given widget.
   ///
-  /// This can also sometimes be triggered with a component is tapped. For example,
-  /// when a [TextField] is tapped, it becomes [focus].
+  /// This can also sometimes be triggered when a widget is tapped. For example,
+  /// when a [TextField] is tapped, it becomes [focused].
   ///
   /// See: https://material.io/design/interaction/states.html#focus.
   focused,
-  /// The state when the user is actively pressing down on the given component.
+  /// The state when the user is actively pressing down on the given widget.
   ///
   /// See: https://material.io/design/interaction/states.html#pressed.
   pressed,

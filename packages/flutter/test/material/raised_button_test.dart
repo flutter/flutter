@@ -53,28 +53,27 @@ void main() {
     // Default, not disabled.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-    // Highlighted (pressed).
-    final Offset center = tester.getCenter(find.byType(RaisedButton));
-    await tester.startGesture(center);
-    await tester.pump(); // Start the splash and highlight animations.
-    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    // Focused.
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
 
-
     // Hovered.
+    final Offset center = tester.getCenter(find.byType(RaisedButton));
     final TestGesture gesture = await tester.createGesture(
-        kind: PointerDeviceKind.mouse,
+      kind: PointerDeviceKind.mouse,
     );
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
     await expectLater(tester, meetsGuideline(textContrastGuideline));
-    await gesture.removePointer();
 
-    // Focused.
-    focusNode.requestFocus();
-    await tester.pumpAndSettle();
+    // Highlighted (pressed).
+    await gesture.down(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await gesture.removePointer();
   },
     semanticsEnabled: true,
   );

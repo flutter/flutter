@@ -87,8 +87,8 @@ class RawMaterialButton extends StatefulWidget {
   /// Defines the default text style, with [Material.textStyle], for the
   /// button's [child].
   ///
-  /// If [textStyle.color] is a [MaterialStateColor], [MaterialStateColor.getColorInStates]
-  /// will be used for the following [MaterialState]s:
+  /// If [textStyle.color] is a [MaterialStateColor], [MaterialStateColor.resolveColor]
+  /// is used for the following [MaterialState]s:
   ///
   ///  * [MaterialState.pressed].
   ///  * [MaterialState.hovered].
@@ -241,7 +241,7 @@ class RawMaterialButton extends StatefulWidget {
 class _RawMaterialButtonState extends State<RawMaterialButton> {
   final Set<MaterialState> _states = <MaterialState>{};
 
-  void _updateState(bool value, MaterialState state) {
+  void _updateState(MaterialState state, bool value) {
     if (value) {
       _states.add(state);
     } else {
@@ -252,7 +252,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   void _handleHighlightChanged(bool value) {
     if (_states.contains(MaterialState.pressed) != value) {
       setState(() {
-        _updateState(value, MaterialState.pressed);
+        _updateState(MaterialState.pressed, value);
         if (widget.onHighlightChanged != null) {
           widget.onHighlightChanged(value);
         }
@@ -292,18 +292,18 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   @override
   Widget build(BuildContext context) {
-    final Color effectiveTextColor = MaterialStateColor.getColorInStates(widget.textStyle?.color, _states);
+    final Color effectiveTextColor = MaterialStateColor.resolveColor(widget.textStyle?.color, _states);
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
       onFocusChange: (bool focused) => setState(() {
-        _updateState(focused, MaterialState.focused);
+        _updateState(MaterialState.focused, focused);
       }),
       child: ConstrainedBox(
         constraints: widget.constraints,
         child: Material(
           elevation: _effectiveElevation(),
-          textStyle: widget?.textStyle?.copyWith(color: effectiveTextColor),
+          textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
           shape: widget.shape,
           color: widget.fillColor,
           type: widget.fillColor == null ? MaterialType.transparency : MaterialType.button,
@@ -316,7 +316,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
             focusColor: widget.focusColor,
             hoverColor: widget.hoverColor,
             onHover: (bool hovering) => setState(() {
-              _updateState(hovering, MaterialState.hovered);
+              _updateState(MaterialState.hovered, hovering);
             }),
             onTap: widget.onPressed,
             customBorder: widget.shape,

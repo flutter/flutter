@@ -92,19 +92,19 @@ class MaterialAccentColor extends ColorSwatch<int> {
 
 /// Signature for the function that returns a (potentially different) color
 /// based on a given set of states.
-typedef ColorFunction = Color Function(Set<MaterialState> states);
+typedef ColorResolver = Color Function(Set<MaterialState> states);
 
 /// Defines a [Color] that can react to changes in the state of a Material
 /// component, based on a given set of [MaterialState]s.
 ///
 /// This is useful for preserving the accessibility of text in different states
-/// of a component. For example, in a [TextButton] with blue text, the text will
+/// of a component. For example, in a [FlatButton] with blue text, the text will
 /// become more difficult to read when the button is hovered, focused, or pressed,
-/// because the contrast ratio between the button and the text will dip. To solve
-/// this, you can use [MaterialStateColor] to make the text darker when the
-/// [TextButton] is hovered, focused, or pressed.
+/// because the contrast ratio between the button and the text will decrease. To
+/// solve this, you can use [MaterialStateColor] to make the text darker when the
+/// [FlatButton] is hovered, focused, or pressed.
 ///
-/// The [colorFunction] member is the callback that will be used to get the color
+/// The [resolve] member is the callback that will be used to get the color
 /// in a given context.
 ///
 /// This should only be used as parameters when they are documented to take
@@ -134,26 +134,26 @@ class MaterialStateColor extends Color {
   /// depending on a given [MaterialState].
   ///
   /// The callback must return a non-null color in the default state (empty set).
-  MaterialStateColor(this.colorFunction) :
-    assert(colorFunction(_defaultState) != null),
-    super(colorFunction(_defaultState).value);
+  MaterialStateColor(this.resolve) :
+    assert(resolve(_defaultStates) != null),
+    super(resolve(_defaultStates).value);
 
   /// The callback that returns a [Color] for a given state.
   ///
   /// The callback must return a non-null color in the default state (empty set).
-  final ColorFunction colorFunction;
+  final ColorResolver resolve;
 
   /// The default state for a Material component, the empty set of interaction states.
-  static const Set<MaterialState> _defaultState = <MaterialState>{};
+  static const Set<MaterialState> _defaultStates = <MaterialState>{};
 
   /// Returns the color for the given set of states if `color` is a
   /// [MaterialStateColor], otherwise returns the color itself.
   ///
   /// This is useful for widgets that accept [Color] params, this will work for
   /// both [Color]s and [MaterialStateColor]s.
-  static Color getColorInStates(Color color, Set<MaterialState> states) {
+  static Color resolveColor(Color color, Set<MaterialState> states) {
     if (color is MaterialStateColor) {
-      return color.colorFunction(states);
+      return color.resolve(states);
     }
     return color;
   }
