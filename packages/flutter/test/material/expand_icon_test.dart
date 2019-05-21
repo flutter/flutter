@@ -232,7 +232,7 @@ void main() {
     IconTheme iconTheme;
 
     await tester.pumpWidget(wrap(
-      child: ExpandIcon(
+      child: const ExpandIcon(
         isExpanded: false,
         onPressed: null,
         disabledColor: Colors.cyan,
@@ -243,7 +243,7 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.cyan));
 
     await tester.pumpWidget(wrap(
-      child: ExpandIcon(
+      child: const ExpandIcon(
         isExpanded: false,
         onPressed: null,
         color: Colors.indigo,
@@ -255,14 +255,14 @@ void main() {
     expect(iconTheme.data.color, equals(Colors.cyan));
 
     await tester.pumpWidget(wrap(
-      child: ExpandIcon(
+      child: const ExpandIcon(
         isExpanded: true,
         onPressed: null,
         disabledColor: Colors.cyan,
       ),
     ));
     await tester.pumpWidget(wrap(
-      child: ExpandIcon(
+      child: const ExpandIcon(
         isExpanded: true,
         onPressed: null,
         expandedColor: Colors.teal,
