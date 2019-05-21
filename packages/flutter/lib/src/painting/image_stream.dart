@@ -157,8 +157,6 @@ typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTr
 ///
 ///  * [ImageChunkListener], the means by which callers get notified of
 ///    these events.
-///  * [Image.imageLoadingBuilder], which allows callers to visually represent
-///    the loading progress of an image at the widget layer.
 @immutable
 class ImageChunkEvent extends Diagnosticable {
   /// Creates a new chunk event.

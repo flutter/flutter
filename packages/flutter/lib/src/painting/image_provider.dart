@@ -519,6 +519,9 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   }
 
   // Do not access this field directly; use [_httpClient] instead.
+  // We set `autoUncompress` to false to ensure that we can trust the value of
+  // the `Content-Length` HTTP header. We automatically uncompress the content
+  // in our call to [consolidateHttpClientResponseBytes].
   static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
