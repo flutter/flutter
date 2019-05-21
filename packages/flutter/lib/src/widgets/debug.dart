@@ -85,7 +85,7 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 /// Adds [Timeline] events for every Widget built.
 ///
 /// For details on how to use [Timeline] events in the Dart Observatory to
-/// optimize your app, see https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md
+/// optimize your app, see https://flutter.dev/docs/testing/debugging#tracing-any-dart-code-performance
 ///
 /// See also [debugProfilePaintsEnabled], which does something similar but for
 /// painting, and [debugPrintRebuildDirtyWidgets], which does something similar
