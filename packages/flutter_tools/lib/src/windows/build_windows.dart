@@ -11,14 +11,28 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
+import 'msbuild_utils.dart';
 
-/// Builds the Windows project through the project bat script.
-Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo) async {
+/// Builds the Windows project using msbuild.
+Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
+  final Map<String, String> environment = <String, String>{
+    'FLUTTER_ROOT': Cache.flutterRoot,
+    'FLUTTER_TARGET': target,
+    'PROJECT_DIR': windowsProject.project.directory.path,
+    'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
+  };
+  writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
+
+  final String vcvarsScript = await findVcvars();
+  if (vcvarsScript == null) {
+    throwToolExit('Unable to build: could not find vcvars64.bat');
+  }
+
+  final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
   final Process process = await processManager.start(<String>[
-    windowsProject.buildScript.path,
-    Cache.flutterRoot,
-    buildInfo.isDebug ? 'debug' : 'release',
-    buildInfo?.trackWidgetCreation == true ? 'track-widget-creation' : 'no-track-widget-creation',
+    vcvarsScript, '&&', 'msbuild',
+    windowsProject.vcprojFile.path,
+    '/p:Configuration=$configuration',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Windows application...',

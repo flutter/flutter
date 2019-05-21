@@ -895,16 +895,131 @@ void main() {
   });
 
   testWidgets('CupertinoNavigationBarBackButton shows an error when placed in a route that cannot be popped', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBarBackButton(),
+      ),
+    );
+
+    final dynamic exception = tester.takeException();
+    expect(exception, isAssertionError);
+    expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
+  });
+
+  testWidgets('CupertinoNavigationBarBackButton with a custom onPressed callback can be placed anywhere', (WidgetTester tester) async {
+    bool backPressed = false;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoNavigationBarBackButton(
+          onPressed: () => backPressed = true,
+        ),
+      ),
+    );
+
+    expect(tester.takeException(), isNull);
+    expect(find.text(String.fromCharCode(CupertinoIcons.back.codePoint)), findsOneWidget);
+
+    await tester.tap(find.byType(CupertinoNavigationBarBackButton));
+
+    expect(backPressed, true);
+  });
+
+  testWidgets(
+    'Manually inserted CupertinoNavigationBarBackButton still automatically '
+        'show previous page title when possible',
+    (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
-          home: CupertinoNavigationBarBackButton(),
+          home: Placeholder(),
         ),
       );
 
-      final dynamic exception = tester.takeException();
-      expect(exception, isAssertionError);
-      expect(exception.toString(), contains('CupertinoNavigationBarBackButton should only be used in routes that can be popped'));
-  });
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'An iPod',
+          builder: (BuildContext context) {
+            return const CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(),
+              child: Placeholder(),
+            );
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'A Phone',
+          builder: (BuildContext context) {
+            return const CupertinoNavigationBarBackButton();
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.widgetWithText(CupertinoButton, 'An iPod'), findsOneWidget);
+    }
+  );
+
+  testWidgets(
+    'CupertinoNavigationBarBackButton onPressed overrides default pop behavior',
+    (WidgetTester tester) async {
+      bool backPressed = false;
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Placeholder(),
+        ),
+      );
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'An iPod',
+          builder: (BuildContext context) {
+            return const CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(),
+              child: Placeholder(),
+            );
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      tester.state<NavigatorState>(find.byType(Navigator)).push(
+        CupertinoPageRoute<void>(
+          title: 'A Phone',
+          builder: (BuildContext context) {
+            return CupertinoPageScaffold(
+              navigationBar: CupertinoNavigationBar(
+                leading: CupertinoNavigationBarBackButton(
+                  onPressed: () => backPressed = true,
+                ),
+              ),
+              child: const Placeholder(),
+            );
+          },
+        )
+      );
+
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      await tester.tap(find.byType(CupertinoNavigationBarBackButton));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+
+      // The second page is still on top and didn't pop.
+      expect(find.text('A Phone'), findsOneWidget);
+      // Custom onPressed called.
+      expect(backPressed, true);
+    }
+  );
 }
 
 class _ExpectStyles extends StatelessWidget {

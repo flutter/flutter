@@ -428,7 +428,7 @@ class RenderEditable extends RenderBox {
   int _handleHorizontalArrows(bool rightArrow, bool leftArrow, bool shift, int newOffset) {
     // Set the new offset to be +/- 1 depending on which arrow is pressed
     // If shift is down, we also want to update the previous cursor location
-    if (rightArrow && _extentOffset < text.text.length) {
+    if (rightArrow && _extentOffset < text.toPlainText().length) {
       newOffset += 1;
       if (shift)
         _previousCursorLocation += 1;

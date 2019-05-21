@@ -29,7 +29,7 @@ void main() {
     double refreshIndicatorExtent,
   ) => mockHelper.builder(context, refreshState, pulledExtent, refreshTriggerPullDistance, refreshIndicatorExtent);
 
-  final Function onRefresh = () => mockHelper.refreshTask();
+  Future<void> onRefresh() => mockHelper.refreshTask();
 
   setUp(() {
     mockHelper = MockHelper();
@@ -52,6 +52,7 @@ void main() {
         }
         return refreshIndicator;
       });
+
     when(mockHelper.refreshTask()).thenAnswer((_) => refreshCompleter.future);
   });
 
@@ -370,6 +371,95 @@ void main() {
         verifyNoMoreInteractions(mockHelper);
 
         debugDefaultTargetPlatformOverride = null;
+      },
+    );
+
+    testWidgets(
+      'refreshing task keeps the sliver expanded forever until completes with error',
+      (WidgetTester tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        final FlutterError error = FlutterError('Oops');
+        double errorCount = 0;
+
+        runZoned(() async {
+          refreshCompleter = Completer<void>.sync();
+
+          await tester.pumpWidget(
+            Directionality(
+              textDirection: TextDirection.ltr,
+              child: CustomScrollView(
+                slivers: <Widget>[
+                  CupertinoSliverRefreshControl(
+                    builder: builder,
+                    onRefresh: onRefresh,
+                  ),
+                  buildAListOfStuff(),
+                ],
+              ),
+            ),
+          );
+
+          await tester.drag(find.text('0'), const Offset(0.0, 150.0), touchSlopY: 0);
+          await tester.pump();
+          // Let it start snapping back.
+          await tester.pump(const Duration(milliseconds: 50));
+
+          verifyInOrder(<void>[
+            mockHelper.builder(
+              any,
+              RefreshIndicatorMode.armed,
+              150.0,
+              100.0, // Default value.
+              60.0, // Default value.
+            ),
+            mockHelper.refreshTask(),
+            mockHelper.builder(
+              any,
+              RefreshIndicatorMode.armed,
+              argThat(moreOrLessEquals(127.10396988577114)),
+              100.0, // Default value.
+              60.0, // Default value.
+            ),
+          ]);
+
+          // Reaches refresh state and sliver's at 60.0 in height after a while.
+          await tester.pump(const Duration(seconds: 1));
+          verify(mockHelper.builder(
+            any,
+            RefreshIndicatorMode.refresh,
+            60.0,
+            100.0, // Default value.
+            60.0, // Default value.
+          ));
+
+          // Stays in that state forever until future completes.
+          await tester.pump(const Duration(seconds: 1000));
+          verifyNoMoreInteractions(mockHelper);
+          expect(
+            tester.getTopLeft(find.widgetWithText(Container, '0')),
+            const Offset(0.0, 60.0),
+          );
+
+          refreshCompleter.completeError(error);
+          await tester.pump();
+
+          verify(mockHelper.builder(
+            any,
+            RefreshIndicatorMode.done,
+            60.0,
+            100.0, // Default value.
+            60.0, // Default value.
+          ));
+          verifyNoMoreInteractions(mockHelper);
+        },
+        onError: (dynamic e) {
+          expect(e, error);
+          expect(errorCount, 0);
+          errorCount++;
+        }
+      );
+
+      debugDefaultTargetPlatformOverride = null;
       },
     );
 

@@ -14,9 +14,11 @@ import 'material_localizations.dart';
 import 'theme.dart';
 
 const double _kHandleSize = 22.0;
+
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
+const double _kToolbarHeight = 44.0;
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
@@ -50,7 +52,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     return Material(
       elevation: 1.0,
       child: Container(
-        height: 44.0,
+        height: _kToolbarHeight,
         child: Row(mainAxisSize: MainAxisSize.min, children: items),
       ),
     );
@@ -130,16 +132,39 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   /// Builder for material-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  ) {
     assert(debugCheckHasMediaQuery(context));
     assert(debugCheckHasMaterialLocalizations(context));
+
+    // The toolbar should appear below the TextField
+    // when there is not enough space above the TextField to show it.
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
+        ? endpoints[1]
+        : null;
+    final double x = (endTextSelectionPoint == null)
+        ? startTextSelectionPoint.point.dx
+        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
+    final double availableHeight
+        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
+    final double y = (availableHeight < _kToolbarHeight)
+        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight + _kToolbarScreenPadding
+        : startTextSelectionPoint.point.dy - globalEditableRegion.height;
+    final Offset preciseMidpoint = Offset(x, y);
+
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
       child: CustomSingleChildLayout(
         delegate: _TextSelectionToolbarLayout(
           MediaQuery.of(context).size,
           globalEditableRegion,
-          position,
+          preciseMidpoint,
         ),
         child: _TextSelectionToolbar(
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,

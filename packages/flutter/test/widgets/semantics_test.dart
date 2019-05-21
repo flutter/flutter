@@ -443,7 +443,7 @@ void main() {
           semanticsOwner.performAction(expectedId, action, true);
           break;
         case SemanticsAction.setSelection:
-          semanticsOwner.performAction(expectedId, action, <String, int>{
+          semanticsOwner.performAction(expectedId, action, <dynamic, dynamic>{
             'base': 4,
             'extent': 5,
           });
