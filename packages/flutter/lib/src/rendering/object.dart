@@ -199,8 +199,8 @@ class PaintingContext extends ClipContext {
         return true;
       }());
     }
-    assert(child._layer != null);
-    child._layer.offset = offset;
+    assert(child._layer is OffsetLayer);
+    child.offsetLayer.offset = offset;
     appendLayer(child._layer);
   }
 
@@ -1804,19 +1804,28 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   @protected
   bool get alwaysNeedsCompositing => false;
 
-  OffsetLayer _layer;
+  ContainerLayer _layer;
   /// The compositing layer that this render object uses to repaint.
+  ///
+  /// To access the layer in debug code, even when it might be inappropriate to
+  /// access it (e.g. because it is dirty), consider [debugLayer].
+  ContainerLayer get layer {
+    assert(!_needsPaint);
+    return _layer;
+  }
+
+  /// The offset layer that this render object uses to repaint.
   ///
   /// Call only when [isRepaintBoundary] is true and the render object has
   /// already painted.
   ///
   /// To access the layer in debug code, even when it might be inappropriate to
   /// access it (e.g. because it is dirty), consider [debugLayer].
-  OffsetLayer get layer {
-    assert(isRepaintBoundary, 'You can only access RenderObject.layer for render objects that are repaint boundaries.');
-    assert(!_needsPaint);
-    return _layer;
+  OffsetLayer get offsetLayer {
+    assert(isRepaintBoundary, 'You can only access RenderObject.offsetLayer for render objects that are repaint boundaries.');
+    return layer;
   }
+
   /// In debug mode, the compositing layer that this render object uses to repaint.
   ///
   /// This getter is intended for debugging purposes only. In release builds, it
@@ -1824,8 +1833,8 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   /// is dirty.
   ///
   /// For production code, consider [layer].
-  OffsetLayer get debugLayer {
-    OffsetLayer result;
+  ContainerLayer get debugLayer {
+    ContainerLayer result;
     assert(() {
       result = _layer;
       return true;

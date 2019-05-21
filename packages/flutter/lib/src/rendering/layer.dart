@@ -478,6 +478,34 @@ class ContainerLayer extends Layer {
   Layer get lastChild => _lastChild;
   Layer _lastChild;
 
+  /// Consider this layer as the root and build a scene (a tree of layers)
+  /// in the engine.
+  ui.Scene buildScene(ui.SceneBuilder builder) {
+    List<PictureLayer> temporaryLayers;
+    assert(() {
+      if (debugCheckElevationsEnabled) {
+        temporaryLayers = _debugCheckElevations();
+      }
+      return true;
+    }());
+    updateSubtreeNeedsAddToScene();
+    addToScene(builder);
+    final ui.Scene scene = builder.build();
+    assert(() {
+      // We should remove any layers that got added to highlight the incorrect
+      // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
+      // or potentially leaving a physical model that is now correct highlighted
+      // in red.
+      if (temporaryLayers != null) {
+        for (PictureLayer temporaryLayer in temporaryLayers) {
+          temporaryLayer.remove();
+        }
+      }
+      return true;
+    }());
+    return scene;
+  }
+
   bool _debugUltimatePreviousSiblingOf(Layer child, { Layer equals }) {
     assert(child.attached == attached);
     while (child.previousSibling != null) {
@@ -865,34 +893,6 @@ class OffsetLayer extends ContainerLayer {
     assert(child != null);
     assert(transform != null);
     transform.multiply(Matrix4.translationValues(offset.dx, offset.dy, 0.0));
-  }
-
-  /// Consider this layer as the root and build a scene (a tree of layers)
-  /// in the engine.
-  ui.Scene buildScene(ui.SceneBuilder builder) {
-    List<PictureLayer> temporaryLayers;
-    assert(() {
-      if (debugCheckElevationsEnabled) {
-        temporaryLayers = _debugCheckElevations();
-      }
-      return true;
-    }());
-    updateSubtreeNeedsAddToScene();
-    addToScene(builder);
-    final ui.Scene scene = builder.build();
-    assert(() {
-      // We should remove any layers that got added to highlight the incorrect
-      // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
-      // or potentially leaving a physical model that is now correct highlighted
-      // in red.
-      if (temporaryLayers != null) {
-        for (PictureLayer temporaryLayer in temporaryLayers) {
-          temporaryLayer.remove();
-        }
-      }
-      return true;
-    }());
-    return scene;
   }
 
   @override

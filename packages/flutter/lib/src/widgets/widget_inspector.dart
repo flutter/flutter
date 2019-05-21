@@ -558,7 +558,7 @@ class _ScreenshotPaintingContext extends PaintingContext {
       // want to capture debugPaint information as well.
       data.containerLayer.append(_ProxyLayer(repaintBoundary.layer));
       data.foundTarget = true;
-      data.screenshotOffset = repaintBoundary.layer.offset;
+      data.screenshotOffset = repaintBoundary.offsetLayer.offset;
     } else {
       // Repaint everything under the repaint boundary.
       // We call debugInstrumentRepaintCompositedChild instead of paintChild as
