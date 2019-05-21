@@ -718,13 +718,11 @@ class VM extends ServiceObjectOwner {
 
   /// The number of bytes allocated (e.g. by malloc) in the native heap.
   int _heapAllocatedMemoryUsage;
-  int get heapAllocatedMemoryUsage {
-    return _heapAllocatedMemoryUsage == null ? 0 : _heapAllocatedMemoryUsage;
-  }
+  int get heapAllocatedMemoryUsage => _heapAllocatedMemoryUsage ?? 0;
 
   /// The peak resident set size for the process.
   int _maxRSS;
-  int get maxRSS => _maxRSS == null ? 0 : _maxRSS;
+  int get maxRSS => _maxRSS ?? 0;
 
   // The embedder's name, Flutter or dart_runner.
   String _embedder;

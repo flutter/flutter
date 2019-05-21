@@ -20,6 +20,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
     this.alignment = Alignment.center,
     this.curve = Curves.linear,
     @required this.duration,
+    this.reverseDuration,
     @required this.vsync,
   }) : super(key: key, child: child);
 
@@ -52,6 +53,12 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
   /// size.
   final Duration duration;
 
+  /// The duration when transitioning this widget's size to match the child's
+  /// size when going in reverse.
+  ///
+  /// If not specified, defaults to [duration].
+  final Duration reverseDuration;
+
   /// The [TickerProvider] for this widget.
   final TickerProvider vsync;
 
@@ -60,6 +67,7 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
     return RenderAnimatedSize(
       alignment: alignment,
       duration: duration,
+      reverseDuration: reverseDuration,
       curve: curve,
       vsync: vsync,
       textDirection: Directionality.of(context),
@@ -71,8 +79,17 @@ class AnimatedSize extends SingleChildRenderObjectWidget {
     renderObject
       ..alignment = alignment
       ..duration = duration
+      ..reverseDuration = reverseDuration
       ..curve = curve
       ..vsync = vsync
       ..textDirection = Directionality.of(context);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: Alignment.topCenter));
+    properties.add(IntProperty('duration', duration.inMilliseconds, unit: 'ms'));
+    properties.add(IntProperty('reverseDuration', reverseDuration?.inMilliseconds, unit: 'ms', defaultValue: null));
   }
 }

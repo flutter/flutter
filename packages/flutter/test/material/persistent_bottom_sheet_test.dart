@@ -406,8 +406,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('modal bottom sheet'), findsOneWidget);
 
-    // Dismiss the modal bottomSheet
-    await tester.tap(find.text('modal bottom sheet'));
+    // Dismiss the modal bottomSheet by tapping above the sheet
+    await tester.tapAt(const Offset(20.0, 20.0));
     await tester.pumpAndSettle();
     expect(find.text('modal bottom sheet'), findsNothing);
     expect(find.text('showModalBottomSheet'), findsOneWidget);

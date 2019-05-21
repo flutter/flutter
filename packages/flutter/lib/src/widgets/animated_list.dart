@@ -44,6 +44,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 /// use the static [of] method from an item's input callback.
 ///
 /// This widget is similar to one created by [ListView.builder].
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ZtfItHwFlZ8}
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted or removed.
   const AnimatedList({
