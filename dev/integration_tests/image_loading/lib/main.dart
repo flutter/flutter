@@ -44,9 +44,17 @@ class _ImageLoaderState extends State<ImageLoader> {
     // http client.
     final NetworkImage image = NetworkImage('https://github.com/flutter/flutter');
     final ImageStream stream = image.resolve(ImageConfiguration.empty);
-    stream.addListener((ImageInfo info, bool syncCall) {}, onError: (dynamic error, StackTrace stackTrace) {
-      print('ERROR caught by framework');
-    });
+    ImageStreamListener listener;
+    listener = ImageStreamListener(
+      (ImageInfo info, bool syncCall) {
+        stream.removeListener(listener);
+      },
+      onError: (dynamic error, StackTrace stackTrace) {
+        print('ERROR caught by framework');
+        stream.removeListener(listener);
+      },
+    );
+    stream.addListener(listener);
     super.initState();
   }
 
