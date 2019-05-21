@@ -85,11 +85,6 @@ Future<int> starter(
       StringSink output,
     }) async {
   ArgResults options;
-  frontend.argParser
-    ..addFlag('track-widget-creation',
-      help: 'Run a kernel transformer to track creation locations for widgets.',
-      defaultsTo: false);
-
   try {
     options = frontend.argParser.parse(args);
   } catch (error) {
