@@ -65,9 +65,9 @@ class ExpandIcon extends StatefulWidget {
 
   /// The color of the icon.
   ///
-  /// Defaults to [Colors.black87] when the theme's
+  /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white] when it is [Brightness.dark]
+  /// [Colors.white70] when it is [Brightness.dark]
   final Color color;
 
   /// The color of the icon when it is disabled,
@@ -80,7 +80,7 @@ class ExpandIcon extends StatefulWidget {
 
   /// The color of the icon when the icon is expanded.
   ///
-  /// Defaults to [Colors.black87] when the theme's
+  /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white] when it is [Brightness.dark]
   final Color expandedColor;
@@ -141,25 +141,9 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
 
     switch(Theme.of(context).brightness) {
       case Brightness.light:
-        return Colors.black87;
+        return Colors.black54;
       case Brightness.dark:
-        return Colors.white;
-    }
-
-    assert(false);
-    return null;
-  }
-
-  Color get _disabledIconColor {
-    if (widget.disabledColor != null) {
-      return widget.disabledColor;
-    }
-
-    switch(Theme.of(context).brightness) {
-      case Brightness.light:
-        return Colors.black38;
-      case Brightness.dark:
-        return Colors.white50;
+        return Colors.white70;
     }
 
     assert(false);
@@ -178,7 +162,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       child: IconButton(
         padding: widget.padding,
         color: _iconColor,
-        disabledColor: _disabledIconColor,
+        disabledColor: widget.disabledColor,
         onPressed: widget.onPressed == null ? null : _handlePressed,
         icon: RotationTransition(
           turns: _iconTurns,

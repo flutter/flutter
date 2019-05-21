@@ -18,6 +18,8 @@ void main() {
   testWidgets('ExpandIcon test', (WidgetTester tester) async {
     bool expanded = false;
     IconTheme iconTheme;
+
+    // Light mode tests
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
         onPressed: (bool isExpanded) {
@@ -25,33 +27,64 @@ void main() {
         }
       ),
     ));
+    await tester.pumpAndSettle();
 
     expect(expanded, isFalse);
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.black87));
+    expect(iconTheme.data.color, equals(Colors.black54));
 
     await tester.tap(find.byType(ExpandIcon));
     await tester.pumpAndSettle();
     expect(expanded, isTrue);
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.black87));
+    expect(iconTheme.data.color, equals(Colors.black54));
 
     await tester.tap(find.byType(ExpandIcon));
     await tester.pumpAndSettle();
     expect(expanded, isFalse);
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.black87));
+    expect(iconTheme.data.color, equals(Colors.black54));
+
+    // Dark Mode tests
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        onPressed: (bool isExpanded) {
+          expanded = !expanded;
+        },
+      ),
+      theme: ThemeData(brightness: Brightness.dark),
+    ));
+    await tester.pumpAndSettle();
+
+    expect(expanded, isFalse);
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.white70));
+
+    await tester.tap(find.byType(ExpandIcon));
+    await tester.pumpAndSettle();
+    expect(expanded, isTrue);
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.white70));
+
+    await tester.tap(find.byType(ExpandIcon));
+    await tester.pumpAndSettle();
+    expect(expanded, isFalse);
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.white70));
   });
 
   testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
     IconTheme iconTheme;
+    // Light mode test
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(onPressed: null),
     ));
+    await tester.pumpAndSettle();
 
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.black38));
 
+    // Dark mode test
     await tester.pumpWidget(wrap(
       child: const ExpandIcon(onPressed: null),
       theme: ThemeData(brightness: Brightness.dark),
