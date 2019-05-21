@@ -110,17 +110,22 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   // The double tap recognizer can be in one of four states. There's no
   // explicit enum for the states, because they are already captured by
   // the state of existing fields. Specifically:
-  // Waiting on first tap: In this state, the _trackers list is empty, and
+  //
+  // - Waiting on first tap: In this state, the _trackers list is empty, and
   // _firstTap is null.
-  // First tap in progress: In this state, the _trackers list contains all
+  //
+  // - First tap in progress: In this state, the _trackers list contains all
   // the states for taps that have begun but not completed. This list can
   // have more than one entry if two pointers begin to tap.
-  // Waiting on second tap: In this state, one of the in-progress taps has
+  //
+  // - Waiting on second tap: In this state, one of the in-progress taps has
   // completed successfully. The _trackers list is again empty, and
   // _firstTap records the successful tap.
-  // Second tap in progress: Much like the "first tap in progress" state, but
+  //
+  // - Second tap in progress: Much like the "first tap in progress" state, but
   // _firstTap is non-null. If a tap completes successfully while in this
   // state, the callback is called and the state is reset.
+  //
   // There are various other scenarios that cause the state to reset:
   // - All in-progress taps are rejected (by time, distance, pointercancel, etc)
   // - The long timer between taps expires
@@ -130,22 +135,30 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// quick succession.
   GestureDoubleTapCallback onDoubleTap;
 
+  GestureTapDownCallback onFirstTapDown;
+  GestureTapUpCallback onFirstTapUp;
+
+  GestureTapDownCallback onSecondTapDown;
+  GestureTapUpCallback onSecondTapUp;
+
+  GestureTapCancelCallback onDoubleTapCancel;
+
   Timer _doubleTapTimer;
   _TapTracker _firstTap;
   final Map<int, _TapTracker> _trackers = <int, _TapTracker>{};
 
   @override
   void addAllowedPointer(PointerEvent event) {
-    if (_firstTap != null) {
-      if (!_firstTap.isWithinTolerance(event, kDoubleTapSlop)) {
-        // Ignore out-of-bounds second taps.
-        return;
-      } else if (!_firstTap.hasElapsedMinTime()) {
-        // Restart when the second tap is too close to the first.
-        _reset();
-        return addAllowedPointer(event);
-      }
+    if (_firstTap != null &&
+      !(_firstTap.isWithinTolerance(event, kDoubleTapSlop) &&
+        _firstTap.hasElapsedMinTime())) {
+      // Restart if the second tap is either too close in time to the first,
+      // or out-of-bounds.
+      _reset();
+      addAllowedPointer(event);
+      return;
     }
+
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
       event: event,
