@@ -143,8 +143,8 @@ void main() {
         chunkEvents.add(event);
       },
     ));
-    streamController.add(const ImageChunkEvent(1, 3));
-    streamController.add(const ImageChunkEvent(2, 3));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
     await tester.idle();
 
     expect(chunkEvents.length, 2);
@@ -164,7 +164,7 @@ void main() {
       scale: 1.0,
     );
 
-    streamController.add(const ImageChunkEvent(1, 3));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
     await tester.idle();
     imageStream.addListener(ImageStreamListener(
       (ImageInfo image, bool synchronousCall) { },
@@ -172,7 +172,7 @@ void main() {
         chunkEvents.add(event);
       },
     ));
-    streamController.add(const ImageChunkEvent(2, 3));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
     await tester.idle();
 
     expect(chunkEvents.length, 1);
@@ -197,7 +197,7 @@ void main() {
       },
     ));
     streamController.addError(Error());
-    streamController.add(const ImageChunkEvent(2, 3));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
     await tester.idle();
 
     expect(tester.takeException(), isNotNull);

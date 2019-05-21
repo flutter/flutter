@@ -554,7 +554,10 @@ class NetworkImage extends ImageProvider<NetworkImage> {
         response,
         client: _httpClient,
         onBytesReceived: (int cumulative, int total) {
-          chunkEvents.add(ImageChunkEvent(cumulative, total));
+          chunkEvents.add(ImageChunkEvent(
+            cumulativeBytesLoaded: cumulative,
+            expectedTotalBytes: total == -1 ? null : total,
+          ));
         },
       );
       if (bytes.lengthInBytes == 0)

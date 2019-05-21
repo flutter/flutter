@@ -160,9 +160,12 @@ typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTr
 @immutable
 class ImageChunkEvent extends Diagnosticable {
   /// Creates a new chunk event.
-  const ImageChunkEvent(this.cumulativeBytesLoaded, this.expectedTotalBytes)
+  const ImageChunkEvent({
+    @required this.cumulativeBytesLoaded,
+    @required this.expectedTotalBytes,
+  })
       : assert(cumulativeBytesLoaded >= 0),
-        assert(expectedTotalBytes >= -1);
+        assert(expectedTotalBytes == null || expectedTotalBytes >= 0);
 
   /// The number of bytes that have been received across the wire thus far.
   final int cumulativeBytesLoaded;
@@ -173,11 +176,9 @@ class ImageChunkEvent extends Diagnosticable {
   /// This value is not necessarily equal to the expected _size_ of the image
   /// in bytes, as the bytes required to load the image may be compressed.
   ///
-  /// This value will be -1 if the number is not known in advance. In this way,
-  /// this value matches the semantics of the `Content-Length` HTTP response
-  /// header.
+  /// This value will be null if the number is not known in advance.
   ///
-  /// When this value is -1, the chunk event may still be useful as an
+  /// When this value is null, the chunk event may still be useful as an
   /// indication that data is loading (and how much), but it cannot represent a
   /// loading completion percentage.
   final int expectedTotalBytes;
