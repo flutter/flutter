@@ -374,7 +374,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.1.png'),
+      matchesGoldenFile('text_field_cursor_test.0.2.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -404,7 +404,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.1.png'),
+      matchesGoldenFile('text_field_cursor_test.1.2.png'),
     );
   }, skip: !Platform.isLinux);
 
