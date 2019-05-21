@@ -22,8 +22,6 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
-import 'navigator.dart';
-import 'routes.dart';
 import 'scroll_controller.dart';
 import 'scroll_physics.dart';
 import 'scrollable.dart';
@@ -198,37 +196,46 @@ class TextEditingController extends ValueNotifier<TextEditingValue> {
 }
 
 /// TODO
-abstract class TextContextMenuControls {
+class TextContextMenuFactory {
   /// TODO
-  TextContextMenuControls();
-
-  /// TODO
-  ModalRoute<ContextMenuAction> buildRoute({
-    @required BuildContext context,
-    @required Offset globalPosition,
-    @required EditableTextState editableText,
-  });
-
-  /// TODO
-  RelativeRect getLocalPosition({
-    @required Offset globalPosition,
-    @required BuildContext context
-  }) {
-    return RelativeRect.fromSize(globalPosition & Size.zero, MediaQuery.of(context).size);
+  factory TextContextMenuFactory() {
+    return _instance ??= TextContextMenuFactory._();
   }
 
+  TextContextMenuFactory._();
+
+  static TextContextMenuFactory _instance;
+
   /// TODO
-  Future<ContextMenuAction> showMenu({
+  ContextMenuContent buildContent({
     @required BuildContext context,
-    @required Offset globalPosition,
     @required EditableTextState editableText,
   }) {
-    final ModalRoute<ContextMenuAction> route = buildRoute(
-      context: context,
-      globalPosition: globalPosition,
-      editableText: editableText,
-    );
-    return Navigator.push<ContextMenuAction>(context, route);
+    final TextSelectionControls controls = editableText.widget.selectionControls;
+    final List<ContextMenuEntry> entries = <ContextMenuEntry>[
+      ContextMenuItem(
+        text: 'Cut',
+        enabled: controls.canCut(editableText),
+        action: Action(callback: (_) async => controls.handleCut(editableText)),
+      ),
+      ContextMenuItem(
+        text: 'Copy',
+        enabled: controls.canCopy(editableText),
+        action: Action(callback: (_) async => controls.handleCopy(editableText)),
+      ),
+      ContextMenuItem(
+        text: 'Paste',
+        enabled: controls.canPaste(editableText),
+        action: Action(callback: (_) async => controls.handlePaste(editableText)),
+      ),
+      ContextMenuDivider(),
+      ContextMenuItem(
+        text: 'Select all',
+        enabled: controls.canSelectAll(editableText),
+        action: Action(callback: (_) async => controls.handleSelectAll(editableText)),
+      ),
+    ];
+    return ContextMenuContent(entries: entries);
   }
 }
 
@@ -328,7 +335,8 @@ class EditableText extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
-    this.contextMenuControls,
+    this.contextMenuFactory,
+    this.renderContextMenu,
     this.onContextMenuChanged,
     this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
@@ -687,7 +695,10 @@ class EditableText extends StatefulWidget {
   final SelectionChangedCallback onSelectionChanged;
 
   /// TODO
-  final TextContextMenuControls contextMenuControls;
+  final TextContextMenuFactory contextMenuFactory;
+
+  /// TODO
+  final RenderContextMenu renderContextMenu;
 
   /// TODO
   final ContextMenuChangedCallback onContextMenuChanged;
@@ -1209,9 +1220,14 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
   }
 
+  bool get _contextMenuEnabled {
+    return widget.contextMenuFactory != null &&
+           widget.renderContextMenu != null;
+  }
+
   Future<void> _handleContextTap(ContextTapDetails details) async {
     // Callback is only assigned when contextMenuControls is not null
-    assert(widget.contextMenuControls != null);
+    assert(_contextMenuEnabled);
 
     // Focus and select the clicked position
     final TextSelection selection = _value.selection;
@@ -1234,15 +1250,19 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     });
     if (widget.onContextMenuChanged != null)
       widget.onContextMenuChanged(true);
-    final ContextMenuAction value = await widget.contextMenuControls.showMenu(
+    final ContextMenuContent content = widget.contextMenuFactory.buildContent(
       context: context,
-      globalPosition: details.globalPosition,
       editableText: this,
+    );
+    final ActionBase value = await widget.renderContextMenu.showMenu(
+      content: content,
+      globalPosition: details.globalPosition,
+      context: context,
     );
 
     // Execute action
     if (value != null)
-      await value(ContextMenuActionDetails());
+      await value.execute(context);
 
     // Clean-up after closing menu
     setState(() {
@@ -1558,7 +1578,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
               onCaretChanged: _handleCaretChanged,
-              onContextTap: widget.contextMenuControls != null ? _handleContextTap : null,
+              onContextTap: _contextMenuEnabled ? _handleContextTap : null,
               rendererIgnoresPointer: widget.rendererIgnoresPointer,
               cursorWidth: widget.cursorWidth,
               cursorRadius: widget.cursorRadius,

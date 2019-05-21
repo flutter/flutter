@@ -11,6 +11,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 
+import '../widgets/context_menu.dart';
 import 'context_menu.dart';
 import 'debug.dart';
 import 'feedback.dart';
@@ -903,7 +904,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
     Radius cursorRadius = widget.cursorRadius;
-    TextContextMenuControls contextMenuControls;
+    TextContextMenuFactory contextMenuFactory;
+    RenderContextMenu renderContextMenu;
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
@@ -930,7 +932,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         paintCursorAboveText = false;
         cursorOpacityAnimates = false;
         cursorColor ??= themeData.cursorColor;
-        contextMenuControls = materialTextContextMenuControls;
+        contextMenuFactory = TextContextMenuFactory();
+        renderContextMenu = materialRenderContextMenu;
         break;
     }
 
@@ -958,7 +961,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
-        contextMenuControls: contextMenuControls,
+        contextMenuFactory: contextMenuFactory,
+        renderContextMenu: renderContextMenu,
         onContextMenuChanged: _handleContextMenuChanged,
         onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
