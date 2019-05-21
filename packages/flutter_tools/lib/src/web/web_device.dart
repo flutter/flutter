@@ -108,7 +108,7 @@ class WebDevice extends Device {
     bool ipv6 = false,
   }) async {
     final Status status = logger.startProgress('Compiling ${package.name} to JavaScript...', timeout: null);
-    final int result = await webCompiler.compile(target: mainPath, minify: false, enabledAssertions: true);
+    final int result = await webCompiler.compileDart2js(target: mainPath, minify: false, enabledAssertions: true);
     status.stop();
     if (result != 0) {
       printError('Failed to compile ${package.name} to JavaScript');

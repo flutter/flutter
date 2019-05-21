@@ -21,7 +21,7 @@ void main() {
 
     setUp(() async {
       flutterProject = FlutterProject.fromPath(fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'web'));
-      when(mockWebCompiler.compile(
+      when(mockWebCompiler.compileDart2js(
         target: anyNamed('target'),
         minify: anyNamed('minify'),
         enabledAssertions: anyNamed('enabledAssertions'),
