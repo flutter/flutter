@@ -44,7 +44,6 @@ abstract class Command {
   ///
   ///  * [WidgetsBinding.isRootWidgetAttached], which indicates whether the
   ///    widget tree has been initialized.
-  @protected
   bool get requiresRootWidgetAttached => true;
 
   /// Serializes this command to parameter name/value pairs.
