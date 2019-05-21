@@ -218,7 +218,7 @@ class PictureLayer extends Layer {
   ui.Picture get picture => _picture;
   ui.Picture _picture;
   set picture(ui.Picture picture) {
-    _needsAddToScene = true;
+    markNeedsAddToScene();
     _picture = picture;
   }
 
@@ -477,6 +477,9 @@ class ContainerLayer extends Layer {
   /// The last composited layer in this layer's child list.
   Layer get lastChild => _lastChild;
   Layer _lastChild;
+
+  /// Returns whether this layer has at least one child layer.
+  bool get hasChildren => _firstChild != null;
 
   /// Consider this layer as the root and build a scene (a tree of layers)
   /// in the engine.
@@ -1266,6 +1269,7 @@ class TransformLayer extends OffsetLayer {
       return;
     _transform = value;
     _inverseDirty = true;
+    markNeedsAddToScene();
   }
 
   Matrix4 _lastEffectiveTransform;
@@ -1697,13 +1701,18 @@ class LeaderLayer extends ContainerLayer {
   ///
   /// The [offset] property must be non-null before the compositing phase of the
   /// pipeline.
-  LeaderLayer({ @required this.link, this.offset = Offset.zero }) : assert(link != null);
+  LeaderLayer({ @required LayerLink link, this.offset = Offset.zero }) : assert(link != null), _link = link;
 
   /// The object with which this layer should register.
   ///
   /// The link will be established when this layer is [attach]ed, and will be
   /// cleared when this layer is [detach]ed.
-  final LayerLink link;
+  LayerLink get link => _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    _link = value;
+  }
+  LayerLink _link;
 
   /// Offset from parent in the parent's coordinate system.
   ///
@@ -1799,18 +1808,23 @@ class FollowerLayer extends ContainerLayer {
   /// The [unlinkedOffset], [linkedOffset], and [showWhenUnlinked] properties
   /// must be non-null before the compositing phase of the pipeline.
   FollowerLayer({
-    @required this.link,
+    @required LayerLink link,
     this.showWhenUnlinked = true,
     this.unlinkedOffset = Offset.zero,
     this.linkedOffset = Offset.zero,
-  }) : assert(link != null);
+  }) : assert(link != null), _link = link;
 
   /// The link to the [LeaderLayer].
   ///
   /// The same object should be provided to a [LeaderLayer] that is earlier in
   /// the layer tree. When this layer is composited, it will apply a transform
   /// that moves its children to match the position of the [LeaderLayer].
-  final LayerLink link;
+  LayerLink get link => _link;
+  set link(LayerLink value) {
+    assert(value != null);
+    _link = value;
+  }
+  LayerLink _link;
 
   /// Whether to show the layer's contents when the [link] does not point to a
   /// [LeaderLayer].

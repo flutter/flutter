@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show ImageFilter;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/rendering/layer.dart';
 
 /// An [Invocation] and the [stack] trace that led to it.
 ///
@@ -103,38 +106,95 @@ class TestRecordingPaintingContext extends ClipContext implements PaintingContex
   }
 
   @override
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge }) {
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect,
+      PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer layer }) {
     clipRectAndPaint(clipRect.shift(offset), clipBehavior, clipRect.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipRRectLayer pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect,
+      PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer layer }) {
     assert(clipBehavior != null);
     clipRRectAndPaint(clipRRect.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipPathLayer pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath,
+      PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer layer }) {
     clipPathAndPaint(clipPath.shift(offset), clipBehavior, bounds.shift(offset), () => painter(this, offset));
+    return null;
   }
 
   @override
-  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+  TransformLayer pushTransform(bool needsCompositing, Offset offset, Matrix4 transform,
+      PaintingContextCallback painter, { TransformLayer layer }) {
     canvas.save();
     canvas.transform(transform.storage);
     painter(this, offset);
     canvas.restore();
+    return null;
   }
 
   @override
-  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
+  OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter,
+      { OpacityLayer layer }) {
     canvas.saveLayer(null, null); // TODO(ianh): Expose the alpha somewhere.
     painter(this, offset);
     canvas.restore();
+    return null;
   }
 
   @override
-  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
+  ShaderMaskLayer pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode,
+      PaintingContextCallback painter, { ShaderMaskLayer layer }) {
+    canvas.saveLayer(null, null);
+    painter(this, offset);
+    canvas.restore();
+    return null;
+  }
+
+  @override
+  BackdropFilterLayer pushBackdropFilter(Offset offset, ui.ImageFilter filter,
+      PaintingContextCallback painter, { BackdropFilterLayer layer }) {
+    canvas.saveLayer(null, null);
+    painter(this, offset);
+    canvas.restore();
+    return null;
+  }
+
+  @override
+  PhysicalModelLayer pushPhysicalModel(Offset offset, Path clipPath, Clip clipBehavior,
+      double elevation, Color color, Color shadowColor, PaintingContextCallback painter,
+      { PhysicalModelLayer layer, Rect childPaintBounds }) {
+    canvas.saveLayer(null, null);
+    painter(this, offset);
+    canvas.restore();
+    return null;
+  }
+
+  @override
+  LeaderLayer pushLeader(Offset offset, LayerLink link, PaintingContextCallback painter,
+      { LeaderLayer layer }) {
+    canvas.saveLayer(null, null);
+    painter(this, Offset.zero);
+    canvas.restore();
+    return null;
+  }
+
+  @override
+  FollowerLayer pushFollower(Offset linkedOffset, Offset unlinkedOffset, LayerLink link, bool showWhenUnlinked,
+      PaintingContextCallback painter, { FollowerLayer layer, Rect childPaintBounds }) {
+    canvas.saveLayer(null, null);
+    painter(this, Offset.zero);
+    canvas.restore();
+    return null;
+  }
+
+  @override
+  void pushLayer(Layer childLayer, PaintingContextCallback painter, Offset offset,
+      { Rect childPaintBounds }) {
     painter(this, offset);
   }
 

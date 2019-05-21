@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder;
+import 'dart:ui' as ui show PictureRecorder, ImageFilter;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -41,6 +41,7 @@ class ParentData {
 /// of the [PaintingContext.canvas] to the coordinate system of the callee.
 ///
 /// Used by many of the methods of [PaintingContext].
+// TODO(yjbanov): should this callback optionally return ContainerLayer?
 typedef PaintingContextCallback = void Function(PaintingContext context, Offset offset);
 
 /// A place to paint.
@@ -360,9 +361,12 @@ class PaintingContext extends ClipContext {
   ///
   ///  * [addLayer], for pushing a leaf layer whose canvas is not used.
   void pushLayer(ContainerLayer childLayer, PaintingContextCallback painter, Offset offset, { Rect childPaintBounds }) {
-    assert(!childLayer.attached);
-    assert(childLayer.parent == null);
     assert(painter != null);
+    // If a layer is being reused, it may already contain children. We remove
+    // them so that `painter` can add children that are relevant for this frame.
+    if (childLayer.hasChildren) {
+      childLayer.removeAllChildren();
+    }
     stopRecordingIfNeeded();
     appendLayer(childLayer);
     final PaintingContext childContext = createChildContext(childLayer, childPaintBounds ?? estimatedBounds);
@@ -387,12 +391,21 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the [clipRect] applied. This
   ///   function calls the [painter] synchronously.
   /// * `clipBehavior` controls how the rectangle is clipped.
-  void pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge }) {
+  ClipRectLayer pushClipRect(bool needsCompositing, Offset offset, Rect clipRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.hardEdge, ClipRectLayer layer }) {
     final Rect offsetClipRect = clipRect.shift(offset);
     if (needsCompositing) {
-      pushLayer(ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetClipRect);
+      if (layer == null) {
+        layer = ClipRectLayer(clipRect: offsetClipRect, clipBehavior: clipBehavior);
+      } else {
+        layer
+          ..clipRect = offsetClipRect
+          ..clipBehavior = clipBehavior;
+      }
+      pushLayer(layer, painter, offset, childPaintBounds: offsetClipRect);
+      return layer;
     } else {
       clipRectAndPaint(offsetClipRect, clipBehavior, offsetClipRect, () => painter(this, offset));
+      return null;
     }
   }
 
@@ -409,14 +422,23 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipRRect` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the path is clipped.
-  void pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipRRectLayer pushClipRRect(bool needsCompositing, Offset offset, Rect bounds, RRect clipRRect, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipRRectLayer layer }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final RRect offsetClipRRect = clipRRect.shift(offset);
     if (needsCompositing) {
-      pushLayer(ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
+      if (layer == null) {
+        layer = ClipRRectLayer(clipRRect: offsetClipRRect, clipBehavior: clipBehavior);
+      } else {
+        layer
+          ..clipRRect = offsetClipRRect
+          ..clipBehavior = clipBehavior;
+      }
+      pushLayer(layer, painter, offset, childPaintBounds: offsetBounds);
+      return layer;
     } else {
       clipRRectAndPaint(offsetClipRRect, clipBehavior, offsetBounds, () => painter(this, offset));
+      return null;
     }
   }
 
@@ -433,14 +455,23 @@ class PaintingContext extends ClipContext {
   /// * `painter` is a callback that will paint with the `clipPath` applied. This
   ///   function calls the `painter` synchronously.
   /// * `clipBehavior` controls how the rounded rectangle is clipped.
-  void pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias }) {
+  ClipPathLayer pushClipPath(bool needsCompositing, Offset offset, Rect bounds, Path clipPath, PaintingContextCallback painter, { Clip clipBehavior = Clip.antiAlias, ClipPathLayer layer }) {
     assert(clipBehavior != null);
     final Rect offsetBounds = bounds.shift(offset);
     final Path offsetClipPath = clipPath.shift(offset);
     if (needsCompositing) {
-      pushLayer(ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior), painter, offset, childPaintBounds: offsetBounds);
+      if (layer == null) {
+        layer = ClipPathLayer(clipPath: offsetClipPath, clipBehavior: clipBehavior);
+      } else {
+        layer
+          ..clipPath = offsetClipPath
+          ..clipBehavior = clipBehavior;
+      }
+      pushLayer(layer, painter, offset, childPaintBounds: offsetBounds);
+      return layer;
     } else {
       clipPathAndPaint(offsetClipPath, clipBehavior, offsetBounds, () => painter(this, offset));
+      return null;
     }
   }
 
@@ -471,16 +502,22 @@ class PaintingContext extends ClipContext {
   /// * `transform` is the matrix to apply to the painting done by `painter`.
   /// * `painter` is a callback that will paint with the `transform` applied. This
   ///   function calls the `painter` synchronously.
-  void pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter) {
+  TransformLayer pushTransform(bool needsCompositing, Offset offset, Matrix4 transform, PaintingContextCallback painter, { TransformLayer layer }) {
     final Matrix4 effectiveTransform = Matrix4.translationValues(offset.dx, offset.dy, 0.0)
       ..multiply(transform)..translate(-offset.dx, -offset.dy);
     if (needsCompositing) {
+      if (layer == null) {
+        layer = TransformLayer(transform: effectiveTransform);
+      } else {
+        layer.transform = effectiveTransform;
+      }
       pushLayer(
-        TransformLayer(transform: effectiveTransform),
+        layer,
         painter,
         offset,
         childPaintBounds: MatrixUtils.inverseTransformRect(effectiveTransform, estimatedBounds),
       );
+      return layer;
     } else {
       canvas
         ..save()
@@ -488,6 +525,7 @@ class PaintingContext extends ClipContext {
       painter(this, offset);
       canvas
         ..restore();
+      return null;
     }
   }
 
@@ -505,8 +543,97 @@ class PaintingContext extends ClipContext {
   /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
   /// ancestor render objects that this render object will include a composited
   /// layer, which, for example, causes them to use composited clips.
-  void pushOpacity(Offset offset, int alpha, PaintingContextCallback painter) {
-    pushLayer(OpacityLayer(alpha: alpha, offset: offset), painter, Offset.zero);
+  OpacityLayer pushOpacity(Offset offset, int alpha, PaintingContextCallback painter, { OpacityLayer layer }) {
+    if (layer == null) {
+      layer = OpacityLayer(alpha: alpha, offset: offset);
+    } else {
+      layer
+        ..alpha = alpha
+        ..offset = offset;
+    }
+    pushLayer(layer, painter, Offset.zero);
+    return layer;
+  }
+
+  ShaderMaskLayer pushShaderMask(Offset offset, Shader shader, Rect maskRect, BlendMode blendMode, PaintingContextCallback painter, { ShaderMaskLayer layer }) {
+    if (layer == null) {
+      layer = ShaderMaskLayer(
+        shader: shader,
+        maskRect: maskRect,
+        blendMode: blendMode,
+      );
+    } else {
+      layer
+        ..shader = shader
+        ..maskRect = maskRect
+        ..blendMode = blendMode;
+    }
+    pushLayer(layer, painter, offset);
+    return layer;
+  }
+
+  BackdropFilterLayer pushBackdropFilter(Offset offset, ui.ImageFilter filter, PaintingContextCallback painter, { BackdropFilterLayer layer }) {
+    if (layer == null) {
+      layer = BackdropFilterLayer(filter: filter);
+    } else {
+      layer.filter = filter;
+    }
+    pushLayer(layer, painter, offset);
+    return layer;
+  }
+
+  PhysicalModelLayer pushPhysicalModel(Offset offset, Path clipPath, Clip clipBehavior, double elevation, Color color,
+      Color shadowColor, PaintingContextCallback painter, { PhysicalModelLayer layer, Rect childPaintBounds }) {
+    if (layer == null) {
+      layer = PhysicalModelLayer(
+        clipPath: clipPath,
+        clipBehavior: clipBehavior,
+        elevation: elevation,
+        color: color,
+        shadowColor: shadowColor,
+      );
+    } else {
+      layer
+        ..clipPath = clipPath
+        ..clipBehavior = clipBehavior
+        ..elevation = elevation
+        ..color = color
+        ..shadowColor = shadowColor;
+    }
+    pushLayer(layer, painter, offset, childPaintBounds: childPaintBounds);
+    return layer;
+  }
+
+  LeaderLayer pushLeader(Offset offset, LayerLink link, PaintingContextCallback painter, { LeaderLayer layer }) {
+     if (layer == null) {
+       layer = LeaderLayer(link: link, offset: offset);
+     } else {
+       layer
+         ..link = link
+         ..offset = offset;
+     }
+     pushLayer(layer, painter, Offset.zero);
+     return layer;
+  }
+
+  FollowerLayer pushFollower(Offset linkedOffset, Offset unlinkedOffset, LayerLink link, bool showWhenUnlinked,
+      PaintingContextCallback painter, { FollowerLayer layer, Rect childPaintBounds }) {
+    if (layer == null) {
+      layer = FollowerLayer(
+        link: link,
+        showWhenUnlinked: showWhenUnlinked,
+        linkedOffset: linkedOffset,
+        unlinkedOffset: unlinkedOffset,
+      );
+    } else {
+      layer
+        ..link = link
+        ..showWhenUnlinked = showWhenUnlinked
+        ..linkedOffset = linkedOffset
+        ..unlinkedOffset = unlinkedOffset;
+    }
+    pushLayer(layer, painter, Offset.zero, childPaintBounds: childPaintBounds);
+    return layer;
   }
 
   @override
@@ -1809,9 +1936,10 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// To access the layer in debug code, even when it might be inappropriate to
   /// access it (e.g. because it is dirty), consider [debugLayer].
-  ContainerLayer get layer {
-    assert(!_needsPaint);
-    return _layer;
+  ContainerLayer get layer => _layer;
+  @protected
+  set layer(ContainerLayer newLayer) {
+    _layer = newLayer;
   }
 
   /// The offset layer that this render object uses to repaint.
@@ -1979,7 +2107,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       // We don't have our own layer; one of our ancestors will take
       // care of updating the layer we're in and when they do that
       // we'll get our paint() method called.
-      assert(_layer == null);
+      //assert(_layer == null);
       final RenderObject parent = this.parent;
       parent.markNeedsPaint();
       assert(parent == this.parent);
@@ -2691,7 +2819,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
     properties.add(DiagnosticsProperty<ParentData>('parentData', parentData, tooltip: _debugCanParentUseSize == true ? 'can use size' : null, missingIfNull: true));
     properties.add(DiagnosticsProperty<Constraints>('constraints', constraints, missingIfNull: true));
     // don't access it via the "layer" getter since that's only valid when we don't need paint
-    properties.add(DiagnosticsProperty<OffsetLayer>('layer', _layer, defaultValue: null));
+    properties.add(DiagnosticsProperty<ContainerLayer>('layer', _layer, defaultValue: null));
     properties.add(DiagnosticsProperty<SemanticsNode>('semantics node', _semantics, defaultValue: null));
     properties.add(FlagProperty(
       'isBlockingSemanticsOfPreviouslyPaintedNodes',
