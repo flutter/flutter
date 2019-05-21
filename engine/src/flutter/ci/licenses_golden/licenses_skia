@@ -1,4 +1,4 @@
-Signature: 948f5290270f2647d919862ebc34ad09
+Signature: 4644eabde2fdb1003505c2d9d8f3e6f2
 
 UNUSED LICENSES:
 
@@ -1076,7 +1076,6 @@ FILE: ../../../third_party/skia/include/private/GrSurfaceProxy.h
 FILE: ../../../third_party/skia/include/private/GrTextureProxy.h
 FILE: ../../../third_party/skia/include/private/SkBitmaskEnum.h
 FILE: ../../../third_party/skia/include/private/SkEncodedInfo.h
-FILE: ../../../third_party/skia/include/private/SkLeanWindows.h
 FILE: ../../../third_party/skia/include/private/SkSafe_math.h
 FILE: ../../../third_party/skia/include/utils/SkNoDrawCanvas.h
 FILE: ../../../third_party/skia/modules/sksg/samples/SampleSVGPong.cpp
@@ -1119,6 +1118,7 @@ FILE: ../../../third_party/skia/src/core/SkICCPriv.h
 FILE: ../../../third_party/skia/src/core/SkImageFilterCache.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterCache.h
 FILE: ../../../third_party/skia/src/core/SkLRUCache.h
+FILE: ../../../third_party/skia/src/core/SkLeanWindows.h
 FILE: ../../../third_party/skia/src/core/SkMSAN.h
 FILE: ../../../third_party/skia/src/core/SkMakeUnique.h
 FILE: ../../../third_party/skia/src/core/SkMatrixPriv.h
