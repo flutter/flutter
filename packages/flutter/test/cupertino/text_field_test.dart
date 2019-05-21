@@ -368,7 +368,6 @@ void main() {
     const String testValue = 'A short phrase';
     await tester.enterText(find.byType(CupertinoTextField), testValue);
 
-    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
     await tester.pump();
 
     await expectLater(
@@ -396,7 +395,6 @@ void main() {
     const String testValue = 'A short phrase';
     await tester.enterText(find.byType(CupertinoTextField), testValue);
 
-    await tester.tapAt(textOffsetToPosition(tester, testValue.length));
     await tester.pump();
 
     debugDefaultTargetPlatformOverride = null;
