@@ -27,7 +27,7 @@ void main() {
     expect(expanded, isFalse);
     await tester.tap(find.byType(ExpandIcon));
     expect(expanded, isTrue);
-    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pumpAndSettle();
     await tester.tap(find.byType(ExpandIcon));
     expect(expanded, isFalse);
   });
@@ -117,4 +117,3 @@ void main() {
     handle.dispose();
   });
 }
-
