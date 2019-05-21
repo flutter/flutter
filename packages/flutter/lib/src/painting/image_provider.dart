@@ -502,8 +502,14 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
   @override
   ImageStreamCompleter load(NetworkImage key) {
+    // Ownership of this controller is handed off to [_loadAsync]; it is that
+    // method's responsibility to close the controller's stream when the image
+    // has been loaded or an error is thrown.
+    final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
+
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, chunkEvents),
+      chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () sync* {
         yield DiagnosticsProperty<ImageProvider>('Image provider', this);
@@ -513,7 +519,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   }
 
   // Do not access this field directly; use [_httpClient] instead.
-  static final HttpClient _sharedHttpClient = HttpClient();
+  static final HttpClient _sharedHttpClient = HttpClient()..autoUncompress = false;
 
   static HttpClient get _httpClient {
     HttpClient client = _sharedHttpClient;
@@ -525,23 +531,36 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     return client;
   }
 
-  Future<ui.Codec> _loadAsync(NetworkImage key) async {
-    assert(key == this);
+  Future<ui.Codec> _loadAsync(
+    NetworkImage key,
+    StreamController<ImageChunkEvent> chunkEvents,
+  ) async {
+    try {
+      assert(key == this);
 
-    final Uri resolved = Uri.base.resolve(key.url);
-    final HttpClientRequest request = await _httpClient.getUrl(resolved);
-    headers?.forEach((String name, String value) {
-      request.headers.add(name, value);
-    });
-    final HttpClientResponse response = await request.close();
-    if (response.statusCode != HttpStatus.ok)
-      throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
+      final Uri resolved = Uri.base.resolve(key.url);
+      final HttpClientRequest request = await _httpClient.getUrl(resolved);
+      headers?.forEach((String name, String value) {
+        request.headers.add(name, value);
+      });
+      final HttpClientResponse response = await request.close();
+      if (response.statusCode != HttpStatus.ok)
+        throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, $resolved');
 
-    final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
-    if (bytes.lengthInBytes == 0)
-      throw Exception('NetworkImage is an empty file: $resolved');
+      final Uint8List bytes = await consolidateHttpClientResponseBytes(
+        response,
+        client: _httpClient,
+        onBytesReceived: (int cumulative, int total) {
+          chunkEvents.add(ImageChunkEvent(cumulative, total));
+        },
+      );
+      if (bytes.lengthInBytes == 0)
+        throw Exception('NetworkImage is an empty file: $resolved');
 
-    return PaintingBinding.instance.instantiateImageCodec(bytes);
+      return PaintingBinding.instance.instantiateImageCodec(bytes);
+    } finally {
+      chunkEvents.close();
+    }
   }
 
   @override

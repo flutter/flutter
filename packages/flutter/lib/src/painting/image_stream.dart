@@ -73,6 +73,7 @@ class ImageStreamListener {
   /// The [onImage] parameter must not be null.
   const ImageStreamListener(
     this.onImage, {
+    this.onChunk,
     this.onError,
   }) : assert(onImage != null);
 
@@ -91,6 +92,19 @@ class ImageStreamListener {
   ///  * [onError], which will be called instead of [onImage] if an error occurs
   ///    during loading.
   final ImageListener onImage;
+
+  /// Callback for getting notified when a chunk of bytes has been received
+  /// during the loading of the image.
+  ///
+  /// This callback may fire many times (e.g. when used with a [NetworkImage],
+  /// where the image bytes are loaded incrementally over the wire) or not at
+  /// all (e.g. when used with a [MemoryImage], where the image bytes are
+  /// already available in memory).
+  ///
+  /// This callback may also continue to fire after the [onImage] callback has
+  /// fired (e.g. for multi-frame images that continue to load after the first
+  /// frame is available).
+  final ImageChunkListener onChunk;
 
   /// Callback for getting notified when an error occurs while loading an image.
   ///
@@ -123,11 +137,60 @@ class ImageStreamListener {
 /// same stack frame as the call to [ImageStream.addListener]).
 typedef ImageListener = void Function(ImageInfo image, bool synchronousCall);
 
+/// Signature for listening to [ImageChunkEvent] events.
+///
+/// Used in [ImageStreamListener].
+typedef ImageChunkListener = void Function(ImageChunkEvent event);
+
 /// Signature for reporting errors when resolving images.
 ///
 /// Used in [ImageStreamListener], as well as by [ImageCache.putIfAbsent] and
 /// [precacheImage], to report errors.
 typedef ImageErrorListener = void Function(dynamic exception, StackTrace stackTrace);
+
+/// An immutable notification of image bytes that have been incrementally loaded.
+///
+/// Chunk events represent progress notifications while an image is being
+/// loaded (e.g. from disk or over the network).
+///
+/// See also:
+///
+///  * [ImageChunkListener], the means by which callers get notified of
+///    these events.
+///  * [Image.imageLoadingBuilder], which allows callers to visually represent
+///    the loading progress of an image at the widget layer.
+@immutable
+class ImageChunkEvent extends Diagnosticable {
+  /// Creates a new chunk event.
+  const ImageChunkEvent(this.cumulativeBytesLoaded, this.expectedTotalBytes)
+      : assert(cumulativeBytesLoaded >= 0),
+        assert(expectedTotalBytes >= -1);
+
+  /// The number of bytes that have been received across the wire thus far.
+  final int cumulativeBytesLoaded;
+
+  /// The expected number of bytes that need to be received to finish loading
+  /// the image.
+  ///
+  /// This value is not necessarily equal to the expected _size_ of the image
+  /// in bytes, as the bytes required to load the image may be compressed.
+  ///
+  /// This value will be -1 if the number is not known in advance. In this way,
+  /// this value matches the semantics of the `Content-Length` HTTP response
+  /// header.
+  ///
+  /// When this value is -1, the chunk event may still be useful as an
+  /// indication that data is loading (and how much), but it cannot represent a
+  /// loading completion percentage.
+  final int expectedTotalBytes;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(IntProperty('cumulativeBytesLoaded', cumulativeBytesLoaded));
+    properties.add(IntProperty('expectedTotalBytes', expectedTotalBytes));
+  }
+}
 
 /// A handle to an image resource.
 ///
@@ -504,13 +567,20 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   ///
   /// Immediately starts decoding the first image frame when the codec is ready.
   ///
-  /// [codec] is a future for an initialized [ui.Codec] that will be used to
+  /// `codec` is a future for an initialized [ui.Codec] that will be used to
   /// decode the image.
-  /// [scale] is the linear scale factor for drawing this frames of this image
+  ///
+  /// `scale` is the linear scale factor for drawing this frames of this image
   /// at their intended size.
+  ///
+  /// The `chunkEvents` parameter is an optional stream of notifications about
+  /// the loading progress of the image. If this stream is provided, the events
+  /// produced by the stream will be delivered to registered [ImageChunkListener]s
+  /// (see [addListener]).
   MultiFrameImageStreamCompleter({
     @required Future<ui.Codec> codec,
     @required double scale,
+    Stream<ImageChunkEvent> chunkEvents,
     InformationCollector informationCollector,
   }) : assert(codec != null),
        _informationCollector = informationCollector,
@@ -524,6 +594,29 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
         silent: true,
       );
     });
+    if (chunkEvents != null) {
+      chunkEvents.listen(
+        (ImageChunkEvent event) {
+          if (hasListeners) {
+            final List<ImageChunkListener> localListeners = _listeners
+                .map<ImageChunkListener>((ImageStreamListener listener) => listener.onChunk)
+                .where((ImageChunkListener chunkListener) => chunkListener != null)
+                .toList();
+            for (ImageChunkListener listener in localListeners) {
+              listener(event);
+            }
+          }
+        }, onError: (dynamic error, StackTrace stack) {
+          reportError(
+            context: ErrorDescription('loading an image'),
+            exception: error,
+            stack: stack,
+            informationCollector: informationCollector,
+            silent: true,
+          );
+        },
+      );
+    }
   }
 
   ui.Codec _codec;
