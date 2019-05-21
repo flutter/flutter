@@ -132,8 +132,8 @@ void main() {
         uri = request.url;
 
         return Response(
-            'test-report-id',
-            200,
+          'test-report-id',
+          200,
         );
       }));
 

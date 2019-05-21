@@ -86,13 +86,10 @@ class CrashReportSender {
     @required String getFlutterVersion(),
   }) async {
     try {
-      if (_usage.suppressAnalytics)
-        return;
-
       final String flutterVersion = getFlutterVersion();
 
       // We don't need to report exceptions happening on user branches
-      if (RegExp(r'^\[user-branch\]\/').hasMatch(flutterVersion)) {
+      if (_usage.suppressAnalytics || RegExp(r'^\[user-branch\]\/').hasMatch(flutterVersion)) {
         return;
       }
 
