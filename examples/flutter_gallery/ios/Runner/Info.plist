@@ -44,8 +44,8 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-  <string>Can we use the camera to scan barcodes?</string>
-  <key>NSMicrophoneUsageDescription</key>
-  <string>We don't use this, but we still need access.</string>
+	<string>Can we use the camera to scan barcodes?</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We don't use this, but we still need access.</string>
 </dict>
 </plist>
