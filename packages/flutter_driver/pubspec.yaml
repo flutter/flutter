@@ -8,7 +8,7 @@ environment:
   sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
-  file: 5.0.7
+  file: 5.0.8
   json_rpc_2: 2.1.0
   meta: 1.1.6
   path: 1.6.2
