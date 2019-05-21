@@ -229,12 +229,11 @@ void main() {
   });
 
   testWidgets('ExpandIcon uses custom disabled icon color', (WidgetTester tester) async {
-    bool expanded = false;
     IconTheme iconTheme;
 
     await tester.pumpWidget(wrap(
       child: ExpandIcon(
-        isExpanded: true,
+        isExpanded: false,
         onPressed: null,
         disabledColor: Colors.cyan,
       ),
@@ -247,6 +246,26 @@ void main() {
       child: ExpandIcon(
         isExpanded: false,
         onPressed: null,
+        color: Colors.indigo,
+        disabledColor: Colors.cyan,
+      ),
+    ));
+    await tester.pumpAndSettle();
+    iconTheme = tester.firstWidget(find.byType(IconTheme).last);
+    expect(iconTheme.data.color, equals(Colors.cyan));
+
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: true,
+        onPressed: null,
+        disabledColor: Colors.cyan,
+      ),
+    ));
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: true,
+        onPressed: null,
+        expandedColor: Colors.teal,
         disabledColor: Colors.cyan,
       ),
     ));
