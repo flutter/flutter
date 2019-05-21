@@ -1019,11 +1019,6 @@ enum Clip {
   antiAliasWithSaveLayer,
 }
 
-// If we actually run on big endian machines, we'll need to do something smarter
-// here. We don't use [Endian.Host] because it's not a compile-time
-// constant and can't propagate into the set/get calls.
-const Endian _kFakeHostEndian = Endian.little;
-
 // Indicates that the image should not be resized in this dimension.
 //
 // Used by [instantiateImageCodec] as a magical value to disable resizing

@@ -81,6 +81,8 @@ source_set("txt") {
     "src/txt/font_asset_provider.h",
     "src/txt/font_collection.cc",
     "src/txt/font_collection.h",
+    "src/txt/font_features.cc",
+    "src/txt/font_features.h",
     "src/txt/font_skia.cc",
     "src/txt/font_skia.h",
     "src/txt/font_style.h",

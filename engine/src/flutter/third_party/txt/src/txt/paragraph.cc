@@ -163,6 +163,7 @@ void GetFontAndMinikinPaint(const TextStyle& style,
   // between same text content with different runs composing it, however, it
   // also produces more accurate layouts.
   paint->paintFlags |= minikin::LinearTextFlag;
+  paint->fontFeatureSettings = style.font_features.GetFeatureSettings();
 }
 
 void FindWords(const std::vector<uint16_t>& text,
