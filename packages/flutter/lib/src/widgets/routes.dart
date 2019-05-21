@@ -1253,8 +1253,11 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     super.didPopNext(nextRoute);
-    FocusScope.of(subtreeContext).resumeScopeFocus();
+    // When the route on top of this route is popped, resume focus onto the
+    // widget that received the last focus.
+    FocusScope.of(subtreeContext).focusedChild?.requestFocus();
   }
+
 
   // We cache the part of the modal scope that doesn't change from frame to
   // frame so that we minimize the amount of building that happens.

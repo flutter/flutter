@@ -886,12 +886,6 @@ class FocusScopeNode extends FocusNode {
     }
   }
 
-  /// Request to move the focus to the previous focus node, by calling the
-  /// [FocusTraversalPolicy.previous] method.
-  ///
-  /// Returns true if it successfully found a node and requested focus.
-  void resumeScopeFocus() => focusedChild?.requestFocus();
-
   @override
   void _doRequestFocus() {
     // Start with the primary focus as the focused child of this scope, if there
