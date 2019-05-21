@@ -336,7 +336,7 @@ class Colors {
   ///    but with different opacities.
   static const Color white54 = Color(0x8AFFFFFF);
 
-  /// White with 54% opacity.
+  /// White with 50% opacity.
   ///
   /// Used for disabled icons in dark themes.
   ///
