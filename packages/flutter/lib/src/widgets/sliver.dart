@@ -6,6 +6,7 @@ import 'dart:collection' show SplayTreeMap, HashMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/rendering/sliver_group.dart';
 
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
@@ -1372,6 +1373,23 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
 
   @override
   RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
+}
+
+/// A sliver lays out multiple sliver children along the main axis of the viewport.
+///
+/// See also:
+///
+/// * [Column], [Row], boxes to place multiple box children in a linear array.
+/// * [SliverList], a sliver to place multiple box children in a linear array along the main axis.
+/// * [CustomScrollView], a box to place multiple sliver children in a linear array.
+/// * [SliverToBoxAdapter], to place a single box child where a sliver is expected.
+class SliverGroup extends MultiChildRenderObjectWidget {
+  /// Creates a sliver that lays out it children along the main axis of the viewport
+  SliverGroup({@required List<Widget> slivers, Key key})
+      : super(key: key, children: slivers);
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => RenderSliverGroup();
 }
 
 /// Mark a child as needing to stay alive even when it's in a lazy list that
