@@ -398,6 +398,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     _currentImage = image;
     if (_listeners.isEmpty)
       return;
+    // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
         List<ImageStreamListener>.from(_listeners);
     for (ImageStreamListener listener in localListeners) {
@@ -458,6 +459,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
       silent: silent,
     );
 
+    // Make a copy to allow for concurrent modification.
     final List<ImageErrorListener> localErrorListeners = _listeners
         .map<ImageErrorListener>((ImageStreamListener listener) => listener.onError)
         .where((ImageErrorListener errorListener) => errorListener != null)
@@ -565,11 +567,11 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
   ///
   /// Immediately starts decoding the first image frame when the codec is ready.
   ///
-  /// `codec` is a future for an initialized [ui.Codec] that will be used to
-  /// decode the image.
+  /// The `codec` parameter is a future for an initialized [ui.Codec] that will
+  /// be used to decode the image.
   ///
-  /// `scale` is the linear scale factor for drawing this frames of this image
-  /// at their intended size.
+  /// The `scale` parameter is the linear scale factor for drawing this frames
+  /// of this image at their intended size.
   ///
   /// The `chunkEvents` parameter is an optional stream of notifications about
   /// the loading progress of the image. If this stream is provided, the events
@@ -596,6 +598,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
       chunkEvents.listen(
         (ImageChunkEvent event) {
           if (hasListeners) {
+            // Make a copy to allow for concurrent modification.
             final List<ImageChunkListener> localListeners = _listeners
                 .map<ImageChunkListener>((ImageStreamListener listener) => listener.onChunk)
                 .where((ImageChunkListener chunkListener) => chunkListener != null)
