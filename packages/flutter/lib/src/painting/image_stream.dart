@@ -163,9 +163,8 @@ class ImageChunkEvent extends Diagnosticable {
   const ImageChunkEvent({
     @required this.cumulativeBytesLoaded,
     @required this.expectedTotalBytes,
-  })
-      : assert(cumulativeBytesLoaded >= 0),
-        assert(expectedTotalBytes == null || expectedTotalBytes >= 0);
+  }) : assert(cumulativeBytesLoaded >= 0),
+       assert(expectedTotalBytes == null || expectedTotalBytes >= 0);
 
   /// The number of bytes that have been received across the wire thus far.
   final int cumulativeBytesLoaded;
