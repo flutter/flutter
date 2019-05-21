@@ -198,7 +198,7 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   args.push_back(action_id >> 16);
   args.push_back(action_id >> 24);
   [self bridge] -> DispatchSemanticsAction([self uid], flutter::SemanticsAction::kCustomAction,
-                                           args);
+                                           std::move(args));
   return YES;
 }
 
@@ -689,14 +689,13 @@ void AccessibilityBridge::UpdateSemantics(flutter::SemanticsNodeUpdates nodes,
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid, flutter::SemanticsAction action) {
-  std::vector<uint8_t> args;
-  platform_view_->DispatchSemanticsAction(uid, action, args);
+  platform_view_->DispatchSemanticsAction(uid, action, {});
 }
 
 void AccessibilityBridge::DispatchSemanticsAction(int32_t uid,
                                                   flutter::SemanticsAction action,
                                                   std::vector<uint8_t> args) {
-  platform_view_->DispatchSemanticsAction(uid, action, args);
+  platform_view_->DispatchSemanticsAction(uid, action, std::move(args));
 }
 
 SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
