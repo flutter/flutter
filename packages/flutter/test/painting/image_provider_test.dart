@@ -31,7 +31,7 @@ void main() {
         final MemoryImage imageProvider = MemoryImage(bytes);
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
-        stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
         await completer.future;
 
         expect(imageCache.currentSize, 1);
@@ -46,7 +46,7 @@ void main() {
         otherCache.putIfAbsent(imageProvider, () => imageProvider.load(imageProvider));
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
         final Completer<void> completer = Completer<void>();
-        stream.addListener((ImageInfo info, bool syncCall) => completer.complete());
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
         await completer.future;
 
         expect(otherCache.currentSize, 1);
@@ -63,11 +63,11 @@ void main() {
           caughtError.complete(false);
         };
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-        stream.addListener((ImageInfo info, bool syncCall) {
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
           caughtError.complete(false);
         }, onError: (dynamic error, StackTrace stackTrace) {
           caughtError.complete(true);
-        });
+        }));
         expect(await caughtError.future, true);
       });
     });
@@ -79,11 +79,11 @@ void main() {
         caughtError.complete(false);
       };
       final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
-      stream.addListener((ImageInfo info, bool syncCall) {
+      stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
         caughtError.complete(false);
       }, onError: (dynamic error, StackTrace stackTrace) {
         caughtError.complete(true);
-      });
+      }));
       expect(await caughtError.future, true);
     });
 
@@ -101,10 +101,10 @@ void main() {
           throw Error();
         };
         final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-        result.addListener((ImageInfo info, bool syncCall) {
+        result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
         }, onError: (dynamic error, StackTrace stackTrace) {
           caughtError.complete(true);
-        });
+        }));
         expect(await caughtError.future, true);
       });
       expect(uncaught, false);
@@ -124,10 +124,10 @@ void main() {
           throw Error();
         };
         final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-        result.addListener((ImageInfo info, bool syncCall) {
+        result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
         }, onError: (dynamic error, StackTrace stackTrace) {
           caughtError.complete(true);
-        });
+        }));
         expect(await caughtError.future, true);
       });
       expect(uncaught, false);
@@ -158,12 +158,12 @@ void main() {
         Future<void> loadNetworkImage() async {
           final NetworkImage networkImage = NetworkImage(nonconst('foo'));
           final ImageStreamCompleter completer = networkImage.load(networkImage);
-          completer.addListener(
+          completer.addListener(ImageStreamListener(
             (ImageInfo image, bool synchronousCall) { },
             onError: (dynamic error, StackTrace stackTrace) {
               capturedErrors.add(error);
             },
-          );
+          ));
           await Future<void>.value();
         }
 
@@ -187,10 +187,10 @@ void main() {
             throw Error();
           };
           final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
-          result.addListener((ImageInfo info, bool syncCall) {
+          result.addListener(ImageStreamListener((ImageInfo info, bool syncCall) {
           }, onError: (dynamic error, StackTrace stackTrace) {
             caughtError.complete(true);
-          });
+          }));
           expect(await caughtError.future, true);
         }, zoneSpecification: ZoneSpecification(
           handleUncaughtError: (Zone zone, ZoneDelegate zoneDelegate, Zone parent, Object error, StackTrace stackTrace) {

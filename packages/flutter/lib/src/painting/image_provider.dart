@@ -218,8 +218,9 @@ class ImageConfiguration {
 ///       // If the keys are the same, then we got the same image back, and so we don't
 ///       // need to update the listeners. If the key changed, though, we must make sure
 ///       // to switch our listeners to the new image stream.
-///       oldImageStream?.removeListener(_updateImage);
-///       _imageStream.addListener(_updateImage);
+///       final ImageStreamListener listener = ImageStreamListener(_updateImage);
+///       oldImageStream?.removeListener(listener);
+///       _imageStream.addListener(listener);
 ///     }
 ///   }
 ///
@@ -232,7 +233,7 @@ class ImageConfiguration {
 ///
 ///   @override
 ///   void dispose() {
-///     _imageStream.removeListener(_updateImage);
+///     _imageStream.removeListener(ImageStreamListener(_updateImage));
 ///     super.dispose();
 ///   }
 ///
