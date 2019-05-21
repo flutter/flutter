@@ -27,10 +27,10 @@ class PackagesCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'packages';
+  final String name = 'pub';
 
   @override
-  List<String> get aliases => const <String>['pub'];
+  List<String> get aliases => const <String>['packages'];
 
   @override
   final String description = 'Commands for managing Flutter packages.';
@@ -65,7 +65,7 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages $name [<target directory>]';
+    return '${runner.executableName} pub $name [<target directory>]';
   }
 
   Future<void> _runPubGet (String directory) async {
@@ -127,7 +127,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages test [<tests...>]';
+    return '${runner.executableName} pub test [<tests...>]';
   }
 
   @override
@@ -157,7 +157,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages $_commandName [<arguments...>]';
+    return '${runner.executableName} pub $_commandName [<arguments...>]';
   }
 
   @override

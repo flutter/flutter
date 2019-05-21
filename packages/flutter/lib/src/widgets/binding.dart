@@ -736,12 +736,6 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     ).attachToRenderTree(buildOwner, renderViewElement);
   }
 
-  /// Whether the [renderViewElement] has been initialized.
-  ///
-  /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]
-  /// is called in the context of a [TestWidgetsFlutterBinding]).
-  bool get isRootWidgetAttached => _renderViewElement != null;
-
   @override
   Future<void> performReassemble() {
     assert(() {
