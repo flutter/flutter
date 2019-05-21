@@ -33,31 +33,17 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   void handlePrimaryPointer(PointerEvent event) {
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    super.acceptGesture(pointer);
-    _checkDown(pointer);
-  }
-
-  void _checkDown(int pointer) {
-    if (_sentTapDown) {
-      return;
+    if (!_sentTapDown) {
+      if (onAnyTapDown != null)
+        onAnyTapDown();
+      _sentTapDown = true;
     }
-    if (onAnyTapDown != null)
-      onAnyTapDown();
-    _sentTapDown = true;
-  }
-
-  void _reset() {
-    _sentTapDown = false;
   }
 
   @override
   void didStopTrackingLastPointer(int pointer) {
-    _reset();
     super.didStopTrackingLastPointer(pointer);
+    _sentTapDown = false;
   }
 
   @override
