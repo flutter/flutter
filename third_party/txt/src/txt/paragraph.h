@@ -120,7 +120,7 @@ class Paragraph {
       return start == other.start && end == other.end;
     }
 
-    T width() { return end - start; }
+    T width() const { return end - start; }
 
     void Shift(T delta) {
       start += delta;
@@ -238,6 +238,7 @@ class Paragraph {
   FRIEND_TEST(ParagraphTest, SimpleShadow);
   FRIEND_TEST(ParagraphTest, ComplexShadow);
   FRIEND_TEST(ParagraphTest, FontFallbackParagraph);
+  FRIEND_TEST(ParagraphTest, FontFeaturesParagraph);
 
   // Starting data to layout.
   std::vector<uint16_t> text_;

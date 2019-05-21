@@ -3627,4 +3627,54 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutForceParagraph)) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(ParagraphTest, FontFeaturesParagraph) {
+  const char* text = "12ab\n";
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families = std::vector<std::string>(1, "Roboto");
+  text_style.color = SK_ColorBLACK;
+  text_style.font_features.SetFeature("tnum", 1);
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  text_style.font_features.SetFeature("tnum", 0);
+  text_style.font_features.SetFeature("pnum", 1);
+  builder.PushStyle(text_style);
+  builder.AddText(u16_text);
+
+  builder.Pop();
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(GetTestCanvasWidth());
+
+  paragraph->Paint(GetCanvas(), 10.0, 15.0);
+
+  ASSERT_EQ(paragraph->glyph_lines_.size(), 3ull);
+
+  // Tabular numbers should have equal widths.
+  const txt::Paragraph::GlyphLine& tnum_line = paragraph->glyph_lines_[0];
+  ASSERT_EQ(tnum_line.positions.size(), 4ull);
+  EXPECT_FLOAT_EQ(tnum_line.positions[0].x_pos.width(),
+                  tnum_line.positions[1].x_pos.width());
+
+  // Proportional numbers should have variable widths.
+  const txt::Paragraph::GlyphLine& pnum_line = paragraph->glyph_lines_[1];
+  ASSERT_EQ(pnum_line.positions.size(), 4ull);
+  EXPECT_NE(pnum_line.positions[0].x_pos.width(),
+            pnum_line.positions[1].x_pos.width());
+
+  // Alphabetic characters should be unaffected.
+  EXPECT_FLOAT_EQ(tnum_line.positions[2].x_pos.width(),
+                  pnum_line.positions[2].x_pos.width());
+
+  ASSERT_TRUE(Snapshot());
+}
+
 }  // namespace txt

@@ -102,6 +102,145 @@ class FontWeight {
   }
 }
 
+/// A feature tag and value that affect the selection of glyphs in a font.
+class FontFeature {
+  /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
+  /// change how the engine selects glyphs when rendering text.
+  ///
+  /// `feature` is the four-character tag that identifies the feature.
+  /// These tags are specified by font formats such as OpenType.
+  ///
+  /// `value` is the value that the feature will be set to.  The behavior
+  /// of the value depends on the specific feature.  Many features are
+  /// flags whose value can be 1 (when enabled) or 0 (when disabled).
+  ///
+  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
+  const FontFeature(this.feature, [ this.value = 1 ]) : assert(feature != null), assert(feature.length == 4), assert(value != null), assert(value >= 0);
+
+  /// Create a [FontFeature] object that enables the feature with the given tag.
+  const FontFeature.enable(String feature) : this(feature, 1);
+
+  /// Create a [FontFeature] object that disables the feature with the given tag.
+  const FontFeature.disable(String feature) : this(feature, 0);
+
+  /// Randomize the alternate forms used in text.
+  ///
+  /// For example, this can be used with suitably-prepared handwriting fonts to
+  /// vary the forms used for each character, so that, for instance, the word
+  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
+  /// and three different "s"s.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
+  const FontFeature.randomize() : feature = 'rand', value = 1;
+
+  /// Select a stylistic set.
+  ///
+  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
+  factory FontFeature.stylisticSet(int value) {
+    assert(value >= 1);
+    assert(value <= 20);
+    return FontFeature('ss${value.toString().padLeft(2, "0")}');
+  }
+
+  /// Use the slashed zero.
+  ///
+  /// Some fonts contain both a circular zero and a zero with a slash. This
+  /// enables the use of the latter form.
+  ///
+  /// This is overridden by [FontFeature.oldstyleFigures].
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
+  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+
+  /// Use oldstyle figures.
+  ///
+  /// Some fonts have variants of the figures (e.g. the digit 9) that, when
+  /// this feature is enabled, render with descenders under the baseline instead
+  /// of being entirely above the baseline.
+  ///
+  /// This overrides [FontFeature.slashedZero].
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#onum>
+  const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
+
+  /// Use proportional (varying width) figures.
+  ///
+  /// For fonts that have both proportional and tabular (monospace) figures,
+  /// this enables the proportional figures.
+  ///
+  /// This is mutually exclusive with [FontFeature.tabularFigures].
+  ///
+  /// The default behavior varies from font to font.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
+  const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
+
+  /// Use tabular (monospace) figures.
+  ///
+  /// For fonts that have both proportional (varying width) and tabular figures,
+  /// this enables the tabular figures.
+  ///
+  /// This is mutually exclusive with [FontFeature.proportionalFigures].
+  ///
+  /// The default behavior varies from font to font.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
+  const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
+
+  /// The tag that identifies the effect of this feature.  Must consist of 4
+  /// ASCII characters (typically lowercase letters).
+  ///
+  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
+  final String feature;
+
+  /// The value assigned to this feature.
+  ///
+  /// Must be a positive integer.  Many features are Boolean values that accept
+  /// values of either 0 (feature is disabled) or 1 (feature is enabled).
+  final int value;
+
+  static const int _kEncodedSize = 8;
+
+  void _encode(ByteData byteData) {
+    assert(feature.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
+    for (int i = 0; i < 4; i++) {
+      byteData.setUint8(i, feature.codeUnitAt(i));
+    }
+    byteData.setInt32(4, value, _kFakeHostEndian);
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final FontFeature typedOther = other;
+    return feature == typedOther.feature
+           && value == typedOther.value;
+  }
+
+  @override
+  int get hashCode => hashValues(feature, value);
+
+  @override
+  String toString() => 'FontFeature($feature, $value)';
+}
+
 /// Whether and how to align text horizontally.
 // The order of this enum must match the order of the values in RenderStyleConstants.h's ETextAlign.
 enum TextAlign {
@@ -281,7 +420,8 @@ Int32List _encodeTextStyle(
   Locale locale,
   Paint background,
   Paint foreground,
-  List<Shadow> shadows
+  List<Shadow> shadows,
+  List<FontFeature> fontFeatures,
 ) {
   final Int32List result = Int32List(8);
   if (color != null) {
@@ -351,6 +491,10 @@ Int32List _encodeTextStyle(
     result[0] |= 1 << 17;
     // Passed separately to native.
   }
+  if (fontFeatures != null) {
+    result[0] |= 1 << 18;
+    // Passed separately to native.
+  }
   return result;
 }
 
@@ -387,6 +531,7 @@ class TextStyle {
   /// * `locale`: The locale used to select region-specific glyphs.
   /// * `background`: The paint drawn as a background for the text.
   /// * `foreground`: The paint used to draw the text. If this is specified, `color` must be null.
+  /// * `fontFeatures`: The font features that should be applied to the text.
   TextStyle({
     Color color,
     TextDecoration decoration,
@@ -406,6 +551,7 @@ class TextStyle {
     Paint background,
     Paint foreground,
     List<Shadow> shadows,
+    List<FontFeature> fontFeatures,
   }) : assert(color == null || foreground == null,
          'Cannot provide both a color and a foreground\n'
          'The color argument is just a shorthand for "foreground: Paint()..color = color".'
@@ -429,6 +575,7 @@ class TextStyle {
          background,
          foreground,
          shadows,
+         fontFeatures,
        ),
        _fontFamily = fontFamily ?? '',
        _fontFamilyFallback = fontFamilyFallback,
@@ -440,7 +587,8 @@ class TextStyle {
        _locale = locale,
        _background = background,
        _foreground = foreground,
-       _shadows = shadows;
+       _shadows = shadows,
+       _fontFeatures = fontFeatures;
 
   final Int32List _encoded;
   final String _fontFamily;
@@ -454,6 +602,7 @@ class TextStyle {
   final Paint _background;
   final Paint _foreground;
   final List<Shadow> _shadows;
+  final List<FontFeature> _fontFeatures;
 
   @override
   bool operator ==(dynamic other) {
@@ -480,11 +629,13 @@ class TextStyle {
       return false;
     if (!_listEquals<String>(_fontFamilyFallback, typedOther._fontFamilyFallback))
       return false;
+    if (!_listEquals<FontFeature>(_fontFeatures, typedOther._fontFeatures))
+      return false;
     return true;
   }
 
   @override
-  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontFamilyFallback, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground, _shadows, _decorationThickness);
+  int get hashCode => hashValues(hashList(_encoded), _fontFamily, _fontFamilyFallback, _fontSize, _letterSpacing, _wordSpacing, _height, _locale, _background, _foreground, hashList(_shadows), _decorationThickness, hashList(_fontFeatures));
 
   @override
   String toString() {
@@ -510,7 +661,8 @@ class TextStyle {
              'locale: ${             _encoded[0] & 0x04000 == 0x04000  ? _locale                                 : "unspecified"}, '
              'background: ${         _encoded[0] & 0x08000 == 0x08000  ? _background                             : "unspecified"}, '
              'foreground: ${         _encoded[0] & 0x10000 == 0x10000  ? _foreground                             : "unspecified"}, '
-             'shadows: ${            _encoded[0] & 0x20000 == 0x20000  ? _shadows                                : "unspecified"}'
+             'shadows: ${            _encoded[0] & 0x20000 == 0x20000  ? _shadows                                : "unspecified"}, '
+             'fontFeatures: ${       _encoded[0] & 0x40000 == 0x40000  ? _fontFeatures                           : "unspecified"}'
            ')';
   }
 }
@@ -1461,7 +1613,18 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
     if (style._fontFamily != null)
       fullFontFamilies.add(style._fontFamily);
     if (style._fontFamilyFallback != null)
-      fullFontFamilies.addAll(style._fontFamilyFallback);
+    fullFontFamilies.addAll(style._fontFamilyFallback);
+
+    ByteData encodedFontFeatures;
+    if (style._fontFeatures != null) {
+      encodedFontFeatures = ByteData(style._fontFeatures.length * FontFeature._kEncodedSize);
+      int byteOffset = 0;
+      for (FontFeature feature in style._fontFeatures) {
+        feature._encode(ByteData.view(encodedFontFeatures.buffer, byteOffset, FontFeature._kEncodedSize));
+        byteOffset += FontFeature._kEncodedSize;
+      }
+    }
+
     _pushStyle(
       style._encoded,
       fullFontFamilies,
@@ -1475,7 +1638,8 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
       style._background?._data,
       style._foreground?._objects,
       style._foreground?._data,
-      Shadow._encodeShadows(style._shadows)
+      Shadow._encodeShadows(style._shadows),
+      encodedFontFeatures,
     );
   }
 
@@ -1492,7 +1656,8 @@ class ParagraphBuilder extends NativeFieldWrapperClass2 {
     ByteData backgroundData,
     List<dynamic> foregroundObjects,
     ByteData foregroundData,
-    ByteData shadowsData
+    ByteData shadowsData,
+    ByteData fontFeaturesData,
   ) native 'ParagraphBuilder_pushStyle';
 
   static String _encodeLocale(Locale locale) => locale?.toString() ?? '';

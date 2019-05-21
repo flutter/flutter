@@ -1060,6 +1060,8 @@ FILE: ../../../flutter/third_party/txt/src/txt/font_asset_provider.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_asset_provider.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_collection.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_collection.h
+FILE: ../../../flutter/third_party/txt/src/txt/font_features.cc
+FILE: ../../../flutter/third_party/txt/src/txt/font_features.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_skia.cc
 FILE: ../../../flutter/third_party/txt/src/txt/font_skia.h
 FILE: ../../../flutter/third_party/txt/src/txt/font_style.h
