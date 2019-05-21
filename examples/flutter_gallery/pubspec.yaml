@@ -18,7 +18,7 @@ dependencies:
   scoped_model: 1.0.1
   shrine_images: 1.1.2
   camera: 0.5.0
-  firebase_ml_vision: 0.8.0
+  firebase_ml_vision: 0.6.0+2
   path_provider: 1.1.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml

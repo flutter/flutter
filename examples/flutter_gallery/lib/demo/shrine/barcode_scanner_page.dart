@@ -212,17 +212,6 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
   }) {
     if (!_cameraController.value.isStreamingImages) {
       return;
-    } else if (barcodes.isEmpty) {
-      if (_barcodeNearAnimationInProgress) {
-        return;
-      }
-
-      if (_currentState != AnimationState.search) {
-        _scannerHint = null;
-        _switchAnimationState(AnimationState.search);
-        setState(() {});
-      }
-      return;
     }
 
     final EdgeInsets padding = data.padding;
@@ -261,13 +250,24 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           setState(() {});
         }
         return;
-      } else {
+      } else if (barcode.boundingBox.overlaps(validRect)) {
         if (_currentState != AnimationState.barcodeNear) {
           _scannerHint = 'Move closer to the barcode';
           _switchAnimationState(AnimationState.barcodeNear);
           setState(() {});
         }
+        return;
       }
+    }
+
+    if (_barcodeNearAnimationInProgress) {
+      return;
+    }
+
+    if (_currentState != AnimationState.search) {
+      _scannerHint = null;
+      _switchAnimationState(AnimationState.search);
+      setState(() {});
     }
   }
 
@@ -449,7 +449,17 @@ class _BarcodeScannerPageState extends State<BarcodeScannerPage>
           ),
         );
       },
-    ).then((_) => Navigator.of(context).pop());
+    ).then((_) => _reset());
+  }
+
+  void _reset() {
+    _initCameraAndScanner();
+    setState(() {
+      _closeWindow = false;
+      _barcodePictureFilePath = null;
+      _scannerHint = null;
+      _switchAnimationState(AnimationState.search);
+    });
   }
 
   @override
