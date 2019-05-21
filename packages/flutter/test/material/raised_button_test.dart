@@ -174,7 +174,7 @@ void main() {
           body: Center(
             child: RaisedButton.icon(
               key: buttonKey,
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               label: const Text('RaisedButton'),
               onPressed: () {},
               focusNode: focusNode,

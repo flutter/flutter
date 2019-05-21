@@ -237,7 +237,7 @@ void main() {
           body: Center(
             child: OutlineButton.icon(
               key: buttonKey,
-              icon: Icon(Icons.add),
+              icon: const Icon(Icons.add),
               label: const Text('OutlineButton'),
               onPressed: () {},
               focusNode: focusNode,
