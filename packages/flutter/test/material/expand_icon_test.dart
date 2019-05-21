@@ -5,19 +5,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+Widget wrap({ Widget child }) {
+  return MaterialApp(
+    home: Center(
+      child: Material(child: child),
+    ),
+  );
+}
+
 void main() {
   testWidgets('ExpandIcon test', (WidgetTester tester) async {
     bool expanded = false;
-
-    await tester.pumpWidget(
-      wrap(
-          child: ExpandIcon(
-            onPressed: (bool isExpanded) {
-              expanded = !expanded;
-            }
-          )
-      )
-    );
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        onPressed: (bool isExpanded) {
+          expanded = !expanded;
+        }
+      ),
+    ));
 
     expect(expanded, isFalse);
     await tester.tap(find.byType(ExpandIcon));
@@ -28,13 +33,11 @@ void main() {
   });
 
   testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-          child: const ExpandIcon(
-            onPressed: null
-          )
-      )
-    );
+    await tester.pumpWidget(wrap(
+      child: const ExpandIcon(
+        onPressed: null,
+      ),
+    ));
 
     final IconTheme iconTheme = tester.firstWidget(find.byType(IconTheme).last);
     expect(iconTheme.data.color, equals(Colors.black38));
@@ -43,27 +46,23 @@ void main() {
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
     bool expanded = false;
 
-    await tester.pumpWidget(
-      wrap(
-          child: ExpandIcon(
-            isExpanded: false,
-            onPressed: (bool isExpanded) {
-              expanded = !expanded;
-            },
-          )
-      )
-    );
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: false,
+        onPressed: (bool isExpanded) {
+          expanded = !expanded;
+        },
+      ),
+    ));
 
-    await tester.pumpWidget(
-      wrap(
-          child: ExpandIcon(
-            isExpanded: true,
-            onPressed: (bool isExpanded) {
-              expanded = !expanded;
-            },
-        )
-      )
-    );
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: true,
+        onPressed: (bool isExpanded) {
+          expanded = !expanded;
+        },
+      ),
+    ));
 
     expect(expanded, isFalse);
   });
@@ -71,16 +70,14 @@ void main() {
   testWidgets('ExpandIcon is rotated initially if isExpanded is true on first build', (WidgetTester tester) async {
     bool expanded = true;
 
-    await tester.pumpWidget(
-        wrap(
-            child: ExpandIcon(
-              isExpanded: expanded,
-              onPressed: (bool isExpanded) {
-                expanded = !isExpanded;
-              },
-            )
-        )
-    );
+    await tester.pumpWidget(wrap(
+      child: ExpandIcon(
+        isExpanded: expanded,
+        onPressed: (bool isExpanded) {
+          expanded = !isExpanded;
+        },
+      ),
+    ));
     final RotationTransition rotation = tester.firstWidget(find.byType(RotationTransition));
     expect(rotation.turns.value, 0.5);
   });
@@ -89,10 +86,10 @@ void main() {
     final SemanticsHandle handle = tester.ensureSemantics();
     const DefaultMaterialLocalizations localizations = DefaultMaterialLocalizations();
     await tester.pumpWidget(wrap(
-        child: ExpandIcon(
-          isExpanded: true,
-          onPressed: (bool _) { },
-        )
+      child: ExpandIcon(
+        isExpanded: true,
+        onPressed: (bool _) { },
+      ),
     ));
 
     expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
@@ -107,7 +104,7 @@ void main() {
       child: ExpandIcon(
         isExpanded: false,
         onPressed: (bool _) { },
-      )
+      ),
     ));
 
     expect(tester.getSemantics(find.byType(ExpandIcon)), matchesSemantics(
@@ -121,10 +118,3 @@ void main() {
   });
 }
 
-Widget wrap({ Widget child }) {
-  return MaterialApp(
-    home: Center(
-      child: Material(child: child),
-    ),
-  );
-}
