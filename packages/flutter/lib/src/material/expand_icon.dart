@@ -22,6 +22,10 @@ import 'theme.dart';
 ///
 /// See [IconButton] for a more general implementation of a pressable button
 /// with an icon.
+///
+/// See also:
+///
+///  * https://material.io/design/iconography/system-icons.html
 class ExpandIcon extends StatefulWidget {
   /// Creates an [ExpandIcon] with the given padding, and a callback that is
   /// triggered when the icon is pressed.
@@ -67,7 +71,8 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white70] when it is [Brightness.dark]
+  /// [Colors.white70] when it is [Brightness.dark]. This adheres to the
+  /// [Material Design specifications](https://material.io/design/iconography/system-icons.html#color)
   final Color color;
 
   /// The color of the icon when it is disabled,
@@ -75,14 +80,16 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// Defaults to [Colors.black38] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white50] when it is [Brightness.dark]
+  /// [Colors.white50] when it is [Brightness.dark]. This adheres to the
+  /// [Material Design specifications](https://material.io/design/iconography/system-icons.html#color)
   final Color disabledColor;
 
   /// The color of the icon when the icon is expanded.
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white] when it is [Brightness.dark]
+  /// [Colors.white] when it is [Brightness.dark]. This adheres to the
+  /// [Material Design specifications](https://material.io/design/iconography/system-icons.html#color)
   final Color expandedColor;
 
   @override
