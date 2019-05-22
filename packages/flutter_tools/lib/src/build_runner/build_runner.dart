@@ -20,7 +20,6 @@ import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
-import '../cache.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
 import '../globals.dart';
@@ -86,11 +85,6 @@ class BuildRunner extends CodeGenerator {
           final Object node = builders[name];
           stringBuffer.writeln('  $name: $node');
         }
-      }
-      if (flutterProject.web.existsSync()) {
-        final String buildersPath = fs.path.join(Cache.flutterRoot, 'packages', 'builders');
-        stringBuffer.writeln('  builders:');
-        stringBuffer.writeln('    path: $buildersPath');
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
       await syntheticPubspec.writeAsString(stringBuffer.toString());

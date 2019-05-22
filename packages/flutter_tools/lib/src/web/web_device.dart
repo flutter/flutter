@@ -50,10 +50,10 @@ class WebDevice extends Device {
   WebApplicationPackage _package;
 
   @override
-  bool get supportsHotReload => false;
+  bool get supportsHotReload => true;
 
   @override
-  bool get supportsHotRestart => false;
+  bool get supportsHotRestart => true;
 
   @override
   bool get supportsStartPaused => true;

@@ -17,10 +17,6 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand() {
     usesTargetOption();
     usesPubOption();
-      argParser.addFlag('debug',
-      negatable: false,
-      help: 'Build a debug version of your app.',
-    );
     argParser.addFlag('profile',
       negatable: false,
       help: 'Build a version of your app specialized for performance profiling.'
@@ -58,15 +54,13 @@ class BuildWebCommand extends BuildSubCommand {
     final BuildInfo buildInfo = getBuildInfo();
     int result;
     switch (buildInfo.mode) {
-      case BuildMode.debug:
-        result = await webCompiler.compileDartDevc(target: target);
-        break;
       case BuildMode.release:
         result = await webCompiler.compileDart2js(target: target);
         break;
       case BuildMode.profile:
         result = await webCompiler.compileDart2js(target: target, minify: false);
         break;
+      case BuildMode.debug:
       case BuildMode.dynamicProfile:
       case BuildMode.dynamicRelease:
         throwToolExit(
