@@ -195,7 +195,7 @@ class Hero extends StatefulWidget {
   ///
   /// Currently if a widget built by [flightShuttleBuilder] takes part in a
   /// [Navigator] push transition, that widget or its descendants must not have
-  /// any [GlobalKey] that presents in the source Hero's descendant widgets.
+  /// any [GlobalKey] that is used in the source Hero's descendant widgets.
   final HeroFlightShuttleBuilder flightShuttleBuilder;
 
   /// Placeholder widget left in place as the Hero's child once the flight takes off.
