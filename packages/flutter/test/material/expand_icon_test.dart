@@ -58,19 +58,19 @@ void main() {
 
     expect(expanded, isFalse);
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.white70));
+    expect(iconTheme.data.color, equals(Colors.white60));
 
     await tester.tap(find.byType(ExpandIcon));
     await tester.pumpAndSettle();
     expect(expanded, isTrue);
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.white70));
+    expect(iconTheme.data.color, equals(Colors.white60));
 
     await tester.tap(find.byType(ExpandIcon));
     await tester.pumpAndSettle();
     expect(expanded, isFalse);
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.white70));
+    expect(iconTheme.data.color, equals(Colors.white60));
   });
 
   testWidgets('ExpandIcon disabled', (WidgetTester tester) async {
@@ -92,7 +92,7 @@ void main() {
     await tester.pumpAndSettle();
 
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
-    expect(iconTheme.data.color, equals(Colors.white50));
+    expect(iconTheme.data.color, equals(Colors.white30));
   });
 
   testWidgets('ExpandIcon test isExpanded does not trigger callback', (WidgetTester tester) async {
