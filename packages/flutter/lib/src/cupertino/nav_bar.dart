@@ -87,6 +87,8 @@ Widget _wrapWithBackground({
   Color backgroundColor,
   Widget child,
   bool updateSystemUiOverlay = true,
+  Gradient backgroundGradient,
+  ImageProvider backgroundImage,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
@@ -104,6 +106,11 @@ Widget _wrapWithBackground({
     decoration: BoxDecoration(
       border: border,
       color: backgroundColor,
+      gradient: backgroundGradient,
+      image: DecorationImage(
+        image: backgroundImage,
+        fit: BoxFit.cover,
+      ),
     ),
     child: result,
   );
@@ -200,20 +207,22 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.backgroundGradient,
+    this.backgroundImage,
   }) : assert(automaticallyImplyLeading != null),
-       assert(automaticallyImplyMiddle != null),
-       assert(transitionBetweenRoutes != null),
-       assert(
-         heroTag != null,
-         'heroTag cannot be null. Use transitionBetweenRoutes = false to '
-         'disable Hero transition on this navigation bar.'
-       ),
-       assert(
-         !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
-         'Cannot specify a heroTag override if this navigation bar does not '
-         'transition due to transitionBetweenRoutes = false.'
-       ),
-       super(key: key);
+        assert(automaticallyImplyMiddle != null),
+        assert(transitionBetweenRoutes != null),
+        assert(
+        heroTag != null,
+        'heroTag cannot be null. Use transitionBetweenRoutes = false to '
+            'disable Hero transition on this navigation bar.'
+        ),
+        assert(
+        !transitionBetweenRoutes || identical(heroTag, _defaultHeroTag),
+        'Cannot specify a heroTag override if this navigation bar does not '
+            'transition due to transitionBetweenRoutes = false.'
+        ),
+        super(key: key);
 
   /// {@template flutter.cupertino.navBar.leading}
   /// Widget to place at the start of the navigation bar. Normally a back button
@@ -360,6 +369,22 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// {@endtemplate}
   final Object heroTag;
 
+  /// {@template flutter.cupertino.navBar.backgroundGradient}
+  /// An optional background gradient for the navigation bar. If it contains transparency, the
+  /// tab bar will automatically produce a blurring effect to the content
+  /// behind it.
+  ///
+  /// If the [backgroundGradient] is set, the [barBackgroundColor] will be ignored.
+  /// {@endtemplate}
+  final Object backgroundGradient;
+
+  /// {@template flutter.cupertino.navBar.backgroundImage}
+  /// An optional background image for the navigation bar.
+  ///
+  /// If the [backgroundImage] is set, the [barBackgroundColor] and the [backgroundGradient] will be ignored.
+  /// {@endtemplate}
+  final Object backgroundImage;
+
   /// True if the navigation bar's background color has no transparency.
   @override
   bool get fullObstruction => backgroundColor == null ? null : backgroundColor.alpha == 0xFF;
@@ -409,6 +434,8 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final Widget navBar = _wrapWithBackground(
       border: widget.border,
       backgroundColor: backgroundColor,
+      backgroundGradient: widget.backgroundGradient,
+      backgroundImage: widget.backgroundImage,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: _PersistentNavigationBar(
@@ -521,15 +548,17 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
     this.heroTag = _defaultHeroTag,
+    this.backgroundGradient,
+    this.backgroundImage,
   }) : assert(automaticallyImplyLeading != null),
-       assert(automaticallyImplyTitle != null),
-       assert(
-         automaticallyImplyTitle == true || largeTitle != null,
-         'No largeTitle has been provided but automaticallyImplyTitle is also '
-         'false. Either provide a largeTitle or set automaticallyImplyTitle to '
-         'true.'
-       ),
-       super(key: key);
+        assert(automaticallyImplyTitle != null),
+        assert(
+        automaticallyImplyTitle == true || largeTitle != null,
+        'No largeTitle has been provided but automaticallyImplyTitle is also '
+            'false. Either provide a largeTitle or set automaticallyImplyTitle to '
+            'true.'
+        ),
+        super(key: key);
 
   /// The navigation bar's title.
   ///
@@ -612,6 +641,12 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
   /// True if the navigation bar's background color has no transparency.
   bool get opaque => backgroundColor.alpha == 0xFF;
 
+  /// {@macro flutter.cupertino.navBar.backgroundGradient}
+  final Object backgroundGradient;
+
+  /// {@macro flutter.cupertino.navBar.backgroundImage}
+  final Object backgroundImage;
+
   @override
   _CupertinoSliverNavigationBarState createState() => _CupertinoSliverNavigationBarState();
 }
@@ -665,6 +700,8 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
           heroTag: widget.heroTag,
           persistentHeight: _kNavBarPersistentHeight + MediaQuery.of(context).padding.top,
           alwaysShowMiddle: widget.middle != null,
+          backgroundGradient: widget.backgroundGradient,
+          backgroundImage: widget.backgroundImage,
         ),
       ),
     );
@@ -685,9 +722,11 @@ class _LargeTitleNavigationBarSliverDelegate
     @required this.heroTag,
     @required this.persistentHeight,
     @required this.alwaysShowMiddle,
+    @required this.backgroundGradient,
+    @required this.backgroundImage,
   }) : assert(persistentHeight != null),
-       assert(alwaysShowMiddle != null),
-       assert(transitionBetweenRoutes != null);
+        assert(alwaysShowMiddle != null),
+        assert(transitionBetweenRoutes != null);
 
   final _NavigationBarStaticComponentsKeys keys;
   final _NavigationBarStaticComponents components;
@@ -700,6 +739,8 @@ class _LargeTitleNavigationBarSliverDelegate
   final Object heroTag;
   final double persistentHeight;
   final bool alwaysShowMiddle;
+  final Gradient backgroundGradient;
+  final ImageProvider backgroundImage;
 
   @override
   double get minExtent => persistentHeight;
@@ -712,7 +753,7 @@ class _LargeTitleNavigationBarSliverDelegate
     final bool showLargeTitle = shrinkOffset < maxExtent - minExtent - _kNavBarShowLargeTitleThreshold;
 
     final _PersistentNavigationBar persistentNavigationBar =
-        _PersistentNavigationBar(
+    _PersistentNavigationBar(
       components: components,
       padding: padding,
       // If a user specified middle exists, always show it. Otherwise, show
@@ -723,6 +764,8 @@ class _LargeTitleNavigationBarSliverDelegate
     final Widget navBar = _wrapWithBackground(
       border: border,
       backgroundColor: backgroundColor,
+      backgroundGradient: backgroundGradient,
+      backgroundImage: backgroundImage,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: Stack(
