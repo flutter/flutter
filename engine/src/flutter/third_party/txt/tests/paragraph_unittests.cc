@@ -2259,6 +2259,41 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeStrut)) {
   ASSERT_TRUE(Snapshot());
 }
 
+TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(GetRectsForRangeStrutFallback)) {
+  const char* text = "Chinese 字典";
+
+  auto icu_text = icu::UnicodeString::fromUTF8(text);
+  std::u16string u16_text(icu_text.getBuffer(),
+                          icu_text.getBuffer() + icu_text.length());
+
+  txt::ParagraphStyle paragraph_style;
+  paragraph_style.strut_enabled = false;
+  txt::ParagraphBuilder builder(paragraph_style, GetTestFontCollection());
+
+  txt::TextStyle text_style;
+  text_style.font_families.push_back("Noto Sans CJK JP");
+  text_style.font_size = 20;
+  builder.PushStyle(text_style);
+
+  builder.AddText(u16_text);
+
+  builder.Pop();
+
+  auto paragraph = builder.Build();
+  paragraph->Layout(550);
+
+  std::vector<txt::Paragraph::TextBox> strut_boxes =
+      paragraph->GetRectsForRange(0, 10, Paragraph::RectHeightStyle::kStrut,
+                                  Paragraph::RectWidthStyle::kMax);
+  std::vector<txt::Paragraph::TextBox> tight_boxes =
+      paragraph->GetRectsForRange(0, 10, Paragraph::RectHeightStyle::kTight,
+                                  Paragraph::RectWidthStyle::kMax);
+
+  ASSERT_EQ(strut_boxes.size(), 1ull);
+  ASSERT_EQ(tight_boxes.size(), 1ull);
+  ASSERT_EQ(strut_boxes.front().rect, tight_boxes.front().rect);
+}
+
 SkRect GetCoordinatesForGlyphPosition(const txt::Paragraph& paragraph,
                                       size_t pos) {
   std::vector<txt::Paragraph::TextBox> boxes =

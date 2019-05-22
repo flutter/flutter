@@ -405,6 +405,8 @@ class Paragraph {
   // Calculates and populates strut based on paragraph_style_ strut info.
   void ComputeStrut(StrutMetrics* strut, SkFont& font);
 
+  bool IsStrutValid() const;
+
   // Calculate the starting X offset of a line based on the line's width and
   // alignment.
   double GetLineXOffset(double line_total_advance);
