@@ -507,6 +507,11 @@ void main() {
 
   group('ModalRoute', () {
     testWidgets('should resume focus when the next route is popped', (WidgetTester tester) async {
+      // TODO(tongmu): It's currently using PageRoute (from MaterialApp)
+      // instead of ModalRoute, which might leave a risk but avoids building
+      // everything from scratch by using the existing setup by MaterialApp and
+      // TextField as a focusable widget. We might want to write a better test.
+
       final FocusNode node = FocusNode();
       BuildContext pageContext;
       final Widget widget = MaterialApp(
