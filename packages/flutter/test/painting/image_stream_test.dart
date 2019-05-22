@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 
 class FakeFrameInfo implements FrameInfo {
   FakeFrameInfo(int width, int height, this._duration)
@@ -604,6 +605,38 @@ void main() {
     await tester.pump(); // first animation frame shows on first app frame.
 
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
+  });
+
+  testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) {
+    void handleImage(ImageInfo image, bool synchronousCall) { }
+    void handleImageDifferently(ImageInfo image, bool synchronousCall) { }
+    void handleError(dynamic error, StackTrace stackTrace) { }
+    void handleChunk(ImageChunkEvent event) { }
+
+    void compare({
+      @required ImageListener onImage1,
+      @required ImageListener onImage2,
+      ImageChunkListener onChunk1,
+      ImageChunkListener onChunk2,
+      ImageErrorListener onError1,
+      ImageErrorListener onError2,
+      bool areEqual = true,
+    }) {
+      final ImageStreamListener l1 = ImageStreamListener(onImage1, onChunk: onChunk1, onError: onError1);
+      final ImageStreamListener l2 = ImageStreamListener(onImage2, onChunk: onChunk2, onError: onError2);
+      Matcher comparison(dynamic expected) => areEqual ? equals(expected) : isNot(equals(expected));
+      expect(l1, comparison(l2));
+      expect(l1.hashCode, comparison(l2.hashCode));
+    }
+
+    compare(onImage1: handleImage, onImage2: handleImage);
+    compare(onImage1: handleImage, onImage2: handleImageDifferently, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onImage2: handleImage, onChunk2: handleChunk);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onChunk2: handleChunk, onError2: handleError);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onImage2: handleImage, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onChunk2: handleChunk, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onError2: handleError, areEqual: false);
   });
 
   // TODO(amirh): enable this once WidgetTester supports flushTimers.
