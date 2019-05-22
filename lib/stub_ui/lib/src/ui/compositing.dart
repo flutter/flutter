@@ -918,7 +918,7 @@ abstract class PersistedSurface implements EngineLayer {
   /// Creates a persisted surface.
   ///
   /// [paintedBy] points to the object that painted this surface.
-  PersistedSurface(this.paintedBy) : assert(paintedBy != null);
+  PersistedSurface(this.paintedBy);
 
   /// The strategy that should be used when attempting to reuse the resources
   /// owned by this surface.
