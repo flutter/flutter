@@ -95,7 +95,7 @@ void main() {
     }
 
     for (String testOs in testPlatforms) {
-      testUsingContext('AnsiSpinner works for $testOs (1)', () async {
+      testUsingContext('AnsiSpinner works for $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
           final AnsiSpinner ansiSpinner = AnsiSpinner(
@@ -131,18 +131,21 @@ void main() {
         Stdio: () => mockStdio,
       });
 
-      testUsingContext('AnsiSpinner works for $testOs (2)', () async {
+      testUsingContext('AnsiSpinner works for $testOs', () async {
         bool done = false;
-        mockStopwatch = FakeStopwatch();
-        FakeAsync().run((FakeAsync time) {
+        // We pad the time here so that we have a little slack in terms of the first part of this test
+        // taking longer to run than we'd like, since we are forced to start the timer before the actual
+        // stopwatch that we're trying to test. This is an unfortunate possible race condition. If this
+        // turns out to be flaky, we will need to find another solution.
+        final Future<void> tenMillisecondsLater = Future<void>.delayed(const Duration(milliseconds: 15));
+        await FakeAsync().run((FakeAsync time) async {
           final AnsiSpinner ansiSpinner = AnsiSpinner(
-            timeout: const Duration(seconds: 2),
+            timeout: const Duration(milliseconds: 10),
           )..start();
-          mockStopwatch.elapsed = const Duration(seconds: 1);
           doWhileAsync(time, () => ansiSpinner.ticks < 10); // one second
           expect(ansiSpinner.seemsSlow, isFalse);
           expect(outputStdout().join('\n'), isNot(contains('This is taking an unexpectedly long time.')));
-          mockStopwatch.elapsed = const Duration(seconds: 3);
+          await tenMillisecondsLater;
           doWhileAsync(time, () => ansiSpinner.ticks < 30); // three seconds
           expect(ansiSpinner.seemsSlow, isTrue);
           // Check the 2nd line to verify there's a newline before the warning
@@ -155,7 +158,6 @@ void main() {
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
         Stdio: () => mockStdio,
-        Stopwatch: () => mockStopwatch,
       });
 
       testUsingContext('Stdout startProgress on colored terminal for $testOs', () async {

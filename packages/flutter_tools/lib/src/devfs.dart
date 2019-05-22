@@ -7,6 +7,7 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
 import 'asset.dart';
+import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -45,7 +46,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
+    return contentsAsStream().transform<List<int>>(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
@@ -267,6 +268,7 @@ class _DevFSHttpWriter {
   final Uri httpAddress;
 
   static const int kMaxInFlight = 6;
+  static const int kMaxRetries = 3;
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
@@ -282,17 +284,19 @@ class _DevFSHttpWriter {
   }
 
   void _scheduleWrites() {
-    while ((_inFlight < kMaxInFlight) && (!_completer.isCompleted) && _outstanding.isNotEmpty) {
+    while (_inFlight < kMaxInFlight) {
+      if (_outstanding.isEmpty) {
+        // Finished.
+        break;
+      }
       final Uri deviceUri = _outstanding.keys.first;
       final DevFSContent content = _outstanding.remove(deviceUri);
-      _startWrite(deviceUri, content);
-      _inFlight += 1;
+      _scheduleWrite(deviceUri, content);
+      _inFlight++;
     }
-    if ((_inFlight == 0) && (!_completer.isCompleted) && _outstanding.isEmpty)
-      _completer.complete();
   }
 
-  Future<void> _startWrite(
+  Future<void> _scheduleWrite(
     Uri deviceUri,
     DevFSContent content, [
     int retry = 0,
@@ -301,19 +305,33 @@ class _DevFSHttpWriter {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
       request.headers.add('dev_fs_name', fsName);
-      request.headers.add('dev_fs_uri_b64', base64.encode(utf8.encode('$deviceUri')));
+      request.headers.add('dev_fs_uri_b64',
+          base64.encode(utf8.encode(deviceUri.toString())));
       final Stream<List<int>> contents = content.contentsAsCompressedStream();
       await request.addStream(contents);
       final HttpClientResponse response = await request.close();
       await response.drain<void>();
-    } catch (error, trace) {
-      if (!_completer.isCompleted) {
-        printTrace('Error writing "$deviceUri" to DevFS: $error');
-        _completer.completeError(error, trace);
+    } on SocketException catch (socketException, stackTrace) {
+      // We have one completer and can get up to kMaxInFlight errors.
+      if (!_completer.isCompleted)
+        _completer.completeError(socketException, stackTrace);
+      return;
+    } catch (e) {
+      if (retry < kMaxRetries) {
+        printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
+        // Synchronization is handled by the _completer below.
+        unawaited(_scheduleWrite(deviceUri, content, retry + 1));
+        return;
+      } else {
+        printError('Error writing "$deviceUri" to DevFS: $e');
       }
     }
-    _inFlight -= 1;
-    _scheduleWrites();
+    _inFlight--;
+    if ((_outstanding.isEmpty) && (_inFlight == 0)) {
+      _completer.complete();
+    } else {
+      _scheduleWrites();
+    }
   }
 }
 

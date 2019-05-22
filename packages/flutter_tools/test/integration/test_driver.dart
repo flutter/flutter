@@ -386,16 +386,16 @@ abstract class FlutterTestDriver {
     final Future<T> future = callback();
 
     future.timeout(timeout ?? defaultTimeout, onTimeout: () {
-      _debugPrint(messages.toString());
+      print(messages.toString());
       timeoutExpired = true;
-      _debugPrint('$task is taking longer than usual...');
+      print('$task is taking longer than usual...');
       return null;
     });
 
     return future.catchError((dynamic error) {
       if (!timeoutExpired) {
         timeoutExpired = true;
-        _debugPrint(messages.toString());
+        print(messages.toString());
       }
       throw error;
     }).whenComplete(() => subscription.cancel());
