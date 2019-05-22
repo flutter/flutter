@@ -175,8 +175,6 @@ class FlutterDriverExtension {
   /// the result into a subclass of [Result], but that's not strictly required.
   @visibleForTesting
   Future<Map<String, dynamic>> call(Map<String, String> params) async {
-    assert(WidgetsBinding.instance.isRootWidgetAttached,
-        'No root widget is attached; have you remembered to call runApp()?');
     final String commandKind = params['command'];
     try {
       final CommandHandlerCallback commandHandler = _commandHandlers[commandKind];
@@ -185,6 +183,8 @@ class FlutterDriverExtension {
       if (commandHandler == null || commandDeserializer == null)
         throw 'Extension $_extensionMethod does not support command $commandKind';
       final Command command = commandDeserializer(params);
+      assert(WidgetsBinding.instance.isRootWidgetAttached || !command.requiresRootWidgetAttached,
+          'No root widget is attached; have you remembered to call runApp()?');
       Future<Result> responseFuture = commandHandler(command);
       if (command.timeout != null)
         responseFuture = responseFuture.timeout(command.timeout);

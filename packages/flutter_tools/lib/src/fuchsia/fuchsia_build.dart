@@ -12,8 +12,8 @@ import '../bundle.dart';
 import '../devfs.dart';
 import '../project.dart';
 
-import 'fuchsia_kernel_compiler.dart';
 import 'fuchsia_pm.dart';
+import 'fuchsia_sdk.dart';
 
 // Building a Fuchsia package has a few steps:
 // 1. Do the custom kernel compile using the kernel compiler from the Fuchsia
@@ -30,7 +30,7 @@ Future<void> buildFuchsia(
     outDir.createSync(recursive: true);
   }
 
-  await fuchsiaKernelCompiler.build(
+  await fuchsiaSdk.fuchsiaKernelCompiler.build(
       fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo);
   await _buildAssets(fuchsiaProject, target, buildInfo);
   await _buildPackage(fuchsiaProject, target, buildInfo);
@@ -96,6 +96,7 @@ Future<void> _buildPackage(
   manifestFile.writeAsStringSync('meta/package=$pkgDir/meta/package\n',
       mode: FileMode.append);
 
+  final FuchsiaPM fuchsiaPM = fuchsiaSdk.fuchsiaPM;
   if (!await fuchsiaPM.init(pkgDir, appName)) {
     return;
   }
