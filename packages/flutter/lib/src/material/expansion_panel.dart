@@ -202,12 +202,6 @@ class ExpansionPanelRadio extends ExpansionPanel {
 ///             title: Text(item.headerValue),
 ///           );
 ///         },
-///         expansionIndicator: (BuildContext context, bool isExpanded) {
-///           return Switch(
-///             value: isExpanded,
-///             onChanged: null,
-///           );
-///         },
 ///         body: ListTile(
 ///           title: Text(item.expandedValue),
 ///           subtitle: Text('To delete this panel, tap the trash can icon'),
@@ -305,12 +299,6 @@ class ExpansionPanelList extends StatefulWidget {
   ///         headerBuilder: (BuildContext context, bool isExpanded) {
   ///           return ListTile(
   ///             title: Text(item.headerValue),
-  ///           );
-  ///         },
-  ///         expansionIndicator: (BuildContext context, bool isExpanded) {
-  ///           return Switch(
-  ///             value: isExpanded,
-  ///             onChanged: null,
   ///           );
   ///         },
   ///         body: ListTile(
