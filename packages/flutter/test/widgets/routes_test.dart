@@ -507,7 +507,6 @@ void main() {
 
   group('ModalRoute', () {
     testWidgets('should resume focus when the next route is popped', (WidgetTester tester) async {
-      final GlobalKey key = GlobalKey();
       final FocusNode node = FocusNode();
       BuildContext pageContext;
       final Widget widget = MaterialApp(
@@ -519,7 +518,7 @@ void main() {
               return Column(
                 children: <Widget>[
                   TextField(),
-                  TextField(key: key, focusNode: node),
+                  TextField(focusNode: node),
                 ],
               );
             }
