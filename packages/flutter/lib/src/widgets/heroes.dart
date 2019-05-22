@@ -12,7 +12,7 @@ import 'overlay.dart';
 import 'pages.dart';
 import 'routes.dart';
 import 'transitions.dart';
-import 'visibility.dart';
+import 'ticker_provider.dart' show TickerMode;
 
 /// Signature for a function that takes two [Rect] instances and returns a
 /// [RectTween] that transitions between them.
@@ -348,13 +348,16 @@ class _HeroState extends State<Hero> {
     }
 
     return _shouldIncludeChild
-      ? Visibility(
-          visible: false,
-          maintainState: true,
-          maintainAnimation: true,
-          maintainSize: true,
-          child: keyedChild,
-        )
+      ? SizedBox(
+        width: _placeholderSize.width,
+        height: _placeholderSize.height,
+        child: Offstage(
+          child: TickerMode(
+            enabled: false,
+            child: keyedChild,
+          )
+        ),
+      )
       : SizedBox(
           width: _placeholderSize.width,
           height: _placeholderSize.height,

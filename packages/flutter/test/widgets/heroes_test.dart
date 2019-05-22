@@ -152,50 +152,6 @@ class _SimpleState extends State<_SimpleStatefulWidget> {
   Widget build(BuildContext context) => Text(state.toString());
 }
 
-class _IsInvisible extends Matcher {
-  const _IsInvisible({
-    this.maintainState = true,
-    this.maintainAnimation = true,
-    this.maintainSize = true,
-    this.maintainSemantics = false,
-    this.maintainInteractivity = false,
-  });
-
-  final bool maintainState;
-  final bool maintainAnimation;
-  final bool maintainSize;
-  final bool maintainSemantics;
-  final bool maintainInteractivity;
-
-  @override
-  bool matches(covariant Finder finder, Map<dynamic, dynamic> matchState) {
-    final Iterable<Element> nodes = finder.evaluate();
-    if (nodes.length != 1)
-      return false;
-    bool result = false;
-    nodes.single.visitAncestorElements((Element ancestor) {
-      final Widget widget = ancestor.widget;
-      if (widget is Visibility && !widget.visible) {
-        result = widget.maintainState == maintainState
-          && widget.maintainAnimation == maintainAnimation
-          && widget.maintainSize == maintainSize
-          && widget.maintainSemantics == maintainSemantics
-          && widget.maintainInteractivity == maintainInteractivity;
-        return false;
-      }
-      return true;
-    });
-    return result;
-  }
-
-  @override
-  Description describe(Description description) {
-    return description.add('inside a matching Visibility widget');
-  }
-}
-
-const Matcher _isInvisible = _IsInvisible();
-
 class MyStatefulWidget extends StatefulWidget {
   const MyStatefulWidget({ Key key, this.value = '123' }) : super(key: key);
   final String value;
@@ -241,7 +197,7 @@ Future<void> main() async {
     // at this stage, the heroes have just gone on their journey, we are
     // seeing them at t=16ms. The original page no longer contains the hero.
 
-    expect(find.byKey(firstKey), _isInvisible);
+    expect(find.byKey(firstKey), findsNothing);
 
     expect(find.byKey(secondKey), findsOneWidget);
     expect(find.byKey(secondKey), isNotInCard);
@@ -251,7 +207,7 @@ Future<void> main() async {
 
     // t=32ms for the journey. Surely they are still at it.
 
-    expect(find.byKey(firstKey), _isInvisible);
+    expect(find.byKey(firstKey), findsNothing);
 
     expect(find.byKey(secondKey), findsOneWidget);
 
@@ -295,7 +251,7 @@ Future<void> main() async {
     // at this stage, the heroes have just gone on their journey, we are
     // seeing them at t=16ms. The original page no longer contains the hero.
 
-    expect(find.byKey(secondKey), _isInvisible);
+    expect(find.byKey(secondKey), findsNothing);
     expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isNotInCard);
 
@@ -303,7 +259,7 @@ Future<void> main() async {
 
     // t=32ms for the journey. Surely they are still at it.
 
-    expect(find.byKey(secondKey), _isInvisible);
+    expect(find.byKey(secondKey), findsNothing);
     expect(find.byKey(thirdKey), isOnstage);
     expect(find.byKey(thirdKey), isNotInCard);
 
@@ -450,7 +406,7 @@ Future<void> main() async {
     expect(log, isEmpty);
 
     await tester.pump(const Duration(milliseconds: 10));
-    expect(find.text('foo'), _isInvisible);
+    expect(find.text('foo'), findsNothing);
     await tester.tap(find.text('bar', skipOffstage: false));
     expect(log, isEmpty);
 
@@ -577,9 +533,9 @@ Future<void> main() async {
 
     // At this point the hero widgets have been replaced by placeholders
     // and the destination hero has been moved to the overlay.
-    expect(find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)), _isInvisible);
+    expect(find.descendant(of: find.byKey(homeRouteKey), matching: find.byKey(firstKey)), findsNothing);
     expect(find.descendant(of: find.byKey(routeTwoKey), matching: find.byKey(secondKey)), findsNothing);
-    expect(find.byKey(firstKey), _isInvisible);
+    expect(find.byKey(firstKey), findsNothing);
     expect(find.byKey(secondKey), isOnstage);
 
     // The duration of a MaterialPageRoute's transition is 300ms.
@@ -1157,9 +1113,8 @@ Future<void> main() async {
 
     // Push flight underway.
     await tester.pump(const Duration(milliseconds: 100));
-    // One visible in the hero animation, one hidden under an `Opacity` widget
-    // as a placeholder.
-    expect(find.text('456'), findsNWidgets(2));
+    // Visible in the hero animation.
+    expect(find.text('456'), findsOneWidget);
 
     // Push flight finished.
     await tester.pump(const Duration(milliseconds: 300));
@@ -1547,7 +1502,7 @@ Future<void> main() async {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 10));
 
-    expect(find.text('foo'), _isInvisible);
+    expect(find.text('foo'), findsNothing);
     expect(find.text('bar'), findsNothing);
     expect(find.text('baz'), findsOneWidget);
   });
@@ -1830,14 +1785,14 @@ Future<void> main() async {
     await tester.pump();
 
     // The hero started flying.
-    expect(find.byKey(largeContainer), _isInvisible);
+    expect(find.byKey(largeContainer), findsNothing);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
 
     await tester.pump(const Duration(milliseconds: 100));
 
     // The hero is in-flight.
-    expect(find.byKey(largeContainer), _isInvisible);
+    expect(find.byKey(largeContainer), findsNothing);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
     final Size size = tester.getSize(find.byKey(smallContainer));
@@ -1999,14 +1954,14 @@ Future<void> main() async {
     await tester.pump();
 
     // The hero started flying.
-    expect(find.byKey(largeContainer), _isInvisible);
+    expect(find.byKey(largeContainer), findsNothing);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
 
     await tester.pump(const Duration(milliseconds: 100));
 
     // The hero is in-flight.
-    expect(find.byKey(largeContainer), _isInvisible);
+    expect(find.byKey(largeContainer), findsNothing);
     expect(find.byKey(smallContainer), isOnstage);
     expect(find.byKey(smallContainer), isNotInCard);
     final Size size = tester.getSize(find.byKey(smallContainer));
@@ -2228,13 +2183,13 @@ Future<void> main() async {
 
     // image1 should snap to the top left corner of the Row widget.
     expect(
-      tester.getRect(find.byKey(imageKey1)),
+      tester.getRect(find.byKey(imageKey1, skipOffstage: false)),
       rectMoreOrLessEquals(tester.getTopLeft(find.widgetWithText(Row, '1')) & const Size(100, 100), epsilon: 0.01)
     );
 
     // Text should respect the correct final size of image1.
     expect(
-      tester.getTopRight(find.byKey(imageKey1)).dx,
+      tester.getTopRight(find.byKey(imageKey1, skipOffstage: false)).dx,
       moreOrLessEquals(tester.getTopLeft(find.text('1')).dx, epsilon: 0.01)
     );
   });
