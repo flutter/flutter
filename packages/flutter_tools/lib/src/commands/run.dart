@@ -411,6 +411,7 @@ class RunCommand extends RunCommandBase {
         flutterDevices,
         target: targetFile,
         flutterProject: flutterProject,
+        ipv6: ipv6,
       );
     } else {
       runner = ColdRunner(

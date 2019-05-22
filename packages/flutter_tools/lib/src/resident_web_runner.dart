@@ -6,11 +6,9 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
 import 'base/terminal.dart';
 import 'build_info.dart';
 import 'bundle.dart';
@@ -20,6 +18,7 @@ import 'globals.dart';
 import 'project.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
+import 'web/asset_server.dart';
 import 'web/compile.dart';
 import 'web/web_device.dart';
 
@@ -29,6 +28,7 @@ class ResidentWebRunner extends ResidentRunner {
     List<FlutterDevice> flutterDevices, {
     String target,
     @required this.flutterProject,
+    @required bool ipv6,
   }) : super(
           flutterDevices,
           target: target,
@@ -38,9 +38,10 @@ class ResidentWebRunner extends ResidentRunner {
           debuggingOptions: DebuggingOptions.enabled(
             const BuildInfo(BuildMode.debug, ''),
           ),
+          ipv6: ipv6,
         );
 
-  HttpServer _server;
+  WebAssetServer _server;
   ProjectFileInvalidator projectFileInvalidator;
   DateTime _lastCompiled;
   final FlutterProject flutterProject;
@@ -63,7 +64,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() {
-    return _server?.close();
+    return _server?.dispose();
   }
 
   @override
@@ -128,13 +129,12 @@ class ResidentWebRunner extends ResidentRunner {
         fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Step 2: Start an HTTP server
-    _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    _server.listen(_basicAssetServer);
-    printStatus('Serving assets from http:localhost:${_server.port}');
+    _server = WebAssetServer(flutterProject, target, ipv6);
+    await _server.initialize();
 
     // Step 3: Spawn an instance of Chrome and direct it to the created server.
     await chromeLauncher.launch('http:localhost:${_server.port}');
- 
+
     // We don't support the debugging proxy yet.
     appStartedCompleter?.complete();
     return attach(
@@ -162,68 +162,5 @@ class ResidentWebRunner extends ResidentRunner {
     await webCompilationProxy.invalidate(inputs: invalidatedSources);
     printStatus('Sources updated, refresh browser');
     return OperationResult.ok;
-  }
-
-  /// An HTTP serve which provides JavaScript and web assets to the browser.
-  Future<void> _basicAssetServer(HttpRequest request) async {
-    if (request.method != 'GET') {
-      request.response.statusCode = HttpStatus.forbidden;
-      await request.response.close();
-      return;
-    }
-    // Resolve all get requests to the build/web/ or build/flutter_assets directory.
-    final Uri uri = request.uri;
-    File file;
-    String contentType;
-    if (uri.path == '/') {
-      file = flutterProject.directory
-          .childDirectory('web')
-          .childFile('index.html');
-      contentType = 'text/html';
-    } else if (uri.path.endsWith('main.dart.js')) {
-      file = fs.file(fs.path.join(flutterProject.generated.path, 'lib',
-          '${fs.path.basename(target)}.js'));
-      contentType = 'text/javascript';
-    } else if (uri.path.endsWith('${fs.path.basename(target)}.bootstrap.js')) {
-      file = fs.file(fs.path.join(flutterProject.generated.path, 'lib',
-          '${fs.path.basename(target)}.bootstrap.js'));
-      contentType = 'text/javascript';
-    } else if (uri.path.contains('dart_sdk')) {
-      file = fs.file(fs.path.join(
-          artifacts.getArtifactPath(Artifact.flutterWebSdk),
-          'kernel',
-          'amd',
-          'dart_sdk.js'));
-      contentType = 'text/javascript';
-    } else if (uri.path.startsWith('/packages')) {
-      final List<String> segments = fs.path.split(uri.path);
-      final String packageName = segments[2];
-      final String filePath = fs.path.joinAll(segments.sublist(3));
-      file = fs.file(fs.path.join(
-          flutterProject.dartTool
-              .childDirectory('build')
-              .childDirectory('generated')
-              .childDirectory(packageName)
-              .childDirectory('lib')
-              .path,
-          filePath));
-      contentType = 'text/javascript';
-    } else {
-      file = fs.file(fs.path.join(
-          getAssetBuildDirectory(), uri.path.replaceFirst('/assets/', '')));
-    }
-
-    if (!file.existsSync()) {
-      printTrace('Could not find ${file.path}');
-      request.response.statusCode = HttpStatus.notFound;
-      await request.response.close();
-      return;
-    }
-    request.response.statusCode = HttpStatus.ok;
-    if (contentType != null) {
-      request.response.headers.add(HttpHeaders.contentTypeHeader, contentType);
-    }
-    await request.response.addStream(file.openRead());
-    await request.response.close();
   }
 }
