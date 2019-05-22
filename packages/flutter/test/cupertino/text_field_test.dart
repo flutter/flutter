@@ -370,7 +370,7 @@ void main() {
     await tester.pump();
 
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
@@ -399,7 +399,7 @@ void main() {
     await tester.pump();
 
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
