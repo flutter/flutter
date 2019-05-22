@@ -109,9 +109,21 @@ class _TapTracker {
 /// Recognizes when the user has tapped the screen at the same location twice in
 /// quick succession.
 ///
-/// [DoubleTapGestureRecognizer] competes on pointer events of [kPrimaryButton]
-/// only when it has a non-null callback. If it has no callbacks, it is a no-op.
+/// Upon receiving a valid [PointerUpEvent] for the first tap, [DoubleTapGestureRecognizer]
+/// optimistically calls [onFirstTapUp] and put the gesture arena of the first
+/// tap on hold. It will attempt to declare victory in both taps' arenas once
+/// a valid second tap is picked up, then immediately call [onDoubleTapUp] and
+/// [onDoubleTap].
 ///
+/// Much like [TapGestureRecognizer], [DoubleTapGestureRecognizer] considers
+/// all the pointers involved in the pointer event sequence as contributing to
+/// one gesture. For this reason, extra pointer interactions duration a tap
+/// sequence are not recognized as additional taps. For example, down-1, down-2,
+/// up-1, up-2 produces only one tap on up-1.
+///
+/// [DoubleTapGestureRecognizer] competes on pointer events of [kPrimaryButton]
+/// only when it has at least one non-null callback. If it has no callbacks,
+/// it is a no-op.
 class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Create a gesture recognizer for double taps.
   ///
@@ -157,13 +169,23 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   ///  * [kPrimaryButton], the button this callback responds to.
   GestureDoubleTapCallback onDoubleTap;
 
-  //GestureTapDownCallback onFirstTapDown;
+  /// Called when a pointer that will trigger a tap of a primary button has
+  /// stopped contacting the screen at a particular location, unless a previous
+  /// tap landed in proximity shortly before, in which case [onDoubleTap] and
+  /// [onDoubleTapUp] will be called.
+  ///
+  /// [onFirstTapUp] is called optimistically before winning the gesture arena,
+  /// the same pointer that triggered [onFirstTapUp] might be rejected afterwards.
+  /// Neither [onDoubleTap] or [onDoubleTapUp] is guaranteed to be called after
+  /// [onFirstTapUp].
   GestureTapUpCallback onFirstTapUp;
 
-  //GestureTapDownCallback onSecondTapDown;
-  GestureTapUpCallback onSecondTapUp;
-
-  //GestureTapCancelCallback onDoubleTapCancel;
+  /// Called when the user has tapped the screen with a primary button at the
+  /// same location twice in quick succession.
+  ///
+  /// This triggers when the pointer stops contacting the device after the
+  /// second tap, immediately after winning the gesture arenas of both taps.
+  GestureTapUpCallback onDoubleTapUp;
 
   Timer _doubleTapTimer;
   _TapTracker _firstTap;
@@ -171,17 +193,21 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   @override
   bool isPointerAllowed(PointerEvent event) {
-    if (_firstTap == null) {
-      switch (event.buttons) {
-        case kPrimaryButton:
-          if (onDoubleTap == null)
-            return false;
-          break;
-        default:
-          return false;
-      }
+    if (_firstTap != null || _trackers.isNotEmpty) {
+      return super.isPointerAllowed(event);
     }
-    return super.isPointerAllowed(event);
+
+    // Skip tracking if no tracking has already begun and there isn't
+    // any callbacks.
+    final bool hasCallbacks = onDoubleTap != null
+                           || onFirstTapUp != null
+                           || onDoubleTapUp != null;
+    switch (event.buttons) {
+      case kPrimaryButton:
+        return hasCallbacks && super.isPointerAllowed(event);
+      default:
+        return false;
+    }
   }
 
   @override
@@ -231,9 +257,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   }
 
   @override
-  void acceptGesture(int pointer) {
-    //print('$pointer accepted by $hashCode');
-  }
+  void acceptGesture(int pointer) { }
 
   @override
   void rejectGesture(int pointer) {
@@ -327,15 +351,15 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
 
   void _checkUp(PointerUpEvent event, int buttons) {
     assert(buttons == kPrimaryButton);
-    if (onDoubleTap != null)
-      invokeCallback<void>('onDoubleTap', onDoubleTap);
-
-    if (onSecondTapUp != null) {
+    if (onDoubleTapUp != null) {
       invokeCallback<void>(
-        'onSecondTapUp',
-        () => onSecondTapUp(TapUpDetails(globalPosition: event.position)),
+        'onDoubleTapUp',
+        () => onDoubleTapUp(TapUpDetails(globalPosition: event.position)),
       );
     }
+
+    if (onDoubleTap != null)
+      invokeCallback<void>('onDoubleTap', onDoubleTap);
   }
 
   @override
