@@ -4353,6 +4353,21 @@ class InheritedElement extends ProxyElement {
     _dependents.remove(dependent);
   }
 
+  /// If there is or not an [Element] subscribed to this [InheritedElement].
+  ///
+  /// See also:
+  ///  * [updateDependencies], which is called each time a dependency is
+  ///    created with [inheritFromWidgetOfExactType].
+  ///  * [setDependencies], which sets the value for a dependent element.
+  ///  * [getDependencies], which returns the current value for a dependent
+  ///    element.
+  ///  * [removeDependencies], which unsets the value for a dependent element.
+  ///  * [notifyDependent], which can be overridden to use a dependent's
+  ///    [getDependencies] value to decide if the dependent needs to be rebuilt.
+  ///  * [InheritedModel], which is an example of a class that uses this method
+  ///    to manage dependency values.
+  bool get hasDependencies => _dependents.isNotEmpty;
+
   /// Called by [notifyClients] for each dependent.
   ///
   /// Calls `dependent.didChangeDependencies()` by default.
