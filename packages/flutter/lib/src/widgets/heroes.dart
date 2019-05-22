@@ -11,8 +11,8 @@ import 'navigator.dart';
 import 'overlay.dart';
 import 'pages.dart';
 import 'routes.dart';
-import 'transitions.dart';
 import 'ticker_provider.dart' show TickerMode;
+import 'transitions.dart';
 
 /// Signature for a function that takes two [Rect] instances and returns a
 /// [RectTween] that transitions between them.
