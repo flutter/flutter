@@ -1429,6 +1429,8 @@ enum BoxHeightStyle {
     /// entire paragraph.  The top edge of each line will align with the bottom
     /// edge of the previous line.  It is possible for glyphs to extend outside
     /// these boxes.
+    ///
+    /// Will fall back to tight bounds if the strut is disabled or invalid.
     strut,
 }
 

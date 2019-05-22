@@ -425,6 +425,12 @@ bool Paragraph::ComputeBidiRuns(std::vector<BidiRun>* result) {
   return true;
 }
 
+bool Paragraph::IsStrutValid() const {
+  // Font size must be positive.
+  return (paragraph_style_.strut_enabled &&
+          paragraph_style_.strut_font_size >= 0);
+}
+
 void Paragraph::ComputeStrut(StrutMetrics* strut, SkFont& font) {
   strut->ascent = 0;
   strut->descent = 0;
@@ -433,15 +439,12 @@ void Paragraph::ComputeStrut(StrutMetrics* strut, SkFont& font) {
   strut->line_height = 0;
   strut->force_strut = false;
 
-  // Font size must be positive.
-  bool valid_strut =
-      paragraph_style_.strut_enabled && paragraph_style_.strut_font_size >= 0;
-  if (!valid_strut) {
+  if (!IsStrutValid())
     return;
-  }
+
   // force_strut makes all lines have exactly the strut metrics, and ignores all
   // actual metrics. We only force the strut if the strut is non-zero and valid.
-  strut->force_strut = paragraph_style_.force_strut_height && valid_strut;
+  strut->force_strut = paragraph_style_.force_strut_height;
   minikin::FontStyle minikin_font_style(
       0, GetWeight(paragraph_style_.strut_font_weight),
       paragraph_style_.strut_font_style == FontStyle::italic);
@@ -1458,12 +1461,18 @@ std::vector<Paragraph::TextBox> Paragraph::GetRectsForRange(
                            box.direction);
       }
     } else if (rect_height_style == RectHeightStyle::kStrut) {
-      for (const Paragraph::TextBox& box : kv.second.boxes) {
-        boxes.emplace_back(
-            SkRect::MakeLTRB(
-                box.rect.fLeft, line_baselines_[kv.first] - strut_.ascent,
-                box.rect.fRight, line_baselines_[kv.first] + strut_.descent),
-            box.direction);
+      if (IsStrutValid()) {
+        for (const Paragraph::TextBox& box : kv.second.boxes) {
+          boxes.emplace_back(
+              SkRect::MakeLTRB(
+                  box.rect.fLeft, line_baselines_[kv.first] - strut_.ascent,
+                  box.rect.fRight, line_baselines_[kv.first] + strut_.descent),
+              box.direction);
+        }
+      } else {
+        // Fall back to tight bounds if the strut is invalid.
+        boxes.insert(boxes.end(), kv.second.boxes.begin(),
+                     kv.second.boxes.end());
       }
     }
   }
