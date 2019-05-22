@@ -71,8 +71,9 @@ class ExpandIcon extends StatefulWidget {
   ///
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
-  /// [Colors.white70] when it is [Brightness.dark]. This adheres to the
-  /// [Material Design specifications](https://material.io/design/iconography/system-icons.html#color)
+  /// [Colors.white60] when it is [Brightness.dark]. This adheres to the
+  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
+  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color color;
 
   /// The color of the icon when it is disabled,
@@ -81,7 +82,8 @@ class ExpandIcon extends StatefulWidget {
   /// Defaults to [Colors.black38] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white50] when it is [Brightness.dark]. This adheres to the
-  /// [Material Design specifications](https://material.io/design/iconography/system-icons.html#color)
+  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
+  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color disabledColor;
 
   /// The color of the icon when the icon is expanded.
@@ -89,7 +91,8 @@ class ExpandIcon extends StatefulWidget {
   /// Defaults to [Colors.black54] when the theme's
   /// [ThemeData.brightness] is [Brightness.light] and to
   /// [Colors.white] when it is [Brightness.dark]. This adheres to the
-  /// [Material Design specifications](https://material.io/design/iconography/system-icons.html#color)
+  /// Material Design specifications for [icons](https://material.io/design/iconography/system-icons.html#color)
+  /// and for [dark theme](https://material.io/design/color/dark-theme.html#ui-application)
   final Color expandedColor;
 
   @override
