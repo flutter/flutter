@@ -107,10 +107,10 @@ Widget _wrapWithBackground({
       border: border,
       color: backgroundColor,
       gradient: backgroundGradient,
-      image: DecorationImage(
+      image: backgroundImage != null ? DecorationImage(
         image: backgroundImage,
         fit: BoxFit.cover,
-      ),
+      ) : null,
     ),
     child: result,
   );
