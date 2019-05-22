@@ -743,6 +743,7 @@ FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_software.h
 FILE: ../../../flutter/shell/platform/darwin/ios/ios_surface_software.mm
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.mm
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/FlutterMacOS.podspec
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEOpenGLContextHandling.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEPlugin.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEPluginRegistrar.h
