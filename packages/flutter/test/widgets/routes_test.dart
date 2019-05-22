@@ -522,7 +522,7 @@ void main() {
               pageContext = context;
               return Column(
                 children: <Widget>[
-                  TextField(),
+                  const TextField(),
                   TextField(focusNode: node),
                 ],
               );
