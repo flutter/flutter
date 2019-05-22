@@ -13,6 +13,7 @@ import 'package:dev_compiler/src/kernel/command.dart'; // ignore: uri_does_not_e
 import 'package:dev_compiler/src/kernel/compiler.dart'; // ignore: uri_does_not_exist
 import 'package:front_end/src/api_unstable/ddc.dart' show CompilerOptions, kernelForComponent;
 import 'package:kernel/kernel.dart';
+import 'package:kernel/target/targets.dart';
 import 'package:path/path.dart' as path;
 
 // This script is forked from https://github.com/dart-lang/sdk/blob/master/pkg/dev_compiler/tool/kernel_sdk.dart
@@ -72,6 +73,8 @@ Future main(List<String> args) async {
 }
 
 class FlutterDevCompilerTarget extends DevCompilerTarget {
+  FlutterDevCompilerTarget() : super(TargetFlags());
+
   @override
   List<String> get extraRequiredLibraries => const [
         'dart:_runtime',
