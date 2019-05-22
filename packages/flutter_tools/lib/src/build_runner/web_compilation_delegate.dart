@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 // ignore_for_file: implementation_imports
 import 'package:build/build.dart';
 import 'package:build_modules/build_modules.dart';
@@ -23,6 +21,7 @@ import 'package:build_modules/src/platform.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
@@ -64,6 +63,7 @@ final DartPlatform flutterWebPlatform =
   'isolate',
 ]);
 
+/// The build application to compile a flutter application to the web.
 final List<BuilderApplication> builders = <BuilderApplication>[
   apply('flutter_tools|module_library',
       <Builder Function(BuilderOptions)>[moduleLibraryBuilder], toAllPackages(),
@@ -122,6 +122,7 @@ final List<BuilderApplication> builders = <BuilderApplication>[
       defaultGenerateFor: const InputSet())
 ];
 
+/// A build_runner specific implementation of the [WebCompilationProxy].
 class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   BuildRunnerWebCompilationProxy();
 
@@ -134,6 +135,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     @required Directory projectDirectory,
     @required String target,
   }) async {
+    // Override the generated output directory so this does not conflict with
+    // other build_runner output.
+    overrideGeneratedOutputDirectory('flutter_web');
     _packageUriMapper = PackageUriMapper(
         path.absolute(target), PackageMap.globalPackagesPath, null, null);
     _packageGraph = PackageGraph.forPath(projectDirectory.path);
@@ -197,6 +201,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   }
 }
 
+/// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
   const FlutterWebEntrypointBuilder(this.target);
 

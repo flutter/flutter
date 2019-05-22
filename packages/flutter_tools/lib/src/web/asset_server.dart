@@ -56,7 +56,7 @@ class WebAssetServer {
     _packages = PackageMap(PackageMap.globalPackagesPath).map;
     _server = await HttpServer.bind(
         ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4, 0)
-          ..autoCompress = false;
+      ..autoCompress = false;
     _server.listen(_onRequest);
   }
 
@@ -80,19 +80,33 @@ class WebAssetServer {
       await _completeRequest(request, file, 'text/html');
     } else if (uri.path.contains('require.js')) {
       final HttpClient client = HttpClient();
-      final HttpClientRequest lookupRequest = await client.getUrl(Uri.parse('https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js'));
+      final HttpClientRequest lookupRequest = await client.getUrl(Uri.parse(
+          'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js'));
       final HttpClientResponse lookupResponse = await lookupRequest.close();
       request.response.statusCode = lookupResponse.statusCode;
-      request.response.headers.add(HttpHeaders.contentTypeHeader, 'text/javascript');
+      request.response.headers
+          .add(HttpHeaders.contentTypeHeader, 'text/javascript');
       await request.response.addStream(lookupResponse);
       await request.response.close();
     } else if (uri.path.endsWith('main.dart.js')) {
-      final File file = fs.file(fs.path.join(flutterProject.generated.path,
-          'lib', '${fs.path.basename(target)}.js'));
+      final File file = fs.file(fs.path.join(
+        flutterProject.dartTool.path,
+        'build',
+        'flutter_web',
+        flutterProject.manifest.appName,
+        'lib',
+        '${fs.path.basename(target)}.js',
+      ));
       await _completeRequest(request, file, 'text/javascript');
     } else if (uri.path.endsWith('${fs.path.basename(target)}.bootstrap.js')) {
-      final File file = fs.file(fs.path.join(flutterProject.generated.path,
-          'lib', '${fs.path.basename(target)}.bootstrap.js'));
+      final File file = fs.file(fs.path.join(
+        flutterProject.dartTool.path,
+        'build',
+        'flutter_web',
+        flutterProject.manifest.appName,
+        'lib',
+        '${fs.path.basename(target)}.bootstrap.js',
+      ));
       await _completeRequest(request, file, 'text/javascript');
     } else if (uri.path.contains('dart_sdk')) {
       final File file = fs.file(fs.path.join(
@@ -122,7 +136,7 @@ class WebAssetServer {
     final String filePath = fs.path.joinAll(segments.sublist(3));
     final Uri packageUri = flutterProject.dartTool
         .childDirectory('build')
-        .childDirectory('generated')
+        .childDirectory('flutter_web')
         .childDirectory(packageName)
         .childDirectory('lib')
         .uri;
@@ -148,6 +162,7 @@ class WebAssetServer {
 
   Future<void> _completeRequest(HttpRequest request, File file,
       [String contentType = 'text']) async {
+    printTrace('looking for ${request.uri} at ${file.path}');
     if (!file.existsSync()) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();

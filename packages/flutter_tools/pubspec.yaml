@@ -118,4 +118,10 @@ dartdoc:
   # Exclude this package from the hosted API docs.
   nodoc: true
 
+dependency_overrides:
+  build_modules:
+    path: /Users/jonahwilliams/Documents/build/build_modules
+  build_web_compilers:
+    path: /Users/jonahwilliams/Documents/build/build_web_compilers
+
 # PUBSPEC CHECKSUM: 9773
