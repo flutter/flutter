@@ -16,6 +16,52 @@ static NSString* const kICUBundlePath = @"icudtl.dat";
 
 static const int kDefaultWindowFramebuffer = 0;
 
+namespace {
+
+/**
+ * State tracking for mouse events, to adapt between the events coming from the system and the
+ * events that the embedding API expects.
+ */
+struct MouseState {
+  /**
+   * Whether or not a kAdd event has been sent (or sent again since the last kRemove if tracking is
+   * enabled). Used to determine whether to send a kAdd event before sending an incoming mouse
+   * event, since Flutter expects pointers to be added before events are sent for them.
+   */
+  bool flutter_state_is_added = false;
+
+  /**
+   * Whether or not a kDown has been sent since the last kAdd/kUp.
+   */
+  bool flutter_state_is_down = false;
+
+  /**
+   * Whether or not mouseExited: was received while a button was down. Cocoa's behavior when
+   * dragging out of a tracked area is to send an exit, then keep sending drag events until the last
+   * button is released. If it was released inside the view, mouseEntered: is sent the next time the
+   * mouse moves. Flutter doesn't expect to receive events after a kRemove, so the kRemove for the
+   * exit needs to be delayed until after the last mouse button is released.
+   */
+  bool has_pending_exit = false;
+
+  /**
+   * The currently pressed buttons, as represented in FlutterPointerEvent.
+   */
+  int64_t buttons = 0;
+
+  /**
+   * Resets all state to default values.
+   */
+  void Reset() {
+    flutter_state_is_added = false;
+    flutter_state_is_down = false;
+    has_pending_exit = false;
+    buttons = 0;
+  }
+};
+
+}  // namespace
+
 #pragma mark - Private interface declaration.
 
 /**
@@ -34,12 +80,9 @@ static const int kDefaultWindowFramebuffer = 0;
 @property(nonatomic) NSTrackingArea* trackingArea;
 
 /**
- * Whether or not a kAdd event has been sent for the mouse (or sent again since
- * the last kRemove was sent if tracking is enabled). Used to determine whether
- * to send an Add event before sending an incoming mouse event, since Flutter
- * expects a pointers to be added before events are sent for them.
+ * The current state of the mouse and the sent mouse events.
  */
-@property(nonatomic) BOOL mouseCurrentlyAdded;
+@property(nonatomic) MouseState mouseState;
 
 /**
  * Updates |trackingArea| for the current tracking settings, creating it with
@@ -80,6 +123,13 @@ static const int kDefaultWindowFramebuffer = 0;
  * Responds to system messages sent to this controller from the Flutter engine.
  */
 - (void)handlePlatformMessage:(const FlutterPlatformMessage*)message;
+
+/**
+ * Calls dispatchMouseEvent:phase: with a phase determined by self.mouseState.
+ *
+ * mouseState.buttons should be updated before calling this method.
+ */
+- (void)dispatchMouseEvent:(nonnull NSEvent*)event;
 
 /**
  * Converts |event| to a FlutterPointerEvent with the given phase, and sends it to the engine.
@@ -447,10 +497,24 @@ static void CommonInit(FLEViewController* controller) {
   }
 }
 
+- (void)dispatchMouseEvent:(nonnull NSEvent*)event {
+  FlutterPointerPhase phase = _mouseState.buttons == 0
+                                  ? (_mouseState.flutter_state_is_down ? kUp : kHover)
+                                  : (_mouseState.flutter_state_is_down ? kMove : kDown);
+  [self dispatchMouseEvent:event phase:phase];
+}
+
 - (void)dispatchMouseEvent:(NSEvent*)event phase:(FlutterPointerPhase)phase {
+  // There are edge cases where the system will deliver enter out of order relative to other
+  // events (e.g., drag out and back in, release, then click; mouseDown: will be called before
+  // mouseEntered:). Discard those events, since the add will already have been synthesized.
+  if (_mouseState.flutter_state_is_added && phase == kAdd) {
+    return;
+  }
+
   // If a pointer added event hasn't been sent, synthesize one using this event for the basic
   // information.
-  if (!_mouseCurrentlyAdded && phase != kAdd) {
+  if (!_mouseState.flutter_state_is_added && phase != kAdd) {
     // Only the values extracted for use in flutterEvent below matter, the rest are dummy values.
     NSEvent* addEvent = [NSEvent enterExitEventWithType:NSEventTypeMouseEntered
                                                location:event.locationInWindow
@@ -468,10 +532,13 @@ static void CommonInit(FLEViewController* controller) {
   NSPoint locationInBackingCoordinates = [self.view convertPointToBacking:locationInView];
   FlutterPointerEvent flutterEvent = {
       .struct_size = sizeof(flutterEvent),
+      .device_kind = kFlutterPointerDeviceKindMouse,
       .phase = phase,
       .x = locationInBackingCoordinates.x,
       .y = -locationInBackingCoordinates.y,  // convertPointToBacking makes this negative.
       .timestamp = static_cast<size_t>(event.timestamp * NSEC_PER_MSEC),
+      // If a click triggered a synthesized kAdd, don't pass the buttons in that event.
+      .buttons = phase == kAdd ? 0 : _mouseState.buttons,
   };
 
   if (event.type == NSEventTypeScrollWheel) {
@@ -491,10 +558,19 @@ static void CommonInit(FLEViewController* controller) {
   }
   FlutterEngineSendPointerEvent(_engine, &flutterEvent, 1);
 
-  if (phase == kAdd) {
-    _mouseCurrentlyAdded = YES;
+  // Update tracking of state as reported to Flutter.
+  if (phase == kDown) {
+    _mouseState.flutter_state_is_down = true;
+  } else if (phase == kUp) {
+    _mouseState.flutter_state_is_down = false;
+    if (_mouseState.has_pending_exit) {
+      [self dispatchMouseEvent:event phase:kRemove];
+      _mouseState.has_pending_exit = false;
+    }
+  } else if (phase == kAdd) {
+    _mouseState.flutter_state_is_added = true;
   } else if (phase == kRemove) {
-    _mouseCurrentlyAdded = NO;
+    _mouseState.Reset();
   }
 }
 
@@ -622,28 +698,62 @@ static void CommonInit(FLEViewController* controller) {
   }
 }
 
-- (void)mouseDown:(NSEvent*)event {
-  [self dispatchMouseEvent:event phase:kDown];
-}
-
-- (void)mouseUp:(NSEvent*)event {
-  [self dispatchMouseEvent:event phase:kUp];
-}
-
-- (void)mouseDragged:(NSEvent*)event {
-  [self dispatchMouseEvent:event phase:kMove];
-}
-
 - (void)mouseEntered:(NSEvent*)event {
   [self dispatchMouseEvent:event phase:kAdd];
 }
 
 - (void)mouseExited:(NSEvent*)event {
+  if (_mouseState.buttons != 0) {
+    _mouseState.has_pending_exit = true;
+    return;
+  }
   [self dispatchMouseEvent:event phase:kRemove];
 }
 
+- (void)mouseDown:(NSEvent*)event {
+  _mouseState.buttons |= kFlutterPointerButtonMousePrimary;
+  [self dispatchMouseEvent:event];
+}
+
+- (void)mouseUp:(NSEvent*)event {
+  _mouseState.buttons &= ~static_cast<uint64_t>(kFlutterPointerButtonMousePrimary);
+  [self dispatchMouseEvent:event];
+}
+
+- (void)mouseDragged:(NSEvent*)event {
+  [self dispatchMouseEvent:event];
+}
+
+- (void)rightMouseDown:(NSEvent*)event {
+  _mouseState.buttons |= kFlutterPointerButtonMouseSecondary;
+  [self dispatchMouseEvent:event];
+}
+
+- (void)rightMouseUp:(NSEvent*)event {
+  _mouseState.buttons &= ~static_cast<uint64_t>(kFlutterPointerButtonMouseSecondary);
+  [self dispatchMouseEvent:event];
+}
+
+- (void)rightMouseDragged:(NSEvent*)event {
+  [self dispatchMouseEvent:event];
+}
+
+- (void)otherMouseDown:(NSEvent*)event {
+  _mouseState.buttons |= (1 << event.buttonNumber);
+  [self dispatchMouseEvent:event];
+}
+
+- (void)otherMouseUp:(NSEvent*)event {
+  _mouseState.buttons &= ~static_cast<uint64_t>(1 << event.buttonNumber);
+  [self dispatchMouseEvent:event];
+}
+
+- (void)otherMouseDragged:(NSEvent*)event {
+  [self dispatchMouseEvent:event];
+}
+
 - (void)mouseMoved:(NSEvent*)event {
-  [self dispatchMouseEvent:event phase:kHover];
+  [self dispatchMouseEvent:event];
 }
 
 - (void)scrollWheel:(NSEvent*)event {
