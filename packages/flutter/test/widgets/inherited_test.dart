@@ -84,6 +84,37 @@ void main() {
     expect(log, equals(<TestInherited>[first, third]));
   });
 
+  testWidgets('InheritedElement hasListeners', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    
+    await tester.pumpWidget(TestInherited(
+      key: key,
+      child: Container(),
+    ));
+
+    // ignore: avoid_as
+    final InheritedElement inheritedElement = key.currentContext as InheritedElement;
+
+    expect(inheritedElement.hasDependencies, isFalse);
+
+    await tester.pumpWidget(TestInherited(
+      key: key,
+      child: Builder(builder: (BuildContext context) {
+        context.inheritFromWidgetOfExactType(TestInherited);
+        return Container();
+      }),
+    ));
+
+    expect(inheritedElement.hasDependencies, isTrue);
+
+    await tester.pumpWidget(TestInherited(
+      key: key,
+      child: Container(),
+    ));
+
+    expect(inheritedElement.hasDependencies, isFalse);
+  });
+
   testWidgets('Update inherited when reparenting state', (WidgetTester tester) async {
     final GlobalKey globalKey = GlobalKey();
     final List<TestInherited> log = <TestInherited>[];
