@@ -238,9 +238,10 @@ class DecorationImagePainter {
 
     final ImageStream newImageStream = _details.image.resolve(configuration);
     if (newImageStream.key != _imageStream?.key) {
-      _imageStream?.removeListener(_imageListener);
+      final ImageStreamListener listener = ImageStreamListener(_handleImage);
+      _imageStream?.removeListener(listener);
       _imageStream = newImageStream;
-      _imageStream.addListener(_imageListener);
+      _imageStream.addListener(listener);
     }
     if (_image == null)
       return;
@@ -268,7 +269,7 @@ class DecorationImagePainter {
       canvas.restore();
   }
 
-  void _imageListener(ImageInfo value, bool synchronousCall) {
+  void _handleImage(ImageInfo value, bool synchronousCall) {
     if (_image == value)
       return;
     _image = value;
@@ -284,7 +285,7 @@ class DecorationImagePainter {
   /// After this method has been called, the object is no longer usable.
   @mustCallSuper
   void dispose() {
-    _imageStream?.removeListener(_imageListener);
+    _imageStream?.removeListener(ImageStreamListener(_handleImage));
   }
 
   @override

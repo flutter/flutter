@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
+import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
@@ -25,69 +26,99 @@ void main() {
   MemoryFileSystem memoryFileSystem;
   MockPlatform linuxPlatform;
   MockPlatform windowsPlatform;
-  MockFuchsiaPM fuchsiaPM;
-  MockFuchsiaKernelCompiler fuchsiaKernelCompiler;
+  MockFuchsiaSdk fuchsiaSdk;
+  MockFuchsiaArtifacts fuchsiaArtifacts;
+  MockFuchsiaArtifacts fuchsiaArtifactsNoCompiler;
 
   setUp(() {
     memoryFileSystem = MemoryFileSystem();
     linuxPlatform = MockPlatform();
     windowsPlatform = MockPlatform();
-    fuchsiaPM = MockFuchsiaPM();
-    fuchsiaKernelCompiler = MockFuchsiaKernelCompiler();
+    fuchsiaSdk = MockFuchsiaSdk();
+    fuchsiaArtifacts = MockFuchsiaArtifacts();
+    fuchsiaArtifactsNoCompiler = MockFuchsiaArtifacts();
 
     when(linuxPlatform.isLinux).thenReturn(true);
     when(windowsPlatform.isWindows).thenReturn(true);
     when(windowsPlatform.isLinux).thenReturn(false);
     when(windowsPlatform.isMacOS).thenReturn(false);
+    when(fuchsiaArtifacts.kernelCompiler).thenReturn(MockFile());
+    when(fuchsiaArtifactsNoCompiler.kernelCompiler).thenReturn(null);
   });
 
-  testUsingContext('Fuchsia build fails when there is no fuchsia project',
-      () async {
-    final BuildCommand command = BuildCommand();
-    applyMocksToCommand(command);
-    expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
-        throwsA(isInstanceOf<ToolExit>()));
-  }, overrides: <Type, Generator>{
-    Platform: () => linuxPlatform,
-    FileSystem: () => memoryFileSystem,
-  });
+  group('Fuchsia build fails gracefully when', () {
+    testUsingContext('there is no Fuchsia project',
+        () async {
+      final BuildCommand command = BuildCommand();
+      applyMocksToCommand(command);
+      expect(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'fuchsia']),
+          throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => linuxPlatform,
+      FileSystem: () => memoryFileSystem,
+      FuchsiaArtifacts: () => fuchsiaArtifacts,
+    });
 
-  testUsingContext('Fuchsia build fails when there is no cmx file', () async {
-    final BuildCommand command = BuildCommand();
-    applyMocksToCommand(command);
-    fs.directory('fuchsia').createSync(recursive: true);
-    fs.file('.packages').createSync();
-    fs.file('pubspec.yaml').createSync();
+    testUsingContext('there is no cmx file', () async {
+      final BuildCommand command = BuildCommand();
+      applyMocksToCommand(command);
+      fs.directory('fuchsia').createSync(recursive: true);
+      fs.file('.packages').createSync();
+      fs.file('pubspec.yaml').createSync();
 
-    expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
-        throwsA(isInstanceOf<ToolExit>()));
-  }, overrides: <Type, Generator>{
-    Platform: () => linuxPlatform,
-    FileSystem: () => memoryFileSystem,
-  });
+      expect(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'fuchsia']),
+          throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => linuxPlatform,
+      FileSystem: () => memoryFileSystem,
+      FuchsiaArtifacts: () => fuchsiaArtifacts,
+    });
 
-  testUsingContext('Fuchsia build fails on Windows platform', () async {
-    final BuildCommand command = BuildCommand();
-    applyMocksToCommand(command);
-    const String appName = 'app_name';
-    fs
-        .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-        .createSync(recursive: true);
-    fs.file('.packages').createSync();
-    final File pubspecFile = fs.file('pubspec.yaml')..createSync();
-    pubspecFile.writeAsStringSync('name: $appName');
+    testUsingContext('on Windows platform', () async {
+      final BuildCommand command = BuildCommand();
+      applyMocksToCommand(command);
+      const String appName = 'app_name';
+      fs
+          .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
+          .createSync(recursive: true);
+      fs.file('.packages').createSync();
+      final File pubspecFile = fs.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync('name: $appName');
 
-    expect(
-        createTestCommandRunner(command)
-            .run(const <String>['build', 'fuchsia']),
-        throwsA(isInstanceOf<ToolExit>()));
-  }, overrides: <Type, Generator>{
-    Platform: () => windowsPlatform,
-    FileSystem: () => memoryFileSystem,
+      expect(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'fuchsia']),
+          throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => windowsPlatform,
+      FileSystem: () => memoryFileSystem,
+      FuchsiaArtifacts: () => fuchsiaArtifacts,
+    });
+
+    testUsingContext('there is no Fuchsia kernel compiler', () async {
+      final BuildCommand command = BuildCommand();
+      applyMocksToCommand(command);
+      const String appName = 'app_name';
+      fs
+          .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
+          .createSync(recursive: true);
+      fs.file('.packages').createSync();
+      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      final File pubspecFile = fs.file('pubspec.yaml')..createSync();
+      pubspecFile.writeAsStringSync('name: $appName');
+      expect(
+          createTestCommandRunner(command)
+              .run(const <String>['build', 'fuchsia']),
+          throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      Platform: () => linuxPlatform,
+      FileSystem: () => memoryFileSystem,
+      FuchsiaArtifacts: () => fuchsiaArtifactsNoCompiler,
+    });
   });
 
   testUsingContext('Fuchsia build parts fit together right', () async {
@@ -110,8 +141,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => linuxPlatform,
     FileSystem: () => memoryFileSystem,
-    FuchsiaPM: () => fuchsiaPM,
-    FuchsiaKernelCompiler: () => fuchsiaKernelCompiler,
+    FuchsiaSdk: () => fuchsiaSdk,
   });
 }
 
@@ -189,3 +219,16 @@ class MockFuchsiaKernelCompiler extends Mock implements FuchsiaKernelCompiler {
     fs.file(manifestPath).createSync(recursive: true);
   }
 }
+
+class MockFuchsiaSdk extends Mock implements FuchsiaSdk {
+  @override
+  final FuchsiaPM fuchsiaPM = MockFuchsiaPM();
+
+  @override
+  final FuchsiaKernelCompiler fuchsiaKernelCompiler =
+      MockFuchsiaKernelCompiler();
+}
+
+class MockFile extends Mock implements File {}
+
+class MockFuchsiaArtifacts extends Mock implements FuchsiaArtifacts {}
