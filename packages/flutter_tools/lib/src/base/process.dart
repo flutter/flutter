@@ -263,7 +263,6 @@ bool exitsHappy(List<String> cli) {
   try {
     return processManager.runSync(cli).exitCode == 0;
   } catch (error) {
-    printTrace('$cli failed with $error');
     return false;
   }
 }
@@ -273,7 +272,6 @@ Future<bool> exitsHappyAsync(List<String> cli) async {
   try {
     return (await processManager.run(cli)).exitCode == 0;
   } catch (error) {
-    printTrace('$cli failed with $error');
     return false;
   }
 }

@@ -26,10 +26,6 @@ void main() {
       await tools.main(<String>['devices', '--bug-report']);
       expect(exitCode, 0);
       verify(os.zip(any, argThat(hasPath(matches(r'bugreport_01\.zip')))));
-    }, overrides: <Type, Generator>{
-      OperatingSystemUtils: () => MockOperatingSystemUtils(),
     });
   });
 }
-
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }
