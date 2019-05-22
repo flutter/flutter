@@ -293,4 +293,6 @@ class IsolateExampleState extends State<StatefulWidget> with SingleTickerProvide
   }
 }
 
-void main() { runApp(MaterialApp(home: IsolateExampleWidget())); }
+void main() {
+  runApp(MaterialApp(home: IsolateExampleWidget()));
+}

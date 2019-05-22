@@ -7,7 +7,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() { runApp(PlatformView()); }
+void main() {
+  runApp(PlatformView());
+}
 
 class PlatformView extends StatelessWidget {
   @override

@@ -76,4 +76,6 @@ class _PlatformChannelState extends State<PlatformChannel> {
   }
 }
 
-void main() { runApp(MaterialApp(home: PlatformChannel())); }
+void main() {
+  runApp(MaterialApp(home: PlatformChannel()));
+}

@@ -29,9 +29,13 @@ Directory sampleDirectory;
 Directory testDirectory;
 Directory driverDirectory;
 
-void logMessage(String s) { print(s); }
+void logMessage(String s) {
+  print(s);
+}
 
-void logError(String s) { print(s); }
+void logError(String s) {
+  print(s);
+}
 
 File inputFile(String dir, String name) {
   return File(dir + Platform.pathSeparator + name);

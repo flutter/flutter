@@ -114,7 +114,9 @@ class ChoiceCard extends StatelessWidget {
   }
 }
 
-void main() { runApp(AppBarBottomSample()); }
+void main() {
+  runApp(AppBarBottomSample());
+}
 
 /*
 Sample Catalog

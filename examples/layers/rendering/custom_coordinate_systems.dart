@@ -20,4 +20,6 @@ RenderBox buildSectorExample() {
   return RenderBoxToRenderSectorAdapter(innerRadius: 50.0, child: rootCircle);
 }
 
-void main() { RenderingFlutterBinding(root: buildSectorExample()); }
+void main() {
+  RenderingFlutterBinding(root: buildSectorExample());
+}

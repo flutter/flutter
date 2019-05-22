@@ -6,7 +6,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-void main() { runApp(FlutterView()); }
+void main() {
+  runApp(FlutterView());
+}
 
 class FlutterView extends StatelessWidget {
   @override
