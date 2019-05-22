@@ -18,6 +18,7 @@ enum Artifact {
   flutterTester,
   snapshotDart,
   flutterFramework,
+  flutterMacOSFramework,
   vmSnapshotData,
   isolateSnapshotData,
   platformKernelDill,
@@ -44,6 +45,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'snapshot.dart';
     case Artifact.flutterFramework:
       return 'Flutter.framework';
+    case Artifact.flutterMacOSFramework:
+      return 'FlutterMacOS.framework';
     case Artifact.vmSnapshotData:
       // Flutter 'debug' and 'dynamic profile' modes for all target platforms use Dart
       // RELEASE VM snapshot that comes from host debug build and has the metadata
@@ -97,7 +100,7 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
-  static Artifacts get instance => context[Artifacts];
+  static Artifacts get instance => context.get<Artifacts>();
 
   static LocalEngineArtifacts getLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine);
@@ -211,6 +214,10 @@ class CachedArtifacts extends Artifacts {
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.flutterMacOSFramework:
+        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        final String platformDirName = getNameForTargetPlatform(platform);
+        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -278,6 +285,8 @@ class LocalEngineArtifacts extends Artifacts {
       case Artifact.platformLibrariesJson:
         return fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterFramework:
+        return fs.path.join(engineOutPath, _artifactToFileName(artifact));
+      case Artifact.flutterMacOSFramework:
         return fs.path.join(engineOutPath, _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of

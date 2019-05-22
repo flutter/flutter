@@ -8,6 +8,7 @@ import '../base/common.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
+import '../version.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
@@ -27,7 +28,16 @@ class BuildBundleCommand extends BuildSubCommand {
       ..addOption('depfile', defaultsTo: defaultDepfilePath)
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64', 'ios'],
+        allowed: const <String>[
+          'android-arm',
+          'android-arm64',
+          'android-x86',
+          'android-x64',
+          'ios',
+          'darwin-x64',
+          'linux-x64',
+          'windows-x64',
+        ],
       )
       ..addFlag('track-widget-creation',
         hide: !verboseHelp,
@@ -64,8 +74,21 @@ class BuildBundleCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String targetPlatform = argResults['target-platform'];
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null)
+    if (platform == null) {
       throwToolExit('Unknown platform: $targetPlatform');
+    }
+    // Check for target platforms that are only allowed on unstable Flutter.
+    switch (platform) {
+      case TargetPlatform.darwin_x64:
+      case TargetPlatform.windows_x64:
+      case TargetPlatform.linux_x64:
+        if (FlutterVersion.instance.isStable) {
+          throwToolExit('$targetPlatform is not supported on stable Flutter.');
+        }
+        break;
+      default:
+        break;
+    }
 
     final BuildMode buildMode = getBuildMode();
 

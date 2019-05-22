@@ -8,7 +8,6 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../desktop.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -26,7 +25,10 @@ class LinuxDevice extends Device {
   void clearLogs() { }
 
   @override
-  DeviceLogReader getLogReader({ ApplicationPackage app }) => NoOpDeviceLogReader('linux');
+  DeviceLogReader getLogReader({ ApplicationPackage app }) {
+    return _logReader;
+  }
+  final DesktopLogReader _logReader = DesktopLogReader();
 
   // Since the host and target devices are the same, no work needs to be done
   // to install the application.
@@ -69,8 +71,9 @@ class LinuxDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
+    _lastBuiltMode = debuggingOptions.buildInfo.mode;
     if (!prebuiltApplication) {
-      await buildLinux((await FlutterProject.current()).linux, debuggingOptions.buildInfo);
+      await buildLinux(FlutterProject.current().linux, debuggingOptions.buildInfo);
     }
     await stopApp(package);
     final Process process = await processManager.start(<String>[
@@ -79,8 +82,8 @@ class LinuxDevice extends Device {
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();
     }
-    final LinuxLogReader logReader = LinuxLogReader(package, process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(logReader);
+    _logReader.initializeProcess(process);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_logReader);
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -94,8 +97,7 @@ class LinuxDevice extends Device {
 
   @override
   Future<bool> stopApp(covariant LinuxApp app) async {
-    // Assume debug for now.
-    return killProcess(app.executable(BuildMode.debug));
+    return killProcess(app.executable(_lastBuiltMode));
   }
 
   @override
@@ -105,6 +107,14 @@ class LinuxDevice extends Device {
   // to uninstall the application.
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
+
+  @override
+  bool isSupportedForProject(FlutterProject flutterProject) {
+    return flutterProject.linux.existsSync();
+  }
+
+  // Track the last built mode from startApp.
+  BuildMode _lastBuiltMode;
 }
 
 class LinuxDevices extends PollingDeviceDiscovery {
@@ -128,19 +138,4 @@ class LinuxDevices extends PollingDeviceDiscovery {
 
   @override
   Future<List<String>> getDiagnostics() async => const <String>[];
-}
-
-class LinuxLogReader extends DeviceLogReader {
-  LinuxLogReader(this.linuxApp, this.process);
-
-  final LinuxApp linuxApp;
-  final Process process;
-
-  @override
-  Stream<String> get logLines {
-    return process.stdout.transform(utf8.decoder);
-  }
-
-  @override
-  String get name => linuxApp.displayName;
 }

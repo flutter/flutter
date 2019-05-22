@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart' as intl;
 import 'package:intl/date_symbols.dart' as intl;
 
+import 'l10n/generated_cupertino_localizations.dart';
 import 'utils/date_localizations.dart' as util;
 import 'widgets_localizations.dart';
 
@@ -16,7 +17,34 @@ import 'widgets_localizations.dart';
 /// package for date and time formatting.
 ///
 /// Further localization of strings beyond date time formatting are provided
-/// by language specific subclasses of [GlobalCupertinoLocalizations]
+/// by language specific subclasses of [GlobalCupertinoLocalizations].
+///
+/// ## Supported languages
+///
+/// This class supports locales with the following [Locale.languageCode]s:
+///
+/// {@macro flutter.localizations.cupertino.languages}
+///
+/// This list is available programatically via [kCupertinoSupportedLanguages].
+///
+/// ## Sample code
+///
+/// To include the localizations provided by this class in a [CupertinoApp],
+/// add [GlobalCupertinoLocalizations.delegates] to
+/// [CupertinoApp.localizationsDelegates], and specify the locales your
+/// app supports with [CupertinoApp.supportedLocales]:
+///
+/// ```dart
+/// new CupertinoApp(
+///   localizationsDelegates: GlobalCupertinoLocalizations.delegates,
+///   supportedLocales: [
+///     const Locale('en', 'US'), // American English
+///     const Locale('he', 'IL'), // Israeli Hebrew
+///     // ...
+///   ],
+///   // ...
+/// )
+/// ```
 ///
 /// See also:
 ///
@@ -358,13 +386,13 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
   const _GlobalCupertinoLocalizationsDelegate();
 
   @override
-  bool isSupported(Locale locale) => false; // TODO(xster): implement.
+  bool isSupported(Locale locale) => kCupertinoSupportedLanguages.contains(locale.languageCode);
 
   static final Map<Locale, Future<CupertinoLocalizations>> _loadedTranslations = <Locale, Future<CupertinoLocalizations>>{};
 
   @override
   Future<CupertinoLocalizations> load(Locale locale) {
-    assert(isSupported(locale)); // TODO(xster): implement.
+    assert(isSupported(locale));
     return _loadedTranslations.putIfAbsent(locale, () {
       util.loadDateIntlDataIfNotLoaded();
 
@@ -395,7 +423,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         singleDigitMinuteFormat = intl.DateFormat.m(locale);
         doubleDigitMinuteFormat = intl.DateFormat('mm', locale);
         singleDigitSecondFormat = intl.DateFormat.s(locale);
-        decimalFormat = intl.NumberFormat(locale);
+        decimalFormat = intl.NumberFormat.decimalPattern(locale);
       }
 
       if (intl.DateFormat.localeExists(localeName)) {
@@ -406,8 +434,8 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
         loadFormats(null);
       }
 
-      return SynchronousFuture<CupertinoLocalizations>(_getCupertinoTranslation(
-        localeName,
+      return SynchronousFuture<CupertinoLocalizations>(getCupertinoTranslation(
+        locale,
         fullYearFormat,
         dayFormat,
         mediumDateFormat,
@@ -422,18 +450,7 @@ class _GlobalCupertinoLocalizationsDelegate extends LocalizationsDelegate<Cupert
 
   @override
   bool shouldReload(_GlobalCupertinoLocalizationsDelegate old) => false;
-}
 
-CupertinoLocalizations _getCupertinoTranslation(
-  String localeName,
-  intl.DateFormat fullYearFormat,
-  intl.DateFormat dayFormat,
-  intl.DateFormat mediumDateFormat,
-  intl.DateFormat singleDigitHourFormat,
-  intl.DateFormat singleDigitMinuteFormat,
-  intl.DateFormat doubleDigitMinuteFormat,
-  intl.DateFormat singleDigitSecondFormat,
-  intl.NumberFormat decimalFormat,
-) {
-  return null; // TODO(xster): implement in generated subclass.
+  @override
+  String toString() => 'GlobalCupertinoLocalizations.delegate(${kCupertinoSupportedLanguages.length} locales)';
 }

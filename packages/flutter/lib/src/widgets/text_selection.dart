@@ -97,7 +97,20 @@ abstract class TextSelectionControls {
   /// Builds a toolbar near a text selection.
   ///
   /// Typically displays buttons for copying and pasting text.
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate);
+  ///
+  /// [globalEditableRegion] is the TextField size of the global coordinate system
+  /// in logical pixels.
+  ///
+  /// The [position] is a general calculation midpoint parameter of the toolbar.
+  /// If you want more detailed position information, can use [endpoints]
+  /// to calculate it.
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  );
 
   /// Returns the size of the selection handle.
   Size get handleSize;
@@ -250,6 +263,7 @@ class TextSelectionOverlay {
     this.selectionControls,
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.onSelectionHandleTapped,
   }) : assert(value != null),
        assert(context != null),
        _value = value {
@@ -302,6 +316,14 @@ class TextSelectionOverlay {
   ///
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
   final DragStartBehavior dragStartBehavior;
+
+  /// {@template flutter.widgets.textSelection.onSelectionHandleTapped}
+  /// A callback that's invoked when a selection handle is tapped.
+  ///
+  /// Both regular taps and long presses invoke this callback, but a drag
+  /// gesture won't.
+  /// {@endtemplate}
+  final VoidCallback onSelectionHandleTapped;
 
   /// Controls the fade-in and fade-out animations for the toolbar and handles.
   static const Duration fadeDuration = Duration(milliseconds: 150);
@@ -380,17 +402,26 @@ class TextSelectionOverlay {
   /// Whether the toolbar is currently visible.
   bool get toolbarIsVisible => _toolbar != null;
 
-  /// Hides the overlay.
+  /// Hides the entire overlay including the toolbar and the handles.
   void hide() {
     if (_handles != null) {
       _handles[0].remove();
       _handles[1].remove();
       _handles = null;
     }
-    _toolbar?.remove();
-    _toolbar = null;
+    if (_toolbar != null) {
+      hideToolbar();
+    }
+  }
 
+  /// Hides the toolbar part of the overlay.
+  ///
+  /// To hide the whole overlay, see [hide].
+  void hideToolbar() {
+    assert(_toolbar != null);
     _toolbarController.stop();
+    _toolbar.remove();
+    _toolbar = null;
   }
 
   /// Final cleanup.
@@ -405,7 +436,7 @@ class TextSelectionOverlay {
       return Container(); // hide the second handle when collapsed
     return _TextSelectionHandleOverlay(
       onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
-      onSelectionHandleTapped: _handleSelectionHandleTapped,
+      onSelectionHandleTapped: onSelectionHandleTapped,
       layerLink: layerLink,
       renderObject: renderObject,
       selection: _selection,
@@ -439,7 +470,13 @@ class TextSelectionOverlay {
         link: layerLink,
         showWhenUnlinked: false,
         offset: -editingRegion.topLeft,
-        child: selectionControls.buildToolbar(context, editingRegion, midpoint, selectionDelegate),
+        child: selectionControls.buildToolbar(
+          context,
+          editingRegion,
+          midpoint,
+          endpoints,
+          selectionDelegate,
+        ),
       ),
     );
   }
@@ -456,17 +493,6 @@ class TextSelectionOverlay {
     }
     selectionDelegate.textEditingValue = _value.copyWith(selection: newSelection, composing: TextRange.empty);
     selectionDelegate.bringIntoView(textPosition);
-  }
-
-  void _handleSelectionHandleTapped() {
-    if (_value.selection.isCollapsed) {
-      if (_toolbar != null) {
-        _toolbar?.remove();
-        _toolbar = null;
-      } else {
-        showToolbar();
-      }
-    }
   }
 }
 
@@ -583,7 +609,8 @@ class _TextSelectionHandleOverlayState
   }
 
   void _handleTap() {
-    widget.onSelectionHandleTapped();
+    if (widget.onSelectionHandleTapped != null)
+      widget.onSelectionHandleTapped();
   }
 
   @override
@@ -611,7 +638,6 @@ class _TextSelectionHandleOverlayState
       point.dx.clamp(0.0, viewport.width),
       point.dy.clamp(0.0, viewport.height),
     );
-
 
     return CompositedTransformFollower(
       link: widget.layerLink,

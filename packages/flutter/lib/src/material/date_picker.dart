@@ -45,20 +45,11 @@ enum DatePickerMode {
   year,
 }
 
-const double _kDatePickerHeaderPortraitHeight = 100.0;
-const double _kDatePickerHeaderLandscapeWidth = 168.0;
-
 const Duration _kMonthScrollDuration = Duration(milliseconds: 200);
 const double _kDayPickerRowHeight = 42.0;
 const int _kMaxDayPickerRowCount = 6; // A 31 day month that starts on Saturday.
 // Two extra rows: one for the day-of-week header and one for the month header.
 const double _kMaxDayPickerHeight = _kDayPickerRowHeight * (_kMaxDayPickerRowCount + 2);
-
-const double _kMonthPickerPortraitWidth = 330.0;
-const double _kMonthPickerLandscapeWidth = 344.0;
-
-const double _kDialogActionBarHeight = 52.0;
-const double _kDatePickerLandscapeHeight = _kMaxDayPickerHeight + _kDialogActionBarHeight;
 
 // Shows the selected date in large font and toggles between year and day mode
 class _DatePickerHeader extends StatelessWidget {
@@ -100,8 +91,8 @@ class _DatePickerHeader extends StatelessWidget {
         yearColor = mode == DatePickerMode.year ? Colors.white : Colors.white70;
         break;
     }
-    final TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor, height: 1.4);
-    final TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor, height: 1.4);
+    final TextStyle dayStyle = headerTextTheme.display1.copyWith(color: dayColor);
+    final TextStyle yearStyle = headerTextTheme.subhead.copyWith(color: yearColor);
 
     Color backgroundColor;
     switch (themeData.brightness) {
@@ -113,18 +104,14 @@ class _DatePickerHeader extends StatelessWidget {
         break;
     }
 
-    double width;
-    double height;
     EdgeInsets padding;
     MainAxisAlignment mainAxisAlignment;
     switch (orientation) {
       case Orientation.portrait:
-        height = _kDatePickerHeaderPortraitHeight;
-        padding = const EdgeInsets.symmetric(horizontal: 16.0);
+        padding = const EdgeInsets.all(16.0);
         mainAxisAlignment = MainAxisAlignment.center;
         break;
       case Orientation.landscape:
-        width = _kDatePickerHeaderLandscapeWidth;
         padding = const EdgeInsets.all(8.0);
         mainAxisAlignment = MainAxisAlignment.start;
         break;
@@ -157,8 +144,6 @@ class _DatePickerHeader extends StatelessWidget {
     );
 
     return Container(
-      width: width,
-      height: height,
       padding: padding,
       color: backgroundColor,
       child: Column(
@@ -210,7 +195,8 @@ class _DayPickerGridDelegate extends SliverGridDelegate {
   SliverGridLayout getLayout(SliverConstraints constraints) {
     const int columnCount = DateTime.daysPerWeek;
     final double tileWidth = constraints.crossAxisExtent / columnCount;
-    final double tileHeight = math.min(_kDayPickerRowHeight, constraints.viewportMainAxisExtent / (_kMaxDayPickerRowCount + 1));
+    final double viewTileHeight = constraints.viewportMainAxisExtent / (_kMaxDayPickerRowCount + 1);
+    final double tileHeight = math.max(_kDayPickerRowHeight, viewTileHeight);
     return SliverGridRegularTileLayout(
       crossAxisCount: columnCount,
       mainAxisStride: tileHeight,
@@ -493,6 +479,7 @@ class DayPicker extends StatelessWidget {
             child: GridView.custom(
               gridDelegate: _kDayPickerGridDelegate,
               childrenDelegate: SliverChildListDelegate(labels, addRepaintBoundaries: false),
+              padding: EdgeInsets.zero,
             ),
           ),
         ],
@@ -682,7 +669,8 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: _kMonthPickerPortraitWidth,
+      // The month picker just adds month navigation to the day picker, so make
+      // it the same height as the DayPicker
       height: _kMaxDayPickerHeight,
       child: Stack(
         children: <Widget>[
@@ -748,6 +736,7 @@ class _MonthPickerState extends State<MonthPicker> with SingleTickerProviderStat
   @override
   void dispose() {
     _timer?.cancel();
+    _chevronOpacityController?.dispose();
     _dayPickerController?.dispose();
     super.dispose();
   }
@@ -994,12 +983,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Widget picker = Flexible(
-      child: SizedBox(
-        height: _kMaxDayPickerHeight,
-        child: _buildPicker(),
-      ),
-    );
+    final Widget picker = _buildPicker();
     final Widget actions = ButtonTheme.bar(
       child: ButtonBar(
         children: <Widget>[
@@ -1014,6 +998,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         ],
       ),
     );
+
     final Dialog dialog = Dialog(
       child: OrientationBuilder(
         builder: (BuildContext context, Orientation orientation) {
@@ -1026,44 +1011,35 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
           );
           switch (orientation) {
             case Orientation.portrait:
-              return SizedBox(
-                width: _kMonthPickerPortraitWidth,
+              return Container(
+                color: theme.dialogBackgroundColor,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
                     header,
-                    Container(
-                      color: theme.dialogBackgroundColor,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: <Widget>[
-                          picker,
-                          actions,
-                        ],
-                      ),
-                    ),
+                    Flexible(child: picker),
+                    actions,
                   ],
                 ),
               );
             case Orientation.landscape:
-              return SizedBox(
-                height: _kDatePickerLandscapeHeight,
+              return Container(
+                color: theme.dialogBackgroundColor,
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: <Widget>[
-                    header,
+                    Flexible(child: header),
                     Flexible(
-                      child: Container(
-                        width: _kMonthPickerLandscapeWidth,
-                        color: theme.dialogBackgroundColor,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: <Widget>[picker, actions],
-                        ),
+                      flex: 2, // have the picker take up 2/3 of the dialog width
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: <Widget>[
+                          Flexible(child: picker),
+                          actions
+                        ],
                       ),
                     ),
                   ],

@@ -25,7 +25,7 @@ class ModalBottomSheetDemo extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.all(32.0),
                   child: Text(
-                    'This is the modal bottom sheet. Tap anywhere to dismiss.',
+                    'This is the modal bottom sheet. Slide down to dismiss.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Theme.of(context).accentColor,

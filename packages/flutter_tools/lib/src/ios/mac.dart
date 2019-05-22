@@ -31,9 +31,9 @@ import 'xcodeproj.dart';
 const int kXcodeRequiredVersionMajor = 9;
 const int kXcodeRequiredVersionMinor = 0;
 
-IMobileDevice get iMobileDevice => context[IMobileDevice];
-PlistBuddy get plistBuddy => context[PlistBuddy];
-Xcode get xcode => context[Xcode];
+IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
+PlistBuddy get plistBuddy => context.get<PlistBuddy>();
+Xcode get xcode => context.get<Xcode>();
 
 class PlistBuddy {
   const PlistBuddy();
@@ -365,7 +365,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   // copied over to a location that is suitable for Xcodebuild to find them.
   await _addServicesToBundle(app.project.hostAppRoot);
 
-  final FlutterProject project = await FlutterProject.current();
+  final FlutterProject project = FlutterProject.current();
   await updateGeneratedXcodeProperties(
     project: project,
     targetOverride: targetOverride,
@@ -384,6 +384,7 @@ Future<XcodeBuildResult> buildXcodeProject({
       ],
       properties: <String, String>{},
     );
+
     final bool didPodInstall = await cocoaPods.processPods(
       iosProject: project.ios,
       iosEngineDir: flutterFrameworkDir(buildInfo.mode),

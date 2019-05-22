@@ -109,7 +109,7 @@ void main() {
       expect(fields['error_runtime_type'], 'StateError');
       expect(fields['error_message'], 'Bad state: Test bad state error');
 
-      final BufferLogger logger = context[Logger];
+      final BufferLogger logger = context.get<Logger>();
       expect(logger.statusText, 'Sending crash report to Google.\n'
           'Crash report sent (report ID: test-report-id)\n');
 
@@ -119,6 +119,39 @@ void main() {
             .map((FileSystemEntity e) => e.path).toList();
       expect(writtenFiles, hasLength(1));
       expect(writtenFiles, contains('flutter_01.log'));
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
+    testUsingContext('should not send a crash report if on a user-branch', () async {
+      String method;
+      Uri uri;
+
+      CrashReportSender.initializeWith(MockClient((Request request) async {
+        method = request.method;
+        uri = request.url;
+
+        return Response(
+          'test-report-id',
+          200,
+        );
+      }));
+
+      final int exitCode = await tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashCommand()],
+        reportCrashes: true,
+        flutterVersion: '[user-branch]/v1.2.3',
+      );
+
+      expect(exitCode, 1);
+
+      // Verify that the report wasn't sent
+      expect(method, null);
+      expect(uri, null);
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.statusText, '');
     }, overrides: <Type, Generator>{
       Stdio: () => const _NoStderr(),
     });
@@ -155,6 +188,7 @@ void main() {
       Platform: () => FakePlatform(
         operatingSystem: 'linux',
         environment: <String, String>{
+          'HOME': '/',
           'FLUTTER_CRASH_SERVER_BASE_URL': 'https://localhost:12345/fake_server',
         },
         script: Uri(scheme: 'data'),

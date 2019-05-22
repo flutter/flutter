@@ -53,6 +53,8 @@ ConstructorGenerator generateMaterialConstructor = (LocaleInfo locale) {
   );''';
 };
 
+const String materialFactoryName = 'getMaterialTranslation';
+
 const String materialFactoryDeclaration = '''
 GlobalMaterialLocalizations getMaterialTranslation(
   Locale locale,
@@ -66,3 +68,7 @@ GlobalMaterialLocalizations getMaterialTranslation(
 
 const String materialFactoryArguments =
     'fullYearFormat: fullYearFormat, mediumDateFormat: mediumDateFormat, longDateFormat: longDateFormat, yearMonthFormat: yearMonthFormat, decimalFormat: decimalFormat, twoDigitZeroPaddedFormat: twoDigitZeroPaddedFormat';
+
+const String materialSupportedLanguagesConstant = 'kMaterialSupportedLanguages';
+
+const String materialSupportedLanguagesDocMacro = 'flutter.localizations.material.languages';

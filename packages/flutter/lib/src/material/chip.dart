@@ -1740,13 +1740,21 @@ class _RenderChipRedirectingHitDetection extends RenderConstrainedBox {
   _RenderChipRedirectingHitDetection(BoxConstraints additionalConstraints) : super(additionalConstraints: additionalConstraints);
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     // Only redirects hit detection which occurs above and below the render object.
     // In order to make this assumption true, I have removed the minimum width
     // constraints, since any reasonable chip would be at least that wide.
-    return child.hitTest(result, position: Offset(position.dx, size.height / 2));
+    final Offset offset = Offset(position.dx, size.height / 2);
+    return result.addWithRawTransform(
+      transform: MatrixUtils.forceToPoint(offset),
+      position: position,
+      hitTest: (BoxHitTestResult result, Offset position) {
+        assert(position == offset);
+        return child.hitTest(result, position: offset);
+      },
+    );
   }
 }
 
@@ -2188,29 +2196,40 @@ class _RenderChip extends RenderBox {
     // Now that we know the label height and the width of the icons, we can
     // determine how much to shrink the width constraints for the "real" layout.
     if (constraints.maxWidth.isFinite) {
+      final double maxWidth = math.max(
+        0.0,
+        constraints.maxWidth
+        - iconSizes
+        - theme.labelPadding.horizontal
+        - theme.padding.horizontal,
+      );
       label.layout(
         constraints.copyWith(
           minWidth: 0.0,
-          maxWidth: math.max(
-            0.0,
-            constraints.maxWidth - iconSizes - theme.labelPadding.horizontal,
-          ),
+          maxWidth: maxWidth,
           minHeight: rawSize.height,
           maxHeight: size.height,
         ),
         parentUsesSize: true,
       );
-    } else {
-      label.layout(
-        BoxConstraints(
-          minHeight: rawSize.height,
-          maxHeight: size.height,
-          minWidth: 0.0,
-          maxWidth: size.width,
-        ),
-        parentUsesSize: true,
+
+      final Size updatedSize = _boxSize(label);
+      return Size(
+        updatedSize.width + theme.labelPadding.horizontal,
+        updatedSize.height + theme.labelPadding.vertical,
       );
     }
+
+    label.layout(
+      BoxConstraints(
+        minHeight: rawSize.height,
+        maxHeight: size.height,
+        minWidth: 0.0,
+        maxWidth: size.width,
+      ),
+      parentUsesSize: true,
+    );
+
     return Size(
       rawSize.width + theme.labelPadding.horizontal,
       rawSize.height + theme.labelPadding.vertical,
@@ -2258,7 +2277,7 @@ class _RenderChip extends RenderBox {
   }
 
   @override
-  bool hitTest(HitTestResult result, { Offset position }) {
+  bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (!size.contains(position))
       return false;
     RenderBox hitTestChild;
@@ -2276,7 +2295,18 @@ class _RenderChip extends RenderBox {
           hitTestChild = label ?? avatar;
         break;
     }
-    return hitTestChild?.hitTest(result, position: hitTestChild.size.center(Offset.zero)) ?? false;
+    if (hitTestChild != null) {
+      final Offset center = hitTestChild.size.center(Offset.zero);
+      return result.addWithRawTransform(
+        transform: MatrixUtils.forceToPoint(center),
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset position) {
+          assert(position == center);
+          return hitTestChild.hitTest(result, position: center);
+        },
+      );
+    }
+    return false;
   }
 
   @override

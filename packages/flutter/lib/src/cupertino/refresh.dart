@@ -248,8 +248,17 @@ typedef RefreshCallback = Future<void> Function();
 /// and the indicator sliver has retracted at least 90% of the way back.
 ///
 /// Can only be used in downward-scrolling vertical lists that overscrolls. In
-/// other words, refreshes can't be triggered with lists using
-/// [ClampingScrollPhysics].
+/// other words, refreshes can't be triggered with [Scrollable]s using
+/// [ClampingScrollPhysics] which is the default on Android. To allow overscroll
+/// on Android, use an overscrolling physics such as [BouncingScrollPhysics].
+/// This can be done via:
+///
+///  * Providing a [BouncingScrollPhysics] (possibly in combination with a
+///    [AlwaysScrollableScrollPhysics]) while constructing the scrollable.
+///  * By inserting a [ScrollConfiguration] with [BouncingScrollPhysics] above
+///    the scrollable.
+///  * By using [CupertinoApp], which always uses a [ScrollConfiguration]
+///    with [BouncingScrollPhysics] regardless of platform.
 ///
 /// In a typical application, this sliver should be inserted between the app bar
 /// sliver such as [CupertinoSliverNavigationBar] and your main scrollable
@@ -454,7 +463,7 @@ class _CupertinoSliverRefreshControlState extends State<CupertinoSliverRefreshCo
             // user supplied and we're always here in the middle of the sliver's
             // performLayout.
             SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-              refreshTask = widget.onRefresh()..then((_) {
+              refreshTask = widget.onRefresh()..whenComplete(() {
                 if (mounted) {
                   setState(() => refreshTask = null);
                   // Trigger one more transition because by this time, BoxConstraint's

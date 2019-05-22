@@ -16,21 +16,21 @@ class PackagesCommand extends FlutterCommand {
     addSubcommand(PackagesGetCommand('upgrade', true));
     addSubcommand(PackagesTestCommand());
     addSubcommand(PackagesForwardCommand('downgrade', 'Downgrade packages in a Flutter project', requiresPubspec: true));
-    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dartlang.org', requiresPubspec: true));
+    addSubcommand(PackagesForwardCommand('publish', 'Publish the current package to pub.dev', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('deps', 'Print package dependencies', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('run', 'Run an executable from a package', requiresPubspec: true));
     addSubcommand(PackagesForwardCommand('cache', 'Work with the Pub system cache'));
     addSubcommand(PackagesForwardCommand('version', 'Print Pub version'));
-    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dartlang.org'));
+    addSubcommand(PackagesForwardCommand('uploader', 'Manage uploaders for a package on pub.dev'));
     addSubcommand(PackagesForwardCommand('global', 'Work with Pub global packages'));
     addSubcommand(PackagesPassthroughCommand());
   }
 
   @override
-  final String name = 'packages';
+  final String name = 'pub';
 
   @override
-  List<String> get aliases => const <String>['pub'];
+  List<String> get aliases => const <String>['packages'];
 
   @override
   final String description = 'Commands for managing Flutter packages.';
@@ -65,7 +65,7 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages $name [<target directory>]';
+    return '${runner.executableName} pub $name [<target directory>]';
   }
 
   Future<void> _runPubGet (String directory) async {
@@ -93,14 +93,14 @@ class PackagesGetCommand extends FlutterCommand {
     }
 
     await _runPubGet(target);
-    final FlutterProject rootProject = await FlutterProject.fromPath(target);
-    await rootProject.ensureReadyForPlatformSpecificTooling();
+    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    await rootProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
 
     // Get/upgrade packages in example app as well
     if (rootProject.hasExampleApp) {
       final FlutterProject exampleProject = rootProject.example;
       await _runPubGet(exampleProject.directory.path);
-      await exampleProject.ensureReadyForPlatformSpecificTooling();
+      await exampleProject.ensureReadyForPlatformSpecificTooling(checkProjects: true);
     }
 
     return null;
@@ -127,7 +127,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages test [<tests...>]';
+    return '${runner.executableName} pub test [<tests...>]';
   }
 
   @override
@@ -157,7 +157,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages $_commandName [<arguments...>]';
+    return '${runner.executableName} pub $_commandName [<arguments...>]';
   }
 
   @override

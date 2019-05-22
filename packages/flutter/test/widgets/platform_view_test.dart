@@ -129,7 +129,7 @@ void main() {
       final Layer textureParentLayer = tester.layers[tester.layers.length - 2];
       expect(textureParentLayer, isInstanceOf<ClipRectLayer>());
       final ClipRectLayer clipRect = textureParentLayer;
-      expect(clipRect.clipRect, Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
+      expect(clipRect.clipRect, const Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
       expect(
         viewsController.views,
         unorderedEquals(<FakeAndroidPlatformView>[
@@ -592,7 +592,10 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
-                        () => VerticalDragGestureRecognizer(),
+                    () {
+                      return VerticalDragGestureRecognizer()
+                        ..onStart = (_) {}; // Add callback to enable recognizer
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -837,7 +840,7 @@ void main() {
 
       // Platform view has not been created yet, no platformViewId.
       expect(semantics.platformViewId, null);
-      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));
       // A 200x100 rect positioned at bottom right of a 800x600 box.
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);
@@ -846,12 +849,64 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(semantics.platformViewId, currentViewId + 1);
-      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));
       // A 200x100 rect positioned at bottom right of a 800x600 box.
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);
 
       handle.dispose();
+    });
+
+    testWidgets('AndroidView can take input focus', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      viewsController.createCompleter = Completer<void>();
+
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(
+        Center(
+          child: Column(
+            children: <Widget>[
+              const SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+              ),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      final Focus androidViewFocusWidget =
+      tester.widget(
+          find.descendant(
+              of: find.byType(AndroidView),
+              matching: find.byType(Focus)
+          )
+      );
+      final Element containerElement = tester.element(find.byKey(containerKey));
+      final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
+      final FocusNode containerFocusNode = Focus.of(containerElement);
+
+      containerFocusNode.requestFocus();
+
+      await tester.pump();
+
+      expect(containerFocusNode.hasFocus, isTrue);
+      expect(androidViewFocusNode.hasFocus, isFalse);
+
+      viewsController.invokeViewFocused(currentViewId + 1);
+
+      await tester.pump();
+
+      expect(containerFocusNode.hasFocus, isFalse);
+      expect(androidViewFocusNode.hasFocus, isTrue);
     });
   });
 
@@ -1263,7 +1318,10 @@ void main() {
                 viewType: 'webview',
                 gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
                   Factory<VerticalDragGestureRecognizer>(
-                        () => VerticalDragGestureRecognizer(),
+                    () {
+                      return VerticalDragGestureRecognizer()
+                        ..onStart = (_) {}; // Add callback to enable recognizer
+                    },
                   ),
                 },
                 layoutDirection: TextDirection.ltr,
@@ -1505,7 +1563,7 @@ void main() {
       final SemanticsNode semantics = tester.getSemantics(find.byType(UiKitView));
 
       expect(semantics.platformViewId, currentViewId + 1);
-      expect(semantics.rect, Rect.fromLTWH(0, 0, 200, 100));
+      expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));
       // A 200x100 rect positioned at bottom right of a 800x600 box.
       expect(semantics.transform, Matrix4.translationValues(600, 500, 0));
       expect(semantics.childrenCount, 0);

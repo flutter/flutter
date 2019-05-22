@@ -1949,12 +1949,12 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       textDirection: data.textDirection,
       textSelectionBase: data.textSelection != null ? data.textSelection.baseOffset : -1,
       textSelectionExtent: data.textSelection != null ? data.textSelection.extentOffset : -1,
-      platformViewId: data.platformViewId != null ? data.platformViewId : -1,
-      scrollChildren: data.scrollChildCount != null ? data.scrollChildCount : 0,
-      scrollIndex: data.scrollIndex != null ? data.scrollIndex : 0 ,
-      scrollPosition: data.scrollPosition != null ? data.scrollPosition : double.nan,
-      scrollExtentMax: data.scrollExtentMax != null ? data.scrollExtentMax : double.nan,
-      scrollExtentMin: data.scrollExtentMin != null ? data.scrollExtentMin : double.nan,
+      platformViewId: data.platformViewId ?? -1,
+      scrollChildren: data.scrollChildCount ?? 0,
+      scrollIndex: data.scrollIndex ?? 0 ,
+      scrollPosition: data.scrollPosition ?? double.nan,
+      scrollExtentMax: data.scrollExtentMax ?? double.nan,
+      scrollExtentMin: data.scrollExtentMin ?? double.nan,
       transform: data.transform?.storage ?? _kIdentityTransform,
       elevation: data.elevation,
       thickness: data.thickness,
@@ -3032,7 +3032,8 @@ class SemanticsConfiguration {
   set onSetSelection(SetSelectionHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (dynamic args) {
-      final Map<String, int> selection = args;
+      assert(args != null && args is Map);
+      final Map<String, int> selection = args.cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
       value(TextSelection(
         baseOffset: selection['base'],

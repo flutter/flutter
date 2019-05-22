@@ -326,6 +326,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.darwin_x64;
     case 'linux-x64':
       return TargetPlatform.linux_x64;
+    case 'windows-x64':
+      return TargetPlatform.windows_x64;
     case 'web':
       return TargetPlatform.web;
   }
@@ -382,9 +384,29 @@ String getIosBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'ios');
 }
 
+/// Returns the macOS build output directory.
+String getMacOSBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'macos');
+}
+
 /// Returns the web build output directory.
 String getWebBuildDirectory() {
   return fs.path.join(getBuildDirectory(), 'web');
+}
+
+/// Returns the Linux build output directory.
+String getLinuxBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'linux');
+}
+
+/// Returns the Windows build output directory.
+String getWindowsBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'windows');
+}
+
+/// Returns the Fuchsia build output directory.
+String getFuchsiaBuildDirectory() {
+  return fs.path.join(getBuildDirectory(), 'fuchsia');
 }
 
 /// Returns directory used by incremental compiler (IKG - incremental kernel

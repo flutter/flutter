@@ -394,8 +394,8 @@ void main() {
     expect(GitTagVersion.parse('v1.2.3-4-g$hash').frameworkVersionFor(hash), '1.2.4-pre.4');
     expect(GitTagVersion.parse('v98.76.54-32-g$hash').frameworkVersionFor(hash), '98.76.55-pre.32');
     expect(GitTagVersion.parse('v10.20.30-0-g$hash').frameworkVersionFor(hash), '10.20.30');
-    expect(GitTagVersion.parse('v1.2.3-hotfix.1-4-g$hash').frameworkVersionFor(hash), '1.2.3-hotfix.2-pre.4');
-    expect(GitTagVersion.parse('v7.2.4-hotfix.8-0-g$hash').frameworkVersionFor(hash), '7.2.4-hotfix.8');
+    expect(GitTagVersion.parse('v1.2.3+hotfix.1-4-g$hash').frameworkVersionFor(hash), '1.2.3+hotfix.2-pre.4');
+    expect(GitTagVersion.parse('v7.2.4+hotfix.8-0-g$hash').frameworkVersionFor(hash), '7.2.4+hotfix.8');
     expect(testLogger.traceText, '');
     expect(GitTagVersion.parse('x1.2.3-4-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
     expect(GitTagVersion.parse('v1.0.0-unknown-0-g$hash').frameworkVersionFor(hash), '0.0.0-unknown');
@@ -414,7 +414,7 @@ void main() {
 }
 
 void _expectVersionMessage(String message) {
-  final BufferLogger logger = context[Logger];
+  final BufferLogger logger = context.get<Logger>();
   expect(logger.statusText.trim(), message.trim());
   logger.clear();
 }

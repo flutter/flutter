@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:archive/archive.dart';
+
+import '../globals.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
@@ -11,7 +13,7 @@ import 'process.dart';
 import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
-OperatingSystemUtils get os => context[OperatingSystemUtils];
+OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
@@ -72,6 +74,37 @@ abstract class OperatingSystemUtils {
 
   /// Returns the separator between items in the PATH environment variable.
   String get pathVarSeparator;
+
+  /// Returns an unused network port.
+  ///
+  /// Returns 0 if an unused port cannot be found.
+  ///
+  /// The port returned by this function may become used before it is bound by
+  /// its intended user.
+  Future<int> findFreePort({bool ipv6 = false}) async {
+    int port = 0;
+    ServerSocket serverSocket;
+    final InternetAddress loopback =
+        ipv6 ? InternetAddress.loopbackIPv6 : InternetAddress.loopbackIPv4;
+    try {
+      serverSocket = await ServerSocket.bind(loopback, 0);
+      port = serverSocket.port;
+    } on SocketException catch (e) {
+      // If ipv4 loopback bind fails, try ipv6.
+      if (!ipv6) {
+        return findFreePort(ipv6: true);
+      }
+      printTrace('findFreePort failed: $e');
+    } catch (e) {
+      // Failures are signaled by a return value of 0 from this function.
+      printTrace('findFreePort failed: $e');
+    } finally {
+      if (serverSocket != null) {
+        await serverSocket.close();
+      }
+    }
+    return port;
+  }
 }
 
 class _PosixUtils extends OperatingSystemUtils {

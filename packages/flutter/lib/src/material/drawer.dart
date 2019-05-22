@@ -181,6 +181,7 @@ class DrawerController extends StatefulWidget {
     @required this.alignment,
     this.drawerCallback,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.scrimColor,
   }) : assert(child != null),
        assert(dragStartBehavior != null),
        assert(alignment != null),
@@ -220,6 +221,11 @@ class DrawerController extends StatefulWidget {
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
+  /// The color to use for the scrim that obscures primary content while a drawer is open.
+  ///
+  /// By default, the color used is [Colors.black54]
+  final Color scrimColor;
+
   @override
   DrawerControllerState createState() => DrawerControllerState();
 }
@@ -231,6 +237,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   @override
   void initState() {
     super.initState();
+    _scrimColorTween = _buildScrimColorTween();
     _controller = AnimationController(duration: _kBaseSettleDuration, vsync: this)
       ..addListener(_animationChanged)
       ..addStatusListener(_animationStatusChanged);
@@ -241,6 +248,13 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     _historyEntry?.remove();
     _controller.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(DrawerController oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.scrimColor != oldWidget.scrimColor)
+      _scrimColorTween = _buildScrimColorTween();
   }
 
   void _animationChanged() {
@@ -379,8 +393,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
       widget.drawerCallback(false);
   }
 
-  final ColorTween _color = ColorTween(begin: Colors.transparent, end: Colors.black54);
+  ColorTween _scrimColorTween;
   final GlobalKey _gestureDetectorKey = GlobalKey();
+
+  ColorTween _buildScrimColorTween() {
+    return ColorTween(begin: Colors.transparent, end: widget.scrimColor ?? Colors.black54);
+  }
 
   AlignmentDirectional get _drawerOuterAlignment {
     assert(widget.alignment != null);
@@ -445,8 +463,8 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                    child: Container(
-                      color: _color.evaluate(_controller),
+                    child: Container( // The drawer's "scrim"
+                      color: _scrimColorTween.evaluate(_controller),
                     ),
                   ),
                 ),

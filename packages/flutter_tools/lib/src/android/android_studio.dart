@@ -13,7 +13,7 @@ import '../globals.dart';
 import '../ios/ios_workflow.dart';
 import '../ios/plist_utils.dart' as plist;
 
-AndroidStudio get androidStudio => context[AndroidStudio];
+AndroidStudio get androidStudio => context.get<AndroidStudio>();
 
 // Android Studio layout:
 

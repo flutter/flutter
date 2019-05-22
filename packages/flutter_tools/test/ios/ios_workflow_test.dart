@@ -187,6 +187,7 @@ Show information about a connected device.
   -x, --xml		output information as xml plist instead of key/value pairs
   -h, --help		prints usage information
         ''');
+        return null;
       });
       final IOSWorkflowTestTarget workflow = IOSWorkflowTestTarget();
       final ValidationResult result = await workflow.validate();

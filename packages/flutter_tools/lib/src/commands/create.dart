@@ -56,11 +56,11 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "flutter packages get" after the project has been created.',
+      help: 'Whether to run "flutter pub get" after the project has been created.',
     );
     argParser.addFlag('offline',
       defaultsTo: false,
-      help: 'When "flutter packages get" is run by the create command, this indicates '
+      help: 'When "flutter pub get" is run by the create command, this indicates '
         'whether to run it in offline mode or not. In offline mode, it will need to '
         'have all dependencies already available in the pub cache to succeed.',
     );
@@ -91,7 +91,8 @@ class CreateCommand extends FlutterCommand {
       abbr: 's',
       help: 'Specifies the Flutter code sample to use as the main.dart for an application. Implies '
         '--template=app. The value should be the sample ID of the desired sample from the API '
-        'documentation website (http://docs.flutter.io).',
+        'documentation website (http://docs.flutter.dev). An example can be found at '
+        'https://master-api.flutter.dev/flutter/widgets/SingleChildScrollView-class.html',
       defaultsTo: null,
       valueHelp: 'id',
     );
@@ -202,7 +203,8 @@ class CreateCommand extends FlutterCommand {
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
-    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json')));
+    return utf8.decode(
+      await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json'), maxAttempts: 2));
   }
 
   /// Fetches the samples index file from the server and writes it to
@@ -213,8 +215,14 @@ class CreateCommand extends FlutterCommand {
       if (outputFile.existsSync()) {
         throwToolExit('File "$outputFilePath" already exists', exitCode: 1);
       }
-      outputFile.writeAsStringSync(await _fetchSamplesIndexFromServer());
-      printStatus('Wrote samples JSON to "$outputFilePath"');
+      final String samplesJson = await _fetchSamplesIndexFromServer();
+      if (samplesJson == null) {
+        throwToolExit('Unable to download samples', exitCode: 2);
+      }
+      else {
+        outputFile.writeAsStringSync(samplesJson);
+        printStatus('Wrote samples JSON to "$outputFilePath"');
+      }
     } catch (e) {
       throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
     }
@@ -223,6 +231,9 @@ class CreateCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
+      // _writeSamplesJson can potentially be long-lived.
+      Cache.releaseLockEarly();
+
       await _writeSamplesJson(argResults['list-samples']);
       return null;
     }
@@ -303,7 +314,7 @@ class CreateCommand extends FlutterCommand {
 
     String organization = argResults['org'];
     if (!argResults.wasParsed('org')) {
-      final FlutterProject project = await FlutterProject.fromDirectory(projectDir);
+      final FlutterProject project = FlutterProject.fromDirectory(projectDir);
       final Set<String> existingOrganizations = project.organizationNames;
       if (existingOrganizations.length == 1) {
         organization = existingOrganizations.first;
@@ -384,7 +395,7 @@ class CreateCommand extends FlutterCommand {
       printStatus('Your module code is in $relativeMainPath.');
     } else {
       // Run doctor; tell the user the next steps.
-      final FlutterProject project = await FlutterProject.fromPath(projectDirPath);
+      final FlutterProject project = FlutterProject.fromPath(projectDirPath);
       final FlutterProject app = project.hasExampleApp ? project.example : project;
       final String relativeAppPath = fs.path.normalize(fs.path.relative(app.directory.path));
       final String relativeAppMain = fs.path.join(relativeAppPath, 'lib', 'main.dart');
@@ -442,8 +453,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         directory: directory.path,
         offline: argResults['offline'],
       );
-      final FlutterProject project = await FlutterProject.fromDirectory(directory);
-      await project.ensureReadyForPlatformSpecificTooling();
+      final FlutterProject project = FlutterProject.fromDirectory(directory);
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
     return generatedCount;
   }
@@ -479,7 +490,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         offline: argResults['offline'],
       );
     }
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);
 
     final String projectName = templateContext['projectName'];
@@ -500,7 +511,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
   Future<int> _generateApp(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
     int generatedCount = 0;
     generatedCount += _renderTemplate('app', directory, templateContext, overwrite: overwrite);
-    final FlutterProject project = await FlutterProject.fromDirectory(directory);
+    final FlutterProject project = FlutterProject.fromDirectory(directory);
     generatedCount += _injectGradleWrapper(project);
 
     if (argResults['with-driver-test']) {
@@ -510,7 +521,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
     if (argResults['pub']) {
       await pubGet(context: PubContext.create, directory: directory.path, offline: argResults['offline']);
-      await project.ensureReadyForPlatformSpecificTooling();
+      await project.ensureReadyForPlatformSpecificTooling(checkProjects: false);
     }
 
     gradle.updateLocalProperties(project: project, requireAndroidSdk: false);

@@ -126,7 +126,7 @@ void main() {
         'SemanticsNode#21(Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), label: "this is a test",'
         ' textDirection: ltr):\nExpected contrast ratio of at least '
         '4.5 but found 1.17 for a font size of 14.0. The '
-        'computed foreground color was: Color(0xfffafafa), The computed background color was:'
+        'computed light color was: Color(0xfffafafa), The computed dark color was:'
         ' Color(0xffffeb3b)\n'
         'See also: https://www.w3.org/TR/UNDERSTANDING-WCAG20/visual-audio-contrast-contrast.html');
       handle.dispose();

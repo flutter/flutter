@@ -9,274 +9,409 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 
+class TestDragData {
+  const TestDragData(
+    this.slop,
+    this.dragDistance,
+    this.expectedOffsets,
+  );
+
+  final Offset slop;
+  final Offset dragDistance;
+  final List<Offset> expectedOffsets;
+}
+
 void main() {
   testWidgets(
     'WidgetTester.drag must break the offset into multiple parallel components if'
     'the drag goes outside the touch slop values',
     (WidgetTester tester) async {
-      // The first Offset in every sub array (ie. offsetResults[i][0]) is (touchSlopX, touchSlopY).
-      // The second Offset in every sub array (ie. offsetResults[i][1]) will be the total move offset.
-      // The remaining values in every sub array are the expected separated drag offsets.
-
       // This test checks to make sure that the total drag will be correctly split into
       // pieces such that the first (and potentially second) moveBy function call(s) in
       // controller.drag() will never have a component greater than the touch
       // slop in that component's respective axis.
-      final List<List<Offset>> offsetResults = <List<Offset>>[
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(-150.0, 200.0),
-          const Offset(-7.5, 10.0),
-          const Offset(-2.5, 3.333333333333333),
-          const Offset(-140.0, 186.66666666666666),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(150, -200),
-          const Offset(7.5, -10),
-          const Offset(2.5, -3.333333333333333),
-          const Offset(140.0, -186.66666666666666),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(-200, 150),
-          const Offset(-10, 7.5),
-          const Offset(-3.333333333333333, 2.5),
-          const Offset(-186.66666666666666, 140.0),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(200.0, -150.0),
-          const Offset(10, -7.5),
-          const Offset(3.333333333333333, -2.5),
-          const Offset(186.66666666666666, -140.0),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(-150.0, -200.0),
-          const Offset(-7.5, -10.0),
-          const Offset(-2.5, -3.333333333333333),
-          const Offset(-140.0, -186.66666666666666),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(8.0, 3.0),
-          const Offset(8.0, 3.0),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(3.0, 8.0),
-          const Offset(3.0, 8.0),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(20.0, 5.0),
-          const Offset(10.0, 2.5),
-          const Offset(10.0, 2.5),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(5.0, 20.0),
-          const Offset(2.5, 10.0),
-          const Offset(2.5, 10.0),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(20.0, 15.0),
-          const Offset(10.0, 7.5),
-          const Offset(3.333333333333333, 2.5),
-          const Offset(6.666666666666668, 5.0),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(15.0, 20.0),
-          const Offset(7.5, 10.0),
-          const Offset(2.5, 3.333333333333333),
-          const Offset(5.0, 6.666666666666668),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(20.0, 20.0),
-          const Offset(10.0, 10.0),
-          const Offset(10.0, 10.0),
-        ],
-        <Offset>[
-          const Offset(10.0, 10.0),
-          const Offset(0.0, 5.0),
-          const Offset(0.0, 5.0),
-        ],
+      const List<TestDragData> offsetResults = <TestDragData>[
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(-150.0, 200.0),
+          <Offset>[
+            Offset(-7.5, 10.0),
+            Offset(-2.5, 3.333333333333333),
+            Offset(-140.0, 186.66666666666666),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(150, -200),
+          <Offset>[
+            Offset(7.5, -10),
+            Offset(2.5, -3.333333333333333),
+            Offset(140.0, -186.66666666666666),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(-200, 150),
+          <Offset>[
+            Offset(-10, 7.5),
+            Offset(-3.333333333333333, 2.5),
+            Offset(-186.66666666666666, 140.0),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(200.0, -150.0),
+          <Offset>[
+            Offset(10, -7.5),
+            Offset(3.333333333333333, -2.5),
+            Offset(186.66666666666666, -140.0),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(-150.0, -200.0),
+          <Offset>[
+            Offset(-7.5, -10.0),
+            Offset(-2.5, -3.333333333333333),
+            Offset(-140.0, -186.66666666666666),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(8.0, 3.0),
+          <Offset>[
+            Offset(8.0, 3.0),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(3.0, 8.0),
+          <Offset>[
+            Offset(3.0, 8.0),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(20.0, 5.0),
+          <Offset>[
+            Offset(10.0, 2.5),
+            Offset(10.0, 2.5),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(5.0, 20.0),
+          <Offset>[
+            Offset(2.5, 10.0),
+            Offset(2.5, 10.0),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(20.0, 15.0),
+          <Offset>[
+            Offset(10.0, 7.5),
+            Offset(3.333333333333333, 2.5),
+            Offset(6.666666666666668, 5.0),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(15.0, 20.0),
+          <Offset>[
+            Offset(7.5, 10.0),
+            Offset(2.5, 3.333333333333333),
+            Offset(5.0, 6.666666666666668),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(20.0, 20.0),
+          <Offset>[
+            Offset(10.0, 10.0),
+            Offset(10.0, 10.0),
+          ],
+        ),
+        TestDragData(
+          Offset(10.0, 10.0),
+          Offset(0.0, 5.0),
+          <Offset>[
+            Offset(0.0, 5.0),
+          ],
+        ),
 
-        //// [VARYING TOUCH SLOP] ////
-        <Offset>[
-          const Offset(12.0, 5.0),
-          const Offset(0.0, 5.0),
-          const Offset(0.0, 5.0),
-        ],
-        <Offset>[
-          const Offset(12.0, 5.0),
-          const Offset(20.0, 5.0),
-          const Offset(12.0, 3.0),
-          const Offset(8.0, 2.0),
-        ],
-        <Offset>[
-          const Offset(12.0, 5.0),
-          const Offset(5.0, 20.0),
-          const Offset(1.25, 5.0),
-          const Offset(3.75, 15.0),
-        ],
-        <Offset>[
-          const Offset(5.0, 12.0),
-          const Offset(5.0, 20.0),
-          const Offset(3.0, 12.0),
-          const Offset(2.0, 8.0),
-        ],
-        <Offset>[
-          const Offset(5.0, 12.0),
-          const Offset(20.0, 5.0),
-          const Offset(5.0, 1.25),
-          const Offset(15.0, 3.75),
-        ],
-        <Offset>[
-          const Offset(18.0, 18.0),
-          const Offset(0.0, 150.0),
-          const Offset(0.0, 18.0),
-          const Offset(0.0, 132.0),
-        ],
-        <Offset>[
-          const Offset(18.0, 18.0),
-          const Offset(0.0, -150.0),
-          const Offset(0.0, -18.0),
-          const Offset(0.0, -132.0),
-        ],
-        <Offset>[
-          const Offset(18.0, 18.0),
-          const Offset(-150.0, 0.0),
-          const Offset(-18.0, 0.0),
-          const Offset(-132.0, 0.0),
-        ],
-        <Offset>[
-          const Offset(0.0, 0.0),
-          const Offset(-150.0, 0.0),
-          const Offset(-150.0, 0.0),
-        ],
-        <Offset>[
-          const Offset(18.0, 18.0),
-          const Offset(-32.0, 0.0),
-          const Offset(-18.0, 0.0),
-          const Offset(-14.0, 0.0),
-        ],
+        //// Varying touch slops
+        TestDragData(
+          Offset(12.0, 5.0),
+          Offset(0.0, 5.0),
+          <Offset>[
+            Offset(0.0, 5.0),
+          ],
+        ),
+        TestDragData(
+          Offset(12.0, 5.0),
+          Offset(20.0, 5.0),
+          <Offset>[
+            Offset(12.0, 3.0),
+            Offset(8.0, 2.0),
+          ],
+        ),
+        TestDragData(
+          Offset(12.0, 5.0),
+          Offset(5.0, 20.0),
+          <Offset>[
+            Offset(1.25, 5.0),
+            Offset(3.75, 15.0),
+          ],
+        ),
+        TestDragData(
+          Offset(5.0, 12.0),
+          Offset(5.0, 20.0),
+          <Offset>[
+            Offset(3.0, 12.0),
+            Offset(2.0, 8.0),
+          ],
+        ),
+        TestDragData(
+          Offset(5.0, 12.0),
+          Offset(20.0, 5.0),
+          <Offset>[
+            Offset(5.0, 1.25),
+            Offset(15.0, 3.75),
+          ],
+        ),
+        TestDragData(
+          Offset(18.0, 18.0),
+          Offset(0.0, 150.0),
+          <Offset>[
+            Offset(0.0, 18.0),
+            Offset(0.0, 132.0),
+          ],
+        ),
+        TestDragData(
+          Offset(18.0, 18.0),
+          Offset(0.0, -150.0),
+          <Offset>[
+            Offset(0.0, -18.0),
+            Offset(0.0, -132.0),
+          ],
+        ),
+        TestDragData(
+          Offset(18.0, 18.0),
+          Offset(-150.0, 0.0),
+          <Offset>[
+            Offset(-18.0, 0.0),
+            Offset(-132.0, 0.0),
+          ],
+        ),
+        TestDragData(
+          Offset(0.0, 0.0),
+          Offset(-150.0, 0.0),
+          <Offset>[
+            Offset(-150.0, 0.0),
+          ],
+        ),
+        TestDragData(
+          Offset(18.0, 18.0),
+          Offset(-32.0, 0.0),
+          <Offset>[
+            Offset(-18.0, 0.0),
+            Offset(-14.0, 0.0),
+          ],
+        ),
       ];
 
+      final List<Offset> dragOffsets = <Offset>[];
+
       await tester.pumpWidget(
-        const Directionality(
-          textDirection: TextDirection.ltr,
-          child: Text('test'),
+        Listener(
+          onPointerMove: (PointerMoveEvent event) {
+            dragOffsets.add(event.delta);
+          },
+          child: const Text('test', textDirection: TextDirection.ltr),
         ),
       );
 
-      final WidgetControllerSpy spyController = WidgetControllerSpy(tester.binding);
-
       for (int resultIndex = 0; resultIndex < offsetResults.length; resultIndex += 1) {
-        final List<Offset> testResult = offsetResults[resultIndex];
-        await spyController.drag(
+        final TestDragData testResult = offsetResults[resultIndex];
+        await tester.drag(
           find.text('test'),
-          testResult[1],
-          touchSlopX: testResult[0].dx,
-          touchSlopY: testResult[0].dy,
+          testResult.dragDistance,
+          touchSlopX: testResult.slop.dx,
+          touchSlopY: testResult.slop.dy,
         );
-        final List<Offset> dragOffsets = spyController.testGestureSpy.offsets;
         expect(
-          offsetResults[resultIndex].length - 2,
+          testResult.expectedOffsets.length,
           dragOffsets.length,
-
           reason:
             'There is a difference in the number of expected and actual split offsets for the drag with:\n'
-            'Touch Slop: ' + testResult[0].toString() + '\n'
-            'Delta:      ' + testResult[1].toString() + '\n',
+            'Touch Slop: ${testResult.slop}\n'
+            'Delta:      ${testResult.dragDistance}\n',
         );
-        for (int valueIndex = 2; valueIndex < offsetResults[resultIndex].length; valueIndex += 1) {
+        for (int valueIndex = 0; valueIndex < offsetResults[resultIndex].expectedOffsets.length; valueIndex += 1) {
           expect(
-            offsetResults[resultIndex][valueIndex],
-            dragOffsets[valueIndex - 2],
+            testResult.expectedOffsets[valueIndex],
+            offsetMoreOrLessEquals(dragOffsets[valueIndex]),
             reason:
               'There is a difference in the expected and actual value of the ' +
               (valueIndex == 2 ? 'first' : valueIndex == 3 ? 'second' : 'third') +
               ' split offset for the drag with:\n'
-              'Touch slop: ' + testResult[0].toString() + '\n'
-              'Delta:      ' + testResult[1].toString() + '\n',
+              'Touch slop: ${testResult.slop}\n'
+              'Delta:      ${testResult.dragDistance}\n'
           );
         }
-        spyController.testGestureSpy.clearOffsets();
+        dragOffsets.clear();
       }
     },
   );
-}
 
-class WidgetControllerSpy extends WidgetController {
-  WidgetControllerSpy(
-    TestWidgetsFlutterBinding binding,
-  ) : super(binding) {
-    _binding = binding;
-  }
+  testWidgets(
+    'WidgetTester.tap must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
 
-  TestWidgetsFlutterBinding _binding;
-
-  @override
-  Future<void> pump(Duration duration) async {
-    if (duration != null)
-      await Future<void>.delayed(duration);
-    _binding.scheduleFrame();
-    await _binding.endOfFrame;
-  }
-
-  int _getNextPointer() {
-    final int result = nextPointer;
-    nextPointer += 1;
-    return result;
-  }
-
-  @override
-  Future<void> sendEventToBinding(PointerEvent event, HitTestResult result) {
-    return TestAsyncUtils.guard<void>(() async {
-      _binding.dispatchEvent(event, result, source: TestBindingEventSource.test);
-    });
-  }
-
-  TestGestureSpy testGestureSpy;
-
-  @override
-  Future<TestGesture> createGesture({int pointer, PointerDeviceKind kind = PointerDeviceKind.touch}) async {
-    return testGestureSpy = TestGestureSpy(
-      pointer: pointer ?? _getNextPointer(),
-      kind: kind,
-      dispatcher: sendEventToBinding,
-      hitTester: hitTestOnBinding,
-    );
-  }
-}
-
-class TestGestureSpy extends TestGesture {
-  TestGestureSpy({
-    int pointer,
-    PointerDeviceKind kind,
-    EventDispatcher dispatcher,
-    HitTester hitTester,
-  }) : super(
-        pointer: pointer,
-        kind: kind,
-        dispatcher: dispatcher,
-        hitTester: hitTester
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
       );
 
-  List<Offset> offsets = <Offset>[];
+      await tester.tap(find.text('test'), buttons: kSecondaryMouseButton);
 
-  void clearOffsets() {
-    offsets = <Offset>[];
-  }
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
 
-  @override
-  Future<void> moveBy(Offset offset, {Duration timeStamp = Duration.zero}) {
-    offsets.add(offset);
-    return super.moveBy(offset, timeStamp: timeStamp);
-  }
+  testWidgets(
+    'WidgetTester.press must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.press(find.text('test'), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      expect(logs, equals(<String>['down $b']));
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.longPress must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.longPress(find.text('test'), buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.drag must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.drag(find.text('test'), const Offset(-150.0, 200.0), buttons: kSecondaryMouseButton);
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
+
+  testWidgets(
+    'WidgetTester.fling must respect buttons',
+    (WidgetTester tester) async {
+      final List<String> logs = <String>[];
+
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: Listener(
+            onPointerDown: (PointerDownEvent event) => logs.add('down ${event.buttons}'),
+            onPointerMove: (PointerMoveEvent event) => logs.add('move ${event.buttons}'),
+            onPointerUp: (PointerUpEvent event) => logs.add('up ${event.buttons}'),
+            child: const Text('test'),
+          ),
+        ),
+      );
+
+      await tester.fling(find.text('test'), const Offset(-10.0, 0.0), 1000.0, buttons: kSecondaryMouseButton);
+      await tester.pumpAndSettle();
+
+      const String b = '$kSecondaryMouseButton';
+      for(int i = 0; i < logs.length; i++) {
+        if (i == 0)
+          expect(logs[i], 'down $b');
+        else if (i != logs.length - 1)
+          expect(logs[i], 'move $b');
+        else
+          expect(logs[i], 'up 0');
+      }
+    },
+  );
 }

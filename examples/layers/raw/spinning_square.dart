@@ -30,7 +30,7 @@ void beginFrame(Duration timeStamp) {
   canvas.rotate(math.pi * (t % 1.0));
 
   canvas.drawRect(
-    ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+    const ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
     ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
   );
   final ui.Picture picture = recorder.endRecording();

@@ -20,7 +20,7 @@ ui.Picture paint(ui.Rect paintBounds) {
 
   canvas.translate(logicalSize.width / 2.0, logicalSize.height / 2.0);
   canvas.drawRect(
-    ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
+    const ui.Rect.fromLTRB(-100.0, -100.0, 100.0, 100.0),
     ui.Paint()..color = const ui.Color.fromARGB(255, 0, 255, 0),
   );
 

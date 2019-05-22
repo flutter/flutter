@@ -23,7 +23,7 @@ void main() {
   });
 
   test('ContinuousRectangleBorder BorderRadius.zero', () {
-    final Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const Rect rect1 = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect1 = isPathThat(
       includes: const <Offset>[ Offset(10.0, 20.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(9.0, 19.0), Offset(31.0, 41.0) ],
@@ -46,7 +46,7 @@ void main() {
   });
 
   test('ContinuousRectangleBorder non-zero BorderRadius', () {
-    final Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
+    const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
     final Matcher looksLikeRect = isPathThat(
       includes: const <Offset>[ Offset(15.0, 25.0), Offset(20.0, 30.0) ],
       excludes: const <Offset>[ Offset(10.0, 20.0), Offset(30.0, 40.0) ],

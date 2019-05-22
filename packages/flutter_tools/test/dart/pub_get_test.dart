@@ -27,7 +27,7 @@ void main() {
   testUsingContext('pub get 69', () async {
     String error;
 
-    final MockProcessManager processMock = context[ProcessManager];
+    final MockProcessManager processMock = context.get<ProcessManager>();
 
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
@@ -39,26 +39,26 @@ void main() {
       });
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
-        'Running "flutter packages get" in /...\n'
+        'Running "flutter pub get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n',
       );
       expect(processMock.lastPubEnvironment, contains('flutter_cli:flutter_tests'));
       expect(processMock.lastPubCache, isNull);
       time.elapse(const Duration(milliseconds: 500));
       expect(testLogger.statusText,
-        'Running "flutter packages get" in /...\n'
+        'Running "flutter pub get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n',
       );
       time.elapse(const Duration(seconds: 1));
       expect(testLogger.statusText,
-        'Running "flutter packages get" in /...\n'
+        'Running "flutter pub get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n',
       );
       time.elapse(const Duration(seconds: 100)); // from t=0 to t=100
       expect(testLogger.statusText,
-        'Running "flutter packages get" in /...\n'
+        'Running "flutter pub get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n'
         'pub get failed (69) -- attempting retry 3 in 4 seconds...\n' // at t=1
@@ -69,7 +69,7 @@ void main() {
       );
       time.elapse(const Duration(seconds: 200)); // from t=0 to t=200
       expect(testLogger.statusText,
-        'Running "flutter packages get" in /...\n'
+        'Running "flutter pub get" in /...\n'
         'pub get failed (69) -- attempting retry 1 in 1 second...\n'
         'pub get failed (69) -- attempting retry 2 in 2 seconds...\n'
         'pub get failed (69) -- attempting retry 3 in 4 seconds...\n'
@@ -95,8 +95,8 @@ void main() {
   testUsingContext('pub cache in root is used', () async {
     String error;
 
-    final MockProcessManager processMock = context[ProcessManager];
-    final MockFileSystem fsMock = context[FileSystem];
+    final MockProcessManager processMock = context.get<ProcessManager>() as MockProcessManager;
+    final MockFileSystem fsMock = context.get<FileSystem>() as MockFileSystem;
 
     FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
@@ -122,7 +122,7 @@ void main() {
   testUsingContext('pub cache in environment is used', () async {
     String error;
 
-    final MockProcessManager processMock = context[ProcessManager];
+    final MockProcessManager processMock = context.get<ProcessManager>();
 
     FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
