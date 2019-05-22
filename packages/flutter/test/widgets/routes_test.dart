@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 final List<String> results = <String>[];
 
@@ -501,6 +502,48 @@ void main() {
       observer.didPush(nextPageRoute, pageRoute);
       observer.didPop(nextPageRoute, pageRoute);
       verifyNoMoreInteractions(pageRouteAware);
+    });
+  });
+
+  group('ModalRoute', () {
+    testWidgets('should resume focus when the next route is popped', (WidgetTester tester) async {
+      final GlobalKey key = GlobalKey();
+      final FocusNode node = FocusNode();
+      BuildContext pageContext;
+      final Widget widget = MaterialApp(
+        theme: ThemeData(),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              pageContext = context;
+              return Column(
+                children: <Widget>[
+                  TextField(),
+                  TextField(key: key, focusNode: node),
+                ],
+              );
+            }
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      expect(node.hasFocus, false);
+
+      node.requestFocus();
+      await tester.pumpAndSettle();
+      expect(node.hasFocus, true);
+
+      showDialog<void>(
+        context: pageContext,
+        builder: (BuildContext _) => const Center(),
+      );
+      await tester.pumpAndSettle();
+      expect(node.hasFocus, false);
+
+      Navigator.of(pageContext).pop();
+      await tester.pumpAndSettle();
+      expect(node.hasFocus, true);
     });
   });
 }
