@@ -699,6 +699,19 @@ inline flutter::PointerData::Change ToPointerDataChange(
   return flutter::PointerData::Change::kCancel;
 }
 
+// Returns the flutter::PointerData::DeviceKind for the given
+// FlutterPointerDeviceKind.
+inline flutter::PointerData::DeviceKind ToPointerDataKind(
+    FlutterPointerDeviceKind device_kind) {
+  switch (device_kind) {
+    case kFlutterPointerDeviceKindMouse:
+      return flutter::PointerData::DeviceKind::kMouse;
+    case kFlutterPointerDeviceKindTouch:
+      return flutter::PointerData::DeviceKind::kTouch;
+  }
+  return flutter::PointerData::DeviceKind::kMouse;
+}
+
 // Returns the flutter::PointerData::SignalKind for the given
 // FlutterPointerSignaKind.
 inline flutter::PointerData::SignalKind ToPointerDataSignalKind(
@@ -712,33 +725,24 @@ inline flutter::PointerData::SignalKind ToPointerDataSignalKind(
   return flutter::PointerData::SignalKind::kNone;
 }
 
-// Returns the buttons for PointerData for the given buttons and change from a
-// FlutterPointerEvent.
-inline int64_t ToPointerDataButtons(int64_t buttons,
-                                    flutter::PointerData::Change change) {
+// Returns the buttons to synthesize for a PointerData from a
+// FlutterPointerEvent with no type or buttons set.
+inline int64_t PointerDataButtonsForLegacyEvent(
+    flutter::PointerData::Change change) {
   switch (change) {
     case flutter::PointerData::Change::kDown:
     case flutter::PointerData::Change::kMove:
       // These kinds of change must have a non-zero `buttons`, otherwise gesture
-      // recognizers will ignore these events. To avoid breaking legacy
-      // embedders, it synthesizes a primary button when seeing `button = 0` and
-      // logs a warning to inform them to update.
-      if (buttons == 0) {
-        // TODO: Log a warning to inform the embedder to send the
-        // correct buttons. See
-        // https://github.com/flutter/flutter/issues/32052#issuecomment-489278965
-        return flutter::kPointerButtonMousePrimary;
-      }
-      return buttons;
-
+      // recognizers will ignore these events.
+      return flutter::kPointerButtonMousePrimary;
     case flutter::PointerData::Change::kCancel:
     case flutter::PointerData::Change::kAdd:
     case flutter::PointerData::Change::kRemove:
     case flutter::PointerData::Change::kHover:
     case flutter::PointerData::Change::kUp:
-      return buttons;
+      return 0;
   }
-  return buttons;
+  return 0;
 }
 
 FlutterEngineResult FlutterEngineSendPointerEvent(
@@ -759,7 +763,6 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     pointer_data.time_stamp = SAFE_ACCESS(current, timestamp, 0);
     pointer_data.change = ToPointerDataChange(
         SAFE_ACCESS(current, phase, FlutterPointerPhase::kCancel));
-    pointer_data.kind = flutter::PointerData::DeviceKind::kMouse;
     pointer_data.physical_x = SAFE_ACCESS(current, x, 0.0);
     pointer_data.physical_y = SAFE_ACCESS(current, y, 0.0);
     pointer_data.device = SAFE_ACCESS(current, device, 0);
@@ -767,10 +770,29 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
         SAFE_ACCESS(current, signal_kind, kFlutterPointerSignalKindNone));
     pointer_data.scroll_delta_x = SAFE_ACCESS(current, scroll_delta_x, 0.0);
     pointer_data.scroll_delta_y = SAFE_ACCESS(current, scroll_delta_y, 0.0);
-    // TODO: Change 0 to a SAFE_ACCESS to current.buttons once this
-    // field is added. See
-    // https://github.com/flutter/flutter/issues/32052#issuecomment-489278965
-    pointer_data.buttons = ToPointerDataButtons(0, pointer_data.change);
+    FlutterPointerDeviceKind device_kind = SAFE_ACCESS(current, device_kind, 0);
+    // For backwards compatibilty with embedders written before the device kind
+    // and buttons were exposed, if the device kind is not set treat it as a
+    // mouse, with a synthesized primary button state based on the phase.
+    if (device_kind == 0) {
+      pointer_data.kind = flutter::PointerData::DeviceKind::kMouse;
+      pointer_data.buttons =
+          PointerDataButtonsForLegacyEvent(pointer_data.change);
+
+    } else {
+      pointer_data.kind = ToPointerDataKind(device_kind);
+      if (pointer_data.kind == flutter::PointerData::DeviceKind::kTouch) {
+        // For touch events, set the button internally rather than requiring
+        // it at the API level, since it's a confusing construction to expose.
+        if (pointer_data.change == flutter::PointerData::Change::kDown ||
+            pointer_data.change == flutter::PointerData::Change::kMove) {
+          pointer_data.buttons = flutter::kPointerButtonTouchContact;
+        }
+      } else {
+        // Buttons use the same mask values, so pass them through directly.
+        pointer_data.buttons = SAFE_ACCESS(current, buttons, 0);
+      }
+    }
     packet->SetPointerData(i, pointer_data);
     current = reinterpret_cast<const FlutterPointerEvent*>(
         reinterpret_cast<const uint8_t*>(current) + current->struct_size);
