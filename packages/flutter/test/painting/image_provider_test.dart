@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -199,8 +200,64 @@ void main() {
         ));
         expect(uncaught, false);
       });
+
+      test('Notifies listeners of chunk events', () async {
+        final List<List<int>> chunks = <List<int>>[];
+        const int chunkSize = 8;
+        for (int offset = 0; offset < kTransparentImage.length; offset += chunkSize) {
+          chunks.add(kTransparentImage.skip(offset).take(chunkSize).toList());
+        }
+        final Completer<void> imageAvailable = Completer<void>();
+        final MockHttpClientRequest request = MockHttpClientRequest();
+        final MockHttpClientResponse response = MockHttpClientResponse();
+        when(httpClient.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
+        when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
+        when(response.statusCode).thenReturn(HttpStatus.ok);
+        when(response.contentLength).thenReturn(kTransparentImage.length);
+        when(response.listen(
+          any,
+          onDone: anyNamed('onDone'),
+          onError: anyNamed('onError'),
+          cancelOnError: anyNamed('cancelOnError'),
+        )).thenAnswer((Invocation invocation) {
+          final void Function(List<int>) onData = invocation.positionalArguments[0];
+          final void Function(Object) onError = invocation.namedArguments[#onError];
+          final void Function() onDone = invocation.namedArguments[#onDone];
+          final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+
+          return Stream<List<int>>.fromIterable(chunks).listen(
+            onData,
+            onDone: onDone,
+            onError: onError,
+            cancelOnError: cancelOnError,
+          );
+        });
+
+        final ImageProvider imageProvider = NetworkImage(nonconst('foo'));
+        final ImageStream result = imageProvider.resolve(ImageConfiguration.empty);
+        final List<ImageChunkEvent> events = <ImageChunkEvent>[];
+        result.addListener(ImageStreamListener(
+          (ImageInfo image, bool synchronousCall) {
+            imageAvailable.complete();
+          },
+          onChunk: (ImageChunkEvent event) {
+            events.add(event);
+          },
+          onError: (dynamic error, StackTrace stackTrace) {
+            imageAvailable.completeError(error, stackTrace);
+          },
+        ));
+        await imageAvailable.future;
+        expect(events.length, chunks.length);
+        for (int i = 0; i < events.length; i++) {
+          expect(events[i].cumulativeBytesLoaded, math.min((i + 1) * chunkSize, kTransparentImage.length));
+          expect(events[i].expectedTotalBytes, kTransparentImage.length);
+        }
+      });
     });
   });
 }
 
 class MockHttpClient extends Mock implements HttpClient {}
+class MockHttpClientRequest extends Mock implements HttpClientRequest {}
+class MockHttpClientResponse extends Mock implements HttpClientResponse {}
