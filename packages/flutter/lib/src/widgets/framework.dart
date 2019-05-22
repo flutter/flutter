@@ -3176,7 +3176,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
       for (InheritedElement dependency in _dependencies)
-        dependency._dependents.remove(this);
+        dependency.removeDependencies(this);
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
       // get re-used, it doesn't matter. If we do, then we'll clear the list in
@@ -4266,6 +4266,7 @@ class InheritedElement extends ProxyElement {
   ///    created with [inheritFromWidgetOfExactType].
   ///  * [setDependencies], which sets dependencies value for a dependent
   ///    element.
+  ///  * [removeDependencies], which unsets the value for a dependent element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
   ///    dependencies value to decide if the dependent needs to be rebuilt.
   ///  * [InheritedModel], which is an example of a class that uses this method
@@ -4293,6 +4294,7 @@ class InheritedElement extends ProxyElement {
   ///    created with [inheritFromWidgetOfExactType].
   ///  * [getDependencies], which returns the current value for a dependent
   ///    element.
+  ///  * [removeDependencies], which unsets the value for a dependent element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
   ///    [getDependencies] value to decide if the dependent needs to be rebuilt.
   ///  * [InheritedModel], which is an example of a class that uses this method
@@ -4320,6 +4322,7 @@ class InheritedElement extends ProxyElement {
   ///  * [getDependencies], which returns the current value for a dependent
   ///    element.
   ///  * [setDependencies], which sets the value for a dependent element.
+  ///  * [removeDependencies], which unsets the value for a dependent element.
   ///  * [notifyDependent], which can be overridden to use a dependent's
   ///    dependencies value to decide if the dependent needs to be rebuilt.
   ///  * [InheritedModel], which is an example of a class that uses this method
@@ -4327,6 +4330,27 @@ class InheritedElement extends ProxyElement {
   @protected
   void updateDependencies(Element dependent, Object aspect) {
     setDependencies(dependent, null);
+  }
+
+  /// Called by [dependent] to stop listening to this [InheritedElement].
+  ///
+  /// Subclasses can override this method to cancel potential side-effects
+  /// related to subscriptions.
+  ///
+  /// See also:
+  ///  * [updateDependencies], which is called each time a dependency is
+  ///    created with [inheritFromWidgetOfExactType].
+  ///  * [setDependencies], which sets the value for a dependent element.
+  ///  * [getDependencies], which returns the current value for a dependent
+  ///    element.
+  ///  * [notifyDependent], which can be overridden to use a dependent's
+  ///    [getDependencies] value to decide if the dependent needs to be rebuilt.
+  ///  * [InheritedModel], which is an example of a class that uses this method
+  ///    to manage dependency values.
+  @protected
+  @mustCallSuper
+  void removeDependencies(Element dependent) {
+    _dependents.remove(dependent);
   }
 
   /// Called by [notifyClients] for each dependent.
@@ -4342,6 +4366,7 @@ class InheritedElement extends ProxyElement {
   ///    created with [inheritFromWidgetOfExactType].
   ///  * [getDependencies], which returns the current value for a dependent
   ///    element.
+  ///  * [removeDependencies], which unsets the value for a dependent element.
   ///  * [setDependencies], which sets the value for a dependent element.
   ///  * [InheritedModel], which is an example of a class that uses this method
   ///    to manage dependency values.
