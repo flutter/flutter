@@ -9,6 +9,7 @@ import '../base/os.dart';
 import '../dart/pub.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../usage.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
@@ -42,6 +43,28 @@ class PackagesCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async => null;
+
+  @override
+  Future<Map<String, String>> get usageValues async {
+    final Map<String, String> usageValues = <String, String>{};
+    final String target = findProjectRoot(
+      argResults.rest.length == 1 ? argResults.rest[0] : null
+    );
+    if (target == null) {
+      return usageValues;
+    }
+    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final bool hasPlugins = await rootProject.flutterPluginsFile.exists();
+    if (hasPlugins) {
+      final int numberOfPlugins = (await rootProject.flutterPluginsFile.readAsLines()).length;
+      usageValues[kCommandPackagesNumberPlugins] = '$numberOfPlugins';
+    } else {
+      usageValues[kCommandPackagesNumberPlugins] = '0';
+    }
+    usageValues[kCommandPackagesProjectModule] = '${rootProject.isModule}';
+    return usageValues;
+  }
+
 }
 
 class PackagesGetCommand extends FlutterCommand {
@@ -68,13 +91,24 @@ class PackagesGetCommand extends FlutterCommand {
     return '${runner.executableName} packages $name [<target directory>]';
   }
 
-  Future<void> _runPubGet (String directory) async {
-    await pubGet(context: PubContext.pubGet,
-      directory: directory,
-      upgrade: upgrade ,
-      offline: argResults['offline'],
-      checkLastModified: false,
-    );
+  Future<void> _runPubGet(String directory) async {
+    final Stopwatch pubGetTimer = Stopwatch()..start();
+    try {
+      await pubGet(context: PubContext.pubGet,
+        directory: directory,
+        upgrade: upgrade ,
+        offline: argResults['offline'],
+        checkLastModified: false,
+      );
+      pubGetTimer.stop();
+      flutterUsage.sendEvent('packages-pub-get', 'success');
+      flutterUsage.sendTiming('packages-pub-get', 'success', pubGetTimer.elapsed);
+    } catch (_) {
+      pubGetTimer.stop();
+      flutterUsage.sendEvent('packages-pub-get', 'failure');
+      flutterUsage.sendTiming('packages-pub-get', 'failure', pubGetTimer.elapsed);
+      rethrow;
+    }
   }
 
   @override

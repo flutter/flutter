@@ -19,6 +19,7 @@ import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
+import '../usage.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -208,8 +209,20 @@ class RunCommand extends RunCommandBase {
     final String deviceType = devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
+            
+    final AndroidProject androidProject = FlutterProject.current().android;
+    final IosProject iosProject = FlutterProject.current().ios;
+    final List<String> hostLanguage = <String>[
+      androidProject.isKotlin ? 'kotlin' : 'java',
+      iosProject.isSwift ? 'swift' : 'objc'
+    ];
 
-    return <String, String>{'cd3': '$isEmulator', 'cd4': deviceType};
+    return <String, String>{
+      kCommandRunIsEmulator: '$isEmulator',
+      kCommandRunTargetName: deviceType,
+      kCommandRunProjectModule: '${FlutterProject.current().isModule}',
+      kCommandRunProjectHostLanguage: hostLanguage.join(','),
+    };
   }
 
   @override

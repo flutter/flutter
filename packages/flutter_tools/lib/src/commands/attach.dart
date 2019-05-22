@@ -26,6 +26,7 @@ import '../resident_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
+import '../usage.dart';
 
 /// A Flutter-command that attaches to applications that have been launched
 /// without `flutter run`.
@@ -306,7 +307,9 @@ class AttachCommand extends FlutterCommand {
             fs.currentDirectory,
             LaunchMode.attach,
           );
+          flutterUsage.sendEvent('attach', 'success');
         } catch (error) {
+          flutterUsage.sendEvent('attach', 'failure');
           throwToolExit(error.toString());
         }
         result = await app.runner.waitForAppToFinish();

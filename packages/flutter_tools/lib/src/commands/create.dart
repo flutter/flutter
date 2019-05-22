@@ -24,6 +24,7 @@ import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../usage.dart';
 import '../version.dart';
 
 enum _ProjectType {
@@ -40,6 +41,13 @@ enum _ProjectType {
   /// This is a native plugin project.
   plugin,
 }
+
+Map<_ProjectType, String> _projectTypeNameMap =  <_ProjectType, String>{
+  _ProjectType.app: 'app',
+  _ProjectType.module: 'module',
+  _ProjectType.package: 'package',
+  _ProjectType.plugin: 'plugin',
+};
 
 _ProjectType _stringToProjectType(String value) {
   _ProjectType result;
@@ -148,6 +156,18 @@ class CreateCommand extends FlutterCommand {
   @override
   String get invocation => '${runner.executableName} $name <output directory>';
 
+  @override
+  Future<Map<String, String>> get usageValues async {
+    final Directory projectDir = fs.directory(argResults.rest.first);
+    final _ProjectType template = getProjectType(projectDir);
+
+    return <String, String>{
+      kCommandCreateProjectType: _projectTypeNameMap[template],
+      kCommandCreateAndroidLanguage: argResults['android-language'],
+      kCommandCreateIosLanguage: argResults['ios-language'],
+    };
+  }
+
   // If it has a .metadata file with the project_type in it, use that.
   // If it has an android dir and an android/app dir, it's a legacy app
   // If it has an ios dir and an ios/Flutter dir, it's a legacy app
@@ -228,6 +248,34 @@ class CreateCommand extends FlutterCommand {
     }
   }
 
+  _ProjectType getProjectType(Directory projectDir) {
+    _ProjectType template;
+    _ProjectType detectedProjectType;
+    final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
+    if (argResults['template'] != null) {
+      template = _stringToProjectType(argResults['template']);
+    } else {
+      if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
+        detectedProjectType = _determineTemplateType(projectDir);
+        if (detectedProjectType == null && metadataExists) {
+          // We can only be definitive that this is the wrong type if the .metadata file
+          // exists and contains a type that we don't understand, or doesn't contain a type.
+          throwToolExit('Sorry, unable to detect the type of project to recreate. '
+              'Try creating a fresh project and migrating your existing code to '
+              'the new project manually.');
+        }
+      }
+    }
+    template ??= detectedProjectType ?? _ProjectType.app;
+    if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
+      // We can only be definitive that this is the wrong type if the .metadata file
+      // exists and contains a type that doesn't match.
+      throwToolExit("The requested template type '${getEnumName(template)}' doesn't match the "
+          "existing template type of '${getEnumName(detectedProjectType)}'.");
+    }
+    return template;
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
@@ -283,31 +331,7 @@ class CreateCommand extends FlutterCommand {
       sampleCode = await _fetchSampleFromServer(argResults['sample']);
     }
 
-    _ProjectType template;
-    _ProjectType detectedProjectType;
-    final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
-    if (argResults['template'] != null) {
-      template = _stringToProjectType(argResults['template']);
-    } else {
-      if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-        detectedProjectType = _determineTemplateType(projectDir);
-        if (detectedProjectType == null && metadataExists) {
-          // We can only be definitive that this is the wrong type if the .metadata file
-          // exists and contains a type that we don't understand, or doesn't contain a type.
-          throwToolExit('Sorry, unable to detect the type of project to recreate. '
-              'Try creating a fresh project and migrating your existing code to '
-              'the new project manually.');
-        }
-      }
-    }
-    template ??= detectedProjectType ?? _ProjectType.app;
-    if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
-      // We can only be definitive that this is the wrong type if the .metadata file
-      // exists and contains a type that doesn't match.
-      throwToolExit("The requested template type '${getEnumName(template)}' doesn't match the "
-          "existing template type of '${getEnumName(detectedProjectType)}'.");
-    }
-
+    final _ProjectType template = getProjectType(projectDir);
     final bool generateModule = template == _ProjectType.module;
     final bool generatePlugin = template == _ProjectType.plugin;
     final bool generatePackage = template == _ProjectType.package;
