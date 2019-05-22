@@ -88,7 +88,24 @@ class ExpansionPanel {
 
   /// The widget builder that builds the expansion panels' indicator.
   ///
-  /// If null, using [ExpandIcon] for default
+  /// If null, [ExpandIcon] will be used as the expansion icon by default.
+  ///
+  /// {@tool sample}
+  ///
+  /// ```dart
+  /// ExpansionPanel(
+  ///  isExpanded: true,
+  ///  headerBuilder: (context, isExpanded) =>
+  ///      Text("This is ExpansionPanel's header"),
+  ///  expansionIndicator: (context, isExpanded) =>
+  ///      Switch(value: isExpanded, onChanged: null,),
+  ///  body: ListTile(
+  ///    title: Text("This is title for ExpansionPanel's body"),
+  ///    subtitle: Text(
+  ///        "This is subtitle for ExpansionPanel's body"),),);
+  /// ```
+  /// {@end-tool}
+  ///
   final ExpansionPanelIndicatorBuilder expansionIndicator;
 
   /// The body of the expansion panel that's displayed below the header.
@@ -458,24 +475,32 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         context,
         _isChildExpanded(index),
       );
-      final Widget expansionIndicator = child.expansionIndicator != null
-          ? InkResponse(
-        onTap: !child.canTapOnHeader
-            ? () => _handlePressed(_isChildExpanded(index), index)
-            : null,
-        child: child
-            .expansionIndicator(
-          context,
-          _isChildExpanded(index),
-        ),
-      )
-          : ExpandIcon(
-        isExpanded: _isChildExpanded(index),
-        padding: const EdgeInsets.all(16.0),
-        onPressed: !child.canTapOnHeader
-            ? (bool isExpanded) => _handlePressed(isExpanded, index)
-            : null,
-      );
+
+      Widget expansionIndicator;
+      if (child.expansionIndicator != null) {
+        expansionIndicator = InkResponse(
+          child: child.expansionIndicator(
+            context,
+            _isChildExpanded(index),
+          ),
+          onTap: !child.canTapOnHeader
+              ? () {
+            _handlePressed(_isChildExpanded(index), index);
+          }
+              : null,
+        );
+      } else {
+        expansionIndicator = ExpandIcon(
+          isExpanded: _isChildExpanded(index),
+          padding: const EdgeInsets.all(16.0),
+          onPressed: !child.canTapOnHeader
+              ? (bool isExpanded) {
+            _handlePressed(isExpanded, index);
+          }
+              : null,
+        );
+      }
+
       final Row header = Row(
         children: <Widget>[
           Expanded(
