@@ -137,8 +137,11 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       widget.onPressed(widget.isExpanded);
   }
 
-  // Default icon colors and opacities are based on the
-  // [Material Design specifications](https://material.io/design/iconography/system-icons.html#color).
+  /// Default icon colors and opacities for when [Theme.brightness] is set to
+  /// [Brightness.light] are based on the
+  /// [Material Design system icon specifications](https://material.io/design/iconography/system-icons.html#color).
+  /// Icon colors and opacities for [Brightness.dark] are based on the
+  /// [Material Design dark theme specifications](https://material.io/design/color/dark-theme.html#ui-application)
   Color get _iconColor {
     if (widget.isExpanded && widget.expandedColor != null) {
       return widget.expandedColor;
@@ -152,7 +155,7 @@ class _ExpandIconState extends State<ExpandIcon> with SingleTickerProviderStateM
       case Brightness.light:
         return Colors.black54;
       case Brightness.dark:
-        return Colors.white70;
+        return Colors.white60;
     }
 
     assert(false);
