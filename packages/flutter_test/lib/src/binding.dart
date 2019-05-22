@@ -764,6 +764,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
           return Future<ByteData>.value(encoded.buffer.asByteData());
         }
+        return null;
       });
     }
   }
@@ -1761,6 +1762,10 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
 
   @override
   int get contentLength => -1;
+
+  // @override
+  // TODO(tvolkert): Uncomment @override annotation once SDK change lands.
+  bool get autoUncompress => true;
 
   @override
   List<Cookie> get cookies => null;

@@ -565,7 +565,7 @@ linter:
     if (stdout.isNotEmpty && stdout.first == 'Building flutter tool...') {
       stdout.removeAt(0);
     }
-    if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter packages get" in ')) {
+    if (stdout.isNotEmpty && stdout.first.startsWith('Running "flutter pub get" in ')) {
       stdout.removeAt(0);
     }
     _exitCode = result.exitCode;

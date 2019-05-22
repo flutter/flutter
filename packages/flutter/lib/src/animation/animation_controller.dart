@@ -231,6 +231,7 @@ class AnimationController extends Animation<double>
   AnimationController({
     double value,
     this.duration,
+    this.reverseDuration,
     this.debugLabel,
     this.lowerBound = 0.0,
     this.upperBound = 1.0,
@@ -264,6 +265,7 @@ class AnimationController extends Animation<double>
   AnimationController.unbounded({
     double value = 0.0,
     this.duration,
+    this.reverseDuration,
     this.debugLabel,
     @required TickerProvider vsync,
     this.animationBehavior = AnimationBehavior.preserve,
@@ -300,7 +302,16 @@ class AnimationController extends Animation<double>
   Animation<double> get view => this;
 
   /// The length of time this animation should last.
+  ///
+  /// If [reverseDuration] is specified, then [duration] is only used when going
+  /// [forward]. Otherwise, it specifies the duration going in both directions.
   Duration duration;
+
+  /// The length of time this animation should last when going in [reverse].
+  ///
+  /// The value of [duration] us used if [reverseDuration] is not specified or
+  /// set to null.
+  Duration reverseDuration;
 
   Ticker _ticker;
 
@@ -429,7 +440,7 @@ class AnimationController extends Animation<double>
     assert(() {
       if (duration == null) {
         throw FlutterError(
-          'AnimationController.forward() called with no default Duration.\n'
+          'AnimationController.forward() called with no default duration.\n'
           'The "duration" property should be set, either in the constructor or later, before '
           'calling the forward() function.'
         );
@@ -460,10 +471,10 @@ class AnimationController extends Animation<double>
   /// reached at the end of the animation.
   TickerFuture reverse({ double from }) {
     assert(() {
-      if (duration == null) {
+      if (duration == null && reverseDuration == null) {
         throw FlutterError(
-          'AnimationController.reverse() called with no default Duration.\n'
-          'The "duration" property should be set, either in the constructor or later, before '
+          'AnimationController.reverse() called with no default duration or reverseDuration.\n'
+          'The "duration" or "reverseDuration" property should be set, either in the constructor or later, before '
           'calling the reverse() function.'
         );
       }
@@ -541,11 +552,11 @@ class AnimationController extends Animation<double>
     Duration simulationDuration = duration;
     if (simulationDuration == null) {
       assert(() {
-        if (this.duration == null) {
+        if ((this.duration == null && _direction == _AnimationDirection.reverse && reverseDuration == null) || this.duration == null) {
           throw FlutterError(
-            'AnimationController.animateTo() called with no explicit Duration and no default Duration.\n'
+            'AnimationController.animateTo() called with no explicit duration and no default duration or reverseDuration.\n'
             'Either the "duration" argument to the animateTo() method should be provided, or the '
-            '"duration" property should be set, either in the constructor or later, before '
+            '"duration" and/or "reverseDuration" property should be set, either in the constructor or later, before '
             'calling the animateTo() function.'
           );
         }
@@ -553,7 +564,11 @@ class AnimationController extends Animation<double>
       }());
       final double range = upperBound - lowerBound;
       final double remainingFraction = range.isFinite ? (target - _value).abs() / range : 1.0;
-      simulationDuration = this.duration * remainingFraction;
+      final Duration directionDuration =
+        (_direction == _AnimationDirection.reverse && reverseDuration != null)
+        ? reverseDuration
+        : this.duration;
+      simulationDuration = directionDuration * remainingFraction;
     } else if (target == value) {
       // Already at target, don't animate.
       simulationDuration = Duration.zero;

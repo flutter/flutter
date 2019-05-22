@@ -104,6 +104,30 @@ void main() {
     ),
   });
 
+  testUsingContext('max attempts', () async {
+    String error;
+    List<int> actualResult;
+    FakeAsync().run((FakeAsync time) {
+      fetchUrl(Uri.parse('http://example.invalid/'), maxAttempts: 3).then((List<int> value) {
+        actualResult = value;
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
+      });
+      expect(testLogger.statusText, '');
+      time.elapse(const Duration(milliseconds: 10000));
+      expect(testLogger.statusText,
+        'Download failed -- attempting retry 1 in 1 second...\n'
+        'Download failed -- attempting retry 2 in 2 seconds...\n'
+        'Download failed -- retry 3\n',
+      );
+    });
+    expect(testLogger.errorText, isEmpty);
+    expect(error, isNull);
+    expect(actualResult, isNull);
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClient(500),
+  });
+
   testUsingContext('remote file non-existant', () async {
     final Uri invalid = Uri.parse('http://example.invalid/');
     final bool result = await doesRemoteFileExist(invalid);

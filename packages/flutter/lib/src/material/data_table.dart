@@ -739,7 +739,7 @@ class _SortArrowState extends State<_SortArrow> with TickerProviderStateMixin {
   void didUpdateWidget(_SortArrow oldWidget) {
     super.didUpdateWidget(oldWidget);
     bool skipArrow = false;
-    final bool newDown = widget.down != null ? widget.down : _down;
+    final bool newDown = widget.down ?? _down;
     if (oldWidget.visible != widget.visible) {
       if (widget.visible && (_opacityController.status == AnimationStatus.dismissed)) {
         _orientationController.stop();
