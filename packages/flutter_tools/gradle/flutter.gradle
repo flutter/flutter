@@ -455,7 +455,7 @@ class FlutterPlugin implements Plugin<Project> {
                     buildSharedLibrary buildSharedLibraryValue
                     targetPlatform currentTargetPlatformValue
                     sourceDir project.file(project.flutter.source)
-                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${platformTaskName}")
+                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${currentTargetPlatformValue}")
                     extraFrontEndOptions extraFrontEndOptionsValue
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
