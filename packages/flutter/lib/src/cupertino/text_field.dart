@@ -786,21 +786,21 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
     final Color cursorColor = widget.cursorColor ?? themeData.primaryColor;
 
-    final Widget paddedEditable = Padding(
-      padding: widget.padding,
-      child: TextSelectionGestureDetector(
-        onTapDown: _handleTapDown,
-        onForcePressStart: _handleForcePressStarted,
-        onForcePressEnd: _handleForcePressEnded,
-        onSingleTapUp: _handleSingleTapUp,
-        onSingleLongTapStart: _handleSingleLongTapStart,
-        onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-        onSingleLongTapEnd: _handleSingleLongTapEnd,
-        onDoubleTapDown: _handleDoubleTapDown,
-        onDragSelectionStart: _handleMouseDragSelectionStart,
-        onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-        onDragSelectionEnd: _handleMouseDragSelectionEnd,
-        behavior: HitTestBehavior.translucent,
+    final Widget paddedEditable = TextSelectionGestureDetector(
+      onTapDown: _handleTapDown,
+      onForcePressStart: _handleForcePressStarted,
+      onForcePressEnd: _handleForcePressEnded,
+      onSingleTapUp: _handleSingleTapUp,
+      onSingleLongTapStart: _handleSingleLongTapStart,
+      onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+      onSingleLongTapEnd: _handleSingleLongTapEnd,
+      onDoubleTapDown: _handleDoubleTapDown,
+      onDragSelectionStart: _handleMouseDragSelectionStart,
+      onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+      onDragSelectionEnd: _handleMouseDragSelectionEnd,
+      behavior: HitTestBehavior.translucent,
+      child: Padding(
+        padding: widget.padding,
         child: RepaintBoundary(
           child: EditableText(
             key: _editableTextKey,
