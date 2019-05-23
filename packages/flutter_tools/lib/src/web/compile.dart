@@ -82,7 +82,7 @@ class WebCompiler {
 
 /// An indirection on web compilation.
 ///
-/// avoids issues with syncing build_runner_core to google3.
+/// Avoids issues with syncing build_runner_core to other repos.
 class WebCompilationProxy {
   const WebCompilationProxy();
 

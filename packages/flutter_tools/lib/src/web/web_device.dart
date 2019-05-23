@@ -201,7 +201,6 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform => flutterWebEnabled;
-
 }
 
 const String _klinuxExecutable = 'google-chrome';
@@ -217,20 +216,14 @@ final List<String> _kWindowsPrefixes = <String>[
 class ChromeLauncher {
   const ChromeLauncher();
 
-  Future<void> launch(String host) async {
+  /// Launch the chrome browser to a particular `host` page.
+  Future<Process> launch(String host) async {
+    String executable;
     if (platform.isMacOS) {
-      return processManager.start(<String>[
-        _kMacOSExecutable,
-        host,
-      ]);
-    }
-    if (platform.isLinux) {
-      return processManager.start(<String>[
-        _klinuxExecutable,
-        host,
-      ]);
-    }
-    if (platform.isWindows) {
+      executable = _kMacOSExecutable;
+    } else if (platform.isLinux) {
+      executable = _klinuxExecutable;
+    } else if (platform.isWindows) {
       final String filePath = _kWindowsPrefixes.firstWhere((String prefix) {
         if (prefix == null) {
           return false;
@@ -238,11 +231,16 @@ class ChromeLauncher {
         final String path = fs.path.join(prefix, _kWindowsExecutable);
         return fs.file(path).existsSync();
       }, orElse: () => '.');
-      return processManager.start(<String>[
-        filePath,
-        host,
-      ]);
+      executable = filePath;
+    } else {
+      throwToolExit('Platform ${platform.operatingSystem} is not supported.');
     }
-    printError('$platform is not supported, please start chrome manually');
+    if (!fs.file(executable).existsSync()) {
+      throwToolExit('Chrome executable not found at $executable');
+    }
+    return processManager.start(<String>[
+      executable,
+      host,
+    ], mode: ProcessStartMode.detached);
   }
 }

@@ -4,21 +4,21 @@
 
 // ignore_for_file: implementation_imports
 import 'package:build/build.dart';
-import 'package:build_modules/build_modules.dart';
-import 'package:build_web_compilers/build_web_compilers.dart';
-import 'package:build_web_compilers/builders.dart';
-import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
-import 'package:build_runner_core/build_runner_core.dart';
 import 'package:build_config/build_config.dart';
+import 'package:build_modules/build_modules.dart';
 import 'package:build_modules/builders.dart';
-import 'package:build_runner_core/src/generate/build_impl.dart';
-import 'package:build_runner_core/src/generate/options.dart';
-import 'package:path/path.dart' as path;
-import 'package:watcher/watcher.dart';
 import 'package:build_modules/src/module_builder.dart';
 import 'package:build_modules/src/platform.dart';
+import 'package:build_runner_core/build_runner_core.dart' as core;
+import 'package:build_runner_core/src/generate/build_impl.dart';
+import 'package:build_runner_core/src/generate/options.dart';
+import 'package:build_web_compilers/build_web_compilers.dart';
+import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
+import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
+import 'package:path/path.dart' as path;
+import 'package:watcher/watcher.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
@@ -64,24 +64,26 @@ final DartPlatform flutterWebPlatform =
 ]);
 
 /// The build application to compile a flutter application to the web.
-final List<BuilderApplication> builders = <BuilderApplication>[
-  apply('flutter_tools|module_library',
-      <Builder Function(BuilderOptions)>[moduleLibraryBuilder], toAllPackages(),
+final List<core.BuilderApplication> builders = <core.BuilderApplication>[
+  core.apply(
+      'flutter_tools|module_library',
+      <Builder Function(BuilderOptions)>[moduleLibraryBuilder],
+      core.toAllPackages(),
       isOptional: true,
       hideOutput: true,
       appliesBuilders: <String>['flutter_tools|module_cleanup']),
-  apply(
+  core.apply(
       'flutter_tools|ddc_modules',
       <Builder Function(BuilderOptions)>[
         (BuilderOptions options) => MetaModuleBuilder(flutterWebPlatform),
         (BuilderOptions options) => MetaModuleCleanBuilder(flutterWebPlatform),
         (BuilderOptions options) => ModuleBuilder(flutterWebPlatform),
       ],
-      toNoneByDefault(),
+      core.toNoneByDefault(),
       isOptional: true,
       hideOutput: true,
       appliesBuilders: <String>['flutter_tools|module_cleanup']),
-  apply(
+  core.apply(
       'flutter_tools|ddc',
       <Builder Function(BuilderOptions)>[
         (BuilderOptions builderOptions) => KernelBuilder(
@@ -99,17 +101,17 @@ final List<BuilderApplication> builders = <BuilderApplication>[
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
             ),
       ],
-      toAllPackages(),
+      core.toAllPackages(),
       isOptional: true,
       hideOutput: true,
       appliesBuilders: <String>['flutter_tools|ddc_modules']),
-  apply(
+  core.apply(
     'flutter_tools|entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
           options.config['target'] ?? 'lib/main.dart'),
     ],
-    toRoot(),
+    core.toRoot(),
     hideOutput: true,
     defaultGenerateFor: const InputSet(
       include: <String>[
@@ -118,7 +120,7 @@ final List<BuilderApplication> builders = <BuilderApplication>[
       ],
     ),
   ),
-  applyPostProcess('flutter_tools|module_cleanup', moduleCleanup,
+  core.applyPostProcess('flutter_tools|module_cleanup', moduleCleanup,
       defaultGenerateFor: const InputSet())
 ];
 
@@ -126,7 +128,7 @@ final List<BuilderApplication> builders = <BuilderApplication>[
 class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   BuildRunnerWebCompilationProxy();
 
-  PackageGraph _packageGraph;
+  core.PackageGraph _packageGraph;
   BuildImpl _builder;
   PackageUriMapper _packageUriMapper;
 
@@ -137,12 +139,12 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   }) async {
     // Override the generated output directory so this does not conflict with
     // other build_runner output.
-    overrideGeneratedOutputDirectory('flutter_web');
+    core.overrideGeneratedOutputDirectory('flutter_web');
     _packageUriMapper = PackageUriMapper(
         path.absolute(target), PackageMap.globalPackagesPath, null, null);
-    _packageGraph = PackageGraph.forPath(projectDirectory.path);
-    final BuildEnvironment buildEnvironment = OverrideableEnvironment(
-        IOEnvironment(_packageGraph), onLog: (LogRecord record) {
+    _packageGraph = core.PackageGraph.forPath(projectDirectory.path);
+    final core.BuildEnvironment buildEnvironment = core.OverrideableEnvironment(
+        core.IOEnvironment(_packageGraph), onLog: (LogRecord record) {
       if (record.level == Level.SEVERE || record.level == Level.SHOUT) {
         printError(record.message);
       } else {
@@ -191,13 +193,13 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
               _packageUriMapper.map(input.toFilePath()).toString())] =
           ChangeType.MODIFY;
     }
-    BuildResult result;
+    core.BuildResult result;
     try {
       result = await _builder.run(updates);
     } finally {
       status.cancel();
     }
-    return result.status == BuildStatus.success;
+    return result.status == core.BuildStatus.success;
   }
 }
 

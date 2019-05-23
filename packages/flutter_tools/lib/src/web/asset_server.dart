@@ -87,15 +87,15 @@ class WebAssetServer {
       ));
       await _completeRequest(request, file, 'text/javascript');
     } else if (uri.path.contains('require.js')) {
-      final HttpClient client = HttpClient();
-      final HttpClientRequest lookupRequest = await client.getUrl(Uri.parse(
-          'https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js'));
-      final HttpClientResponse lookupResponse = await lookupRequest.close();
-      request.response.statusCode = lookupResponse.statusCode;
-      request.response.headers
-          .add(HttpHeaders.contentTypeHeader, 'text/javascript');
-      await request.response.addStream(lookupResponse);
-      await request.response.close();
+     final File file = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+       'lib',
+       'dev_compiler',
+       'kernel',
+       'amd',
+       'require.js'
+     ));
+     await _completeRequest(request, file, 'text/javascript');
     } else if (uri.path.endsWith('main.dart.js')) {
       final File file = fs.file(fs.path.join(
         flutterProject.dartTool.path,

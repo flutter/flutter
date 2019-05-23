@@ -17,14 +17,7 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand() {
     usesTargetOption();
     usesPubOption();
-    argParser.addFlag('profile',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
-    );
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.',
-    );
+    addBuildModeFlags();
   }
 
   @override
