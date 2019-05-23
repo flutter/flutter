@@ -49,15 +49,15 @@ List<File> listOutputAssets(Environment environment) {
 /// Assemble the assets used in the application into a build directory.
 const Target copyAssets = Target(
   name: 'copy_assets',
-  inputs: <Object>[
-    '{PROJECT_DIR}/pubspec.yaml',
-    listAssets,
+  inputs: <Source>[
+    Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
+    Source.function(listAssets),
   ],
-  outputs: <Object>[
-    '{BUILD_DIR}/flutter_assets/AssetManifest.json',
-    '{BUILD_DIR}/flutter_assets/FontManifest.json',
-    '{BUILD_DIR}/flutter_assets/LICENSE',
-    listOutputAssets, // <- everything in this subdirectory.
+  outputs: <Source>[
+    Source.pattern('{BUILD_DIR}/flutter_assets/AssetManifest.json'),
+    Source.pattern('{BUILD_DIR}/flutter_assets/FontManifest.json'),
+    Source.pattern('{BUILD_DIR}/flutter_assets/LICENSE'),
+    Source.function(listOutputAssets), // <- everything in this subdirectory.
   ],
   dependencies: <Target>[],
   invocation: copyAssetsInvocation,
@@ -128,11 +128,11 @@ Future<void> compileKernelTrack(List<FileSystemEntity> inputs, Environment envir
 /// Generate a snapshot of the dart code used in the program.
 const Target kernelSnapshot = Target(
   name: 'kernel_snapshot',
-  inputs: <Object>[
-    listDartSources, // <- every dart file under {PROJECT_DIR}/lib
+  inputs: <Source>[
+    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib
   ],
-  outputs: <String>[
-    '{BUILD_DIR}/{mode}/main.app.dill',
+  outputs: <Source>[
+    Source.pattern('{BUILD_DIR}/{mode}/main.app.dill'),
   ],
   dependencies: <Target>[],
   invocation: compileKernel,
@@ -142,11 +142,11 @@ const Target kernelSnapshot = Target(
 /// track widget creation flag applied.
 const Target kernelSnapshotTrack = Target(
   name: 'kernel_snapshot_track',
-  inputs: <Object>[
-    listDartSources, // <- every dart file under {PROJECT_DIR}/lib
+  inputs: <Source>[
+    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib
   ],
-  outputs: <String>[
-    '{BUILD_DIR}/{mode}/main.app.track.dill',
+  outputs: <Source>[
+    Source.pattern('{BUILD_DIR}/{mode}/main.app.track.dill'),
   ],
   dependencies: <Target>[],
   invocation: compileKernelTrack,
@@ -235,23 +235,23 @@ Future<void> copyFramework(List<FileSystemEntity> input, Environment environment
 /// Copies the Linux desktop embedder files to the copy directory.
 const Target unpackLinux = Target(
   name: 'unpack_linux',
-  inputs: <Object>[
-    '{CACHE_DIR}/{platform}/libflutter_linux.so',
-    '{CACHE_DIR}/{platform}/flutter_export.h',
-    '{CACHE_DIR}/{platform}/flutter_messenger.h',
-    '{CACHE_DIR}/{platform}/flutter_plugin_registrar.h',
-    '{CACHE_DIR}/{platform}/flutter_glfw.h',
-    '{CACHE_DIR}/{platform}/icudtl.dat',
-    listClientWrapperInput,
+  inputs: <Source>[
+    Source.pattern('{CACHE_DIR}/{platform}/libflutter_linux.so'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_export.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_messenger.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_plugin_registrar.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_glfw.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/icudtl.dat'),
+    Source.function(listClientWrapperInput),
   ],
-  outputs: <Object>[
-    '{COPY_DIR}/libflutter_linux.so',
-    '{COPY_DIR}/flutter_export.h',
-    '{COPY_DIR}/flutter_messenger.h',
-    '{COPY_DIR}/flutter_plugin_registrar.h',
-    '{COPY_DIR}/flutter_glfw.h',
-    '{COPY_DIR}/icudtl.dat',
-    listClientWrapperOutput,
+  outputs: <Source>[
+    Source.pattern('{COPY_DIR}/libflutter_linux.so'),
+    Source.pattern('{COPY_DIR}/flutter_export.h'),
+    Source.pattern('{COPY_DIR}/flutter_messenger.h'),
+    Source.pattern('{COPY_DIR}/flutter_plugin_registrar.h'),
+    Source.pattern('{COPY_DIR}/flutter_glfw.h'),
+    Source.pattern('{COPY_DIR}/icudtl.dat'),
+    Source.function(listClientWrapperOutput),
   ],
   dependencies: <Target>[],
   platforms: <TargetPlatform>[
@@ -263,11 +263,11 @@ const Target unpackLinux = Target(
 /// Copies the macOS desktop framework to the copy directory.
 const Target unpackMacos = Target(
   name: 'unpack_macos',
-  inputs: <Object>[
-    '{CACHE_DIR}/{platform}/FlutterMacOS.framework/',
+  inputs: <Source>[
+    Source.pattern('{CACHE_DIR}/{platform}/FlutterMacOS.framework/'),
   ],
-  outputs: <Object>[
-    '{COPY_DIR}/FlutterMacOS.framework/',
+  outputs: <Source>[
+    Source.pattern('{COPY_DIR}/FlutterMacOS.framework/'),
   ],
   dependencies: <Target>[],
   platforms: <TargetPlatform>[
@@ -279,29 +279,29 @@ const Target unpackMacos = Target(
 /// Copies the Windows desktop embedder files to the copy directory.
 const Target unpackWindows = Target(
   name: 'unpack_windows',
-  inputs: <Object>[
-    '{CACHE_DIR}/{platform}/flutter_windows.dll',
-    '{CACHE_DIR}/{platform}/flutter_windows.dll.exp',
-    '{CACHE_DIR}/{platform}/flutter_windows.dll.lib',
-    '{CACHE_DIR}/{platform}/flutter_windows.dll.pdb',
-    '{CACHE_DIR}/{platform}/flutter_export.h',
-    '{CACHE_DIR}/{platform}/flutter_messenger.h',
-    '{CACHE_DIR}/{platform}/flutter_plugin_registrar.h',
-    '{CACHE_DIR}/{platform}/flutter_glfw.h',
-    '{CACHE_DIR}/{platform}/icudtl.dat',
-    listClientWrapperInput,
+  inputs: <Source>[
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_windows.dll'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_windows.dll.exp'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_windows.dll.lib'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_windows.dll.pdb'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_export.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_messenger.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_plugin_registrar.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/flutter_glfw.h'),
+    Source.pattern('{CACHE_DIR}/{platform}/icudtl.dat'),
+    Source.function(listClientWrapperInput),
   ],
-  outputs: <Object>[
-    '{COPY_DIR}/flutter_windows.dll',
-    '{COPY_DIR}/flutter_windows.dll.exp',
-    '{COPY_DIR}/flutter_windows.dll.lib',
-    '{COPY_DIR}/flutter_windows.dll.pdb',
-    '{COPY_DIR}/flutter_export.h',
-    '{COPY_DIR}/flutter_messenger.h',
-    '{COPY_DIR}/flutter_plugin_registrar.h',
-    '{COPY_DIR}/flutter_glfw.h',
-    '{COPY_DIR}/icudtl.dat',
-    listClientWrapperOutput,
+  outputs: <Source>[
+    Source.pattern('{COPY_DIR}/flutter_windows.dll'),
+    Source.pattern('{COPY_DIR}/flutter_windows.dll.exp'),
+    Source.pattern('{COPY_DIR}/flutter_windows.dll.lib'),
+    Source.pattern('{COPY_DIR}/flutter_windows.dll.pdb'),
+    Source.pattern('{COPY_DIR}/flutter_export.h'),
+    Source.pattern('{COPY_DIR}/flutter_messenger.h'),
+    Source.pattern('{COPY_DIR}/flutter_plugin_registrar.h'),
+    Source.pattern('{COPY_DIR}/flutter_glfw.h'),
+    Source.pattern('{COPY_DIR}/icudtl.dat'),
+    Source.function(listClientWrapperOutput),
   ],
   dependencies: <Target>[],
   platforms: <TargetPlatform>[

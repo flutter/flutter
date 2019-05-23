@@ -4,6 +4,7 @@
 
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
 import '../base/platform.dart';
@@ -115,6 +116,82 @@ typedef BuildInvocation = Future<void> Function(
   Environment environment,
 );
 
+/// A visitor for the [Source] types.
+abstract class SourceVisitor {
+  /// Visit a source which contains a file uri with some magic environment
+  /// variables.
+  void visitPattern(String pattern);
+
+  /// Visit a source which contains a function.
+  void visitFunction(InputFunction function);
+}
+
+/// Collects sources into a single list.
+class SourceCollector extends SourceVisitor {
+  /// Create a new [SourceCollector] from an [Environment].
+  SourceCollector(this.environment);
+
+  final Environment environment;
+
+  /// The entities are populated after visiting each source.
+  final List<FileSystemEntity> sources = <FileSystemEntity>[];
+
+  @override
+  void visitFunction(InputFunction function) {
+    sources.addAll(function(environment));
+  }
+
+  @override
+  void visitPattern(String pattern) {
+    // perform substituion of the environmental values and then
+    // of the local values.
+    final String value = pattern
+      .replaceAll('{PROJECT_DIR}', environment.projectDir.absolute.uri.toString())
+      .replaceAll('{BUILD_DIR}', environment.buildDir.absolute.uri.toString())
+      .replaceAll('{CACHE_DIR}', environment.cacheDir.absolute.uri.toString())
+      .replaceAll('{COPY_DIR}', environment.copyDir.absolute.uri.toString())
+      .replaceAll('{platform}', getNameForTargetPlatform(environment.targetPlatform))
+      .replaceAll('{mode}', getNameForBuildMode(environment.buildMode));
+    final String filePath = Uri.file(value).toString().substring(10);
+    if (value.endsWith(platform.pathSeparator)) {
+      sources.add(fs.directory(fs.path.normalize(filePath)));
+    } else {
+      sources.add(fs.file(fs.path.normalize(filePath)));
+    }
+  }
+}
+
+/// A description of an input or ooutput of a [Target].
+abstract class Source {
+  /// This source is a file-uri which contains some references to magic
+  /// environment variables.
+  const factory Source.pattern(String pattern) = _PatternSource;
+
+  /// This source is produced by invoking the provided function.
+  const factory Source.function(InputFunction function) = _FunctionSource;
+
+  /// Visit the particular source type.
+  void accept(SourceVisitor visitor);
+}
+
+class _FunctionSource implements Source {
+  const _FunctionSource(this.value);
+
+  final InputFunction value;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitFunction(value);
+}
+
+class _PatternSource implements Source {
+  const _PatternSource(this.value);
+
+  final String value;
+
+  @override
+  void accept(SourceVisitor visitor) => visitor.visitPattern(value);
+}
+
 /// A Target describes a single step during a flutter build.
 ///
 /// The target inputs are required to be files discoverable via a combination
@@ -166,8 +243,8 @@ class Target {
 
   final String name;
   final List<Target> dependencies;
-  final List<dynamic> inputs;
-  final List<dynamic> outputs;
+  final List<Source> inputs;
+  final List<Source> outputs;
   final BuildInvocation invocation;
   final bool phony;
 
@@ -295,6 +372,12 @@ class Target {
     return _resolveConfiguration(outputs, environment);
   }
 
+  /// Performs a fold across this target and its dependencies.
+  T fold<T>(T initialValue, T combine(T previousValue, Target target)) {
+    final T dependencyResult = dependencies.fold(initialValue, (T prev, Target t) => t.fold(prev, combine));
+    return combine(dependencyResult, this);
+  }
+
   /// Convert the target to a JSON structure appropriate for consumption by
   /// external systems.
   ///
@@ -318,34 +401,12 @@ class Target {
     return environment.stampDir.childFile(fileName);
   }
 
-  static List<FileSystemEntity> _resolveConfiguration(List<dynamic> config, Environment environment) {
-    // Perform some simple substitutions to produce a list of files that
-    // are considered build inputs or outputs.
-    final List<FileSystemEntity> files = <FileSystemEntity>[];
-    for (dynamic rawInput in config)  {
-      if (rawInput is String) {
-        // First, perform substituion of the environmental values and then
-        // of the local values.
-        rawInput = rawInput
-          .replaceAll('{PROJECT_DIR}', environment.projectDir.absolute.uri.toString())
-          .replaceAll('{BUILD_DIR}', environment.buildDir.absolute.uri.toString())
-          .replaceAll('{CACHE_DIR}', environment.cacheDir.absolute.uri.toString())
-          .replaceAll('{COPY_DIR}', environment.copyDir.absolute.uri.toString())
-          .replaceAll('{platform}', getNameForTargetPlatform(environment.targetPlatform))
-          .replaceAll('{mode}', getNameForBuildMode(environment.buildMode));
-        final String filePath = Uri.file(rawInput).toString().substring(10);
-        if (rawInput.endsWith(platform.pathSeparator)) {
-          files.add(fs.directory(fs.path.normalize(filePath)));
-        } else {
-          files.add(fs.file(fs.path.normalize(filePath)));
-        }
-      } else if (rawInput is InputFunction) {
-        files.addAll(rawInput(environment));
-      } else {
-        assert(false);
-      }
+  static List<FileSystemEntity> _resolveConfiguration(List<Source> config, Environment environment) {
+    final SourceCollector collector = SourceCollector(environment);
+    for (Source source in config)  {
+      source.accept(collector);
     }
-    return files;
+    return collector.sources;
   }
 }
 
@@ -398,7 +459,7 @@ class _InvocationEvaluation {
 /// not require a target at all, in which case this value will be null and
 /// substitution will fail.
 ///
-/// ## build_mod
+/// ## build_mode
 ///
 /// The current build mode the target is being executed for, one of `release`,
 /// `debug`, and `profile`. Defaults to `debug` if not specified.
@@ -487,6 +548,8 @@ class BuildSystem {
     String name,
     Environment environment,
   ) async {
+    final Target target = _getNamedTarget(name);
+
     // Initialize any destination directories that don't currently exist.
     if (!environment.cacheDir.existsSync()) {
       environment.cacheDir.createSync(recursive: true);
@@ -495,26 +558,31 @@ class BuildSystem {
       environment.copyDir.createSync(recursive: true);
     }
 
-    // Compute the required order of targets.
-    final List<Target> ordered = _computeTargetOrder(targets, name, environment);
+    checkCycles(target);
+    final Pool resourcePool = Pool(platform.numberOfProcessors);
+    final Set<Target> completed = <Target>{};
 
-    // Visit each target and check if its stamp is up to date. If so,
-    // we can safely skip it. Otherwise, we must invoke the associated rule.
-    for (Target target in ordered) {
+    Future<void> invokeTarget(Target target) async {
+      if (completed.contains(target)) {
+        return;
+      }
+      await Future.wait(target.dependencies.map(invokeTarget));
+      final PoolResource resource = await resourcePool.request();
       final List<FileSystemEntity> inputs = target.resolveInputs(environment);
       final _InvocationEvaluation evaluation = target._canSkipInvocation(inputs, environment);
-
       if (evaluation.canSkip) {
         printTrace('Skipping target: ${target.name}');
-        continue;
-      }
-      printTrace('${target.name}: Starting');
-      await target.invocation(inputs, environment);
+      } else {
+        printTrace('${target.name}: Starting');
+        await target.invocation(inputs, environment);
 
-      printTrace('${target.name}: Complete');
-      final List<FileSystemEntity> outputs = target.resolveOutputs(environment);
-      target.writeStamp(inputs, outputs, environment, evaluation.shas);
+        printTrace('${target.name}: Complete');
+        final List<FileSystemEntity> outputs = target.resolveOutputs(environment);
+        target.writeStamp(inputs, outputs, environment, evaluation.shas);
+      }
+      resource.release();
     }
+    await invokeTarget(target);
   }
 
   /// Describe the target `name` and all of its dependencies.
@@ -522,56 +590,52 @@ class BuildSystem {
     String name,
     Environment environment,
   ) {
-    // Compute the required order of targets.
-    final List<Target> ordered = _computeTargetOrder(targets, name, environment);
-    final List<Map<String, Object>> result = <Map<String, Object>>[];
-    for (Target target in ordered) {
-      result.add(target.toJson(environment));
-    }
-    return result;
+    final Target target = _getNamedTarget(name);
+    checkCycles(target);
+    // Cheat a bit and re-use the same map.
+    final Map<String, Object> targets = target.fold<Map<String, Object>>(<String, Object>{}, (Map<String, Object> accumulation, Target current) {
+      return accumulation[current.name] = current.toJson(environment);
+    });
+    return targets.values.toList();
   }
 
-  static List<Target> _computeTargetOrder(List<Target> allTargets, String name, Environment environment) {
-    /// Step 1: Find the target we have been asked to invoke.
-    final Target target = allTargets.firstWhere((Target target) => target.name  == name, orElse: () => null);
-
-    /// Error case 1: The target name did not exist. In the interest of brevity,
-    /// we do nothing, but to be complete we should print an error which fully
-    /// describes the error along with targets that are closest in spelling.
-    /// Furthermore, we should log this error in analytics to track if it is
-    /// being hit frequently.
+  // Returns the corresponding target or throws.
+  Target _getNamedTarget(String name) {
+    final Target target = targets.firstWhere((Target target) => target.name  == name, orElse: () => null);
     if (target == null) {
       throw Exception('No registered target named $name.');
     }
-
-    // Step 2: Flatten the dependencies into a set of targets to invoke
-    // in order. This is done performing a depth-first search and adding
-    // a target to the resulting order if it either has no dependencies,
-    // or if all dependencies have already been added. We take advantage
-    // of the fact that the literal [Set] provides an ordered [LinkedHashSet].
-    final Set<Target> ordered = <Target>{};
-    final Set<Target> visited = <Target>{};
-    void orderTargets(Target current) {
-      // If we've already visited this target, returning so we do not
-      // repeat ourselves in the resulting order
-      if (visited.contains(current)) {
-        return;
-      }
-      visited.add(current);
-      // If the target has no dependencies, we can add it the current order.
-      if (current.dependencies.isEmpty) {
-        ordered.add(current);
-        return;
-      }
-      // Visit each dependency recursively, and when complete add this
-      // target to the order.
-      current.dependencies.forEach(orderTargets);
-      // We can't hit the case where we visit a target recursively, right?
-      // that would trip visited, but we need to make sure that this case
-      // is covered via testing.
-      ordered.add(current);
-    }
-    orderTargets(target);
-    return ordered.toList();
+    return target;
   }
+}
+
+/// Check if there are any dependency cycles in the target.
+///
+/// Throws a [CycleException] if one is encountered.
+void checkCycles(Target initial) {
+  void checkInternal(Target target, Set<Target> visited, Set<Target> stack) {
+    if (stack.contains(target)) {
+      throw CycleException(stack..add(target));
+    }
+    if (visited.contains(target)) {
+      return;
+    }
+    visited.add(target);
+    stack.add(target);
+    for (Target dependency in target.dependencies) {
+      checkInternal(dependency, visited, stack);
+    }
+    stack.remove(target);
+  }
+  checkInternal(initial, <Target>{}, <Target>{});
+}
+
+class CycleException implements Exception {
+  CycleException(this.targets);
+
+  final Set<Target> targets;
+
+  @override
+  String toString() => 'Dependency cycle detected in build: '
+    '${targets.map((Target target) => target.name).join(' -> ')}';
 }

@@ -34,11 +34,11 @@ void main() {
           fs.file('pubspec.yaml').createSync();
           fooTarget = Target(
             name: 'foo',
-            inputs: <dynamic>[
-              '{PROJECT_DIR}/foo.dart',
+            inputs: const <Source>[
+              Source.pattern('{PROJECT_DIR}/foo.dart'),
             ],
-            outputs: <dynamic>[
-              '{BUILD_DIR}/out'
+            outputs: const <Source>[
+              Source.pattern('{BUILD_DIR}/out'),
             ],
             dependencies: <Target>[],
             invocation: (List<FileSystemEntity> inputs, Environment environment) {
@@ -50,11 +50,11 @@ void main() {
           );
           barTarget = Target(
             name: 'bar',
-            inputs: <dynamic>[
-              '{BUILD_DIR}/out',
+            inputs: const <Source>[
+              Source.pattern('{BUILD_DIR}/out'),
             ],
-            outputs: <dynamic>[
-              '{BUILD_DIR}/bar',
+            outputs: const <Source>[
+              Source.pattern('{BUILD_DIR}/bar'),
             ],
             dependencies: <Target>[fooTarget],
             invocation: (List<FileSystemEntity> inputs, Environment environment) {
@@ -138,4 +138,27 @@ void main() {
       });
     }));
   });
+
+  test('Can find dependency cycles', () {
+    final Target barTarget = Target(
+      name: 'bar',
+      inputs: <Source>[],
+      outputs: <Source>[],
+      invocation: null,
+      dependencies: nonconst(<Target>[])
+    );
+    final Target fooTarget = Target(
+      name: 'foo',
+      inputs: <Source>[],
+      outputs: <Source>[],
+      invocation: null,
+      dependencies: nonconst(<Target>[])
+    );
+    barTarget.dependencies.add(fooTarget);
+    fooTarget.dependencies.add(barTarget);
+    expect(() => checkCycles(barTarget), throwsA(isInstanceOf<CycleException>()));
+  });
 }
+
+// Work-around for silly lint check.
+T nonconst<T>(T input) => input;
