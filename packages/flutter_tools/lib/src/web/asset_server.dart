@@ -78,6 +78,15 @@ class WebAssetServer {
           .childDirectory('web')
           .childFile('index.html');
       await _completeRequest(request, file, 'text/html');
+    } else if (uri.path.contains('stack_trace_mapper')) {
+      final File file = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'web',
+        'dart_stack_trace_mapper.js'
+      ));
+      await _completeRequest(request, file, 'text/javascript');
     } else if (uri.path.contains('require.js')) {
       final HttpClient client = HttpClient();
       final HttpClientRequest lookupRequest = await client.getUrl(Uri.parse(

@@ -204,19 +204,46 @@ class WebDevices extends PollingDeviceDiscovery {
 
 }
 
+const String _kchromeEnvironment = 'CHROME_EXECUTABLE';
+const String _klinuxExecutable = 'google-chrome';
+const String _kMacOSExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const String _kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+final List<String> _kWindowsPrefixes = [
+  platform.environment['LOCALAPPDATA'],
+  platform.environment['PROGRAMFILES'],
+  platform.environment['PROGRAMFILES(X86)'],
+];
+
 // Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
   const ChromeLauncher();
 
-  static const String _kMacosLocation = '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome';
-
   Future<void> launch(String host) async {
     if (platform.isMacOS) {
       return processManager.start(<String>[
-        _kMacosLocation,
+        _kMacOSExecutable,
         host,
       ]);
     }
-    throw UnsupportedError('$platform is not supported');
+    if (platform.isLinux) {
+      return processManager.start(<String>[
+        _klinuxExecutable,
+        host,
+      ]);
+    }
+    if (platform.isWindows) {
+      final String filePath = _kWindowsPrefixes.firstWhere((String prefix) {
+        if (prefix == null) {
+          return false;
+        }
+        var path = fs.path.join(prefix, _kWindowsExecutable);
+        return fs.file(path).existsSync();
+      }, orElse: () => '.');
+      return processManager.start(<String>[
+        filePath,
+        host,
+      ]);
+    }
+    printError('$platform is not supported, please start chrome manually');
   }
 }
