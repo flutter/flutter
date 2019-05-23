@@ -121,6 +121,7 @@ class ThemeData extends Diagnosticable {
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
+    Color shadowColor,
     Color scaffoldBackgroundColor,
     Color bottomAppBarColor,
     Color cardColor,
@@ -183,6 +184,7 @@ class ThemeData extends Diagnosticable {
     accentColorBrightness ??= estimateBrightnessForColor(accentColor);
     final bool accentIsDark = accentColorBrightness == Brightness.dark;
     canvasColor ??= isDark ? Colors.grey[850] : Colors.grey[50];
+    shadowColor ??= Colors.black;
     scaffoldBackgroundColor ??= canvasColor;
     bottomAppBarColor ??= isDark ? Colors.grey[800] : Colors.white;
     cardColor ??= isDark ? Colors.grey[800] : Colors.white;
@@ -278,6 +280,7 @@ class ThemeData extends Diagnosticable {
       accentColor: accentColor,
       accentColorBrightness: accentColorBrightness,
       canvasColor: canvasColor,
+      shadowColor: shadowColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor,
       bottomAppBarColor: bottomAppBarColor,
       cardColor: cardColor,
@@ -345,6 +348,7 @@ class ThemeData extends Diagnosticable {
     @required this.primaryColorLight,
     @required this.primaryColorDark,
     @required this.canvasColor,
+    @required this.shadowColor,
     @required this.accentColor,
     @required this.accentColorBrightness,
     @required this.scaffoldBackgroundColor,
@@ -402,6 +406,7 @@ class ThemeData extends Diagnosticable {
        assert(accentColor != null),
        assert(accentColorBrightness != null),
        assert(canvasColor != null),
+       assert(shadowColor != null),
        assert(scaffoldBackgroundColor != null),
        assert(bottomAppBarColor != null),
        assert(cardColor != null),
@@ -507,6 +512,9 @@ class ThemeData extends Diagnosticable {
 
   /// The default color of [MaterialType.canvas] [Material].
   final Color canvasColor;
+
+  /// The color used to draw elevation shadows [Material].
+  final Color shadowColor;
 
   /// The foreground color for widgets (knobs, text, overscroll edge effect, etc).
   ///
@@ -742,6 +750,7 @@ class ThemeData extends Diagnosticable {
     Color accentColor,
     Brightness accentColorBrightness,
     Color canvasColor,
+    Color shadowColor,
     Color scaffoldBackgroundColor,
     Color bottomAppBarColor,
     Color cardColor,
@@ -800,6 +809,7 @@ class ThemeData extends Diagnosticable {
       accentColor: accentColor ?? this.accentColor,
       accentColorBrightness: accentColorBrightness ?? this.accentColorBrightness,
       canvasColor: canvasColor ?? this.canvasColor,
+      shadowColor: shadowColor ?? this.shadowColor,
       scaffoldBackgroundColor: scaffoldBackgroundColor ?? this.scaffoldBackgroundColor,
       bottomAppBarColor: bottomAppBarColor ?? this.bottomAppBarColor,
       cardColor: cardColor ?? this.cardColor,
@@ -934,6 +944,7 @@ class ThemeData extends Diagnosticable {
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
       primaryColorDark: Color.lerp(a.primaryColorDark, b.primaryColorDark, t),
       canvasColor: Color.lerp(a.canvasColor, b.canvasColor, t),
+      shadowColor: Color.lerp(a.shadowColor, b.shadowColor, t),
       accentColor: Color.lerp(a.accentColor, b.accentColor, t),
       accentColorBrightness: t < 0.5 ? a.accentColorBrightness : b.accentColorBrightness,
       scaffoldBackgroundColor: Color.lerp(a.scaffoldBackgroundColor, b.scaffoldBackgroundColor, t),
@@ -1002,6 +1013,7 @@ class ThemeData extends Diagnosticable {
            (otherData.accentColor == accentColor) &&
            (otherData.accentColorBrightness == accentColorBrightness) &&
            (otherData.canvasColor == canvasColor) &&
+           (otherData.shadowColor == shadowColor) &&
            (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
            (otherData.bottomAppBarColor == bottomAppBarColor) &&
            (otherData.cardColor == cardColor) &&
@@ -1063,6 +1075,7 @@ class ThemeData extends Diagnosticable {
       accentColor,
       accentColorBrightness,
       canvasColor,
+      shadowColor,
       scaffoldBackgroundColor,
       bottomAppBarColor,
       cardColor,
@@ -1125,6 +1138,7 @@ class ThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<Color>('accentColor', accentColor, defaultValue: defaultData.accentColor));
     properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness));
     properties.add(DiagnosticsProperty<Color>('canvasColor', canvasColor, defaultValue: defaultData.canvasColor));
+    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
     properties.add(DiagnosticsProperty<Color>('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
     properties.add(DiagnosticsProperty<Color>('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
     properties.add(DiagnosticsProperty<Color>('cardColor', cardColor, defaultValue: defaultData.cardColor));

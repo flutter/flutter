@@ -169,7 +169,7 @@ class Material extends StatefulWidget {
     this.type = MaterialType.canvas,
     this.elevation = 0.0,
     this.color,
-    this.shadowColor = const Color(0xFF000000),
+    this.shadowColor,
     this.textStyle,
     this.borderRadius,
     this.shape,
@@ -179,7 +179,6 @@ class Material extends StatefulWidget {
     this.child,
   }) : assert(type != null),
        assert(elevation != null && elevation >= 0.0),
-       assert(shadowColor != null),
        assert(!(shape != null && borderRadius != null)),
        assert(animationDuration != null),
        assert(!(identical(type, MaterialType.circle) && (borderRadius != null || shape != null))),
@@ -319,6 +318,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
     final Color backgroundColor = _getBackgroundColor(context);
     assert(
       backgroundColor != null || widget.type == MaterialType.transparency,
@@ -367,7 +367,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
         color: backgroundColor,
-        shadowColor: widget.shadowColor,
+        shadowColor: widget.shadowColor ?? themeData.shadowColor,
         animateColor: false,
         child: contents,
       );
@@ -392,7 +392,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
       clipBehavior: widget.clipBehavior,
       elevation: widget.elevation,
       color: backgroundColor,
-      shadowColor: widget.shadowColor,
+      shadowColor: widget.shadowColor ?? themeData.shadowColor,
       child: contents,
     );
   }
