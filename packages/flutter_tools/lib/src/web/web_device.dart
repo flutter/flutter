@@ -204,11 +204,10 @@ class WebDevices extends PollingDeviceDiscovery {
 
 }
 
-const String _kchromeEnvironment = 'CHROME_EXECUTABLE';
 const String _klinuxExecutable = 'google-chrome';
 const String _kMacOSExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const String _kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
-final List<String> _kWindowsPrefixes = [
+final List<String> _kWindowsPrefixes = <String>[
   platform.environment['LOCALAPPDATA'],
   platform.environment['PROGRAMFILES'],
   platform.environment['PROGRAMFILES(X86)'],
@@ -236,7 +235,7 @@ class ChromeLauncher {
         if (prefix == null) {
           return false;
         }
-        var path = fs.path.join(prefix, _kWindowsExecutable);
+        final String path = fs.path.join(prefix, _kWindowsExecutable);
         return fs.file(path).existsSync();
       }, orElse: () => '.');
       return processManager.start(<String>[
