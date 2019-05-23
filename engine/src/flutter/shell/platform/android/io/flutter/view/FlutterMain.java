@@ -312,12 +312,12 @@ public class FlutterMain {
     }
 
     /**
-     * Extract the AOT blobs from the app's asset directory. 
+     * Extract the AOT blobs from the app's asset directory.
      * This is required by the Dart runtime, so it can read the blobs.
      */
     private static void initResources(@NonNull Context applicationContext) {
-        // When the AOT blobs are contained in the native library directory, 
-        // we don't need to extract them manually because they are 
+        // When the AOT blobs are contained in the native library directory,
+        // we don't need to extract them manually because they are
         // extracted by the Android Package Manager automatically.
         if (!sSnapshotPath.equals(PathUtils.getDataDirectory(applicationContext))) {
             return;
@@ -369,15 +369,15 @@ public class FlutterMain {
     }
 
     /**
-     * Returns a list of the file names at the root of the application's 
+     * Returns a list of the file names at the root of the application's
      * native library directory.
      */
     @NonNull
     private static Set<String> listLibs(@NonNull Context applicationContext) {
         ApplicationInfo applicationInfo = getApplicationInfo(applicationContext);
         File[] files = new File(applicationInfo.nativeLibraryDir).listFiles();
-        
-        ImmutableSetBuilder builder = ImmutableSetBuilder.<String>newInstance();
+
+        ImmutableSetBuilder<String> builder = ImmutableSetBuilder.newInstance();
         for (File file : files) {
             builder.add(file.getName());
         }
@@ -385,10 +385,10 @@ public class FlutterMain {
     }
 
     /**
-     * Determines if the APK contains a shared library or AOT snapshots, 
+     * Determines if the APK contains a shared library or AOT snapshots,
      * the file name of the snapshots and the directory where they are contained.
      *
-     * <p>The snapshots can be contained in the app's assets or in the native library 
+     * <p>The snapshots can be contained in the app's assets or in the native library
      * directory. The default names are:
      *
      * <ul>
@@ -402,7 +402,7 @@ public class FlutterMain {
      * <p>When the blobs are contained in the native library directory,
      * the format <b>`lib_%s.so`</b> is applied to the file name.
      *
-     * <p>Note: The name of the files can be customized in the app's metadata, but the 
+     * <p>Note: The name of the files can be customized in the app's metadata, but the
      * format is preserved.
      *
      * <p>The AOT snapshots and the shared library cannot exist at the same time in the APK.
