@@ -33,12 +33,17 @@ import 'text_style.dart';
 ///
 /// The sum of these four values is the total height of the line.
 ///
-/// The `ascent + descent` is equivalent to the [fontSize]. Ascent is the font's
-/// spacing above the baseline without leading and descent is the spacing below the
-/// baseline without leading. Leading is split evenly between the top and bottom.
-/// The values for `ascent` and `descent` are provided by the font named by
-/// [fontFamily]. If no [fontFamily] or [fontFamilyFallback] is provided, then the
-/// platform's default family will be used.
+/// Ascent is the font's spacing above the baseline without leading and descent is
+/// the spacing below the baseline without leading. Leading is split evenly between
+/// the top and bottom. The values for `ascent` and `descent` are provided by the
+/// font named by [fontFamily]. If no [fontFamily] or [fontFamilyFallback] is
+/// provided, then the platform's default family will be used.
+///
+/// When `height` is omitted or null, then the font's ascent and descent will be
+/// used. The font's combined ascent and descent may be taller or shorter than the
+/// `fontSize`. When height is provided, the ascent + decent is normalized before
+/// multipling by the `height` in order to ensure the total line height is exactly
+/// the `height * fontSize`.
 ///
 /// Each line's spacing above the baseline will be at least as tall as the half
 /// leading plus ascent. Each line's spacing below the baseline will be at least as
@@ -74,11 +79,14 @@ import 'text_style.dart';
 ///    cannot be negative.
 ///    Default is 14 logical pixels.
 ///
-///  * [height]: the multiple of [fontSize] to multiply the ascent and descent by.
-///    The [height] will impact the spacing above and below the baseline differently
-///    depending on the ratios between the font's ascent and descent. This property is
-///    separate from the leading multiplier, which is controlled through [leading].
-///    Default is 1.0.
+///  * [height]: the multiple of [fontSize] the line's height should be. The line's
+///    height will take the font's ascent and descent values if `height` is omitted or
+///    null. If provided, the ascent plus descent is scaled to match the `fontSize`
+///    before being multiplied by the `height` The [height] will impact the spacing
+///    above and below the baseline differently depending on the ratios between the
+///    font's ascent and descent. This property is separate from the leading multiplier,
+///    which is controlled through [leading].
+///    Default is `null`.
 ///
 ///  * [leading]: the custom leading to apply to the strut as a multiple of [fontSize].
 ///    Leading is additional spacing between lines. Half of the leading is added

@@ -106,6 +106,11 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 ///
 /// ### Line height
 ///
+/// By default, text will layout with line height as defined by the font.
+/// Font-defined line height may be taller or shorter than the font size. the
+/// `height` property allows manual adjustment of the height of the line as
+/// a multiple of `fontSize`.
+///
 /// {@tool sample}
 /// The [height] property can be used to change the line height. Here, the line
 /// height is set to 5 times the font size, so that the text is very spaced out.
