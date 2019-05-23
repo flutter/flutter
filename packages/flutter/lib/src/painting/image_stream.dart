@@ -113,7 +113,7 @@ class ImageStreamListener {
   final ImageErrorListener onError;
 
   @override
-  int get hashCode => hashValues(onImage, onError);
+  int get hashCode => hashValues(onImage, onChunk, onError);
 
   @override
   bool operator ==(dynamic other) {
@@ -121,6 +121,7 @@ class ImageStreamListener {
       return false;
     final ImageStreamListener typedOther = other;
     return onImage == typedOther.onImage
+        && onChunk == typedOther.onChunk
         && onError == typedOther.onError;
   }
 }
