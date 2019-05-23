@@ -90,7 +90,6 @@ class ResidentWebRunner extends ResidentRunner {
     printStatus(message);
     const String quitMessage = 'To quit, press "q".';
     if (details) {
-      printHelpDetails();
       printStatus('To repeat this help message, press "h". $quitMessage');
     } else {
       printStatus('For a more detailed help message, press "h". $quitMessage');
