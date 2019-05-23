@@ -6,10 +6,23 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../build_system/build_system.dart';
+import '../build_system/targets/assets.dart';
+import '../build_system/targets/dart.dart';
+import '../build_system/targets/linux.dart';
+import '../build_system/targets/macos.dart';
+import '../build_system/targets/windows.dart';
 import '../convert.dart';
 import '../project.dart';
-
 import '../runner/flutter_command.dart';
+
+// TODO(jonahwilliams): create a namepsaced registry system for targets.
+const BuildSystem buildSystem = BuildSystem(<Target>[
+  unpackMacos,
+  unpackLinux,
+  unpackWindows,
+  copyAssets,
+  kernelSnapshot,
+]);
 
 /// Assemble provides a low level API to interact with the flutter tool build
 /// system.
@@ -115,8 +128,11 @@ class AssembleRun extends AssembleBase {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    const BuildSystem buildSystem = BuildSystem();
-    await buildSystem.build(targetName, environment);
+    try {
+      await buildSystem.build(targetName, environment);
+    } on Exception catch (err) {
+      throwToolExit(err.toString());
+    }
     return null;
   }
 }
@@ -131,7 +147,6 @@ class AssembleDescribe extends AssembleBase {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    const BuildSystem buildSystem = BuildSystem();
     try {
       print(
         json.encode(buildSystem.describe(targetName, environment))
@@ -153,7 +168,6 @@ class AssembleListInputs extends AssembleBase {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    const BuildSystem buildSystem = BuildSystem();
     try {
       final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
       for (Map<String, Object> result in results) {
@@ -179,7 +193,6 @@ class AssembleListOutputs extends AssembleBase {
 
   @override
   Future<FlutterCommandResult> runCommand() {
-    const BuildSystem buildSystem = BuildSystem();
     try {
       final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
       for (Map<String, Object> result in results) {

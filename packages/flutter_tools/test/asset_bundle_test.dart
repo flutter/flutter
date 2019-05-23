@@ -50,7 +50,7 @@ void main() {
       expect(bundle.entries.length, 1);
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
     }, overrides: <Type, Generator>{
