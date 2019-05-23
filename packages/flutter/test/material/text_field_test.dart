@@ -993,6 +993,10 @@ void main() {
     await gesture.removePointer();
   });
 
+  // TODO(justinmc): Get cursor dragging to match native, where the sensitivity
+  // is much higher and a drag immediately starts moving the cursor. Then update
+  // this test and the one below. Listeners in the text field may interfere with
+  // the listener on the handle, making drag fire later.
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -1032,7 +1036,7 @@ void main() {
     // We use a small offset because the endpoint is on the very corner
     // of the handle.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, 9); // Position of 'h'.
+    Offset newHandlePos = textOffsetToPosition(tester, testValue.length);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -1041,11 +1045,11 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection.extentOffset, 11);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    newHandlePos = textOffsetToPosition(tester, 0);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -1053,8 +1057,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 2);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 11);
   });
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
@@ -1074,7 +1078,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     // Long press the 'e' to select 'def'.
-    final Offset ePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    final Offset ePos = textOffsetToPosition(tester, 5); // Position before 'e'.
     TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
@@ -1095,8 +1099,8 @@ void main() {
     // Drag the right handle until there's only 1 char selected.
     // We use a small offset because the endpoint is on the very corner
     // of the handle.
-    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    final Offset handlePos = endpoints[1].point + const Offset(4.0, 0.0);
+    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position before 'e'.
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -1105,7 +1109,7 @@ void main() {
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 5);
 
-    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    newHandlePos = textOffsetToPosition(tester, 2); // Position before 'c'.
     await gesture.moveTo(newHandlePos);
     await tester.pump();
     await gesture.up();
