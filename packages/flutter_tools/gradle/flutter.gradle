@@ -319,6 +319,13 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     /**
+     * Converts a dashed-string to a `dashedString`.
+     */
+    private static String toCamelCase(String text) {
+        return text.replaceAll( "(-)([A-Za-z0-9])", { Object[] it -> it[2].toUpperCase() } )
+    }
+
+    /**
      * Returns a Flutter build mode suitable for the specified Android buildType.
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
@@ -427,7 +434,8 @@ class FlutterPlugin implements Plugin<Project> {
 
             targetPlatforms.each { currentTargetPlatformValue ->
                 String abiValue = allTargetPlatforms[currentTargetPlatformValue]
-                FlutterTask compileTask = project.tasks.create(name: "compile${flutterBuildPrefix}${variant.name.capitalize()}${currentTargetPlatformValue}", 
+                String platformTaskName = toCamelCase(currentTargetPlatformValue).capitalize()
+                FlutterTask compileTask = project.tasks.create(name: "compile${flutterBuildPrefix}${variant.name.capitalize()}${platformTaskName}", 
                     type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
@@ -447,7 +455,7 @@ class FlutterPlugin implements Plugin<Project> {
                     buildSharedLibrary buildSharedLibraryValue
                     targetPlatform currentTargetPlatformValue
                     sourceDir project.file(project.flutter.source)
-                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${currentTargetPlatformValue}")
+                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${platformTaskName}")
                     extraFrontEndOptions extraFrontEndOptionsValue
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
