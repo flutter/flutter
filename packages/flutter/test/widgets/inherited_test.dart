@@ -86,7 +86,7 @@ void main() {
 
   testWidgets('InheritedElement hasListeners', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
-    
+
     await tester.pumpWidget(TestInherited(
       key: key,
       child: Container(),
