@@ -69,8 +69,6 @@ class _InputBorderPainter extends CustomPainter {
     @required this.gap,
     @required this.textDirection,
     @required this.fillColor,
-    @required this.focusAnimation,
-    @required this.focusColorTween,
     @required this.hoverAnimation,
     @required this.hoverColorTween,
   }) : super(repaint: repaint);
@@ -81,17 +79,10 @@ class _InputBorderPainter extends CustomPainter {
   final _InputBorderGap gap;
   final TextDirection textDirection;
   final Color fillColor;
-  final ColorTween focusColorTween;
-  final Animation<double> focusAnimation;
   final ColorTween hoverColorTween;
   final Animation<double> hoverAnimation;
 
-  Color get blendedColor {
-    return Color.alphaBlend(
-      hoverColorTween.evaluate(hoverAnimation),
-      Color.alphaBlend(focusColorTween.evaluate(focusAnimation), fillColor),
-    );
-  }
+  Color get blendedColor => Color.alphaBlend(hoverColorTween.evaluate(hoverAnimation), fillColor);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -120,7 +111,6 @@ class _InputBorderPainter extends CustomPainter {
   @override
   bool shouldRepaint(_InputBorderPainter oldPainter) {
     return borderAnimation != oldPainter.borderAnimation
-        || focusAnimation != oldPainter.focusAnimation
         || hoverAnimation != oldPainter.hoverAnimation
         || gapAnimation != oldPainter.gapAnimation
         || border != oldPainter.border
@@ -140,8 +130,6 @@ class _BorderContainer extends StatefulWidget {
     @required this.gap,
     @required this.gapAnimation,
     @required this.fillColor,
-    @required this.focusColor,
-    @required this.isFocused,
     @required this.hoverColor,
     @required this.isHovering,
     this.child,
@@ -154,8 +142,6 @@ class _BorderContainer extends StatefulWidget {
   final _InputBorderGap gap;
   final Animation<double> gapAnimation;
   final Color fillColor;
-  final Color focusColor;
-  final bool isFocused;
   final Color hoverColor;
   final bool isHovering;
   final Widget child;
@@ -165,28 +151,18 @@ class _BorderContainer extends StatefulWidget {
 }
 
 class _BorderContainerState extends State<_BorderContainer> with TickerProviderStateMixin {
-  static const Duration _kFocusInDuration = Duration(milliseconds: 45);
   static const Duration _kHoverDuration = Duration(milliseconds: 15);
 
   AnimationController _controller;
-  AnimationController _focusColorController;
   AnimationController _hoverColorController;
   Animation<double> _borderAnimation;
   _InputBorderTween _border;
-  Animation<double> _focusAnimation;
-  ColorTween _focusColorTween;
   Animation<double> _hoverAnimation;
   ColorTween _hoverColorTween;
 
   @override
   void initState() {
     super.initState();
-    _focusColorController = AnimationController(
-      duration: _kFocusInDuration,
-      // TODO(gspencer): use reverseDuration set to 15ms, once available.
-      value: widget.isFocused ? 1.0 : 0.0,
-      vsync: this,
-    );
     _hoverColorController = AnimationController(
       duration: _kHoverDuration,
       value: widget.isHovering ? 1.0 : 0.0,
@@ -204,11 +180,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
       begin: widget.border,
       end: widget.border,
     );
-    _focusAnimation = CurvedAnimation(
-      parent: _focusColorController,
-      curve: Curves.linear,
-    );
-    _focusColorTween = ColorTween(begin: Colors.transparent, end: widget.focusColor);
     _hoverAnimation = CurvedAnimation(
       parent: _hoverColorController,
       curve: Curves.linear,
@@ -219,7 +190,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
   @override
   void dispose() {
     _controller.dispose();
-    _focusColorController.dispose();
     _hoverColorController.dispose();
     super.dispose();
   }
@@ -235,16 +205,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
       _controller
         ..value = 0.0
         ..forward();
-    }
-    if (widget.focusColor != oldWidget.focusColor) {
-      _focusColorTween = ColorTween(begin: Colors.transparent, end: widget.focusColor);
-    }
-    if (widget.isFocused != oldWidget.isFocused) {
-      if (widget.isFocused) {
-        _focusColorController.forward();
-      } else {
-        _focusColorController.reverse();
-      }
     }
     if (widget.hoverColor != oldWidget.hoverColor) {
       _hoverColorTween = ColorTween(begin: Colors.transparent, end: widget.hoverColor);
@@ -265,7 +225,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         repaint: Listenable.merge(<Listenable>[
           _borderAnimation,
           widget.gap,
-          _focusColorController,
           _hoverColorController,
         ]),
         borderAnimation: _borderAnimation,
@@ -274,8 +233,6 @@ class _BorderContainerState extends State<_BorderContainer> with TickerProviderS
         gap: widget.gap,
         textDirection: Directionality.of(context),
         fillColor: widget.fillColor,
-        focusColorTween: _focusColorTween,
-        focusAnimation: _focusAnimation,
         hoverColorTween: _hoverColorTween,
         hoverAnimation: _hoverAnimation,
       ),
@@ -1822,8 +1779,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   }
 
   TextAlign get textAlign => widget.textAlign;
-  bool get isFocused => widget.isFocused;
-  bool get isHovering => widget.isHovering;
+  bool get isFocused => widget.isFocused && decoration.enabled;
+  bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
 
   @override
@@ -1861,7 +1818,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return themeData.hintColor;
   }
 
-  Color _getBorderColor(ThemeData themeData) {
+  Color _getDefaultBorderColor(ThemeData themeData) {
     if (isFocused) {
       switch (themeData.brightness) {
         case Brightness.dark:
@@ -1873,13 +1830,12 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (decoration.filled) {
       return themeData.hintColor;
     }
+    final Color enabledColor = themeData.colorScheme.onSurface.withOpacity(0.38);
     if (isHovering) {
-      // TODO(gspencer): Find out the actual value here from the spec writers.
       final Color hoverColor = decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
-      return Color.alphaBlend(hoverColor.withOpacity(0.16), themeData.colorScheme.onSurface.withOpacity(0.12));
+      return Color.alphaBlend(hoverColor.withOpacity(0.12), enabledColor);
     }
-    // TODO(gspencer): Find out the actual value here from the spec writers.
-    return themeData.colorScheme.onSurface.withOpacity(0.12);
+    return enabledColor;
   }
 
   Color _getFillColor(ThemeData themeData) {
@@ -1904,14 +1860,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     return lightEnabled;
   }
 
-  Color _getFocusColor(ThemeData themeData) {
-    if (decoration.filled != true) // filled == null same as filled == false
-      return Colors.transparent;
-    return decoration.focusColor ?? themeData.inputDecorationTheme?.focusColor ?? themeData.focusColor;
-  }
-
   Color _getHoverColor(ThemeData themeData) {
-    if (isFocused || decoration.filled != true) // filled == null same as filled == false
+    if (decoration.filled == null || !decoration.filled || isFocused || !decoration.enabled)
       return Colors.transparent;
     return decoration.hoverColor ?? themeData.inputDecorationTheme?.hoverColor ?? themeData.hoverColor;
   }
@@ -1974,7 +1924,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     Color borderColor;
     if (decoration.enabled) {
       borderColor = decoration.errorText == null
-        ? _getBorderColor(themeData)
+        ? _getDefaultBorderColor(themeData)
         : themeData.errorColor;
     } else {
       borderColor = (decoration.filled == true && decoration.border?.isOutline != true)
@@ -2027,9 +1977,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       gap: _borderGap,
       gapAnimation: _floatingLabelController.view,
       fillColor: _getFillColor(themeData),
-      focusColor: _getFocusColor(themeData),
       hoverColor: _getHoverColor(themeData),
-      isFocused: isFocused,
       isHovering: isHovering,
     );
 

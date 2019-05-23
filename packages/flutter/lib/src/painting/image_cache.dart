@@ -183,8 +183,10 @@ class ImageCache {
       _checkCacheSize();
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
-      _pendingImages[key] = _PendingImage(result, listener);
-      result.addListener(listener);
+      final ImageStreamListener streamListener = ImageStreamListener(listener);
+      _pendingImages[key] = _PendingImage(result, streamListener);
+      // Listener is removed in [_PendingImage.removeListener].
+      result.addListener(streamListener);
     }
     return result;
   }
@@ -215,7 +217,7 @@ class _PendingImage {
   _PendingImage(this.completer, this.listener);
 
   final ImageStreamCompleter completer;
-  final ImageListener listener;
+  final ImageStreamListener listener;
 
   void removeListener() {
     completer.removeListener(listener);

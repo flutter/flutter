@@ -19,7 +19,7 @@ void main() {
 
     setUp(() {
       testbed = Testbed(
-        setup: () {
+        setup: () async {
           fs.file('pubspec.yaml').createSync();
           fs.file('.packages').createSync();
           fs.file('test/foo.dart').createSync(recursive: true);

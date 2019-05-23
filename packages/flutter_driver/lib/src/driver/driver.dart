@@ -101,7 +101,7 @@ Future<T> _warnIfSlow<T>({
   assert(future != null);
   assert(timeout != null);
   assert(message != null);
-  return future..timeout(timeout, onTimeout: () { _log.warning(message); });
+  return future..timeout(timeout, onTimeout: () { _log.warning(message); return null; });
 }
 
 /// A convenient accessor to frequently used finders.

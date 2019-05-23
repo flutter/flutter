@@ -659,7 +659,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
     _context = context;
-    _onKey = onKey;
+    _onKey = onKey ?? _onKey;
     _attachment = FocusAttachment._(this);
     return _attachment;
   }

@@ -318,7 +318,38 @@ void main() {
     }
   });
 
-  test('Should not synthesise kPrimaryButton for certain devices', () {
+  test('Should synthesise kPrimaryButton for unknown devices', () {
+    final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
+    const PointerDeviceKind kind = PointerDeviceKind.unknown;
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(
+      data: <ui.PointerData>[
+        ui.PointerData(change: ui.PointerChange.add, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.hover, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.down, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.move, kind: kind, physicalX: location.dx, physicalY: location.dy),
+        ui.PointerData(change: ui.PointerChange.up, kind: kind, physicalX: location.dx, physicalY: location.dy),
+      ]
+    );
+
+    final List<PointerEvent> events = PointerEventConverter.expand(
+      packet.data, ui.window.devicePixelRatio).toList();
+
+    expect(events.length, 5);
+    expect(events[0].runtimeType, equals(PointerAddedEvent));
+    expect(events[0].buttons, equals(0));
+    expect(events[1].runtimeType, equals(PointerHoverEvent));
+    expect(events[1].buttons, equals(0));
+    expect(events[2].runtimeType, equals(PointerDownEvent));
+    expect(events[2].buttons, equals(kPrimaryButton));
+    expect(events[3].runtimeType, equals(PointerMoveEvent));
+    expect(events[3].buttons, equals(kPrimaryButton));
+    expect(events[4].runtimeType, equals(PointerUpEvent));
+    expect(events[4].buttons, equals(0));
+
+    PointerEventConverter.clearPointers();
+  });
+
+  test('Should not synthesise kPrimaryButton for mouse', () {
     final Offset location = const Offset(10.0, 10.0) * ui.window.devicePixelRatio;
     for (PointerDeviceKind kind in <PointerDeviceKind>[
       PointerDeviceKind.mouse,
