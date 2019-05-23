@@ -10,7 +10,7 @@ import 'package:yaml/yaml.dart';
 import 'base/file_system.dart';
 import 'dart/package_map.dart';
 import 'globals.dart';
-import 'ios/cocoapods.dart';
+import 'macos/cocoapods.dart';
 import 'project.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
