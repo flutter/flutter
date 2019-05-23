@@ -427,7 +427,7 @@ class FlutterPlugin implements Plugin<Project> {
 
             targetPlatforms.each { currentTargetPlatformValue ->
                 String abiValue = allTargetPlatforms[currentTargetPlatformValue]
-                FlutterTask compileTask = project.tasks.create(name: "${flutterBuildPrefix}${variant.name.capitalize()}${currentTargetPlatformValue}:compile", 
+                FlutterTask compileTask = project.tasks.create(name: "compile${flutterBuildPrefix}${variant.name.capitalize()}${currentTargetPlatformValue}", 
                     type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
@@ -455,7 +455,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/libs.jar")
-            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: ":flutter:package:packLibs${variant.name.capitalize()}", type: Jar) {
+            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packFlutterSnapshotsAndLibs${flutterBuildPrefix}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
                 targetPlatforms.each { targetPlatform ->

@@ -571,6 +571,8 @@ class MacOSProject {
 
   final FlutterProject project;
 
+  static const String _hostAppBundleName = 'Runner';
+
   bool existsSync() => project.directory.childDirectory('macos').existsSync();
 
   Directory get _editableDirectory => project.directory.childDirectory('macos');
@@ -582,7 +584,10 @@ class MacOSProject {
   File get generatedXcodePropertiesFile => _cacheDirectory.childFile('Generated.xcconfig');
 
   /// The Xcode project file.
-  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
+  Directory get xcodeProject => _editableDirectory.childDirectory('$_hostAppBundleName.xcodeproj');
+
+  /// The Xcode workspace file.
+  Directory get xcodeWorkspace => _editableDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
 
   /// The file where the Xcode build will write the name of the built app.
   ///
