@@ -367,13 +367,14 @@ void main() {
 
     const String testValue = 'A short phrase';
     await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pump();
 
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.1.png'),
+      matchesGoldenFile('text_field_cursor_test.0.2.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -395,14 +396,15 @@ void main() {
 
     const String testValue = 'A short phrase';
     await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pump();
 
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.1.png'),
+      matchesGoldenFile('text_field_cursor_test.1.2.png'),
     );
   }, skip: !Platform.isLinux);
 
