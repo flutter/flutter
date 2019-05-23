@@ -27,10 +27,9 @@ import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
-import 'fuchsia/fuchsia_kernel_compiler.dart';
-import 'fuchsia/fuchsia_pm.dart';
-import 'fuchsia/fuchsia_sdk.dart';
-import 'fuchsia/fuchsia_workflow.dart';
+import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
+import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
+import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'ios/cocoapods.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -76,8 +75,7 @@ Future<T> runInContext<T>(
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
-      FuchsiaKernelCompiler: () => FuchsiaKernelCompiler(),
-      FuchsiaPM: () => FuchsiaPM(),
+      FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       GenSnapshot: () => const GenSnapshot(),
