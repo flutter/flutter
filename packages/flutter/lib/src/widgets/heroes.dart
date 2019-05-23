@@ -22,6 +22,21 @@ import 'transitions.dart';
 /// [MaterialRectArcTween].
 typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 
+/// A builder that builds a placeholder widget given a child and a [Size]
+///
+/// The child can optionally be part of the returned widget tree. The returned
+/// widget should typically be sized to [heroSize], if it doesn't do so
+/// implicitly.
+///
+/// See also:
+///  * [TransitionBuilder], which is similar but only takes a [BuildContext]
+///    and a child widget.
+typedef HeroPlaceholderBuilder = Widget Function(
+  BuildContext context,
+  Size heroSize,
+  Widget child,
+);
+
 /// A function that lets [Hero]es self supply a [Widget] that is shown during the
 /// hero's flight from one route to another instead of default (which is to
 /// show the destination route's instance of the Hero).
@@ -193,16 +208,26 @@ class Hero extends StatefulWidget {
   ///
   /// ## Limitations
   ///
-  /// Currently if a widget built by [flightShuttleBuilder] takes part in a
-  /// [Navigator] push transition, that widget or its descendants must not have
-  /// any [GlobalKey] that is used in the source Hero's descendant widgets.
+  /// If a widget built by [flightShuttleBuilder] takes part in a [Navigator]
+  /// push transition, that widget or its descendants must not have any
+  /// [GlobalKey] that is used in the source Hero's descendant widgets, as both
+  /// subtrees will be included in the tree during the Hero flight animation.
+  ///
+  /// If the said [GlobalKey] is essential to your application, consider providing
+  /// a custom [placeholderBuilder] for the source Hero, to avoid the [GlobalKey]
+  /// collision, such as a builder that builds an empty [SizedBox], keeping the
+  /// Hero [child]'s original size.
   final HeroFlightShuttleBuilder flightShuttleBuilder;
 
-  /// Placeholder widget left in place as the Hero's child once the flight takes off.
+  /// Placeholder widget left in place as the Hero's [child] once the flight takes
+  /// off.
   ///
-  /// By default, an empty SizedBox keeping the Hero child's original size is
-  /// left in place once the Hero shuttle has taken flight.
-  final TransitionBuilder placeholderBuilder;
+  /// By default the placeholder widget left in place is an empty [SizedBox]
+  /// keeping the Hero child's original size, unless this Hero is a source Hero
+  /// of a [Navigator] push transition, in which case the placeholder will be a
+  /// widget that includes [child] as a descendant, and also preserves its
+  /// original size, keeps it offstage and pauses its animation.
+  final HeroPlaceholderBuilder placeholderBuilder;
 
   /// Whether to perform the hero transition if the [PageRoute] transition was
   /// triggered by a user gesture, such as a back swipe on iOS.
@@ -344,7 +369,7 @@ class _HeroState extends State<Hero> {
     }
 
     if (widget.placeholderBuilder != null) {
-      return widget.placeholderBuilder(context, widget.child);
+      return widget.placeholderBuilder(context, _placeholderSize, widget.child);
     }
 
     return _shouldIncludeChild

@@ -1515,7 +1515,7 @@ Future<void> main() async {
             Hero(
               tag: 'a',
               child: const Text('Batman'),
-              placeholderBuilder: (BuildContext context, Widget child) {
+              placeholderBuilder: (BuildContext context, Size heroSize, Widget child) {
                 return const Text('Venom');
               },
             ),
@@ -1528,7 +1528,7 @@ Future<void> main() async {
                       child: Hero(
                         tag: 'a',
                         child: const Text('Wolverine'),
-                        placeholderBuilder: (BuildContext context, Widget child) {
+                        placeholderBuilder: (BuildContext context, Size size, Widget child) {
                           return const Text('Joker');
                         },
                       ),
