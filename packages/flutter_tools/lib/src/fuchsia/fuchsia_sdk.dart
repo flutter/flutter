@@ -111,6 +111,10 @@ class FuchsiaArtifacts {
   /// FUCHSIA_SSH_CONFIG) to find the ssh configuration needed to talk to
   /// a device.
   factory FuchsiaArtifacts.find() {
+    if (!platform.isLinux && !platform.isMacOS) {
+      // Don't try to find the artifacts on platforms that are not supported.
+      return FuchsiaArtifacts();
+    }
     final String fuchsia = Cache.instance.getArtifactDirectory('fuchsia').path;
     final String tools = fs.path.join(fuchsia, 'tools');
     final String dartPrebuilts = fs.path.join(tools, 'dart_prebuilts');
