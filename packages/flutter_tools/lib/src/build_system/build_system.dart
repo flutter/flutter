@@ -145,13 +145,17 @@ class SourceCollector extends SourceVisitor {
   void visitPattern(String pattern) {
     // perform substituion of the environmental values and then
     // of the local values.
-    final String value = pattern
+    String value = pattern
       .replaceAll('{PROJECT_DIR}', environment.projectDir.absolute.uri.toString())
       .replaceAll('{BUILD_DIR}', environment.buildDir.absolute.uri.toString())
       .replaceAll('{CACHE_DIR}', environment.cacheDir.absolute.uri.toString())
       .replaceAll('{COPY_DIR}', environment.copyDir.absolute.uri.toString())
       .replaceAll('{platform}', getNameForTargetPlatform(environment.targetPlatform))
       .replaceAll('{mode}', getNameForBuildMode(environment.buildMode));
+    // TODO(jonahwilliams): lookup the right way to do this.
+    if (platform.isWindows) {
+      value = value.replaceAll('/', r'\');
+    }
     final String filePath = Uri.file(value).toString().substring(10);
     if (value.endsWith(platform.pathSeparator)) {
       sources.add(fs.directory(fs.path.normalize(filePath)));
