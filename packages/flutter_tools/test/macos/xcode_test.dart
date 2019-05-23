@@ -12,7 +12,7 @@ import '../src/common.dart';
 import '../src/context.dart';
 
 class MockProcessManager extends Mock implements ProcessManager {}
-class MockXcode extends Mock implements Xcode {}
+class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 
 void main() {
   group('Xcode', () {

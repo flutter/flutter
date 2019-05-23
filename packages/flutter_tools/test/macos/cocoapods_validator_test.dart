@@ -72,7 +72,7 @@ void main() {
     testUsingContext('Emits installed status when homebrew not installed, but not needed', () async {
       final CocoaPodsTestTarget workflow = CocoaPodsTestTarget(hasHomebrew: false);
       final ValidationResult result = await workflow.validate();
-      expect(result.type, ValidationType.missing);
+      expect(result.type, ValidationType.installed);
     }, overrides: <Type, Generator>{
       CocoaPods: () => cocoaPods,
     });

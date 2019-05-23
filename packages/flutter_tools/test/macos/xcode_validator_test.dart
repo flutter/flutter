@@ -34,12 +34,12 @@ void main() {
       Xcode: () => xcode,
     });
 
-    testUsingContext('Emits partial status when Xcode is partially installed', () async {
+    testUsingContext('Emits missing status when Xcode installation is incomplete', () async {
       when(xcode.isInstalled).thenReturn(false);
       when(xcode.xcodeSelectPath).thenReturn('/Library/Developer/CommandLineTools');
       const XcodeValidator validator = XcodeValidator();
       final ValidationResult result = await validator.validate();
-      expect(result.type, ValidationType.partial);
+      expect(result.type, ValidationType.missing);
     }, overrides: <Type, Generator>{
       Xcode: () => xcode,
     });
