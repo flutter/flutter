@@ -607,7 +607,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
   });
 
-  testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) {
+  testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) async {
     void handleImage(ImageInfo image, bool synchronousCall) { }
     void handleImageDifferently(ImageInfo image, bool synchronousCall) { }
     void handleError(dynamic error, StackTrace stackTrace) { }
@@ -637,7 +637,6 @@ void main() {
     compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, areEqual: false);
     compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onChunk2: handleChunk, areEqual: false);
     compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onError2: handleError, areEqual: false);
-    return null;
   });
 
   // TODO(amirh): enable this once WidgetTester supports flushTimers.
