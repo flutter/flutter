@@ -27,7 +27,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// subclasses automatically handle the caching of images.
 ///
 /// A shared instance of this cache is retained by [PaintingBinding] and can be
-/// obtained via the [imageCache] top-level property.
+/// obtained via the [imageCache] top-level property in the [painting] library.
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};
