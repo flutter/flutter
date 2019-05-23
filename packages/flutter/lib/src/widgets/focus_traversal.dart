@@ -723,7 +723,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
   bool previous(FocusNode currentNode) => _move(currentNode, forward: false);
 }
 
-/// A widget that describes an inherited focus policy for focus traversal.
+/// A widget that describes the inherited focus policy for focus traversal.
 ///
 /// By default, traverses in widget order using
 /// [ReadingOrderFocusTraversalPolicy].
@@ -738,7 +738,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 ///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
 ///     focus traversal in a direction.
 class DefaultFocusTraversal extends InheritedWidget {
-  /// Creates a FocusTraversal object.
+  /// Creates a [DefaultFocusTraversal] object.
   ///
   /// The [child] argument must not be null.
   const DefaultFocusTraversal({
@@ -763,7 +763,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   ///    bottom.
   final FocusTraversalPolicy policy;
 
-  /// Returns the [DefaultFocusTraversal] that most tightly encloses the given
+  /// Returns the [FocusTraversalPolicy] that most tightly encloses the given
   /// [BuildContext].
   ///
   /// The [context] argument must not be null.

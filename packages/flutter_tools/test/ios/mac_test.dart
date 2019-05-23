@@ -360,7 +360,7 @@ Error launching application on iPhone.''',
       final XcodeBuildResult buildResult = XcodeBuildResult(
         success: false,
         stdout: '''
-Running "flutter packages get" in flutter_gallery...  0.6s
+Running "flutter pub get" in flutter_gallery...  0.6s
 Launching lib/main.dart on x in release mode...
 Running pod install...                                1.2s
 Running Xcode build...                                1.4s

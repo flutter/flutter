@@ -121,7 +121,7 @@ void testUsingContext(
         },
       );
     });
-  }, timeout: timeout != null ? timeout : const Timeout(Duration(seconds: 60)),
+  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)),
       testOn: testOn, skip: skip);
 }
 

@@ -374,8 +374,9 @@ class _ImageProviderResolver {
     assert(_imageStream != null);
 
     if (_imageStream.key != oldImageStream?.key) {
-      oldImageStream?.removeListener(_handleImageChanged);
-      _imageStream.addListener(_handleImageChanged);
+      final ImageStreamListener listener = ImageStreamListener(_handleImageChanged);
+      oldImageStream?.removeListener(listener);
+      _imageStream.addListener(listener);
     }
   }
 
@@ -385,7 +386,7 @@ class _ImageProviderResolver {
   }
 
   void stopListening() {
-    _imageStream?.removeListener(_handleImageChanged);
+    _imageStream?.removeListener(ImageStreamListener(_handleImageChanged));
   }
 }
 
@@ -558,7 +559,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
     return Semantics(
       container: _semanticLabel != null,
       image: true,
-      label: _semanticLabel == null ? '' : _semanticLabel,
+      label: _semanticLabel ?? '',
       child: image,
     );
   }
