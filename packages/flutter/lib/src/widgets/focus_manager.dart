@@ -371,7 +371,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusOnKeyCallback _onKey;
 
   FocusManager _manager;
-  bool _hasKeyboardToken = false;
 
   /// Returns the parent node for this object.
   ///
@@ -558,28 +557,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
   }
 
-  /// Removes the keyboard token from this focus node if it has one.
-  ///
-  /// This mechanism helps distinguish between an input control gaining focus by
-  /// default and gaining focus as a result of an explicit user action.
-  ///
-  /// When a focus node requests the focus (either via
-  /// [FocusScopeNode.requestFocus] or [FocusScopeNode.autofocus]), the focus
-  /// node receives a keyboard token if it does not already have one. Later,
-  /// when the focus node becomes focused, the widget that manages the
-  /// [TextInputConnection] should show the keyboard (i.e. call
-  /// [TextInputConnection.show]) only if it successfully consumes the keyboard
-  /// token from the focus node.
-  ///
-  /// Returns true if this method successfully consumes the keyboard token.
-  bool consumeKeyboardToken() {
-    if (!_hasKeyboardToken) {
-      return false;
-    }
-    _hasKeyboardToken = false;
-    return true;
-  }
-
   // Marks the node as dirty, meaning that it needs to notify listeners of a
   // focus change the next time focus is resolved by the manager.
   void _markAsDirty({FocusNode newFocus}) {
@@ -718,7 +695,6 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (hasPrimaryFocus) {
       return;
     }
-    _hasKeyboardToken = true;
     _markAsDirty(newFocus: this);
   }
 
