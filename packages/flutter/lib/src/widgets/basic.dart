@@ -4710,10 +4710,10 @@ class Wrap extends MultiChildRenderObjectWidget {
 /// {@tool snippet --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
-/// as it is interacted with. The icons in the menu change to indicate which one
-/// has been selected.
+/// as it is interacted with. The color of the button in the menu changes to
+/// indicate which one has been selected.
 ///
-/// ![A menu created using the Flow widget opens and closes.](https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4)
+/// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
 ///
 /// ```dart main
 /// import 'package:flutter/material.dart';
@@ -4739,8 +4739,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   _FlowMenuState createState() => _FlowMenuState();
 /// }
 ///
-/// class _FlowMenuState extends State<FlowMenu>
-///     with SingleTickerProviderStateMixin {
+/// class _FlowMenuState extends State<FlowMenu> with SingleTickerProviderStateMixin {
 ///   AnimationController menuAnimation;
 ///   IconData lastTapped = Icons.notifications;
 ///   final List<IconData> menuItems = <IconData>[
@@ -4752,18 +4751,14 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///   ];
 ///
 ///   void _updateMenu(IconData icon) {
-///     setState(() {
-///       if (icon != Icons.menu)
-///         lastTapped = icon;
-///     });
+///     if (icon != Icons.menu)
+///       setState(() => lastTapped = icon);
 ///   }
 ///
 ///   @override
 ///   void initState() {
 ///     super.initState();
 ///     menuAnimation = AnimationController(
-///       lowerBound: 0,
-///       upperBound: 1,
 ///       duration: const Duration(milliseconds: 250),
 ///       vsync: this,
 ///     );
