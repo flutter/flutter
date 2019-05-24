@@ -1,4 +1,4 @@
-Signature: 325d99fc98da391f9673b69a1f687fd4
+Signature: e0e9963a43f11b24556fd6dacaca039a
 
 UNUSED LICENSES:
 
@@ -2348,12 +2348,13 @@ FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
-FILE: ../../../third_party/skia/src/sksl/sksl.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_fp.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_frag.inc
-FILE: ../../../third_party/skia/src/sksl/sksl_generic.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.inc
+FILE: ../../../third_party/skia/src/sksl/sksl_gpu.inc
+FILE: ../../../third_party/skia/src/sksl/sksl_interp.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_mixer.inc
+FILE: ../../../third_party/skia/src/sksl/sksl_pipeline.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_vert.inc
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2011 Google Inc. All rights reserved.
