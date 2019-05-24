@@ -120,7 +120,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// A pointer that is in contact with the screen with a primary button and
   /// moving has moved again.
   ///
-  /// The distance travelled by the pointer since the last update is provided in
+  /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [DragUpdateDetails] object.
   ///
   /// See also:
@@ -281,7 +281,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           sourceTimeStamp: timestamp,
           delta: updateDelta,
           primaryDelta: _getPrimaryValueFromOffset(updateDelta),
-          globalPosition: _initialPosition + updateDelta, // Only adds delta for down behaviour
+          globalPosition: _initialPosition + updateDelta, // Only adds delta for down behavior
         );
       }
     }

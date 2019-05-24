@@ -2134,7 +2134,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       final Route<dynamic> previousRoute = !route.willHandlePopInternally && _history.length > 1
           ? _history[_history.length - 2]
           : null;
-      // Don't operate the _history list since the gesture may be cancelled.
+      // Don't operate the _history list since the gesture may be canceled.
       // In case of a back swipe, the gesture controller will call .pop() itself.
 
       for (NavigatorObserver observer in widget.observers)
