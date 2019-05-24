@@ -27,16 +27,19 @@ class Plugin {
     this.path,
     this.androidPackage,
     this.iosPrefix,
+    this.macosPrefix,
     this.pluginClass,
   });
 
   factory Plugin.fromYaml(String name, String path, dynamic pluginYaml) {
     String androidPackage;
     String iosPrefix;
+    String macosPrefix;
     String pluginClass;
     if (pluginYaml != null) {
       androidPackage = pluginYaml['androidPackage'];
       iosPrefix = pluginYaml['iosPrefix'] ?? '';
+      macosPrefix = pluginYaml['macosPrefix'] ?? '';
       pluginClass = pluginYaml['pluginClass'];
     }
     return Plugin(
@@ -44,6 +47,7 @@ class Plugin {
       path: path,
       androidPackage: androidPackage,
       iosPrefix: iosPrefix,
+      macosPrefix: macosPrefix,
       pluginClass: pluginClass,
     );
   }
@@ -52,6 +56,7 @@ class Plugin {
   final String path;
   final String androidPackage;
   final String iosPrefix;
+  final String macosPrefix;
   final String pluginClass;
 }
 

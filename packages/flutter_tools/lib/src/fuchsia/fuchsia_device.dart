@@ -44,9 +44,6 @@ class FuchsiaDeviceTools {
   FuchsiaTilesCtl get tilesCtl => _tilesCtl ??= FuchsiaTilesCtl();
 }
 
-final FuchsiaAmberCtl _amberCtl = fuchsiaDeviceTools.amberCtl;
-final FuchsiaTilesCtl _tilesCtl = fuchsiaDeviceTools.tilesCtl;
-
 final String _ipv4Loopback = InternetAddress.loopbackIPv4.address;
 final String _ipv6Loopback = InternetAddress.loopbackIPv6.address;
 
@@ -233,6 +230,10 @@ class FuchsiaDevice extends Device {
     await stopApp(package);
     // Find out who the device thinks we are.
     final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(name);
+    if (host == null) {
+      printError('Failed to resolve host for Fuchsia device');
+      return LaunchResult.failed();
+    }
     final int port = await os.findFreePort();
     if (port == 0) {
       printError('Failed to find a free port');
@@ -265,14 +266,14 @@ class FuchsiaDevice extends Device {
       }
 
       // Teach amber about the package server.
-      if (!await _amberCtl.addSrc(this, fuchsiaPackageServer)) {
+      if (!await fuchsiaDeviceTools.amberCtl.addSrc(this, fuchsiaPackageServer)) {
         printError('Failed to teach amber about the package server');
         return LaunchResult.failed();
       }
       serverRegistered = true;
 
       // Tell amber to prefetch the app.
-      if (!await _amberCtl.getUp(this, appName)) {
+      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, appName)) {
         printError('Failed to get amber to prefetch the package');
         return LaunchResult.failed();
       }
@@ -286,14 +287,14 @@ class FuchsiaDevice extends Device {
       // Instruct tiles_ctl to start the app.
       final String fuchsiaUrl =
           'fuchsia-pkg://fuchsia.com/$appName#meta/$appName.cmx';
-      if (!await _tilesCtl.add(this, fuchsiaUrl, <String>[])) {
+      if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
         printError('Failed to add the app to tiles');
         return LaunchResult.failed();
       }
     } finally {
       // Try to un-teach amber about the package server if needed.
       if (serverRegistered) {
-        await _amberCtl.rmSrc(this, fuchsiaPackageServer);
+        await fuchsiaDeviceTools.amberCtl.rmSrc(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
       fuchsiaPackageServer.stop();
@@ -308,7 +309,7 @@ class FuchsiaDevice extends Device {
 
     // In a debug or profile build, try to find the observatory uri.
     final FuchsiaIsolateDiscoveryProtocol discovery =
-        FuchsiaIsolateDiscoveryProtocol(this, appName);
+        getIsolateDiscoveryProtocol(appName);
     try {
       final Uri observatoryUri = await discovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
@@ -321,7 +322,7 @@ class FuchsiaDevice extends Device {
   Future<bool> stopApp(covariant FuchsiaApp app) async {
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
-      if (!await _tilesCtl.remove(this, appKey)) {
+      if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
         printError('tiles_ctl remove on ${app.id} failed.');
         return false;
       }
