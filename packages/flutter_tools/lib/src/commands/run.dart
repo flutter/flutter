@@ -209,7 +209,6 @@ class RunCommand extends RunCommandBase {
     final String deviceType = devices.length == 1
             ? getNameForTargetPlatform(await devices[0].targetPlatform)
             : 'multiple';
-            
     final AndroidProject androidProject = FlutterProject.current().android;
     final IosProject iosProject = FlutterProject.current().ios;
     final List<String> hostLanguage = <String>[
