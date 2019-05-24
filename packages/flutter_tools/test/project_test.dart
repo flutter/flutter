@@ -126,7 +126,7 @@ void main() {
         expectExists(project.directory.childDirectory('.android').childDirectory('Flutter'));
         expect(
           project.directory.childDirectory('android').childFile('settings.gradle').readAsStringSync(),
-          contains('../.android/include_flutter.groovy'),
+          contains('new File(settingsDir.parentFile, \'.android/include_flutter.groovy\')'),
         );
       });
       testInMemory('can be redone after deletion', () async {
