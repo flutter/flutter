@@ -42,7 +42,7 @@ enum _ProjectType {
   plugin,
 }
 
-Map<_ProjectType, String> _projectTypeNameMap =  <_ProjectType, String>{
+const Map<_ProjectType, String> _projectTypeNameMap =  <_ProjectType, String>{
   _ProjectType.app: 'app',
   _ProjectType.module: 'module',
   _ProjectType.package: 'package',
@@ -159,7 +159,7 @@ class CreateCommand extends FlutterCommand {
   @override
   Future<Map<String, String>> get usageValues async {
     final Directory projectDir = fs.directory(argResults.rest.first);
-    final _ProjectType template = getProjectType(projectDir);
+    final _ProjectType template = _getProjectType(projectDir);
 
     return <String, String>{
       kCommandCreateProjectType: _projectTypeNameMap[template],
@@ -248,13 +248,15 @@ class CreateCommand extends FlutterCommand {
     }
   }
 
-  _ProjectType getProjectType(Directory projectDir) {
+  _ProjectType _getProjectType(Directory projectDir) {
     _ProjectType template;
     _ProjectType detectedProjectType;
     final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
     if (argResults['template'] != null) {
       template = _stringToProjectType(argResults['template']);
     } else {
+      // If the project directory exists and isn't empty, then try to determine the template
+      // type from the project directory.
       if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
         detectedProjectType = _determineTemplateType(projectDir);
         if (detectedProjectType == null && metadataExists) {
@@ -331,7 +333,7 @@ class CreateCommand extends FlutterCommand {
       sampleCode = await _fetchSampleFromServer(argResults['sample']);
     }
 
-    final _ProjectType template = getProjectType(projectDir);
+    final _ProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == _ProjectType.module;
     final bool generatePlugin = template == _ProjectType.plugin;
     final bool generatePackage = template == _ProjectType.package;
