@@ -86,3 +86,8 @@ follows:
 - [`stateless_widget_scaffold`](stateless_widget_scaffold.tmpl) : Similar to
   `stateless_widget_material`, except that it wraps the stateless widget with a
   Scaffold.
+
+- [`stateful_widget_animation`](stateful_widget_animation.tmpl) : Similar to
+  `stateful_widget`, except that it declares an `AnimationController` instance
+  variable called `_controller`, and it properly initializes the controller
+  in `initState()` and properly disposes of the controller in `dispose()`.
