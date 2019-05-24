@@ -480,6 +480,8 @@ class ButtonThemeData extends Diagnosticable {
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.30 if [getBrightness] is dark, 0.38 otherwise.
   Color getDisabledTextColor(MaterialButton button) {
+    if (button.textColor is MaterialStateColor)
+      return button.textColor;
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
     return _getDisabledColor(button);

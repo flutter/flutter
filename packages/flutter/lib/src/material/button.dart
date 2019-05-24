@@ -241,16 +241,17 @@ class RawMaterialButton extends StatefulWidget {
 class _RawMaterialButtonState extends State<RawMaterialButton> {
   final Set<MaterialState> _states = <MaterialState>{};
 
+  bool get _hovered => _states.contains(MaterialState.hovered);
+  bool get _focused => _states.contains(MaterialState.focused);
+  bool get _pressed => _states.contains(MaterialState.pressed);
+  bool get _disabled => _states.contains(MaterialState.disabled);
+
   void _updateState(MaterialState state, bool value) {
-    if (value) {
-      _states.add(state);
-    } else {
-      _states.remove(state);
-    }
+    value ? _states.add(state) : _states.remove(state);
   }
 
   void _handleHighlightChanged(bool value) {
-    if (_states.contains(MaterialState.pressed) != value) {
+    if (_pressed != value) {
       setState(() {
         _updateState(MaterialState.pressed, value);
         if (widget.onHighlightChanged != null) {
@@ -263,31 +264,30 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (_states.contains(MaterialState.pressed) && !widget.enabled) {
-      _states.remove(MaterialState.pressed);
+    _updateState(MaterialState.disabled, !widget.enabled);
+    if (_pressed && !widget.enabled) {
       if (widget.onHighlightChanged != null) {
         widget.onHighlightChanged(false);
       }
     }
   }
 
-  double _effectiveElevation() {
-    if (widget.enabled) {
-      // These conditionals are in order of precedence, so be careful about
-      // reorganizing them.
-      if (_states.contains(MaterialState.pressed)) {
-        return widget.highlightElevation;
-      }
-      if (_states.contains(MaterialState.hovered)) {
-        return widget.hoverElevation;
-      }
-      if (_states.contains(MaterialState.focused)) {
-        return widget.focusElevation;
-      }
-      return widget.elevation;
-    } else {
+  double get _effectiveElevation {
+    // These conditionals are in order of precedence, so be careful about
+    // reorganizing them.
+    if (_disabled) {
       return widget.disabledElevation;
     }
+    if (_pressed) {
+      return widget.highlightElevation;
+    }
+    if (_hovered) {
+      return widget.hoverElevation;
+    }
+    if (_focused) {
+      return widget.focusElevation;
+    }
+    return widget.elevation;
   }
 
   @override
@@ -302,7 +302,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
       child: ConstrainedBox(
         constraints: widget.constraints,
         child: Material(
-          elevation: _effectiveElevation(),
+          elevation: _effectiveElevation,
           textStyle: widget.textStyle?.copyWith(color: effectiveTextColor),
           shape: widget.shape,
           color: widget.fillColor,
