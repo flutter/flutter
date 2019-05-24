@@ -193,24 +193,35 @@ to the MDC-Flutter Team.
 
 ## Unpublishing published archives
 
-Flutter downloadable archives are built for each release by our continuous integration systems using the
-[`prepare_package.dart`](prepare_package.dart) script, but if something goes
-very wrong, and a release is published that wasn't intended to be published, the
-[`unpublish_package.dart`](unpublish_package.dart) script may be used to remove
-the package or packages from the channels in which they were published.
+Flutter downloadable archives are built for each release by our continuous
+integration systems using the [`prepare_package.dart`](prepare_package.dart)
+script, but if something goes very wrong, and a release is published that wasn't
+intended to be published, the [`unpublish_package.dart`](unpublish_package.dart)
+script may be used to remove the package or packages from the channels in which
+they were published.
 
-For example To remove a published package corresponding to the git hash `d444a455de87a2e40b7f576dc12ffd9ab82fd491`, first do a dry run of the script to see what it will do:
+For example To remove a published package corresponding to the git hash
+`d444a455de87a2e40b7f576dc12ffd9ab82fd491`, first do a dry run of the script to
+see what it will do:
 
 ```
 $ dart ./unpublish_pacakge.dart --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
-And once you've verified the output of the dry run to be sure it is what you want to do, run:
+And once you've verified the output of the dry run to be sure it is what you
+want to do, run:
 
 ```
 $ dart ./unpublish_pacakge.dart --confirm --temp_dir=/tmp/foo --revision d444a455de87a2e40b7f576dc12ffd9ab82fd491
 ```
 
-and it will actually perform the actions. You will of course need to have access to the cloud storage server and have gsutil installed in order to perform this operation. Only runs on Linux or macOS systems.
+and it will actually perform the actions. You will of course need to have access
+to the cloud storage server and have gsutil installed in order to perform this
+operation. Only runs on Linux or macOS systems.
 
 See `dart ./unpublish_pacakge.dart --help` for more details.
+
+Once the package is unpublished, it will not be available from the website for
+download, and will not be rebuilt (even though there is a tagged revision in the
+repo still) unless someone forces the packaging build to run again at that
+revision to rebuild the package.

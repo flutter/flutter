@@ -107,12 +107,18 @@ PublishedPlatform fromPublishedPlatform(String name) {
 /// stderr and stdout reported as the process runs, and capture the stdout
 /// properly without dropping any.
 class ProcessRunner {
+  /// Creates a [ProcessRunner].
+  ///
+  /// The [processManager], [subprocessOutput], and [platform] arguments must
+  /// not be null.
   ProcessRunner({
-    ProcessManager processManager,
+    this.processManager = const LocalProcessManager(),
     this.subprocessOutput = true,
     this.defaultWorkingDirectory,
     this.platform = const LocalPlatform(),
-  }) : processManager = processManager ?? const LocalProcessManager() {
+  }) : assert(subprocessOutput != null),
+       assert(processManager != null),
+       assert(platform != null) {
     environment = Map<String, String>.from(platform.environment);
   }
 
