@@ -93,6 +93,7 @@ class RawMaterialButton extends StatefulWidget {
   ///  * [MaterialState.pressed].
   ///  * [MaterialState.hovered].
   ///  * [MaterialState.focused].
+  ///  * [MaterialState.disabled].
   final TextStyle textStyle;
 
   /// The color of the button's [Material].
