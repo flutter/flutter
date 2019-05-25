@@ -5,6 +5,7 @@
 import 'dart:ui' show Color, Size, Rect;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/src/painting/gradient.dart';
 
 import 'animation.dart';
 import 'animations.dart';
@@ -268,8 +269,8 @@ class Tween<T extends dynamic> extends Animatable<T> {
 class ReverseTween<T> extends Tween<T> {
   /// Construct a [Tween] that evaluates its [parent] in reverse.
   ReverseTween(this.parent)
-    : assert(parent != null),
-      super(begin: parent.end, end: parent.begin);
+      : assert(parent != null),
+        super(begin: parent.end, end: parent.begin);
 
   /// This tween's value is the same as the parent's value evaluated in reverse.
   ///
@@ -303,6 +304,23 @@ class ColorTween extends Tween<Color> {
   /// Returns the value this variable has at the given animation clock value.
   @override
   Color lerp(double t) => Color.lerp(begin, end, t);
+}
+
+/// An interpolation between two LinearGradients.
+///
+/// This class specializes the interpolation of [Tween] to use
+/// [LinearGradient.lerp].
+///
+/// See [Tween] for a discussion on how to use interpolation objects.
+class LinearGradientTween extends Tween<LinearGradient> {
+  /// Provide a begin and end Gradient. To fade between.
+  LinearGradientTween({
+    LinearGradient begin,
+    LinearGradient end,
+  }) : super(begin: begin, end: end);
+
+  @override
+  LinearGradient lerp(double t) => LinearGradient.lerp(begin, end, t);
 }
 
 /// An interpolation between two sizes.
@@ -435,7 +453,7 @@ class CurveTween extends Animatable<double> {
   ///
   /// The [curve] argument must not be null.
   CurveTween({ @required this.curve })
-    : assert(curve != null);
+      : assert(curve != null);
 
   /// The curve to use when transforming the value of the animation.
   Curve curve;
