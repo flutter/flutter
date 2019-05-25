@@ -1870,6 +1870,11 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (!decoration.enabled)
       return themeData.disabledColor;
 
+      // Checks if unselectedWidgetColor property is not one of the defaults and returns based on the result
+    if (themeData.unselectedWidgetColor != Colors.black54??Colors.white70){
+      return themeData.unselectedWidgetColor;
+    }
+
     switch (themeData.brightness) {
       case Brightness.dark:
         return Colors.white70;
