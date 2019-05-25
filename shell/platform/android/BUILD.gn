@@ -128,6 +128,7 @@ action("flutter_shell_java") {
     "io/flutter/embedding/android/FlutterTextureView.java",
     "io/flutter/embedding/android/FlutterView.java",
     "io/flutter/embedding/engine/FlutterEngine.java",
+    "io/flutter/embedding/engine/FlutterEngineAndroidLifecycle.java",
     "io/flutter/embedding/engine/FlutterEnginePluginRegistry.java",
     "io/flutter/embedding/engine/FlutterJNI.java",
     "io/flutter/embedding/engine/FlutterShellArgs.java",
@@ -216,6 +217,8 @@ action("flutter_shell_java") {
     "//third_party/android_support/android_support_annotations.jar",
     "//third_party/android_support/android_support_fragment.jar",
     "//third_party/android_support/android_arch_lifecycle_common.jar",
+    "//third_party/android_support/android_arch_lifecycle_common_java8.jar",
+    "//third_party/android_support/android_arch_lifecycle_runtime.jar",
     "//third_party/android_support/android_arch_lifecycle_viewmodel.jar",
   ]
 

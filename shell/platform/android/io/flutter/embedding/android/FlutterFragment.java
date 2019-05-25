@@ -66,6 +66,7 @@ public class FlutterFragment extends Fragment {
   protected static final String ARG_FLUTTER_INITIALIZATION_ARGS = "initialization_args";
   protected static final String ARG_FLUTTERVIEW_RENDER_MODE = "flutterview_render_mode";
   protected static final String ARG_FLUTTERVIEW_TRANSPARENCY_MODE = "flutterview_transparency_mode";
+  protected static final String ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY = "should_attach_engine_to_activity";
 
   /**
    * Builder that creates a new {@code FlutterFragment} with {@code arguments} that correspond
@@ -118,6 +119,7 @@ public class FlutterFragment extends Fragment {
     private FlutterShellArgs shellArgs = null;
     private FlutterView.RenderMode renderMode = FlutterView.RenderMode.surface;
     private FlutterView.TransparencyMode transparencyMode = FlutterView.TransparencyMode.transparent;
+    private boolean shouldAttachEngineToActivity = true;
 
     /**
      * Constructs a {@code Builder} that is configured to construct an instance of
@@ -200,6 +202,46 @@ public class FlutterFragment extends Fragment {
     }
 
     /**
+     * Whether or not this {@code FlutterFragment} should automatically attach its
+     * {@code Activity} as a control surface for its {@link FlutterEngine}.
+     * <p>
+     * Control surfaces are used to provide Android resources and lifecycle events to
+     * plugins that are attached to the {@link FlutterEngine}. If {@code shouldAttachEngineToActivity}
+     * is true then this {@code FlutterFragment} will connect its {@link FlutterEngine} to the
+     * surrounding {@code Activity}, along with any plugins that are registered with that
+     * {@link FlutterEngine}. This allows plugins to access the {@code Activity}, as well as
+     * receive {@code Activity}-specific calls, e.g., {@link android.app.Activity#onNewIntent(Intent)}.
+     * If {@code shouldAttachEngineToActivity} is false, then this {@code FlutterFragment} will not
+     * automatically manage the connection between its {@link FlutterEngine} and the surrounding
+     * {@code Activity}. The {@code Activity} will need to be manually connected to this
+     * {@code FlutterFragment}'s {@link FlutterEngine} by the app developer. See
+     * {@link FlutterEngine#getActivityControlSurface()}.
+     * <p>
+     * One reason that a developer might choose to manually manage the relationship between the
+     * {@code Activity} and {@link FlutterEngine} is if the developer wants to move the
+     * {@link FlutterEngine} somewhere else. For example, a developer might want the
+     * {@link FlutterEngine} to outlive the surrounding {@code Activity} so that it can be used
+     * later in a different {@code Activity}. To accomplish this, the {@link FlutterEngine} will
+     * need to be disconnected from the surrounding {@code Activity} at an unusual time, preventing
+     * this {@code FlutterFragment} from correctly managing the relationship between the
+     * {@link FlutterEngine} and the surrounding {@code Activity}.
+     * <p>
+     * Another reason that a developer might choose to manually manage the relationship between the
+     * {@code Activity} and {@link FlutterEngine} is if the developer wants to prevent, or explicitly
+     * control when the {@link FlutterEngine}'s plugins have access to the surrounding {@code Activity}.
+     * For example, imagine that this {@code FlutterFragment} only takes up part of the screen and
+     * the app developer wants to ensure that none of the Flutter plugins are able to manipulate
+     * the surrounding {@code Activity}. In this case, the developer would not want the
+     * {@link FlutterEngine} to have access to the {@code Activity}, which can be accomplished by
+     * setting {@code shouldAttachEngineToActivity} to {@code false}.
+     */
+    @NonNull
+    public Builder shouldAttachEngineToActivity(boolean shouldAttachEngineToActivity) {
+      this.shouldAttachEngineToActivity = shouldAttachEngineToActivity;
+      return this;
+    }
+
+    /**
      * Creates a {@link Bundle} of arguments that are assigned to the new {@code FlutterFragment}.
      * <p>
      * Subclasses should override this method to add new properties to the {@link Bundle}. Subclasses
@@ -217,6 +259,7 @@ public class FlutterFragment extends Fragment {
       }
       args.putString(ARG_FLUTTERVIEW_RENDER_MODE, renderMode != null ? renderMode.name() : FlutterView.RenderMode.surface.name());
       args.putString(ARG_FLUTTERVIEW_TRANSPARENCY_MODE, transparencyMode != null ? transparencyMode.name() : FlutterView.TransparencyMode.transparent.name());
+      args.putBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY, shouldAttachEngineToActivity);
       return args;
     }
 
@@ -303,10 +346,12 @@ public class FlutterFragment extends Fragment {
     //                    use-cases.
     platformPlugin = new PlatformPlugin(getActivity(), flutterEngine.getPlatformChannel());
 
-    // Notify any plugins that are currently attached to our FlutterEngine that they
-    // are now attached to an Activity.
-    // TODO(mattcarroll): send in a real lifecycle.
-    flutterEngine.getActivityControlSurface().attachToActivity(getActivity(), null);
+    if (shouldAttachEngineToActivity()) {
+      // Notify any plugins that are currently attached to our FlutterEngine that they
+      // are now attached to an Activity.
+      // TODO(mattcarroll): send in a real lifecycle.
+      flutterEngine.getActivityControlSurface().attachToActivity(getActivity(), null);
+    }
   }
 
   private void initializeFlutter(@NonNull Context context) {
@@ -543,9 +588,11 @@ public class FlutterFragment extends Fragment {
     super.onDetach();
     Log.d(TAG, "onDetach()");
 
-    // Notify plugins that they are no longer attached to an Activity.
-    // TODO(mattcarroll): differentiate between detaching for config changes and otherwise.
-    flutterEngine.getActivityControlSurface().detachFromActivity();
+    if (shouldAttachEngineToActivity()) {
+      // Notify plugins that they are no longer attached to an Activity.
+      // TODO(mattcarroll): differentiate between detaching for config changes and otherwise.
+      flutterEngine.getActivityControlSurface().detachFromActivity();
+    }
 
     // Null out the platformPlugin to avoid a possible retain cycle between the plugin, this Fragment,
     // and this Fragment's Activity.
@@ -570,6 +617,10 @@ public class FlutterFragment extends Fragment {
   //                    Manually provided engines should probably not be destroyed.
   protected boolean retainFlutterEngineAfterFragmentDestruction() {
     return false;
+  }
+
+  protected boolean shouldAttachEngineToActivity() {
+    return getArguments().getBoolean(ARG_SHOULD_ATTACH_ENGINE_TO_ACTIVITY);
   }
 
   /**

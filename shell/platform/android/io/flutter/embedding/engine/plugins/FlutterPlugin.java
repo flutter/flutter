@@ -5,6 +5,7 @@
 package io.flutter.embedding.engine.plugins;
 
 import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
@@ -87,12 +88,12 @@ public interface FlutterPlugin {
    * {@link FlutterEngine#getDartExecutor()}.
    * <p>
    * A {@link FlutterEngine} may move from foreground to background, from an {@code Activity} to
-   * a {@code Service}, and {@code FlutterPluginBinding}'s {@code lifecycle} generalizes those
+   * a {@code Service}. {@code FlutterPluginBinding}'s {@code lifecycle} generalizes those
    * lifecycles so that a {@code FlutterPlugin} can react to lifecycle events without being
    * concerned about which Android Component is currently holding the {@link FlutterEngine}.
    * TODO(mattcarroll): add info about ActivityAware and ServiceAware for plugins that care.
    */
-  class FlutterPluginBinding {
+  class FlutterPluginBinding implements LifecycleOwner {
         private final Context applicationContext;
         private final FlutterEngine flutterEngine;
         private final Lifecycle lifecycle;
@@ -117,6 +118,7 @@ public interface FlutterPlugin {
             return flutterEngine;
         }
 
+        @Override
         @NonNull
         public Lifecycle getLifecycle() {
             return lifecycle;
