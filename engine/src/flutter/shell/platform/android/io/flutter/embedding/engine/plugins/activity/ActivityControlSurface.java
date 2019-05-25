@@ -66,7 +66,7 @@ public interface ActivityControlSurface {
    * This method gives each {@link ActivityAware} plugin an opportunity to re-establish necessary
    * references to the given {@link Activity}.
    */
-  void reattachToActivityAfterConfigChange(@NonNull Activity activity);
+  void reattachToActivityAfterConfigChange(@NonNull Activity activity, @NonNull Lifecycle lifecycle);
 
   /**
    * Call this method from the {@link Activity} that is attached to this {@code ActivityControlSurfaces}'s

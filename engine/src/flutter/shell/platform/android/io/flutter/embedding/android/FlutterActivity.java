@@ -274,7 +274,24 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
         .flutterShellArgs(FlutterShellArgs.fromIntent(getIntent()))
         .renderMode(FlutterView.RenderMode.surface)
         .transparencyMode(FlutterView.TransparencyMode.opaque)
+        .shouldAttachEngineToActivity(shouldAttachEngineToActivity())
         .build();
+  }
+
+  /**
+   * Hook for subclasses to control whether or not the {@link FlutterFragment} within this
+   * {@code Activity} automatically attaches its {@link FlutterEngine} to this {@code Activity}.
+   * <p>
+   * For an explanation of why this control exists, see {@link FlutterFragment.Builder#shouldAttachEngineToActivity()}.
+   * <p>
+   * This property is controlled with a protected method instead of an {@code Intent} argument because
+   * the only situation where changing this value would help, is a situation in which
+   * {@code FlutterActivity} is being subclassed to utilize a custom and/or cached {@link FlutterEngine}.
+   * <p>
+   * Defaults to {@code true}.
+   */
+  protected boolean shouldAttachEngineToActivity() {
+    return true;
   }
 
   @Override

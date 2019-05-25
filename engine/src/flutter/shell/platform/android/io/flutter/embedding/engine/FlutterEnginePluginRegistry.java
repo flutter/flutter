@@ -47,6 +47,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   // Standard FlutterPlugin
   private final FlutterPlugin.FlutterPluginBinding pluginBinding;
+  private final FlutterEngineAndroidLifecycle flutterEngineAndroidLifecycle;
 
   // ActivityAware
   private final Map<Class<? extends FlutterPlugin>, ActivityAware> activityAwarePlugins = new HashMap<>();
@@ -71,13 +72,29 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   FlutterEnginePluginRegistry(
       @NonNull Context appContext,
       @NonNull FlutterEngine flutterEngine,
-      @NonNull Lifecycle lifecycle
+      @NonNull FlutterEngineAndroidLifecycle lifecycle
   ) {
+    flutterEngineAndroidLifecycle = lifecycle;
     pluginBinding = new FlutterPlugin.FlutterPluginBinding(
         appContext,
         flutterEngine,
         lifecycle
     );
+  }
+
+  public void destroy() {
+    // Detach from any Android component that we may currently be attached to, e.g., Activity, Service,
+    // BroadcastReceiver, ContentProvider. This must happen before removing all plugins so that the
+    // plugins have an opportunity to clean up references as a result of component detachment.
+    detachFromAndroidComponent();
+
+    // Push FlutterEngine's Lifecycle to the DESTROYED state. This must happen before removing all
+    // plugins so that the plugins have an opportunity to clean up references as a result of moving
+    // to the DESTROYED state.
+    flutterEngineAndroidLifecycle.destroy();
+
+    // Remove all registered plugins.
+    removeAll();
   }
 
   public void add(@NonNull FlutterPlugin plugin) {
@@ -241,7 +258,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     this.activity = activity;
     this.activityPluginBinding = new FlutterEngineActivityPluginBinding(activity);
-    // TODO(mattcarroll): resolve possibility of different lifecycles between this and engine attachment
+    this.flutterEngineAndroidLifecycle.setBackingLifecycle(lifecycle);
 
     // Notify all ActivityAware plugins that they are now attached to a new Activity.
     for (ActivityAware activityAware : activityAwarePlugins.values()) {
@@ -257,6 +274,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
         activityAware.onDetachedFromActivityForConfigChanges();
       }
 
+      flutterEngineAndroidLifecycle.setBackingLifecycle(null);
       activity = null;
       activityPluginBinding = null;
     } else {
@@ -265,11 +283,12 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   }
 
   @Override
-  public void reattachToActivityAfterConfigChange(@NonNull Activity activity) {
+  public void reattachToActivityAfterConfigChange(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
     Log.d(TAG, "Re-attaching to an Activity after config change.");
     if (!isAttachedToActivity()) {
       this.activity = activity;
       activityPluginBinding = new FlutterEngineActivityPluginBinding(activity);
+      this.flutterEngineAndroidLifecycle.setBackingLifecycle(lifecycle);
 
       for (ActivityAware activityAware : activityAwarePlugins.values()) {
         activityAware.onReattachedToActivityForConfigChanges(activityPluginBinding);
@@ -287,6 +306,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
         activityAware.onDetachedFromActivity();
       }
 
+      flutterEngineAndroidLifecycle.setBackingLifecycle(null);
       activity = null;
       activityPluginBinding = null;
     } else {
@@ -349,7 +369,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     this.service = service;
     this.servicePluginBinding = new FlutterEngineServicePluginBinding(service);
-    // TODO(mattcarroll): resolve possibility of different lifecycles between this and engine attachment
+    flutterEngineAndroidLifecycle.setBackingLifecycle(lifecycle);
 
     // Notify all ServiceAware plugins that they are now attached to a new Service.
     for (ServiceAware serviceAware : serviceAwarePlugins.values()) {
@@ -364,6 +384,10 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
       for (ServiceAware serviceAware : serviceAwarePlugins.values()) {
         serviceAware.onDetachedFromService();
       }
+
+      flutterEngineAndroidLifecycle.setBackingLifecycle(null);
+      service = null;
+      servicePluginBinding = null;
     } else {
       Log.e(TAG, "Attempted to detach plugins from a Service when no Service was attached.");
     }
