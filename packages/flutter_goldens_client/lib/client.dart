@@ -183,7 +183,7 @@ class NonZeroExitCode implements Exception {
 
   /// The code that the process will signal to the operating system.
   ///
-  /// By definiton, this is not zero.
+  /// By definition, this is not zero.
   final int exitCode;
 
   /// The message to show on standard error.

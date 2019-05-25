@@ -217,7 +217,7 @@ class UiKitView extends StatefulWidget {
        assert(creationParams == null || creationParamsCodec != null),
        super(key: key);
 
-  // TODO(amirh): reference the iOS API doc once avaliable.
+  // TODO(amirh): reference the iOS API doc once available.
   /// The unique identifier for iOS view type to be embedded by this widget.
   ///
   /// A PlatformViewFactory for this type must have been registered.
