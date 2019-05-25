@@ -100,6 +100,26 @@ class CupertinoTabController extends ChangeNotifier {
   }
 }
 
+class _CupertinoTabViewTapNotifier extends ChangeNotifier {
+  VoidCallback currentListener;
+
+  @override
+  void addListener(VoidCallback listener) {
+    if (currentListener != null) {
+      removeListener(listener);
+    }
+    currentListener = listener;
+    super.addListener(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    assert(identical(listener, currentListener));
+    currentListener = null;
+    super.removeListener(listener);
+  }
+}
+
 /// Implements a tabbed iOS application's root layout and behavior structure.
 ///
 /// The scaffold lays out the tab bar at the bottom and the content between or
@@ -274,12 +294,17 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Defaults to true and cannot be null.
   final bool resizeToAvoidBottomInset;
 
+  static ChangeNotifier of(BuildContext context) {
+
+  }
+
   @override
   _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   CupertinoTabController _controller;
+  final _CupertinoTabViewTapNotifier _notifier = _CupertinoTabViewTapNotifier();
 
   @override
   void initState() {
