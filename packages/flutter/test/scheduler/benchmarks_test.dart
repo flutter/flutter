@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
-
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -70,5 +68,5 @@ void main() {
       expect(endFramesBegun, equals(startFramesBegun + 1));
       expect(endFramesDrawn, equals(startFramesDrawn + 1));
     });
-  });
+  }, tags: 'web_unimplemented');
 }
