@@ -21,7 +21,7 @@ the app stores. It is configured by the [.cirrus.yml](/.cirrus.yml).
 We also have post-commit testing with actual devices, in what we call our
 [devicelab](../devicelab/README.md).
 
-## LUCI (Layered Universal Continuous Intergration)
+## LUCI (Layered Universal Continuous Integration)
 
 A [set of recipes](https://chromium.googlesource.com/chromium/tools/build.git/+/master/scripts/slave/recipes/flutter)
 are run on Windows, Linux, and Mac machines. The configuration for how many

@@ -1701,7 +1701,7 @@ mixin WidgetInspectorService {
       return true;
     }
     if (value is! Element || !isWidgetCreationTracked()) {
-      // Creation locations are not availabe so include all nodes in the
+      // Creation locations are not available so include all nodes in the
       // summary tree.
       return true;
     }
