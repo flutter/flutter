@@ -97,6 +97,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     removeAll();
   }
 
+  @Override
   public void add(@NonNull FlutterPlugin plugin) {
     // Add the plugin to our generic set of plugins and notify the plugin
     // that is has been attached to an engine.
@@ -152,20 +153,24 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     }
   }
 
+  @Override
   public void add(@NonNull Set<FlutterPlugin> plugins) {
     for (FlutterPlugin plugin : plugins) {
       add(plugin);
     }
   }
 
+  @Override
   public boolean has(@NonNull Class<? extends FlutterPlugin> pluginClass) {
     return plugins.containsKey(pluginClass);
   }
 
+  @Override
   public FlutterPlugin get(@NonNull Class<? extends FlutterPlugin> pluginClass) {
     return plugins.get(pluginClass);
   }
 
+  @Override
   public void remove(@NonNull Class<? extends FlutterPlugin> pluginClass) {
     FlutterPlugin plugin = plugins.get(pluginClass);
     if (plugin != null) {
@@ -220,12 +225,14 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     }
   }
 
+  @Override
   public void remove(@NonNull Set<Class<? extends FlutterPlugin>> pluginClasses) {
     for (Class<? extends FlutterPlugin> pluginClass : pluginClasses) {
       remove(pluginClass);
     }
   }
 
+  @Override
   public void removeAll() {
     // We copy the keys to a new set so that we can mutate the set while using
     // the keys.
@@ -489,6 +496,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
      * Returns the {@link Activity} that is currently attached to the {@link FlutterEngine} that
      * owns this {@code ActivityPluginBinding}.
      */
+    @Override
     @NonNull
     public Activity getActivity() {
       return activity;
@@ -498,6 +506,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
      * Adds a listener that is invoked whenever the associated {@link Activity}'s
      * {@code onRequestPermissionsResult(...)} method is invoked.
      */
+    @Override
     public void addRequestPermissionsResultListener(@NonNull io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener listener) {
       onRequestPermissionsResultListeners.add(listener);
     }
@@ -505,6 +514,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     /**
      * Removes a listener that was added in {@link #addRequestPermissionsResultListener(io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener)}.
      */
+    @Override
     public void removeRequestPermissionsResultListener(@NonNull io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener listener) {
       onRequestPermissionsResultListeners.remove(listener);
     }
@@ -525,6 +535,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
      * Adds a listener that is invoked whenever the associated {@link Activity}'s
      * {@code onActivityResult(...)} method is invoked.
      */
+    @Override
     public void addActivityResultListener(@NonNull io.flutter.plugin.common.PluginRegistry.ActivityResultListener listener) {
       onActivityResultListeners.add(listener);
     }
@@ -532,6 +543,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     /**
      * Removes a listener that was added in {@link #addActivityResultListener(io.flutter.plugin.common.PluginRegistry.ActivityResultListener)}.
      */
+    @Override
     public void removeActivityResultListener(@NonNull io.flutter.plugin.common.PluginRegistry.ActivityResultListener listener) {
       onActivityResultListeners.remove(listener);
     }
@@ -552,6 +564,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
      * Adds a listener that is invoked whenever the associated {@link Activity}'s
      * {@code onNewIntent(...)} method is invoked.
      */
+    @Override
     public void addOnNewIntentListener(@NonNull io.flutter.plugin.common.PluginRegistry.NewIntentListener listener) {
       onNewIntentListeners.add(listener);
     }
@@ -559,6 +572,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     /**
      * Removes a listener that was added in {@link #addOnNewIntentListener(io.flutter.plugin.common.PluginRegistry.NewIntentListener)}.
      */
+    @Override
     public void removeOnNewIntentListener(@NonNull io.flutter.plugin.common.PluginRegistry.NewIntentListener listener) {
       onNewIntentListeners.remove(listener);
     }
@@ -577,6 +591,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
      * Adds a listener that is invoked whenever the associated {@link Activity}'s
      * {@code onUserLeaveHint()} method is invoked.
      */
+    @Override
     public void addOnUserLeaveHintListener(@NonNull io.flutter.plugin.common.PluginRegistry.UserLeaveHintListener listener) {
       onUserLeaveHintListeners.add(listener);
     }
@@ -584,6 +599,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
     /**
      * Removes a listener that was added in {@link #addOnUserLeaveHintListener(io.flutter.plugin.common.PluginRegistry.UserLeaveHintListener)}.
      */
+    @Override
     public void removeOnUserLeaveHintListener(@NonNull io.flutter.plugin.common.PluginRegistry.UserLeaveHintListener listener) {
       onUserLeaveHintListeners.remove(listener);
     }
