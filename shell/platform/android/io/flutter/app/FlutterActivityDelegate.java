@@ -127,15 +127,6 @@ public final class FlutterActivityDelegate
         return flutterView.getPluginRegistry().onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    /*
-     * Method onRequestPermissionResult(int, String[], int[]) was made
-     * unavailable on 2018-02-28, following deprecation. This comment is left as
-     * a temporary tombstone for reference, to be removed on 2018-03-28 (or at
-     * least four weeks after release of unavailability).
-     *
-     * https://github.com/flutter/flutter/wiki/Changelog#typo-fixed-in-flutter-engine-android-api
-     */
-
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         return flutterView.getPluginRegistry().onActivityResult(requestCode, resultCode, data);
