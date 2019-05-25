@@ -81,7 +81,7 @@ void main() {
           sampleSize: 100,
         ),
       );
-    }, skip: identical(1, 1.0)); // Not implemented on web.
+    }, tags: 'web_unimplemented');
 
     test('AutomaticNotchedShape - no guest', () {
       expect(
