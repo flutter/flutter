@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('TickerMode', (WidgetTester tester) async {
-    const Widget widget = const TickerMode(
+    const Widget widget = TickerMode(
       enabled: false,
-      child: const CircularProgressIndicator()
+      child: CircularProgressIndicator(),
     );
     expect(widget.toString, isNot(throwsException));
 
@@ -19,21 +19,21 @@ void main() {
 
     await tester.pumpWidget(const TickerMode(
       enabled: true,
-      child: const CircularProgressIndicator()
+      child: CircularProgressIndicator(),
     ));
 
     expect(tester.binding.transientCallbackCount, 1);
 
     await tester.pumpWidget(const TickerMode(
       enabled: false,
-      child: const CircularProgressIndicator()
+      child: CircularProgressIndicator(),
     ));
 
     expect(tester.binding.transientCallbackCount, 0);
   });
 
   testWidgets('Navigation with TickerMode', (WidgetTester tester) async {
-    await tester.pumpWidget(new MaterialApp(
+    await tester.pumpWidget(MaterialApp(
       home: const LinearProgressIndicator(),
       routes: <String, WidgetBuilder>{
         '/test': (BuildContext context) => const Text('hello'),
@@ -55,21 +55,21 @@ void main() {
   });
 
   testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
-    final Widget widget = new BoringTickerTest();
+    final Widget widget = BoringTickerTest();
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     // the test is that this doesn't crash, like it used to...
   });
 }
 
 class BoringTickerTest extends StatefulWidget {
   @override
-  _BoringTickerTestState createState() => new _BoringTickerTestState();
+  _BoringTickerTestState createState() => _BoringTickerTestState();
 }
 
 class _BoringTickerTestState extends State<BoringTickerTest> with SingleTickerProviderStateMixin {
   @override
-  Widget build(BuildContext context) => new Container();
+  Widget build(BuildContext context) => Container();
 }

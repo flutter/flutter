@@ -7,19 +7,18 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/flags.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:test/test.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
-typedef FutureOr<Null> _TestMethod();
+typedef _TestMethod = FutureOr<void> Function();
 
 void main() {
   Cache.disableLocking();
 
-  Future<Null> runCommand(Iterable<String> flags, _TestMethod testMethod) async {
+  Future<void> runCommand(Iterable<String> flags, _TestMethod testMethod) async {
     final List<String> args = <String>['test']..addAll(flags);
-    final _TestCommand command = new _TestCommand(testMethod);
+    final _TestCommand command = _TestCommand(testMethod);
     await createTestCommandRunner(command).run(args);
   }
 

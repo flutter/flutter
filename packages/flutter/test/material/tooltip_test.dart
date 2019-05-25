@@ -1,8 +1,8 @@
-import 'dart:ui';
-
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:ui';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
@@ -33,27 +34,27 @@ const String tooltipText = 'TIP';
 
 void main() {
   testWidgets('Does tooltip end up in the right place - center', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 300.0,
                       top: 0.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
                         height: 20.0,
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: new Container(
+                        child: Container(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -67,7 +68,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // before using "as dynamic" in your code, see note top of file
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -89,27 +90,27 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - top left', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 0.0,
                       top: 0.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
                         height: 20.0,
                         padding: const EdgeInsets.all(5.0),
                         verticalOffset: 20.0,
                         preferBelow: false,
-                        child: new Container(
+                        child: Container(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -123,7 +124,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // before using "as dynamic" in your code, see note top of file
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -141,27 +142,27 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 400.0,
                       top: 300.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
                         height: 100.0,
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: new Container(
+                        child: Container(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -175,7 +176,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // before using "as dynamic" in your code, see note top of file
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -195,27 +196,27 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer above does not fit', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 400.0,
                       top: 299.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
                         height: 190.0,
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: false,
-                        child: new Container(
+                        child: Container(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -229,7 +230,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // before using "as dynamic" in your code, see note top of file
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     // we try to put it here but it doesn't fit:
@@ -260,27 +261,27 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - center prefer below fits', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 400.0,
                       top: 300.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
                         height: 190.0,
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 100.0,
                         preferBelow: true,
-                        child: new Container(
+                        child: Container(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -294,7 +295,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // before using "as dynamic" in your code, see note top of file
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -313,27 +314,27 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - way off to the right', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 1600.0,
                       top: 300.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
                         height: 10.0,
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: new Container(
+                        child: Container(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -347,7 +348,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // before using "as dynamic" in your code, see note top of file
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -368,27 +369,27 @@ void main() {
   });
 
   testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 780.0,
                       top: 300.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
                         height: 10.0,
                         padding: const EdgeInsets.all(0.0),
                         verticalOffset: 10.0,
                         preferBelow: true,
-                        child: new Container(
+                        child: Container(
                           width: 0.0,
                           height: 0.0,
                         ),
@@ -402,7 +403,7 @@ void main() {
         ),
       ),
     );
-    (key.currentState as dynamic).ensureTooltipVisible(); // before using "as dynamic" in your code, see note top of file
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
 
     /********************* 800x600 screen
@@ -422,19 +423,95 @@ void main() {
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
   });
 
+  testWidgets('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return Tooltip(
+                  key: key,
+                  message: tooltipText,
+                  child: Container(
+                    width: 0.0,
+                    height: 0.0,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent;
+
+    expect(tip.size.height, equals(32.0));
+    expect(tip.size.width, equals(74.0));
+    expect(tip, paints..rrect(
+      rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
+      color: const Color(0xe6616161),
+    ));
+  });
+
+  testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    const Decoration customDecoration = ShapeDecoration(
+      shape: StadiumBorder(),
+      color: Color(0x80800000),
+    );
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          initialEntries: <OverlayEntry>[
+            OverlayEntry(
+              builder: (BuildContext context) {
+                return Tooltip(
+                  key: key,
+                  decoration: customDecoration,
+                  message: tooltipText,
+                  child: Container(
+                    width: 0.0,
+                    height: 0.0,
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    (key.currentState as dynamic).ensureTooltipVisible(); // Before using "as dynamic" in your code, see note at the top of the file.
+    await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
+
+    final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent;
+
+    expect(tip.size.height, equals(32.0));
+    expect(tip.size.width, equals(74.0));
+    expect(tip, paints..path(
+      color: const Color(0x80800000),
+    ));
+  });
+
   testWidgets('Tooltip stays around', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Tooltip(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
             message: tooltipText,
-            child: new Container(
+            child: Container(
               width: 100.0,
               height: 100.0,
               color: Colors.green[500],
-            )
-          )
-        )
+            ),
+          ),
+        ),
       )
     );
 
@@ -457,26 +534,76 @@ void main() {
     gesture.up();
   });
 
-  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+  testWidgets('Tooltip shows/hides when hovered', (WidgetTester tester) async {
+    const Duration waitDuration = Duration(milliseconds: 0);
+    const Duration showDuration = Duration(milliseconds: 1500);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(const Offset(1.0, 1.0));
+    await tester.pump();
+    await gesture.moveTo(Offset.zero);
 
-    final GlobalKey key = new GlobalKey();
     await tester.pumpWidget(
-      new Directionality(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
+            message: tooltipText,
+            showDuration: showDuration,
+            waitDuration: waitDuration,
+            child: Container(
+              width: 100.0,
+              height: 100.0,
+            ),
+          ),
+        ),
+      )
+    );
+
+    final Finder tooltip = find.byType(Tooltip);
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+    await gesture.moveTo(tester.getCenter(tooltip));
+    await tester.pump();
+    // Wait for it to appear.
+    await tester.pump(waitDuration);
+    expect(find.text(tooltipText), findsOneWidget);
+
+    // Wait a looong time to make sure that it doesn't go away if the mouse is
+    // still over the widget.
+    await tester.pump(const Duration(days: 1));
+    await tester.pumpAndSettle();
+    expect(find.text(tooltipText), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await tester.pump();
+
+    // Wait for it to disappear.
+    await tester.pump(showDuration);
+    await tester.pumpAndSettle();
+    await gesture.removePointer();
+    expect(find.text(tooltipText), findsNothing);
+  });
+
+  testWidgets('Does tooltip contribute semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Overlay(
+        child: Overlay(
           initialEntries: <OverlayEntry>[
-            new OverlayEntry(
+            OverlayEntry(
               builder: (BuildContext context) {
-                return new Stack(
+                return Stack(
                   children: <Widget>[
-                    new Positioned(
+                    Positioned(
                       left: 780.0,
                       top: 300.0,
-                      child: new Tooltip(
+                      child: Tooltip(
                         key: key,
                         message: tooltipText,
-                        child: new Container(width: 10.0, height: 10.0),
+                        child: Container(width: 10.0, height: 10.0),
                       ),
                     ),
                   ],
@@ -488,9 +615,9 @@ void main() {
       ),
     );
 
-    final TestSemantics expected = new TestSemantics.root(
+    final TestSemantics expected = TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 1,
           label: 'TIP',
           textDirection: TextDirection.ltr,
@@ -500,7 +627,7 @@ void main() {
 
     expect(semantics, hasSemantics(expected, ignoreTransform: true, ignoreRect: true));
 
-    // before using "as dynamic" in your code, see note top of file
+    // Before using "as dynamic" in your code, see note at the top of the file.
     (key.currentState as dynamic).ensureTooltipVisible(); // this triggers a rebuild of the semantics because the tree changes
 
     await tester.pump(const Duration(seconds: 2)); // faded in, show timer started (and at 0.0)
@@ -512,17 +639,17 @@ void main() {
 
   testWidgets('Tooltip overlay does not update', (WidgetTester tester) async {
     Widget buildApp(String text) {
-      return new MaterialApp(
-        home: new Center(
-          child: new Tooltip(
+      return MaterialApp(
+        home: Center(
+          child: Tooltip(
             message: text,
-            child: new Container(
+            child: Container(
               width: 100.0,
               height: 100.0,
               color: Colors.green[500],
-            )
-          )
-        )
+            ),
+          ),
+        ),
       );
     }
 
@@ -541,18 +668,18 @@ void main() {
 
   testWidgets('Tooltip text scales with textScaleFactor', (WidgetTester tester) async {
     Widget buildApp(String text, { double textScaleFactor }) {
-      return new MediaQuery(
-        data: new MediaQueryData(textScaleFactor: textScaleFactor),
-        child: new Directionality(
+      return MediaQuery(
+        data: MediaQueryData(textScaleFactor: textScaleFactor),
+        child: Directionality(
           textDirection: TextDirection.ltr,
-          child: new Navigator(
+          child: Navigator(
             onGenerateRoute: (RouteSettings settings) {
-              return new MaterialPageRoute<void>(
+              return MaterialPageRoute<void>(
                 builder: (BuildContext context) {
-                  return new Center(
-                    child: new Tooltip(
+                  return Center(
+                    child: Tooltip(
                       message: text,
-                      child: new Container(
+                      child: Container(
                         width: 100.0,
                         height: 100.0,
                         color: Colors.green[500],
@@ -583,13 +710,13 @@ void main() {
   });
 
   testWidgets('Haptic feedback', (WidgetTester tester) async {
-    final FeedbackTester feedback = new FeedbackTester();
+    final FeedbackTester feedback = FeedbackTester();
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Tooltip(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
             message: 'Foo',
-            child: new Container(
+            child: Container(
               width: 100.0,
               height: 100.0,
               color: Colors.green[500],
@@ -607,30 +734,30 @@ void main() {
   });
 
   testWidgets('Semantics included', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Center(
-          child: const Tooltip(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
             message: 'Foo',
-            child: const Text('Bar'),
+            child: Text('Bar'),
           ),
         ),
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   label: 'Foo\nBar',
                   textDirection: TextDirection.ltr,
-                )
+                ),
               ],
             ),
           ],
@@ -642,31 +769,31 @@ void main() {
   });
 
   testWidgets('Semantics excluded', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Center(
-          child: const Tooltip(
+      const MaterialApp(
+        home: Center(
+          child: Tooltip(
             message: 'Foo',
-            child: const Text('Bar'),
+            child: Text('Bar'),
             excludeFromSemantics: true,
           ),
         ),
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   label: 'Bar',
                   textDirection: TextDirection.ltr,
-                )
+                ),
               ],
             ),
           ],
@@ -679,17 +806,17 @@ void main() {
 
   testWidgets('has semantic events', (WidgetTester tester) async {
     final List<dynamic> semanticEvents = <dynamic>[];
-    SystemChannels.accessibility.setMockMessageHandler((dynamic message) {
+    SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
       semanticEvents.add(message);
     });
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new Center(
-          child: new Tooltip(
+      MaterialApp(
+        home: Center(
+          child: Tooltip(
             message: 'Foo',
-            child: new Container(
+            child: Container(
               width: 100.0,
               height: 100.0,
               color: Colors.green[500],
@@ -717,6 +844,52 @@ void main() {
     ]));
     semantics.dispose();
     SystemChannels.accessibility.setMockMessageHandler(null);
+  });
+  testWidgets('default Tooltip debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    const Tooltip(message: 'message',).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      '"message"',
+      'position: below',
+    ]);
+  });
+  testWidgets('Tooltip implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+    // Not checking controller, inputFormatters, focusNode
+    const Tooltip(
+      key: ValueKey<String>('foo'),
+      message: 'message',
+      decoration: BoxDecoration(),
+      waitDuration: Duration(seconds: 1),
+      showDuration: Duration(seconds: 2),
+      padding: EdgeInsets.zero,
+      height: 100.0,
+      excludeFromSemantics: true,
+      preferBelow: false,
+      verticalOffset: 50.0,
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+      .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+      .map((DiagnosticsNode node) => node.toString()).toList();
+
+    expect(description, <String>[
+      '"message"',
+      'height: 100.0',
+      'padding: EdgeInsets.zero',
+      'vertical offset: 50.0',
+      'position: above',
+      'semantics: excluded',
+      'wait duration: 0:00:01.000000',
+      'show duration: 0:00:02.000000',
+    ]);
   });
 }
 

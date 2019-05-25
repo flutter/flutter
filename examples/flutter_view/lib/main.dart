@@ -1,28 +1,32 @@
+// Copyright 2015 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 void main() {
-  runApp(new FlutterView());
+  runApp(FlutterView());
 }
 
 class FlutterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
+    return MaterialApp(
       title: 'Flutter View',
-      theme: new ThemeData(
+      theme: ThemeData(
         primarySwatch: Colors.grey,
       ),
-      home: new MyHomePage(),
+      home: MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
@@ -30,7 +34,7 @@ class _MyHomePageState extends State<MyHomePage> {
   static const String _pong = 'pong';
   static const String _emptyMessage = '';
   static const BasicMessageChannel<String> platform =
-      const BasicMessageChannel<String>(_channel, const StringCodec());
+      BasicMessageChannel<String>(_channel, StringCodec());
 
   int _counter = 0;
 
@@ -53,29 +57,29 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      body: new Column(
+    return Scaffold(
+      body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          new Expanded(
-            child: new Center(
-              child: new Text(
+          Expanded(
+            child: Center(
+              child: Text(
                 'Platform button tapped $_counter time${ _counter == 1 ? '' : 's' }.',
-                style: const TextStyle(fontSize: 17.0))
+                style: const TextStyle(fontSize: 17.0)),
             ),
           ),
-          new Container(
+          Container(
             padding: const EdgeInsets.only(bottom: 15.0, left: 5.0),
-            child: new Row(
+            child: Row(
               children: <Widget>[
-                new Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
-                const Text('Flutter', style: const TextStyle(fontSize: 30.0)),
+                Image.asset('assets/flutter-mark-square-64.png', scale: 1.5),
+                const Text('Flutter', style: TextStyle(fontSize: 30.0)),
               ],
             ),
           ),
         ],
       ),
-      floatingActionButton: new FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         onPressed: _sendFlutterIncrement,
         child: const Icon(Icons.add),
       ),

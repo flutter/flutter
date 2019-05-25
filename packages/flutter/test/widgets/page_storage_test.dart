@@ -7,22 +7,22 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('PageStorage read and write', (WidgetTester tester) async {
-    const Key builderKey = const PageStorageKey<String>('builderKey');
+    const Key builderKey = PageStorageKey<String>('builderKey');
     StateSetter setState;
     int storedValue = 0;
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: new StatefulBuilder(
+      MaterialApp(
+        home: StatefulBuilder(
           key: builderKey,
           builder: (BuildContext context, StateSetter setter) {
             PageStorage.of(context).writeState(context, storedValue);
             setState = setter;
-            return new Center(
-              child: new Text('storedValue: $storedValue')
+            return Center(
+              child: Text('storedValue: $storedValue'),
             );
-          }
-        )
+          },
+        ),
       )
     );
 
@@ -42,17 +42,17 @@ void main() {
     int storedValue = 0;
 
     Widget buildWidthKey(Key key) {
-      return new MaterialApp(
-        home: new StatefulBuilder(
+      return MaterialApp(
+        home: StatefulBuilder(
           key: key,
           builder: (BuildContext context, StateSetter setter) {
             PageStorage.of(context).writeState(context, storedValue, identifier: 123);
             setState = setter;
-            return new Center(
-              child: new Text('storedValue: $storedValue')
+            return Center(
+              child: Text('storedValue: $storedValue'),
             );
-          }
-        )
+          },
+        ),
       );
     }
 

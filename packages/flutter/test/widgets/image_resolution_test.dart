@@ -26,8 +26,8 @@ class TestImage implements ui.Image {
   void dispose() { }
 
   @override
-  Future<ByteData> toByteData({ui.ImageByteFormat format}) async {
-    throw new UnsupportedError('Cannot encode test image');
+  Future<ByteData> toByteData({ ui.ImageByteFormat format = ui.ImageByteFormat.rawRgba }) async {
+    throw UnsupportedError('Cannot encode test image');
   }
 }
 
@@ -61,32 +61,32 @@ class TestAssetBundle extends CachingAssetBundle {
     ByteData data;
     switch (key) {
       case 'assets/image.png':
-        data = new TestByteData(1.0);
+        data = TestByteData(1.0);
         break;
       case 'assets/1.0x/image.png':
-        data = new TestByteData(10.0); // see "...with a main asset and a 1.0x asset"
+        data = TestByteData(10.0); // see "...with a main asset and a 1.0x asset"
         break;
       case 'assets/1.5x/image.png':
-        data = new TestByteData(1.5);
+        data = TestByteData(1.5);
         break;
       case 'assets/2.0x/image.png':
-        data = new TestByteData(2.0);
+        data = TestByteData(2.0);
         break;
       case 'assets/3.0x/image.png':
-        data = new TestByteData(3.0);
+        data = TestByteData(3.0);
         break;
       case 'assets/4.0x/image.png':
-        data = new TestByteData(4.0);
+        data = TestByteData(4.0);
         break;
     }
-    return new SynchronousFuture<ByteData>(data);
+    return SynchronousFuture<ByteData>(data);
   }
 
   @override
   Future<String> loadString(String key, { bool cache = true }) {
     if (key == 'AssetManifest.json')
-      return new SynchronousFuture<String>(manifest);
-    return null;
+      return SynchronousFuture<String>(manifest);
+    return SynchronousFuture<String>(null);
   }
 
   @override
@@ -107,43 +107,45 @@ class TestAssetImage extends AssetImage {
     ImageInfo imageInfo;
     key.bundle.load(key.name).then<void>((ByteData data) {
       final TestByteData testData = data;
-      final ui.Image image = new TestImage(testData.scale);
-      imageInfo = new ImageInfo(image: image, scale: key.scale);
+      final ui.Image image = TestImage(testData.scale);
+      imageInfo = ImageInfo(image: image, scale: key.scale);
     });
     assert(imageInfo != null);
-    return new FakeImageStreamCompleter(
-      new SynchronousFuture<ImageInfo>(imageInfo)
+    return FakeImageStreamCompleter(
+      SynchronousFuture<ImageInfo>(imageInfo)
     );
   }
 }
 
-Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [AssetBundle bundle]) {
+Widget buildImageAtRatio(String image, Key key, double ratio, bool inferSize, [ AssetBundle bundle ]) {
   const double windowSize = 500.0; // 500 logical pixels
   const double imageSize = 200.0; // 200 logical pixels
 
-  return new MediaQuery(
-    data: new MediaQueryData(
+  return MediaQuery(
+    data: MediaQueryData(
       size: const Size(windowSize, windowSize),
       devicePixelRatio: ratio,
-      padding: const EdgeInsets.all(0.0)
+      padding: const EdgeInsets.all(0.0),
     ),
-    child: new DefaultAssetBundle(
-      bundle: bundle ?? new TestAssetBundle(),
-      child: new Center(
+    child: DefaultAssetBundle(
+      bundle: bundle ?? TestAssetBundle(),
+      child: Center(
         child: inferSize ?
-          new Image(
+          Image(
             key: key,
-            image: new TestAssetImage(image)
+            excludeFromSemantics: true,
+            image: TestAssetImage(image),
           ) :
-          new Image(
+          Image(
             key: key,
-            image: new TestAssetImage(image),
+            excludeFromSemantics: true,
+            image: TestAssetImage(image),
             height: imageSize,
             width: imageSize,
-            fit: BoxFit.fill
-          )
-      )
-    )
+            fit: BoxFit.fill,
+          ),
+      ),
+    ),
   );
 }
 
@@ -154,8 +156,8 @@ TestImage getTestImage(WidgetTester tester, Key key) {
   return tester.renderObject<RenderImage>(find.byKey(key)).image;
 }
 
-Future<Null> pumpTreeToLayout(WidgetTester tester, Widget widget) {
-  const Duration pumpDuration = const Duration(milliseconds: 0);
+Future<void> pumpTreeToLayout(WidgetTester tester, Widget widget) {
+  const Duration pumpDuration = Duration(milliseconds: 0);
   const EnginePhase pumpPhase = EnginePhase.layout;
   return tester.pumpWidget(widget, pumpDuration, pumpPhase);
 }
@@ -165,11 +167,11 @@ void main() {
 
   testWidgets('Image for device pixel ratio 1.0', (WidgetTester tester) async {
     const double ratio = 1.0;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 1.0);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 1.0);
@@ -177,11 +179,11 @@ void main() {
 
   testWidgets('Image for device pixel ratio 0.5', (WidgetTester tester) async {
     const double ratio = 0.5;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 1.0);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 1.0);
@@ -189,11 +191,11 @@ void main() {
 
   testWidgets('Image for device pixel ratio 1.5', (WidgetTester tester) async {
     const double ratio = 1.5;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 1.5);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 1.5);
@@ -201,11 +203,11 @@ void main() {
 
   testWidgets('Image for device pixel ratio 1.75', (WidgetTester tester) async {
     const double ratio = 1.75;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 1.5);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 1.5);
@@ -213,11 +215,11 @@ void main() {
 
   testWidgets('Image for device pixel ratio 2.3', (WidgetTester tester) async {
     const double ratio = 2.3;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 2.0);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 2.0);
@@ -225,11 +227,11 @@ void main() {
 
   testWidgets('Image for device pixel ratio 3.7', (WidgetTester tester) async {
     const double ratio = 3.7;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 4.0);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 4.0);
@@ -237,11 +239,11 @@ void main() {
 
   testWidgets('Image for device pixel ratio 5.1', (WidgetTester tester) async {
     const double ratio = 5.1;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 4.0);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 4.0);
@@ -258,14 +260,14 @@ void main() {
       ]
     }
     ''';
-    final AssetBundle bundle = new TestAssetBundle(manifest: manifest);
+    final AssetBundle bundle = TestAssetBundle(manifest: manifest);
 
     const double ratio = 1.0;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, bundle));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 1.5);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, bundle));
     expect(getRenderImage(tester, key).size, const Size(48.0, 48.0));
     expect(getTestImage(tester, key).scale, 1.5);
@@ -287,14 +289,14 @@ void main() {
       ]
     }
     ''';
-    final AssetBundle bundle = new TestAssetBundle(manifest: manifest);
+    final AssetBundle bundle = TestAssetBundle(manifest: manifest);
 
     const double ratio = 1.0;
-    Key key = new GlobalKey();
+    Key key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, false, bundle));
     expect(getRenderImage(tester, key).size, const Size(200.0, 200.0));
     expect(getTestImage(tester, key).scale, 10.0);
-    key = new GlobalKey();
+    key = GlobalKey();
     await pumpTreeToLayout(tester, buildImageAtRatio(image, key, ratio, true, bundle));
     expect(getRenderImage(tester, key).size, const Size(480.0, 480.0));
     expect(getTestImage(tester, key).scale, 10.0);

@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
 import 'button.dart';
+import 'colors.dart';
+import 'localizations.dart';
 
 // Padding around the line at the edge of the text selection that has 0 width and
 // the height of the text font.
@@ -17,35 +19,55 @@ const double _kHandlesPadding = 18.0;
 const double _kToolbarScreenPadding = 8.0;
 const double _kToolbarHeight = 36.0;
 
-const Color _kToolbarBackgroundColor = const Color(0xFF2E2E2E);
-const Color _kToolbarDividerColor = const Color(0xFFB9B9B9);
-const Color _kHandlesColor = const Color(0xFF146DDE);
+const Color _kToolbarBackgroundColor = Color(0xFF2E2E2E);
+const Color _kToolbarDividerColor = Color(0xFFB9B9B9);
+// Read off from the output on iOS 12. This color does not vary with the
+// application's theme color.
+const Color _kHandlesColor = Color(0xFF136FE0);
 
 // This offset is used to determine the center of the selection during a drag.
 // It's slightly below the center of the text so the finger isn't entirely
 // covering the text being selected.
-const Size _kSelectionOffset = const Size(20.0, 30.0);
-const Size _kToolbarTriangleSize = const Size(18.0, 9.0);
-const EdgeInsets _kToolbarButtonPadding = const EdgeInsets.symmetric(vertical: 10.0, horizontal: 21.0);
-const BorderRadius _kToolbarBorderRadius = const BorderRadius.all(const Radius.circular(7.5));
+const Size _kSelectionOffset = Size(20.0, 30.0);
+const Size _kToolbarTriangleSize = Size(18.0, 9.0);
+const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
+const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(7.5));
 
-const TextStyle _kToolbarButtonFontStyle = const TextStyle(
+const TextStyle _kToolbarButtonFontStyle = TextStyle(
+  inherit: false,
   fontSize: 14.0,
   letterSpacing: -0.11,
   fontWeight: FontWeight.w300,
+  color: CupertinoColors.white,
 );
+
+/// The direction of the triangle attached to the toolbar.
+///
+/// Defaults to showing the triangle downwards if sufficient space is available
+/// to show the toolbar above the text field. Otherwise, the toolbar will
+/// appear below the text field and the triangle's direction will be [up].
+enum _ArrowDirection { up, down }
 
 /// Paints a triangle below the toolbar.
 class _TextSelectionToolbarNotchPainter extends CustomPainter {
+  const _TextSelectionToolbarNotchPainter(
+    this.arrowDirection
+  ) : assert (arrowDirection != null);
+
+  final _ArrowDirection arrowDirection;
+
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
         ..color = _kToolbarBackgroundColor
         ..style = PaintingStyle.fill;
-    final Path triangle = new Path()
-        ..lineTo(_kToolbarTriangleSize.width / 2, 0.0)
+    final double triangleBottomY = (arrowDirection == _ArrowDirection.down)
+        ? 0.0
+        : _kToolbarTriangleSize.height;
+    final Path triangle = Path()
+        ..lineTo(_kToolbarTriangleSize.width / 2, triangleBottomY)
         ..lineTo(0.0, _kToolbarTriangleSize.height)
-        ..lineTo(-(_kToolbarTriangleSize.width / 2), 0.0)
+        ..lineTo(-(_kToolbarTriangleSize.width / 2), triangleBottomY)
         ..close();
     canvas.drawPath(triangle, paint);
   }
@@ -62,71 +84,91 @@ class _TextSelectionToolbar extends StatelessWidget {
     this.handleCopy,
     this.handlePaste,
     this.handleSelectAll,
+    this.arrowDirection,
   }) : super(key: key);
 
   final VoidCallback handleCut;
   final VoidCallback handleCopy;
   final VoidCallback handlePaste;
   final VoidCallback handleSelectAll;
+  final _ArrowDirection arrowDirection;
 
   @override
   Widget build(BuildContext context) {
     final List<Widget> items = <Widget>[];
     final Widget onePhysicalPixelVerticalDivider =
-        new SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
 
     if (handleCut != null)
-      items.add(_buildToolbarButton('Cut', handleCut));
+      items.add(_buildToolbarButton(localizations.cutButtonLabel, handleCut));
 
     if (handleCopy != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Copy', handleCopy));
+      items.add(_buildToolbarButton(localizations.copyButtonLabel, handleCopy));
     }
 
     if (handlePaste != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Paste', handlePaste));
+      items.add(_buildToolbarButton(localizations.pasteButtonLabel, handlePaste));
     }
 
     if (handleSelectAll != null) {
       if (items.isNotEmpty)
         items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton('Select All', handleSelectAll));
+      items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
 
-    final Widget triangle = new SizedBox.fromSize(
+    const Widget padding = Padding(padding: EdgeInsets.only(bottom: 10.0));
+
+    final Widget triangle = SizedBox.fromSize(
       size: _kToolbarTriangleSize,
-      child: new CustomPaint(
-        painter: new _TextSelectionToolbarNotchPainter(),
-      )
+      child: CustomPaint(
+        painter: _TextSelectionToolbarNotchPainter(arrowDirection),
+      ),
     );
 
-    return new Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        new ClipRRect(
+    final Widget toolbar = ClipRRect(
+      borderRadius: _kToolbarBorderRadius,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: _kToolbarDividerColor,
           borderRadius: _kToolbarBorderRadius,
-          child: new DecoratedBox(
-            decoration: const BoxDecoration(
-              color: _kToolbarDividerColor,
-            ),
-            child: new Row(mainAxisSize: MainAxisSize.min, children: items),
-          ),
+          // Add a hairline border with the button color to avoid
+          // antialiasing artifacts.
+          border: Border.all(color: _kToolbarBackgroundColor, width: 0),
         ),
-        // TODO(https://github.com/flutter/flutter/issues/11274):
-        // Position the triangle based on the layout delegate.
-        // And avoid letting the triangle line up with any dividers.
-        triangle,
-      ],
+        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      ),
+    );
+
+    final List<Widget> menus = (arrowDirection == _ArrowDirection.down)
+        ? <Widget>[
+            toolbar,
+            // TODO(xster): Position the triangle based on the layout delegate, and
+            // avoid letting the triangle line up with any dividers.
+            // https://github.com/flutter/flutter/issues/11274
+            triangle,
+            padding,
+          ]
+        : <Widget>[
+            padding,
+            triangle,
+            toolbar,
+          ];
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: menus,
     );
   }
 
   /// Builds a themed [CupertinoButton] for the toolbar.
   CupertinoButton _buildToolbarButton(String text, VoidCallback onPressed) {
-    return new CupertinoButton(
-      child: new Text(text, style: _kToolbarButtonFontStyle),
+    return CupertinoButton(
+      child: Text(text, style: _kToolbarButtonFontStyle),
       color: _kToolbarBackgroundColor,
       minSize: _kToolbarHeight,
       padding: _kToolbarButtonPadding,
@@ -175,7 +217,7 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
     else if (y + childSize.height > screenSize.height - _kToolbarScreenPadding)
       y = screenSize.height - childSize.height - _kToolbarScreenPadding;
 
-    return new Offset(x, y);
+    return Offset(x, y);
   }
 
   @override
@@ -198,7 +240,7 @@ class _TextSelectionHandlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final Paint paint = new Paint()
+    final Paint paint = Paint()
         ..color = _kHandlesColor
         ..strokeWidth = 2.0;
     // Draw circle below the origin that slightly overlaps the bar.
@@ -224,23 +266,51 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
-  Widget buildToolbar(BuildContext context, Rect globalEditableRegion, Offset position, TextSelectionDelegate delegate) {
+  Widget buildToolbar(
+    BuildContext context,
+    Rect globalEditableRegion,
+    Offset position,
+    List<TextSelectionPoint> endpoints,
+    TextSelectionDelegate delegate,
+  ) {
     assert(debugCheckHasMediaQuery(context));
-    return new ConstrainedBox(
-      constraints: new BoxConstraints.tight(globalEditableRegion.size),
-      child: new CustomSingleChildLayout(
-        delegate: new _TextSelectionToolbarLayout(
+
+    // The toolbar should appear below the TextField
+    // when there is not enough space above the TextField to show it.
+    final double availableHeight
+        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
+    final _ArrowDirection direction = (availableHeight > _kToolbarHeight)
+        ? _ArrowDirection.down
+        : _ArrowDirection.up;
+
+    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
+    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
+        ? endpoints[1]
+        : null;
+    final double x = (endTextSelectionPoint == null)
+        ? startTextSelectionPoint.point.dx
+        : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
+    final double y = (direction == _ArrowDirection.up)
+        ? startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight
+        : startTextSelectionPoint.point.dy - globalEditableRegion.height;
+    final Offset preciseMidpoint = Offset(x, y);
+
+    return ConstrainedBox(
+      constraints: BoxConstraints.tight(globalEditableRegion.size),
+      child: CustomSingleChildLayout(
+        delegate: _TextSelectionToolbarLayout(
           MediaQuery.of(context).size,
           globalEditableRegion,
-          position,
+          preciseMidpoint,
         ),
-        child: new _TextSelectionToolbar(
+        child: _TextSelectionToolbar(
           handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
           handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
           handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
           handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+          arrowDirection: direction,
         ),
-      )
+      ),
     );
   }
 
@@ -249,21 +319,21 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
-    final Size desiredSize = new Size(
+    final Size desiredSize = Size(
       2.0 * _kHandlesPadding,
-      textLineHeight + 2.0 * _kHandlesPadding
+      textLineHeight + 2.0 * _kHandlesPadding,
     );
 
-    final Widget handle = new SizedBox.fromSize(
+    final Widget handle = SizedBox.fromSize(
       size: desiredSize,
-      child: new CustomPaint(
-        painter: new _TextSelectionHandlePainter(
+      child: CustomPaint(
+        painter: _TextSelectionHandlePainter(
           // We give the painter a point of origin that's at the bottom baseline
           // of the selection cursor position.
           //
           // We give it in the form of an offset from the top left of the
           // SizedBox.
-          origin: new Offset(_kHandlesPadding, textLineHeight + _kHandlesPadding),
+          origin: Offset(_kHandlesPadding, textLineHeight + _kHandlesPadding),
         ),
       ),
     );
@@ -273,22 +343,22 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // on top of the text selection endpoints.
     switch (type) {
       case TextSelectionHandleType.left: // The left handle is upside down on iOS.
-        return new Transform(
-          transform: new Matrix4.rotationZ(math.pi)
+        return Transform(
+          transform: Matrix4.rotationZ(math.pi)
               ..translate(-_kHandlesPadding, -_kHandlesPadding),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.right:
-        return new Transform(
-          transform: new Matrix4.translationValues(
+        return Transform(
+          transform: Matrix4.translationValues(
             -_kHandlesPadding,
             -(textLineHeight + _kHandlesPadding),
-            0.0
+            0.0,
           ),
-          child: handle
+          child: handle,
         );
       case TextSelectionHandleType.collapsed: // iOS doesn't draw anything for collapsed selections.
-        return new Container();
+        return Container();
     }
     assert(type != null);
     return null;
@@ -296,4 +366,4 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 }
 
 /// Text selection controls that follows iOS design conventions.
-final TextSelectionControls cupertinoTextSelectionControls = new _CupertinoTextSelectionControls();
+final TextSelectionControls cupertinoTextSelectionControls = _CupertinoTextSelectionControls();

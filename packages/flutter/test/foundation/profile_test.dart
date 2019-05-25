@@ -3,19 +3,18 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:test/test.dart';
-
-// We run our tests in debug mode, to this will always evaluate to false...
-const bool isReleaseMode = const bool.fromEnvironment('dart.vm.product');
+import '../flutter_test_alternative.dart';
 
 void main() {
   // TODO(devoncarew): This test - while very nice - isn't testing what we really want to know:
   // that the code in the `profile` closure is omitted in release mode.
   test('profile invokes its closure in debug or profile mode', () {
     int count = 0;
-    profile(() {
+    profile(() { // ignore: deprecated_member_use_from_same_package
       count++;
     });
-    expect(count, isReleaseMode ? 0 : 1);
+    // We run our tests in debug mode, so kReleaseMode will always evaluate to
+    // false...
+    expect(count, kReleaseMode ? 0 : 1);
   });
 }

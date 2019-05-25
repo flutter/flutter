@@ -9,17 +9,17 @@ import 'states.dart';
 
 void main() {
   testWidgets('ScrollController control test', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return new Container(
+            return Container(
               height: 200.0,
-              child: new Text(state),
+              child: Text(state),
             );
           }).toList(),
         ),
@@ -50,15 +50,15 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           key: const Key('second'),
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return new Container(
+            return Container(
               height: 200.0,
-              child: new Text(state),
+              child: Text(state),
             );
           }).toList(),
         ),
@@ -73,18 +73,18 @@ void main() {
     expect(controller.offset, equals(653.0));
     expect(realOffset(), equals(controller.offset));
 
-    final ScrollController controller2 = new ScrollController();
+    final ScrollController controller2 = ScrollController();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           key: const Key('second'),
           controller: controller2,
           children: kStates.map<Widget>((String state) {
-            return new Container(
+            return Container(
               height: 200.0,
-              child: new Text(state),
+              child: Text(state),
             );
           }).toList(),
         ),
@@ -99,16 +99,16 @@ void main() {
     expect(() => controller.animateTo(132.0, duration: const Duration(milliseconds: 300), curve: Curves.ease), throwsAssertionError);
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           key: const Key('second'),
           controller: controller2,
           physics: const BouncingScrollPhysics(),
           children: kStates.map<Widget>((String state) {
-            return new Container(
+            return Container(
               height: 200.0,
-              child: new Text(state),
+              child: Text(state),
             );
           }).toList(),
         ),
@@ -130,17 +130,17 @@ void main() {
   });
 
   testWidgets('ScrollController control test', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController(
+    final ScrollController controller = ScrollController(
       initialScrollOffset: 209.0,
     );
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new GridView.count(
+        child: GridView.count(
           crossAxisCount: 4,
           controller: controller,
-          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
       ),
     );
@@ -160,12 +160,12 @@ void main() {
     expect(realOffset(), equals(controller.offset));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new GridView.count(
+        child: GridView.count(
           crossAxisCount: 2,
           controller: controller,
-          children: kStates.map<Widget>((String state) => new Text(state)).toList(),
+          children: kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
       ),
     );
@@ -175,14 +175,14 @@ void main() {
   });
 
   testWidgets('DrivenScrollActivity ending after dispose', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
-          children: <Widget>[ new Container(height: 200000.0) ],
+          children: <Widget>[ Container(height: 200000.0) ],
         ),
       ),
     );
@@ -192,37 +192,37 @@ void main() {
     await tester.pump(); // Start the animation.
 
     // We will now change the tree on the same frame as the animation ends.
-    await tester.pumpWidget(new Container(), const Duration(seconds: 2));
+    await tester.pumpWidget(Container(), const Duration(seconds: 2));
   });
 
   testWidgets('Read operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     expect(() => controller.offset, throwsAssertionError);
     expect(() => controller.position, throwsAssertionError);
   });
 
   testWidgets('Read operations on ScrollControllers with more than one position fail', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           children: <Widget>[
-            new Container(
+            Container(
               constraints: const BoxConstraints(maxHeight: 500.0),
-              child: new ListView(
+              child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return new Container(height: 200.0, child: new Text(state));
+                  return Container(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
-            new Container(
+            Container(
               constraints: const BoxConstraints(maxHeight: 500.0),
-              child: new ListView(
+              child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return new Container(height: 200.0, child: new Text(state));
+                  return Container(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -236,33 +236,33 @@ void main() {
   });
 
   testWidgets('Write operations on ScrollControllers with no positions fail', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     expect(() => controller.animateTo(1.0, duration: const Duration(seconds: 1), curve: Curves.linear), throwsAssertionError);
     expect(() => controller.jumpTo(1.0), throwsAssertionError);
   });
 
   testWidgets('Write operations on ScrollControllers with more than one position do not throw', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           children: <Widget>[
-            new Container(
+            Container(
               constraints: const BoxConstraints(maxHeight: 500.0),
-              child: new ListView(
+              child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return new Container(height: 200.0, child: new Text(state));
+                  return Container(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
-            new Container(
+            Container(
               constraints: const BoxConstraints(maxHeight: 500.0),
-              child: new ListView(
+              child: ListView(
                 controller: controller,
                 children: kStates.map<Widget>((String state) {
-                  return new Container(height: 200.0, child: new Text(state));
+                  return Container(height: 200.0, child: Text(state));
                 }).toList(),
               ),
             ),
@@ -277,7 +277,7 @@ void main() {
   });
 
   testWidgets('Scroll controllers notify when the position changes', (WidgetTester tester) async {
-    final ScrollController controller = new ScrollController();
+    final ScrollController controller = ScrollController();
 
     final List<double> log = <double>[];
 
@@ -286,12 +286,12 @@ void main() {
     });
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new ListView(
+        child: ListView(
           controller: controller,
           children: kStates.map<Widget>((String state) {
-            return new Container(height: 200.0, child: new Text(state));
+            return Container(height: 200.0, child: Text(state));
           }).toList(),
         ),
       ),
@@ -301,7 +301,7 @@ void main() {
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -250.0));
 
-    expect(log, equals(<double>[ 250.0 ]));
+    expect(log, equals(<double>[ 20.0, 250.0 ]));
     log.clear();
 
     controller.dispose();
@@ -311,20 +311,20 @@ void main() {
   });
 
   testWidgets('keepScrollOffset', (WidgetTester tester) async {
-    final PageStorageBucket bucket = new PageStorageBucket();
+    final PageStorageBucket bucket = PageStorageBucket();
 
     Widget buildFrame(ScrollController controller) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new PageStorage(
+        child: PageStorage(
           bucket: bucket,
-          child: new KeyedSubtree(
+          child: KeyedSubtree(
             key: const PageStorageKey<String>('ListView'),
-            child: new ListView(
-              key: new UniqueKey(), // it's a different ListView every time
+            child: ListView(
+              key: UniqueKey(), // it's a different ListView every time
               controller: controller,
-              children: new List<Widget>.generate(50, (int index) {
-                return new Container(height: 100.0, child: new Text('Item $index'));
+              children: List<Widget>.generate(50, (int index) {
+                return Container(height: 100.0, child: Text('Item $index'));
               }).toList(),
             ),
           ),
@@ -337,7 +337,7 @@ void main() {
 
     // The initialScrollOffset is used in this case, because there's no saved
     // scroll offset.
-    ScrollController controller = new ScrollController(initialScrollOffset: 200.0);
+    ScrollController controller = ScrollController(initialScrollOffset: 200.0);
     await tester.pumpWidget(buildFrame(controller));
     expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 2')), Offset.zero);
 
@@ -347,7 +347,7 @@ void main() {
 
     // The initialScrollOffset isn't used in this case, because the scrolloffset
     // can be restored.
-    controller = new ScrollController(initialScrollOffset: 25.0);
+    controller = ScrollController(initialScrollOffset: 25.0);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 2000.0);
     expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 20')), Offset.zero);
@@ -356,7 +356,7 @@ void main() {
     // when the ListView is recreated with a new ScrollController and
     // the initialScrollOffset is used.
 
-    controller = new ScrollController(keepScrollOffset: false, initialScrollOffset: 100.0);
+    controller = ScrollController(keepScrollOffset: false, initialScrollOffset: 100.0);
     await tester.pumpWidget(buildFrame(controller));
     expect(controller.offset, 100.0);
     expect(tester.getTopLeft(find.widgetWithText(Container, 'Item 1')), Offset.zero);

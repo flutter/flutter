@@ -8,42 +8,42 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Directionality', (WidgetTester tester) async {
     final List<TextDirection> log = <TextDirection>[];
-    final Widget inner = new Builder(
+    final Widget inner = Builder(
       builder: (BuildContext context) {
         log.add(Directionality.of(context));
         return const Placeholder();
       }
     );
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: inner,
       ),
     );
     expect(log, <TextDirection>[TextDirection.ltr]);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: inner,
       ),
     );
     expect(log, <TextDirection>[TextDirection.ltr]);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
         child: inner,
       ),
     );
     expect(log, <TextDirection>[TextDirection.ltr, TextDirection.rtl]);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
         child: inner,
       ),
     );
     expect(log, <TextDirection>[TextDirection.ltr, TextDirection.rtl]);
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
         child: inner,
       ),
@@ -53,7 +53,7 @@ void main() {
 
   testWidgets('Directionality default', (WidgetTester tester) async {
     bool good = false;
-    await tester.pumpWidget(new Builder(
+    await tester.pumpWidget(Builder(
       builder: (BuildContext context) {
         expect(Directionality.of(context), isNull);
         good = true;
@@ -65,7 +65,7 @@ void main() {
 
   testWidgets('Directionality can\'t be null', (WidgetTester tester) async {
     expect(() {
-      new Directionality(textDirection: nonconst(null), child: const Placeholder());
+      Directionality(textDirection: nonconst(null), child: const Placeholder());
     }, throwsAssertionError);
   });
 }

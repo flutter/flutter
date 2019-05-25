@@ -4,9 +4,12 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter_gallery/demo/shrine/model/app_state_model.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
@@ -36,18 +39,19 @@ class GalleryApp extends StatefulWidget {
   final bool testMode;
 
   @override
-  _GalleryAppState createState() => new _GalleryAppState();
+  _GalleryAppState createState() => _GalleryAppState();
 }
 
 class _GalleryAppState extends State<GalleryApp> {
   GalleryOptions _options;
   Timer _timeDilationTimer;
+  AppStateModel model;
 
   Map<String, WidgetBuilder> _buildRoutes() {
     // For a different example of how to set up an application routing table
     // using named routes, consider the example in the Navigator class documentation:
     // https://docs.flutter.io/flutter/widgets/Navigator-class.html
-    return new Map<String, WidgetBuilder>.fromIterable(
+    return Map<String, WidgetBuilder>.fromIterable(
       kAllGalleryDemos,
       key: (dynamic demo) => '${demo.routeName}',
       value: (dynamic demo) => demo.buildRoute,
@@ -57,12 +61,13 @@ class _GalleryAppState extends State<GalleryApp> {
   @override
   void initState() {
     super.initState();
-    _options = new GalleryOptions(
+    _options = GalleryOptions(
       theme: kLightGalleryTheme,
       textScaleFactor: kAllGalleryTextScaleValues[0],
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
+    model = AppStateModel()..loadProducts();
   }
 
   @override
@@ -81,7 +86,7 @@ class _GalleryAppState extends State<GalleryApp> {
           // We delay the time dilation change long enough that the user can see
           // that UI has started reacting and then we slam on the brakes so that
           // they see that the time is in fact now dilated.
-          _timeDilationTimer = new Timer(const Duration(milliseconds: 150), () {
+          _timeDilationTimer = Timer(const Duration(milliseconds: 150), () {
             timeDilation = newOptions.timeDilation;
           });
         } else {
@@ -94,9 +99,9 @@ class _GalleryAppState extends State<GalleryApp> {
   }
 
   Widget _applyTextScaleFactor(Widget child) {
-    return new Builder(
+    return Builder(
       builder: (BuildContext context) {
-        return new MediaQuery(
+        return MediaQuery(
           data: MediaQuery.of(context).copyWith(
             textScaleFactor: _options.textScaleFactor.scale,
           ),
@@ -108,39 +113,52 @@ class _GalleryAppState extends State<GalleryApp> {
 
   @override
   Widget build(BuildContext context) {
-    Widget home = new GalleryHome(
+    Widget home = GalleryHome(
       testMode: widget.testMode,
-      optionsPage: new GalleryOptionsPage(
+      optionsPage: GalleryOptionsPage(
         options: _options,
         onOptionsChanged: _handleOptionsChanged,
         onSendFeedback: widget.onSendFeedback ?? () {
-          launch('https://github.com/flutter/flutter/issues/new', forceSafariVC: false);
+          launch('https://github.com/flutter/flutter/issues/new/choose', forceSafariVC: false);
         },
       ),
     );
 
     if (widget.updateUrlFetcher != null) {
-      home = new Updater(
+      home = Updater(
         updateUrlFetcher: widget.updateUrlFetcher,
         child: home,
       );
     }
 
-    return new MaterialApp(
-      theme: _options.theme.data.copyWith(platform: _options.platform),
-      title: 'Flutter Gallery',
-      color: Colors.grey,
-      showPerformanceOverlay: _options.showPerformanceOverlay,
-      checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
-      checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
-      routes: _buildRoutes(),
-      builder: (BuildContext context, Widget child) {
-        return new Directionality(
-          textDirection: _options.textDirection,
-          child: _applyTextScaleFactor(child),
-        );
-      },
-      home: home,
+    return ScopedModel<AppStateModel>(
+      model: model,
+      child: MaterialApp(
+        theme: _options.theme.data.copyWith(platform: _options.platform),
+        title: 'Flutter Gallery',
+        color: Colors.grey,
+        showPerformanceOverlay: _options.showPerformanceOverlay,
+        checkerboardOffscreenLayers: _options.showOffscreenLayersCheckerboard,
+        checkerboardRasterCacheImages: _options.showRasterCacheImagesCheckerboard,
+        routes: _buildRoutes(),
+        builder: (BuildContext context, Widget child) {
+          return Directionality(
+            textDirection: _options.textDirection,
+            child: _applyTextScaleFactor(
+              // Specifically use a blank Cupertino theme here and do not transfer
+              // over the Material primary color etc except the brightness to
+              // showcase standard iOS looks.
+              CupertinoTheme(
+                data: CupertinoThemeData(
+                  brightness: _options.theme.data.brightness,
+                ),
+                child: child,
+              ),
+            ),
+          );
+        },
+        home: home,
+      ),
     );
   }
 }

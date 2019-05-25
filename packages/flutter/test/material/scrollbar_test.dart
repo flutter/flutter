@@ -21,26 +21,26 @@ class TestCanvas implements Canvas {
 
 void main() {
   testWidgets('Scrollbar doesn\'t show when tapping list', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Center(
-        child: new Container(
-          decoration: new BoxDecoration(
-            border: new Border.all(color: const Color(0xFFFFFF00))
+      child: Center(
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(color: const Color(0xFFFFFF00))
           ),
           height: 200.0,
           width: 300.0,
-          child: new Scrollbar(
-            child: new ListView(
+          child: Scrollbar(
+            child: ListView(
               children: <Widget>[
-                new Container(height: 40.0, child: const Text('0')),
-                new Container(height: 40.0, child: const Text('1')),
-                new Container(height: 40.0, child: const Text('2')),
-                new Container(height: 40.0, child: const Text('3')),
-                new Container(height: 40.0, child: const Text('4')),
-                new Container(height: 40.0, child: const Text('5')),
-                new Container(height: 40.0, child: const Text('6')),
-                new Container(height: 40.0, child: const Text('7')),
+                Container(height: 40.0, child: const Text('0')),
+                Container(height: 40.0, child: const Text('1')),
+                Container(height: 40.0, child: const Text('2')),
+                Container(height: 40.0, child: const Text('3')),
+                Container(height: 40.0, child: const Text('4')),
+                Container(height: 40.0, child: const Text('5')),
+                Container(height: 40.0, child: const Text('6')),
+                Container(height: 40.0, child: const Text('7')),
               ],
             ),
           ),
@@ -64,15 +64,15 @@ void main() {
   });
 
   testWidgets('ScrollbarPainter does not divide by zero', (WidgetTester tester) async {
-    await tester.pumpWidget(new Directionality(
+    await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
-      child: new Container(
+      child: Container(
         height: 200.0,
         width: 300.0,
-        child: new Scrollbar(
-          child: new ListView(
+        child: Scrollbar(
+          child: ListView(
             children: <Widget>[
-              new Container(height: 40.0, child: const Text('0')),
+              Container(height: 40.0, child: const Text('0')),
             ],
           ),
         ),
@@ -89,17 +89,17 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200));
     await tester.pump(const Duration(milliseconds: 200));
 
-    final ScrollMetrics metrics = new FixedScrollMetrics(
+    final ScrollMetrics metrics = FixedScrollMetrics(
       minScrollExtent: 0.0,
       maxScrollExtent: 0.0,
       pixels: 0.0,
       viewportDimension: 100.0,
-      axisDirection: AxisDirection.down
+      axisDirection: AxisDirection.down,
     );
     scrollPainter.update(metrics, AxisDirection.down);
 
     final List<Invocation> invocations = <Invocation>[];
-    final TestCanvas canvas = new TestCanvas(invocations);
+    final TestCanvas canvas = TestCanvas(invocations);
     scrollPainter.paint(canvas, const Size(10.0, 100.0));
     final Rect thumbRect = invocations.single.positionalArguments[0];
     expect(thumbRect.isFinite, isTrue);
@@ -107,15 +107,15 @@ void main() {
 
   testWidgets('Adaptive scrollbar', (WidgetTester tester) async {
     Widget viewWithScroll(TargetPlatform platform) {
-      return new Directionality(
+      return Directionality(
         textDirection: TextDirection.ltr,
-        child: new Theme(
-          data: new ThemeData(
+        child: Theme(
+          data: ThemeData(
             platform: platform
           ),
-          child: new Scrollbar(
-            child: new SingleChildScrollView(
-              child: const SizedBox(width: 4000.0, height: 4000.0),
+          child: const Scrollbar(
+            child: SingleChildScrollView(
+              child: SizedBox(width: 4000.0, height: 4000.0),
             ),
           ),
         ),

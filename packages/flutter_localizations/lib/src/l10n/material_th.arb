@@ -38,6 +38,18 @@
   "drawerLabel": "เมนูการนำทาง",
   "popupMenuLabel": "เมนูป๊อปอัป",
   "dialogLabel": "กล่องโต้ตอบ",
-  "alertDialogLabel": "เตือนภัย",
-  "searchFieldLabel": "ค้นหา"
+  "alertDialogLabel": "การแจ้งเตือน",
+  "searchFieldLabel": "ค้นหา",
+  "reorderItemToStart": "ย้ายไปต้นรายการ",
+  "reorderItemToEnd": "ย้ายไปท้ายรายการ",
+  "reorderItemUp": "ย้ายขึ้น",
+  "reorderItemDown": "ย้ายลง",
+  "reorderItemLeft": "ย้ายไปทางซ้าย",
+  "reorderItemRight": "ย้ายไปทางขวา",
+  "expandedIconTapHint": "ยุบ",
+  "collapsedIconTapHint": "ขยาย",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "เหลือ 1 อักขระ",
+  "remainingTextFieldCharacterCountOther": "เหลือ $remainingCount อักขระ",
+  "refreshIndicatorSemanticLabel": "รีเฟรช"
 }

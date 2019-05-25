@@ -24,7 +24,7 @@ ProcessManager _processManager = const LocalProcessManager();
 class ProcessInfo {
   ProcessInfo(this.command, this.process);
 
-  final DateTime startTime = new DateTime.now();
+  final DateTime startTime = DateTime.now();
   final String command;
   final Process process;
 
@@ -52,7 +52,7 @@ class HealthCheckResult {
 
   @override
   String toString() {
-    final StringBuffer buf = new StringBuffer(succeeded ? 'succeeded' : 'failed');
+    final StringBuffer buf = StringBuffer(succeeded ? 'succeeded' : 'failed');
     if (details != null && details.trim().isNotEmpty) {
       buf.writeln();
       // Indent details by 4 spaces
@@ -74,25 +74,33 @@ class BuildFailedError extends Error {
 }
 
 void fail(String message) {
-  throw new BuildFailedError(message);
+  throw BuildFailedError(message);
 }
 
-void rm(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync();
+// Remove the given file or directory.
+void rm(FileSystemEntity entity, { bool recursive = false}) {
+  if (entity.existsSync()) {
+    // This should not be necessary, but it turns out that
+    // on Windows it's common for deletions to fail due to
+    // bogus (we think) "access denied" errors.
+    try {
+      entity.deleteSync(recursive: recursive);
+    } on FileSystemException catch (error) {
+      print('Failed to delete ${entity.path}: $error');
+    }
+  }
 }
 
 /// Remove recursively.
 void rmTree(FileSystemEntity entity) {
-  if (entity.existsSync())
-    entity.deleteSync(recursive: true);
+  rm(entity, recursive: true);
 }
 
 List<FileSystemEntity> ls(Directory directory) => directory.listSync();
 
-Directory dir(String path) => new Directory(path);
+Directory dir(String path) => Directory(path);
 
-File file(String path) => new File(path);
+File file(String path) => File(path);
 
 void copy(File sourceFile, Directory targetDirectory, {String name}) {
   final File target = file(
@@ -107,9 +115,9 @@ void recursiveCopy(Directory source, Directory target) {
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is Directory)
-      recursiveCopy(entity, new Directory(path.join(target.path, name)));
+      recursiveCopy(entity, Directory(path.join(target.path, name)));
     else if (entity is File) {
-      final File dest = new File(path.join(target.path, name));
+      final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
     }
   }
@@ -161,17 +169,17 @@ Future<String> getDartVersion() async {
 
 Future<String> getCurrentFlutterRepoCommit() {
   if (!dir('${flutterDirectory.path}/.git').existsSync()) {
-    return null;
+    return Future<String>.value(null);
   }
 
-  return inDirectory(flutterDirectory, () {
+  return inDirectory<String>(flutterDirectory, () {
     return eval('git', <String>['rev-parse', 'HEAD']);
   });
 }
 
 Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
   // git show -s --format=%at 4b546df7f0b3858aaaa56c4079e5be1ba91fbb65
-  return inDirectory(flutterDirectory, () async {
+  return inDirectory<DateTime>(flutterDirectory, () async {
     final String unixTimestamp = await eval('git', <String>[
       'show',
       '-s',
@@ -179,7 +187,7 @@ Future<DateTime> getFlutterRepoCommitTimestamp(String commit) {
       commit,
     ]);
     final int secondsSinceEpoch = int.parse(unixTimestamp);
-    return new DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
+    return DateTime.fromMillisecondsSinceEpoch(secondsSinceEpoch * 1000);
   });
 }
 
@@ -224,27 +232,27 @@ Future<Process> startProcess(
     environment: environment,
     workingDirectory: workingDirectory ?? cwd,
   );
-  final ProcessInfo processInfo = new ProcessInfo(command, process);
+  final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
 
-  process.exitCode.then((int exitCode) {
-    print('exitcode: $exitCode');
+  process.exitCode.then<void>((int exitCode) {
+    print('"$executable" exit code: $exitCode');
     _runningProcesses.remove(processInfo);
   });
 
   return process;
 }
 
-Future<Null> forceQuitRunningProcesses() async {
+Future<void> forceQuitRunningProcesses() async {
   if (_runningProcesses.isEmpty)
     return;
 
   // Give normally quitting processes a chance to report their exit code.
-  await new Future<Null>.delayed(const Duration(seconds: 1));
+  await Future<void>.delayed(const Duration(seconds: 1));
 
   // Whatever's left, kill it.
   for (ProcessInfo p in _runningProcesses) {
-    print('Force quitting process:\n$p');
+    print('Force-quitting process:\n$p');
     if (!p.process.kill()) {
       print('Failed to force quit process');
     }
@@ -257,30 +265,31 @@ Future<int> exec(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
-  final Completer<Null> stdoutDone = new Completer<Null>();
-  final Completer<Null> stderrDone = new Completer<Null>();
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
       }, onDone: () { stderrDone.complete(); });
 
-  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
-    fail('Executable failed with exit code $exitCode.');
+    fail('Executable "$executable" failed with exit code $exitCode.');
 
   return exitCode;
 }
@@ -292,39 +301,42 @@ Future<String> eval(
   String executable,
   List<String> arguments, {
   Map<String, String> environment,
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
+  String workingDirectory,
+  StringBuffer stderr, // if not null, the stderr will be written here
 }) async {
-  final Process process = await startProcess(executable, arguments, environment: environment);
+  final Process process = await startProcess(executable, arguments, environment: environment, workingDirectory: workingDirectory);
 
-  final StringBuffer output = new StringBuffer();
-  final Completer<Null> stdoutDone = new Completer<Null>();
-  final Completer<Null> stderrDone = new Completer<Null>();
+  final StringBuffer output = StringBuffer();
+  final Completer<void> stdoutDone = Completer<void>();
+  final Completer<void> stderrDone = Completer<void>();
   process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stdout: $line');
         output.writeln(line);
       }, onDone: () { stdoutDone.complete(); });
   process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
+      .transform<String>(utf8.decoder)
+      .transform<String>(const LineSplitter())
       .listen((String line) {
         print('stderr: $line');
+        stderr?.writeln(line);
       }, onDone: () { stderrDone.complete(); });
 
-  await Future.wait<Null>(<Future<Null>>[stdoutDone.future, stderrDone.future]);
+  await Future.wait<void>(<Future<void>>[stdoutDone.future, stderrDone.future]);
   final int exitCode = await process.exitCode;
 
   if (exitCode != 0 && !canFail)
-    fail('Executable failed with exit code $exitCode.');
+    fail('Executable "$executable" failed with exit code $exitCode.');
 
   return output.toString().trimRight();
 }
 
 Future<int> flutter(String command, {
   List<String> options = const <String>[],
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
   final List<String> args = <String>[command]..addAll(options);
@@ -335,12 +347,13 @@ Future<int> flutter(String command, {
 /// Runs a `flutter` command and returns the standard output as a string.
 Future<String> evalFlutter(String command, {
   List<String> options = const <String>[],
-  bool canFail = false,
+  bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
+  StringBuffer stderr, // if not null, the stderr will be written here.
 }) {
   final List<String> args = <String>[command]..addAll(options);
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
-      canFail: canFail, environment: environment);
+      canFail: canFail, environment: environment, stderr: stderr);
 }
 
 String get dartBin =>
@@ -362,7 +375,7 @@ Future<String> findJavaHome() async {
   return path.dirname(path.dirname(javaBinary));
 }
 
-Future<dynamic> inDirectory(dynamic directory, Future<dynamic> action()) async {
+Future<T> inDirectory<T>(dynamic directory, Future<T> action()) async {
   final String previousCwd = cwd;
   try {
     cd(directory);
@@ -410,18 +423,18 @@ String jsonEncode(dynamic data) {
   return const JsonEncoder.withIndent('  ').convert(data) + '\n';
 }
 
-Future<Null> getFlutter(String revision) async {
+Future<void> getFlutter(String revision) async {
   section('Get Flutter!');
 
   if (exists(flutterDirectory)) {
-    rmTree(flutterDirectory);
+    flutterDirectory.deleteSync(recursive: true);
   }
 
-  await inDirectory(flutterDirectory.parent, () async {
+  await inDirectory<void>(flutterDirectory.parent, () async {
     await exec('git', <String>['clone', 'https://github.com/flutter/flutter.git']);
   });
 
-  await inDirectory(flutterDirectory, () async {
+  await inDirectory<void>(flutterDirectory, () async {
     await exec('git', <String>['checkout', revision]);
   });
 
@@ -485,8 +498,8 @@ Iterable<String> grep(Pattern pattern, {@required String from}) {
 ///     } catch (error, chain) {
 ///
 ///     }
-Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
-  final Completer<Null> completer = new Completer<Null>();
+Future<void> runAndCaptureAsyncStacks(Future<void> callback()) {
+  final Completer<void> completer = Completer<void>();
   Chain.capture(() async {
     await callback();
     completer.complete();
@@ -497,7 +510,7 @@ Future<Null> runAndCaptureAsyncStacks(Future<Null> callback()) {
 bool canRun(String path) => _processManager.canRun(path);
 
 String extractCloudAuthTokenArg(List<String> rawArgs) {
-  final ArgParser argParser = new ArgParser()..addOption('cloud-auth-token');
+  final ArgParser argParser = ArgParser()..addOption('cloud-auth-token');
   ArgResults args;
   try {
     args = argParser.parse(rawArgs);
@@ -516,21 +529,45 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
   return token;
 }
 
+final RegExp _obsRegExp =
+  RegExp('An Observatory debugger .* is available at: ');
+final RegExp _obsPortRegExp = RegExp('(\\S+:(\\d+)/\\S*)\$');
+final RegExp _obsUriRegExp = RegExp('((http|\/\/)[a-zA-Z0-9:/=_\\-\.\\[\\]]+)');
+
 /// Tries to extract a port from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
-///
-/// The `multiLine` flag should be set to true if `line` is actually a buffer of many lines.
+/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
 int parseServicePort(String line, {
-  String prefix = 'An Observatory debugger .* is available at: ',
-  bool multiLine = false,
+  Pattern prefix,
 }) {
-  // e.g. "An Observatory debugger and profiler on ... is available at: http://127.0.0.1:8100/"
-  final RegExp pattern = new RegExp('$prefix(\\S+:(\\d+)/\\S*)\$', multiLine: multiLine);
-  final Match match = pattern.firstMatch(line);
-  print(pattern);
-  print(match);
-  return match == null ? null : int.parse(match.group(2));
+  prefix ??= _obsRegExp;
+  final Iterable<Match> matchesIter = prefix.allMatches(line);
+  if (matchesIter.isEmpty) {
+    return null;
+  }
+  final Match prefixMatch = matchesIter.first;
+  final List<Match> matches =
+    _obsPortRegExp.allMatches(line, prefixMatch.end).toList();
+  return matches.isEmpty ? null : int.parse(matches[0].group(2));
+}
+
+/// Tries to extract a Uri from the string.
+///
+/// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
+/// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
+Uri parseServiceUri(String line, {
+  Pattern prefix,
+}) {
+  prefix ??= _obsRegExp;
+  final Iterable<Match> matchesIter = prefix.allMatches(line);
+  if (matchesIter.isEmpty) {
+    return null;
+  }
+  final Match prefixMatch = matchesIter.first;
+  final List<Match> matches =
+    _obsUriRegExp.allMatches(line, prefixMatch.end).toList();
+  return matches.isEmpty ? null : Uri.parse(matches[0].group(0));
 }
 
 /// If FLUTTER_ENGINE environment variable is set then we need to pass
@@ -541,7 +578,7 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       // If engine flavor was not specified explicitly then scan options looking
       // for flags that specify the engine flavor (--release, --profile or
       // --debug). Default flavor to debug if no flags were found.
-      const Map<String, String> optionToFlavor = const <String, String>{
+      const Map<String, String> optionToFlavor = <String, String>{
         '--release': 'release',
         '--debug': 'debug',
         '--profile': 'profile',
@@ -557,7 +594,7 @@ void setLocalEngineOptionIfNecessary(List<String> options, [String flavor]) {
       flavor ??= 'debug';
     }
 
-    const Map<DeviceOperatingSystem, String> osNames = const <DeviceOperatingSystem, String>{
+    const Map<DeviceOperatingSystem, String> osNames = <DeviceOperatingSystem, String>{
       DeviceOperatingSystem.ios: 'ios',
       DeviceOperatingSystem.android: 'android',
     };

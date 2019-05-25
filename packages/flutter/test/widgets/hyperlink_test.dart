@@ -9,38 +9,38 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('Can tap a hyperlink', (WidgetTester tester) async {
     bool didTapLeft = false;
-    final TapGestureRecognizer tapLeft = new TapGestureRecognizer()
+    final TapGestureRecognizer tapLeft = TapGestureRecognizer()
       ..onTap = () {
         didTapLeft = true;
       };
 
     bool didTapRight = false;
-    final TapGestureRecognizer tapRight = new TapGestureRecognizer()
+    final TapGestureRecognizer tapRight = TapGestureRecognizer()
       ..onTap = () {
         didTapRight = true;
       };
 
-    const Key textKey = const Key('text');
+    const Key textKey = Key('text');
 
     await tester.pumpWidget(
-      new Center(
-        child: new RichText(
+      Center(
+        child: RichText(
           key: textKey,
           textDirection: TextDirection.ltr,
-          text: new TextSpan(
+          text: TextSpan(
             children: <TextSpan>[
-              new TextSpan(
+              TextSpan(
                 text: 'xxxxxxxx',
-                recognizer: tapLeft
+                recognizer: tapLeft,
               ),
               const TextSpan(text: 'yyyyyyyy'),
-              new TextSpan(
+              TextSpan(
                 text: 'zzzzzzzzz',
-                recognizer: tapRight
+                recognizer: tapRight,
               ),
             ]
-          )
-        )
+          ),
+        ),
       )
     );
 
@@ -63,7 +63,7 @@ void main() {
 
     didTapLeft = false;
 
-    await tester.tapAt(box.localToGlobal(new Offset(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
+    await tester.tapAt(box.localToGlobal(Offset(box.size.width, 0.0)) + const Offset(-2.0, 2.0));
 
     expect(didTapLeft, isFalse);
     expect(didTapRight, isTrue);

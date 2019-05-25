@@ -12,34 +12,34 @@ import 'semantics_tester.dart';
 void main() {
   group('BlockSemantics', () {
     testWidgets('hides semantic nodes of siblings', (WidgetTester tester) async {
-      final SemanticsTester semantics = new SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-      await tester.pumpWidget(new Stack(
+      await tester.pumpWidget(Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Semantics(
+          Semantics(
             label: 'layer#1',
             textDirection: TextDirection.ltr,
-            child: new Container(),
+            child: Container(),
           ),
           const BlockSemantics(),
-          new Semantics(
+          Semantics(
             label: 'layer#2',
             textDirection: TextDirection.ltr,
-            child: new Container(),
+            child: Container(),
           ),
         ],
       ));
 
       expect(semantics, isNot(includesNodeWith(label: 'layer#1')));
 
-      await tester.pumpWidget(new Stack(
+      await tester.pumpWidget(Stack(
         textDirection: TextDirection.ltr,
         children: <Widget>[
-          new Semantics(
+          Semantics(
             label: 'layer#1',
             textDirection: TextDirection.ltr,
-            child: new Container(),
+            child: Container(),
           ),
         ],
       ));
@@ -50,44 +50,44 @@ void main() {
     });
 
     testWidgets('does not hides semantic nodes of siblings outside the current semantic boundary', (WidgetTester tester) async {
-      final SemanticsTester semantics = new SemanticsTester(tester);
+      final SemanticsTester semantics = SemanticsTester(tester);
 
-      await tester.pumpWidget(new Directionality(textDirection: TextDirection.ltr, child: new Stack(
+      await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: Stack(
         children: <Widget>[
-          new Semantics(
+          Semantics(
             label: '#1',
-            child: new Container(),
+            child: Container(),
           ),
-          new Semantics(
+          Semantics(
             label: '#2',
             container: true,
             explicitChildNodes: true,
-            child: new Stack(
+            child: Stack(
               children: <Widget>[
-                new Semantics(
+                Semantics(
                   label: 'NOT#2.1',
-                  child: new Container(),
+                  child: Container(),
                 ),
-                new Semantics(
+                Semantics(
                   label: '#2.2',
-                  child: new BlockSemantics(
-                    child: new Semantics(
+                  child: BlockSemantics(
+                    child: Semantics(
                       container: true,
                       label: '#2.2.1',
-                      child: new Container(),
+                      child: Container(),
                     ),
                   ),
                 ),
-                new Semantics(
+                Semantics(
                   label: '#2.3',
-                  child: new Container(),
+                  child: Container(),
                 ),
               ],
             ),
           ),
-          new Semantics(
+          Semantics(
             label: '#3',
-            child: new Container(),
+            child: Container(),
           ),
         ],
       )));
@@ -104,25 +104,25 @@ void main() {
     });
 
     testWidgets('node is semantic boundary and blocking previously painted nodes', (WidgetTester tester) async {
-      final SemanticsTester semantics = new SemanticsTester(tester);
-      final GlobalKey stackKey = new GlobalKey();
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final GlobalKey stackKey = GlobalKey();
 
-      await tester.pumpWidget(new Directionality(textDirection: TextDirection.ltr, child: new Stack(
+      await tester.pumpWidget(Directionality(textDirection: TextDirection.ltr, child: Stack(
         key: stackKey,
         children: <Widget>[
-          new Semantics(
+          Semantics(
             label: 'NOT#1',
-            child: new Container(),
+            child: Container(),
           ),
-          new BoundaryBlockSemantics(
-            child: new Semantics(
+          BoundaryBlockSemantics(
+            child: Semantics(
               label: '#2.1',
-              child: new Container(),
-            )
+              child: Container(),
+            ),
           ),
-          new Semantics(
+          Semantics(
             label: '#3',
-            child: new Container(),
+            child: Container(),
           ),
         ],
       )));
@@ -140,7 +140,7 @@ class BoundaryBlockSemantics extends SingleChildRenderObjectWidget {
   const BoundaryBlockSemantics({ Key key, Widget child }) : super(key: key, child: child);
 
   @override
-  RenderBoundaryBlockSemantics createRenderObject(BuildContext context) => new RenderBoundaryBlockSemantics();
+  RenderBoundaryBlockSemantics createRenderObject(BuildContext context) => RenderBoundaryBlockSemantics();
 }
 
 class RenderBoundaryBlockSemantics extends RenderProxyBox {

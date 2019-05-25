@@ -6,9 +6,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-final BoxDecoration kBoxDecorationA = new BoxDecoration(border: nonconst(null));
-final BoxDecoration kBoxDecorationB = new BoxDecoration(border: nonconst(null));
-final BoxDecoration kBoxDecorationC = new BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationA = BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationB = BoxDecoration(border: nonconst(null));
+final BoxDecoration kBoxDecorationC = BoxDecoration(border: nonconst(null));
 
 class TestWidget extends StatelessWidget {
   const TestWidget({ this.child });
@@ -26,16 +26,16 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
     final Orientation orientation = MediaQuery.of(context).orientation;
     switch (orientation) {
       case Orientation.landscape:
-        return const BoxDecoration(color: const Color(0xFF00FF00));
+        return const BoxDecoration(color: Color(0xFF00FF00));
       case Orientation.portrait:
-        return const BoxDecoration(color: const Color(0xFF0000FF));
+        return const BoxDecoration(color: Color(0xFF0000FF));
     }
     assert(orientation != null);
     return null;
   }
 
   @override
-  RenderDecoratedBox createRenderObject(BuildContext context) => new RenderDecoratedBox(decoration: _getDecoration(context));
+  RenderDecoratedBox createRenderObject(BuildContext context) => RenderDecoratedBox(decoration: _getDecoration(context));
 
   @override
   void updateRenderObject(BuildContext context, RenderDecoratedBox renderObject) {
@@ -45,7 +45,7 @@ class TestOrientedBox extends SingleChildRenderObjectWidget {
 
 void main() {
   testWidgets('RenderObjectWidget smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationA));
+    await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationA));
     SingleChildRenderObjectElement element =
         tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element, isNotNull);
@@ -54,7 +54,7 @@ void main() {
     expect(renderObject.decoration, equals(kBoxDecorationA));
     expect(renderObject.position, equals(DecorationPosition.background));
 
-    await tester.pumpWidget(new DecoratedBox(decoration: kBoxDecorationB));
+    await tester.pumpWidget(DecoratedBox(decoration: kBoxDecorationB));
     element = tester.element(find.byElementType(SingleChildRenderObjectElement));
     expect(element, isNotNull);
     expect(element.renderObject is RenderDecoratedBox, isTrue);
@@ -92,55 +92,55 @@ void main() {
       expect(renderObject.child, isNull);
     }
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
-      child: new DecoratedBox(
+      child: DecoratedBox(
         decoration: kBoxDecorationB
-      )
+      ),
     ));
 
     checkFullTree();
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
-      child: new TestWidget(
-        child: new DecoratedBox(
+      child: TestWidget(
+        child: DecoratedBox(
           decoration: kBoxDecorationB
-        )
-      )
+        ),
+      ),
     ));
 
     checkFullTree();
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
-      child: new DecoratedBox(
+      child: DecoratedBox(
         decoration: kBoxDecorationB
-      )
+      ),
     ));
 
     checkFullTree();
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA
     ));
 
     childBareTree();
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
-      child: new TestWidget(
-        child: new TestWidget(
-          child: new DecoratedBox(
+      child: TestWidget(
+        child: TestWidget(
+          child: DecoratedBox(
             decoration: kBoxDecorationB
-          )
-        )
-      )
+          ),
+        ),
+      ),
     ));
 
     checkFullTree();
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA
     ));
 
@@ -149,14 +149,14 @@ void main() {
 
   testWidgets('Detached render tree is intact', (WidgetTester tester) async {
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA,
-      child: new DecoratedBox(
+      child: DecoratedBox(
         decoration: kBoxDecorationB,
-        child: new DecoratedBox(
+        child: DecoratedBox(
           decoration: kBoxDecorationC
-        )
-      )
+        ),
+      ),
     ));
 
     SingleChildRenderObjectElement element =
@@ -171,7 +171,7 @@ void main() {
     expect(grandChild.decoration, equals(kBoxDecorationC));
     expect(grandChild.child, isNull);
 
-    await tester.pumpWidget(new DecoratedBox(
+    await tester.pumpWidget(DecoratedBox(
       decoration: kBoxDecorationA
     ));
 
@@ -190,21 +190,21 @@ void main() {
   });
 
   testWidgets('Can watch inherited widgets', (WidgetTester tester) async {
-    final Key boxKey = new UniqueKey();
-    final TestOrientedBox box = new TestOrientedBox(key: boxKey);
+    final Key boxKey = UniqueKey();
+    final TestOrientedBox box = TestOrientedBox(key: boxKey);
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(400.0, 300.0)),
-      child: box
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
+      child: box,
     ));
 
     final RenderDecoratedBox renderBox = tester.renderObject(find.byKey(boxKey));
     BoxDecoration decoration = renderBox.decoration;
     expect(decoration.color, equals(const Color(0xFF00FF00)));
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(300.0, 400.0)),
-      child: box
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
+      child: box,
     ));
 
     decoration = renderBox.decoration;

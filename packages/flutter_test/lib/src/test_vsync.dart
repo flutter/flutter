@@ -13,5 +13,5 @@ class TestVSync implements TickerProvider {
   const TestVSync();
 
   @override
-  Ticker createTicker(TickerCallback onTick) => new Ticker(onTick);
+  Ticker createTicker(TickerCallback onTick) => Ticker(onTick);
 }

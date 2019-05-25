@@ -22,7 +22,10 @@ end
 platform :ios do
   desc 'Push a new release to TestFlight'
   lane :build_and_deploy_testflight do |options|
-    # Doesn't do anything when not on Travis.
+    # Doesn't do anything when not on a CI bot. Even though it's called
+    # "setup_travis", this also runs on Cirrus, since the CI environment
+    # variable is set. When on a CI bot, it creates a temporary keychain and
+    # switches "match" to readonly mode to not create new profiles/certs on CI.
     setup_travis
 
     # Relative to this file.
@@ -41,14 +44,15 @@ platform :ios do
       version_number: /\d+\.\d+\.\d+/.match(raw_version)[0]
     )
 
-    puts 'Retrieving signing certificates and profiles...'
     # Stop fastlane from echoing back PUBLISHING_MATCH_CERTIFICATE_REPO var.
+    # Doesn't matter too much since Cirrus doesn't echo back encrypted variables
+    # anyway.
     suppress_output {
       # Retrieves all the necessary certs and provisioning profiles.
       sync_code_signing(
-        git_url: ENV['PUBLISHING_MATCH_CERTIFICATE_REPO'],
+        git_url:  "https://x-access-token:#{ENV['PUBLISHING_MATCH_REPO_TOKEN']}@#{ENV['PUBLISHING_MATCH_CERTIFICATE_REPO']}" ,
         type: 'appstore',
-        readonly: true
+        readonly: true,
       )
     }
     puts 'Certificates and profiles installed'
@@ -70,7 +74,7 @@ platform :ios do
       scheme: 'Runner',
       export_method: 'app-store',
       # Verify that the right signing identity is used for publishing.
-      codesigning_identity: 'iPhone Distribution: Store Ladd (S8QB4VV633)',
+      codesigning_identity: 'iPhone Distribution: FLUTTER.IO LLC (S8QB4VV633)',
     )
 
     if options[:upload]

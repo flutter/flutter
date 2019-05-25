@@ -7,6 +7,10 @@ import 'package:flutter/widgets.dart';
 import 'checkbox.dart';
 import 'list_tile.dart';
 import 'theme.dart';
+import 'theme_data.dart';
+
+// Examples can assume:
+// void setState(VoidCallback fn) { }
 
 /// A [ListTile] with a [Checkbox]. In other words, a checkbox with a label.
 ///
@@ -33,24 +37,208 @@ import 'theme.dart';
 /// To show the [CheckboxListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![CheckboxListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile.png)
 ///
 /// This widget shows a checkbox that, when checked, slows down all animations
 /// (including the animation of the checkbox itself getting checked!).
 ///
-/// ```dart
-/// new CheckboxListTile(
-///   title: const Text('Animate Slowly'),
-///   value: timeDilation != 1.0,
-///   onChanged: (bool value) {
-///     setState(() { timeDilation = value ? 20.0 : 1.0; });
-///   },
-///   secondary: const Icon(Icons.hourglass_empty),
-/// )
-/// ```
-///
 /// This sample requires that you also import 'package:flutter/scheduler.dart',
 /// so that you can reference [timeDilation].
+///
+/// ```dart imports
+/// import 'package:flutter/scheduler.dart' show timeDilation;
+/// ```
+/// ```dart
+/// @override
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: CheckboxListTile(
+///       title: const Text('Animate Slowly'),
+///       value: timeDilation != 1.0,
+///       onChanged: (bool value) {
+///         setState(() { timeDilation = value ? 10.0 : 1.0; });
+///       },
+///       secondary: const Icon(Icons.hourglass_empty),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## Semantics in CheckboxListTile
+///
+/// Since the entirety of the CheckboxListTile is interactive, it should represent
+/// itself as a single interactive entity.
+///
+/// To do so, a CheckboxListTile widget wraps its children with a [MergeSemantics]
+/// widget. [MergeSemantics] will attempt to merge its descendant [Semantics]
+/// nodes into one node in the semantics tree. Therefore, CheckboxListTile will
+/// throw an error if any of its children requires its own [Semantics] node.
+///
+/// For example, you cannot nest a [RichText] widget as a descendant of
+/// CheckboxListTile. [RichText] has an embedded gesture recognizer that
+/// requires its own [Semantics] node, which directly conflicts with
+/// CheckboxListTile's desire to merge all its descendants' semantic nodes
+/// into one. Therefore, it may be necessary to create a custom radio tile
+/// widget to accommodate similar use cases.
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Checkbox list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_semantics.png)
+///
+/// Here is an example of a custom labeled checkbox widget, called
+/// LinkedLabelCheckbox, that includes an interactive [RichText] widget that
+/// handles tap gestures.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// ```
+/// ```dart preamble
+/// class LinkedLabelCheckbox extends StatelessWidget {
+///   const LinkedLabelCheckbox({
+///     this.label,
+///     this.padding,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: padding,
+///       child: Row(
+///         children: <Widget>[
+///           Expanded(
+///             child: RichText(
+///               text: TextSpan(
+///                 text: label,
+///                 style: TextStyle(
+///                   color: Colors.blueAccent,
+///                   decoration: TextDecoration.underline,
+///                 ),
+///                 recognizer: TapGestureRecognizer()
+///                   ..onTap = () {
+///                   print('Label has been tapped.');
+///                 },
+///               ),
+///             ),
+///           ),
+///           Checkbox(
+///             value: value,
+///             onChanged: (bool newValue) {
+///               onChanged(newValue);
+///             },
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool _isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LinkedLabelCheckbox(
+///         label: 'Linked, tappable label text',
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///         value: _isSelected,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             _isSelected = newValue;
+///           });
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## CheckboxListTile isn't exactly what I want
+///
+/// If the way CheckboxListTile pads and positions its elements isn't quite
+/// what you're looking for, you can create custom labeled checkbox widgets by
+/// combining [Checkbox] with other widgets, such as [Text], [Padding] and
+/// [InkWell].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Custom checkbox list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/checkbox_list_tile_custom.png)
+///
+/// Here is an example of a custom LabeledCheckbox widget, but you can easily
+/// make your own configurable widget.
+///
+/// ```dart preamble
+/// class LabeledCheckbox extends StatelessWidget {
+///   const LabeledCheckbox({
+///     this.label,
+///     this.padding,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return InkWell(
+///       onTap: () {
+///         onChanged(!value);
+///       },
+///       child: Padding(
+///         padding: padding,
+///         child: Row(
+///           children: <Widget>[
+///             Expanded(child: Text(label)),
+///             Checkbox(
+///               value: value,
+///               onChanged: (bool newValue) {
+///                 onChanged(newValue);
+///               },
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool _isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LabeledCheckbox(
+///         label: 'This is the label text',
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///         value: _isSelected,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             _isSelected = newValue;
+///           });
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -112,14 +300,14 @@ class CheckboxListTile extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new CheckboxListTile(
+  /// CheckboxListTile(
   ///   value: _throwShotAway,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
   ///       _throwShotAway = newValue;
   ///     });
   ///   },
-  ///   title: new Text('Throw away your shot'),
+  ///   title: Text('Throw away your shot'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
@@ -169,10 +357,11 @@ class CheckboxListTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Checkbox(
+    final Widget control = Checkbox(
       value: value,
       onChanged: onChanged,
       activeColor: activeColor,
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
     Widget leading, trailing;
     switch (controlAffinity) {
@@ -186,10 +375,10 @@ class CheckboxListTile extends StatelessWidget {
         trailing = control;
         break;
     }
-    return new MergeSemantics(
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: leading,
           title: title,
           subtitle: subtitle,

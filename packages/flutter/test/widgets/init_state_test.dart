@@ -9,7 +9,7 @@ List<String> ancestors = <String>[];
 
 class TestWidget extends StatefulWidget {
   @override
-  TestWidgetState createState() => new TestWidgetState();
+  TestWidgetState createState() => TestWidgetState();
 }
 
 class TestWidgetState extends State<TestWidget> {
@@ -23,12 +23,12 @@ class TestWidgetState extends State<TestWidget> {
   }
 
   @override
-  Widget build(BuildContext context) => new Container();
+  Widget build(BuildContext context) => Container();
 }
 
 void main() {
   testWidgets('initState() is called when we are in the tree', (WidgetTester tester) async {
-    await tester.pumpWidget(new Container(child: new TestWidget()));
+    await tester.pumpWidget(Container(child: TestWidget()));
     expect(ancestors, equals(<String>['Container', 'RenderObjectToWidgetAdapter<RenderBox>']));
   });
 }

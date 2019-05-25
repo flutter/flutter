@@ -64,17 +64,17 @@ class NavigationToolbar extends StatelessWidget {
     final List<Widget> children = <Widget>[];
 
     if (leading != null)
-      children.add(new LayoutId(id: _ToolbarSlot.leading, child: leading));
+      children.add(LayoutId(id: _ToolbarSlot.leading, child: leading));
 
     if (middle != null)
-      children.add(new LayoutId(id: _ToolbarSlot.middle, child: middle));
+      children.add(LayoutId(id: _ToolbarSlot.middle, child: middle));
 
     if (trailing != null)
-      children.add(new LayoutId(id: _ToolbarSlot.trailing, child: trailing));
+      children.add(LayoutId(id: _ToolbarSlot.trailing, child: trailing));
 
     final TextDirection textDirection = Directionality.of(context);
-    return new CustomMultiChildLayout(
-      delegate: new _ToolbarLayout(
+    return CustomMultiChildLayout(
+      delegate: _ToolbarLayout(
         centerMiddle: centerMiddle,
         middleSpacing: middleSpacing,
         textDirection: textDirection,
@@ -115,7 +115,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     double trailingWidth = 0.0;
 
     if (hasChild(_ToolbarSlot.leading)) {
-      final BoxConstraints constraints = new BoxConstraints(
+      final BoxConstraints constraints = BoxConstraints(
         minWidth: 0.0,
         maxWidth: size.width / 3.0, // The leading widget shouldn't take up more than 1/3 of the space.
         minHeight: size.height, // The height should be exactly the height of the bar.
@@ -131,11 +131,11 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
           leadingX = 0.0;
           break;
       }
-      positionChild(_ToolbarSlot.leading, new Offset(leadingX, 0.0));
+      positionChild(_ToolbarSlot.leading, Offset(leadingX, 0.0));
     }
 
     if (hasChild(_ToolbarSlot.trailing)) {
-      final BoxConstraints constraints = new BoxConstraints.loose(size);
+      final BoxConstraints constraints = BoxConstraints.loose(size);
       final Size trailingSize = layoutChild(_ToolbarSlot.trailing, constraints);
       double trailingX;
       switch (textDirection) {
@@ -148,12 +148,12 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
       }
       final double trailingY = (size.height - trailingSize.height) / 2.0;
       trailingWidth = trailingSize.width;
-      positionChild(_ToolbarSlot.trailing, new Offset(trailingX, trailingY));
+      positionChild(_ToolbarSlot.trailing, Offset(trailingX, trailingY));
     }
 
     if (hasChild(_ToolbarSlot.middle)) {
       final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - middleSpacing * 2.0, 0.0);
-      final BoxConstraints constraints = new BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
+      final BoxConstraints constraints = BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
       final double middleStartMargin = leadingWidth + middleSpacing;
@@ -179,7 +179,7 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
           break;
       }
 
-      positionChild(_ToolbarSlot.middle, new Offset(middleX, middleY));
+      positionChild(_ToolbarSlot.middle, Offset(middleX, middleY));
     }
   }
 

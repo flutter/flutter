@@ -10,11 +10,11 @@ import 'package:flutter/material.dart';
 void main() {
   testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             margin: const EdgeInsets.all(50.0),
-            decoration: new BoxDecoration(
+            decoration: BoxDecoration(
               boxShadow: kElevationToShadow[9],
             ),
             height: 100.0,
@@ -43,12 +43,12 @@ void main() {
   testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
     debugDisableShadows = false;
     Widget build(int elevation) {
-      return new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      return Center(
+        child: RepaintBoundary(
+          child: Container(
             margin: const EdgeInsets.all(150.0),
-            decoration: new ShapeDecoration(
-              shape: new BeveledRectangleBorder(borderRadius: new BorderRadius.circular(20.0)),
+            decoration: ShapeDecoration(
+              shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
               shadows: kElevationToShadow[elevation],
             ),
             height: 100.0,
@@ -69,12 +69,12 @@ void main() {
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      Center(
+        child: RepaintBoundary(
+          child: Container(
             margin: const EdgeInsets.all(150.0),
             color: Colors.yellow[200],
-            child: new PhysicalModel(
+            child: PhysicalModel(
               elevation: 9.0,
               color: Colors.blue[900],
               child: const SizedBox(
@@ -106,14 +106,14 @@ void main() {
   testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
     debugDisableShadows = false;
     Widget build(double elevation) {
-      return new Center(
-        child: new RepaintBoundary(
-          child: new Container(
+      return Center(
+        child: RepaintBoundary(
+          child: Container(
             padding: const EdgeInsets.all(150.0),
             color: Colors.yellow[200],
-            child: new PhysicalShape(
+            child: PhysicalShape(
               color: Colors.green[900],
-              clipper: new ShapeBorderClipper(shape: new BeveledRectangleBorder(borderRadius: new BorderRadius.circular(20.0))),
+              clipper: ShapeBorderClipper(shape: BeveledRectangleBorder(borderRadius: BorderRadius.circular(20.0))),
               elevation: elevation,
               child: const SizedBox(
                 height: 100.0,
@@ -128,7 +128,7 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile('shadow.PhysicalShape.$elevation.png'),
+        matchesGoldenFile('shadow.PhysicalShape.$elevation.1.png'),
       );
     }
     debugDisableShadows = true;

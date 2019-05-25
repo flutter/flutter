@@ -11,22 +11,22 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      MaterialApp(
         title: 'Pirate app',
-        home: new Scaffold(
-          appBar: new AppBar(
+        home: Scaffold(
+          appBar: AppBar(
             title: const Text('Home'),
           ),
-          drawer: new Drawer(
-            child: new ListView(
+          drawer: Drawer(
+            child: ListView(
               children: const <Widget>[
-                const AboutListTile(
+                AboutListTile(
                   applicationVersion: '0.1.2',
-                  applicationIcon: const FlutterLogo(),
+                  applicationIcon: FlutterLogo(),
                   applicationLegalese: 'I am the very model of a modern major general.',
-                  aboutBoxChildren: const <Widget>[
-                    const Text('About box'),
-                  ]
+                  aboutBoxChildren: <Widget>[
+                    Text('About box'),
+                  ],
                 ),
               ],
             ),
@@ -54,8 +54,8 @@ void main() {
     expect(find.text('About box'), findsOneWidget);
 
     LicenseRegistry.addLicense(() {
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(const <String>[ 'Pirate package '], 'Pirate license')
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>[ 'Pirate package '], 'Pirate license'),
       ]);
     });
 
@@ -67,9 +67,9 @@ void main() {
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new MaterialApp(
+      const MaterialApp(
         title: 'flutter_tester',
-        home: const Material(child: const AboutListTile()),
+        home: Material(child: AboutListTile()),
       ),
     );
     expect(find.text('About flutter_tester'), findsOneWidget);
@@ -77,21 +77,21 @@ void main() {
 
   testWidgets('AboutListTile control test', (WidgetTester tester) async {
     LicenseRegistry.addLicense(() {
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(const <String>['AAA'], 'BBB')
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['AAA'], 'BBB'),
       ]);
     });
 
     LicenseRegistry.addLicense(() {
-      return new Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
-        const LicenseEntryWithLineBreaks(const <String>['Another package'], 'Another license')
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['Another package'], 'Another license'),
       ]);
     });
 
     await tester.pumpWidget(
-      new MaterialApp(
-        home: const Center(
-          child: const LicensePage(),
+      const MaterialApp(
+        home: Center(
+          child: LicensePage(),
         ),
       ),
     );
@@ -107,5 +107,30 @@ void main() {
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
     expect(find.text('Another license'), findsOneWidget);
+  });
+
+  testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
+    const double safeareaPadding = 27.0;
+
+    LicenseRegistry.addLicense(() {
+      return Stream<LicenseEntry>.fromIterable(<LicenseEntry>[
+        const LicenseEntryWithLineBreaks(<String>['ABC'], 'DEF'),
+      ]);
+    });
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: MediaQuery(
+          data: MediaQueryData(
+            padding: EdgeInsets.all(safeareaPadding),
+          ),
+          child: LicensePage(),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 527.0));
   });
 }

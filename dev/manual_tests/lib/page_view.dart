@@ -10,34 +10,34 @@ class CardModel {
   Size size;
   Color color;
   String get label => 'Card $value';
-  Key get key => new ObjectKey(this);
+  Key get key => ObjectKey(this);
 }
 
 class PageViewApp extends StatefulWidget {
   @override
-  PageViewAppState createState() => new PageViewAppState();
+  PageViewAppState createState() => PageViewAppState();
 }
 
 class PageViewAppState extends State<PageViewApp> {
   @override
   void initState() {
     super.initState();
-    const List<Size> cardSizes = const <Size>[
-      const Size(100.0, 300.0),
-      const Size(300.0, 100.0),
-      const Size(200.0, 400.0),
-      const Size(400.0, 400.0),
-      const Size(300.0, 400.0),
+    const List<Size> cardSizes = <Size>[
+      Size(100.0, 300.0),
+      Size(300.0, 100.0),
+      Size(200.0, 400.0),
+      Size(400.0, 400.0),
+      Size(300.0, 400.0),
     ];
 
-    cardModels = new List<CardModel>.generate(cardSizes.length, (int i) {
+    cardModels = List<CardModel>.generate(cardSizes.length, (int i) {
       final Color color = Color.lerp(Colors.red.shade300, Colors.blue.shade900, i / cardSizes.length);
-      return new CardModel(i, cardSizes[i], color);
+      return CardModel(i, cardSizes[i], color);
     });
   }
 
   static const TextStyle cardLabelStyle =
-    const TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
+    TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.bold);
 
   List<CardModel> cardModels;
   Size pageSize = const Size(200.0, 200.0);
@@ -45,24 +45,24 @@ class PageViewAppState extends State<PageViewApp> {
   bool itemsWrap = false;
 
   Widget buildCard(CardModel cardModel) {
-    final Widget card = new Card(
+    final Widget card = Card(
       color: cardModel.color,
-      child: new Container(
+      child: Container(
         width: cardModel.size.width,
         height: cardModel.size.height,
         padding: const EdgeInsets.all(8.0),
-        child: new Center(child: new Text(cardModel.label, style: cardLabelStyle)),
+        child: Center(child: Text(cardModel.label, style: cardLabelStyle)),
       ),
     );
 
     final BoxConstraints constraints = (scrollDirection == Axis.vertical)
-      ? new BoxConstraints.tightFor(height: pageSize.height)
-      : new BoxConstraints.tightFor(width: pageSize.width);
+      ? BoxConstraints.tightFor(height: pageSize.height)
+      : BoxConstraints.tightFor(width: pageSize.width);
 
-    return new Container(
+    return Container(
       key: cardModel.key,
       constraints: constraints,
-      child: new Center(child: card),
+      child: Center(child: card),
     );
   }
 
@@ -81,27 +81,27 @@ class PageViewAppState extends State<PageViewApp> {
   }
 
   Widget _buildDrawer() {
-    return new Drawer(
-      child: new ListView(
+    return Drawer(
+      child: ListView(
         children: <Widget>[
-          const DrawerHeader(child: const Center(child: const Text('Options'))),
-          new ListTile(
+          const DrawerHeader(child: Center(child: Text('Options'))),
+          ListTile(
             leading: const Icon(Icons.more_horiz),
             selected: scrollDirection == Axis.horizontal,
             trailing: const Text('Horizontal Layout'),
             onTap: switchScrollDirection,
           ),
-          new ListTile(
+          ListTile(
             leading: const Icon(Icons.more_vert),
             selected: scrollDirection == Axis.vertical,
             trailing: const Text('Vertical Layout'),
             onTap: switchScrollDirection,
           ),
-          new ListTile(
+          ListTile(
             onTap: toggleItemsWrap,
             title: const Text('Scrolling wraps around'),
             // TODO(abarth): Actually make this checkbox change this value.
-            trailing: new Checkbox(value: itemsWrap, onChanged: null),
+            trailing: Checkbox(value: itemsWrap, onChanged: null),
           ),
         ],
       ),
@@ -109,17 +109,17 @@ class PageViewAppState extends State<PageViewApp> {
   }
 
   Widget _buildAppBar() {
-    return new AppBar(
+    return AppBar(
       title: const Text('PageView'),
       actions: <Widget>[
-        new Text(scrollDirection == Axis.horizontal ? 'horizontal' : 'vertical'),
+        Text(scrollDirection == Axis.horizontal ? 'horizontal' : 'vertical'),
       ],
     );
   }
 
   Widget _buildBody(BuildContext context) {
-    return new PageView(
-      children: cardModels.map(buildCard).toList(),
+    return PageView(
+      children: cardModels.map<Widget>(buildCard).toList(),
       // TODO(abarth): itemsWrap: itemsWrap,
       scrollDirection: scrollDirection,
     );
@@ -127,9 +127,9 @@ class PageViewAppState extends State<PageViewApp> {
 
   @override
   Widget build(BuildContext context) {
-    return new IconTheme(
+    return IconTheme(
       data: const IconThemeData(color: Colors.white),
-      child: new Scaffold(
+      child: Scaffold(
         appBar: _buildAppBar(),
         drawer: _buildDrawer(),
         body: _buildBody(context),
@@ -139,13 +139,13 @@ class PageViewAppState extends State<PageViewApp> {
 }
 
 void main() {
-  runApp(new MaterialApp(
+  runApp(MaterialApp(
     title: 'PageView',
-    theme: new ThemeData(
+    theme: ThemeData(
       brightness: Brightness.light,
       primarySwatch: Colors.blue,
       accentColor: Colors.redAccent,
     ),
-    home: new PageViewApp(),
+    home: PageViewApp(),
   ));
 }

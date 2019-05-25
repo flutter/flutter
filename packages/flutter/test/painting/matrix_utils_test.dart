@@ -11,30 +11,30 @@ import 'package:vector_math/vector_math_64.dart';
 void main() {
   test('MatrixUtils.getAsTranslation()', () {
     Matrix4 test;
-    test = new Matrix4.identity();
+    test = Matrix4.identity();
     expect(MatrixUtils.getAsTranslation(test), equals(Offset.zero));
-    test = new Matrix4.zero();
+    test = Matrix4.zero();
     expect(MatrixUtils.getAsTranslation(test), isNull);
-    test = new Matrix4.rotationX(1.0);
+    test = Matrix4.rotationX(1.0);
     expect(MatrixUtils.getAsTranslation(test), isNull);
-    test = new Matrix4.rotationZ(1.0);
+    test = Matrix4.rotationZ(1.0);
     expect(MatrixUtils.getAsTranslation(test), isNull);
-    test = new Matrix4.translationValues(1.0, 2.0, 0.0);
+    test = Matrix4.translationValues(1.0, 2.0, 0.0);
     expect(MatrixUtils.getAsTranslation(test), equals(const Offset(1.0, 2.0)));
-    test = new Matrix4.translationValues(1.0, 2.0, 3.0);
+    test = Matrix4.translationValues(1.0, 2.0, 3.0);
     expect(MatrixUtils.getAsTranslation(test), isNull);
 
-    test = new Matrix4.identity();
+    test = Matrix4.identity();
     expect(MatrixUtils.getAsTranslation(test), equals(Offset.zero));
     test.rotateX(2.0);
     expect(MatrixUtils.getAsTranslation(test), isNull);
 
-    test = new Matrix4.identity();
+    test = Matrix4.identity();
     expect(MatrixUtils.getAsTranslation(test), equals(Offset.zero));
     test.scale(2.0);
     expect(MatrixUtils.getAsTranslation(test), isNull);
 
-    test = new Matrix4.identity();
+    test = Matrix4.identity();
     expect(MatrixUtils.getAsTranslation(test), equals(Offset.zero));
     test.translate(2.0, -2.0);
     expect(MatrixUtils.getAsTranslation(test), equals(const Offset(2.0, -2.0)));
@@ -49,7 +49,7 @@ void main() {
       perspective: 0.0,
     );
 
-    expect(initialState, new Matrix4.identity());
+    expect(initialState, Matrix4.identity());
   });
 
   test('cylindricalProjectionTransform rotate with no radius', () {
@@ -59,7 +59,7 @@ void main() {
       perspective: 0.0,
     );
 
-    expect(simpleRotate, new Matrix4.rotationX(pi / 2.0));
+    expect(simpleRotate, Matrix4.rotationX(pi / 2.0));
   });
 
   test('cylindricalProjectionTransform radius does not change scale', () {
@@ -69,7 +69,7 @@ void main() {
       perspective: 0.0,
     );
 
-    expect(noRotation, new Matrix4.identity());
+    expect(noRotation, Matrix4.identity());
   });
 
   test('cylindricalProjectionTransform calculation spot check', () {
@@ -85,5 +85,40 @@ void main() {
       0.0, moreOrLessEquals(-0.8660254037844386), moreOrLessEquals(0.5), moreOrLessEquals(-0.0005),
       0.0, moreOrLessEquals(-86.60254037844386), moreOrLessEquals(-50.0), 1.05,
     ]);
+  });
+
+  test('forceToPoint', () {
+    const Offset forcedOffset = Offset(20, -30);
+    final Matrix4 forcedTransform = MatrixUtils.forceToPoint(forcedOffset);
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, forcedOffset),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, Offset.zero),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(1, 1)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-1, -1)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-20, 30)),
+      forcedOffset,
+    );
+
+    expect(
+      MatrixUtils.transformPoint(forcedTransform, const Offset(-1.2344, 1422434.23)),
+      forcedOffset,
+    );
   });
 }

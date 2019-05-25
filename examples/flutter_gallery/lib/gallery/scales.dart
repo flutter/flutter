@@ -28,10 +28,10 @@ class GalleryTextScaleValue {
 
 }
 
-const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = const <GalleryTextScaleValue>[
-  const GalleryTextScaleValue(null, 'System Default'),
-  const GalleryTextScaleValue(0.8, 'Small'),
-  const GalleryTextScaleValue(1.0, 'Normal'),
-  const GalleryTextScaleValue(1.3, 'Large'),
-  const GalleryTextScaleValue(2.0, 'Huge'),
+const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = <GalleryTextScaleValue>[
+  GalleryTextScaleValue(null, 'System Default'),
+  GalleryTextScaleValue(0.8, 'Small'),
+  GalleryTextScaleValue(1.0, 'Normal'),
+  GalleryTextScaleValue(1.3, 'Large'),
+  GalleryTextScaleValue(2.0, 'Huge'),
 ];

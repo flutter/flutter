@@ -13,7 +13,7 @@ import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
-  return new GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
+  return GalleryTransitionTest(semanticsEnabled: semanticsEnabled);
 }
 
 class GalleryTransitionTest {
@@ -28,7 +28,7 @@ class GalleryTransitionTest {
     final String deviceId = device.deviceId;
     final Directory galleryDirectory =
         dir('${flutterDirectory.path}/examples/flutter_gallery');
-    await inDirectory(galleryDirectory, () async {
+    await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
 
       if (deviceOperatingSystem == DeviceOperatingSystem.ios)
@@ -50,12 +50,13 @@ class GalleryTransitionTest {
 
     // Route paths contains slashes, which Firebase doesn't accept in keys, so we
     // remove them.
-    final Map<String, List<int>> original = json.decode(file(
-            '${galleryDirectory.path}/build/transition_durations.timeline.json')
-        .readAsStringSync());
+    final Map<String, dynamic> original = Map<String, dynamic>.from(
+        json.decode(
+            file('${galleryDirectory.path}/build/transition_durations.timeline.json').readAsStringSync()
+        ));
     final Map<String, List<int>> transitions = <String, List<int>>{};
     for (String key in original.keys) {
-      transitions[key.replaceAll('/', '')] = original[key];
+      transitions[key.replaceAll('/', '')] = List<int>.from(original[key]);
     }
 
     final Map<String, dynamic> summary = json.decode(file('${galleryDirectory.path}/build/transitions.timeline_summary.json').readAsStringSync());
@@ -66,13 +67,16 @@ class GalleryTransitionTest {
     };
     data.addAll(summary);
 
-    return new TaskResult.success(data, benchmarkScoreKeys: <String>[
+    return TaskResult.success(data, benchmarkScoreKeys: <String>[
       'missed_transition_count',
       'average_frame_build_time_millis',
       'worst_frame_build_time_millis',
       'missed_frame_build_budget_count',
+      '90th_percentile_frame_build_time_millis',
+      '99th_percentile_frame_build_time_millis',
       'average_frame_rasterizer_time_millis',
       'worst_frame_rasterizer_time_millis',
+      'missed_frame_rasterizer_budget_count',
       '90th_percentile_frame_rasterizer_time_millis',
       '99th_percentile_frame_rasterizer_time_millis',
     ]);

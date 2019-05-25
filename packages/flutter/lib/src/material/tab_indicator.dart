@@ -22,7 +22,8 @@ class UnderlineTabIndicator extends Decoration {
   const UnderlineTabIndicator({
     this.borderSide = const BorderSide(width: 2.0, color: Colors.white),
     this.insets = EdgeInsets.zero,
-  }) : assert(borderSide != null), assert(insets != null);
+  }) : assert(borderSide != null),
+       assert(insets != null);
 
   /// The color and weight of the horizontal line drawn below the selected tab.
   final BorderSide borderSide;
@@ -37,7 +38,7 @@ class UnderlineTabIndicator extends Decoration {
   @override
   Decoration lerpFrom(Decoration a, double t) {
     if (a is UnderlineTabIndicator) {
-      return new UnderlineTabIndicator(
+      return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(a.borderSide, borderSide, t),
         insets: EdgeInsetsGeometry.lerp(a.insets, insets, t),
       );
@@ -48,7 +49,7 @@ class UnderlineTabIndicator extends Decoration {
   @override
   Decoration lerpTo(Decoration b, double t) {
     if (b is UnderlineTabIndicator) {
-      return new UnderlineTabIndicator(
+      return UnderlineTabIndicator(
         borderSide: BorderSide.lerp(borderSide, b.borderSide, t),
         insets: EdgeInsetsGeometry.lerp(insets, b.insets, t),
       );
@@ -57,14 +58,15 @@ class UnderlineTabIndicator extends Decoration {
   }
 
   @override
-  _UnderlinePainter createBoxPainter([VoidCallback onChanged]) {
-    return new _UnderlinePainter(this, onChanged);
+  _UnderlinePainter createBoxPainter([ VoidCallback onChanged ]) {
+    return _UnderlinePainter(this, onChanged);
   }
 }
 
 class _UnderlinePainter extends BoxPainter {
   _UnderlinePainter(this.decoration, VoidCallback onChanged)
-    : assert(decoration != null), super(onChanged);
+    : assert(decoration != null),
+      super(onChanged);
 
   final UnderlineTabIndicator decoration;
 
@@ -75,7 +77,7 @@ class _UnderlinePainter extends BoxPainter {
     assert(rect != null);
     assert(textDirection != null);
     final Rect indicator = insets.resolve(textDirection).deflateRect(rect);
-    return new Rect.fromLTWH(
+    return Rect.fromLTWH(
       indicator.left,
       indicator.bottom - borderSide.width,
       indicator.width,
@@ -90,6 +92,7 @@ class _UnderlinePainter extends BoxPainter {
     final Rect rect = offset & configuration.size;
     final TextDirection textDirection = configuration.textDirection;
     final Rect indicator = _indicatorRectFor(rect, textDirection).deflate(borderSide.width / 2.0);
-    canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, borderSide.toPaint());
+    final Paint paint = borderSide.toPaint()..strokeCap = StrokeCap.square;
+    canvas.drawLine(indicator.bottomLeft, indicator.bottomRight, paint);
   }
 }

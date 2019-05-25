@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test('Wrap test; toStringDeep', () {
-    final RenderWrap renderWrap = new RenderWrap();
+    final RenderWrap renderWrap = RenderWrap();
     expect(renderWrap, hasAGoodToStringDeep);
     expect(
       renderWrap.toStringDeep(minLevel: DiagnosticLevel.info),

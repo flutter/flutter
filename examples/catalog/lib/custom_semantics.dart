@@ -36,7 +36,7 @@ class AdjustableDropdownListTile extends StatelessWidget {
     final bool canIncrease = indexOfValue < items.length - 1;
     final bool canDecrease = indexOfValue > 0;
 
-    return new Semantics(
+    return Semantics(
       container: true,
       label: label,
       value: value,
@@ -44,21 +44,21 @@ class AdjustableDropdownListTile extends StatelessWidget {
       decreasedValue: canDecrease ? _decreasedValue : null,
       onIncrease: canIncrease ? _performIncrease : null,
       onDecrease: canDecrease ? _performDecrease : null,
-      child: new ExcludeSemantics(
-        child: new ListTile(
-          title: new Text(label),
-          trailing: new DropdownButton<String>(
+      child: ExcludeSemantics(
+        child: ListTile(
+          title: Text(label),
+          trailing: DropdownButton<String>(
             value: value,
             onChanged: onChanged,
-            items: items.map((String item) {
-              return new DropdownMenuItem<String>(
+            items: items.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
                 value: item,
-                child: new Text(item),
+                child: Text(item),
               );
             }).toList(),
           ),
         ),
-      )
+      ),
     );
   }
 
@@ -81,7 +81,7 @@ class AdjustableDropdownListTile extends StatelessWidget {
 
 class AdjustableDropdownExample extends StatefulWidget {
   @override
-  AdjustableDropdownExampleState createState() => new AdjustableDropdownExampleState();
+  AdjustableDropdownExampleState createState() => AdjustableDropdownExampleState();
 }
 
 class AdjustableDropdownExampleState extends State<AdjustableDropdownExample> {
@@ -91,20 +91,20 @@ class AdjustableDropdownExampleState extends State<AdjustableDropdownExample> {
     '5 seconds',
     '15 seconds',
     '30 seconds',
-    '1 minute'
+    '1 minute',
   ];
   String timeout;
 
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new Scaffold(
-        appBar: new AppBar(
+    return MaterialApp(
+      home: Scaffold(
+        appBar: AppBar(
           title: const Text('Adjustable DropDown'),
         ),
-        body: new ListView(
+        body: ListView(
           children: <Widget>[
-            new AdjustableDropdownListTile(
+            AdjustableDropdownListTile(
               label: 'Timeout',
               value: timeout ?? items[2],
               items: items,
@@ -122,7 +122,7 @@ class AdjustableDropdownExampleState extends State<AdjustableDropdownExample> {
 }
 
 void main() {
-  runApp(new AdjustableDropdownExample());
+  runApp(AdjustableDropdownExample());
 }
 
 /*

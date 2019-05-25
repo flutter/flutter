@@ -68,7 +68,7 @@ class Unicode {
   /// Treat the following text as isolated and in the direction of its first
   /// strong directional character that is not inside a nested isolate.
   ///
-  /// This essentially "autodetects" the directionality of the text. It is not
+  /// This essentially "auto-detects" the directionality of the text. It is not
   /// 100% reliable. For example, Arabic text that starts with an English quote
   /// will be detected as LTR, not RTL, which will lead to the text being in a
   /// weird order.

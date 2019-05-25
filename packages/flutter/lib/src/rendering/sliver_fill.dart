@@ -25,7 +25,7 @@ import 'sliver_multi_box_adaptor.dart';
 ///    remaining space rather than the viewport itself.
 ///  * [RenderSliverFixedExtentList], which has a configurable [itemExtent].
 ///  * [RenderSliverList], which does not require its children to have the same
-///  * /// extent in the main axis.
+///    extent in the main axis.
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
@@ -75,7 +75,8 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   }
 
   @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints, {
     int firstIndex,
     int lastIndex,
     double leadingScrollOffset,
@@ -122,7 +123,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,

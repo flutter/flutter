@@ -8,13 +8,13 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedContainer.debugFillProperties', (WidgetTester tester) async {
-    final AnimatedContainer container = new AnimatedContainer(
+    final AnimatedContainer container = AnimatedContainer(
       constraints: const BoxConstraints.tightFor(width: 17.0, height: 23.0),
-      decoration: const BoxDecoration(color: const Color(0xFF00FF00)),
-      foregroundDecoration: const BoxDecoration(color: const Color(0x7F0000FF)),
+      decoration: const BoxDecoration(color: Color(0xFF00FF00)),
+      foregroundDecoration: const BoxDecoration(color: Color(0x7F0000FF)),
       margin: const EdgeInsets.all(10.0),
       padding: const EdgeInsets.all(7.0),
-      transform: new Matrix4.translationValues(4.0, 3.0, 0.0),
+      transform: Matrix4.translationValues(4.0, 3.0, 0.0),
       width: 50.0,
       height: 75.0,
       curve: Curves.ease,
@@ -25,23 +25,23 @@ void main() {
   });
 
   testWidgets('AnimatedContainer control test', (WidgetTester tester) async {
-    final GlobalKey key = new GlobalKey();
+    final GlobalKey key = GlobalKey();
 
-    const BoxDecoration decorationA = const BoxDecoration(
-      color: const Color(0xFF00FF00),
+    const BoxDecoration decorationA = BoxDecoration(
+      color: Color(0xFF00FF00),
     );
 
-    const BoxDecoration decorationB = const BoxDecoration(
-      color: const Color(0xFF0000FF),
+    const BoxDecoration decorationB = BoxDecoration(
+      color: Color(0xFF0000FF),
     );
 
     BoxDecoration actualDecoration;
 
     await tester.pumpWidget(
-      new AnimatedContainer(
+      AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
-        decoration: decorationA
+        decoration: decorationA,
       )
     );
 
@@ -50,10 +50,10 @@ void main() {
     expect(actualDecoration.color, equals(decorationA.color));
 
     await tester.pumpWidget(
-      new AnimatedContainer(
+      AnimatedContainer(
         key: key,
         duration: const Duration(milliseconds: 200),
-        decoration: decorationB
+        decoration: decorationB,
       )
     );
 
@@ -98,7 +98,7 @@ void main() {
 
   testWidgets('AnimatedContainer overanimate test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new AnimatedContainer(
+      AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         color: const Color(0xFF00FF00),
       )
@@ -107,7 +107,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
-      new AnimatedContainer(
+      AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         color: const Color(0xFF00FF00),
       )
@@ -116,7 +116,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
-      new AnimatedContainer(
+      AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         color: const Color(0xFF0000FF),
       )
@@ -125,7 +125,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(tester.binding.transientCallbackCount, 0);
     await tester.pumpWidget(
-      new AnimatedContainer(
+      AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         color: const Color(0xFF0000FF),
       )
@@ -134,15 +134,15 @@ void main() {
   });
 
   testWidgets('AnimatedContainer padding visual-to-directional animation', (WidgetTester tester) async {
-    final Key target = new UniqueKey();
+    final Key target = UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedContainer(
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.only(right: 50.0),
-          child: new SizedBox.expand(key: target),
+          child: SizedBox.expand(key: target),
         ),
       ),
     );
@@ -151,12 +151,12 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(750.0, 0.0));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedContainer(
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsetsDirectional.only(start: 100.0),
-          child: new SizedBox.expand(key: target),
+          child: SizedBox.expand(key: target),
         ),
       ),
     );
@@ -176,15 +176,15 @@ void main() {
   });
 
   testWidgets('AnimatedContainer alignment visual-to-directional animation', (WidgetTester tester) async {
-    final Key target = new UniqueKey();
+    final Key target = UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedContainer(
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           alignment: Alignment.topRight,
-          child: new SizedBox(key: target, width: 100.0, height: 200.0),
+          child: SizedBox(key: target, width: 100.0, height: 200.0),
         ),
       ),
     );
@@ -193,12 +193,12 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 0.0));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedContainer(
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           alignment: AlignmentDirectional.bottomStart,
-          child: new SizedBox(key: target, width: 100.0, height: 200.0),
+          child: SizedBox(key: target, width: 100.0, height: 200.0),
         ),
       ),
     );
@@ -219,13 +219,13 @@ void main() {
 
   testWidgets('Animation rerun', (WidgetTester tester) async {
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedContainer(
+      Center(
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: 100.0,
           height: 100.0,
-          child: const Text('X', textDirection: TextDirection.ltr)
-        )
+          child: const Text('X', textDirection: TextDirection.ltr),
+        ),
       )
     );
 
@@ -239,13 +239,13 @@ void main() {
     await tester.pump(const Duration(milliseconds: 1000));
 
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedContainer(
+      Center(
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 200.0,
-          child: const Text('X', textDirection: TextDirection.ltr)
-        )
+          child: const Text('X', textDirection: TextDirection.ltr),
+        ),
       )
     );
     await tester.pump();
@@ -263,13 +263,13 @@ void main() {
     expect(text.size.height, equals(200.0));
 
     await tester.pumpWidget(
-      new Center(
-        child: new AnimatedContainer(
+      Center(
+        child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: 200.0,
           height: 100.0,
-          child: const Text('X', textDirection: TextDirection.ltr)
-        )
+          child: const Text('X', textDirection: TextDirection.ltr),
+        ),
       )
     );
     await tester.pump();

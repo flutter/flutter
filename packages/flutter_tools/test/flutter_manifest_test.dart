@@ -6,13 +6,15 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
-import 'package:test/test.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
+import 'src/pubspec_schema.dart';
 
 void main() {
   setUpAll(() {
@@ -21,7 +23,7 @@ void main() {
 
   group('FlutterManifest', () {
     testUsingContext('is empty when the pubspec.yaml file is empty', () async {
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString('');
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString('');
       expect(flutterManifest.isEmpty, true);
       expect(flutterManifest.appName, '');
       expect(flutterManifest.usesMaterialDesign, false);
@@ -37,7 +39,7 @@ dependencies:
   flutter:
     sdk: flutter
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest, isNotNull);
       expect(flutterManifest.isEmpty, false);
       expect(flutterManifest.appName, 'test');
@@ -56,7 +58,7 @@ dependencies:
 flutter:
   uses-material-design: true
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.usesMaterialDesign, true);
     });
 
@@ -72,7 +74,7 @@ flutter:
     - a/foo
     - a/bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.assets.length, 2);
       expect(flutterManifest.assets[0], Uri.parse('a/foo'));
       expect(flutterManifest.assets[1], Uri.parse('a/bar'));
@@ -91,14 +93,14 @@ flutter:
       fonts:
         - asset: a/bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      expect(flutterManifest.fontsDescriptor.toString(), '[{fonts: [{asset: a/bar}], family: foo}]');
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}]}';
-      expect(font.descriptor.toString(), fontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(font.descriptor, fooFontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 1);
@@ -123,15 +125,14 @@ flutter:
         - asset: a/bar
           weight: 400
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}], family: foo}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, asset: a/bar}]}';
-      expect(font.descriptor.toString(), fontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(font.descriptor, fooFontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
@@ -161,15 +162,15 @@ flutter:
           weight: 400
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
 
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font font = fonts[0];
-      const String fontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(font.descriptor.toString(), fontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(font.descriptor, fooFontDescriptor);
       expect(font.familyName, 'foo');
       final List<FontAsset> assets = font.fontAssets;
       expect(assets.length, 2);
@@ -205,17 +206,18 @@ flutter:
           asset: a/baz
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
-                                             ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}], family: bar}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final dynamic expectedFontsDescriptor = <dynamic>[
+          {'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}, // ignore: always_specify_types
+          {'fonts': [{'asset': 'a/baz'}, {'style': 'italic', 'weight': 400, 'asset': 'a/baz'}], 'family': 'bar'}, // ignore: always_specify_types
+      ];
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 2);
 
       final Font fooFont = fonts[0];
-      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(fooFont.descriptor.toString(), barFontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(fooFont.descriptor, fooFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -229,7 +231,7 @@ flutter:
       expect(fooFontAsset1.style, 'italic');
 
       final Font barFont = fonts[1];
-      const String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}';
+      const String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}'; // ignore: always_specify_types
       expect(barFont.descriptor.toString(), fontDescriptor);
       expect(barFont.familyName, 'bar');
       final List<FontAsset> barAssets = barFont.fontAssets;
@@ -265,17 +267,15 @@ flutter:
           weight: 400
           style: italic
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
-                                             ' {fonts: [{asset: a/baz}, {style: italic, weight: 400, asset: a/baz}]}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(fooFont.descriptor.toString(), barFontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(fooFont.descriptor, fooFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -306,16 +306,14 @@ flutter:
           style: italic
     - family: bar
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
-
-      const String expectedFontsDescriptor = '[{fonts: [{asset: a/bar}, {style: italic, weight: 400, asset: a/bar}], family: foo},'
-                                             ' {family: bar}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      final dynamic expectedFontsDescriptor = [{'fonts': [{'asset': 'a/bar'}, {'style': 'italic', 'weight': 400, 'asset': 'a/bar'}], 'family': 'foo'}]; // ignore: always_specify_types
+      expect(flutterManifest.fontsDescriptor, expectedFontsDescriptor);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 1);
       final Font fooFont = fonts[0];
-      const String barFontDescriptor = '{family: foo, fonts: [{asset: a/bar}, {weight: 400, style: italic, asset: a/bar}]}';
-      expect(fooFont.descriptor.toString(), barFontDescriptor);
+      final dynamic fooFontDescriptor = {'family': 'foo', 'fonts': [{'asset': 'a/bar'}, {'weight': 400, 'style': 'italic', 'asset': 'a/bar'}]}; // ignore: always_specify_types
+      expect(fooFont.descriptor, fooFontDescriptor);
       expect(fooFont.familyName, 'foo');
       final List<FontAsset> fooAassets = fooFont.fontAssets;
       expect(fooAassets.length, 2);
@@ -342,10 +340,9 @@ flutter:
       fonts:
         - weight: 400
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
-      const String expectedFontsDescriptor = '[{fonts: [{weight: 400}], family: foo}]';
-      expect(flutterManifest.fontsDescriptor.toString(), expectedFontsDescriptor);
+      expect(flutterManifest.fontsDescriptor, <dynamic>[]);
       final List<Font> fonts = flutterManifest.fonts;
       expect(fonts.length, 0);
     });
@@ -358,23 +355,50 @@ dependencies:
     sdk: flutter
 flutter:
 ''';
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
+      expect(flutterManifest.isModule, false);
+      expect(flutterManifest.isPlugin, false);
+      expect(flutterManifest.androidPackage, null);
+    });
+
+    test('allows a module declaration', () async {
+      const String manifest = '''
+name: test
+flutter:
+  module:
+    androidPackage: com.example
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isModule, true);
+      expect(flutterManifest.androidPackage, 'com.example');
+    });
+
+    test('allows a plugin declaration', () async {
+      const String manifest = '''
+name: test
+flutter:
+  plugin:
+    androidPackage: com.example
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+      expect(flutterManifest.isPlugin, true);
+      expect(flutterManifest.androidPackage, 'com.example');
     });
 
     Future<void> checkManifestVersion({
       String manifest,
       String expectedAppVersion,
       String expectedBuildName,
-      int expectedBuildNumber,
+      String expectedBuildNumber,
     }) async {
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.appVersion, expectedAppVersion);
       expect(flutterManifest.buildName, expectedBuildName);
       expect(flutterManifest.buildNumber, expectedBuildNumber);
     }
 
-    test('parses major.minor.patch+build version clause', () async {
+    test('parses major.minor.patch+build version clause 1', () async {
       const String manifest = '''
 name: test
 version: 1.0.0+2
@@ -387,7 +411,24 @@ flutter:
         manifest: manifest,
         expectedAppVersion: '1.0.0+2',
         expectedBuildName: '1.0.0',
-        expectedBuildNumber: 2,
+        expectedBuildNumber: '2',
+      );
+    });
+
+    test('parses major.minor.patch+build version clause 2', () async {
+      const String manifest = '''
+name: test
+version: 1.0.0-beta+exp.sha.5114f85
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+''';
+      await checkManifestVersion(
+        manifest: manifest,
+        expectedAppVersion: '1.0.0-beta+exp.sha.5114f85',
+        expectedBuildName: '1.0.0-beta',
+        expectedBuildNumber: 'exp.sha.5114f85',
       );
     });
 
@@ -404,41 +445,7 @@ flutter:
         manifest: manifest,
         expectedAppVersion: '1.0+2',
         expectedBuildName: '1.0',
-        expectedBuildNumber: 2,
-      );
-    });
-
-    test('parses major+build version clause', () async {
-      const String manifest = '''
-name: test
-version: 1+2
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-      await checkManifestVersion(
-        manifest: manifest,
-        expectedAppVersion: '1+2',
-        expectedBuildName: '1',
-        expectedBuildNumber: 2,
-      );
-    });
-
-    test('parses major version clause', () async {
-      const String manifest = '''
-name: test
-version: 1
-dependencies:
-  flutter:
-    sdk: flutter
-flutter:
-''';
-      await checkManifestVersion(
-        manifest: manifest,
-        expectedAppVersion: '1',
-        expectedBuildName: '1',
-        expectedBuildNumber: null,
+        expectedBuildNumber: '2',
       );
     });
 
@@ -458,6 +465,7 @@ flutter:
         expectedBuildNumber: null,
       );
     });
+
     test('parses no version clause', () async {
       const String manifest = '''
 name: test
@@ -473,10 +481,30 @@ flutter:
         expectedBuildNumber: null,
       );
     });
+
+    // Regression test for https://github.com/flutter/flutter/issues/31764
+    testUsingContext('Returns proper error when font detail is malformed', () async {
+      final BufferLogger logger = context.get<Logger>();
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  fonts:
+    - family: foo
+      fonts:
+        -asset: a/bar
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+
+      expect(flutterManifest, null);
+      expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
+    });
   });
 
   group('FlutterManifest with MemoryFileSystem', () {
-    void assertSchemaIsReadable() async {
+    Future<void> assertSchemaIsReadable() async {
       const String manifest = '''
 name: test
 dependencies:
@@ -485,49 +513,45 @@ dependencies:
 flutter:
 ''';
 
-      final FlutterManifest flutterManifest = await FlutterManifest.createFromString(manifest);
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isEmpty, false);
     }
 
-    void writeSchemaFile(FileSystem filesystem, String schemaData) {
-      final String schemaPath = buildSchemaPath(filesystem);
-      final File schemaFile = filesystem.file(schemaPath);
-
-      final String schemaDir = buildSchemaDir(filesystem);
-
-      filesystem.directory(schemaDir).createSync(recursive: true);
-      filesystem.file(schemaFile).writeAsStringSync(schemaData);
-    }
-
-    void testUsingContextAndFs(String description, FileSystem filesystem,
-        dynamic testMethod()) {
-      const String schemaData = '{}';
-
-      testUsingContext(description,
-              () async {
-            writeSchemaFile( filesystem, schemaData);
-            testMethod();
-      },
-          overrides: <Type, Generator>{
-            FileSystem: () => filesystem,
-          }
+    void testUsingContextAndFs(
+      String description,
+      FileSystem filesystem,
+      dynamic testMethod(),
+    ) {
+      testUsingContext(
+        description,
+        () async {
+          writeEmptySchemaFile(filesystem);
+          testMethod();
+        },
+        overrides: <Type, Generator>{
+          FileSystem: () => filesystem,
+        },
       );
     }
 
-    testUsingContext('Validate manifest on original fs', () async {
+    testUsingContext('Validate manifest on original fs', () {
       assertSchemaIsReadable();
     });
 
-    testUsingContextAndFs('Validate manifest on Posix FS',
-        new MemoryFileSystem(style: FileSystemStyle.posix), () async {
-          assertSchemaIsReadable();
-        }
+    testUsingContextAndFs(
+      'Validate manifest on Posix FS',
+      MemoryFileSystem(style: FileSystemStyle.posix),
+      () {
+        assertSchemaIsReadable();
+      },
     );
 
-    testUsingContextAndFs('Validate manifest on Windows FS',
-        new MemoryFileSystem(style: FileSystemStyle.windows), () async {
-          assertSchemaIsReadable();
-        }
+    testUsingContextAndFs(
+      'Validate manifest on Windows FS',
+      MemoryFileSystem(style: FileSystemStyle.windows),
+      () {
+        assertSchemaIsReadable();
+      },
     );
 
   });

@@ -18,7 +18,7 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
   final String deviceId = device.deviceId;
 
   final Directory catalogDirectory = dir('${flutterDirectory.path}/examples/catalog');
-  await inDirectory(catalogDirectory, () async {
+  await inDirectory<void>(catalogDirectory, () async {
     await flutter('packages', options: <String>['get']);
 
     final bool isIosDevice = deviceOperatingSystem == DeviceOperatingSystem.ios;
@@ -44,5 +44,5 @@ Future<TaskResult> samplePageCatalogGenerator(String authorizationToken) async {
     );
   });
 
-  return new TaskResult.success(null);
+  return TaskResult.success(null);
 }

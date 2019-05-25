@@ -42,9 +42,8 @@ class SshCommandRunner {
   /// undefined.
   ///
   /// [ArgumentError] is thrown in the event that `address` is neither valid
-  /// IPv4 nor IPv6. Note that when connecting to a link local address (fe80::
-  /// is usually at the start of the address), then an interface should be
-  /// supplied.
+  /// IPv4 nor IPv6. When connecting to a link local address (`fe80::` is
+  /// usually at the start of the address), an interface should be supplied.
   SshCommandRunner({
     this.address,
     this.interface = '',
@@ -64,7 +63,7 @@ class SshCommandRunner {
     validateAddress(address);
   }
 
-  final Logger _log = new Logger('SshCommandRunner');
+  final Logger _log = Logger('SshCommandRunner');
 
   final ProcessManager _processManager;
 
@@ -98,7 +97,7 @@ class SshCommandRunner {
     _log.fine('Running command through SSH: ${args.join(' ')}');
     final ProcessResult result = await _processManager.run(args);
     if (result.exitCode != 0) {
-      throw new SshCommandError(
+      throw SshCommandError(
           'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
     _log.fine('SSH command stdout in brackets:[${result.stdout}]');

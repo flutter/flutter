@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/gestures.dart';
-import 'package:test/test.dart';
 
+import '../flutter_test_alternative.dart';
 
 void main() {
   bool approx(double value, double expectation) {
@@ -17,7 +17,7 @@ void main() {
     final List<double> y = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
     final PolynomialFit fit = solver.solve(1);
 
     expect(fit.coefficients.length, 2);
@@ -31,7 +31,7 @@ void main() {
     final List<double> y = <double>[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
     final PolynomialFit fit = solver.solve(1);
 
     expect(fit.coefficients.length, 2);
@@ -45,7 +45,7 @@ void main() {
     final List<double> y = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
     final PolynomialFit fit = solver.solve(2);
 
     expect(fit.coefficients.length, 3);
@@ -60,7 +60,7 @@ void main() {
     final List<double> y = <double>[1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
     final List<double> w = <double>[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0];
 
-    final LeastSquaresSolver solver = new LeastSquaresSolver(x, y, w);
+    final LeastSquaresSolver solver = LeastSquaresSolver(x, y, w);
     final PolynomialFit fit = solver.solve(2);
 
     expect(fit.coefficients.length, 3);

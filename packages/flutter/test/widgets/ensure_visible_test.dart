@@ -8,28 +8,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-Finder findKey(int i) => find.byKey(new ValueKey<int>(i));
+Finder findKey(int i) => find.byKey(ValueKey<int>(i));
 
 Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse = false }) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Center(
-      child: new SizedBox(
+    child: Center(
+      child: SizedBox(
         width: 600.0,
         height: 400.0,
-        child: new SingleChildScrollView(
+        child: SingleChildScrollView(
           scrollDirection: scrollDirection,
           reverse: reverse,
-          child: new ListBody(
+          child: ListBody(
             mainAxis: scrollDirection,
             children: <Widget>[
-              new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
-              new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
-              new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
-              new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
-              new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
-              new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
-              new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
+              Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
+              Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
+              Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
+              Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
+              Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
+              Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
+              Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
             ],
           ),
         ),
@@ -39,24 +39,25 @@ Widget buildSingleChildScrollView(Axis scrollDirection, { bool reverse = false }
 }
 
 Widget buildListView(Axis scrollDirection, { bool reverse = false, bool shrinkWrap = false }) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Center(
-      child: new SizedBox(
+    child: Center(
+      child: SizedBox(
         width: 600.0,
         height: 400.0,
-        child: new ListView(
+        child: ListView(
           scrollDirection: scrollDirection,
           reverse: reverse,
+          addSemanticIndexes: false,
           shrinkWrap: shrinkWrap,
           children: <Widget>[
-            new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
-            new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
-            new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
-            new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
-            new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
-            new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
-            new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
+            Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0),
+            Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0),
+            Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0),
+            Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0),
+            Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0),
+            Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0),
+            Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0),
           ],
         ),
       ),
@@ -179,22 +180,22 @@ void main() {
       BuildContext findContext(int i) => tester.element(findKey(i));
 
       await tester.pumpWidget(
-        new Center(
-          child: new SizedBox(
+        Center(
+          child: SizedBox(
             width: 600.0,
             height: 400.0,
-            child: new SingleChildScrollView(
-              child: new ListBody(
+            child: SingleChildScrollView(
+              child: ListBody(
                 children: <Widget>[
-                  new Container(height: 200.0),
-                  new Container(height: 200.0),
-                  new Container(height: 200.0),
-                  new Container(
+                  Container(height: 200.0),
+                  Container(height: 200.0),
+                  Container(height: 200.0),
+                  Container(
                     height: 200.0,
-                    child: new Center(
-                      child: new Transform(
-                        transform: new Matrix4.rotationZ(math.pi),
-                        child: new Container(
+                    child: Center(
+                      child: Transform(
+                        transform: Matrix4.rotationZ(math.pi),
+                        child: Container(
                           key: const ValueKey<int>(0),
                           width: 100.0,
                           height: 100.0,
@@ -203,9 +204,9 @@ void main() {
                       ),
                     ),
                   ),
-                  new Container(height: 200.0),
-                  new Container(height: 200.0),
-                  new Container(height: 200.0),
+                  Container(height: 200.0),
+                  Container(height: 200.0),
+                  Container(height: 200.0),
                 ],
               ),
             ),
@@ -226,7 +227,7 @@ void main() {
   group('ListView', () {
     testWidgets('ListView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -262,7 +263,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -298,7 +299,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -334,7 +335,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -371,7 +372,7 @@ void main() {
     // TODO(abarth): Unskip this test. See https://github.com/flutter/flutter/issues/7919
     testWidgets('ListView ensureVisible negative child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -381,22 +382,22 @@ void main() {
       }
 
       Widget buildSliver(int i) {
-        return new SliverToBoxAdapter(
-          key: new ValueKey<int>(i),
-          child: new Container(width: 200.0, height: 200.0),
+        return SliverToBoxAdapter(
+          key: ValueKey<int>(i),
+          child: Container(width: 200.0, height: 200.0),
         );
       }
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Center(
-            child: new SizedBox(
+          child: Center(
+            child: SizedBox(
               width: 600.0,
               height: 400.0,
-              child: new Scrollable(
+              child: Scrollable(
                 viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                  return new Viewport(
+                  return Viewport(
                     offset: offset,
                     center: const ValueKey<int>(4),
                     slivers: <Widget>[
@@ -429,28 +430,28 @@ void main() {
 
     testWidgets('ListView ensureVisible rotated child', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
-      await tester.pumpWidget(new Directionality(
+      await tester.pumpWidget(Directionality(
         textDirection: TextDirection.ltr,
-        child: new Center(
-          child: new SizedBox(
+        child: Center(
+          child: SizedBox(
             width: 600.0,
             height: 400.0,
-            child: new ListView(
+            child: ListView(
               children: <Widget>[
-                new Container(height: 200.0),
-                new Container(height: 200.0),
-                new Container(height: 200.0),
-                new Container(
+                Container(height: 200.0),
+                Container(height: 200.0),
+                Container(height: 200.0),
+                Container(
                   height: 200.0,
-                  child: new Center(
-                    child: new Transform(
-                      transform: new Matrix4.rotationZ(math.pi),
-                      child: new Container(
+                  child: Center(
+                    child: Transform(
+                      transform: Matrix4.rotationZ(math.pi),
+                      child: Container(
                         key: const ValueKey<int>(0),
                         width: 100.0,
                         height: 100.0,
@@ -459,13 +460,13 @@ void main() {
                     ),
                   ),
                 ),
-                new Container(height: 200.0),
-                new Container(height: 200.0),
-                new Container(height: 200.0),
+                Container(height: 200.0),
+                Container(height: 200.0),
+                Container(height: 200.0),
               ],
             ),
           ),
-        )
+        ),
       ));
 
       await prepare(321.0);
@@ -482,7 +483,7 @@ void main() {
   group('ListView shrinkWrap', () {
     testWidgets('ListView ensureVisible Axis.vertical', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -518,7 +519,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -554,7 +555,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.vertical reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -590,7 +591,7 @@ void main() {
 
     testWidgets('ListView ensureVisible Axis.horizontal reverse', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
@@ -628,37 +629,37 @@ void main() {
   group('Scrollable with center', () {
     testWidgets('ensureVisible', (WidgetTester tester) async {
       BuildContext findContext(int i) => tester.element(findKey(i));
-      Future<Null> prepare(double offset) async {
+      Future<void> prepare(double offset) async {
         tester.state<ScrollableState>(find.byType(Scrollable)).position.jumpTo(offset);
         await tester.pump();
       }
 
       await tester.pumpWidget(
-        new Directionality(
+        Directionality(
           textDirection: TextDirection.ltr,
-          child: new Center(
-            child: new SizedBox(
+          child: Center(
+            child: SizedBox(
               width: 600.0,
               height: 400.0,
-              child: new Scrollable(
+              child: Scrollable(
                 viewportBuilder: (BuildContext context, ViewportOffset offset) {
-                  return new Viewport(
+                  return Viewport(
                     offset: offset,
                     center: const ValueKey<String>('center'),
                     slivers: <Widget>[
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-6), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-5), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-4), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-3), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-2), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(-1), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0), key: const ValueKey<String>('center')),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0)),
-                      new SliverToBoxAdapter(child: new Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(-6), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(-5), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(-4), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(-3), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(-2), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(-1), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(0), width: 200.0, height: 200.0), key: const ValueKey<String>('center')),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(1), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(2), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(3), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(4), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(5), width: 200.0, height: 200.0)),
+                      SliverToBoxAdapter(child: Container(key: const ValueKey<int>(6), width: 200.0, height: 200.0)),
                     ],
                   );
                 },

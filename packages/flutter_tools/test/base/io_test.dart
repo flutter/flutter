@@ -7,17 +7,17 @@ import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
   group('ProcessSignal', () {
 
     testUsingContext('signals are properly delegated', () async {
-      final MockIoProcessSignal mockSignal = new MockIoProcessSignal();
-      final ProcessSignal signalUnderTest = new ProcessSignal(mockSignal);
-      final StreamController<io.ProcessSignal> controller = new StreamController<io.ProcessSignal>();
+      final MockIoProcessSignal mockSignal = MockIoProcessSignal();
+      final ProcessSignal signalUnderTest = ProcessSignal(mockSignal);
+      final StreamController<io.ProcessSignal> controller = StreamController<io.ProcessSignal>();
 
       when(mockSignal.watch()).thenAnswer((Invocation invocation) => controller.stream);
       controller.add(mockSignal);
@@ -26,7 +26,7 @@ void main() {
     });
 
     testUsingContext('toString() works', () async {
-      expect(io.ProcessSignal.SIGINT.toString(), ProcessSignal.SIGINT.toString()); // ignore: deprecated_member_use
+      expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
     });
   });
 }

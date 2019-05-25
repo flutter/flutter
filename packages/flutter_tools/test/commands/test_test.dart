@@ -9,13 +9,13 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 
-Future<Null> _testExclusionLock;
+Future<void> _testExclusionLock;
 
 void main() {
   group('flutter test should', () {
@@ -90,7 +90,7 @@ void main() {
   });
 }
 
-Future<Null> _testFile(String testName, String workingDirectory, String testDirectory, {Matcher exitCode}) async {
+Future<void> _testFile(String testName, String workingDirectory, String testDirectory, { Matcher exitCode }) async {
   exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
   final File expectationFile = fs.file(fullTestExpectation);
@@ -106,6 +106,8 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   final List<String> output = exec.stdout.split('\n');
   if (output.first == 'Waiting for another flutter command to release the startup lock...')
     output.removeAt(0);
+  if (output.first.startsWith('Running "flutter pub get" in'))
+    output.removeAt(0);
   output.add('<<stderr>>');
   output.addAll(exec.stderr.split('\n'));
   final List<String> expectations = fs.file(fullTestExpectation).readAsLinesSync();
@@ -114,16 +116,20 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
   int outputLineNumber = 0;
   bool haveSeenStdErrMarker = false;
   while (expectationLineNumber < expectations.length) {
-    expect(output, hasLength(greaterThan(outputLineNumber)));
+    expect(
+      output,
+      hasLength(greaterThan(outputLineNumber)),
+      reason: 'Failure in $testName to compare to $fullTestExpectation',
+    );
     final String expectationLine = expectations[expectationLineNumber];
-    final String outputLine = output[outputLineNumber];
+    String outputLine = output[outputLineNumber];
     if (expectationLine == '<<skip until matching line>>') {
       allowSkip = true;
       expectationLineNumber += 1;
       continue;
     }
     if (allowSkip) {
-      if (!new RegExp(expectationLine).hasMatch(outputLine)) {
+      if (!RegExp(expectationLine).hasMatch(outputLine)) {
         outputLineNumber += 1;
         continue;
       }
@@ -133,6 +139,18 @@ Future<Null> _testFile(String testName, String workingDirectory, String testDire
       expect(haveSeenStdErrMarker, isFalse);
       haveSeenStdErrMarker = true;
     }
+    if (!RegExp(expectationLine).hasMatch(outputLine) && outputLineNumber + 1 < output.length) {
+      // Check if the RegExp can match the next two lines in the output so
+      // that it is possible to write expectations that still hold even if a
+      // line is wrapped slightly differently due to for example a file name
+      // being longer on one platform than another.
+      final String mergedLines = '$outputLine\n${output[outputLineNumber+1]}';
+      if (RegExp(expectationLine).hasMatch(mergedLines)) {
+        outputLineNumber += 1;
+        outputLine = mergedLines;
+      }
+    }
+
     expect(outputLine, matches(expectationLine), reason: 'Full output:\n- - - -----8<----- - - -\n${output.join("\n")}\n- - - -----8<----- - - -');
     expectationLineNumber += 1;
     outputLineNumber += 1;
@@ -165,7 +183,7 @@ Future<ProcessResult> _runFlutterTest(
   while (_testExclusionLock != null)
     await _testExclusionLock;
 
-  final Completer<Null> testExclusionCompleter = new Completer<Null>();
+  final Completer<void> testExclusionCompleter = Completer<void>();
   _testExclusionLock = testExclusionCompleter.future;
   try {
     return await Process.run(

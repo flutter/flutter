@@ -6,11 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 
+import '../rendering/mock_canvas.dart';
+
 void main() {
-  testWidgets('FlatButton implements debugFillDescription', (WidgetTester tester) async {
-    final DiagnosticPropertiesBuilder builder = new DiagnosticPropertiesBuilder();
-    new FlatButton(
-        onPressed: () {},
+  testWidgets('FlatButton implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    FlatButton(
+        onPressed: () { },
         textColor: const Color(0xFF00FF00),
         disabledTextColor: const Color(0xFFFF0000),
         color: const Color(0xFF000000),
@@ -28,5 +30,51 @@ void main() {
       'highlightColor: Color(0xff1565c0)',
       'splashColor: Color(0xff9e9e9e)',
     ]);
+  });
+
+  testWidgets('Default FlatButton meets a11y contrast guidelines', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FlatButton(
+              child: const Text('FlatButton'),
+              onPressed: () { },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    // Default, not disabled.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+
+    // Highlighted (pressed).
+    final Offset center = tester.getCenter(find.byType(FlatButton));
+    await tester.startGesture(center);
+    await tester.pump(); // Start the splash and highlight animations.
+    await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
+    await expectLater(tester, meetsGuideline(textContrastGuideline));
+  },
+    semanticsEnabled: true,
+  );
+
+  testWidgets('FlatButton has no clip by default', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: FlatButton(
+            child: Container(),
+            onPressed: () { /* to make sure the button is enabled */ },
+          ),
+        ),
+      ),
+    );
+
+    expect(
+        tester.renderObject(find.byType(FlatButton)),
+        paintsExactlyCountTimes(#clipPath, 0),
+    );
   });
 }

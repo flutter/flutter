@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../gallery/demo.dart';
+
 class _PageSelector extends StatelessWidget {
   const _PageSelector({ this.icons });
 
@@ -19,49 +21,49 @@ class _PageSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final TabController controller = DefaultTabController.of(context);
     final Color color = Theme.of(context).accentColor;
-    return new SafeArea(
+    return SafeArea(
       top: false,
       bottom: false,
-      child: new Column(
+      child: Column(
         children: <Widget>[
-          new Container(
+          Container(
             margin: const EdgeInsets.only(top: 16.0),
-            child: new Row(
+            child: Row(
               children: <Widget>[
-                new IconButton(
+                IconButton(
                   icon: const Icon(Icons.chevron_left),
                   color: color,
                   onPressed: () { _handleArrowButtonPress(context, -1); },
-                  tooltip: 'Page back'
+                  tooltip: 'Page back',
                 ),
-                new TabPageSelector(controller: controller),
-                new IconButton(
+                TabPageSelector(controller: controller),
+                IconButton(
                   icon: const Icon(Icons.chevron_right),
                   color: color,
                   onPressed: () { _handleArrowButtonPress(context, 1); },
-                  tooltip: 'Page forward'
-                )
+                  tooltip: 'Page forward',
+                ),
               ],
-              mainAxisAlignment: MainAxisAlignment.spaceBetween
-            )
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            ),
           ),
-          new Expanded(
-            child: new IconTheme(
-              data: new IconThemeData(
+          Expanded(
+            child: IconTheme(
+              data: IconThemeData(
                 size: 128.0,
                 color: color,
               ),
-              child: new TabBarView(
-                children: icons.map((Icon icon) {
-                  return new Container(
+              child: TabBarView(
+                children: icons.map<Widget>((Icon icon) {
+                  return Container(
                     padding: const EdgeInsets.all(12.0),
-                    child: new Card(
-                      child: new Center(
+                    child: Card(
+                      child: Center(
                         child: icon,
                       ),
                     ),
                   );
-                }).toList()
+                }).toList(),
               ),
             ),
           ),
@@ -84,11 +86,14 @@ class PageSelectorDemo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
-      appBar: new AppBar(title: const Text('Page selector')),
-      body: new DefaultTabController(
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Page selector'),
+        actions: <Widget>[MaterialDemoDocumentationButton(routeName)],
+      ),
+      body: DefaultTabController(
         length: icons.length,
-        child: new _PageSelector(icons: icons),
+        child: _PageSelector(icons: icons),
       ),
     );
   }

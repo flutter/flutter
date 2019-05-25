@@ -5,34 +5,34 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-const Color kSelectedColor = const Color(0xFF00FF00);
+const Color kSelectedColor = Color(0xFF00FF00);
 const Color kUnselectedColor = Colors.transparent;
 
 Widget buildFrame(TabController tabController, { Color color, Color selectedColor, double indicatorSize = 12.0 }) {
-  return new Directionality(
+  return Directionality(
     textDirection: TextDirection.ltr,
-    child: new Theme(
-      data: new ThemeData(accentColor: kSelectedColor),
-      child: new SizedBox.expand(
-        child: new Center(
-          child: new SizedBox(
+    child: Theme(
+      data: ThemeData(accentColor: kSelectedColor),
+      child: SizedBox.expand(
+        child: Center(
+          child: SizedBox(
             width: 400.0,
             height: 400.0,
-            child: new Column(
+            child: Column(
               children: <Widget>[
-                new TabPageSelector(
+                TabPageSelector(
                   controller: tabController,
                   color: color,
                   selectedColor: selectedColor,
                   indicatorSize: indicatorSize,
                 ),
-                new Flexible(
-                  child: new TabBarView(
+                Flexible(
+                  child: TabBarView(
                     controller: tabController,
                     children: const <Widget>[
-                      const Center(child: const Text('0')),
-                      const Center(child: const Text('1')),
-                      const Center(child: const Text('2')),
+                      Center(child: Text('0')),
+                      Center(child: Text('1')),
+                      Center(child: Text('2')),
                     ],
                   ),
                 ),
@@ -49,15 +49,15 @@ List<Color> indicatorColors(WidgetTester tester) {
   final Iterable<TabPageSelectorIndicator> indicators = tester.widgetList(
     find.descendant(
       of: find.byType(TabPageSelector),
-      matching: find.byType(TabPageSelectorIndicator)
+      matching: find.byType(TabPageSelectorIndicator),
     )
   );
-  return indicators.map((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
+  return indicators.map<Color>((TabPageSelectorIndicator indicator) => indicator.backgroundColor).toList();
 }
 
 void main() {
   testWidgets('PageSelector responds correctly to setting the TabController index', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
     );
@@ -78,7 +78,7 @@ void main() {
   });
 
   testWidgets('PageSelector responds correctly to TabController.animateTo()', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       length: 3,
     );
@@ -121,7 +121,7 @@ void main() {
   });
 
   testWidgets('PageSelector responds correctly to TabBarView drags', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
@@ -180,10 +180,10 @@ void main() {
   });
 
   testWidgets('PageSelector indicatorColors', (WidgetTester tester) async {
-    const Color kRed = const Color(0xFFFF0000);
-    const Color kBlue = const Color(0xFF0000FF);
+    const Color kRed = Color(0xFFFF0000);
+    const Color kBlue = Color(0xFF0000FF);
 
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,
@@ -199,7 +199,7 @@ void main() {
   });
 
   testWidgets('PageSelector indicatorSize', (WidgetTester tester) async {
-    final TabController tabController = new TabController(
+    final TabController tabController = TabController(
       vsync: const TestVSync(),
       initialIndex: 1,
       length: 3,

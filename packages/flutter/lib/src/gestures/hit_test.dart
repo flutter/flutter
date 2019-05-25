@@ -5,7 +5,7 @@
 import 'events.dart';
 
 /// An object that can hit-test pointers.
-abstract class HitTestable { // ignore: one_member_abstracts
+abstract class HitTestable {
   // This class is intended to be used as an interface with the implements
   // keyword, and should not be extended directly.
   factory HitTestable._() => null;
@@ -18,7 +18,7 @@ abstract class HitTestable { // ignore: one_member_abstracts
 }
 
 /// An object that can dispatch events.
-abstract class HitTestDispatcher { // ignore: one_member_abstracts
+abstract class HitTestDispatcher {
   // This class is intended to be used as an interface with the implements
   // keyword, and should not be extended directly.
   factory HitTestDispatcher._() => null;
@@ -28,7 +28,7 @@ abstract class HitTestDispatcher { // ignore: one_member_abstracts
 }
 
 /// An object that can handle events.
-abstract class HitTestTarget { // ignore: one_member_abstracts
+abstract class HitTestTarget {
   // This class is intended to be used as an interface with the implements
   // keyword, and should not be extended directly.
   factory HitTestTarget._() => null;
@@ -54,19 +54,23 @@ class HitTestEntry {
 
 /// The result of performing a hit test.
 class HitTestResult {
-  /// Creates a hit test result.
+  /// Creates an empty hit test result.
+  HitTestResult() : _path = <HitTestEntry>[];
+
+  /// Wraps `result` (usually a subtype of [HitTestResult]) to create a
+  /// generic [HitTestResult].
   ///
-  /// If the [path] argument is null, the [path] field will be initialized with
-  /// and empty list.
-  HitTestResult({ List<HitTestEntry> path })
-    : _path = path ?? <HitTestEntry>[];
+  /// The [HitTestEntry]s added to the returned [HitTestResult] are also
+  /// added to the wrapped `result` (both share the same underlying data
+  /// structure to store [HitTestEntry]s).
+  HitTestResult.wrap(HitTestResult result) : _path = result._path;
 
   /// An unmodifiable list of [HitTestEntry] objects recorded during the hit test.
   ///
   /// The first entry in the path is the most specific, typically the one at
   /// the leaf of tree being hit tested. Event propagation starts with the most
   /// specific (i.e., first) entry and proceeds in order through the path.
-  List<HitTestEntry> get path => new List<HitTestEntry>.unmodifiable(_path);
+  Iterable<HitTestEntry> get path => _path;
   final List<HitTestEntry> _path;
 
   /// Add a [HitTestEntry] to the path.

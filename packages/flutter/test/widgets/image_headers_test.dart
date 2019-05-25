@@ -12,14 +12,14 @@ import 'package:mockito/mockito.dart';
 import '../painting/image_data.dart';
 
 void main() {
-  final MockHttpClient client = new MockHttpClient();
-  final MockHttpClientRequest request = new MockHttpClientRequest();
-  final MockHttpClientResponse response = new MockHttpClientResponse();
-  final MockHttpHeaders headers = new MockHttpHeaders();
+  final MockHttpClient client = MockHttpClient();
+  final MockHttpClientRequest request = MockHttpClientRequest();
+  final MockHttpClientResponse response = MockHttpClientResponse();
+  final MockHttpHeaders headers = MockHttpHeaders();
 
   testWidgets('Headers', (WidgetTester tester) async {
-    HttpOverrides.runZoned(() async {
-      await tester.pumpWidget(new Image.network(
+    HttpOverrides.runZoned<Future<void>>(() async {
+      await tester.pumpWidget(Image.network(
         'https://www.example.com/images/frame.png',
         headers: const <String, String>{'flutter': 'flutter'},
       ));
@@ -27,17 +27,17 @@ void main() {
       verify(headers.add('flutter', 'flutter')).called(1);
 
     }, createHttpClient: (SecurityContext _) {
-      when(client.getUrl(any)).thenAnswer((_) => new Future<HttpClientRequest>.value(request));
+      when(client.getUrl(any)).thenAnswer((_) => Future<HttpClientRequest>.value(request));
       when(request.headers).thenReturn(headers);
-      when(request.close()).thenAnswer((_) => new Future<HttpClientResponse>.value(response));
+      when(request.close()).thenAnswer((_) => Future<HttpClientResponse>.value(response));
       when(response.contentLength).thenReturn(kTransparentImage.length);
       when(response.statusCode).thenReturn(HttpStatus.ok);
       when(response.listen(any)).thenAnswer((Invocation invocation) {
         final void Function(List<int>) onData = invocation.positionalArguments[0];
         final void Function() onDone = invocation.namedArguments[#onDone];
-        final void Function(Object, [StackTrace]) onError = invocation.namedArguments[#onError];
+        final void Function(Object, [ StackTrace ]) onError = invocation.namedArguments[#onError];
         final bool cancelOnError = invocation.namedArguments[#cancelOnError];
-        return new Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
+        return Stream<List<int>>.fromIterable(<List<int>>[kTransparentImage]).listen(onData, onDone: onDone, onError: onError, cancelOnError: cancelOnError);
       });
       return client;
     });

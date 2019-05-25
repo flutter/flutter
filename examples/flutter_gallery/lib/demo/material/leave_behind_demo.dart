@@ -5,12 +5,16 @@
 import 'package:collection/collection.dart' show lowerBound;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
+
+import '../../gallery/demo.dart';
 
 enum LeaveBehindDemoAction {
   reset,
   horizontalSwipe,
   leftSwipe,
-  rightSwipe
+  rightSwipe,
+  confirmDismiss,
 }
 
 class LeaveBehindItem implements Comparable<LeaveBehindItem> {
@@ -34,21 +38,22 @@ class LeaveBehindDemo extends StatefulWidget {
   static const String routeName = '/material/leave-behind';
 
   @override
-  LeaveBehindDemoState createState() => new LeaveBehindDemoState();
+  LeaveBehindDemoState createState() => LeaveBehindDemoState();
 }
 
 class LeaveBehindDemoState extends State<LeaveBehindDemo> {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   DismissDirection _dismissDirection = DismissDirection.horizontal;
+  bool _confirmDismiss = true;
   List<LeaveBehindItem> leaveBehindItems;
 
   void initListItems() {
-    leaveBehindItems = new List<LeaveBehindItem>.generate(16, (int index) {
-      return new LeaveBehindItem(
+    leaveBehindItems = List<LeaveBehindItem>.generate(16, (int index) {
+      return LeaveBehindItem(
         index: index,
         name: 'Item $index Sender',
         subject: 'Subject: $index',
-        body: "[$index] first line of the message's body..."
+        body: "[$index] first line of the message's body...",
       );
     });
   }
@@ -74,6 +79,9 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         case LeaveBehindDemoAction.rightSwipe:
           _dismissDirection = DismissDirection.startToEnd;
           break;
+        case LeaveBehindDemoAction.confirmDismiss:
+          _confirmDismiss = !_confirmDismiss;
+          break;
       }
     });
   }
@@ -85,94 +93,204 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
     });
   }
 
-  Widget buildItem(LeaveBehindItem item) {
-    final ThemeData theme = Theme.of(context);
-    return new Dismissible(
-      key: new ObjectKey(item),
-      direction: _dismissDirection,
-      onDismissed: (DismissDirection direction) {
-        setState(() {
-          leaveBehindItems.remove(item);
-        });
-        final String action = (direction == DismissDirection.endToStart) ? 'archived' : 'deleted';
-        _scaffoldKey.currentState.showSnackBar(new SnackBar(
-          content: new Text('You $action item ${item.index}'),
-          action: new SnackBarAction(
-            label: 'UNDO',
-            onPressed: () { handleUndo(item); }
-          )
-        ));
-      },
-      background: new Container(
-        color: theme.primaryColor,
-        child: const ListTile(
-          leading: const Icon(Icons.delete, color: Colors.white, size: 36.0)
-        )
+  void _handleArchive(LeaveBehindItem item) {
+    setState(() {
+      leaveBehindItems.remove(item);
+    });
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      content: Text('You archived item ${item.index}'),
+      action: SnackBarAction(
+        label: 'UNDO',
+        onPressed: () { handleUndo(item); },
       ),
-      secondaryBackground: new Container(
-        color: theme.primaryColor,
-        child: const ListTile(
-          trailing: const Icon(Icons.archive, color: Colors.white, size: 36.0)
-        )
+    ));
+  }
+
+  void _handleDelete(LeaveBehindItem item) {
+    setState(() {
+      leaveBehindItems.remove(item);
+    });
+    _scaffoldKey.currentState.showSnackBar(SnackBar(
+      content: Text('You deleted item ${item.index}'),
+      action: SnackBarAction(
+        label: 'UNDO',
+        onPressed: () { handleUndo(item); },
       ),
-      child: new Container(
-        decoration: new BoxDecoration(
-          color: theme.canvasColor,
-          border: new Border(bottom: new BorderSide(color: theme.dividerColor))
-        ),
-        child: new ListTile(
-          title: new Text(item.name),
-          subtitle: new Text('${item.subject}\n${item.body}'),
-          isThreeLine: true
-        )
-      )
-    );
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    Widget body;
+    if (leaveBehindItems.isEmpty) {
+      body = Center(
+        child: RaisedButton(
+          onPressed: () => handleDemoAction(LeaveBehindDemoAction.reset),
+          child: const Text('Reset the list'),
+        ),
+      );
+    } else {
+      body = ListView(
+        children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
+          return _LeaveBehindListItem(
+            confirmDismiss: _confirmDismiss,
+            item: item,
+            onArchive: _handleArchive,
+            onDelete: _handleDelete,
+            dismissDirection: _dismissDirection,
+          );
+        }).toList(),
+      );
+    }
+
+    return Scaffold(
       key: _scaffoldKey,
-      appBar: new AppBar(
+      appBar: AppBar(
         title: const Text('Swipe to dismiss'),
         actions: <Widget>[
-          new PopupMenuButton<LeaveBehindDemoAction>(
+          MaterialDemoDocumentationButton(LeaveBehindDemo.routeName),
+          PopupMenuButton<LeaveBehindDemoAction>(
             onSelected: handleDemoAction,
             itemBuilder: (BuildContext context) => <PopupMenuEntry<LeaveBehindDemoAction>>[
               const PopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.reset,
-                child: const Text('Reset the list')
+                child: Text('Reset the list'),
               ),
-              const PopupMenuDivider(), // ignore: list_element_type_not_assignable, https://github.com/flutter/flutter/issues/5771
-              new CheckedPopupMenuItem<LeaveBehindDemoAction>(
+              const PopupMenuDivider(),
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.horizontalSwipe,
                 checked: _dismissDirection == DismissDirection.horizontal,
-                child: const Text('Horizontal swipe')
+                child: const Text('Horizontal swipe'),
               ),
-              new CheckedPopupMenuItem<LeaveBehindDemoAction>(
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.leftSwipe,
                 checked: _dismissDirection == DismissDirection.endToStart,
-                child: const Text('Only swipe left')
+                child: const Text('Only swipe left'),
               ),
-              new CheckedPopupMenuItem<LeaveBehindDemoAction>(
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
                 value: LeaveBehindDemoAction.rightSwipe,
                 checked: _dismissDirection == DismissDirection.startToEnd,
-                child: const Text('Only swipe right')
-              )
-            ]
-          )
-        ]
-      ),
-      body: leaveBehindItems.isEmpty
-          ? new Center(
-              child: new RaisedButton(
-                onPressed: () => handleDemoAction(LeaveBehindDemoAction.reset),
-                child: const Text('Reset the list'),
+                child: const Text('Only swipe right'),
               ),
-            )
-          : new ListView(
-             children: leaveBehindItems.map(buildItem).toList()
+              CheckedPopupMenuItem<LeaveBehindDemoAction>(
+                value: LeaveBehindDemoAction.confirmDismiss,
+                checked: _confirmDismiss,
+                child: const Text('Confirm dismiss'),
+              ),
+            ],
+          ),
+        ],
+      ),
+      body: body,
+    );
+  }
+}
+
+class _LeaveBehindListItem extends StatelessWidget {
+  const _LeaveBehindListItem({
+    Key key,
+    @required this.item,
+    @required this.onArchive,
+    @required this.onDelete,
+    @required this.dismissDirection,
+    @required this.confirmDismiss,
+  }) : super(key: key);
+
+  final LeaveBehindItem item;
+  final DismissDirection dismissDirection;
+  final void Function(LeaveBehindItem) onArchive;
+  final void Function(LeaveBehindItem) onDelete;
+  final bool confirmDismiss;
+
+  void _handleArchive() {
+    onArchive(item);
+  }
+
+  void _handleDelete() {
+    onDelete(item);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Semantics(
+      customSemanticsActions: <CustomSemanticsAction, VoidCallback>{
+        const CustomSemanticsAction(label: 'Archive'): _handleArchive,
+        const CustomSemanticsAction(label: 'Delete'): _handleDelete,
+      },
+      child: Dismissible(
+        key: ObjectKey(item),
+        direction: dismissDirection,
+        onDismissed: (DismissDirection direction) {
+          if (direction == DismissDirection.endToStart)
+            _handleArchive();
+          else
+            _handleDelete();
+        },
+        confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
+          switch(dismissDirection) {
+            case DismissDirection.endToStart:
+              return await _showConfirmationDialog(context, 'archive') == true;
+            case DismissDirection.startToEnd:
+              return await _showConfirmationDialog(context, 'delete') == true;
+            case DismissDirection.horizontal:
+            case DismissDirection.vertical:
+            case DismissDirection.up:
+            case DismissDirection.down:
+              assert(false);
+          }
+          return false;
+        },
+        background: Container(
+          color: theme.primaryColor,
+          child: const ListTile(
+            leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
+          ),
+        ),
+        secondaryBackground: Container(
+          color: theme.primaryColor,
+          child: const ListTile(
+            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),
+          ),
+        ),
+        child: Container(
+          decoration: BoxDecoration(
+            color: theme.canvasColor,
+            border: Border(bottom: BorderSide(color: theme.dividerColor)),
+          ),
+          child: ListTile(
+            title: Text(item.name),
+            subtitle: Text('${item.subject}\n${item.body}'),
+            isThreeLine: true,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<bool> _showConfirmationDialog(BuildContext context, String action) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Do you want to $action this item?'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('Yes'),
+              onPressed: () {
+                Navigator.pop(context, true); // showDialog() returns true
+              },
             ),
+            FlatButton(
+              child: const Text('No'),
+              onPressed: () {
+                Navigator.pop(context, false); // showDialog() returns false
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

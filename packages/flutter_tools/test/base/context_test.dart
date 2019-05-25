@@ -5,7 +5,8 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:test/test.dart';
+
+import '../src/common.dart';
 
 void main() {
   group('AppContext', () {
@@ -23,7 +24,7 @@ void main() {
       test('returns root context in child of root zone if zone was manually created', () {
         final Zone rootZone = Zone.current;
         final AppContext rootContext = context;
-        runZoned(() {
+        runZoned<void>(() {
           expect(Zone.current, isNot(rootZone));
           expect(Zone.current.parent, rootZone);
           expect(context, rootContext);
@@ -60,7 +61,7 @@ void main() {
         final AppContext rootContext = context;
         await rootContext.run<void>(name: 'child', body: () {
           final AppContext childContext = context;
-          runZoned(() {
+          runZoned<void>(() {
             expect(context, isNot(rootContext));
             expect(context, same(childContext));
             expect(context.name, 'child');
@@ -73,13 +74,13 @@ void main() {
 
     group('operator[]', () {
       test('still finds values if async code runs after body has finished', () async {
-        final Completer<void> outer = new Completer<void>();
-        final Completer<void> inner = new Completer<void>();
+        final Completer<void> outer = Completer<void>();
+        final Completer<void> inner = Completer<void>();
         String value;
         await context.run<void>(
           body: () {
-            outer.future.then((_) {
-              value = context[String];
+            outer.future.then<void>((_) {
+              value = context.get<String>();
               inner.complete();
             });
           },
@@ -98,10 +99,10 @@ void main() {
         String value;
         await context.run<void>(
           body: () async {
-            final StringBuffer buf = new StringBuffer(context[String]);
-            buf.write(context[String]);
+            final StringBuffer buf = StringBuffer(context.get<String>());
+            buf.write(context.get<String>());
             await context.run<void>(body: () {
-              buf.write(context[String]);
+              buf.write(context.get<String>());
             });
             value = buf.toString();
           },
@@ -121,10 +122,10 @@ void main() {
         String value;
         await context.run(
           body: () async {
-            final StringBuffer buf = new StringBuffer(context[String]);
-            buf.write(context[String]);
+            final StringBuffer buf = StringBuffer(context.get<String>());
+            buf.write(context.get<String>());
             await context.run<void>(body: () {
-              buf.write(context[String]);
+              buf.write(context.get<String>());
             });
             value = buf.toString();
           },
@@ -141,7 +142,7 @@ void main() {
 
       test('returns null if generated value is null', () async {
         final String value = await context.run<String>(
-          body: () => context[String],
+          body: () => context.get<String>(),
           overrides: <Type, Generator>{
             String: () => null,
           },
@@ -152,12 +153,12 @@ void main() {
       test('throws if generator has dependency cycle', () async {
         final Future<String> value = context.run<String>(
           body: () async {
-            return context[String];
+            return context.get<String>();
           },
           fallbacks: <Type, Generator>{
-            int: () => int.parse(context[String]),
-            String: () => '${context[double]}',
-            double: () => context[int] * 1.0,
+            int: () => int.parse(context.get<String>()),
+            String: () => '${context.get<double>()}',
+            double: () => context.get<int>() * 1.0,
           },
         );
         try {
@@ -196,7 +197,7 @@ void main() {
               return context.run<String>(
                 body: () {
                   called = true;
-                  return context[String];
+                  return context.get<String>();
                 },
                 fallbacks: <Type, Generator>{
                   String: () => 'child',
@@ -215,7 +216,7 @@ void main() {
               return context.run<String>(
                 body: () {
                   called = true;
-                  return context[String];
+                  return context.get<String>();
                 },
                 fallbacks: <Type, Generator>{
                   String: () {
@@ -237,11 +238,11 @@ void main() {
         test('may depend on one another', () async {
           final String value = await context.run<String>(
             body: () {
-              return context[String];
+              return context.get<String>();
             },
             fallbacks: <Type, Generator>{
               int: () => 123,
-              String: () => '-${context[int]}-',
+              String: () => '-${context.get<int>()}-',
             },
           );
           expect(value, '-123-');
@@ -254,7 +255,7 @@ void main() {
           final String value = await context.run<String>(
             body: () {
               return context.run<String>(
-                body: () => context[String],
+                body: () => context.get<String>(),
                 overrides: <Type, Generator>{
                   String: () => 'child',
                 },

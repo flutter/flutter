@@ -5,13 +5,14 @@
 import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/fingerprint.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
@@ -22,8 +23,8 @@ void main() {
     MockFlutterVersion mockVersion;
 
     setUp(() {
-      fs = new MemoryFileSystem();
-      mockVersion = new MockFlutterVersion();
+      fs = MemoryFileSystem();
+      mockVersion = MockFlutterVersion();
       when(mockVersion.frameworkRevision).thenReturn(kVersion);
     });
 
@@ -36,7 +37,7 @@ void main() {
       await fs.file('b.dart').create();
       await fs.file('depfile').create();
 
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart'],
         depfilePaths: <String>['depfile'],
@@ -51,7 +52,7 @@ void main() {
     testUsingContext('creates fingerprint with specified properties and files', () async {
       await fs.file('a.dart').create();
 
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart'],
         properties: <String, String>{
@@ -60,7 +61,7 @@ void main() {
         },
       );
       final Fingerprint fingerprint = await fingerprinter.buildFingerprint();
-      expect(fingerprint, new Fingerprint.fromBuildInputs(<String, String>{
+      expect(fingerprint, Fingerprint.fromBuildInputs(<String, String>{
         'foo': 'bar',
         'wibble': 'wobble',
       }, <String>['a.dart']));
@@ -71,7 +72,7 @@ void main() {
       await fs.file('b.dart').create();
       await fs.file('depfile').writeAsString('depfile : b.dart');
 
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart'],
         depfilePaths: <String>['depfile'],
@@ -81,7 +82,7 @@ void main() {
         },
       );
       final Fingerprint fingerprint = await fingerprinter.buildFingerprint();
-      expect(fingerprint, new Fingerprint.fromBuildInputs(<String, String>{
+      expect(fingerprint, Fingerprint.fromBuildInputs(<String, String>{
         'bar': 'baz',
         'wobble': 'womble',
       }, <String>['a.dart', 'b.dart']));
@@ -91,7 +92,7 @@ void main() {
       await fs.file('a.dart').create();
       await fs.file('b.dart').create();
 
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
         properties: <String, String>{
@@ -106,7 +107,7 @@ void main() {
       await fs.file('a.dart').create();
       await fs.file('b.dart').create();
 
-      final Fingerprinter fingerprinter1 = new Fingerprinter(
+      final Fingerprinter fingerprinter1 = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
         properties: <String, String>{
@@ -116,7 +117,7 @@ void main() {
       );
       await fingerprinter1.writeFingerprint();
 
-      final Fingerprinter fingerprinter2 = new Fingerprinter(
+      final Fingerprinter fingerprinter2 = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
         properties: <String, String>{
@@ -133,7 +134,7 @@ void main() {
       await fs.file('depfile').writeAsString('depfile : b.dart');
 
       // Write a valid fingerprint
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
         depfilePaths: <String>['depfile'],
@@ -146,7 +147,7 @@ void main() {
 
       // Write a corrupt depfile.
       await fs.file('depfile').writeAsString('');
-      final Fingerprinter badFingerprinter = new Fingerprinter(
+      final Fingerprinter badFingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
         depfilePaths: <String>['depfile'],
@@ -164,7 +165,7 @@ void main() {
       await fs.file('b.dart').create();
       await fs.file('out.fingerprint').writeAsString('** not JSON **');
 
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
         depfilePaths: <String>['depfile'],
@@ -180,7 +181,7 @@ void main() {
       await fs.file('a.dart').create();
       await fs.file('b.dart').create();
 
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart', 'b.dart'],
         properties: <String, String>{
@@ -192,8 +193,48 @@ void main() {
       expect(await fingerprinter.doesFingerprintMatch(), isTrue);
     }, overrides: contextOverrides);
 
+    final Platform mockPlatformDisabledCache = MockPlatform();
+    mockPlatformDisabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'true';
+    testUsingContext('can be disabled with an environment variable', () async {
+      await fs.file('a.dart').create();
+      await fs.file('b.dart').create();
+
+      final Fingerprinter fingerprinter = Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      await fingerprinter.writeFingerprint();
+      expect(await fingerprinter.doesFingerprintMatch(), isFalse);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatformDisabledCache,
+    }..addAll(contextOverrides));
+
+    final Platform mockPlatformEnabledCache = MockPlatform();
+    mockPlatformEnabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'false';
+    testUsingContext('can be not-disabled with an environment variable', () async {
+      await fs.file('a.dart').create();
+      await fs.file('b.dart').create();
+
+      final Fingerprinter fingerprinter = Fingerprinter(
+        fingerprintPath: 'out.fingerprint',
+        paths: <String>['a.dart', 'b.dart'],
+        properties: <String, String>{
+          'bar': 'baz',
+          'wobble': 'womble',
+        },
+      );
+      await fingerprinter.writeFingerprint();
+      expect(await fingerprinter.doesFingerprintMatch(), isTrue);
+    }, overrides: <Type, Generator>{
+      Platform: () => mockPlatformEnabledCache,
+    }..addAll(contextOverrides));
+
     testUsingContext('fails to write fingerprint if inputs are missing', () async {
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart'],
         properties: <String, String>{
@@ -210,7 +251,7 @@ void main() {
       await fs.file('ab.dart').create();
       await fs.file('depfile').writeAsString('depfile : ab.dart c.dart');
 
-      final Fingerprinter fingerprinter = new Fingerprinter(
+      final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',
         paths: <String>['a.dart'],
         depfilePaths: <String>['depfile'],
@@ -230,7 +271,7 @@ void main() {
     const String kVersion = '123456abcdef';
 
     setUp(() {
-      mockVersion = new MockFlutterVersion();
+      mockVersion = MockFlutterVersion();
       when(mockVersion.frameworkRevision).thenReturn(kVersion);
     });
 
@@ -238,48 +279,48 @@ void main() {
       MemoryFileSystem fs;
 
       setUp(() {
-        fs = new MemoryFileSystem();
+        fs = MemoryFileSystem();
       });
 
       testUsingContext('throws if any input file does not exist', () async {
         await fs.file('a.dart').create();
         expect(
-          () => new Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']),
+          () => Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']),
           throwsArgumentError,
         );
-      }, overrides: <Type, Generator>{ FileSystem: () => fs });
+      }, overrides: <Type, Generator>{FileSystem: () => fs});
 
       testUsingContext('populates checksums for valid files', () async {
         await fs.file('a.dart').writeAsString('This is a');
         await fs.file('b.dart').writeAsString('This is b');
-        final Fingerprint fingerprint = new Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']);
+        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']);
 
         final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
         expect(jsonObject['files'], hasLength(2));
         expect(jsonObject['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
         expect(jsonObject['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
-      }, overrides: <Type, Generator>{ FileSystem: () => fs });
+      }, overrides: <Type, Generator>{FileSystem: () => fs});
 
       testUsingContext('includes framework version', () {
-        final Fingerprint fingerprint = new Fingerprint.fromBuildInputs(<String, String>{}, <String>[]);
+        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>[]);
 
         final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
         expect(jsonObject['version'], mockVersion.frameworkRevision);
-      }, overrides: <Type, Generator>{ FlutterVersion: () => mockVersion });
+      }, overrides: <Type, Generator>{FlutterVersion: () => mockVersion});
 
       testUsingContext('includes provided properties', () {
-        final Fingerprint fingerprint = new Fingerprint.fromBuildInputs(<String, String>{'a': 'A', 'b': 'B'}, <String>[]);
+        final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{'a': 'A', 'b': 'B'}, <String>[]);
 
         final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
         expect(jsonObject['properties'], hasLength(2));
         expect(jsonObject['properties']['a'], 'A');
         expect(jsonObject['properties']['b'], 'B');
-      }, overrides: <Type, Generator>{ FlutterVersion: () => mockVersion });
+      }, overrides: <Type, Generator>{FlutterVersion: () => mockVersion});
     });
 
     group('fromJson', () {
       testUsingContext('throws if JSON is invalid', () async {
-        expect(() => new Fingerprint.fromJson('<xml></xml>'), throwsA(anything));
+        expect(() => Fingerprint.fromJson('<xml></xml>'), throwsA(anything));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -297,7 +338,7 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         });
-        final Fingerprint fingerprint = new Fingerprint.fromJson(jsonString);
+        final Fingerprint fingerprint = Fingerprint.fromJson(jsonString);
         final Map<String, dynamic> content = json.decode(fingerprint.toJson());
         expect(content, hasLength(3));
         expect(content['version'], mockVersion.frameworkRevision);
@@ -315,20 +356,20 @@ void main() {
       testUsingContext('throws ArgumentError for unknown versions', () async {
         final String jsonString = json.encode(<String, dynamic>{
           'version': 'bad',
-          'properties':<String, String>{},
-          'files':<String, String>{},
+          'properties': <String, String>{},
+          'files': <String, String>{},
         });
-        expect(() => new Fingerprint.fromJson(jsonString), throwsArgumentError);
+        expect(() => Fingerprint.fromJson(jsonString), throwsArgumentError);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
 
       testUsingContext('throws ArgumentError if version is not present', () async {
         final String jsonString = json.encode(<String, dynamic>{
-          'properties':<String, String>{},
-          'files':<String, String>{},
+          'properties': <String, String>{},
+          'files': <String, String>{},
         });
-        expect(() => new Fingerprint.fromJson(jsonString), throwsArgumentError);
+        expect(() => Fingerprint.fromJson(jsonString), throwsArgumentError);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -337,7 +378,7 @@ void main() {
         final String jsonString = json.encode(<String, dynamic>{
           'version': kVersion,
         });
-        expect(new Fingerprint.fromJson(jsonString), new Fingerprint.fromBuildInputs(<String, String>{}, <String>[]));
+        expect(Fingerprint.fromJson(jsonString), Fingerprint.fromBuildInputs(<String, String>{}, <String>[]));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -352,11 +393,11 @@ void main() {
           },
           'files': <String, dynamic>{},
         };
-        final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
+        final Map<String, dynamic> b = Map<String, dynamic>.from(a);
         b['properties'] = <String, String>{
           'buildMode': BuildMode.release.toString(),
         };
-        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(b)), isFalse);
+        expect(Fingerprint.fromJson(json.encode(a)) == Fingerprint.fromJson(json.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -370,12 +411,12 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         };
-        final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
+        final Map<String, dynamic> b = Map<String, dynamic>.from(a);
         b['files'] = <String, dynamic>{
           'a.dart': '8a21a15fad560b799f6731d436c1b698',
           'b.dart': '6f144e08b58cd0925328610fad7ac07d',
         };
-        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(b)), isFalse);
+        expect(Fingerprint.fromJson(json.encode(a)) == Fingerprint.fromJson(json.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -389,12 +430,12 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         };
-        final Map<String, dynamic> b = new Map<String, dynamic>.from(a);
+        final Map<String, dynamic> b = Map<String, dynamic>.from(a);
         b['files'] = <String, dynamic>{
           'a.dart': '8a21a15fad560b799f6731d436c1b698',
           'c.dart': '6f144e08b58cd0925328610fad7ac07d',
         };
-        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(b)), isFalse);
+        expect(Fingerprint.fromJson(json.encode(a)) == Fingerprint.fromJson(json.encode(b)), isFalse);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
@@ -412,15 +453,15 @@ void main() {
             'b.dart': '6f144e08b58cd0925328610fad7ac07c',
           },
         };
-        expect(new Fingerprint.fromJson(json.encode(a)) == new Fingerprint.fromJson(json.encode(a)), isTrue);
+        expect(Fingerprint.fromJson(json.encode(a)) == Fingerprint.fromJson(json.encode(a)), isTrue);
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockVersion,
       });
     });
     group('hashCode', () {
       testUsingContext('is consistent with equals, even if map entries are reordered', () async {
-        final Fingerprint a = new Fingerprint.fromJson('{"version":"$kVersion","properties":{"a":"A","b":"B"},"files":{}}');
-        final Fingerprint b = new Fingerprint.fromJson('{"version":"$kVersion","properties":{"b":"B","a":"A"},"files":{}}');
+        final Fingerprint a = Fingerprint.fromJson('{"version":"$kVersion","properties":{"a":"A","b":"B"},"files":{}}');
+        final Fingerprint b = Fingerprint.fromJson('{"version":"$kVersion","properties":{"b":"B","a":"A"},"files":{}}');
         expect(a, b);
         expect(a.hashCode, b.hashCode);
       }, overrides: <Type, Generator>{
@@ -434,10 +475,10 @@ void main() {
     MemoryFileSystem fs;
 
     setUp(() {
-      fs = new MemoryFileSystem();
+      fs = MemoryFileSystem();
     });
 
-    final Map<Type, Generator> contextOverrides = <Type, Generator>{ FileSystem: () => fs };
+    final Map<Type, Generator> contextOverrides = <Type, Generator>{FileSystem: () => fs};
 
     testUsingContext('returns one file if only one is listed', () async {
       await fs.file('a.d').writeAsString('snapshot.d: /foo/a.dart');
@@ -470,4 +511,9 @@ void main() {
       ]));
     }, overrides: contextOverrides);
   });
+}
+
+class MockPlatform extends Mock implements Platform {
+  @override
+  Map<String, String> environment = <String, String>{};
 }

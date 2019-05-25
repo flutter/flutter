@@ -44,49 +44,51 @@ import 'material.dart';
 /// generally speaking will match the order they are given in the widget tree,
 /// but this order may appear to be somewhat random in more dynamic situations.
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// This example shows how a [Material] widget can have a yellow rectangle drawn
 /// on it using [Ink], while still having ink effects over the yellow rectangle:
 ///
 /// ```dart
-/// new Material(
+/// Material(
 ///   color: Colors.teal[900],
-///   child: new Center(
-///     child: new Ink(
+///   child: Center(
+///     child: Ink(
 ///       color: Colors.yellow,
 ///       width: 200.0,
 ///       height: 100.0,
-///       child: new InkWell(
+///       child: InkWell(
 ///         onTap: () { /* ... */ },
-///         child: new Center(
-///           child: new Text('YELLOW'),
+///         child: Center(
+///           child: Text('YELLOW'),
 ///         )
 ///       ),
 ///     ),
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
+/// {@tool sample}
 ///
 /// The following example shows how an image can be printed on a [Material]
 /// widget with an [InkWell] above it:
 ///
 /// ```dart
-/// new Material(
+/// Material(
 ///   color: Colors.grey[800],
-///   child: new Center(
-///     child: new Ink.image(
-///       image: new AssetImage('cat.jpeg'),
+///   child: Center(
+///     child: Ink.image(
+///       image: AssetImage('cat.jpeg'),
 ///       fit: BoxFit.cover,
 ///       width: 300.0,
 ///       height: 200.0,
-///       child: new InkWell(
+///       child: InkWell(
 ///         onTap: () { /* ... */ },
-///         child: new Align(
+///         child: Align(
 ///           alignment: Alignment.topLeft,
-///           child: new Padding(
+///           child: Padding(
 ///             padding: const EdgeInsets.all(10.0),
-///             child: new Text('KITTEN', style: new TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
+///             child: Text('KITTEN', style: TextStyle(fontWeight: FontWeight.w900, color: Colors.white)),
 ///           ),
 ///         )
 ///       ),
@@ -94,6 +96,7 @@ import 'material.dart';
 ///   ),
 /// )
 /// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -126,7 +129,7 @@ class Ink extends StatefulWidget {
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
        ),
-       decoration = decoration ?? (color != null ? new BoxDecoration(color: color) : null),
+       decoration = decoration ?? (color != null ? BoxDecoration(color: color) : null),
        super(key: key);
 
   /// Creates a widget that shows an image (obtained from an [ImageProvider]) on
@@ -160,8 +163,8 @@ class Ink extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       decoration = new BoxDecoration(
-         image: new DecorationImage(
+       decoration = BoxDecoration(
+         image: DecorationImage(
            image: image,
            colorFilter: colorFilter,
            fit: fit,
@@ -215,12 +218,12 @@ class Ink extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(new DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
-    properties.add(new DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
+    properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
   }
 
   @override
-  _InkState createState() => new _InkState();
+  _InkState createState() => _InkState();
 }
 
 class _InkState extends State<Ink> {
@@ -239,7 +242,7 @@ class _InkState extends State<Ink> {
 
   Widget _build(BuildContext context, BoxConstraints constraints) {
     if (_ink == null) {
-      _ink = new InkDecoration(
+      _ink = InkDecoration(
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context),
@@ -253,18 +256,18 @@ class _InkState extends State<Ink> {
     Widget current = widget.child;
     final EdgeInsetsGeometry effectivePadding = widget._paddingIncludingDecoration;
     if (effectivePadding != null)
-      current = new Padding(padding: effectivePadding, child: current);
+      current = Padding(padding: effectivePadding, child: current);
     return current;
   }
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
-    Widget result = new LayoutBuilder(
+    Widget result = LayoutBuilder(
       builder: _build,
     );
     if (widget.width != null || widget.height != null) {
-      result = new SizedBox(
+      result = SizedBox(
         width: widget.width,
         height: widget.height,
         child: result,

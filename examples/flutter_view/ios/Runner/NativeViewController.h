@@ -11,7 +11,7 @@
 
 @end
 
-@interface NativeViewController: UIViewController 
+@interface NativeViewController: UIViewController
 @property (strong, nonatomic) id<NativeViewControllerDelegate> delegate;
 - (void) didReceiveIncrement;
 @end

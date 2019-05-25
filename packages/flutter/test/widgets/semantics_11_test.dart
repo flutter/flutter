@@ -11,15 +11,15 @@ import 'semantics_tester.dart';
 
 void main() {
   testWidgets('markNeedsSemanticsUpdate() called on non-boundary with non-boundary parent', (WidgetTester tester) async {
-    final SemanticsTester semantics = new SemanticsTester(tester);
+    final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
-      new Semantics(
+      Semantics(
         container: true,
         onTap: dummyTapHandler,
-        child: new Semantics(
+        child: Semantics(
           onTap: dummyTapHandler,
-          child: new Semantics(
+          child: Semantics(
             onTap: dummyTapHandler,
             textDirection: TextDirection.ltr,
             label: 'foo',
@@ -28,25 +28,25 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 1,
           actions: SemanticsAction.tap.index,
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               id: 2,
               actions: SemanticsAction.tap.index,
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   id: 3,
                   actions: SemanticsAction.tap.index,
                   label: 'foo',
-                )
+                ),
               ],
             ),
           ],
-        )
+        ),
       ],
     ), ignoreRect: true, ignoreTransform: true));
 
@@ -54,12 +54,12 @@ void main() {
 
     // This should not throw an assert.
     await tester.pumpWidget(
-      new Semantics(
+      Semantics(
         container: true,
         onTap: dummyTapHandler,
-        child: new Semantics(
+        child: Semantics(
           onTap: dummyTapHandler,
-          child: new Semantics(
+          child: Semantics(
             onTap: dummyTapHandler,
             textDirection: TextDirection.ltr,
             label: 'bar', // <-- only change
@@ -68,25 +68,25 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(new TestSemantics.root(
+    expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
-        new TestSemantics.rootChild(
+        TestSemantics.rootChild(
           id: 1,
           actions: SemanticsAction.tap.index,
           children: <TestSemantics>[
-            new TestSemantics(
+            TestSemantics(
               id: 2,
               actions: SemanticsAction.tap.index,
               children: <TestSemantics>[
-                new TestSemantics(
+                TestSemantics(
                   id: 3,
                   actions: SemanticsAction.tap.index,
                   label: 'bar',
-                )
+                ),
               ],
             ),
           ],
-        )
+        ),
       ],
     ), ignoreRect: true, ignoreTransform: true));
 

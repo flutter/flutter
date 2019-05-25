@@ -5,18 +5,21 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
-import 'package:test/test.dart';
 
+import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 class MockIMobileDevice extends Mock implements IMobileDevice {}
 class MockProcessManager extends Mock implements ProcessManager {}
@@ -25,14 +28,14 @@ class MockFile extends Mock implements File {}
 class MockProcess extends Mock implements Process {}
 
 void main() {
-  final FakePlatform osx = new FakePlatform.fromPlatform(const LocalPlatform());
+  final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform());
   osx.operatingSystem = 'macos';
 
   group('getAttachedDevices', () {
     MockIMobileDevice mockIMobileDevice;
 
     setUp(() {
-      mockIMobileDevice = new MockIMobileDevice();
+      mockIMobileDevice = MockIMobileDevice();
     });
 
     testUsingContext('return no devices if Xcode is not installed', () async {
@@ -45,7 +48,7 @@ void main() {
     testUsingContext('returns no devices if none are attached', () async {
       when(iMobileDevice.isInstalled).thenReturn(true);
       when(iMobileDevice.getAvailableDeviceIDs())
-          .thenAnswer((Invocation invocation) => new Future<String>.value(''));
+          .thenAnswer((Invocation invocation) => Future<String>.value(''));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, isEmpty);
     }, overrides: <Type, Generator>{
@@ -55,24 +58,43 @@ void main() {
     testUsingContext('returns attached devices', () async {
       when(iMobileDevice.isInstalled).thenReturn(true);
       when(iMobileDevice.getAvailableDeviceIDs())
-          .thenAnswer((Invocation invocation) => new Future<String>.value('''
+          .thenAnswer((Invocation invocation) => Future<String>.value('''
 98206e7a4afd4aedaff06e687594e089dede3c44
 f577a7903cc54959be2e34bc4f7f80b7009efcf4
 '''));
       when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
-          .thenAnswer((_) => new Future<String>.value('La tele me regarde'));
+          .thenAnswer((_) => Future<String>.value('La tele me regarde'));
       when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'ProductVersion'))
-          .thenAnswer((_) => new Future<String>.value('10.3.2'));
+          .thenAnswer((_) => Future<String>.value('10.3.2'));
       when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
-          .thenAnswer((_) => new Future<String>.value('Puits sans fond'));
+          .thenAnswer((_) => Future<String>.value('Puits sans fond'));
       when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'ProductVersion'))
-          .thenAnswer((_) => new Future<String>.value('11.0'));
+          .thenAnswer((_) => Future<String>.value('11.0'));
       final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
       expect(devices, hasLength(2));
       expect(devices[0].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
       expect(devices[0].name, 'La tele me regarde');
       expect(devices[1].id, 'f577a7903cc54959be2e34bc4f7f80b7009efcf4');
       expect(devices[1].name, 'Puits sans fond');
+    }, overrides: <Type, Generator>{
+      IMobileDevice: () => mockIMobileDevice,
+    });
+
+    testUsingContext('returns attached devices and ignores devices that cannot be found by ideviceinfo', () async {
+      when(iMobileDevice.isInstalled).thenReturn(true);
+      when(iMobileDevice.getAvailableDeviceIDs())
+          .thenAnswer((Invocation invocation) => Future<String>.value('''
+98206e7a4afd4aedaff06e687594e089dede3c44
+f577a7903cc54959be2e34bc4f7f80b7009efcf4
+'''));
+      when(iMobileDevice.getInfoForDevice('98206e7a4afd4aedaff06e687594e089dede3c44', 'DeviceName'))
+          .thenAnswer((_) => Future<String>.value('La tele me regarde'));
+      when(iMobileDevice.getInfoForDevice('f577a7903cc54959be2e34bc4f7f80b7009efcf4', 'DeviceName'))
+          .thenThrow(IOSDeviceNotFoundError('Device not found'));
+      final List<IOSDevice> devices = await IOSDevice.getAttachedDevices();
+      expect(devices, hasLength(1));
+      expect(devices[0].id, '98206e7a4afd4aedaff06e687594e089dede3c44');
+      expect(devices[0].name, 'La tele me regarde');
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
     });
@@ -91,16 +113,18 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
   });
   group('logging', () {
     MockIMobileDevice mockIMobileDevice;
+    MockIosProject mockIosProject;
 
     setUp(() {
-      mockIMobileDevice = new MockIMobileDevice();
+      mockIMobileDevice = MockIMobileDevice();
+      mockIosProject = MockIosProject();
     });
 
     testUsingContext('suppresses non-Flutter lines from output', () async {
-      when(mockIMobileDevice.startLogger()).thenAnswer((Invocation invocation) {
-        final Process mockProcess = new MockProcess();
+      when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
+        final Process mockProcess = MockProcess();
         when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
-            new Stream<List<int>>.fromIterable(<List<int>>['''
+            Stream<List<int>>.fromIterable(<List<int>>['''
   Runner(Flutter)[297] <Notice>: A is for ari
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
   Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
@@ -111,13 +135,13 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
             .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
         when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.zero, () => 0));
-        return new Future<Process>.value(mockProcess);
+            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+        return Future<Process>.value(mockProcess);
       });
 
-      final IOSDevice device = new IOSDevice('123456');
+      final IOSDevice device = IOSDevice('123456');
       final DeviceLogReader logReader = device.getLogReader(
-        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+        app: BuildableIOSApp(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
@@ -127,10 +151,10 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     });
 
     testUsingContext('includes multi-line Flutter logs in the output', () async {
-      when(mockIMobileDevice.startLogger()).thenAnswer((Invocation invocation) {
-        final Process mockProcess = new MockProcess();
+      when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
+        final Process mockProcess = MockProcess();
         when(mockProcess.stdout).thenAnswer((Invocation invocation) =>
-            new Stream<List<int>>.fromIterable(<List<int>>['''
+            Stream<List<int>>.fromIterable(<List<int>>['''
   Runner(Flutter)[297] <Notice>: This is a multi-line message,
   with another Flutter message following it.
   Runner(Flutter)[297] <Notice>: This is a multi-line message,
@@ -141,13 +165,13 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
             .thenAnswer((Invocation invocation) => const Stream<List<int>>.empty());
         // Delay return of exitCode until after stdout stream data, since it terminates the logger.
         when(mockProcess.exitCode)
-            .thenAnswer((Invocation invocation) => new Future<int>.delayed(Duration.zero, () => 0));
-        return new Future<Process>.value(mockProcess);
+            .thenAnswer((Invocation invocation) => Future<int>.delayed(Duration.zero, () => 0));
+        return Future<Process>.value(mockProcess);
       });
 
-      final IOSDevice device = new IOSDevice('123456');
+      final IOSDevice device = IOSDevice('123456');
       final DeviceLogReader logReader = device.getLogReader(
-        app: new BuildableIOSApp(projectBundleId: 'bundleId'),
+        app: BuildableIOSApp(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
@@ -160,5 +184,43 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
     });
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
+    fs.file('pubspec.yaml')
+      ..createSync()
+      ..writeAsStringSync(r'''
+name: example
+
+flutter:
+  module: {}
+''');
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.directory('ios').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+  });
+
+  testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    final FlutterProject flutterProject = FlutterProject.current();
+
+    expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
   });
 }

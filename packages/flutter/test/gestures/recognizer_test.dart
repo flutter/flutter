@@ -23,7 +23,7 @@ class TestGestureRecognizer extends GestureRecognizer {
 
 void main() {
   test('GestureRecognizer smoketest', () {
-    final TestGestureRecognizer recognizer = new TestGestureRecognizer(debugOwner: 0);
+    final TestGestureRecognizer recognizer = TestGestureRecognizer(debugOwner: 0);
     expect(recognizer, hasAGoodToStringDeep);
   });
 }

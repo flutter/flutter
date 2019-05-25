@@ -10,7 +10,7 @@ flutter daemon
 
 It runs a persistent, JSON-RPC based server to communicate with devices. IDEs and other tools can start the flutter tool in this mode and get device addition and removal notifications, as well as being able to programmatically start and stop apps on those devices.
 
-A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` which allows IDEs and tools to launch flutter applications and interact to send commands like Hot Reload. The command and events that are available in this mode are documented at the bottom of this document.
+A set of `flutter daemon` commands/events are also exposed via `flutter run --machine` and `flutter attach --machine` which allow IDEs and tools to launch and attach to flutter applications and interact to send commands like Hot Reload. The command and events that are available in these modes are documented at the bottom of this document.
 
 ## Protocol
 
@@ -42,6 +42,12 @@ Any params for that command should be passed in through a `params` field. Here's
 [{"id":2,"result":[{"id":"702ABC1F-5EA5-4F83-84AB-6380CA91D39A","name":"iPhone 6","platform":"ios_x64","available":true}]}]
 ```
 
+Events that come from the server will have an `event` field containing the type of event, along with a `params` field.
+
+```
+[{"event":"device.added","params":{"id":"1DD6786B-37D4-4355-AA15-B818A87A18B4","name":"iPhone XS Max","platform":"ios","emulator":true}}]
+```
+
 ## Domains and Commands
 
 ### daemon domain
@@ -63,10 +69,9 @@ The `daemon.connected` event is sent when the daemon starts. The `params` field 
 - `version`: The protocol version. This is the same version returned by the `version()` command.
 - `pid`: The `pid` of the daemon process.
 
-#### daemon.logMessage
+#### daemon.log
 
-The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
-
+This is sent when user-facing output is received. The `params` field will be a map with the field `log`. The `log` field is a string with the output text. If the output indicates an error, an `error` boolean field will be present, and set to `true`.
 
 #### daemon.showMessage
 
@@ -74,14 +79,21 @@ The `daemon.showMessage` event is sent by the daemon when some if would be usefu
 
 It is up to the client to decide how best to display the message; for some clients, it may map well to a toast style notification. There is an implicit contract that the daemon will not send too many messages over some reasonable period of time.
 
+#### daemon.logMessage
+
+The `daemon.logMessage` event is sent whenever a log message is created - either a status level message or an error. The JSON message will contain an `event` field with the value `daemon.logMessage`, and an `params` field containing a map with `level`, `message`, and (optionally) `stackTrace` fields.
+
+Generally, clients won't display content from `daemon.logMessage` events unless they're set to a more verbose output mode.
+
 ### app domain
 
 #### app.restart
 
-The `restart()` restarts the given application. It returns a Map of `{ int code, String message, String hintMessage, String hintId }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure. If `hintId` is non-null and equal to `restartRecommended`, that indicates that the reload was successful, but not all reloaded elements were executed during view reassembly (i.e., the user might not see all the changes in the current UI, and a restart could be necessary).
+The `restart()` restarts the given application. It returns a Map of `{ int code, String message }` to indicate success or failure in restarting the app. A `code` of `0` indicates success, and non-zero indicates a failure.
 
 - `appId`: the id of a previously started app; this is required.
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
+- `reason`: optional; the reason for the full restart (eg. `save`, `manual`) for reporting purposes
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
 
 #### app.callServiceExtension
@@ -91,6 +103,12 @@ The `callServiceExtension()` allows clients to make arbitrary calls to service p
 - `appId`: the id of a previously started app; this is required.
 - `methodName`: the name of the service protocol extension to invoke; this is required.
 - `params`: an optional Map of parameters to pass to the service protocol extension.
+
+#### app.detach
+
+The `detach()` command takes one parameter, `appId`. It returns a `bool` to indicate success or failure in detaching from an app without stopping it.
+
+- `appId`: the id of a previously started app; this is required.
 
 #### app.stop
 
@@ -102,15 +120,15 @@ The `stop()` command takes one parameter, `appId`. It returns a `bool` to indica
 
 #### app.start
 
-This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, and `deviceId`.
+This is sent when an app is starting. The `params` field will be a map with the fields `appId`, `directory`, `deviceId`, and `launchMode`.
 
 #### app.debugPort
 
-This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field (`port` will be removed in a future version of the protocol). An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
+This is sent when an observatory port is available for a started app. The `params` field will be a map with the fields `appId`, `port`, and `wsUri`. Clients should prefer using the `wsUri` field in preference to synthesizing a uri using the `port` field. An optional field, `baseUri`, is populated if a path prefix is required for setting breakpoints on the target device.
 
 #### app.started
 
-This is sent once the application launch process is complete and the app is either paused before main() (if `startPaused` is true) or main() has begun running. The `params` field will be a map containing the field `appId`.
+This is sent once the application launch process is complete and the app is either paused before main() (if `startPaused` is true) or main() has begun running. When attaching, this even will be fired once attached. The `params` field will be a map containing the field `appId`.
 
 #### app.log
 
@@ -122,7 +140,7 @@ This is sent when an operation starts and again when it stops. When an operation
 
 #### app.stop
 
-This is sent when an app is stopped. The `params` field will be a map with the field `appId`.
+This is sent when an app is stopped or detached from. The `params` field will be a map with the field `appId`.
 
 ### device domain
 
@@ -182,9 +200,9 @@ The returned `params` will contain:
 - `emulatorName` - the name of the emulator created; this will have been auto-generated if you did not supply one
 - `error` - when `success`=`false`, a message explaining why the creation of the emulator failed
 
-## Flutter Run --machine
+## 'flutter run --machine' and 'flutter attach --machine'
 
-When running `flutter run --machine` the following subset of the daemon is available:
+When running `flutter run --machine` or `flutter attach --machine` the following subset of the daemon is available:
 
 ### daemon domain
 
@@ -195,6 +213,7 @@ The following subset of the daemon domain is available in `flutter run --machine
   - [`shutdown`](#daemonshutdown)
 - Events
   - [`connected`](#daemonconnected)
+  - [`log`](#daemonlog)
   - [`logMessage`](#daemonlogmessage)
 
 ### app domain
@@ -204,6 +223,7 @@ The following subset of the app domain is available in `flutter run --machine`. 
 - Commands
   - [`restart`](#apprestart)
   - [`callServiceExtension`](#appcallserviceextension)
+  - [`detach`](#appdetach)
   - [`stop`](#appstop)
 - Events
   - [`start`](#appstart)
@@ -219,5 +239,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.4.2: Added `app.detach` command
+- 0.4.1: Added `flutter attach --machine`
 - 0.4.0: Added `emulator.create` command
 - 0.3.0: Added `daemon.connected` event at startup

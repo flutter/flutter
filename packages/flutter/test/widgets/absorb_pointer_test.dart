@@ -5,19 +5,21 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import 'semantics_tester.dart';
+
 void main() {
   testWidgets('AbsorbPointers do not block siblings', (WidgetTester tester) async {
     bool tapped = false;
     await tester.pumpWidget(
-      new Column(
+      Column(
         children: <Widget>[
-          new Expanded(
-            child: new GestureDetector(
+          Expanded(
+            child: GestureDetector(
               onTap: () => tapped = true,
             ),
           ),
           const Expanded(
-            child: const AbsorbPointer(
+            child: AbsorbPointer(
               absorbing: true,
             ),
           ),
@@ -27,5 +29,42 @@ void main() {
 
     await tester.tap(find.byType(GestureDetector));
     expect(tapped, true);
+  });
+
+  testWidgets('AbsorbPointers semantics', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    await tester.pumpWidget(
+      AbsorbPointer(
+        absorbing: true,
+        child: Semantics(
+          label: 'test',
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    );
+    expect(semantics, hasSemantics(
+      TestSemantics.root(), ignoreId: true, ignoreRect: true, ignoreTransform: true));
+
+    await tester.pumpWidget(
+      AbsorbPointer(
+        absorbing: false,
+        child: Semantics(
+          label: 'test',
+          textDirection: TextDirection.ltr,
+        ),
+      ),
+    );
+
+    expect(semantics, hasSemantics(
+      TestSemantics.root(
+        children: <TestSemantics>[
+          TestSemantics.rootChild(
+            label: 'test',
+            textDirection: TextDirection.ltr,
+          ),
+        ],
+      ),
+      ignoreId: true, ignoreRect: true, ignoreTransform: true));
+    semantics.dispose();
   });
 }

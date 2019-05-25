@@ -14,12 +14,12 @@ import 'package:flutter/foundation.dart';
 /// This is useful for running in the test Zone, where it is tricky to receive
 /// callbacks originating from the IO thread.
 class FakeCodec implements ui.Codec {
+  FakeCodec._(this._frameCount, this._repetitionCount, this._frameInfos);
+
   final int _frameCount;
   final int _repetitionCount;
   final List<ui.FrameInfo> _frameInfos;
   int _nextFrame = 0;
-
-  FakeCodec._(this._frameCount, this._repetitionCount, this._frameInfos);
 
   /// Creates a FakeCodec from encoded image data.
   ///
@@ -27,10 +27,10 @@ class FakeCodec implements ui.Codec {
   static Future<FakeCodec> fromData(Uint8List data) async {
     final ui.Codec codec = await ui.instantiateImageCodec(data);
     final int frameCount = codec.frameCount;
-    final List<ui.FrameInfo> frameInfos = new List<ui.FrameInfo>(frameCount);
+    final List<ui.FrameInfo> frameInfos = List<ui.FrameInfo>(frameCount);
     for (int i = 0; i < frameCount; i += 1)
       frameInfos[i] = await codec.getNextFrame();
-    return new FakeCodec._(frameCount, codec.repetitionCount, frameInfos);
+    return FakeCodec._(frameCount, codec.repetitionCount, frameInfos);
   }
 
   @override
@@ -42,7 +42,7 @@ class FakeCodec implements ui.Codec {
   @override
   Future<ui.FrameInfo> getNextFrame() {
     final SynchronousFuture<ui.FrameInfo> result =
-      new SynchronousFuture<ui.FrameInfo>(_frameInfos[_nextFrame]);
+      SynchronousFuture<ui.FrameInfo>(_frameInfos[_nextFrame]);
     _nextFrame = (_nextFrame + 1) % _frameCount;
     return result;
   }

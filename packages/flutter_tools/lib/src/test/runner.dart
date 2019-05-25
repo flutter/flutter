@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
-// ignore: implementation_imports
-import 'package:test/src/executable.dart' as test;
+import 'package:meta/meta.dart';
+import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -16,31 +15,32 @@ import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../project.dart';
 import 'flutter_platform.dart' as loader;
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
 Future<int> runTests(
-    List<String> testFiles, {
-    Directory workDir,
-    List<String> names = const <String>[],
-    List<String> plainNames = const <String>[],
-    bool enableObservatory = false,
-    bool startPaused = false,
-    bool ipv6 = false,
-    bool machine = false,
-    bool previewDart2 = false,
-    bool trackWidgetCreation = false,
-    bool updateGoldens = false,
-    TestWatcher watcher,
-    }) async {
-  if (trackWidgetCreation && !previewDart2) {
-    throw new UsageException(
-      '--track-widget-creation is valid only when --preview-dart-2 is specified.',
-      null,
-    );
-  }
-
+  List<String> testFiles, {
+  Directory workDir,
+  List<String> names = const <String>[],
+  List<String> plainNames = const <String>[],
+  bool enableObservatory = false,
+  bool startPaused = false,
+  bool disableServiceAuthCodes = false,
+  bool ipv6 = false,
+  bool machine = false,
+  String precompiledDillPath,
+  Map<String, String> precompiledDillFiles,
+  bool trackWidgetCreation = false,
+  bool updateGoldens = false,
+  TestWatcher watcher,
+  @required int concurrency,
+  bool buildTestAssets = false,
+  FlutterProject flutterProject,
+  String icudtlPath,
+  Directory coverageDirectory,
+}) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
   if (!terminal.supportsColor) {
@@ -53,13 +53,7 @@ Future<int> runTests(
     testArgs.addAll(<String>['-r', 'compact']);
   }
 
-  if (enableObservatory) { // (In particular, for collecting code coverage.)
-    // Turn on concurrency, but just barely. This is a trade-off between running
-    // too many tests such that they all time out, and too few tests such that
-    // the tests overall take too much time. The current number is empirically
-    // based on what our infrastructure can handle, which isn't ideal...
-    testArgs.add('--concurrency=2');
-  }
+  testArgs.add('--concurrency=$concurrency');
 
   for (String name in names) {
     testArgs..add('--name')..add(name);
@@ -78,7 +72,7 @@ Future<int> runTests(
     throwToolExit('Cannot find Flutter shell at $shellPath');
 
   final InternetAddressType serverType =
-      ipv6 ? InternetAddressType.IP_V6 : InternetAddressType.IP_V4; // ignore: deprecated_member_use
+      ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
   loader.installHook(
     shellPath: shellPath,
@@ -86,10 +80,16 @@ Future<int> runTests(
     enableObservatory: enableObservatory,
     machine: machine,
     startPaused: startPaused,
+    disableServiceAuthCodes: disableServiceAuthCodes,
     serverType: serverType,
-    previewDart2: previewDart2,
+    precompiledDillPath: precompiledDillPath,
+    precompiledDillFiles: precompiledDillFiles,
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
+    buildTestAssets: buildTestAssets,
+    projectRootDirectory: fs.currentDirectory.uri,
+    flutterProject: flutterProject,
+    icudtlPath: icudtlPath,
   );
 
   // Make the global packages path absolute.

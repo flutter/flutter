@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter_devicelab/tasks/plugin_tests.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 
-Future<Null> main() async {
+Future<void> main() async {
   await task(combine(<TaskFunction>[
-    new PluginTest('ios', <String>['-i', 'objc']),
-    new PluginTest('ios', <String>['-i', 'swift']),
+    PluginTest('ios', <String>['-i', 'objc']),
+    PluginTest('ios', <String>['-i', 'swift']),
   ]));
 }

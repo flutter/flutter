@@ -22,6 +22,8 @@ import 'ticker_provider.dart';
 /// so that the image appears on screen with a graceful animation rather than
 /// abruptly pops onto the screen.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=pK738Pg9cxc}
+///
 /// If the [image] emits an [ImageInfo] synchronously, such as when the image
 /// has been loaded and cached, the [image] is displayed immediately and the
 /// [placeholder] is never displayed.
@@ -49,15 +51,16 @@ import 'ticker_provider.dart';
 /// different image. This is known as "gapless playback" (see also
 /// [Image.gaplessPlayback]).
 ///
-/// ## Sample code
+/// {@tool sample}
 ///
 /// ```dart
-/// new FadeInImage(
+/// FadeInImage(
 ///   // here `bytes` is a Uint8List containing the bytes for the in-memory image
-///   placeholder: new MemoryImage(bytes),
-///   image: new NetworkImage('https://backend.example.com/image.png'),
+///   placeholder: MemoryImage(bytes),
+///   image: NetworkImage('https://backend.example.com/image.png'),
 /// )
 /// ```
+/// {@end-tool}
 class FadeInImage extends StatefulWidget {
   /// Creates a widget that displays a [placeholder] while an [image] is loading
   /// then cross-fades to display the [image].
@@ -65,10 +68,21 @@ class FadeInImage extends StatefulWidget {
   /// The [placeholder], [image], [fadeOutDuration], [fadeOutCurve],
   /// [fadeInDuration], [fadeInCurve], [alignment], [repeat], and
   /// [matchTextDirection] arguments must not be null.
+  ///
+  /// There are two different semantic label for the class.
+  /// [placeholderSemanticLabel] is used for defining a semantics label for
+  /// [placeholder]. [imageSemanticLabel] is used for defining a semantics label
+  /// for [image]
+  ///
+  /// If [excludeFromSemantics] is true, then [placeholderSemanticLabel] and
+  /// [imageSemanticLabel] will be ignored.
   const FadeInImage({
     Key key,
     @required this.placeholder,
     @required this.image,
+    this.excludeFromSemantics = false,
+    this.imageSemanticLabel,
+    this.placeholderSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
@@ -117,6 +131,9 @@ class FadeInImage extends StatefulWidget {
     @required String image,
     double placeholderScale = 1.0,
     double imageScale = 1.0,
+    this.excludeFromSemantics = false,
+    this.imageSemanticLabel,
+    this.placeholderSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
@@ -138,8 +155,8 @@ class FadeInImage extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       placeholder = new MemoryImage(placeholder, scale: placeholderScale),
-       image = new NetworkImage(image, scale: imageScale),
+       placeholder = MemoryImage(placeholder, scale: placeholderScale),
+       image = NetworkImage(image, scale: imageScale),
        super(key: key);
 
   /// Creates a widget that uses a placeholder image stored in an asset bundle
@@ -173,6 +190,9 @@ class FadeInImage extends StatefulWidget {
     AssetBundle bundle,
     double placeholderScale,
     double imageScale = 1.0,
+    this.excludeFromSemantics = false,
+    this.imageSemanticLabel,
+    this.placeholderSemanticLabel,
     this.fadeOutDuration = const Duration(milliseconds: 300),
     this.fadeOutCurve = Curves.easeOut,
     this.fadeInDuration = const Duration(milliseconds: 700),
@@ -186,8 +206,8 @@ class FadeInImage extends StatefulWidget {
   }) : assert(placeholder != null),
        assert(image != null),
        placeholder = placeholderScale != null
-         ? new ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
-         : new AssetImage(placeholder, bundle: bundle),
+         ? ExactAssetImage(placeholder, bundle: bundle, scale: placeholderScale)
+         : AssetImage(placeholder, bundle: bundle),
        assert(imageScale != null),
        assert(fadeOutDuration != null),
        assert(fadeOutCurve != null),
@@ -196,7 +216,7 @@ class FadeInImage extends StatefulWidget {
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
-       image = new NetworkImage(image, scale: imageScale),
+       image = NetworkImage(image, scale: imageScale),
        super(key: key);
 
   /// Image displayed while the target [image] is loading.
@@ -242,8 +262,8 @@ class FadeInImage extends StatefulWidget {
   /// How to align the image within its bounds.
   ///
   /// The alignment aligns the given position in the image to the given position
-  /// in the layout bounds. For example, a [Alignment] alignment of (-1.0,
-  /// -1.0) aligns the image to the top-left corner of its layout bounds, while a
+  /// in the layout bounds. For example, an [Alignment] alignment of (-1.0,
+  /// -1.0) aligns the image to the top-left corner of its layout bounds, while an
   /// [Alignment] alignment of (1.0, 1.0) aligns the bottom right of the
   /// image with the bottom right corner of its layout bounds. Similarly, an
   /// alignment of (0.0, 1.0) aligns the bottom middle of the image with the
@@ -283,8 +303,26 @@ class FadeInImage extends StatefulWidget {
   /// scope.
   final bool matchTextDirection;
 
+  /// Whether to exclude this image from semantics.
+  ///
+  /// Useful for images which do not contribute meaningful information to an
+  /// application.
+  final bool excludeFromSemantics;
+
+  /// A Semantic description of the [placeholder].
+  ///
+  /// Used to provide a description of the [placeholder] to TalkBack on Android, and
+  /// VoiceOver on iOS.
+  final String placeholderSemanticLabel;
+
+  /// A Semantic description of the [image].
+  ///
+  /// Used to provide a description of the [image] to TalkBack on Android, and
+  /// VoiceOver on iOS.
+  final String imageSemanticLabel;
+
   @override
-  State<StatefulWidget> createState() => new _FadeInImageState();
+  State<StatefulWidget> createState() => _FadeInImageState();
 }
 
 
@@ -311,7 +349,7 @@ enum FadeInImagePhase {
   completed,
 }
 
-typedef void _ImageProviderResolverListener();
+typedef _ImageProviderResolverListener = void Function();
 
 class _ImageProviderResolver {
   _ImageProviderResolver({
@@ -331,13 +369,14 @@ class _ImageProviderResolver {
     final ImageStream oldImageStream = _imageStream;
     _imageStream = provider.resolve(createLocalImageConfiguration(
       state.context,
-      size: widget.width != null && widget.height != null ? new Size(widget.width, widget.height) : null
+      size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
     ));
     assert(_imageStream != null);
 
     if (_imageStream.key != oldImageStream?.key) {
-      oldImageStream?.removeListener(_handleImageChanged);
-      _imageStream.addListener(_handleImageChanged);
+      final ImageStreamListener listener = ImageStreamListener(_handleImageChanged);
+      oldImageStream?.removeListener(listener);
+      _imageStream.addListener(listener);
     }
   }
 
@@ -347,7 +386,7 @@ class _ImageProviderResolver {
   }
 
   void stopListening() {
-    _imageStream?.removeListener(_handleImageChanged);
+    _imageStream?.removeListener(ImageStreamListener(_handleImageChanged));
   }
 }
 
@@ -363,13 +402,13 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
 
   @override
   void initState() {
-    _imageResolver = new _ImageProviderResolver(state: this, listener: _updatePhase);
-    _placeholderResolver = new _ImageProviderResolver(state: this, listener: () {
+    _imageResolver = _ImageProviderResolver(state: this, listener: _updatePhase);
+    _placeholderResolver = _ImageProviderResolver(state: this, listener: () {
       setState(() {
         // Trigger rebuild to display the placeholder image
       });
     });
-    _controller = new AnimationController(
+    _controller = AnimationController(
       value: 1.0,
       vsync: this,
     );
@@ -393,7 +432,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
   @override
   void didUpdateWidget(FadeInImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.image != oldWidget.image || widget.placeholder != widget.placeholder)
+    if (widget.image != oldWidget.image || widget.placeholder != oldWidget.placeholder)
       _resolveImage();
   }
 
@@ -427,7 +466,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           if (_imageResolver._imageInfo != null) {
             // Received image data. Begin placeholder fade-out.
             _controller.duration = widget.fadeOutDuration;
-            _animation = new CurvedAnimation(
+            _animation = CurvedAnimation(
               parent: _controller,
               curve: widget.fadeOutCurve,
             );
@@ -439,7 +478,7 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
           if (_controller.status == AnimationStatus.dismissed) {
             // Done fading out placeholder. Begin target image fade-in.
             _controller.duration = widget.fadeInDuration;
-            _animation = new CurvedAnimation(
+            _animation = CurvedAnimation(
               parent: _controller,
               curve: widget.fadeInCurve,
             );
@@ -490,30 +529,47 @@ class _FadeInImageState extends State<FadeInImage> with TickerProviderStateMixin
       : _imageResolver._imageInfo;
   }
 
+  String get _semanticLabel {
+    return _isShowingPlaceholder
+      ? widget.placeholderSemanticLabel
+      : widget.imageSemanticLabel;
+  }
+
   @override
   Widget build(BuildContext context) {
     assert(_phase != FadeInImagePhase.start);
     final ImageInfo imageInfo = _imageInfo;
-    return new RawImage(
+    final RawImage image = RawImage(
       image: imageInfo?.image,
       width: widget.width,
       height: widget.height,
       scale: imageInfo?.scale ?? 1.0,
-      color: new Color.fromRGBO(255, 255, 255, _animation?.value ?? 1.0),
+      color: Color.fromRGBO(255, 255, 255, _animation?.value ?? 1.0),
       colorBlendMode: BlendMode.modulate,
       fit: widget.fit,
       alignment: widget.alignment,
       repeat: widget.repeat,
       matchTextDirection: widget.matchTextDirection,
     );
+
+    if (widget.excludeFromSemantics) {
+      return image;
+    }
+
+    return Semantics(
+      container: _semanticLabel != null,
+      image: true,
+      label: _semanticLabel ?? '',
+      child: image,
+    );
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(new EnumProperty<FadeInImagePhase>('phase', _phase));
-    description.add(new DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
-    description.add(new DiagnosticsProperty<ImageStream>('image stream', _imageResolver._imageStream));
-    description.add(new DiagnosticsProperty<ImageStream>('placeholder stream', _placeholderResolver._imageStream));
+    description.add(EnumProperty<FadeInImagePhase>('phase', _phase));
+    description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
+    description.add(DiagnosticsProperty<ImageStream>('image stream', _imageResolver._imageStream));
+    description.add(DiagnosticsProperty<ImageStream>('placeholder stream', _placeholderResolver._imageStream));
   }
 }

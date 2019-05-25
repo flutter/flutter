@@ -7,13 +7,13 @@ import 'package:flutter/widgets.dart';
 
 class Inside extends StatefulWidget {
   @override
-  InsideState createState() => new InsideState();
+  InsideState createState() => InsideState();
 }
 
 class InsideState extends State<Inside> {
   @override
   Widget build(BuildContext context) {
-    return new Listener(
+    return Listener(
       onPointerDown: _handlePointerDown,
       child: const Text('INSIDE', textDirection: TextDirection.ltr),
     );
@@ -30,13 +30,13 @@ class Middle extends StatefulWidget {
   final Inside child;
 
   @override
-  MiddleState createState() => new MiddleState();
+  MiddleState createState() => MiddleState();
 }
 
 class MiddleState extends State<Middle> {
   @override
   Widget build(BuildContext context) {
-    return new Listener(
+    return Listener(
       onPointerDown: _handlePointerDown,
       child: widget.child,
     );
@@ -49,19 +49,19 @@ class MiddleState extends State<Middle> {
 
 class Outside extends StatefulWidget {
   @override
-  OutsideState createState() => new OutsideState();
+  OutsideState createState() => OutsideState();
 }
 
 class OutsideState extends State<Outside> {
   @override
   Widget build(BuildContext context) {
-    return new Middle(child: new Inside());
+    return Middle(child: Inside());
   }
 }
 
 void main() {
   testWidgets('setState() smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(new Outside());
+    await tester.pumpWidget(Outside());
     final Offset location = tester.getCenter(find.text('INSIDE'));
     final TestGesture gesture = await tester.startGesture(location);
     await tester.pump();

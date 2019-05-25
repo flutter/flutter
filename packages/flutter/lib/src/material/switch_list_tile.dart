@@ -7,11 +7,23 @@ import 'package:flutter/widgets.dart';
 import 'list_tile.dart';
 import 'switch.dart';
 import 'theme.dart';
+import 'theme_data.dart';
+
+// Examples can assume:
+// void setState(VoidCallback fn) { }
+// bool _isSelected;
+
+enum _SwitchListTileType { material, adaptive }
 
 /// A [ListTile] with a [Switch]. In other words, a switch with a label.
 ///
 /// The entire list tile is interactive: tapping anywhere in the tile toggles
-/// the switch.
+/// the switch. Tapping and dragging the [Switch] also triggers the [onChanged]
+/// callback.
+///
+/// To ensure that [onChanged] correctly triggers, the state passed
+/// into [value] must be properly managed. This is typically done by invoking
+/// [State.setState] in [onChanged] to toggle the state value.
 ///
 /// The [value], [onChanged], [activeColor], [activeThumbImage], and
 /// [inactiveThumbImage] properties of this widget are identical to the
@@ -34,19 +46,204 @@ import 'theme.dart';
 /// To show the [SwitchListTile] as disabled, pass null as the [onChanged]
 /// callback.
 ///
-/// ## Sample code
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![SwitchListTile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile.png)
 ///
 /// This widget shows a switch that, when toggled, changes the state of a [bool]
 /// member field called `_lights`.
 ///
 /// ```dart
-/// new SwitchListTile(
-///   title: const Text('Lights'),
-///   value: _lights,
-///   onChanged: (bool value) { setState(() { _lights = value; }); },
-///   secondary: const Icon(Icons.lightbulb_outline),
-/// )
+/// bool _lights = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: SwitchListTile(
+///       title: const Text('Lights'),
+///       value: _lights,
+///       onChanged: (bool value) { setState(() { _lights = value; }); },
+///       secondary: const Icon(Icons.lightbulb_outline),
+///     ),
+///   );
+/// }
 /// ```
+/// {@end-tool}
+///
+/// ## Semantics in SwitchListTile
+///
+/// Since the entirety of the SwitchListTile is interactive, it should represent
+/// itself as a single interactive entity.
+///
+/// To do so, a SwitchListTile widget wraps its children with a [MergeSemantics]
+/// widget. [MergeSemantics] will attempt to merge its descendant [Semantics]
+/// nodes into one node in the semantics tree. Therefore, SwitchListTile will
+/// throw an error if any of its children requires its own [Semantics] node.
+///
+/// For example, you cannot nest a [RichText] widget as a descendant of
+/// SwitchListTile. [RichText] has an embedded gesture recognizer that
+/// requires its own [Semantics] node, which directly conflicts with
+/// SwitchListTile's desire to merge all its descendants' semantic nodes
+/// into one. Therefore, it may be necessary to create a custom radio tile
+/// widget to accommodate similar use cases.
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Switch list tile semantics sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_semantics.png)
+///
+/// Here is an example of a custom labeled radio widget, called
+/// LinkedLabelRadio, that includes an interactive [RichText] widget that
+/// handles tap gestures.
+///
+/// ```dart imports
+/// import 'package:flutter/gestures.dart';
+/// ```
+/// ```dart preamble
+/// class LinkedLabelSwitch extends StatelessWidget {
+///   const LinkedLabelSwitch({
+///     this.label,
+///     this.padding,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Padding(
+///       padding: padding,
+///       child: Row(
+///         children: <Widget>[
+///           Expanded(
+///             child: RichText(
+///               text: TextSpan(
+///                 text: label,
+///                 style: TextStyle(
+///                   color: Colors.blueAccent,
+///                   decoration: TextDecoration.underline,
+///                 ),
+///                 recognizer: TapGestureRecognizer()
+///                   ..onTap = () {
+///                   print('Label has been tapped.');
+///                 },
+///               ),
+///             ),
+///           ),
+///           Switch(
+///             value: value,
+///             onChanged: (bool newValue) {
+///               onChanged(newValue);
+///             },
+///           ),
+///         ],
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool _isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LinkedLabelSwitch(
+///         label: 'Linked, tappable label text',
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///         value: _isSelected,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             _isSelected = newValue;
+///           });
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// ## SwitchListTile isn't exactly what I want
+///
+/// If the way SwitchListTile pads and positions its elements isn't quite what
+/// you're looking for, you can create custom labeled switch widgets by
+/// combining [Switch] with other widgets, such as [Text], [Padding] and
+/// [InkWell].
+///
+/// {@tool snippet --template=stateful_widget_scaffold}
+///
+/// ![Custom switch list tile sample](https://flutter.github.io/assets-for-api-docs/assets/material/switch_list_tile_custom.png)
+///
+/// Here is an example of a custom LabeledSwitch widget, but you can easily
+/// make your own configurable widget.
+///
+/// ```dart preamble
+/// class LabeledSwitch extends StatelessWidget {
+///   const LabeledSwitch({
+///     this.label,
+///     this.padding,
+///     this.groupValue,
+///     this.value,
+///     this.onChanged,
+///   });
+///
+///   final String label;
+///   final EdgeInsets padding;
+///   final bool groupValue;
+///   final bool value;
+///   final Function onChanged;
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return InkWell(
+///       onTap: () {
+///         onChanged(!value);
+///       },
+///       child: Padding(
+///         padding: padding,
+///         child: Row(
+///           children: <Widget>[
+///             Expanded(child: Text(label)),
+///             Switch(
+///               value: value,
+///               onChanged: (bool newValue) {
+///                 onChanged(newValue);
+///               },
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// ```dart
+/// bool _isSelected = false;
+///
+/// @override
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     body: Center(
+///       child: LabeledSwitch(
+///         label: 'This is the label text',
+///         padding: const EdgeInsets.symmetric(horizontal: 20.0),
+///         value: _isSelected,
+///         onChanged: (bool newValue) {
+///           setState(() {
+///             _isSelected = newValue;
+///           });
+///         },
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -73,6 +270,9 @@ class SwitchListTile extends StatelessWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
     this.activeThumbImage,
     this.inactiveThumbImage,
     this.title,
@@ -81,7 +281,39 @@ class SwitchListTile extends StatelessWidget {
     this.dense,
     this.secondary,
     this.selected = false,
-  }) : assert(value != null),
+  }) : _switchListTileType = _SwitchListTileType.material,
+       assert(value != null),
+       assert(isThreeLine != null),
+       assert(!isThreeLine || subtitle != null),
+       assert(selected != null),
+       super(key: key);
+
+  /// Creates the wrapped switch with [Switch.adaptive].
+  ///
+  /// Creates a [CupertinoSwitch] if the target platform is iOS, creates a
+  /// material design switch otherwise.
+  ///
+  /// If a [CupertinoSwitch] is created, the following parameters are
+  /// ignored: [activeTrackColor], [inactiveThumbColor], [inactiveTrackColor],
+  /// [activeThumbImage], [inactiveThumbImage], [materialTapTargetSize].
+  const SwitchListTile.adaptive({
+    Key key,
+    @required this.value,
+    @required this.onChanged,
+    this.activeColor,
+    this.activeTrackColor,
+    this.inactiveThumbColor,
+    this.inactiveTrackColor,
+    this.activeThumbImage,
+    this.inactiveThumbImage,
+    this.title,
+    this.subtitle,
+    this.isThreeLine = false,
+    this.dense,
+    this.secondary,
+    this.selected = false,
+  }) : _switchListTileType = _SwitchListTileType.adaptive,
+       assert(value != null),
        assert(isThreeLine != null),
        assert(!isThreeLine || subtitle != null),
        assert(selected != null),
@@ -105,14 +337,14 @@ class SwitchListTile extends StatelessWidget {
   /// gets rebuilt; for example:
   ///
   /// ```dart
-  /// new SwitchListTile(
-  ///   value: _lights,
+  /// SwitchListTile(
+  ///   value: _isSelected,
   ///   onChanged: (bool newValue) {
   ///     setState(() {
-  ///       _lights = newValue;
+  ///       _isSelected = newValue;
   ///     });
   ///   },
-  ///   title: new Text('Lights'),
+  ///   title: Text('Selection'),
   /// )
   /// ```
   final ValueChanged<bool> onChanged;
@@ -122,10 +354,33 @@ class SwitchListTile extends StatelessWidget {
   /// Defaults to accent color of the current [Theme].
   final Color activeColor;
 
+  /// The color to use on the track when this switch is on.
+  ///
+  /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final Color activeTrackColor;
+
+  /// The color to use on the thumb when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final Color inactiveThumbColor;
+
+  /// The color to use on the track when this switch is off.
+  ///
+  /// Defaults to the colors described in the Material design specification.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
+  final Color inactiveTrackColor;
+
   /// An image to use on the thumb of this switch when the switch is on.
   final ImageProvider activeThumbImage;
 
   /// An image to use on the thumb of this switch when the switch is off.
+  ///
+  /// Ignored if created with [SwitchListTile.adaptive].
   final ImageProvider inactiveThumbImage;
 
   /// The primary content of the list tile.
@@ -163,19 +418,44 @@ class SwitchListTile extends StatelessWidget {
   /// Normally, this property is left to its default value, false.
   final bool selected;
 
+  /// If adaptive, creates the switch with [Switch.adaptive].
+  final _SwitchListTileType _switchListTileType;
+
   @override
   Widget build(BuildContext context) {
-    final Widget control = new Switch(
-      value: value,
-      onChanged: onChanged,
-      activeColor: activeColor,
-      activeThumbImage: activeThumbImage,
-      inactiveThumbImage: inactiveThumbImage,
-    );
-    return new MergeSemantics(
+    Widget control;
+    switch (_switchListTileType) {
+      case _SwitchListTileType.adaptive:
+        control = Switch.adaptive(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          activeThumbImage: activeThumbImage,
+          inactiveThumbImage: inactiveThumbImage,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          activeTrackColor: activeTrackColor,
+          inactiveTrackColor: inactiveTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+        );
+        break;
+
+      case _SwitchListTileType.material:
+        control = Switch(
+          value: value,
+          onChanged: onChanged,
+          activeColor: activeColor,
+          activeThumbImage: activeThumbImage,
+          inactiveThumbImage: inactiveThumbImage,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          activeTrackColor: activeTrackColor,
+          inactiveTrackColor: inactiveTrackColor,
+          inactiveThumbColor: inactiveThumbColor,
+        );
+    }
+    return MergeSemantics(
       child: ListTileTheme.merge(
         selectedColor: activeColor ?? Theme.of(context).accentColor,
-        child: new ListTile(
+        child: ListTile(
           leading: secondary,
           title: title,
           subtitle: subtitle,

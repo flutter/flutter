@@ -20,15 +20,15 @@ void main() {
   testWidgets('Sliver protocol', (WidgetTester tester) async {
     GlobalKey key1, key2, key3, key4, key5;
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new CustomScrollView(
+        child: CustomScrollView(
           slivers: <Widget>[
-            new BigSliver(key: key1 = new GlobalKey()),
-            new OverlappingSliver(key: key2 = new GlobalKey()),
-            new OverlappingSliver(key: key3 = new GlobalKey()),
-            new BigSliver(key: key4 = new GlobalKey()),
-            new BigSliver(key: key5 = new GlobalKey()),
+            BigSliver(key: key1 = GlobalKey()),
+            OverlappingSliver(key: key2 = GlobalKey()),
+            OverlappingSliver(key: key3 = GlobalKey()),
+            BigSliver(key: key4 = GlobalKey()),
+            BigSliver(key: key5 = GlobalKey()),
           ],
         ),
       ),
@@ -59,7 +59,7 @@ class RenderBigSliver extends RenderSliver {
 
   @override
   void performLayout() {
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: height,
       paintExtent: paintExtent,
       maxPaintExtent: height,
@@ -71,7 +71,7 @@ class BigSliver extends LeafRenderObjectWidget {
   const BigSliver({ Key key }) : super(key: key);
   @override
   RenderBigSliver createRenderObject(BuildContext context) {
-    return new RenderBigSliver();
+    return RenderBigSliver();
   }
 }
 
@@ -95,7 +95,7 @@ class RenderOverlappingSliver extends RenderSliver {
 
   @override
   void performLayout() {
-    geometry = new SliverGeometry(
+    geometry = SliverGeometry(
       scrollExtent: totalHeight,
       paintExtent: paintExtent,
       layoutExtent: layoutExtent,
@@ -108,6 +108,6 @@ class OverlappingSliver extends LeafRenderObjectWidget {
   const OverlappingSliver({ Key key }) : super(key: key);
   @override
   RenderOverlappingSliver createRenderObject(BuildContext context) {
-    return new RenderOverlappingSliver();
+    return RenderOverlappingSliver();
   }
 }

@@ -9,7 +9,7 @@ import 'debug.dart';
 import 'framework.dart';
 
 /// The signature of the [LayoutBuilder] builder function.
-typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constraints);
+typedef LayoutWidgetBuilder = Widget Function(BuildContext context, BoxConstraints constraints);
 
 /// Builds a widget tree that can depend on the parent widget's size.
 ///
@@ -19,22 +19,24 @@ typedef Widget LayoutWidgetBuilder(BuildContext context, BoxConstraints constrai
 /// the child's intrinsic size. The [LayoutBuilder]'s final size will match its
 /// child's size.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=IYDVcriKjsw}
+///
 /// If the child should be smaller than the parent, consider wrapping the child
 /// in an [Align] widget. If the child might want to be bigger, consider
 /// wrapping it in a [SingleChildScrollView].
 ///
 /// See also:
 ///
-/// * [Builder], which calls a `builder` function at build time.
-/// * [StatefulBuilder], which passes its `builder` function a `setState` callback.
-/// * [CustomSingleChildLayout], which positions its child during layout.
+///  * [Builder], which calls a `builder` function at build time.
+///  * [StatefulBuilder], which passes its `builder` function a `setState` callback.
+///  * [CustomSingleChildLayout], which positions its child during layout.
 class LayoutBuilder extends RenderObjectWidget {
   /// Creates a widget that defers its building until layout.
   ///
   /// The [builder] argument must not be null.
   const LayoutBuilder({
     Key key,
-    @required this.builder
+    @required this.builder,
   }) : assert(builder != null),
        super(key: key);
 
@@ -43,10 +45,10 @@ class LayoutBuilder extends RenderObjectWidget {
   final LayoutWidgetBuilder builder;
 
   @override
-  _LayoutBuilderElement createElement() => new _LayoutBuilderElement(this);
+  _LayoutBuilderElement createElement() => _LayoutBuilderElement(this);
 
   @override
-  _RenderLayoutBuilder createRenderObject(BuildContext context) => new _RenderLayoutBuilder();
+  _RenderLayoutBuilder createRenderObject(BuildContext context) => _RenderLayoutBuilder();
 
   // updateRenderObject is redundant with the logic in the LayoutBuilderElement below.
 }
@@ -111,14 +113,14 @@ class _LayoutBuilderElement extends RenderObjectElement {
           built = widget.builder(this, constraints);
           debugWidgetBuilderValue(widget, built);
         } catch (e, stack) {
-          built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
+          built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $widget'), e, stack));
         }
       }
       try {
         _child = updateChild(_child, built, null);
         assert(_child != null);
       } catch (e, stack) {
-        built = ErrorWidget.builder(_debugReportException('building $widget', e, stack));
+        built = ErrorWidget.builder(_debugReportException(ErrorDescription('building $widget'), e, stack));
         _child = updateChild(null, built, slot);
       }
     });
@@ -164,7 +166,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   bool _debugThrowIfNotCheckingIntrinsics() {
     assert(() {
       if (!RenderObject.debugCheckingIntrinsics) {
-        throw new FlutterError(
+        throw FlutterError(
           'LayoutBuilder does not support returning intrinsic dimensions.\n'
           'Calculating the intrinsic dimensions would require running the layout '
           'callback speculatively, which might mutate the live render object tree.'
@@ -212,7 +214,7 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
   }
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     return child?.hitTest(result, position: position) ?? false;
   }
 
@@ -224,15 +226,15 @@ class _RenderLayoutBuilder extends RenderBox with RenderObjectWithChildMixin<Ren
 }
 
 FlutterErrorDetails _debugReportException(
-  String context,
+  DiagnosticsNode context,
   dynamic exception,
   StackTrace stack,
 ) {
-  final FlutterErrorDetails details = new FlutterErrorDetails(
+  final FlutterErrorDetails details = FlutterErrorDetails(
     exception: exception,
     stack: stack,
     library: 'widgets library',
-    context: context
+    context: context,
   );
   FlutterError.reportError(details);
   return details;

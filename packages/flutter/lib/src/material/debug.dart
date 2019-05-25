@@ -5,6 +5,8 @@
 import 'package:flutter/widgets.dart';
 
 import 'material.dart';
+import 'material_localizations.dart';
+import 'scaffold.dart' show Scaffold;
 
 /// Asserts that the given context has a [Material] ancestor.
 ///
@@ -22,7 +24,7 @@ import 'material.dart';
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
     if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
-      final StringBuffer message = new StringBuffer();
+      final StringBuffer message = StringBuffer();
       message.writeln('No Material widget found.');
       message.writeln(
         '${context.widget.runtimeType} widgets require a Material '
@@ -60,7 +62,100 @@ bool debugCheckHasMaterial(BuildContext context) {
           'ancestors, let alone a "Material" ancestor.'
         );
       }
-      throw new FlutterError(message.toString());
+      throw FlutterError(message.toString());
+    }
+    return true;
+  }());
+  return true;
+}
+
+
+/// Asserts that the given context has a [Localizations] ancestor that contains
+/// a [MaterialLocalizations] delegate.
+///
+/// Used by many material design widgets to make sure that they are
+/// only used in contexts where they have access to localizations.
+///
+/// To call this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasMaterialLocalizations(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasMaterialLocalizations(BuildContext context) {
+  assert(() {
+    if (Localizations.of<MaterialLocalizations>(context, MaterialLocalizations) == null) {
+      final StringBuffer message = StringBuffer();
+      message.writeln('No MaterialLocalizations found.');
+      message.writeln(
+        '${context.widget.runtimeType} widgets require MaterialLocalizations '
+        'to be provided by a Localizations widget ancestor.'
+      );
+      message.writeln(
+        'Localizations are used to generate many different messages, labels,'
+        'and abbreviations which are used by the material library. '
+      );
+      message.writeln(
+        'To introduce a MaterialLocalizations, either use a '
+        ' MaterialApp at the root of your application to include them '
+        'automatically, or add a Localization widget with a '
+        'MaterialLocalizations delegate.'
+      );
+      message.writeln(
+        'The specific widget that could not find a MaterialLocalizations ancestor was:'
+      );
+      message.writeln('  ${context.widget}');
+      final List<Widget> ancestors = <Widget>[];
+      context.visitAncestorElements((Element element) {
+        ancestors.add(element.widget);
+        return true;
+      });
+      if (ancestors.isNotEmpty) {
+        message.write('The ancestors of this widget were:');
+        for (Widget ancestor in ancestors)
+          message.write('\n  $ancestor');
+      } else {
+        message.writeln(
+          'This widget is the root of the tree, so it has no '
+          'ancestors, let alone a "Localizations" ancestor.'
+        );
+      }
+      throw FlutterError(message.toString());
+    }
+    return true;
+  }());
+  return true;
+}
+
+/// Asserts that the given context has a [Scaffold] ancestor.
+///
+/// Used by various widgets to make sure that they are only used in an
+/// appropriate context.
+///
+/// To invoke this function, use the following pattern, typically in the
+/// relevant Widget's build method:
+///
+/// ```dart
+/// assert(debugCheckHasScaffold(context));
+/// ```
+///
+/// Does nothing if asserts are disabled. Always returns true.
+bool debugCheckHasScaffold(BuildContext context) {
+  assert(() {
+    if (context.widget is! Scaffold && context.ancestorWidgetOfExactType(Scaffold) == null) {
+      final Element element = context;
+      throw FlutterError(
+          'No Scaffold widget found.\n'
+          '${context.widget.runtimeType} widgets require a Scaffold widget ancestor.\n'
+          'The Specific widget that could not find a Scaffold ancestor was:\n'
+          '  ${context.widget}\n'
+          'The ownership chain for the affected widget is:\n'
+          '  ${element.debugGetCreatorChain(10)}\n'
+          'Typically, the Scaffold widget is introduced by the MaterialApp or '
+          'WidgetsApp widget at the top of your application widget tree.'
+      );
     }
     return true;
   }());

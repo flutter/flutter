@@ -9,70 +9,71 @@ class MyNotification extends Notification { }
 
 void main() {
   testWidgets('Notification basics - toString', (WidgetTester tester) async {
-    expect(new MyNotification(), hasOneLineDescription);
+    expect(MyNotification(), hasOneLineDescription);
   });
 
   testWidgets('Notification basics - dispatch', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
-    final GlobalKey key = new GlobalKey();
-    await tester.pumpWidget(new NotificationListener<MyNotification>(
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(NotificationListener<MyNotification>(
       onNotification: (MyNotification value) {
         log.add('a');
         log.add(value);
         return true;
       },
-      child: new NotificationListener<MyNotification>(
+      child: NotificationListener<MyNotification>(
         onNotification: (MyNotification value) {
           log.add('b');
           log.add(value);
           return false;
         },
-        child: new Container(key: key),
+        child: Container(key: key),
       ),
     ));
     expect(log, isEmpty);
-    final Notification notification = new MyNotification();
+    final Notification notification = MyNotification();
     expect(() { notification.dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <dynamic>['b', notification, 'a', notification]);
   });
 
   testWidgets('Notification basics - cancel', (WidgetTester tester) async {
     final List<dynamic> log = <dynamic>[];
-    final GlobalKey key = new GlobalKey();
-    await tester.pumpWidget(new NotificationListener<MyNotification>(
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(NotificationListener<MyNotification>(
       onNotification: (MyNotification value) {
         log.add('a - error');
         log.add(value);
         return true;
       },
-      child: new NotificationListener<MyNotification>(
+      child: NotificationListener<MyNotification>(
         onNotification: (MyNotification value) {
           log.add('b');
           log.add(value);
           return true;
         },
-        child: new Container(key: key),
+        child: Container(key: key),
       ),
     ));
     expect(log, isEmpty);
-    final Notification notification = new MyNotification();
+    final Notification notification = MyNotification();
     expect(() { notification.dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <dynamic>['b', notification]);
   });
 
   testWidgets('Notification basics - listener null return value', (WidgetTester tester) async {
     final List<Type> log = <Type>[];
-    final GlobalKey key = new GlobalKey();
-    await tester.pumpWidget(new NotificationListener<MyNotification>(
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(NotificationListener<MyNotification>(
       onNotification: (MyNotification value) {
         log.add(value.runtimeType);
+        return false;
       },
-      child: new NotificationListener<MyNotification>(
-        onNotification: (MyNotification value) { },
-        child: new Container(key: key),
+      child: NotificationListener<MyNotification>(
+        onNotification: (MyNotification value) => false,
+        child: Container(key: key),
       ),
     ));
-    expect(() { new MyNotification().dispatch(key.currentContext); }, isNot(throwsException));
+    expect(() { MyNotification().dispatch(key.currentContext); }, isNot(throwsException));
     expect(log, <Type>[MyNotification]);
   });
 }

@@ -38,7 +38,7 @@ class ObserverList<T> extends Iterable<T> {
 
     if (_isDirty) {
       if (_set == null) {
-        _set = new HashSet<T>.from(_list);
+        _set = HashSet<T>.from(_list);
       } else {
         _set.clear();
         _set.addAll(_list);

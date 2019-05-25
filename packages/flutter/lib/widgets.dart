@@ -8,7 +8,7 @@
 ///
 /// See also:
 ///
-///  * [flutter.io/widgets](https://flutter.io/widgets/)
+///  * [flutter.dev/widgets](https://flutter.dev/widgets/)
 ///    for a catalog of commonly-used Flutter widgets.
 library widgets;
 
@@ -30,10 +30,12 @@ export 'src/widgets/container.dart';
 export 'src/widgets/debug.dart';
 export 'src/widgets/dismissible.dart';
 export 'src/widgets/drag_target.dart';
+export 'src/widgets/draggable_scrollable_sheet.dart';
 export 'src/widgets/editable_text.dart';
 export 'src/widgets/fade_in_image.dart';
 export 'src/widgets/focus_manager.dart';
 export 'src/widgets/focus_scope.dart';
+export 'src/widgets/focus_traversal.dart';
 export 'src/widgets/form.dart';
 export 'src/widgets/framework.dart';
 export 'src/widgets/gesture_detector.dart';
@@ -46,6 +48,8 @@ export 'src/widgets/icon_theme_data.dart';
 export 'src/widgets/image.dart';
 export 'src/widgets/image_icon.dart';
 export 'src/widgets/implicit_animations.dart';
+export 'src/widgets/inherited_model.dart';
+export 'src/widgets/inherited_notifier.dart';
 export 'src/widgets/layout_builder.dart';
 export 'src/widgets/list_wheel_scroll_view.dart';
 export 'src/widgets/localizations.dart';
@@ -63,6 +67,7 @@ export 'src/widgets/page_view.dart';
 export 'src/widgets/pages.dart';
 export 'src/widgets/performance_overlay.dart';
 export 'src/widgets/placeholder.dart';
+export 'src/widgets/platform_view.dart';
 export 'src/widgets/preferred_size.dart';
 export 'src/widgets/primary_scroll_controller.dart';
 export 'src/widgets/raw_keyboard_listener.dart';
@@ -97,6 +102,8 @@ export 'src/widgets/ticker_provider.dart';
 export 'src/widgets/title.dart';
 export 'src/widgets/transitions.dart';
 export 'src/widgets/unique_widget.dart';
+export 'src/widgets/value_listenable_builder.dart';
 export 'src/widgets/viewport.dart';
+export 'src/widgets/visibility.dart';
 export 'src/widgets/widget_inspector.dart';
 export 'src/widgets/will_pop_scope.dart';

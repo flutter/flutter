@@ -9,12 +9,12 @@ import 'package:flutter/foundation.dart';
 import 'events.dart';
 
 /// A callback that receives a [PointerEvent]
-typedef void PointerRoute(PointerEvent event);
+typedef PointerRoute = void Function(PointerEvent event);
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {
   final Map<int, LinkedHashSet<PointerRoute>> _routeMap = <int, LinkedHashSet<PointerRoute>>{};
-  final LinkedHashSet<PointerRoute> _globalRoutes = new LinkedHashSet<PointerRoute>();
+  final LinkedHashSet<PointerRoute> _globalRoutes = LinkedHashSet<PointerRoute>();
 
   /// Adds a route to the routing table.
   ///
@@ -24,7 +24,7 @@ class PointerRouter {
   /// Routes added reentrantly within [PointerRouter.route] will take effect when
   /// routing the next event.
   void addRoute(int pointer, PointerRoute route) {
-    final LinkedHashSet<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => new LinkedHashSet<PointerRoute>());
+    final LinkedHashSet<PointerRoute> routes = _routeMap.putIfAbsent(pointer, () => LinkedHashSet<PointerRoute>());
     assert(!routes.contains(route));
     routes.add(route);
   }
@@ -72,18 +72,17 @@ class PointerRouter {
     try {
       route(event);
     } catch (exception, stack) {
-      FlutterError.reportError(new FlutterErrorDetailsForPointerRouter(
+      FlutterError.reportError(FlutterErrorDetailsForPointerRouter(
         exception: exception,
         stack: stack,
         library: 'gesture library',
-        context: 'while routing a pointer event',
+        context: ErrorDescription('while routing a pointer event'),
         router: this,
         route: route,
         event: event,
-        informationCollector: (StringBuffer information) {
-          information.writeln('Event:');
-          information.write('  $event');
-        }
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<PointerEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
+        },
       ));
     }
   }
@@ -94,9 +93,9 @@ class PointerRouter {
   /// PointerRouter object.
   void route(PointerEvent event) {
     final LinkedHashSet<PointerRoute> routes = _routeMap[event.pointer];
-    final List<PointerRoute> globalRoutes = new List<PointerRoute>.from(_globalRoutes);
+    final List<PointerRoute> globalRoutes = List<PointerRoute>.from(_globalRoutes);
     if (routes != null) {
-      for (PointerRoute route in new List<PointerRoute>.from(routes)) {
+      for (PointerRoute route in List<PointerRoute>.from(routes)) {
         if (routes.contains(route))
           _dispatch(event, route);
       }
@@ -123,12 +122,12 @@ class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
     dynamic exception,
     StackTrace stack,
     String library,
-    String context,
+    DiagnosticsNode context,
     this.router,
     this.route,
     this.event,
     InformationCollector informationCollector,
-    bool silent = false
+    bool silent = false,
   }) : super(
     exception: exception,
     stack: stack,

@@ -9,25 +9,25 @@ import 'package:flutter/widgets.dart';
 void main() {
   testWidgets('LayoutBuilder parent size', (WidgetTester tester) async {
     Size layoutBuilderSize;
-    final Key childKey = new UniqueKey();
-    final Key parentKey = new UniqueKey();
+    final Key childKey = UniqueKey();
+    final Key parentKey = UniqueKey();
 
     await tester.pumpWidget(
-      new Center(
-        child: new ConstrainedBox(
+      Center(
+        child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 100.0, maxHeight: 200.0),
-          child: new LayoutBuilder(
+          child: LayoutBuilder(
             key: parentKey,
             builder: (BuildContext context, BoxConstraints constraints) {
               layoutBuilderSize = constraints.biggest;
-              return new SizedBox(
+              return SizedBox(
                 key: childKey,
                 width: layoutBuilderSize.width / 2.0,
-                height: layoutBuilderSize.height / 2.0
+                height: layoutBuilderSize.height / 2.0,
               );
-            }
-          )
-        )
+            },
+          ),
+        ),
       )
     );
 
@@ -41,29 +41,29 @@ void main() {
   testWidgets('LayoutBuilder stateful child', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
-    final Key childKey = new UniqueKey();
-    final Key parentKey = new UniqueKey();
+    final Key childKey = UniqueKey();
+    final Key parentKey = UniqueKey();
     double childWidth = 10.0;
     double childHeight = 20.0;
 
     await tester.pumpWidget(
-      new Center(
-        child: new LayoutBuilder(
+      Center(
+        child: LayoutBuilder(
           key: parentKey,
           builder: (BuildContext context, BoxConstraints constraints) {
             layoutBuilderSize = constraints.biggest;
-            return new StatefulBuilder(
+            return StatefulBuilder(
               builder: (BuildContext context, StateSetter setter) {
                 setState = setter;
-                return new SizedBox(
+                return SizedBox(
                   key: childKey,
                   width: childWidth,
-                  height: childHeight
+                  height: childHeight,
                 );
               }
             );
-          }
-        )
+          },
+        ),
       )
     );
 
@@ -87,31 +87,31 @@ void main() {
   testWidgets('LayoutBuilder stateful parent', (WidgetTester tester) async {
     Size layoutBuilderSize;
     StateSetter setState;
-    final Key childKey = new UniqueKey();
+    final Key childKey = UniqueKey();
     double childWidth = 10.0;
     double childHeight = 20.0;
 
     await tester.pumpWidget(
-      new Center(
-        child: new StatefulBuilder(
+      Center(
+        child: StatefulBuilder(
           builder: (BuildContext context, StateSetter setter) {
             setState = setter;
-            return new SizedBox(
+            return SizedBox(
               width: childWidth,
               height: childHeight,
-              child: new LayoutBuilder(
+              child: LayoutBuilder(
                 builder: (BuildContext context, BoxConstraints constraints) {
                   layoutBuilderSize = constraints.biggest;
-                  return new SizedBox(
+                  return SizedBox(
                     key: childKey,
                     width: layoutBuilderSize.width,
-                    height: layoutBuilderSize.height
+                    height: layoutBuilderSize.height,
                   );
                 }
-              )
+              ),
             );
           }
-        )
+        ),
       )
     );
 
@@ -131,47 +131,47 @@ void main() {
 
   testWidgets('LayoutBuilder and Inherited -- do not rebuild when not using inherited', (WidgetTester tester) async {
     int built = 0;
-    final Widget target = new LayoutBuilder(
+    final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
-        return new Container();
+        return Container();
       }
     );
     expect(built, 0);
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(400.0, 300.0)),
-      child: target
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
+      child: target,
     ));
     expect(built, 1);
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(300.0, 400.0)),
-      child: target
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
+      child: target,
     ));
     expect(built, 1);
   });
 
   testWidgets('LayoutBuilder and Inherited -- do rebuild when using inherited', (WidgetTester tester) async {
     int built = 0;
-    final Widget target = new LayoutBuilder(
+    final Widget target = LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
         built += 1;
         MediaQuery.of(context);
-        return new Container();
+        return Container();
       }
     );
     expect(built, 0);
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(400.0, 300.0)),
-      child: target
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(400.0, 300.0)),
+      child: target,
     ));
     expect(built, 1);
 
-    await tester.pumpWidget(new MediaQuery(
-      data: const MediaQueryData(size: const Size(300.0, 400.0)),
-      child: target
+    await tester.pumpWidget(MediaQuery(
+      data: const MediaQueryData(size: Size(300.0, 400.0)),
+      child: target,
     ));
     expect(built, 2);
   });

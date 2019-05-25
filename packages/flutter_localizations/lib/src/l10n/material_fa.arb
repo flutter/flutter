@@ -39,5 +39,17 @@
   "popupMenuLabel": "منوی بازشو",
   "dialogLabel": "کادر گفتگو",
   "alertDialogLabel": "هشدار",
-  "searchFieldLabel": "جستجو کردن"
+  "searchFieldLabel": "جستجو",
+  "reorderItemToStart": "انتقال به ابتدا",
+  "reorderItemToEnd": "انتقال به انتها",
+  "reorderItemUp": "انتقال به بالا",
+  "reorderItemDown": "انتقال به پایین",
+  "reorderItemLeft": "انتقال به راست",
+  "reorderItemRight": "انتقال به چپ",
+  "expandedIconTapHint": "کوچک کردن",
+  "collapsedIconTapHint": "بزرگ کردن",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "۱ نویسه باقی مانده است",
+  "remainingTextFieldCharacterCountOther": "$remainingCount نویسه باقی مانده است",
+  "refreshIndicatorSemanticLabel": "بازخوانی"
 }

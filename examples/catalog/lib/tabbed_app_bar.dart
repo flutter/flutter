@@ -7,27 +7,27 @@ import 'package:flutter/material.dart';
 class TabbedAppBarSample extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return new MaterialApp(
-      home: new DefaultTabController(
+    return MaterialApp(
+      home: DefaultTabController(
         length: choices.length,
-        child: new Scaffold(
-          appBar: new AppBar(
+        child: Scaffold(
+          appBar: AppBar(
             title: const Text('Tabbed AppBar'),
-            bottom: new TabBar(
+            bottom: TabBar(
               isScrollable: true,
-              tabs: choices.map((Choice choice) {
-                return new Tab(
+              tabs: choices.map<Widget>((Choice choice) {
+                return Tab(
                   text: choice.title,
-                  icon: new Icon(choice.icon),
+                  icon: Icon(choice.icon),
                 );
               }).toList(),
             ),
           ),
-          body: new TabBarView(
-            children: choices.map((Choice choice) {
-              return new Padding(
+          body: TabBarView(
+            children: choices.map<Widget>((Choice choice) {
+              return Padding(
                 padding: const EdgeInsets.all(16.0),
-                child: new ChoiceCard(choice: choice),
+                child: ChoiceCard(choice: choice),
               );
             }).toList(),
           ),
@@ -43,13 +43,13 @@ class Choice {
   final IconData icon;
 }
 
-const List<Choice> choices = const <Choice>[
-  const Choice(title: 'CAR', icon: Icons.directions_car),
-  const Choice(title: 'BICYCLE', icon: Icons.directions_bike),
-  const Choice(title: 'BOAT', icon: Icons.directions_boat),
-  const Choice(title: 'BUS', icon: Icons.directions_bus),
-  const Choice(title: 'TRAIN', icon: Icons.directions_railway),
-  const Choice(title: 'WALK', icon: Icons.directions_walk),
+const List<Choice> choices = <Choice>[
+  Choice(title: 'CAR', icon: Icons.directions_car),
+  Choice(title: 'BICYCLE', icon: Icons.directions_bike),
+  Choice(title: 'BOAT', icon: Icons.directions_boat),
+  Choice(title: 'BUS', icon: Icons.directions_bus),
+  Choice(title: 'TRAIN', icon: Icons.directions_railway),
+  Choice(title: 'WALK', icon: Icons.directions_walk),
 ];
 
 class ChoiceCard extends StatelessWidget {
@@ -60,15 +60,15 @@ class ChoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextStyle textStyle = Theme.of(context).textTheme.display1;
-    return new Card(
+    return Card(
       color: Colors.white,
-      child: new Center(
-        child: new Column(
+      child: Center(
+        child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            new Icon(choice.icon, size: 128.0, color: textStyle.color),
-            new Text(choice.title, style: textStyle),
+            Icon(choice.icon, size: 128.0, color: textStyle.color),
+            Text(choice.title, style: textStyle),
           ],
         ),
       ),
@@ -77,7 +77,7 @@ class ChoiceCard extends StatelessWidget {
 }
 
 void main() {
-  runApp(new TabbedAppBarSample());
+  runApp(TabbedAppBarSample());
 }
 
 /*

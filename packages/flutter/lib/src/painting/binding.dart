@@ -2,31 +2,56 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data' show Uint8List;
+import 'dart:ui' as ui show instantiateImageCodec, Codec;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show ServicesBinding;
 
 import 'image_cache.dart';
+import 'shader_warm_up.dart';
 
 /// Binding for the painting library.
 ///
 /// Hooks into the cache eviction logic to clear the image cache.
 ///
 /// Requires the [ServicesBinding] to be mixed in earlier.
-abstract class PaintingBinding extends BindingBase with ServicesBinding {
-  // This class is intended to be used as a mixin, and should not be
-  // extended directly.
-  factory PaintingBinding._() => null;
-
+mixin PaintingBinding on BindingBase, ServicesBinding {
   @override
   void initInstances() {
     super.initInstances();
     _instance = this;
     _imageCache = createImageCache();
+    if (shaderWarmUp != null) {
+      shaderWarmUp.execute();
+    }
   }
 
   /// The current [PaintingBinding], if one has been created.
   static PaintingBinding get instance => _instance;
   static PaintingBinding _instance;
+
+  /// [ShaderWarmUp] to be executed during [initInstances].
+  ///
+  /// If the application has scenes that require the compilation of complex
+  /// shaders that are not covered by [DefaultShaderWarmUp], it may cause jank
+  /// in the middle of an animation or interaction. In that case, set
+  /// [shaderWarmUp] to a custom [ShaderWarmUp] before calling [initInstances]
+  /// (usually before [runApp] for normal Flutter apps, and before
+  /// [enableFlutterDriverExtension] for Flutter driver tests). Paint the scene
+  /// in the custom [ShaderWarmUp] so Flutter can pre-compile and cache the
+  /// shaders during startup. The warm up is only costly (100ms-200ms,
+  /// depending on the shaders to compile) during the first run after the
+  /// installation or a data wipe. The warm up does not block the main thread
+  /// so there should be no "Application Not Responding" warning.
+  ///
+  /// Currently the warm-up happens synchronously on the GPU thread which means
+  /// the rendering of the first frame on the GPU thread will be postponed until
+  /// the warm-up is finished.
+  ///
+  /// See also:
+  ///
+  ///  * [ShaderWarmUp], the interface of how this warm up works.
+  static ShaderWarmUp shaderWarmUp = const DefaultShaderWarmUp();
 
   /// The singleton that implements the Flutter framework's image cache.
   ///
@@ -42,7 +67,12 @@ abstract class PaintingBinding extends BindingBase with ServicesBinding {
   ///
   /// This method can be overridden to provide a custom image cache.
   @protected
-  ImageCache createImageCache() => new ImageCache();
+  ImageCache createImageCache() => ImageCache();
+
+  /// Calls through to [dart:ui] with [decodedCacheRatioCap] from [ImageCache].
+  Future<ui.Codec> instantiateImageCodec(Uint8List list) {
+    return ui.instantiateImageCodec(list);
+  }
 
   @override
   void evict(String asset) {

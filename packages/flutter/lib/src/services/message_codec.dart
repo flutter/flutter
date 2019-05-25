@@ -17,8 +17,8 @@ export 'dart:typed_data' show ByteData;
 ///
 /// See also:
 ///
-/// * [BasicMessageChannel], which use [MessageCodec]s for communication
-///   between Flutter and platform plugins.
+///  * [BasicMessageChannel], which use [MessageCodec]s for communication
+///    between Flutter and platform plugins.
 abstract class MessageCodec<T> {
   /// Encodes the specified [message] in binary.
   ///
@@ -57,10 +57,10 @@ class MethodCall {
 ///
 /// See also:
 ///
-/// * [MethodChannel], which use [MethodCodec]s for communication
-///   between Flutter and platform plugins.
-/// * [EventChannel], which use [MethodCodec]s for communication
-///   between Flutter and platform plugins.
+///  * [MethodChannel], which use [MethodCodec]s for communication
+///    between Flutter and platform plugins.
+///  * [EventChannel], which use [MethodCodec]s for communication
+///    between Flutter and platform plugins.
 abstract class MethodCodec {
   /// Encodes the specified [methodCall] into binary.
   ByteData encodeMethodCall(MethodCall methodCall);
@@ -81,7 +81,7 @@ abstract class MethodCodec {
   ///
   /// The specified error [code], human-readable error [message], and error
   /// [details] correspond to the fields of [PlatformException].
-  ByteData encodeErrorEnvelope({@required String code, String message, dynamic details});
+  ByteData encodeErrorEnvelope({ @required String code, String message, dynamic details });
 }
 
 
@@ -90,14 +90,14 @@ abstract class MethodCodec {
 ///
 /// See also:
 ///
-/// * [MethodCodec], which throws a [PlatformException], if a received result
-///   envelope represents an error.
-/// * [MethodChannel.invokeMethod], which completes the returned future
-///   with a [PlatformException], if invoking the platform plugin method
-///   results in an error envelope.
-/// * [EventChannel.receiveBroadcastStream], which emits
-///   [PlatformException]s as error events, whenever an event received from the
-///   platform plugin is wrapped in an error envelope.
+///  * [MethodCodec], which throws a [PlatformException], if a received result
+///    envelope represents an error.
+///  * [MethodChannel.invokeMethod], which completes the returned future
+///    with a [PlatformException], if invoking the platform plugin method
+///    results in an error envelope.
+///  * [EventChannel.receiveBroadcastStream], which emits
+///    [PlatformException]s as error events, whenever an event received from the
+///    platform plugin is wrapped in an error envelope.
 class PlatformException implements Exception {
   /// Creates a [PlatformException] with the specified error [code] and optional
   /// [message], and with the optional error [details] which must be a valid
@@ -126,11 +126,11 @@ class PlatformException implements Exception {
 ///
 /// See also:
 ///
-/// * [MethodChannel.invokeMethod], which completes the returned future
-///   with a [MissingPluginException], if no plugin handler for the method call
-///   was found.
-/// * [OptionalMethodChannel.invokeMethod], which completes the returned future
-///   with null, if no plugin handler for the method call was found.
+///  * [MethodChannel.invokeMethod], which completes the returned future
+///    with a [MissingPluginException], if no plugin handler for the method call
+///    was found.
+///  * [OptionalMethodChannel.invokeMethod], which completes the returned future
+///    with null, if no plugin handler for the method call was found.
 class MissingPluginException implements Exception {
   /// Creates a [MissingPluginException] with an optional human-readable
   /// error message.

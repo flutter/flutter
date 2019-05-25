@@ -8,24 +8,24 @@ import 'package:flutter/widgets.dart';
 
 void main() {
   testWidgets('AnimatedAlign.debugFillProperties', (WidgetTester tester) async {
-    const AnimatedAlign box = const AnimatedAlign(
+    const AnimatedAlign box = AnimatedAlign(
       alignment: Alignment.topCenter,
       curve: Curves.ease,
-      duration: const Duration(milliseconds: 200),
+      duration: Duration(milliseconds: 200),
     );
     expect(box, hasOneLineDescription);
   });
 
   testWidgets('AnimatedAlign alignment visual-to-directional animation', (WidgetTester tester) async {
-    final Key target = new UniqueKey();
+    final Key target = UniqueKey();
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedAlign(
+        child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
           alignment: Alignment.topRight,
-          child: new SizedBox(key: target, width: 100.0, height: 200.0),
+          child: SizedBox(key: target, width: 100.0, height: 200.0),
         ),
       ),
     );
@@ -34,12 +34,12 @@ void main() {
     expect(tester.getTopRight(find.byKey(target)), const Offset(800.0, 0.0));
 
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.rtl,
-        child: new AnimatedAlign(
+        child: AnimatedAlign(
           duration: const Duration(milliseconds: 200),
           alignment: AlignmentDirectional.bottomStart,
-          child: new SizedBox(key: target, width: 100.0, height: 200.0),
+          child: SizedBox(key: target, width: 100.0, height: 200.0),
         ),
       ),
     );

@@ -1,8 +1,8 @@
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file('local.properties')
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.withInputStream { stream ->
-        localProperties.load(stream)
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
     }
 }
 
@@ -11,21 +11,32 @@ if (flutterRoot == null) {
     throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
 }
 
+// The Gallery app's version is defined by the Flutter framework's version.
 def flutterVersion = file("$flutterRoot/version").text
 def flutterVersionComponents = flutterVersion.split(/[^0-9]+/)
 // Let the integer version code of xx.yy.zz-pre.nnn be xxyyzznnn.
-int flutterVersionCode = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
-flutterVersionCode += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
-flutterVersionCode += Math.min(flutterVersionComponents[2].toInteger(), 999) * 1000
+int flutterVersionNumber = Math.min(flutterVersionComponents[0].toInteger(), 20) * 100000000
+flutterVersionNumber += Math.min(flutterVersionComponents[1].toInteger(), 99) * 1000000
+flutterVersionNumber += Math.min(flutterVersionComponents[2].toInteger(), 999) * 1000
 if (flutterVersionComponents.length > 3) {
-    flutterVersionCode += Math.min(flutterVersionComponents[3].toInteger(), 999)
+    flutterVersionNumber += Math.min(flutterVersionComponents[3].toInteger(), 999)
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = "$flutterVersionNumber"
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = "$flutterVersion"
 }
 
 apply plugin: 'com.android.application'
 apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
 
 android {
-    compileSdkVersion 27
+    compileSdkVersion 28
 
     lintOptions {
         disable 'InvalidPackage'
@@ -34,10 +45,9 @@ android {
     defaultConfig {
         applicationId "io.flutter.demo.gallery"
         minSdkVersion 16
-        targetSdkVersion 27
-        // The Gallery app's version is defined by the Flutter framework's version.
-        versionCode flutterVersionCode
-        versionName "$flutterVersion"
+        targetSdkVersion 28
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
 

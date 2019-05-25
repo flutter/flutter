@@ -1,4 +1,6 @@
 {
+  "remainingTextFieldCharacterCountTwo": "נותרו $remainingCount תווים",
+  "remainingTextFieldCharacterCountMany": "נותרו $remainingCount תווים",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "H:mm",
   "selectedRowCountTitleOne": "פריט אחד נבחר",
@@ -40,6 +42,18 @@
   "drawerLabel": "תפריט ניווט",
   "popupMenuLabel": "תפריט קופץ",
   "dialogLabel": "תיבת דו-שיח",
-  "alertDialogLabel": "עֵרָנִי",
-  "searchFieldLabel": "לחפש"
+  "alertDialogLabel": "התראה",
+  "searchFieldLabel": "חיפוש",
+  "reorderItemToStart": "העברה להתחלה",
+  "reorderItemToEnd": "העברה לסוף",
+  "reorderItemUp": "העברה למעלה",
+  "reorderItemDown": "העברה למטה",
+  "reorderItemLeft": "העברה שמאלה",
+  "reorderItemRight": "העברה ימינה",
+  "expandedIconTapHint": "כיווץ",
+  "collapsedIconTapHint": "הרחבה",
+  "remainingTextFieldCharacterCountZero": "TBD",
+  "remainingTextFieldCharacterCountOne": "נותר תו אחד",
+  "remainingTextFieldCharacterCountOther": "נותרו $remainingCount תווים",
+  "refreshIndicatorSemanticLabel": "רענון"
 }

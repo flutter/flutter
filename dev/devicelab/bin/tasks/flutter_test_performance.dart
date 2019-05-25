@@ -23,8 +23,8 @@ import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-// Matches the output of package:test, e.g.: "00:01 +1 loading foo"
-final RegExp testOutputPattern = new RegExp(r'^[0-9][0-9]:[0-9][0-9] \+[0-9]+: (.+?) *$');
+// Matches the output of the "test" package, e.g.: "00:01 +1 loading foo"
+final RegExp testOutputPattern = RegExp(r'^[0-9][0-9]:[0-9][0-9] \+[0-9]+: (.+?) *$');
 
 enum TestStep {
   starting,
@@ -36,21 +36,30 @@ enum TestStep {
   testPassed,
 }
 
-Future<int> runTest() async {
-  final Stopwatch clock = new Stopwatch()..start();
+Future<int> runTest({bool coverage = false}) async {
+  final Stopwatch clock = Stopwatch()..start();
+  final List<String> arguments = <String>[
+    'test',
+  ];
+  if (coverage) {
+    arguments.add('--coverage');
+  }
+  arguments.add(path.join('flutter_test', 'trivial_widget_test.dart'));
   final Process analysis = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
-    <String>['test', path.join('flutter_test', 'trivial_widget_test.dart')],
+    arguments,
     workingDirectory: path.join(flutterDirectory.path, 'dev', 'automated_tests'),
   );
   int badLines = 0;
   TestStep step = TestStep.starting;
-  await for (String entry in analysis.stdout.transform(utf8.decoder).transform(const LineSplitter())) {
+  await for (String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     print('test stdout ($step): $entry');
     if (step == TestStep.starting && entry == 'Building flutter tool...') {
       // ignore this line
       step = TestStep.buildingFlutterTool;
-    } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter packages get" in automated_tests...') {
+    } else if (step == TestStep.testPassed && entry.contains('Collecting coverage information...')) {
+      // ignore this line
+    } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter pub get" in automated_tests...') {
       // ignore this line
       step = TestStep.runningPubGet;
     } else if (step.index < TestStep.testWritesFirstCarriageReturn.index && entry == '') {
@@ -76,25 +85,25 @@ Future<int> runTest() async {
       }
     }
   }
-  await for (String entry in analysis.stderr.transform(utf8.decoder).transform(const LineSplitter())) {
+  await for (String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
     print('test stderr: $entry');
     badLines += 1;
   }
   final int result = await analysis.exitCode;
   clock.stop();
   if (result != 0)
-    throw new Exception('flutter test failed with exit code $result');
+    throw Exception('flutter test failed with exit code $result');
   if (badLines > 0)
-    throw new Exception('flutter test renderered unexpected output ($badLines bad lines)');
+    throw Exception('flutter test rendered unexpected output ($badLines bad lines)');
   if (step != TestStep.testPassed)
-    throw new Exception('flutter test did not finish (only reached step $step)');
+    throw Exception('flutter test did not finish (only reached step $step)');
   print('elapsed time: ${clock.elapsedMilliseconds}ms');
   return clock.elapsedMilliseconds;
 }
 
 void main() {
   task(() async {
-    final File nodeSourceFile = new File(path.join(
+    final File nodeSourceFile = File(path.join(
       flutterDirectory.path, 'packages', 'flutter', 'lib', 'src', 'foundation', 'node.dart',
     ));
     final String originalSource = await nodeSourceFile.readAsString();
@@ -113,12 +122,15 @@ void main() {
           .replaceAll('_xyzzy', 'owner')
       );
       final int interfaceChange = await runTest(); // run test again with interface changed
+      // run test with coverage enabled.
+      final int withCoverage = await runTest(coverage: true);
       final Map<String, dynamic> data = <String, dynamic>{
         'without_change_elapsed_time_ms': withoutChange,
         'implementation_change_elapsed_time_ms': implementationChange,
         'interface_change_elapsed_time_ms': interfaceChange,
+        'with_coverage_time_ms': withCoverage,
       };
-      return new TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
+      return TaskResult.success(data, benchmarkScoreKeys: data.keys.toList());
     } finally {
       await nodeSourceFile.writeAsString(originalSource);
     }

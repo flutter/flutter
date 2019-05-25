@@ -26,10 +26,14 @@
 /dev/bots/.recipe_deps
 /dev/bots/android_tools/
 /dev/docs/doc/
+/dev/docs/flutter.docs.zip
 /dev/docs/lib/
 /dev/docs/pubspec.yaml
 /packages/flutter/coverage/
 version
+
+# packages file containing multi-root paths
+.packages.generated
 
 # Flutter/Dart/Pub related
 **/doc/api/
@@ -52,6 +56,8 @@ unlinked_spec.ds
 **/android/gradlew.bat
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
+**/android/key.properties
+*.jks
 
 # iOS/XCode related
 **/ios/**/*.mode1v3
@@ -78,6 +84,9 @@ unlinked_spec.ds
 **/ios/Flutter/flutter_assets/
 **/ios/ServiceDefinitions.json
 **/ios/Runner/GeneratedPluginRegistrant.*
+
+# Coverage
+coverage/
 
 # Exceptions to above rules.
 !**/ios/**/default.mode1v3

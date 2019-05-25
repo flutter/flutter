@@ -4,15 +4,16 @@
 
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
 final List<String> results = <String>[];
 
-Set<TestRoute> routes = new HashSet<TestRoute>();
+Set<TestRoute> routes = HashSet<TestRoute>();
 
-class TestRoute extends LocalHistoryRoute<String> {
+class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   TestRoute(this.name);
   final String name;
 
@@ -28,9 +29,9 @@ class TestRoute extends LocalHistoryRoute<String> {
   @override
   void install(OverlayEntry insertionPoint) {
     log('install');
-    final OverlayEntry entry = new OverlayEntry(
-      builder: (BuildContext context) => new Container(),
-      opaque: true
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) => Container(),
+      opaque: true,
     );
     _entries.add(entry);
     navigator.overlay?.insert(entry, above: insertionPoint);
@@ -89,11 +90,11 @@ class TestRoute extends LocalHistoryRoute<String> {
 
 }
 
-Future<Null> runNavigatorTest(
+Future<void> runNavigatorTest(
   WidgetTester tester,
   NavigatorState host,
   VoidCallback test,
-  List<String> expectations
+  List<String> expectations,
 ) async {
   expect(host, isNotNull);
   test();
@@ -104,7 +105,7 @@ Future<Null> runNavigatorTest(
 
 void main() {
   testWidgets('Route settings', (WidgetTester tester) async {
-    const RouteSettings settings = const RouteSettings(name: 'A');
+    const RouteSettings settings = RouteSettings(name: 'A');
     expect(settings, hasOneLineDescription);
     final RouteSettings settings2 = settings.copyWith(name: 'B');
     expect(settings2.name, 'B');
@@ -114,14 +115,31 @@ void main() {
     expect(settings3.isInitialRoute, true);
   });
 
+  testWidgets('Route settings arguments', (WidgetTester tester) async {
+    const RouteSettings settings = RouteSettings(name: 'A');
+    expect(settings.arguments, isNull);
+
+    final Object arguments = Object();
+    final RouteSettings settings2 = RouteSettings(name: 'A', arguments: arguments);
+    expect(settings2.arguments, same(arguments));
+
+    final RouteSettings settings3 = settings2.copyWith();
+    expect(settings3.arguments, equals(arguments));
+
+    final Object arguments2 = Object();
+    final RouteSettings settings4 = settings2.copyWith(arguments: arguments2);
+    expect(settings4.arguments, same(arguments2));
+    expect(settings4.arguments, isNot(same(arguments)));
+  });
+
   testWidgets('Route management - push, replace, pop', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Navigator(
+        child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (_) => new TestRoute('initial'),
+          onGenerateRoute: (_) => TestRoute('initial'),
         ),
       ),
     );
@@ -134,42 +152,42 @@ void main() {
         'initial: install',
         'initial: didPush',
         'initial: didChangeNext null',
-      ]
+      ],
     );
     TestRoute second;
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(second = new TestRoute('second')); },
+      () { host.push(second = TestRoute('second')); },
       <String>[
         'second: install',
         'second: didPush',
         'second: didChangeNext null',
         'initial: didChangeNext second',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(new TestRoute('third')); },
+      () { host.push(TestRoute('third')); },
       <String>[
         'third: install',
         'third: didPush',
         'third: didChangeNext null',
         'second: didChangeNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
       host,
-      () { host.replace(oldRoute: second, newRoute: new TestRoute('two')); },
+      () { host.replace(oldRoute: second, newRoute: TestRoute('two')); },
       <String>[
         'two: install',
         'two: didReplace second',
         'two: didChangeNext third',
         'initial: didChangeNext two',
         'second: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -179,7 +197,7 @@ void main() {
         'third: didPop hello',
         'third: dispose',
         'two: didPopNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -189,22 +207,22 @@ void main() {
         'two: didPop good bye',
         'two: dispose',
         'initial: didPopNext two',
-      ]
+      ],
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(results, equals(<String>['initial: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
 
   testWidgets('Route management - push, remove, pop', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Navigator(
+        child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (_) => new TestRoute('first')
+          onGenerateRoute: (_) => TestRoute('first'),
         ),
       ),
     );
@@ -217,30 +235,30 @@ void main() {
         'first: install',
         'first: didPush',
         'first: didChangeNext null',
-      ]
+      ],
     );
     TestRoute second;
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(second = new TestRoute('second')); },
+      () { host.push(second = TestRoute('second')); },
       <String>[
         'second: install',
         'second: didPush',
         'second: didChangeNext null',
         'first: didChangeNext second',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(new TestRoute('third')); },
+      () { host.push(TestRoute('third')); },
       <String>[
         'third: install',
         'third: didPush',
         'third: didChangeNext null',
         'second: didChangeNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -248,7 +266,7 @@ void main() {
       () { host.removeRouteBelow(second); },
       <String>[
         'first: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -258,30 +276,30 @@ void main() {
         'third: didPop good bye',
         'third: dispose',
         'second: didPopNext third',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(new TestRoute('three')); },
+      () { host.push(TestRoute('three')); },
       <String>[
         'three: install',
         'three: didPush',
         'three: didChangeNext null',
         'second: didChangeNext three',
-      ]
+      ],
     );
     TestRoute four;
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(four = new TestRoute('four')); },
+      () { host.push(four = TestRoute('four')); },
       <String>[
         'four: install',
         'four: didPush',
         'four: didChangeNext null',
         'three: didChangeNext four',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -290,7 +308,7 @@ void main() {
       <String>[
         'second: didChangeNext four',
         'three: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -300,22 +318,22 @@ void main() {
         'four: didPop the end',
         'four: dispose',
         'second: didPopNext four',
-      ]
+      ],
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(results, equals(<String>['second: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
 
   testWidgets('Route management - push, replace, popUntil', (WidgetTester tester) async {
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Navigator(
+        child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (_) => new TestRoute('A')
+          onGenerateRoute: (_) => TestRoute('A'),
         ),
       ),
     );
@@ -328,44 +346,44 @@ void main() {
         'A: install',
         'A: didPush',
         'A: didChangeNext null',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(new TestRoute('B')); },
+      () { host.push(TestRoute('B')); },
       <String>[
         'B: install',
         'B: didPush',
         'B: didChangeNext null',
         'A: didChangeNext B',
-      ]
+      ],
     );
     TestRoute routeC;
     await runNavigatorTest(
       tester,
       host,
-      () { host.push(routeC = new TestRoute('C')); },
+      () { host.push(routeC = TestRoute('C')); },
       <String>[
         'C: install',
         'C: didPush',
         'C: didChangeNext null',
         'B: didChangeNext C',
-      ]
+      ],
     );
     expect(routeC.isActive, isTrue);
     TestRoute routeB;
     await runNavigatorTest(
       tester,
       host,
-      () { host.replaceRouteBelow(anchorRoute: routeC, newRoute: routeB = new TestRoute('b')); },
+      () { host.replaceRouteBelow(anchorRoute: routeC, newRoute: routeB = TestRoute('b')); },
       <String>[
         'b: install',
         'b: didReplace B',
         'b: didChangeNext C',
         'A: didChangeNext b',
         'B: dispose',
-      ]
+      ],
     );
     await runNavigatorTest(
       tester,
@@ -375,29 +393,29 @@ void main() {
         'C: didPop null',
         'C: dispose',
         'b: didPopNext C',
-      ]
+      ],
     );
-    await tester.pumpWidget(new Container());
+    await tester.pumpWidget(Container());
     expect(results, equals(<String>['A: dispose', 'b: dispose']));
     expect(routes.isEmpty, isTrue);
     results.clear();
   });
 
   testWidgets('Route localHistory - popUntil', (WidgetTester tester) async {
-    final TestRoute routeA = new TestRoute('A');
-    routeA.addLocalHistoryEntry(new LocalHistoryEntry(
+    final TestRoute routeA = TestRoute('A');
+    routeA.addLocalHistoryEntry(LocalHistoryEntry(
       onRemove: () { routeA.log('onRemove 0'); }
     ));
-    routeA.addLocalHistoryEntry(new LocalHistoryEntry(
+    routeA.addLocalHistoryEntry(LocalHistoryEntry(
       onRemove: () { routeA.log('onRemove 1'); }
     ));
-    final GlobalKey<NavigatorState> navigatorKey = new GlobalKey<NavigatorState>();
+    final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
     await tester.pumpWidget(
-      new Directionality(
+      Directionality(
         textDirection: TextDirection.ltr,
-        child: new Navigator(
+        child: Navigator(
           key: navigatorKey,
-          onGenerateRoute: (_) => routeA
+          onGenerateRoute: (_) => routeA,
         ),
       ),
     );
@@ -414,7 +432,7 @@ void main() {
         'A: onRemove 1',
         'A: didPop null',
         'A: onRemove 0',
-      ]
+      ],
     );
 
     await runNavigatorTest(
@@ -422,20 +440,20 @@ void main() {
       host,
       () { host.popUntil((Route<dynamic> route) => !route.willHandlePopInternally); },
       <String>[
-      ]
+      ],
     );
   });
 
   group('PageRouteObserver', () {
     test('calls correct listeners', () {
-      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware1 = new MockRouteAware();
-      final MockPageRoute route1 = new MockPageRoute();
+      final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware1 = MockRouteAware();
+      final MockPageRoute route1 = MockPageRoute();
       observer.subscribe(pageRouteAware1, route1);
       verify(pageRouteAware1.didPush()).called(1);
 
-      final RouteAware pageRouteAware2 = new MockRouteAware();
-      final MockPageRoute route2 = new MockPageRoute();
+      final RouteAware pageRouteAware2 = MockRouteAware();
+      final MockPageRoute route2 = MockPageRoute();
       observer.didPush(route2, route1);
       verify(pageRouteAware1.didPushNext()).called(1);
 
@@ -448,10 +466,10 @@ void main() {
     });
 
     test('does not call listeners for non-PageRoute', () {
-      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = new MockRouteAware();
-      final MockPageRoute pageRoute = new MockPageRoute();
-      final MockRoute route = new MockRoute();
+      final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware = MockRouteAware();
+      final MockPageRoute pageRoute = MockPageRoute();
+      final MockRoute route = MockRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       verify(pageRouteAware.didPush());
 
@@ -461,19 +479,19 @@ void main() {
     });
 
     test('does not call listeners when already subscribed', () {
-      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = new MockRouteAware();
-      final MockPageRoute pageRoute = new MockPageRoute();
+      final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware = MockRouteAware();
+      final MockPageRoute pageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, pageRoute);
       verify(pageRouteAware.didPush()).called(1);
     });
 
     test('does not call listeners when unsubscribed', () {
-      final RouteObserver<PageRoute<dynamic>> observer = new RouteObserver<PageRoute<dynamic>>();
-      final RouteAware pageRouteAware = new MockRouteAware();
-      final MockPageRoute pageRoute = new MockPageRoute();
-      final MockPageRoute nextPageRoute = new MockPageRoute();
+      final RouteObserver<PageRoute<dynamic>> observer = RouteObserver<PageRoute<dynamic>>();
+      final RouteAware pageRouteAware = MockRouteAware();
+      final MockPageRoute pageRoute = MockPageRoute();
+      final MockPageRoute nextPageRoute = MockPageRoute();
       observer.subscribe(pageRouteAware, pageRoute);
       observer.subscribe(pageRouteAware, nextPageRoute);
       verify(pageRouteAware.didPush()).called(2);
