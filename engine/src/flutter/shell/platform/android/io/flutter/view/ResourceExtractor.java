@@ -17,7 +17,6 @@ import android.support.annotation.WorkerThread;
 import android.util.Log;
 
 import io.flutter.BuildConfig;
-import io.flutter.util.BSDiff;
 import io.flutter.util.PathUtils;
 
 import org.json.JSONObject;

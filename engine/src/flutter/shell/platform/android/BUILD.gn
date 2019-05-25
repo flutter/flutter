@@ -209,8 +209,6 @@ action("flutter_shell_java") {
 
   sources += get_target_outputs(":gen_android_build_config_java")
 
-  sources += [ "$flutter_root/third_party/bsdiff/io/flutter/util/BSDiff.java" ]
-
   android_support_jars = [
     "//third_party/android_support/android_support_v13.jar",
     "//third_party/android_support/android_support_compat.jar",
