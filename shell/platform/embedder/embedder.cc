@@ -771,7 +771,7 @@ FlutterEngineResult FlutterEngineSendPointerEvent(
     pointer_data.scroll_delta_x = SAFE_ACCESS(current, scroll_delta_x, 0.0);
     pointer_data.scroll_delta_y = SAFE_ACCESS(current, scroll_delta_y, 0.0);
     FlutterPointerDeviceKind device_kind = SAFE_ACCESS(current, device_kind, 0);
-    // For backwards compatibilty with embedders written before the device kind
+    // For backwards compatibility with embedders written before the device kind
     // and buttons were exposed, if the device kind is not set treat it as a
     // mouse, with a synthesized primary button state based on the phase.
     if (device_kind == 0) {

@@ -1311,12 +1311,12 @@ TEST_F(FontCollectionItemizeTest, itemize_emojiSelection_withFE0F) {
   const FontStyle kDefaultFontStyle;
 
   // U+00A9 is a text default emoji which is available only in
-  // TextEmojiFont.ttf. TextEmojiFont.ttf shoudl be selected.
+  // TextEmojiFont.ttf. TextEmojiFont.ttf should be selected.
   itemize(collection, "U+00A9 U+FE0F", kDefaultFontStyle, &runs);
   ASSERT_EQ(1U, runs.size());
   EXPECT_EQ(0, runs[0].start);
   EXPECT_EQ(2, runs[0].end);
-  // Color emoji is specified but it is not available. Use text representaion
+  // Color emoji is specified but it is not available. Use text representation
   // instead.
   EXPECT_EQ(kTextEmojiFont, getFontPath(runs[0]));
 

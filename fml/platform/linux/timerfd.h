@@ -46,7 +46,7 @@ namespace fml {
 /// Rearms the timer to expire at the given time point.
 bool TimerRearm(int fd, fml::TimePoint time_point);
 
-/// Drains the timer FD and retuns true if it has expired. This may be false in
+/// Drains the timer FD and returns true if it has expired. This may be false in
 /// case the timer read is non-blocking and this routine was called before the
 /// timer expiry.
 bool TimerDrain(int fd);

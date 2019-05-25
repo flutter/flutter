@@ -156,7 +156,7 @@ void Runner::StartComponent(
 
   auto thread_application_pair = Application::Create(
       std::move(termination_callback),  // termination callback
-      std::move(package),               // application pacakge
+      std::move(package),               // application package
       std::move(startup_info),          // startup info
       runner_context_->svc(),           // runner incoming services
       std::move(controller)             // controller request

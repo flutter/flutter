@@ -51,7 +51,7 @@ class DomRenderer {
   html.Element get sceneElement => _sceneElement;
   html.Element _sceneElement;
 
-  /// This is state persistant across hot restarts that indicates what
+  /// This is state persistent across hot restarts that indicates what
   /// to clear.  We delay removal of old visible state to make the
   /// transition appear smooth.
   static const String _staleHotRestartStore = '__flutter_state';

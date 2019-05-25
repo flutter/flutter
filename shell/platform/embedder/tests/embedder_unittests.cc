@@ -151,12 +151,12 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
   // pump its event loop while we wait for all the conditions to be checked.
   fml::Thread thread;
   UniqueEngine engine;
-  bool signalled = false;
+  bool signaled = false;
 
   EmbedderTestTaskRunner runner([&](FlutterTask task) {
     // There may be multiple tasks posted but we only need to check assertions
     // once.
-    if (signalled) {
+    if (signaled) {
       // Since we have the baton, return it back to the engine. We don't care
       // about the return value because the engine could be shutting down an it
       // may not actually be able to accept the same.
@@ -164,7 +164,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
       return;
     }
 
-    signalled = true;
+    signaled = true;
     FML_LOG(INFO) << "Checking assertions.";
     ASSERT_TRUE(engine.is_valid());
     ASSERT_EQ(FlutterEngineRunTask(engine.get(), &task), kSuccess);
@@ -182,7 +182,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
     ASSERT_TRUE(engine.is_valid());
   });
 
-  // Signalled when all the assertions are checked.
+  // Signaled when all the assertions are checked.
   latch.Wait();
   FML_LOG(INFO) << "Assertions checked. Killing engine.";
   ASSERT_TRUE(engine.is_valid());
@@ -198,7 +198,7 @@ TEST_F(EmbedderTest, CanSpecifyCustomTaskRunner) {
       }));
   kill_latch.Wait();
 
-  ASSERT_TRUE(signalled);
+  ASSERT_TRUE(signaled);
 }
 
 TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {

@@ -246,7 +246,7 @@ typedef void (*FlutterPluginRegistrantCallback)(NSObject<FlutterPluginRegistry>*
 - (NSObject<FlutterTextureRegistry>*)textures;
 
 /**
- * Registers a `FlutterPlatformViewFactory` for creation of platfrom views.
+ * Registers a `FlutterPlatformViewFactory` for creation of platform views.
  *
  * Plugins expose `UIView` for embedding in Flutter apps by registering a view factory.
  *

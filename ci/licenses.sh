@@ -36,7 +36,7 @@ then
     echo "changed, no diffs are typically expected in the output of the"
     echo "script. Verify the output, and if it looks correct, update the"
     echo "license tool signature golden file:"
-    echo "  ci/licences_golden/tool_signature"
+    echo "  ci/licenses_golden/tool_signature"
     echo "For more information, see the script in:"
     echo "  https://github.com/flutter/engine/tree/master/tools/licenses"
     echo ""

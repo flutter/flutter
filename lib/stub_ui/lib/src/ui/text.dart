@@ -423,7 +423,7 @@ class TextStyle {
   /// * `fontWeight`: The typeface thickness to use when painting the text (e.g., bold).
   /// * `fontStyle`: The typeface variant to use when drawing the letters (e.g., italics).
   /// * `fontFamily`: The name of the font to use when painting the text (e.g., Roboto). If a `fontFamilyFallback` is
-  ///   provided and `fontFamily` is not, then the first font family in `fontFamilyFallback` will take the postion of
+  ///   provided and `fontFamily` is not, then the first font family in `fontFamilyFallback` will take the position of
   ///   the preferred font family. When a higher priority font cannot be found or does not contain a glyph, a lower
   ///   priority font will be used.
   /// * `fontFamilyFallback`: An ordered list of the names of the fonts to fallback on when a glyph cannot

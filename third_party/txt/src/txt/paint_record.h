@@ -26,7 +26,7 @@
 namespace txt {
 
 // PaintRecord holds the layout data after Paragraph::Layout() is called. This
-// stores all nessecary offsets, blobs, metrics, and more for Skia to draw the
+// stores all necessary offsets, blobs, metrics, and more for Skia to draw the
 // text.
 class PaintRecord {
  public:

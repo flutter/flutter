@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// See README in this directory for information on how this code is organised.
+// See README in this directory for information on how this code is organized.
 
 import 'dart:async';
 import 'dart:collection';

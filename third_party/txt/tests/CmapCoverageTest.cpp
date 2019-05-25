@@ -59,7 +59,7 @@ static std::vector<uint8_t> buildCmapFormat4Table(
   size_t head = 0;
   head = writeU16(4, out.data(), head);            // format
   head = writeU16(finalLength, out.data(), head);  // length
-  head = writeU16(0, out.data(), head);            // langauge
+  head = writeU16(0, out.data(), head);            // language
 
   const uint16_t searchRange =
       2 * (1 << static_cast<int>(floor(log2(segmentCount))));
@@ -120,7 +120,7 @@ static std::vector<uint8_t> buildCmapFormat12Table(
   head = writeU16(12, out.data(), head);           // format
   head = writeU16(0, out.data(), head);            // reserved
   head = writeU32(finalLength, out.data(), head);  // length
-  head = writeU32(0, out.data(), head);            // langauge
+  head = writeU32(0, out.data(), head);            // language
   head = writeU32(numGroups, out.data(), head);    // numGroups
 
   for (uint32_t i = 0; i < numGroups; ++i) {

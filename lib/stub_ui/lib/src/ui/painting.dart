@@ -1600,7 +1600,7 @@ enum FilterQuality {
 
   /// Fastest possible filtering, albeit also the lowest quality.
   ///
-  /// Typically this implies nearest-neighbour filtering.
+  /// Typically this implies nearest-neighbor filtering.
   none,
 
   /// Better quality than [none], faster than [medium].
@@ -1804,7 +1804,7 @@ Future<void> _decodeImageFromListAsync(
 /// [pixels] is the pixel data in the encoding described by [format].
 ///
 /// [rowBytes] is the number of bytes consumed by each row of pixels in the
-/// data buffer.  If unspecified, it defaults to [width] multipled by the
+/// data buffer.  If unspecified, it defaults to [width] multiplied by the
 /// number of bytes per pixel in the provided [format].
 void decodeImageFromPixels(Uint8List pixels, int width, int height,
     PixelFormat format, ImageDecoderCallback callback,
@@ -1883,7 +1883,7 @@ class Shadow {
   ///
   /// This class does not provide a way to disable shadows to avoid inconsistencies
   /// in shadow blur rendering, primarily as a method of reducing test flakiness.
-  /// [toPaint] should be overriden in subclasses to provide this functionality.
+  /// [toPaint] should be overridden in subclasses to provide this functionality.
   Paint toPaint() {
     return Paint()
       ..color = color

@@ -289,7 +289,7 @@ TEST(GraphemeBreak, DISABLED_emojiModifiers) {
   EXPECT_FALSE(IsBreak("U+1F466 | U+1F3FF"));  // boy + modifier
   EXPECT_FALSE(IsBreak("U+1F918 | U+1F3FF"));  // sign of the horns + modifier
   EXPECT_FALSE(IsBreak("U+1F933 | U+1F3FF"));  // selfie (Unicode 9) + modifier
-  // Reptition of the tests above, with the knowledge that they are ligated.
+  // Repetition of the tests above, with the knowledge that they are ligated.
   const float ligated1_2[] = {1.0, 0.0, 0.0};
   const float ligated2_2[] = {1.0, 0.0, 0.0, 0.0};
   EXPECT_FALSE(IsBreakWithAdvances(ligated1_2, "U+261D | U+1F3FB"));
@@ -301,7 +301,8 @@ TEST(GraphemeBreak, DISABLED_emojiModifiers) {
   EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F466 | U+1F3FF"));
   EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F918 | U+1F3FF"));
   EXPECT_FALSE(IsBreakWithAdvances(ligated2_2, "U+1F933 | U+1F3FF"));
-  // Reptition of the tests above, with the knowledge that they are not ligated.
+  // Repetition of the tests above, with the knowledge that they are not
+  // ligated.
   const float unligated1_2[] = {1.0, 1.0, 0.0};
   const float unligated2_2[] = {1.0, 0.0, 1.0, 0.0};
   EXPECT_TRUE(IsBreakWithAdvances(unligated1_2, "U+261D | U+1F3FB"));
@@ -320,11 +321,12 @@ TEST(GraphemeBreak, DISABLED_emojiModifiers) {
       "U+270C U+FE0E | U+1F3FB"));  // victory hand + text style + modifier
   EXPECT_FALSE(
       IsBreak("U+270C U+FE0F | U+1F3FB"));  // heart + emoji style + modifier
-  // Reptition of the two tests above, with the knowledge that they are ligated.
+  // Repetition of the two tests above, with the knowledge that they are
+  // ligated.
   const float ligated1_1_2[] = {1.0, 0.0, 0.0, 0.0};
   EXPECT_FALSE(IsBreakWithAdvances(ligated1_1_2, "U+270C U+FE0E | U+1F3FB"));
   EXPECT_FALSE(IsBreakWithAdvances(ligated1_1_2, "U+270C U+FE0F | U+1F3FB"));
-  // Reptition of the first two tests, with the knowledge that they are not
+  // Repetition of the first two tests, with the knowledge that they are not
   // ligated.
   const float unligated1_1_2[] = {1.0, 0.0, 1.0, 0.0};
   EXPECT_TRUE(IsBreakWithAdvances(unligated1_1_2, "U+270C U+FE0E | U+1F3FB"));

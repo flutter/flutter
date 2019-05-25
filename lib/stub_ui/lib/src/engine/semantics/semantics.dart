@@ -1067,7 +1067,7 @@ class EngineSemanticsOwner {
 
   /// Declares that the [child] must be attached to the [parent].
   ///
-  /// Attachments take precendence over detachments (see [_detachObject]). This
+  /// Attachments take precedence over detachments (see [_detachObject]). This
   /// allows the same node to be detached from one parent in the tree and
   /// reattached to another parent.
   void _attachObject({SemanticsObject parent, SemanticsObject child}) {
