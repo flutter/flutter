@@ -163,26 +163,6 @@ public interface PluginRegistry {
          */
         Registrar addRequestPermissionsResultListener(RequestPermissionsResultListener listener);
 
-        /*
-         * Method addRequestPermissionResultListener(RequestPermissionResultListener listener)
-         * was made unavailable on 2018-02-28, leaving this comment as a temporary
-         * tombstone for reference. This comment will be removed on 2018-03-28
-         * (or at least four weeks after the unavailability is released).
-         *
-         * https://github.com/flutter/flutter/wiki/Changelog#typo-fixed-in-flutter-engine-android-api
-         *
-         * Adds a callback allowing the plugin to take part in handling incoming
-         * calls to {@code Activity#onRequestPermissionsResult(int, String[], int[])}
-         * or {@code android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback#onRequestPermissionsResult(int, String[], int[])}.
-         *
-         * @param listener a {@link RequestPermissionResultListener} callback.
-         * @return this {@link Registrar}.
-
-         * @deprecated on 2018-01-02 because of misspelling. This method will be made unavailable
-         * on 2018-02-06 (or at least four weeks after the deprecation is released). Use
-         * {@link #addRequestPermissionsResultListener(RequestPermissionsResultListener)} instead.
-         */
-
         /**
          * Adds a callback allowing the plugin to take part in handling incoming
          * calls to {@link Activity#onActivityResult(int, int, Intent)}.
@@ -230,22 +210,6 @@ public interface PluginRegistry {
          */
         boolean onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults);
     }
-
-    /*
-     * interface RequestPermissionResultListener was made unavailable on
-     * 2018-02-28, leaving this comment as a temporary tombstone for reference.
-     * This comment will be removed on 2018-03-28 (or at least four weeks after
-     * the unavailability is released).
-     *
-     * https://github.com/flutter/flutter/wiki/Changelog#typo-fixed-in-flutter-engine-android-api
-     *
-     * Delegate interface for handling result of permissions requests on
-     * behalf of the main {@link Activity}.
-     *
-     * Deprecated on 2018-01-02 because of misspelling. This interface will be made
-     * unavailable on 2018-02-06 (or at least four weeks after the deprecation is released).
-     * Use {@link RequestPermissionsResultListener} instead.
-     */
 
     /**
      * Delegate interface for handling activity results on behalf of the main
