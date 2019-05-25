@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // doesn't use flutter_test
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
@@ -13,7 +15,11 @@ import 'scheduler_tester.dart';
 class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding { }
 
 void main() {
-  final SchedulerBinding scheduler = TestSchedulerBinding();
+  SchedulerBinding scheduler;
+
+  setUpAll(() {
+    scheduler = TestSchedulerBinding();
+  });
 
   test('Check for a time dilation being in effect', () {
     expect(timeDilation, equals(1.0));

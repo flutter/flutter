@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -34,8 +36,12 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
   }
 }
 
-Future<void> main() async {
-  final TestBinding binding = TestBinding();
+void main() {
+  TestBinding binding;
+
+  setUp(() {
+    binding = TestBinding();
+  });
 
   test('test pumpBenchmark() only runs one frame', () async {
     await benchmarkWidgets((WidgetTester tester) async {
