@@ -119,7 +119,7 @@ void main() {
     expect(caretOffset.dx, 112); // 🇸
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 22), ui.Rect.zero);
     expect(caretOffset.dx, 112); // 🇸
-  });
+  }, tags: 'web_unimplemented');
 
   test('TextPainter caret center space test', () {
     final TextPainter painter = TextPainter()
@@ -141,7 +141,7 @@ void main() {
     expect(caretOffset.dx, 35);
     caretOffset = painter.getOffsetForCaret(const ui.TextPosition(offset: 2), ui.Rect.zero);
     expect(caretOffset.dx, 49);
-  });
+  }, tags: 'web_unimplemented');
 
   test('TextPainter error test', () {
     final TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
@@ -633,5 +633,5 @@ void main() {
     );
     expect(caretOffset.dx, closeTo(0.0, 0.0001));
     expect(caretOffset.dy, closeTo(0.0, 0.0001));
-  });
+  }, tags: 'web_unimplemented');
 }

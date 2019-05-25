@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 const bool skipTestsWithKnownBugs = true;
 const bool skipExpectsWithKnownBugs = false;
+const bool skipTestOnWeb = identical(0, 0.0);
 
 void main() {
   test('TextPainter - basic words', () {
@@ -321,7 +322,7 @@ void main() {
     );
   },
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: Platform.isWindows || Platform.isMacOS);
+  skip: skipTestOnWeb || Platform.isWindows || Platform.isMacOS);
 
   test('TextPainter - line wrap mid-word', () {
     final TextPainter painter = TextPainter()
