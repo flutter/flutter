@@ -50,28 +50,30 @@ void main() {
     expect(positionBelow.offset, greaterThan(position40.offset));
   });
 
-  test('getBoxesForSelection control test', () {
-    final RenderParagraph paragraph = RenderParagraph(
-      const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
-      textDirection: TextDirection.ltr,
-    );
-    layout(paragraph);
+  group('', () {
+    test('getBoxesForSelection control test', () {
+      final RenderParagraph paragraph = RenderParagraph(
+        const TextSpan(text: _kText, style: TextStyle(fontSize: 10.0)),
+        textDirection: TextDirection.ltr,
+      );
+      layout(paragraph);
 
-    List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 5, extentOffset: 25)
-    );
+      List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+          const TextSelection(baseOffset: 5, extentOffset: 25)
+      );
 
-    expect(boxes.length, equals(1));
+      expect(boxes.length, equals(1));
 
-    boxes = paragraph.getBoxesForSelection(
-        const TextSelection(baseOffset: 25, extentOffset: 50)
-    );
+      boxes = paragraph.getBoxesForSelection(
+          const TextSelection(baseOffset: 25, extentOffset: 50)
+      );
 
-    expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
-    expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
-  },
-  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  skip: Platform.isWindows || Platform.isMacOS);
+      expect(boxes.any((ui.TextBox box) => box.left == 250 && box.top == 0), isTrue);
+      expect(boxes.any((ui.TextBox box) => box.right == 100 && box.top == 10), isTrue);
+    },
+    // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+    skip: Platform.isWindows || Platform.isMacOS);
+  }, tags: 'io_usage');
 
   test('getWordBoundary control test', () {
     final RenderParagraph paragraph = RenderParagraph(

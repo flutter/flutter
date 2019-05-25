@@ -15,10 +15,10 @@ void main() {
     final Matrix4 identity = Matrix4.identity();
     final List<String> description = debugDescribeTransform(identity);
     expect(description, equals(<String>[
-      '[0] 1.0,0.0,0.0,0.0',
-      '[1] 0.0,1.0,0.0,0.0',
-      '[2] 0.0,0.0,1.0,0.0',
-      '[3] 0.0,0.0,0.0,1.0',
+      ignoreWebNumericQuirks('[0] 1.0,0.0,0.0,0.0'),
+      ignoreWebNumericQuirks('[1] 0.0,1.0,0.0,0.0'),
+      ignoreWebNumericQuirks('[2] 0.0,0.0,1.0,0.0'),
+      ignoreWebNumericQuirks('[3] 0.0,0.0,0.0,1.0'),
     ]));
   });
 
@@ -33,16 +33,16 @@ void main() {
     expect(
       simple.toString(parentConfiguration: sparseTextConfiguration),
       equals(
-        'transform:\n'
+        ignoreWebNumericQuirks('transform:\n'
         '  [0] 2.0,0.0,0.0,0.0\n'
         '  [1] 0.0,2.0,0.0,0.0\n'
         '  [2] 0.0,0.0,2.0,0.0\n'
         '  [3] 0.0,0.0,0.0,1.0',
-      ),
+      )),
     );
     expect(
       simple.toString(parentConfiguration: singleLineTextConfiguration),
-      equals('transform: [2.0,0.0,0.0,0.0; 0.0,2.0,0.0,0.0; 0.0,0.0,2.0,0.0; 0.0,0.0,0.0,1.0]'),
+      equals(ignoreWebNumericQuirks('transform: [2.0,0.0,0.0,0.0; 0.0,2.0,0.0,0.0; 0.0,0.0,2.0,0.0; 0.0,0.0,0.0,1.0]')),
     );
 
     final TransformProperty nullProperty = TransformProperty(
