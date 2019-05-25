@@ -29,9 +29,6 @@ class InputConnectionAdaptor extends BaseInputConnection {
     private InputMethodManager mImm;
     private final Layout mLayout;
 
-    private static final MethodChannel.Result logger =
-        new ErrorLogResult("FlutterTextInput");
-
     @SuppressWarnings("deprecation")
     public InputConnectionAdaptor(
         View view,
