@@ -43,7 +43,7 @@ static void BM_GraphemeBreak_Ascii(benchmark::State& state) {
   }
 }
 BENCHMARK(BM_GraphemeBreak_Ascii)
-    ->Arg(0)    // Begining of the text.
+    ->Arg(0)    // Beginning of the text.
     ->Arg(1)    // Middle of the text.
     ->Arg(12);  // End of the text.
 

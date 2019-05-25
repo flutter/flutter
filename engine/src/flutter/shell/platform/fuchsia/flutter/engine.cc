@@ -80,8 +80,8 @@ Engine::Engine(Delegate& delegate,
   environment->GetServices(parent_environment_service_provider.NewRequest());
   environment.Unbind();
 
-  // Grab the accessibilty context writer that can understand the semantics tree
-  // on the platform view.
+  // Grab the accessibility context writer that can understand the semantics
+  // tree on the platform view.
   fidl::InterfaceHandle<fuchsia::modular::ContextWriter>
       accessibility_context_writer;
   svc->Connect(accessibility_context_writer.NewRequest());

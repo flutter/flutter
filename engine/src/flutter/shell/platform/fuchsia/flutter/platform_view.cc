@@ -583,8 +583,8 @@ void PlatformView::HandlePlatformMessage(
   if (found == platform_message_handlers_.end()) {
     FML_LOG(ERROR)
         << "Platform view received message on channel '" << message->channel()
-        << "' with no registed handler. And empty response will be generated. "
-           "Please implement the native message handler.";
+        << "' with no registered handler. And empty response will be "
+           "generated. Please implement the native message handler.";
     flutter::PlatformView::HandlePlatformMessage(std::move(message));
     return;
   }

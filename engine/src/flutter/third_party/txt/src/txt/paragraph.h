@@ -39,8 +39,8 @@ namespace txt {
 
 using GlyphID = uint32_t;
 
-// Paragraph provides Layout, metrics, and painting capabilites for text. Once a
-// Paragraph is constructed with ParagraphBuilder::Build(), an example basic
+// Paragraph provides Layout, metrics, and painting capabilities for text. Once
+// a Paragraph is constructed with ParagraphBuilder::Build(), an example basic
 // workflow can be this:
 //
 //   std::unique_ptr<Paragraph> paragraph = paragraph_builder.Build();

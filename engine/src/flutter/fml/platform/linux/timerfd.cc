@@ -46,7 +46,7 @@ bool TimerRearm(int fd, fml::TimePoint time_point) {
 }
 
 bool TimerDrain(int fd) {
-  // 8 bytes must be read from a signalled timer file descriptor when signalled.
+  // 8 bytes must be read from a signaled timer file descriptor when signaled.
   uint64_t fire_count = 0;
   ssize_t size = FML_HANDLE_EINTR(::read(fd, &fire_count, sizeof(uint64_t)));
   if (size != sizeof(uint64_t)) {

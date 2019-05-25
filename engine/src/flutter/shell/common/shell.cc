@@ -452,7 +452,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
     latch.Signal();
   });
 
-  // The normal flow exectued by this method is that the platform thread is
+  // The normal flow executed by this method is that the platform thread is
   // starting the sequence and waiting on the latch. Later the UI thread posts
   // gpu_task to the GPU thread which signals the latch. If the GPU the and
   // platform threads are the same this results in a deadlock as the gpu_task
@@ -545,7 +545,7 @@ void Shell::OnPlatformViewDestroyed() {
     fml::TaskRunner::RunNowOrPostTask(io_task_runner, io_task);
   };
 
-  // The normal flow exectued by this method is that the platform thread is
+  // The normal flow executed by this method is that the platform thread is
   // starting the sequence and waiting on the latch. Later the UI thread posts
   // gpu_task to the GPU thread triggers signaling the latch(on the IO thread).
   // If the GPU the and platform threads are the same this results in a deadlock

@@ -72,7 +72,7 @@ class ParagraphStyle {
   std::string locale;
 
   // Default strategy is kBreakStrategy_Greedy. Sometimes,
-  // kBreakStrategy_HighQuality will produce more desireable layouts (eg, very
+  // kBreakStrategy_HighQuality will produce more desirable layouts (e.g., very
   // long words are more likely to be reasonably placed).
   // kBreakStrategy_Balanced will balance between the two.
   minikin::BreakStrategy break_strategy =

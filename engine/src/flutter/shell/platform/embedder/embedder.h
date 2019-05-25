@@ -483,7 +483,7 @@ typedef struct {
   size_t struct_size;
   // The unique custom action or action override ID.
   int32_t id;
-  // For overriden standard actions, corresponds to the
+  // For overridden standard actions, corresponds to the
   // |FlutterSemanticsAction| to override.
   FlutterSemanticsAction override_action;
   // The user-readable name of this custom semantics action.

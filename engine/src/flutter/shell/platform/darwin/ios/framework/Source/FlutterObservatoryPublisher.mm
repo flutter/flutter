@@ -12,7 +12,7 @@
 #if TARGET_IPHONE_SIMULATOR
 #include <dns_sd.h>  // nogncheck
 #include <net/if.h>  // nogncheck
-#endif               // TARGET_IPHONE_SIMLUATOR
+#endif               // TARGET_IPHONE_SIMULATOR
 
 #import "FlutterObservatoryPublisher.h"
 

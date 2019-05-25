@@ -225,7 +225,7 @@ public class PlatformPlugin implements ActivityLifecycleListener {
             }
         }
         if (systemChromeStyle.systemNavigationBarDividerColor != null) {
-            // Not availible until Android P.
+            // Not available until Android P.
             // window.setNavigationBarDividerColor(systemNavigationBarDividerColor);
         }
         view.setSystemUiVisibility(flags);

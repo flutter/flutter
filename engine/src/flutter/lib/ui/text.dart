@@ -381,7 +381,7 @@ bool _listEquals<T>(List<T> a, List<T> b) {
 //
 // The encoded array buffer has 8 elements.
 //
-//  - Element 0: A bit field where the ith bit indicates wheter the ith element
+//  - Element 0: A bit field where the ith bit indicates whether the ith element
 //    has a non-null value. Bits 8 to 12 indicate whether |fontFamily|,
 //    |fontSize|, |letterSpacing|, |wordSpacing|, and |height| are non-null,
 //    respectively. Bit 0 is unused.

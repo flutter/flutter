@@ -21,7 +21,7 @@ static NSString* const kTextKey = @"text";
 
 /**
  * These three static methods are necessary because Cocoa and Flutter have different idioms for
- * signalling an empty range: Flutter uses {-1, -1} while Cocoa uses {NSNotFound, 0}. Also,
+ * signaling an empty range: Flutter uses {-1, -1} while Cocoa uses {NSNotFound, 0}. Also,
  * despite the name, the "extent" fields are actually end indices, not lengths.
  */
 

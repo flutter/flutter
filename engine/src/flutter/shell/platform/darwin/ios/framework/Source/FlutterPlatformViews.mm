@@ -44,7 +44,7 @@ void FlutterPlatformViewsController::OnMethodCall(FlutterMethodCall* call, Flutt
 void FlutterPlatformViewsController::OnCreate(FlutterMethodCall* call, FlutterResult& result) {
   if (!flutter_view_.get()) {
     // Right now we assume we have a reference to FlutterView when creating a new view.
-    // TODO(amirh): support this by setting the refernce to FlutterView when it becomes available.
+    // TODO(amirh): support this by setting the reference to FlutterView when it becomes available.
     // https://github.com/flutter/flutter/issues/23787
     result([FlutterError errorWithCode:@"create_failed"
                                message:@"can't create a view on a headless engine"

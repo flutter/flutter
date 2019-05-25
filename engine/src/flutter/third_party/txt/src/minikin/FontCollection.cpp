@@ -235,7 +235,7 @@ uint32_t FontCollection::calcCoverageScore(
 }
 
 // Calculate font scores based on the script matching, subtag matching and
-// primary langauge matching.
+// primary language matching.
 //
 // 1. If only the font's language matches or there is no matches between
 // requested font and

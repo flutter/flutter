@@ -144,7 +144,7 @@
     <cmap_format_4 platformID="3" platEncID="10" language="0">
       <map code="0x5380" name="defaultGlyph" />
     </cmap_format_4>
-    <!-- Do not add cmap_format_14 here since this font is desinged for testing purpose. -->
+    <!-- Do not add cmap_format_14 here since this font is designed for testing purpose. -->
   </cmap>
 
   <loca>
