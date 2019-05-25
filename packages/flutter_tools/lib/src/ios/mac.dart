@@ -519,7 +519,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     (List<String>
         .from(buildCommands)
         ..add('-showBuildSettings'))
-        // Undocumented behaviour: xcodebuild craps out if -showBuildSettings
+        // Undocumented behavior: xcodebuild craps out if -showBuildSettings
         // is used together with -allowProvisioningUpdates or
         // -allowProvisioningDeviceRegistration and freezes forever.
         .where((String buildCommand) {
