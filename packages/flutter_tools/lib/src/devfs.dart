@@ -192,45 +192,14 @@ class DevFSStringContent extends DevFSByteContent {
   }
 }
 
-/// Abstract DevFS operations interface.
-abstract class DevFSOperations {
-  Future<Uri> create(String fsName);
-
-  Future<dynamic> destroy(String fsName);
-}
-
-/// An implementation of [DevFSOperations] that speaks to the
-/// vm service.
-class ServiceProtocolDevFSOperations implements DevFSOperations {
-  ServiceProtocolDevFSOperations(this.vmService);
+class DevFSOperations {
+  DevFSOperations(this.vmService, this.fsName)
+      : httpAddress = vmService.httpAddress;
 
   final VMService vmService;
-
-  @override
-  Future<Uri> create(String fsName) async {
-    final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
-    return Uri.parse(response['uri']);
-  }
-
-  @override
-  Future<dynamic> destroy(String fsName) async {
-    await vmService.vm.deleteDevFS(fsName);
-  }
-}
-
-class DevFSException implements Exception {
-  DevFSException(this.message, [this.error, this.stackTrace]);
-  final String message;
-  final dynamic error;
-  final StackTrace stackTrace;
-}
-
-class _DevFSHttpWriter {
-  _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-    : httpAddress = serviceProtocol.httpAddress;
-
   final String fsName;
   final Uri httpAddress;
+  final HttpClient _client = HttpClient();
 
   static const int kMaxInFlight = 6;
   static const int kMaxRetries = 3;
@@ -238,7 +207,15 @@ class _DevFSHttpWriter {
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
-  final HttpClient _client = HttpClient();
+
+  Future<Uri> create(String fsName) async {
+    final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
+    return Uri.parse(response['uri']);
+  }
+
+  Future<void> destroy(String fsName) async {
+    await vmService.vm.deleteDevFS(fsName);
+  }
 
   Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client.maxConnectionsPerHost = kMaxInFlight;
@@ -262,10 +239,10 @@ class _DevFSHttpWriter {
   }
 
   Future<void> _scheduleWrite(
-    Uri deviceUri,
-    DevFSContent content, [
-    int retry = 0,
-  ]) async {
+      Uri deviceUri,
+      DevFSContent content, [
+        int retry = 0,
+      ]) async {
     try {
       final HttpClientRequest request = await _client.putUrl(httpAddress);
       request.headers.removeAll(HttpHeaders.acceptEncodingHeader);
@@ -297,6 +274,14 @@ class _DevFSHttpWriter {
       _scheduleWrites();
     }
   }
+}
+
+class DevFSException implements Exception {
+  DevFSException(this.message, [this.error, this.stackTrace]);
+
+  final String message;
+  final dynamic error;
+  final StackTrace stackTrace;
 }
 
 // Basic statistics for DevFS update operation.
@@ -335,8 +320,7 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     String packagesFilePath,
-  }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
+  }) : _operations = DevFSOperations(serviceProtocol, fsName),
        _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
@@ -344,11 +328,9 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     String packagesFilePath,
-  }) : _httpWriter = null,
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
+  }) : _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   final DevFSOperations _operations;
-  final _DevFSHttpWriter _httpWriter;
   final String fsName;
   final Directory rootDirectory;
   String _packagesFilePath;
@@ -469,9 +451,10 @@ class DevFS {
       }
     }
     printTrace('Updating files');
+    print(dirtyEntries);
     if (dirtyEntries.isNotEmpty) {
       try {
-        await _httpWriter.write(dirtyEntries);
+        await _operations.write(dirtyEntries);
       } on SocketException catch (socketException, stackTrace) {
         printTrace('DevFS sync failed. Lost connection to device: $socketException');
         throw DevFSException('Lost connection to device.', socketException, stackTrace);

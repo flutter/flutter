@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
@@ -478,20 +477,6 @@ class BasicMock {
   }
 }
 
-class MockDevFSOperations extends BasicMock implements DevFSOperations {
-  Map<Uri, DevFSContent> devicePathToContent = <Uri, DevFSContent>{};
-
-  @override
-  Future<Uri> create(String fsName) async {
-    messages.add('create $fsName');
-    return Uri.parse('file:///$fsName');
-  }
-
-  @override
-  Future<dynamic> destroy(String fsName) async {
-    messages.add('destroy $fsName');
-  }
-}
 
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   @override
