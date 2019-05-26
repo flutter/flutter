@@ -8,7 +8,7 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../emulator.dart';
 import '../globals.dart';
-import '../ios/mac.dart';
+import '../macos/xcode.dart';
 import 'ios_workflow.dart';
 
 class IOSEmulators extends EmulatorDiscovery {

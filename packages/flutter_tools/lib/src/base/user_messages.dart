@@ -126,24 +126,26 @@ class UserMessages {
       'Android Studio not found; download from https://developer.android.com/studio/index.html\n'
       '(or visit https://flutter.dev/setup/#android-setup for detailed instructions).';
 
-  // Messages used in IOSValidator
-  String iOSXcodeLocation(String location) => 'Xcode at $location';
-  String iOSXcodeOutdated(int versionMajor, int versionMinor) =>
+  // Messages used in XcodeValidator
+  String xcodeLocation(String location) => 'Xcode at $location';
+  String xcodeOutdated(int versionMajor, int versionMinor) =>
       'Flutter requires a minimum Xcode version of $versionMajor.$versionMinor.0.\n'
       'Download the latest version or update via the Mac App Store.';
-  String get iOSXcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
-  String get iOSXcodeMissingSimct =>
+  String get xcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
+  String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
       'Launch Xcode and install additional required components when prompted.';
-  String get iOSXcodeMissing =>
+  String get xcodeMissing =>
       'Xcode not installed; this is necessary for iOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
-  String get iOSXcodeIncomplete =>
+  String get xcodeIncomplete =>
       'Xcode installation is incomplete; a full installation is necessary for iOS development.\n'
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
       '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer';
+
+  // Messages used in IOSValidator
   String get iOSIMobileDeviceMissing =>
       'libimobiledevice and ideviceinstaller are not installed. To install with Brew, run:\n'
       '  brew update\n'
@@ -204,6 +206,9 @@ class UserMessages {
       '$consequence\n'
       'To upgrade:\n'
       '$upgradeInstructions';
+  String get cocoaPodsBrewMissing =>
+      'Brew can be used to install CocoaPods.\n'
+      'Download brew at https://brew.sh/.';
 
   // Messages used in VsCodeValidator
   String vsCodeVersion(String version) => 'version $version';
