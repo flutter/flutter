@@ -29,7 +29,13 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     throwToolExit('Unable to build: could not find vcvars64.bat');
   }
 
-  final String buildScript = fs.path.join(Cache.flutterRoot, 'bin', 'vs_build.bat');
+  final String buildScript = fs.path.join(
+    Cache.flutterRoot,
+    'packages',
+    'flutter_tools',
+    'bin',
+    'vs_build.bat',
+  );
 
   final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
   final String projectPath = windowsProject.vcprojFile.path;

@@ -90,7 +90,7 @@ void main() {
     fs.file('.packages').createSync();
 
     when(mockProcessManager.start(<String>[
-      r'C:\bin\vs_build.bat',
+      r'C:\packages\flutter_tools\bin\vs_build.bat',
       vcvarsPath,
       fs.path.basename(projectPath),
       'Release',
