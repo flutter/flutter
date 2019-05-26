@@ -681,7 +681,7 @@ void main() {
       secondary.dispose();
     });
 
-    testGesture('A primary tap recognizer does not form competion with a secondary tap recognizer', (GestureTester tester) {
+    testGesture('A primary tap recognizer does not form competition with a secondary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       secondary.addPointer(down1);
       tester.closeArena(1);
@@ -694,7 +694,7 @@ void main() {
       expect(recognized, <String>['primaryUp']);
     });
 
-    testGesture('A primary tap recognizer forms competion with another primary tap recognizer', (GestureTester tester) {
+    testGesture('A primary tap recognizer forms competition with another primary tap recognizer', (GestureTester tester) {
       primary.addPointer(down1);
       primary2.addPointer(down1);
       tester.closeArena(1);
