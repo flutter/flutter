@@ -156,6 +156,9 @@ class BuildRunner extends CodeGenerator {
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = flutterProject.manifest.appName;
     }));
+    buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
+      builder.target = 'test';
+    }));
     return _BuildRunnerCodegenDaemon(buildDaemonClient);
   }
 }
