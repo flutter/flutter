@@ -4,6 +4,7 @@
 
 import '../base/common.dart';
 import '../base/process.dart';
+import '../globals.dart';
 import 'fuchsia_sdk.dart';
 
 // Usage: dev_finder <flags> <subcommand> <subcommand args>
@@ -31,7 +32,11 @@ class FuchsiaDevFinder {
       '-full'
     ];
     final RunResult result = await runAsync(command);
-    return (result.exitCode == 0) ? result.stdout.split('\n') : null;
+    if (result.exitCode != 0) {
+      printError('dev_finder failed: ${result.stderr}');
+      return null;
+    }
+    return result.stdout.split('\n');
   }
 
   /// Returns the host address by which the device [deviceName] should use for
@@ -51,6 +56,10 @@ class FuchsiaDevFinder {
       deviceName
     ];
     final RunResult result = await runAsync(command);
-    return (result.exitCode == 0) ? result.stdout.trim() : null;
+    if (result.exitCode != 0) {
+      printError('dev_finder failed: ${result.stderr}');
+      return null;
+    }
+    return result.stdout.trim();
   }
 }

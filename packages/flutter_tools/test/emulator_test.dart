@@ -11,7 +11,7 @@ import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
-import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
