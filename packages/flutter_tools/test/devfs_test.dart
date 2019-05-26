@@ -25,7 +25,7 @@ void main() {
   String basePath;
   DevFS devFS;
 
-  setUpAll(() {
+  setUp(() {
     fs = MemoryFileSystem();
     filePath = fs.path.join('lib', 'foo.txt');
   });
@@ -41,6 +41,7 @@ void main() {
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
     });
+
     test('string', () {
       final DevFSStringContent content = DevFSStringContent('some string');
       expect(content.string, 'some string');
@@ -58,6 +59,7 @@ void main() {
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
     });
+
     testUsingContext('file', () async {
       final File file = fs.file(filePath);
       final DevFSFileContent content = DevFSFileContent(file);
@@ -73,10 +75,9 @@ void main() {
       expect(content.isModifiedAfter(null), isTrue);
 
       file.writeAsBytesSync(<int>[2, 3, 4], flush: true);
-      expect(content.fileDependencies, <String>[filePath]);
       expect(content.isModified, isTrue);
       expect(content.isModified, isFalse);
-      expect(await content.contentsAsBytes(), <int>[2, 3, 4]);
+      expect(content.contentsAsBytes(), <int>[2, 3, 4]);
       updateFileModificationTime(file.path, fiveSecondsAgo, 0);
       expect(content.isModified, isFalse);
       expect(content.isModified, isFalse);
@@ -87,20 +88,21 @@ void main() {
       expect(content.isModified, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-    }, skip: Platform.isWindows); // TODO(jonahwilliams): fix or disable this functionality.
+    });
   });
 
   group('devfs remote', () {
     MockVMService vmService;
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
 
-    setUpAll(() async {
+    setUp(() async {
       tempDir = _newTempDir(fs);
       basePath = tempDir.path;
       vmService = MockVMService();
       await vmService.setUp();
     });
-    tearDownAll(() async {
+
+    tearDown(() async {
       await vmService.tearDown();
       _cleanupTempDirs();
     });

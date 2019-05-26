@@ -491,16 +491,6 @@ class MockDevFSOperations extends BasicMock implements DevFSOperations {
   Future<dynamic> destroy(String fsName) async {
     messages.add('destroy $fsName');
   }
-
-  @override
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    String message = 'writeFile $fsName $deviceUri';
-    if (content is DevFSFileContent) {
-      message += ' ${content.file.path}';
-    }
-    messages.add(message);
-    devicePathToContent[deviceUri] = content;
-  }
 }
 
 class MockResidentCompiler extends BasicMock implements ResidentCompiler {

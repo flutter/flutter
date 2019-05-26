@@ -39,21 +39,19 @@ abstract class DevFSContent {
   /// or if the given time is null.
   bool isModifiedAfter(DateTime time);
 
+  /// The number of bytes in this file.
   int get size;
 
-  Future<List<int>> contentsAsBytes();
+  /// Returns the raw bytes of this file.
+  List<int> contentsAsBytes();
 
-  Stream<List<int>> contentsAsStream();
-
-  Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
+  /// Returns a gzipped representation of the contents of this file.
+  List<int> contentsAsCompressedBytes() {
+    return gzip.encode(contentsAsBytes().cast<int>());
   }
-
-  /// Return the list of files this content depends on.
-  List<String> get fileDependencies => <String>[];
 }
 
-// File content to be copied to the device.
+/// File content to be copied to the device.
 class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
@@ -104,9 +102,6 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  List<String> get fileDependencies => <String>[_getFile().path];
-
-  @override
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
@@ -136,10 +131,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  Future<List<int>> contentsAsBytes() => _getFile().readAsBytes();
-
-  @override
-  Stream<List<int>> contentsAsStream() => _getFile().openRead();
+  List<int> contentsAsBytes() => _getFile().readAsBytesSync();
 }
 
 /// Byte content to be copied to the device.
@@ -176,14 +168,10 @@ class DevFSByteContent extends DevFSContent {
   int get size => _bytes.length;
 
   @override
-  Future<List<int>> contentsAsBytes() async => _bytes;
-
-  @override
-  Stream<List<int>> contentsAsStream() =>
-      Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
+  List<int> contentsAsBytes() => _bytes;
 }
 
-/// String content to be copied to the device.
+/// String content to be copied to the device encoded as utf8.
 class DevFSStringContent extends DevFSByteContent {
   DevFSStringContent(String string)
     : _string = string,
@@ -207,8 +195,8 @@ class DevFSStringContent extends DevFSByteContent {
 /// Abstract DevFS operations interface.
 abstract class DevFSOperations {
   Future<Uri> create(String fsName);
+
   Future<dynamic> destroy(String fsName);
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content);
 }
 
 /// An implementation of [DevFSOperations] that speaks to the
@@ -227,29 +215,6 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   @override
   Future<dynamic> destroy(String fsName) async {
     await vmService.vm.deleteDevFS(fsName);
-  }
-
-  @override
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    List<int> bytes;
-    try {
-      bytes = await content.contentsAsBytes();
-    } catch (e) {
-      return e;
-    }
-    final String fileContents = base64.encode(bytes);
-    try {
-      return await vmService.vm.invokeRpcRaw(
-        '_writeDevFSFile',
-        params: <String, dynamic>{
-          'fsName': fsName,
-          'uri': deviceUri.toString(),
-          'fileContents': fileContents,
-        },
-      );
-    } catch (error) {
-      printTrace('DevFS: Failed to write $deviceUri: $error');
-    }
   }
 }
 
@@ -307,8 +272,7 @@ class _DevFSHttpWriter {
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
           base64.encode(utf8.encode(deviceUri.toString())));
-      final Stream<List<int>> contents = content.contentsAsCompressedStream();
-      await request.addStream(contents);
+      request.add(content.contentsAsCompressedBytes());
       final HttpClientResponse response = await request.close();
       await response.drain<void>();
     } on SocketException catch (socketException, stackTrace) {
