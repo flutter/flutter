@@ -83,7 +83,20 @@ class BuildRunner extends CodeGenerator {
       if (builders != null) {
         for (String name in builders.keys) {
           final Object node = builders[name];
-          stringBuffer.writeln('  $name: $node');
+          // For relative paths, make sure it is accounted for
+          // parent directories.
+          if (node is YamlMap && node['path'] != null) {
+            final String path = node['path'];
+            if (fs.path.isRelative(path)) {
+              final String convertedPath = fs.path.join('..', '..', node['path']);
+              stringBuffer.writeln('  $name:');
+              stringBuffer.writeln('    path: $convertedPath');
+            } else {
+              stringBuffer.writeln('  $name: $node');
+            }
+          } else {
+            stringBuffer.writeln('  $name: $node');
+          }
         }
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
@@ -149,12 +162,21 @@ class BuildRunner extends CodeGenerator {
          '--skip-build-script-check',
          '--delete-conflicting-outputs'
       ];
-      buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command, logHandler: (ServerLog log) => printTrace(log.toString()));
+      buildDaemonClient = await BuildDaemonClient.connect(
+        flutterProject.directory.path,
+        command,
+        logHandler: (ServerLog log) {
+          printTrace(log.toString());
+        }
+      );
     } finally {
       status.stop();
     }
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = flutterProject.manifest.appName;
+    }));
+    buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
+      builder.target = 'test';
     }));
     return _BuildRunnerCodegenDaemon(buildDaemonClient);
   }
@@ -195,10 +217,15 @@ List<int> _produceScriptId(YamlMap builders) {
   if (builders == null || builders.isEmpty) {
     return md5.convert(platform.version.codeUnits).bytes;
   }
-  final List<String> orderedBuilders = builders.keys
+  final List<String> orderedBuilderNames = builders.keys
     .cast<String>()
     .toList()..sort();
-  return md5.convert(orderedBuilders
-    .followedBy(<String>[platform.version])
-    .join('').codeUnits).bytes;
+  final List<String> orderedBuilderValues = builders.values
+    .map((dynamic value) => value.toString())
+    .toList()..sort();
+  return md5.convert(<String>[
+    ...orderedBuilderNames,
+    ...orderedBuilderValues,
+    platform.version,
+  ].join('').codeUnits).bytes;
 }

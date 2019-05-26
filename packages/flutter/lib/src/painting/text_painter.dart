@@ -629,7 +629,7 @@ class TextPainter {
 
   // Holds the TextPosition and caretPrototype the last caret metrics were
   // computed with. When new values are passed in, we recompute the caret metrics.
-  // only as nessecary.
+  // only as necessary.
   TextPosition _previousCaretPosition;
   Rect _previousCaretPrototype;
 

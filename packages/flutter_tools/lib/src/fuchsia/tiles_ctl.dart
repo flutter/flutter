@@ -84,7 +84,7 @@ class FuchsiaTilesCtl {
   /// Instructs tiles on the device to begin running the app at [url] in a new
   /// tile.
   ///
-  /// The app is passed the arguemnts in [args]. Flutter apps receive these
+  /// The app is passed the arguments in [args]. Flutter apps receive these
   /// arguments as arguments to `main()`. [url] should be formatted as a
   /// Fuchsia-style package url, e.g.:
   ///     fuchsia-pkg://fuchsia.com/flutter_gallery#meta/flutter_gallery.cmx

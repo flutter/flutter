@@ -190,7 +190,7 @@ class FuchsiaPackageServer {
   /// Usees [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.
   ///
-  /// Returns false if ther repo could not be created or the server could not
+  /// Returns false if the repo could not be created or the server could not
   /// be spawned, and true otherwise.
   Future<bool> start() async {
     if (_process != null) {
