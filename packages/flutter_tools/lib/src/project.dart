@@ -591,7 +591,7 @@ class MacOSProject {
 
   /// The file where the Xcode build will write the name of the built app.
   ///
-  /// Ideally this will be replaced in the future with inpection of the Runner
+  /// Ideally this will be replaced in the future with inspection of the Runner
   /// scheme's target.
   File get nameFile => _cacheDirectory.childFile('.app_filename');
 }
