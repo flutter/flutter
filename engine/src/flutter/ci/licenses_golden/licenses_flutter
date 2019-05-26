@@ -714,12 +714,12 @@ FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.h
 FILE: ../../../flutter/shell/platform/darwin/ios/platform_view_ios.mm
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/FlutterMacOS.podspec
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEOpenGLContextHandling.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEPlugin.h
-FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEPluginRegistrar.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEReshapeListener.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEView.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FLEViewController.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterMacOS.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginMacOS.h
+FILE: ../../../flutter/shell/platform/darwin/macos/framework/Headers/FlutterPluginRegistrarMacOS.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Info.plist
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FLETextInputModel.h
 FILE: ../../../flutter/shell/platform/darwin/macos/framework/Source/FLETextInputModel.mm

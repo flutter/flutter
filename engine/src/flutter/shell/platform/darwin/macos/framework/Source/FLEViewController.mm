@@ -240,7 +240,8 @@ static bool HeadlessOnMakeResourceCurrent(FLEViewController* controller) {
   // A mapping of channel names to the registered handlers for those channels.
   NSMutableDictionary<NSString*, FlutterBinaryMessageHandler>* _messageHandlers;
 
-  // The plugin used to handle text input. This is not an FLEPlugin, so must be owned separately.
+  // The plugin used to handle text input. This is not an FlutterPlugin, so must be owned
+  // separately.
   FLETextInputPlugin* _textInputPlugin;
 
   // A message channel for passing key events to the Flutter engine. This should be replaced with
@@ -653,22 +654,22 @@ static void CommonInit(FLEViewController* controller) {
   _messageHandlers[channel] = [handler copy];
 }
 
-#pragma mark - FLEPluginRegistrar
+#pragma mark - FlutterPluginRegistrar
 
 - (id<FlutterBinaryMessenger>)messenger {
   return self;
 }
 
-- (void)addMethodCallDelegate:(nonnull id<FLEPlugin>)delegate
+- (void)addMethodCallDelegate:(nonnull id<FlutterPlugin>)delegate
                       channel:(nonnull FlutterMethodChannel*)channel {
   [channel setMethodCallHandler:^(FlutterMethodCall* call, FlutterResult result) {
     [delegate handleMethodCall:call result:result];
   }];
 }
 
-#pragma mark - FLEPluginRegistry
+#pragma mark - FlutterPluginRegistry
 
-- (id<FLEPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
+- (id<FlutterPluginRegistrar>)registrarForPlugin:(NSString*)pluginName {
   // Currently, the view controller acts as the registrar for all plugins, so the
   // name is ignored.
   return self;

@@ -14,7 +14,10 @@
 #import "FlutterMacros.h"
 #endif
 
-@protocol FLEPluginRegistrar;
+// TODO: Merge this file and FlutterPluginRegistrarMacOS.h with the iOS FlutterPlugin.h, sharing
+// all but the platform-specific methods.
+
+@protocol FlutterPluginRegistrar;
 
 /**
  * Implemented by the platform side of a Flutter plugin.
@@ -22,23 +25,23 @@
  * Defines a set of optional callback methods and a method to set up the plugin
  * and register it to be called by other application components.
  *
- * Currently FLEPlugin has very limited functionality, but is expected to expand over time to
- * more closely match the functionality of FlutterPlugin.
+ * Currently the macOS version of FlutterPlugin has very limited functionality, but is expected to
+ * expand over time to more closely match the functionality of the iOS FlutterPlugin.
  */
 FLUTTER_EXPORT
-@protocol FLEPlugin <NSObject>
+@protocol FlutterPlugin <NSObject>
 
 /**
  * Creates an instance of the plugin to register with |registrar| using the desired
- * FLEPluginRegistrar methods.
+ * FlutterPluginRegistrar methods.
  */
-+ (void)registerWithRegistrar:(nonnull id<FLEPluginRegistrar>)registrar;
++ (void)registerWithRegistrar:(nonnull id<FlutterPluginRegistrar>)registrar;
 
 @optional
 
 /**
  * Called when a message is sent from Flutter on a channel that a plugin instance has subscribed
- * to via -[FLEPluginRegistrar addMethodCallDelegate:channel:].
+ * to via -[FlutterPluginRegistrar addMethodCallDelegate:channel:].
  *
  * The |result| callback must be called exactly once, with one of:
  * - FlutterMethodNotImplemented, if the method call is unknown.

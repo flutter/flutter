@@ -5,8 +5,8 @@
 #import <Cocoa/Cocoa.h>
 
 #import "FLEOpenGLContextHandling.h"
-#import "FLEPluginRegistrar.h"
 #import "FLEReshapeListener.h"
+#import "FlutterPluginRegistrarMacOS.h"
 
 #if defined(FLUTTER_FRAMEWORK)
 #import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h"
@@ -36,8 +36,8 @@ typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
  */
 FLUTTER_EXPORT
 @interface FLEViewController : NSViewController <FlutterBinaryMessenger,
-                                                 FLEPluginRegistrar,
-                                                 FLEPluginRegistry,
+                                                 FlutterPluginRegistrar,
+                                                 FlutterPluginRegistry,
                                                  FLEReshapeListener>
 
 /**

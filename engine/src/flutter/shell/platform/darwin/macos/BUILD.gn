@@ -31,9 +31,9 @@ _flutter_framework_dir = "$root_out_dir/$_flutter_framework_filename"
 # the Flutter engine source root.
 _flutter_framework_headers = [
   "framework/Headers/FlutterMacOS.h",
+  "framework/Headers/FlutterPluginMacOS.h",
+  "framework/Headers/FlutterPluginRegistrarMacOS.h",
   "framework/Headers/FLEOpenGLContextHandling.h",
-  "framework/Headers/FLEPlugin.h",
-  "framework/Headers/FLEPluginRegistrar.h",
   "framework/Headers/FLEReshapeListener.h",
   "framework/Headers/FLEView.h",
   "framework/Headers/FLEViewController.h",
