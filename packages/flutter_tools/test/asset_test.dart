@@ -65,5 +65,5 @@ void main() {
 }
 
 Future<String> getValueAsString(String key, AssetBundle asset) async {
-  return String.fromCharCodes(await asset.entries[key].contentsAsBytes());
+  return String.fromCharCodes(asset.entries[key].contentsAsBytes());
 }

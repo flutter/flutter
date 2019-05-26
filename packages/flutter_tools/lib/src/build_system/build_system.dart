@@ -12,69 +12,14 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
-import 'targets.dart';
-
-/// Return the name for the build mode, or "any" if null.
-String getNameForBuildMode(BuildMode buildMode) {
-  switch (buildMode) {
-    case BuildMode.debug:
-      return 'debug';
-    case BuildMode.profile:
-      return 'profile';
-    case BuildMode.release:
-      return 'relese';
-    case BuildMode.dynamicProfile:
-      return 'dynamic-profile';
-    case BuildMode.dynamicRelease:
-      return 'dynamic-release';
-  }
-  return 'any';
-}
-
-/// Returns the [BuildMode] for a particular `name`.
-BuildMode getBuildModeForName(String name) {
-  switch (name) {
-    case 'debug':
-      return BuildMode.debug;
-    case 'profile':
-      return BuildMode.profile;
-    case 'release':
-      return BuildMode.release;
-    default:
-      throw ArgumentError('$name is not a valid build mode');
-  }
-}
-
-/// Returns the host folder name for a particular target platform.
-String getHostFolderForTargetPlaltform(TargetPlatform targetPlatform) {
-  switch (targetPlatform) {
-    case TargetPlatform.android_arm:
-    case TargetPlatform.android_arm64:
-    case TargetPlatform.android_x64:
-    case TargetPlatform.android_x86:
-      return 'android';
-    case TargetPlatform.ios:
-      return 'ios';
-    case TargetPlatform.darwin_x64:
-      return 'macos';
-    case TargetPlatform.linux_x64:
-      return 'linux';
-    case TargetPlatform.windows_x64:
-      return 'windows';
-    case TargetPlatform.fuchsia:
-      return 'fuchsia';
-    case TargetPlatform.web:
-      return 'web';
-    case TargetPlatform.tester:
-      throw UnsupportedError('tester is not a support platform for building.');
-  }
-  return 'any';
-}
-
 
 /// An input function produces a list of additional input files for an
 /// environment.
 typedef InputFunction = List<FileSystemEntity> Function(Environment environment);
+
+/// The function signature of a build target which can be invoked to perform
+/// the underlying task.
+typedef BuildInvocation = Future<void> Function(List<FileSystemEntity> inputs, Environment environment);
 
 /// An exception thrown when a rule declares an output that was not produced
 /// by the invocation.
@@ -94,27 +39,23 @@ class MissingOutputException implements Exception {
   }
 }
 
-/// Finds the locations of all dart files within the project.
-///
-/// This does not attempt to determine if a file is used or imported, so it
-/// may otherwise report more files than strictly necessary.
-List<FileSystemEntity> listDartSources(
-  Environment environment,
-) {
-  return environment.projectDir
-    .childDirectory('lib')
-    .listSync(recursive: true)
-    .whereType<File>()
-    .where((File file) => file.path.endsWith('.dart'))
-    .toList();
-}
+/// An exception thrown when a rule declares an input that does not exist on
+/// disk.
+class MissingInputException implements Exception {
+  const MissingInputException(this.file, this.target);
 
-/// The function signature of a build target which can be invoked to perform
-/// the underlying task.
-typedef BuildInvocation = Future<void> Function(
-  List<FileSystemEntity> inputs,
-  Environment environment,
-);
+  /// The file we expected to find.
+  final File file;
+
+  /// The name of the target this file should have been output from.
+  final String target;
+
+  @override
+  String toString() {
+    return '${file.path} was declared as an input, but does not exist on '
+    'disk. Check the definition of target:$target for errors';
+  }
+}
 
 /// A visitor for the [Source] types.
 abstract class SourceVisitor {
@@ -126,11 +67,12 @@ abstract class SourceVisitor {
   void visitFunction(InputFunction function);
 }
 
-/// Collects sources into a single list.
+/// Collects sources for a [Target] into a single list of [FileSystemEntities].
 class SourceCollector extends SourceVisitor {
   /// Create a new [SourceCollector] from an [Environment].
   SourceCollector(this.environment);
 
+  /// The current environment.
   final Environment environment;
 
   /// The entities are populated after visiting each source.
@@ -156,7 +98,7 @@ class SourceCollector extends SourceVisitor {
     if (platform.isWindows) {
       value = value.replaceAll('/', r'\');
     }
-    final String filePath = Uri.file(value).toString().substring(10);
+    final String filePath = Uri.file(value).toString().substring(9);
     if (value.endsWith(platform.pathSeparator)) {
       sources.add(fs.directory(fs.path.normalize(filePath)));
     } else {
@@ -280,19 +222,26 @@ class Target {
     if (!stamp.existsSync()) {
       canSkip = false;
     } else {
-      final Map<String, Object> values = json.decode(stamp.readAsStringSync());
-      for (List<Object> pair in values['inputs']) {
-        assert(pair.length == 2);
-        previousStamps[pair.first] = pair.last;
-      }
-      // Check that the last set of output files have not been deleted since the
-      // last invocation. While the set of output files can vary based on inputs,
-      // it should be safe to skip if none of the inputs changed.
-      for (String absoluteOutputPath in values['outputs']) {
-        final FileStat fileStat = fs.statSync(absoluteOutputPath);
-        // Case 5: output was deleted for some reason.
-        if (fileStat == null) {
-          canSkip = false;
+      final String content = stamp.readAsStringSync();
+      // Something went wrong writing the stamp file.
+      if (content == null || content.isEmpty) {
+        stamp.deleteSync();
+        canSkip = false;
+      } else {
+        final Map<String, Object> values = json.decode(content);
+        for (List<Object> pair in values['inputs']) {
+          assert(pair.length == 2);
+          previousStamps[pair.first] = pair.last;
+        }
+        // Check that the last set of output files have not been deleted since the
+        // last invocation. While the set of output files can vary based on inputs,
+        // it should be safe to skip if none of the inputs changed.
+        for (String absoluteOutputPath in values['outputs']) {
+          final FileStat fileStat = fs.statSync(absoluteOutputPath);
+          // Case 5: output was deleted for some reason.
+          if (fileStat == null) {
+            canSkip = false;
+          }
         }
       }
     }
@@ -305,7 +254,9 @@ class Target {
     // Check that the current input files have not been changed since the last
     // invocation.
     for (FileSystemEntity inputEntity in inputs) {
-      assert(inputEntity.existsSync());
+      if (!inputEntity.existsSync()) {
+        throw MissingInputException(inputEntity, name);
+      }
       final String absolutePath = inputEntity.absolute.path;
       final String previousSha = previousStamps[absolutePath];
       // TODO(jonahwilliams): implement framework copy in dart so we don't need
@@ -336,9 +287,6 @@ class Target {
       return;
     }
     final File stamp = _findStampFile(name, environment);
-    if (!stamp.existsSync()) {
-      stamp.createSync(recursive: true);
-    }
     final List<List<Object>> inputStamps = <List<Object>>[];
     for (FileSystemEntity input in inputs) {
       assert(shas[input.absolute.path] != null);
@@ -358,6 +306,9 @@ class Target {
       'inputs': inputStamps,
       'outputs': outputStamps,
     };
+    if (!stamp.existsSync()) {
+      stamp.createSync(recursive: true);
+    }
     stamp.writeAsStringSync(json.encode(result));
   }
 
@@ -542,8 +493,9 @@ class Environment {
   final TargetPlatform targetPlatform;
 }
 
+/// The build system is responsible for invoking and ordering [Target]s.
 class BuildSystem {
-  const BuildSystem([this.targets = allTargets]);
+  const BuildSystem([this.targets]);
 
   final List<Target> targets;
 
@@ -597,9 +549,12 @@ class BuildSystem {
     final Target target = _getNamedTarget(name);
     checkCycles(target);
     // Cheat a bit and re-use the same map.
-    final Map<String, Object> targets = target.fold<Map<String, Object>>(<String, Object>{}, (Map<String, Object> accumulation, Target current) {
-      return accumulation[current.name] = current.toJson(environment);
-    });
+    Map<String, Map<String, Object>> fold(Map<String, Map<String, Object>> accumulation, Target current) {
+      accumulation[current.name] = current.toJson(environment);
+      return accumulation;
+    }
+    final Map<String, Map<String, Object>> result = <String, Map<String, Object>>{};
+    final Map<String, Map<String, Object>> targets = target.fold(result, fold);
     return targets.values.toList();
   }
 
@@ -634,6 +589,7 @@ void checkCycles(Target initial) {
   checkInternal(initial, <Target>{}, <Target>{});
 }
 
+/// An exception thrown if we detect a cycle in the dependencies of a target.
 class CycleException implements Exception {
   CycleException(this.targets);
 
