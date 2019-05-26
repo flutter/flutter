@@ -80,7 +80,7 @@ void main() {
       // Delete required input file.
       fs.file('foo.dart').deleteSync();
 
-      expect(buildSystem.build('foo', environment), throwsA(isInstanceOf<AssertionError>()));
+      expect(buildSystem.build('foo', environment), throwsA(isInstanceOf<MissingInputException>()));
     }));
 
     test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {

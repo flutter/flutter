@@ -515,7 +515,7 @@ class BuildSystem {
     }
 
     checkCycles(target);
-    final Pool resourcePool = Pool(platform.numberOfProcessors);
+    final Pool resourcePool = Pool(platform?.numberOfProcessors ?? 1);
     final Set<Target> completed = <Target>{};
 
     Future<void> invokeTarget(Target target) async {
