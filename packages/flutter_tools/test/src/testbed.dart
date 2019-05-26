@@ -32,7 +32,6 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   HttpClient: () => MockHttpClient(),
   OutputPreferences: () => OutputPreferences(showColor: false),
   OperatingSystemUtils: () => MockOperatingSystemUtils(),
-  SimControl: () => MockSimControl(),
   Usage: () => MockUsage(),
   TimeoutConfiguration: () => const TimeoutConfiguration(),
 };
