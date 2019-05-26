@@ -846,7 +846,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
                   color: disabledColor,
                 )
               : BoxDecoration(
-                  color: disabledColor,
+                  color: widget.decoration.color ?? disabledColor,
                   // The main decoration
                   border: widget.decoration.border,
                   borderRadius: widget.decoration.borderRadius,
