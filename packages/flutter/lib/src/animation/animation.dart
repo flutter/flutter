@@ -63,6 +63,8 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
   /// Stop calling the listener every time the value of the animation changes.
   ///
+  /// If `listener` is not currently registered as a listener, this is a no-op.
+  ///
   /// Listeners can be added with [addListener].
   @override
   void removeListener(VoidCallback listener);
@@ -73,6 +75,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   void addStatusListener(AnimationStatusListener listener);
 
   /// Stops calling the listener every time the status of the animation changes.
+  ///
+  /// If `listener` is not currently registered as a status listener, this is
+  /// a no-op.
   ///
   /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener);
