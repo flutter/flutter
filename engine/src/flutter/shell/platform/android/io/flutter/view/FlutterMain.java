@@ -375,6 +375,9 @@ public class FlutterMain {
     private static Set<String> listLibs(@NonNull Context applicationContext) {
         ApplicationInfo applicationInfo = getApplicationInfo(applicationContext);
         File[] files = new File(applicationInfo.nativeLibraryDir).listFiles();
+        if (files == null) {
+            files = new File[0];
+        }
 
         ImmutableSetBuilder<String> builder = ImmutableSetBuilder.newInstance();
         for (File file : files) {
