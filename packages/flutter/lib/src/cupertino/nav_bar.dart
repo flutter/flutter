@@ -1683,9 +1683,11 @@ class _NavigationBarTransition extends StatelessWidget {
                       image: bottomNavBar.background?.image != null
                           ? DecorationImage(
                         image: bottomNavBar.background.image.image,
-                        fit: BoxFit.cover,
+                        fit: bottomNavBar.background.image.fit,
                         colorFilter: ColorFilter.mode(Color(0xff000000)
-                            .withOpacity(_NavigationBarComponentsTransition.fadeOut.evaluate(animation)),
+                            .withOpacity(
+                            _NavigationBarComponentsTransition.fadeOut.evaluate(
+                                animation)),
                             BlendMode.dstATop),
                       ) : null,
                       border: borderTween.evaluate(animation),
@@ -1696,9 +1698,11 @@ class _NavigationBarTransition extends StatelessWidget {
                       image: topNavBar.background?.image != null
                           ? DecorationImage(
                         image: topNavBar.background.image.image,
-                        fit: BoxFit.cover,
+                        fit: topNavBar.background.image.fit,
                         colorFilter: ColorFilter.mode(Color(0xff000000)
-                            .withOpacity(_NavigationBarComponentsTransition.fadeIn.evaluate(animation)),
+                            .withOpacity(
+                            _NavigationBarComponentsTransition.fadeIn.evaluate(
+                                animation)),
                             BlendMode.dstATop),
                       ) : null,
                       border: borderTween.evaluate(animation),
