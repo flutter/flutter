@@ -49,6 +49,7 @@ export 'dart:async' show Future;
 export 'src/accessibility.dart';
 export 'src/all_elements.dart';
 export 'src/binding.dart';
+export 'src/browser.dart';
 export 'src/controller.dart';
 export 'src/finders.dart';
 export 'src/goldens.dart';
