@@ -22,11 +22,13 @@ import 'src/mocks.dart';
 
 void main() {
   FileSystem fs;
-  String filePath;
+  MockPlatform mockPlatform;
 
   setUp(() {
-    fs = MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
-    filePath = fs.path.join('lib', 'foo.txt');
+    fs = MemoryFileSystem(style: FileSystemStyle.posix);
+    mockPlatform = MockPlatform();
+    when(mockPlatform.pathSeparator).thenReturn('/');
+    when(mockPlatform.isWindows).thenReturn(false);
   });
 
   group('DevFSContent', () {
@@ -60,6 +62,7 @@ void main() {
     });
 
     testUsingContext('file', () async {
+      final String filePath = fs.path.join('lib', 'foo.txt');
       final File file = fs.file(filePath);
       final DevFSFileContent content = DevFSFileContent(file);
       expect(content.isModified, isFalse);
@@ -127,6 +130,7 @@ void main() {
 
     testUsingContext('create dev file system', () async {
       // simulate workspace
+      final String filePath = fs.path.join('lib', 'foo.txt');
       final File file = fs.file(filePath);
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
@@ -146,7 +150,7 @@ void main() {
         invalidatedFiles: <Uri>[],
       );
 
-      expect(writtenFiles.single, contains('lib/foo.txt.dill'));
+      expect(writtenFiles.single, contains('foo.txt.dill'));
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(report.syncedBytes, 22);
       expect(report.success, true);
@@ -164,6 +168,7 @@ void main() {
 
     testUsingContext('cleanup preexisting file system', () async {
       // simulate workspace
+      final String filePath = fs.path.join('lib', 'foo.txt');
       final File file = fs.file(filePath);
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
@@ -194,6 +199,8 @@ void main() {
 class MockVMService extends Mock implements VMService {}
 
 class MockDevFSOperations extends Mock implements DevFSOperations {}
+
+class MockPlatform extends Mock implements Platform {}
 
 final Map <String, Uri> _packages = <String, Uri>{};
 
