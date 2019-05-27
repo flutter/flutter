@@ -16,7 +16,7 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   Logger: () => BufferLogger(),
-  FileSystem: () => MemoryFileSystem(style: platform.isWindows 
+  FileSystem: () => MemoryFileSystem(style: platform.isWindows
       ? FileSystemStyle.windows
       : FileSystemStyle.posix)
 };
