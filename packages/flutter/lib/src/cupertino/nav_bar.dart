@@ -1612,7 +1612,7 @@ class _NavigationBarTransition extends StatelessWidget {
     end: topNavBar.renderBox.size.height,
   ),
         backgroundTween = LinearGradientTween(
-          begin: bottomNavBar.background != null ? bottomNavBar.background
+          begin: bottomNavBar.background?.gradient != null ? bottomNavBar.background
               .gradient : LinearGradient(
             colors: [
               bottomNavBar.backgroundColor != null ? bottomNavBar
@@ -1621,7 +1621,7 @@ class _NavigationBarTransition extends StatelessWidget {
                   .backgroundColor : bottomNavBar.background?.color
             ],
           ),
-          end: topNavBar.background != null
+          end: topNavBar.background?.gradient != null
               ? topNavBar.background.gradient
               : LinearGradient(
             colors: [
@@ -1635,8 +1635,8 @@ class _NavigationBarTransition extends StatelessWidget {
           ),
         ),
         borderTween = BorderTween(
-          begin: bottomNavBar.background?.border != null
-              ? bottomNavBar.background?.border
+          begin: bottomNavBar.background != null
+              ? bottomNavBar.background
               : bottomNavBar.border,
           end: topNavBar.background?.border != null
               ? topNavBar.background?.border
@@ -1659,6 +1659,8 @@ class _NavigationBarTransition extends StatelessWidget {
       topNavBar: topNavBar,
       directionality: Directionality.of(context),
     );
+
+    print("backgroundTween.evaluate(animation) ${backgroundTween.evaluate(animation)}");
 
     final List<Widget> children = <Widget>[
       // Draw an empty navigation bar box with changing shape behind all the
