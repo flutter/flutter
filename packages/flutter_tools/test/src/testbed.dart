@@ -8,14 +8,17 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
-  FileSystem: () => MemoryFileSystem(),
   Logger: () => BufferLogger(),
+  FileSystem: () => MemoryFileSystem(style: platform.isWindows 
+      ? FileSystemStyle.windows
+      : FileSystemStyle.posix)
 };
 
 /// Manages interaction with the tool injection and runner system.

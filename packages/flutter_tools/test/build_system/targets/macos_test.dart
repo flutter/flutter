@@ -45,7 +45,7 @@ void main() {
         });
       }, overrides: <Type, Generator>{
         ProcessManager: () => MockProcessManager(),
-        MockPlatform: () => mockPlatform,
+        Platform: () => mockPlatform,
       });
     });
 

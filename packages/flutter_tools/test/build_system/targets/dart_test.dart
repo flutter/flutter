@@ -34,7 +34,7 @@ void main() {
           ..createSync()
           ..writeAsStringSync('''
 # Generated
-flutter_tools:lib${fs.path.separator}''');
+flutter_tools:lib/''');
         fs.file(fs.path.join('lib', 'foo.dart')).createSync(recursive: true);
         fs.file(fs.path.join('lib', 'bar.dart')).createSync();
         fs.file(fs.path.join('lib', 'fizz')).createSync();

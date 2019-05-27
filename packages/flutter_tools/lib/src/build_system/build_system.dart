@@ -42,17 +42,17 @@ class MissingOutputException implements Exception {
 /// An exception thrown when a rule declares an input that does not exist on
 /// disk.
 class MissingInputException implements Exception {
-  const MissingInputException(this.file, this.target);
+  const MissingInputException(this.entity, this.target);
 
-  /// The file we expected to find.
-  final File file;
+  /// The file or directory we expected to find.
+  final FileSystemEntity entity;
 
   /// The name of the target this file should have been output from.
   final String target;
 
   @override
   String toString() {
-    return '${file.path} was declared as an input, but does not exist on '
+    return '${entity.path} was declared as an input, but does not exist on '
     'disk. Check the definition of target:$target for errors';
   }
 }
@@ -72,6 +72,13 @@ class SourceCollector extends SourceVisitor {
   /// Create a new [SourceCollector] from an [Environment].
   SourceCollector(this.environment);
 
+  static const String _kProjectDirectory = '{PROJECT_DIR}';
+  static const String _kBuildDirectory = '{BUILD_DIR}';
+  static const String _kCacheDirectory = '{CACHE_DIR}';
+  static const String _kCopyDirecotry = '{COPY_DIR}';
+  static const String _kPlatform = '{platform}';
+  static const String _kMode = '{mode}';
+
   /// The current environment.
   final Environment environment;
 
@@ -87,15 +94,36 @@ class SourceCollector extends SourceVisitor {
   void visitPattern(String pattern) {
     // perform substitution of the environmental values and then
     // of the local values.
-    final String value = pattern
-      .replaceAll('{PROJECT_DIR}', environment.projectDir.absolute.uri.toString())
-      .replaceAll('{BUILD_DIR}', environment.buildDir.absolute.uri.toString())
-      .replaceAll('{CACHE_DIR}', environment.cacheDir.absolute.uri.toString())
-      .replaceAll('{COPY_DIR}', environment.copyDir.absolute.uri.toString())
-      .replaceAll('{platform}', getNameForTargetPlatform(environment.targetPlatform))
-      .replaceAll('{mode}', getNameForBuildMode(environment.buildMode));
-    final String filePath = Uri.parse(value).toFilePath(windows: platform.isWindows);
-    if (value.endsWith(platform.pathSeparator)) {
+
+    // We always use posix-style forward slashes in the rules.
+    final bool isDirectory = pattern.endsWith('/');
+    final List<String> segments = <String>[];
+    for (String segment in pattern.split('/')) {
+      switch (segment) {
+        case _kProjectDirectory:
+          segments.addAll(fs.path.split(environment.projectDir.absolute.path));
+          break;
+        case _kBuildDirectory:
+          segments.addAll(fs.path.split( environment.buildDir.absolute.path));
+          break;
+        case _kCacheDirectory:
+          segments.addAll(fs.path.split(environment.cacheDir.absolute.path));
+          break;
+        case _kCopyDirecotry:
+          segments.addAll(fs.path.split(environment.copyDir.absolute.path));
+          break;
+        case _kPlatform:
+          segments.add(getNameForTargetPlatform(environment.targetPlatform));
+          break;
+        case _kMode:
+          segments.add(getNameForBuildMode(environment.buildMode));
+          break;
+        default:
+          segments.add(segment);
+      }
+    }
+    final String filePath = fs.path.joinAll(segments);
+    if (isDirectory) {
       sources.add(fs.directory(fs.path.normalize(filePath)));
     } else {
       sources.add(fs.file(fs.path.normalize(filePath)));
