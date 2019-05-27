@@ -58,7 +58,7 @@ void main() {
         .map((DiagnosticsNode n) => n.toString()).toList();
     expect(description, <String>[
       'backgroundColor: Color(0xff123456)',
-      'elevation: 8.0',
+      ignoreWebNumericQuirks('elevation: 8.0'),
       'titleTextStyle: TextStyle(inherit: true, color: Color(0xffffffff))',
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff000000))',
     ]);
@@ -135,7 +135,7 @@ void main() {
       matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
       skip: !Platform.isLinux,
     );
-  });
+  }, tags: 'golden');
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
     const String titleText = 'Title';

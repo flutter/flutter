@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // needs substantial triage.
 import 'dart:async';
 import 'dart:io' show Platform;
 
@@ -1438,7 +1439,7 @@ void main() {
     expect(tester.getTopLeft(find.text('text')).dy, 12.0);
     expect(getBorderBottom(tester), 40.0);
     expect(getBorderWeight(tester), 1.0);
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('InputDecorator.collapsed', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1477,7 +1478,7 @@ void main() {
     expect(tester.getSize(find.text('hint')).height, 16.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 0.0);
     expect(getBorderWeight(tester), 0.0);
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('InputDecorator with baseStyle', (WidgetTester tester) async {
     // Setting the baseStyle of the InputDecoration and the style of the input
@@ -1518,7 +1519,7 @@ void main() {
     expect(tester.getTopLeft(find.text('hint')).dy, 23.5);
     expect(tester.getTopLeft(find.text('label')).dy, 17.75);
     expect(tester.getTopLeft(find.text('text')).dy, 23.5);
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {
     // Same as not specifying any style overrides
@@ -1560,7 +1561,7 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1612,7 +1613,7 @@ void main() {
 
     // The label should not be seen.
     expect(getOpacity(tester, 'label'), 0.0);
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1637,7 +1638,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('InputDecorationTheme outline border, dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2041,7 +2042,7 @@ void main() {
         skip: !Platform.isLinux,
       );
     },
-    skip: !Platform.isLinux,
+    tags: 'golden',
   );
 
   testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {

@@ -142,7 +142,7 @@ void main() {
       matchesGoldenFile('card_theme.custom_shape.png'),
       skip: !Platform.isLinux,
     );
-  });
+  }, tags: 'golden');
 }
 
 CardTheme _cardTheme() {

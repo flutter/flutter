@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // This whole test suite needs triage.
 import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
@@ -404,8 +405,9 @@ void main() {
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.0.0.png'),
+      skip: !Platform.isLinux
     );
-  }, skip: !Platform.isLinux);
+  }, tags: 'golden');
 
   testWidgets('cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -433,8 +435,9 @@ void main() {
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.1.0.png'),
+      skip: !Platform.isLinux,
     );
-  }, skip: !Platform.isLinux);
+  }, tags: 'golden');
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -486,7 +489,7 @@ void main() {
       matchesGoldenFile('text_field_opacity_test.0.1.png'),
       skip: !Platform.isLinux,
     );
-  });
+  }, tags: 'golden');
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -2370,7 +2373,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(

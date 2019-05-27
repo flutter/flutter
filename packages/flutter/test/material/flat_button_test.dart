@@ -57,6 +57,7 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
+    tags: 'web_unimplemented',
   );
 
   testWidgets('FlatButton has no clip by default', (WidgetTester tester) async {

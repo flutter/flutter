@@ -621,7 +621,7 @@ void main() {
         matchesGoldenFile('material.border_paint_above.png'),
         skip: !Platform.isLinux,
       );
-    });
+    }, tags: 'golden');
 
     testWidgets('border is painted below child when specified', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
@@ -662,6 +662,6 @@ void main() {
         matchesGoldenFile('material.border_paint_below.png'),
         skip: !Platform.isLinux,
       );
-    });
+    }, tags: 'golden');
   });
 }

@@ -1439,7 +1439,7 @@ void main() {
         skip: !Platform.isLinux,
       );
     }
-  });
+  }, tags: 'golden');
 
   testWidgets('BottomNavigationBar item title should not be nullable', (WidgetTester tester) async {
     expect(() {

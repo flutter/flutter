@@ -280,6 +280,6 @@ void main() {
       matchesGoldenFile('radio.ink_ripple.png'),
       skip: !Platform.isLinux,
     );
-  });
+  }, tags: 'golden');
 }
 

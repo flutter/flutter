@@ -1721,7 +1721,7 @@ void main() {
     ], excludes: <Offset>[
       const Offset(4, 4),
     ]));
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28646

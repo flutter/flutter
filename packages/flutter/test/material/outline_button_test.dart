@@ -59,6 +59,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
+    tags: 'web_unimplemented',
     semanticsEnabled: true,
   );
 
