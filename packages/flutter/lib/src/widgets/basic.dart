@@ -13,6 +13,7 @@ import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
 
+export 'gesture_transformable.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
   ChangeNotifier,

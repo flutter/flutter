@@ -1,12 +1,12 @@
-import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
-import 'transformations_demo_inertial_motion.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/physics.dart';
 
-// This widget allows 2D transform interactions on its child in relation to its
-// parent. The user can transform the child by dragging to pan or pinching to
-// zoom and rotate. All event callbacks for GestureDetector are supported, and
-// the coordinates that are given are untransformed and in relation to the
-// original position of the child.
+/// This widget allows 2D transform interactions on its child in relation to its
+/// parent. The user can transform the child by dragging to pan or pinching to
+/// zoom and rotate. All event callbacks for GestureDetector are supported, and
+/// the coordinates that are given are untransformed and in relation to the
+/// original position of the child.
 @immutable
 class GestureTransformable extends StatefulWidget {
   const GestureTransformable({
@@ -499,12 +499,25 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
 
     final Vector3 translationVector = _transform.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
-    final InertialMotion inertialMotion = InertialMotion(details.velocity, translation);
+    final FrictionSimulation frictionSimulationX = FrictionSimulation(
+      // TODO(justinmc): Share this value with scroll_simulation.dart
+      0.135,
+      translation.dx,
+      details.velocity.pixelsPerSecond.dx,
+    );
+    final FrictionSimulation frictionSimulationY = FrictionSimulation(
+      // TODO(justinmc): Share this value with scroll_simulation.dart
+      0.135,
+      translation.dy,
+      details.velocity.pixelsPerSecond.dy,
+    );
     _animation = Tween<Offset>(
       begin: translation,
-      end: inertialMotion.finalPosition,
+      end: Offset(frictionSimulationX.finalX, frictionSimulationY.finalX),
     ).animate(_controller);
-    _controller.duration = Duration(milliseconds: inertialMotion.duration.toInt());
+    // The fastest possible velocity is 8000 px/s. Limit the longest animation
+    // to 500ms and scale the duration so fast velocities animate for longer.
+    _controller.duration = Duration(milliseconds: details.velocity.pixelsPerSecond.distance ~/ 16);
     _animation.addListener(_onAnimate);
     _controller.fling();
   }

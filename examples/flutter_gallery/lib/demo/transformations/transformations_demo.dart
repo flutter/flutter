@@ -2,7 +2,6 @@ import 'dart:ui' show Vertices;
 import 'package:flutter/material.dart';
 import 'transformations_demo_board.dart';
 import 'transformations_demo_edit_board_point.dart';
-import 'transformations_demo_gesture_transformable.dart';
 
 class TransformationsDemo extends StatefulWidget {
   const TransformationsDemo({ Key key }) : super(key: key);
