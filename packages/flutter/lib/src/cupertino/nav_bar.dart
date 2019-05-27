@@ -92,7 +92,7 @@ Widget _wrapWithBackground({
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
-    // TODO: Compute the luminace from gradient or image when the [background] is set
+    // TODO: Compute the luminance from gradient or image when the [background] is set
     final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
     final SystemUiOverlayStyle overlayStyle = darkBackground
         ? SystemUiOverlayStyle.light
@@ -223,6 +223,11 @@ class CupertinoNavigationBar extends StatefulWidget
         background == null || backgroundColor == null,
         'Cannot specify a backgroundColor if the background is set.'
             'The backgroundColor would be overriden by the background.'
+        ),
+        assert(
+        background == null || border == null || border == _kDefaultNavBarBorder,
+        'Cannot specify a border if the background is set.'
+            'The border would be overriden by the background.'
         ),
         super(key: key);
 
@@ -569,6 +574,11 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
         background == null || backgroundColor == null,
         'Cannot specify a backgroundColor if the background is set.'
             'The backgroundColor would be overriden by the background.'
+        ),
+        assert(
+        background == null || border == null || border == _kDefaultNavBarBorder,
+        'Cannot specify a border if the background is set.'
+            'The border would be overriden by the background.'
         ),
         super(key: key);
 
@@ -1601,21 +1611,14 @@ class _NavigationBarTransition extends StatelessWidget {
     begin: bottomNavBar.renderBox.size.height,
     end: topNavBar.renderBox.size.height,
   ),
-        backgroundColorTween = ColorTween(
-          begin: bottomNavBar.backgroundColor != null ? bottomNavBar
-              .backgroundColor : bottomNavBar.background.color,
-          end: topNavBar.backgroundColor != null
-              ? topNavBar.backgroundColor
-              : topNavBar.background.color,
-        ),
         backgroundTween = LinearGradientTween(
           begin: bottomNavBar.background != null ? bottomNavBar.background
               .gradient : LinearGradient(
             colors: [
               bottomNavBar.backgroundColor != null ? bottomNavBar
-                  .backgroundColor : bottomNavBar.background.color,
+                  .backgroundColor : bottomNavBar.background?.color,
               bottomNavBar.backgroundColor != null ? bottomNavBar
-                  .backgroundColor : bottomNavBar.background.color
+                  .backgroundColor : bottomNavBar.background?.color
             ],
           ),
           end: topNavBar.background != null
@@ -1624,16 +1627,20 @@ class _NavigationBarTransition extends StatelessWidget {
             colors: [
               topNavBar.backgroundColor != null
                   ? topNavBar.backgroundColor
-                  : topNavBar.background.color,
+                  : topNavBar.background?.color,
               topNavBar.backgroundColor != null
                   ? topNavBar.backgroundColor
-                  : topNavBar.background.color,
+                  : topNavBar.background?.color,
             ],
           ),
         ),
         borderTween = BorderTween(
-          begin: bottomNavBar.border,
-          end: topNavBar.border,
+          begin: bottomNavBar.background?.border != null
+              ? bottomNavBar.background?.border
+              : bottomNavBar.border,
+          end: topNavBar.background?.border != null
+              ? topNavBar.background?.border
+              : topNavBar.border,
         );
 
   final Animation<double> animation;
@@ -1641,7 +1648,6 @@ class _NavigationBarTransition extends StatelessWidget {
   final _TransitionableNavigationBar bottomNavBar;
 
   final Tween<double> heightTween;
-  final ColorTween backgroundColorTween;
   final LinearGradientTween backgroundTween;
   final BorderTween borderTween;
 
@@ -1663,12 +1669,10 @@ class _NavigationBarTransition extends StatelessWidget {
           return _wrapWithBackground(
             // Don't update the system status bar color mid-flight.
             updateSystemUiOverlay: false,
-            backgroundColor: backgroundColorTween.evaluate(animation),
             background: BoxDecoration(
               gradient: backgroundTween.evaluate(animation),
-              color: backgroundColorTween.evaluate(animation),
+              border: borderTween.evaluate(animation),
             ),
-            border: borderTween.evaluate(animation),
             child: SizedBox(
               height: heightTween.evaluate(animation),
               width: double.infinity,
