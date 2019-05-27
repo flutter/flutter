@@ -98,10 +98,19 @@ Widget _wrapWithBackground({
       // calculate the average luminance for the array of colors
       // and use it to determine wether it is considered
       // a [darkbackground]
+      //
       // First and last colors are given a stronger value
       // and account for twice their real value
       // as those are closer to the icons in the status bar
-      if (background?.gradient != null) {
+      //
+      // If the color property of the background is set
+      // it will override the gradient's computed luminance
+      // despite the color itself being ignored
+      // This gives the developer the ability to manually
+      // change the luminance if so desired
+      if (background?.color != null) {
+        return background.color.computeLuminance() < luminanceThreshold;
+      } else if (background?.gradient != null) {
         double gradientLuminanceThreshold = 0.0;
         gradientLuminanceThreshold +=
             background.gradient.colors.first.computeLuminance();
