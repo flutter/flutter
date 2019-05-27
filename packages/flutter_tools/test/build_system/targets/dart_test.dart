@@ -34,10 +34,10 @@ void main() {
           ..createSync()
           ..writeAsStringSync('''
 # Generated
-flutter_tools:lib/''');
-        fs.file('lib/foo.dart').createSync(recursive: true);
-        fs.file('lib/bar.dart').createSync();
-        fs.file('lib/fizz').createSync();
+flutter_tools:lib${fs.path.separator}''');
+        fs.file(fs.path.join('lib', 'foo.dart')).createSync(recursive: true);
+        fs.file(fs.path.join('lib', 'bar.dart')).createSync();
+        fs.file(fs.path.join('lib', 'fizz')).createSync();
       }, overrides: <Type, Generator>{
         KernelCompilerFactory: () => FakeKernelCompilerFactory(),
       });
@@ -46,7 +46,7 @@ flutter_tools:lib/''');
     test('Produces correct output directory', () => testbed.run(() async {
       await buildSystem.build('kernel_snapshot', environment);
 
-      expect(fs.file('build/debug/main.app.dill').existsSync(), true);
+      expect(fs.file(fs.path.join('build', 'debug', 'main.app.dill')).existsSync(), true);
     }));
   });
 }

@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -15,8 +17,11 @@ void main() {
     Testbed testbed;
     BuildSystem buildSystem;
     Environment environment;
+    MockPlatform mockPlatform;
 
     setUp(() {
+      mockPlatform = MockPlatform();
+      when(mockPlatform.isWindows).thenReturn(false);
       testbed = Testbed(setup: () {
         final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
         environment = Environment(
@@ -36,6 +41,8 @@ void main() {
         fs.file('cache/linux-x64/icudtl.dat').createSync();
         fs.file('cache/linux-x64/cpp_client_wrapper/foo').createSync(recursive: true);
         fs.directory('linux').createSync();
+      }, overrides: <Type, Generator>{
+        Platform: () => mockPlatform,
       });
     });
 
@@ -70,3 +77,5 @@ void main() {
     }));
   });
 }
+
+class MockPlatform extends Mock implements Platform {}

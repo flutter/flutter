@@ -159,7 +159,7 @@ class _PatternSource implements Source {
 ///      ...
 ///    ],
 ///    "outputs": [
-///      "absolte/path/fizz"
+///      "absolute/path/fizz"
 ///    ]
 /// }
 ///

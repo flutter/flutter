@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -19,8 +20,11 @@ void main() {
     Testbed testbed;
     BuildSystem buildSystem;
     Environment environment;
+    MockPlatform mockPlatform;
 
     setUp(() {
+      mockPlatform = MockPlatform();
+      when(mockPlatform.isWindows).thenReturn(false);
       testbed = Testbed(setup: () {
         final Directory cacheDir = fs.currentDirectory.childDirectory('cache');
         environment = Environment(
@@ -41,6 +45,7 @@ void main() {
         });
       }, overrides: <Type, Generator>{
         ProcessManager: () => MockProcessManager(),
+        MockPlatform: () => mockPlatform,
       });
     });
 
@@ -51,6 +56,8 @@ void main() {
     }));
   });
 }
+
+class MockPlatform extends Mock implements Platform {}
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class FakeProcessResult implements ProcessResult {
