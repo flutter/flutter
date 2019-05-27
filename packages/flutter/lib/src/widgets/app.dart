@@ -1194,7 +1194,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     return DefaultFocusTraversal(
       policy: ReadingOrderTraversalPolicy(),
       child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+        data: MediaQuery.of(context, nullOk: true) ?? MediaQueryData.fromWindow(WidgetsBinding.instance.window),
         child: Localizations(
           locale: appLocale,
           delegates: _localizationsDelegates.toList(),
