@@ -1170,7 +1170,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1271,7 +1271,7 @@ void main() {
     expect(controller.selection.extentOffset, 2);
 
     semantics.dispose();
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('can extend selection with a11y means - word', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1373,7 +1373,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -2024,7 +2024,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -2064,7 +2064,7 @@ void main() {
     expect(positioned[1].left, 70.0);
     expect(controller.selection.base.offset, 0);
     expect(controller.selection.extent.offset, 5);
-  });
+  }, tags: 'web_unimplemented');
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
@@ -2213,7 +2213,7 @@ void main() {
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
 
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, tags: 'web_unimplemented');
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {}

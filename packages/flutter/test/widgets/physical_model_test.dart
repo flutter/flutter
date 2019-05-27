@@ -114,7 +114,7 @@ void main() {
       matchesGoldenFile('physical_model_overflow.png'),
       skip: !Platform.isLinux,
     );
-  });
+  }, tags: 'golden');
 
   group('PhysicalModelLayer checks elevation', () {
     Future<void> _testStackChildren(
@@ -279,7 +279,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    });
+    }, tags: 'web_unimplemented');
 
     // Tests:
     //
@@ -486,7 +486,7 @@ void main() {
 
       await _testStackChildren(tester, children, expectedErrorCount: 0);
       expect(find.byType(Material), findsNWidgets(2));
-    });
+    }, tags: 'web_unimplemented');
 
     // Tests:
     //

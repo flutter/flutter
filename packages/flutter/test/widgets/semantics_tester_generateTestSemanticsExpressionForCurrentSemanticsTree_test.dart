@@ -14,7 +14,7 @@ import 'semantics_tester.dart';
 void main() {
   group('generateTestSemanticsExpressionForCurrentSemanticsTree', () {
     _tests();
-  });
+  }, tags: 'web_unimplemented');
 }
 
 void _tests() {

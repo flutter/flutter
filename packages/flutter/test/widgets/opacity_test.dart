@@ -182,7 +182,7 @@ void main() {
       matchesGoldenFile('opacity_test.offset.1.png'),
       skip: !Platform.isLinux,
     );
-  });
+  }, tags: 'golden');
 
   testWidgets('empty opacity does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -192,5 +192,5 @@ void main() {
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
     await element.renderObject.layer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
-  });
+  }, tags: 'web_unimplemented');
 }

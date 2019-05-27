@@ -94,7 +94,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.0.3.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: identical(0, 0.0) || !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -145,7 +145,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.1.3.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: identical(0, 0.0) || !Platform.isLinux);
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
@@ -661,7 +661,7 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, tags: 'web_unimplemented');
 
   testWidgets('cursor layout iOS', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -724,6 +724,6 @@ void main() {
       matchesGoldenFile('editable_text_test.2.0.png'),
     );
     debugDefaultTargetPlatformOverride = null;
-  }, skip: !Platform.isLinux);
+  }, skip: identical(0, 0.0) || !Platform.isLinux);
 
 }
