@@ -213,10 +213,10 @@ class RunCommand extends RunCommandBase {
     final IosProject iosProject = FlutterProject.current().ios;
     final List<String> hostLanguage = <String>[];
 
-    if (androidProject != null) {
+    if (androidProject != null && androidProject.existsSync()) {
       hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
     }
-    if (iosProject != null) {
+    if (iosProject != null && iosProject.exists) {
       hostLanguage.add(iosProject.isSwift ? 'swift' : 'objc');
     }
 
