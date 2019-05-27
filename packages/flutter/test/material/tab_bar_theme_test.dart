@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -270,7 +268,7 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_tab.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 
@@ -282,7 +280,7 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_label.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 
@@ -299,7 +297,7 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.custom_tab_indicator.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 
@@ -316,7 +314,7 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.beveled_rect_indicator.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 }
