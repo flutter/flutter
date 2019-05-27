@@ -451,7 +451,6 @@ class DevFS {
       }
     }
     printTrace('Updating files');
-    print(dirtyEntries);
     if (dirtyEntries.isNotEmpty) {
       try {
         await _operations.write(dirtyEntries);

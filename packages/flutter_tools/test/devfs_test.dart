@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -24,7 +25,7 @@ void main() {
   String filePath;
 
   setUp(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix);
     filePath = fs.path.join('lib', 'foo.txt');
   });
 
@@ -145,7 +146,7 @@ void main() {
         invalidatedFiles: <Uri>[],
       );
 
-      expect(writtenFiles, <String>['lib/foo.txt.dill']);
+      expect(writtenFiles.single, contains('lib/foo.txt.dill'));
       expect(devFS.assetPathsToEvict, isEmpty);
       expect(report.syncedBytes, 22);
       expect(report.success, true);
