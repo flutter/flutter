@@ -85,20 +85,16 @@ class SourceCollector extends SourceVisitor {
 
   @override
   void visitPattern(String pattern) {
-    // perform substituion of the environmental values and then
+    // perform substitution of the environmental values and then
     // of the local values.
-    String value = pattern
+    final String value = pattern
       .replaceAll('{PROJECT_DIR}', environment.projectDir.absolute.uri.toString())
       .replaceAll('{BUILD_DIR}', environment.buildDir.absolute.uri.toString())
       .replaceAll('{CACHE_DIR}', environment.cacheDir.absolute.uri.toString())
       .replaceAll('{COPY_DIR}', environment.copyDir.absolute.uri.toString())
       .replaceAll('{platform}', getNameForTargetPlatform(environment.targetPlatform))
       .replaceAll('{mode}', getNameForBuildMode(environment.buildMode));
-    // TODO(jonahwilliams): lookup the right way to do this.
-    if (platform.isWindows) {
-      value = value.replaceAll('/', r'\');
-    }
-    final String filePath = Uri.file(value).toString().substring(9);
+    final String filePath = Uri.parse(value).toFilePath(windows: platform.isWindows);
     if (value.endsWith(platform.pathSeparator)) {
       sources.add(fs.directory(fs.path.normalize(filePath)));
     } else {
@@ -107,7 +103,7 @@ class SourceCollector extends SourceVisitor {
   }
 }
 
-/// A description of an input or ooutput of a [Target].
+/// A description of an input or output of a [Target].
 abstract class Source {
   /// This source is a file-uri which contains some references to magic
   /// environment variables.
