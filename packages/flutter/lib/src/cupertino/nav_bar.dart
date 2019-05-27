@@ -92,8 +92,30 @@ Widget _wrapWithBackground({
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
-    // TODO: Compute the luminance from gradient or image when the [background] is set
-    final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
+    bool computeLuminance() {
+      double luminanceThreshold = 0.179;
+      // If the background contains a gradient
+      // calculate the average luminance for the array of colors
+      // and use it to determine wether it is considered
+      // a [darkbackground]
+      // First and last colors are given a stronger value
+      // and account for twice their real value
+      // as those are closer to the icons in the status bar
+      if (background?.gradient != null) {
+        double gradientLuminanceThreshold = 0.0;
+        gradientLuminanceThreshold +=
+            background.gradient.colors.first.computeLuminance();
+        gradientLuminanceThreshold +=
+            background.gradient.colors.last.computeLuminance();
+        for (Color color in background.gradient.colors) {
+          gradientLuminanceThreshold += color.computeLuminance();
+        }
+        return gradientLuminanceThreshold /
+            (background.gradient.colors.length + 2) < luminanceThreshold;
+      }
+      return backgroundColor.computeLuminance() < luminanceThreshold;
+    };
+    final bool darkBackground = computeLuminance();
     final SystemUiOverlayStyle overlayStyle = darkBackground
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;
