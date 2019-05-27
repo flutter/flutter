@@ -41,7 +41,7 @@ bool get isLinux {
   return Platform.isMacOS;
 }
 
-/// Whether the test is running in the Chrome browser.
-bool get isChrome {
+/// Whether the test is running in a web browser compiled to JavaScript.
+bool get isBrowser {
   return _kIsCompiledToJavaScript;
 }
