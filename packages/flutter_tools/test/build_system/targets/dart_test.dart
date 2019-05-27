@@ -30,6 +30,11 @@ void main() {
         buildSystem = const BuildSystem(<Target>[
           kernelSnapshot,
         ]);
+        fs.file('.packages')
+          ..createSync()
+          ..writeAsStringSync('''
+# Generated
+flutter_tools:lib/''');
         fs.file('lib/foo.dart').createSync(recursive: true);
         fs.file('lib/bar.dart').createSync();
         fs.file('lib/fizz').createSync();
