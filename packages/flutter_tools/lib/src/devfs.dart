@@ -47,7 +47,7 @@ abstract class DevFSContent {
 
   /// Returns a gzipped representation of the contents of this file.
   List<int> contentsAsCompressedBytes() {
-    return gzip.encode(contentsAsBytes().cast<int>());
+    return gzip.encode(contentsAsBytes());
   }
 }
 
@@ -131,7 +131,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  List<int> contentsAsBytes() => _getFile().readAsBytesSync();
+  List<int> contentsAsBytes() => _getFile().readAsBytesSync().cast<int>();
 }
 
 /// Byte content to be copied to the device.
