@@ -90,7 +90,7 @@ void main() {
       expect(content.isModified, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-    });
+    }, skip: platform.isWindows); // Still flaky, but only on CI :(
   });
 
   group('devfs remote', () {
