@@ -1612,7 +1612,8 @@ class _NavigationBarTransition extends StatelessWidget {
     end: topNavBar.renderBox.size.height,
   ),
         backgroundTween = LinearGradientTween(
-          begin: bottomNavBar.background?.gradient != null ? bottomNavBar.background
+          begin: bottomNavBar.background?.gradient != null ? bottomNavBar
+              .background
               .gradient : LinearGradient(
             colors: [
               bottomNavBar.backgroundColor != null ? bottomNavBar
@@ -1635,8 +1636,8 @@ class _NavigationBarTransition extends StatelessWidget {
           ),
         ),
         borderTween = BorderTween(
-          begin: bottomNavBar.background != null
-              ? bottomNavBar.background
+          begin: bottomNavBar.background?.border != null
+              ? bottomNavBar.background?.border
               : bottomNavBar.border,
           end: topNavBar.background?.border != null
               ? topNavBar.background?.border
@@ -1660,8 +1661,6 @@ class _NavigationBarTransition extends StatelessWidget {
       directionality: Directionality.of(context),
     );
 
-    print("backgroundTween.evaluate(animation) ${backgroundTween.evaluate(animation)}");
-
     final List<Widget> children = <Widget>[
       // Draw an empty navigation bar box with changing shape behind all the
       // moving components without any components inside it itself.
@@ -1673,11 +1672,40 @@ class _NavigationBarTransition extends StatelessWidget {
             updateSystemUiOverlay: false,
             background: BoxDecoration(
               gradient: backgroundTween.evaluate(animation),
-              border: borderTween.evaluate(animation),
             ),
             child: SizedBox(
               height: heightTween.evaluate(animation),
               width: double.infinity,
+              child: Stack(
+                children: <Widget>[
+                  Container(
+                    decoration: BoxDecoration(
+                      image: bottomNavBar.background?.image != null
+                          ? DecorationImage(
+                        image: bottomNavBar.background.image.image,
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(Color(0xff000000)
+                            .withOpacity(_NavigationBarComponentsTransition.fadeOut.evaluate(animation)),
+                            BlendMode.dstATop),
+                      ) : null,
+                      border: borderTween.evaluate(animation),
+                    ),
+                  ),
+                  Container(
+                    decoration: BoxDecoration(
+                      image: topNavBar.background?.image != null
+                          ? DecorationImage(
+                        image: topNavBar.background.image.image,
+                        fit: BoxFit.cover,
+                        colorFilter: ColorFilter.mode(Color(0xff000000)
+                            .withOpacity(_NavigationBarComponentsTransition.fadeIn.evaluate(animation)),
+                            BlendMode.dstATop),
+                      ) : null,
+                      border: borderTween.evaluate(animation),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         },
