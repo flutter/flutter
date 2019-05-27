@@ -211,10 +211,14 @@ class RunCommand extends RunCommandBase {
             : 'multiple';
     final AndroidProject androidProject = FlutterProject.current().android;
     final IosProject iosProject = FlutterProject.current().ios;
-    final List<String> hostLanguage = <String>[
-      androidProject.isKotlin ? 'kotlin' : 'java',
-      iosProject.isSwift ? 'swift' : 'objc'
-    ];
+    final List<String> hostLanguage = <String>[];
+
+    if (androidProject != null) {
+      hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
+    }
+    if (iosProject != null) {
+      hostLanguage.add(iosProject.isSwift ? 'swift' : 'objc');
+    }
 
     return <String, String>{
       kCommandRunIsEmulator: '$isEmulator',
