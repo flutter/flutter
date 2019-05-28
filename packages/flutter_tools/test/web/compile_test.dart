@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:mockito/mockito.dart';
@@ -33,12 +34,12 @@ void main() {
       await webCompiler.compile(target: 'lib/main.dart');
 
       verify(mockProcessManager.start(<String>[
-        'bin/cache/dart-sdk/bin/dart',
-        'bin/cache/dart-sdk/bin/snapshots/dart2js.dart.snapshot',
-        'lib/main.dart',
+        fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+        fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+        fs.path.join('lib', 'main.dart'),
         '-o',
-        'build/web/main.dart.js',
-        '--libraries-spec=bin/cache/flutter_web_sdk/libraries.json',
+        fs.path.join('build', 'web', 'main.dart.js'),
+        '--libraries-spec=${fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json')}',
         '-m',
       ])).called(1);
 
