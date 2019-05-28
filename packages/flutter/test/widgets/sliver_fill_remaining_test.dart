@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 void main() {
@@ -61,5 +62,32 @@ void main() {
     controller.jumpTo(0.0);
     await tester.pump();
     expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(500.0));
+  });
+
+  testWidgets('SliverFillRemaining does not extend past viewport.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          controller: controller,
+          slivers: <Widget>[
+            SliverToBoxAdapter(
+              child: Container(
+                color: Colors.red,
+                height: 150.0,
+              ),
+            ),
+            SliverFillRemaining(
+              child: Container(color: Colors.white),
+            ),
+          ],
+        ),
+      ),
+    );
+    expect(find.byType(Container), findsNWidgets(2));
+    controller.jumpTo(200.0);
+    await tester.pump();
+    expect(find.byType(Container), findsNWidgets(2));
   });
 }
