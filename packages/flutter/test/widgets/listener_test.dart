@@ -785,6 +785,8 @@ void main() {
       expect(events.last.localDelta, const Offset(-1, -1));
 
       events.clear();
+
+      await gesture.removePointer();
     });
 
     testWidgets('scaled for touch/signal', (WidgetTester tester) async {
@@ -862,6 +864,8 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
+
+      await gesture.removePointer();
     });
 
     testWidgets('scaled for mouse hover', (WidgetTester tester) async {
@@ -941,6 +945,7 @@ void main() {
       expect(events.last.localDelta, const Offset(2, 2));
 
       events.clear();
+      await gesture.removePointer();
     });
 
     testWidgets('scaled and offset for touch/signal', (WidgetTester tester) async {
@@ -1019,6 +1024,8 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
+
+      await gesture.removePointer();
     });
 
     testWidgets('scaled and offset for hover', (WidgetTester tester) async {
@@ -1097,6 +1104,7 @@ void main() {
       expect(events.last.localDelta, const Offset(-1, -1));
 
       events.clear();
+      await gesture.removePointer();
     });
 
     testWidgets('rotated for touch/signal', (WidgetTester tester) async {
@@ -1174,6 +1182,8 @@ void main() {
       expect(events.single.delta, Offset.zero);
       expect(events.single.localDelta, Offset.zero);
       expect(events.single.transform, expectedTransform);
+
+      await gesture.removePointer();
     });
 
     testWidgets('rotated for  hover', (WidgetTester tester) async {
@@ -1252,6 +1262,7 @@ void main() {
       expect(events.last.localDelta, const Offset(-2, -1));
 
       events.clear();
+      await gesture.removePointer();
     });
   });
 }

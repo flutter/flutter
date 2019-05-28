@@ -164,7 +164,7 @@ class HitTestResult {
     _transforms.removeLast();
   }
 
-  bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon =  0.000001 }) {
+  bool _debugVectorMoreOrLessEquals(Vector4 a, Vector4 b, { double epsilon = precisionErrorTolerance }) {
     bool result = true;
     assert(() {
       final Vector4 difference = a - b;
