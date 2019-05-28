@@ -1616,7 +1616,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(51));
+      expect(location.line, equals(50));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
