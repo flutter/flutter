@@ -305,7 +305,7 @@ class IosProject {
   }
 
   /// True, if the host app project is using Swift.
-  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
+  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION') ?? false;
 
   /// The build settings for the host app of this project, as a detached map.
   ///
