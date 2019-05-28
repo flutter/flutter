@@ -5,10 +5,9 @@
 import 'package:flutter/src/material/debug.dart';
 import 'package:flutter/widgets.dart';
 
+import 'button.dart';
 import 'colors.dart';
-import 'ink_well.dart';
 import 'theme.dart';
-import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
 // See: <https://material.io/design/usability/accessibility.html#layout-typography>
@@ -21,105 +20,107 @@ const Border _kDefaultStandaloneBorder = Border(
   bottom: BorderSide(color: Colors.black12),
 );
 
+/// An individual toggle button, otherwise known as a segmented button.
+///
+/// This button is used by [ToggleButtons] to implement a set of segmented controls.
 class ToggleButton extends StatelessWidget {
-  // TODO: Figure out which properties should be required
-  ToggleButton({
+  // TODO(WIP): Figure out which properties should be required
+  const ToggleButton({
     Key key,
-    this.alignment = Alignment.center,
-    this.icon,
-    this.iconSize = 24.0,
-    this.padding = const EdgeInsets.all(12.0),
     this.selected = false,
-    this.iconColor,
-    this.backgroundColor,
+    this.color,
+    this.activeColor,
     this.disabledColor,
+    this.fillColor,
+    this.focusColor,
     this.highlightColor,
+    this.hoverColor,
     this.splashColor,
-    this.border = _kDefaultStandaloneBorder,
     this.onPressed,
-    this.tooltip,
+    this.shape,
+    this.child,
   }) : super(key: key);
 
-  // TODO: Write out documentation for final fields
-
-  final AlignmentGeometry alignment;
-
-  final Widget icon;
-
-  final double iconSize;
-
-  final EdgeInsets padding;
-
+  /// Determines if the button is displayed as active/selected or enabled.
   final bool selected;
 
-  final Color iconColor;
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
+  final Color color;
 
-  final Color backgroundColor;
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
+  final Color activeColor;
 
-  final Color highlightColor;
-
-  final Color splashColor;
-
-  final Border border;
-
+  /// The color for [Text] and [Icon] widgets if the button is disabled.
+  ///
+  /// If [onPressed] is null, this color will be used.
   final Color disabledColor;
 
+  /// The color of the button's [Material].
+  final Color fillColor;
+
+  /// The color for the button's [Material] when it has the input focus.
+  final Color focusColor;
+
+  /// The color for the button's [Material] when a pointer is hovering over it.
+  final Color hoverColor;
+
+  /// The highlight color for the button's [InkWell].
+  final Color highlightColor;
+
+  /// The splash color for the button's [InkWell].
+  final Color splashColor;
+
+  /// Called when the button is tapped or otherwise activated.
+  ///
+  /// If this is set to null, the button will be disabled, see [enabled].
   final VoidCallback onPressed;
 
-  final String tooltip;
+  /// The shape of the button's [Material].
+  ///
+  /// The button's highlight and splash are clipped to this shape. If the
+  /// button has an elevation, then its drop shadow is defined by this shape.
+  final ShapeBorder shape;
+
+  /// The button's label, which is usually an [Icon] or a [Text] widget.
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Color currentColor;
 
-    if (onPressed != null) {
-      currentColor = iconColor;
+    if (onPressed != null && selected) {
+      currentColor = activeColor ?? Theme.of(context).colorScheme.primary;
+    } else if (onPressed != null && !selected) {
+      currentColor = color ?? Theme.of(context).colorScheme.onSurface;
     } else {
       currentColor = disabledColor ?? Theme.of(context).disabledColor;
     }
 
-    // TODO: perhaps come up with better intermediate variable
-    Widget resultingIcon = Semantics(
-      button: true,
-      enabled: onPressed != null,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(
-          minWidth: _kMinButtonSize,
-          minHeight: _kMinButtonSize,
-        ),
-        child: Padding(
-          padding: padding,
-          child: SizedBox(
-            height: iconSize,
-            width: iconSize,
-            // TODO: Test out need for alignment here (seems like not needed). If not needed, file issue for IconButton
-            child: IconTheme.merge(
-              data: IconThemeData(
-                size: iconSize,
-                color: currentColor,
-              ),
-              child: icon,
-            ),
-          )
-        ),
+    return IconTheme.merge(
+      data: IconThemeData(
+        color: currentColor,
       ),
-    );
-
-    if (tooltip != null) {
-      resultingIcon = Tooltip(
-        message: tooltip,
-        child: resultingIcon,
-      );
-    }
-
-    return InkWell(
-      onTap: onPressed,
-      child: resultingIcon,
-      highlightColor: highlightColor ?? Theme.of(context).highlightColor,
-      splashColor: splashColor ?? Theme.of(context).splashColor,
+      child: RawMaterialButton(
+        textStyle: TextStyle(
+          color: currentColor,
+        ),
+        elevation: 0.0,
+        highlightElevation: 0.0,
+        fillColor: selected ? fillColor : null,
+        highlightColor: highlightColor,
+        hoverColor: hoverColor,
+        splashColor: splashColor,
+        onPressed: onPressed,
+        shape: shape,
+        child: child,
+      ),
     );
   }
 
-  // TODO: include debugFillProperties method
+  // TODO(WIP): include debugFillProperties method
 }
