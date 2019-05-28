@@ -167,7 +167,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 10));
     expect(tester.hasRunningAnimations, isFalse);
 
-    await tester.pumpAndSettle();
+    expect(await tester.pumpAndSettle(), 1);
     transformWidget = tester.firstWidget(find.byType(Transform));
 
     // Icon has not rotated.

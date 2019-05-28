@@ -16,6 +16,9 @@ import 'debug.dart';
 import 'object.dart';
 
 /// How overflowing text should be handled.
+///
+/// A [TextOverflow] can be passed to [Text] and [RichText] via their
+/// [Text.overflow] and [RichText.overflow] properties respectively.
 enum TextOverflow {
   /// Clip the overflowing text to fix its container.
   clip,

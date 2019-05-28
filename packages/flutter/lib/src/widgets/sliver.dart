@@ -670,7 +670,10 @@ class SliverChildListDelegate extends SliverChildDelegate {
       return null;
     Widget child = children[index];
     final Key key = child.key != null? _SaltedValueKey(child.key) : null;
-    assert(child != null);
+    assert(
+      child != null,
+      "The sliver's children must not contain null values, but a null value was found at index $index"
+    );
     if (addRepaintBoundaries)
       child = RepaintBoundary(child: child);
     if (addSemanticIndexes) {

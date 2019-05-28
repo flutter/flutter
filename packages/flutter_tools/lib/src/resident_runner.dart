@@ -182,7 +182,7 @@ class FlutterDevice {
     // The flutterExit message only returns if it fails, so just wait a few
     // seconds then assume it worked.
     // TODO(ianh): We should make this return once the VM service disconnects.
-    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () { });
+    await Future.wait(futures).timeout(const Duration(seconds: 2), onTimeout: () => <void>[]);
   }
 
   Future<Uri> setupDevFS(
@@ -313,9 +313,15 @@ class FlutterDevice {
   }
 
   void startEchoingDeviceLog() {
-    if (_loggingSubscription != null)
+    if (_loggingSubscription != null) {
       return;
-    _loggingSubscription = device.getLogReader(app: package).logLines.listen((String line) {
+    }
+    final Stream<String> logStream = device.getLogReader(app: package).logLines;
+    if (logStream == null) {
+      printError('Failed to read device log stream');
+      return;
+    }
+    _loggingSubscription = logStream.listen((String line) {
       if (!line.contains('Observatory listening on http'))
         printStatus(line, wrap: false);
     });

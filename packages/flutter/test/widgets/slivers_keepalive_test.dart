@@ -9,9 +9,9 @@ import 'package:flutter/rendering.dart';
 void main() {
   testWidgets('Sliver with keep alive without key - should dispose after reodering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
-      WidgetTest0(text: 'child 0', keepAlive: true),
-      WidgetTest1(text: 'child 1', keepAlive: true),
-      WidgetTest2(text: 'child 2', keepAlive: true),
+      const WidgetTest0(text: 'child 0', keepAlive: true),
+      const WidgetTest1(text: 'child 1', keepAlive: true),
+      const WidgetTest2(text: 'child 2', keepAlive: true),
     ];
     await tester.pumpWidget(SwitchingChildListTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
@@ -32,9 +32,9 @@ void main() {
 
   testWidgets('Sliver without keep alive without key - should dispose after reodering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
-      WidgetTest0(text: 'child 0'),
-      WidgetTest1(text: 'child 1'),
-      WidgetTest2(text: 'child 2'),
+      const WidgetTest0(text: 'child 0'),
+      const WidgetTest1(text: 'child 1'),
+      const WidgetTest2(text: 'child 2'),
     ];
     await tester.pumpWidget(SwitchingChildListTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
@@ -122,9 +122,9 @@ void main() {
 
   testWidgets('Sliver with keep alive with Value key - should not dispose after reodering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
-      WidgetTest0(text: 'child 0', key: const ValueKey<int>(0), keepAlive: true),
-      WidgetTest1(text: 'child 1', key: const ValueKey<int>(1), keepAlive: true),
-      WidgetTest2(text: 'child 2', key: const ValueKey<int>(2), keepAlive: true),
+      const WidgetTest0(text: 'child 0', key: ValueKey<int>(0), keepAlive: true),
+      const WidgetTest1(text: 'child 1', key: ValueKey<int>(1), keepAlive: true),
+      const WidgetTest2(text: 'child 2', key: ValueKey<int>(2), keepAlive: true),
     ];
     await tester.pumpWidget(SwitchingChildListTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
@@ -146,7 +146,7 @@ void main() {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey(), keepAlive: true),
-      WidgetTest2(text: 'child 2', keepAlive: true),
+      const WidgetTest2(text: 'child 2', keepAlive: true),
     ];
     await tester.pumpWidget(SwitchingChildListTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
@@ -190,7 +190,7 @@ void main() {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: GlobalKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
-      WidgetTest2(text: 'child 2', keepAlive: true),
+      const WidgetTest2(text: 'child 2', keepAlive: true),
     ];
     await tester.pumpWidget(SwitchingChildListTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
@@ -233,7 +233,7 @@ void main() {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: GlobalKey()),
-      WidgetTest2(text: 'child 2', keepAlive: true),
+      const WidgetTest2(text: 'child 2', keepAlive: true),
     ];
     await tester.pumpWidget(SwitchingChildBuilderTest(children: childList));
     final _WidgetTest0State state0 = tester.state(find.byType(WidgetTest0));
@@ -276,7 +276,7 @@ void main() {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
       WidgetTest1(text: 'child 1', key: UniqueKey()),
-      WidgetTest2(text: 'child 2', keepAlive: true),
+      const WidgetTest2(text: 'child 2', keepAlive: true),
     ];
     await tester.pumpWidget(
         SwitchingChildListTest(children: childList, viewportFraction: 0.1)
@@ -316,7 +316,7 @@ void main() {
   testWidgets('SliverList should not dispose widget with key during in screen reordering', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
-      WidgetTest1(text: 'child 1', keepAlive: true),
+      const WidgetTest1(text: 'child 1', keepAlive: true),
       WidgetTest2(text: 'child 2', key: UniqueKey()),
     ];
     await tester.pumpWidget(
@@ -366,7 +366,7 @@ void main() {
   testWidgets('SliverList remove child from child list', (WidgetTester tester) async {
     List<Widget> childList= <Widget>[
       WidgetTest0(text: 'child 0', key: UniqueKey(), keepAlive: true),
-      WidgetTest1(text: 'child 1', keepAlive: true),
+      const WidgetTest1(text: 'child 1', keepAlive: true),
       WidgetTest2(text: 'child 2', key: UniqueKey()),
     ];
     await tester.pumpWidget(
@@ -401,7 +401,7 @@ List<Widget> createSwitchedChildList(List<Widget> childList, int i, int j) {
 }
 
 class SwitchingChildBuilderTest extends StatefulWidget {
-  SwitchingChildBuilderTest({
+  const SwitchingChildBuilderTest({
     this.children,
     Key key
   }) : super(key: key);
@@ -460,9 +460,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
                     return children[index];
                   },
                   childCount: children.length,
-                  findChildIndexCallback: (Key key) {
-                    return _mapKeyToIndex[key] == null ? -1 : _mapKeyToIndex[key];
-                  }
+                  findChildIndexCallback: (Key key) => _mapKeyToIndex[key] ?? -1,
                 ),
               )
             ],
@@ -474,7 +472,7 @@ class _SwitchingChildBuilderTest extends State<SwitchingChildBuilderTest> {
 }
 
 class SwitchingChildListTest extends StatefulWidget {
-  SwitchingChildListTest({
+  const SwitchingChildListTest({
     this.children,
     this.viewportFraction = 1.0,
     Key key
@@ -511,7 +509,7 @@ class _SwitchingChildListTest extends State<SwitchingChildListTest> {
 }
 
 class SwitchingSliverListTest extends StatefulWidget {
-  SwitchingSliverListTest({
+  const SwitchingSliverListTest({
     this.children,
     this.viewportFraction = 1.0,
     Key key
@@ -547,7 +545,7 @@ class _SwitchingSliverListTest extends State<SwitchingSliverListTest> {
 }
 
 class WidgetTest0 extends StatefulWidget {
-  WidgetTest0({
+  const WidgetTest0({
     this.text,
     this.keepAlive = false,
     Key key
@@ -580,7 +578,7 @@ class _WidgetTest0State extends State<WidgetTest0> with AutomaticKeepAliveClient
 }
 
 class WidgetTest1 extends StatefulWidget {
-  WidgetTest1({
+  const WidgetTest1({
     this.text,
     this.keepAlive = false,
     Key key
@@ -613,7 +611,7 @@ class _WidgetTest1State extends State<WidgetTest1> with AutomaticKeepAliveClient
 }
 
 class WidgetTest2 extends StatefulWidget {
-  WidgetTest2({
+  const WidgetTest2({
     this.text,
     this.keepAlive = false,
     Key key

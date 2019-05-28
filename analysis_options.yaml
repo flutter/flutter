@@ -142,6 +142,7 @@ linter:
     - prefer_is_not_empty
     - prefer_iterable_whereType
     # - prefer_mixin # https://github.com/dart-lang/language/issues/32
+    # - prefer_null_aware_operators # disable until NNBD, see https://github.com/flutter/flutter/pull/32711#issuecomment-492930932
     - prefer_single_quotes
     - prefer_typing_uninitialized_variables
     - prefer_void_to_null

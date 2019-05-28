@@ -230,19 +230,16 @@ class _LeaveBehindListItem extends StatelessWidget {
         confirmDismiss: !confirmDismiss ? null : (DismissDirection dismissDirection) async {
           switch(dismissDirection) {
             case DismissDirection.endToStart:
-              if (await _showConfirmationDialog(context, 'archive'))
-                _handleArchive();
-              break;
+              return await _showConfirmationDialog(context, 'archive') == true;
             case DismissDirection.startToEnd:
-              if (await _showConfirmationDialog(context, 'delete'))
-                _handleDelete();
-              break;
+              return await _showConfirmationDialog(context, 'delete') == true;
             case DismissDirection.horizontal:
             case DismissDirection.vertical:
             case DismissDirection.up:
             case DismissDirection.down:
               assert(false);
           }
+          return false;
         },
         background: Container(
           color: theme.primaryColor,

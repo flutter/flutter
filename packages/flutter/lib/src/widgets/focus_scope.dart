@@ -93,13 +93,9 @@ import 'inherited_notifier.dart';
 ///             return GestureDetector(
 ///               onTap: () {
 ///                 if (hasFocus) {
-///                   setState(() {
-///                     focusNode.unfocus();
-///                   });
+///                   focusNode.unfocus();
 ///                 } else {
-///                   setState(() {
-///                     focusNode.requestFocus();
-///                   });
+///                   focusNode.requestFocus();
 ///                 }
 ///               },
 ///               child: Center(
@@ -132,6 +128,10 @@ import 'inherited_notifier.dart';
 ///     traversal.
 ///   * [FocusManager], a singleton that manages the primary focus and
 ///     distributes key events to focused nodes.
+///   * [FocusTraversalPolicy], an object used to determine how to move the
+///     focus to other nodes.
+///   * [DefaultFocusTraversal], a widget used to configure the default focus
+///     traversal policy for a widget subtree.
 class Focus extends StatefulWidget {
   /// Creates a widget that manages a [FocusNode].
   ///
@@ -146,8 +146,10 @@ class Focus extends StatefulWidget {
     this.onFocusChange,
     this.onKey,
     this.debugLabel,
+    this.skipTraversal = false,
   })  : assert(child != null),
         assert(autofocus != null),
+        assert(skipTraversal != null),
         super(key: key);
 
   /// A debug label for this widget.
@@ -208,33 +210,75 @@ class Focus extends StatefulWidget {
   /// node when needed.
   final FocusNode focusNode;
 
-  /// Returns the [focusNode] of the [Focus] that most tightly encloses the given
-  /// [BuildContext].
+  /// Sets the [FocusNode.skipTraversal] flag on the focus node so that it won't
+  /// be visited by the [FocusTraversalPolicy].
   ///
-  /// If this node doesn't have a [Focus] widget ancestor, then the
-  /// [FocusManager.rootScope] is returned.
+  /// This is sometimes useful if a Focus widget should receive key events as
+  /// part of the focus chain, but shouldn't be accessible via focus traversal.
+  final bool skipTraversal;
+
+  /// Returns the [focusNode] of the [Focus] that most tightly encloses the
+  /// given [BuildContext].
   ///
-  /// The [context] argument must not be null.
-  static FocusNode of(BuildContext context) {
+  /// If no [Focus] node is found before reaching the nearest [FocusScope]
+  /// widget, or there is no [Focus] widget in scope, then this method will
+  /// throw an exception. To return null instead of throwing, pass true for
+  /// [nullOk].
+  ///
+  /// The [context] and [nullOk] arguments must not be null.
+  static FocusNode of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
+    assert(nullOk != null);
     final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
-    return marker?.notifier ?? context.owner.focusManager.rootScope;
+    final FocusNode node = marker?.notifier;
+    if (node is FocusScopeNode) {
+      if (!nullOk) {
+        throw FlutterError(
+            'Focus.of() was called with a context that does not contain a Focus between the given '
+            'context and the nearest FocusScope widget.\n'
+            'No Focus ancestor could be found starting from the context that was passed to '
+            'Focus.of() to the point where it found the nearest FocusScope widget. This can happen '
+            'because you are using a widget that looks for a Focus ancestor, and do not have a '
+            'Focus widget ancestor in the current FocusScope.\n'
+            'The context used was:\n'
+            '  $context'
+        );
+      }
+      return null;
+    }
+    if (node == null) {
+      if (!nullOk) {
+        throw FlutterError(
+            'Focus.of() was called with a context that does not contain a Focus widget.\n'
+            'No Focus widget ancestor could be found starting from the context that was passed to '
+            'Focus.of(). This can happen because you are using a widget that looks for a Focus '
+            'ancestor, and do not have a Focus widget descendant in the nearest FocusScope.\n'
+            'The context used was:\n'
+            '  $context'
+        );
+      }
+      return null;
+    }
+    return node;
   }
 
   /// Returns true if the nearest enclosing [Focus] widget's node is focused.
   ///
   /// A convenience method to allow build methods to write:
-  /// `Focus.isAt(context)` to get whether or not the nearest [Focus] or
-  /// [FocusScope] above them in the widget hierarchy currently has the keyboard
-  /// focus.
-  static bool isAt(BuildContext context) => Focus.of(context).hasFocus;
+  /// `Focus.isAt(context)` to get whether or not the nearest [Focus] above them
+  /// in the widget hierarchy currently has the input focus.
+  ///
+  /// Returns false if no [Focus] widget is found before reaching the nearest
+  /// [FocusScope], or if the root of the focus tree is reached without finding
+  /// a [Focus] widget.
+  static bool isAt(BuildContext context) => Focus.of(context, nullOk: true)?.hasFocus ?? false;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null));
     properties.add(FlagProperty('autofocus', value: autofocus, ifTrue: 'AUTOFOCUS', defaultValue: false));
-    properties.add(DiagnosticsProperty<FocusScopeNode>('node', focusNode, defaultValue: null));
+    properties.add(DiagnosticsProperty<FocusNode>('node', focusNode, defaultValue: null));
   }
 
   @override
@@ -243,7 +287,7 @@ class Focus extends StatefulWidget {
 
 class _FocusState extends State<Focus> {
   FocusNode _internalNode;
-  FocusNode get node => widget.focusNode ?? _internalNode;
+  FocusNode get focusNode => widget.focusNode ?? _internalNode;
   bool _hasFocus;
   bool _didAutofocus = false;
   FocusAttachment _focusAttachment;
@@ -257,27 +301,27 @@ class _FocusState extends State<Focus> {
   void _initNode() {
     if (widget.focusNode == null) {
       // Only create a new node if the widget doesn't have one.
+      // This calls a function instead of just allocating in place because
+      // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
-    _focusAttachment = node.attach(context, onKey: widget.onKey);
-    _hasFocus = node.hasFocus;
+    focusNode.skipTraversal = widget.skipTraversal;
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
+    _hasFocus = focusNode.hasFocus;
+
     // Add listener even if the _internalNode existed before, since it should
-    // not be listening now if we're re-using a previous one, because it should
+    // not be listening now if we're re-using a previous one because it should
     // have already removed its listener.
-    node.addListener(_handleFocusChanged);
+    focusNode.addListener(_handleFocusChanged);
   }
 
-  FocusNode _createNode() {
-    return FocusNode(
-      debugLabel: widget.debugLabel,
-    );
-  }
+  FocusNode _createNode() => FocusNode(debugLabel: widget.debugLabel);
 
   @override
   void dispose() {
     // Regardless of the node owner, we need to remove it from the tree and stop
     // listening to it.
-    node.removeListener(_handleFocusChanged);
+    focusNode.removeListener(_handleFocusChanged);
     _focusAttachment.detach();
     // Don't manage the lifetime of external nodes given to the widget, just the
     // internal node.
@@ -290,7 +334,7 @@ class _FocusState extends State<Focus> {
     super.didChangeDependencies();
     _focusAttachment?.reparent();
     if (!_didAutofocus && widget.autofocus) {
-      FocusScope.of(context).autofocus(node);
+      FocusScope.of(context).autofocus(focusNode);
       _didAutofocus = true;
     }
   }
@@ -304,45 +348,33 @@ class _FocusState extends State<Focus> {
   @override
   void didUpdateWidget(Focus oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.debugLabel != widget.debugLabel && _internalNode != null) {
-      _internalNode.debugLabel = widget.debugLabel;
-    }
-    if ((oldWidget.focusNode == widget.focusNode && oldWidget.onKey == widget.onKey)
-        || oldWidget.focusNode == null && widget.focusNode == null) {
-      // Either there aren't changes, or the _internalNode is already attached
-      // and being listened to.
+    assert(() {
+      // Only update the debug label in debug builds, and only if we own the
+      // node.
+      if (oldWidget.debugLabel != widget.debugLabel && _internalNode != null) {
+        _internalNode.debugLabel = widget.debugLabel;
+      }
+      return true;
+    }());
+
+    if (oldWidget.focusNode == widget.focusNode) {
       return;
     }
+
     _focusAttachment.detach();
-    if (oldWidget.focusNode == null && widget.focusNode != null) {
-      // We're no longer using the node we were managing. We don't stop managing
-      // it until dispose, so just detach it: we might re-use it eventually, and
-      // calling dispose on it here will confuse other widgets that haven't yet
-      // been notified of a widget change and might still be listening.
-      _internalNode?.removeListener(_handleFocusChanged);
-      _focusAttachment = widget.focusNode?.attach(context, onKey: widget.onKey);
-      widget.focusNode?.addListener(_handleFocusChanged);
-    } else if (oldWidget.focusNode != null && widget.focusNode == null) {
-      oldWidget.focusNode?.removeListener(_handleFocusChanged);
-      // We stopped using the external node, and now we need to manage one.
-      _initNode();
-    } else {
-      // We just switched which node the widget had, so just change what we
-      // listen to/attach.
-      oldWidget.focusNode.removeListener(_handleFocusChanged);
-      widget.focusNode.addListener(_handleFocusChanged);
-      _focusAttachment = widget.focusNode.attach(context, onKey: widget.onKey);
-    }
-    _hasFocus = node.hasFocus;
+    focusNode.removeListener(_handleFocusChanged);
+    _initNode();
+
+    _hasFocus = focusNode.hasFocus;
   }
 
   void _handleFocusChanged() {
-    if (_hasFocus != node.hasFocus) {
+    if (_hasFocus != focusNode.hasFocus) {
       setState(() {
-        _hasFocus = node.hasFocus;
+        _hasFocus = focusNode.hasFocus;
       });
       if (widget.onFocusChange != null) {
-        widget.onFocusChange(node.hasFocus);
+        widget.onFocusChange(focusNode.hasFocus);
       }
     }
   }
@@ -351,7 +383,7 @@ class _FocusState extends State<Focus> {
   Widget build(BuildContext context) {
     _focusAttachment.reparent();
     return _FocusMarker(
-      node: node,
+      node: focusNode,
       child: widget.child,
     );
   }
@@ -375,6 +407,20 @@ class _FocusState extends State<Focus> {
 /// more information about the details of what node management entails if not
 /// using a [FocusScope] widget.
 ///
+/// A [DefaultTraversalPolicy] widget provides the [FocusTraversalPolicy] for
+/// the [FocusScopeNode]s owned by its descendant widgets. Each [FocusScopeNode]
+/// has [FocusNode] descendants. The traversal policy defines what "previous
+/// focus", "next focus", and "move focus in this direction" means for them.
+///
+/// [FocusScopeNode]s remember the last [FocusNode] that was focused within
+/// their descendants, and can move that focus to the next/previous node, or a
+/// node in a particular direction when the [FocusNode.nextFocus],
+/// [FocusNode.previousFocus], or [FocusNode.focusInDirection] are called on a
+/// [FocusNode] or [FocusScopeNode].
+///
+/// To move the focus, use methods on [FocusScopeNode]. For instance, to move
+/// the focus to the next node, call `Focus.of(context).nextFocus()`.
+///
 /// See also:
 ///
 ///   * [FocusScopeNode], which represents a scope node in the focus hierarchy.
@@ -384,6 +430,10 @@ class _FocusState extends State<Focus> {
 ///     managing focus without having to manage the node.
 ///   * [FocusManager], a singleton that manages the focus and distributes key
 ///     events to focused nodes.
+///   * [FocusTraversalPolicy], an object used to determine how to move the
+///     focus to other nodes.
+///   * [DefaultFocusTraversal], a widget used to configure the default focus
+///     traversal policy for a widget subtree.
 class FocusScope extends Focus {
   /// Creates a widget that manages a [FocusScopeNode].
   ///
@@ -392,7 +442,7 @@ class FocusScope extends Focus {
   /// The [autofocus], and [showDecorations] arguments must not be null.
   const FocusScope({
     Key key,
-    FocusNode node,
+    FocusScopeNode node,
     @required Widget child,
     bool autofocus = false,
     ValueChanged<bool> onFocusChange,
@@ -441,7 +491,7 @@ class _FocusScopeState extends _FocusState {
     return Semantics(
       explicitChildNodes: true,
       child: _FocusMarker(
-        node: node,
+        node: focusNode,
         child: widget.child,
       ),
     );
