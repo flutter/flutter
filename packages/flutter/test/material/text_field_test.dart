@@ -735,6 +735,45 @@ void main() {
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
   });
 
+  testWidgets('Slight movements in longpress don\'t hide/show handles', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(
+      overlay(
+        child: TextField(
+          controller: controller,
+        ),
+      )
+    );
+
+    const String testValue = 'abc def ghi';
+    await tester.enterText(find.byType(TextField), testValue);
+    expect(controller.value.text, testValue);
+    await skipPastScrollingAnimation(tester);
+
+    expect(controller.selection.isCollapsed, true);
+
+    // Long press the 'e' to select 'def', but don't release the gesture.
+    final Offset ePos = textOffsetToPosition(tester, testValue.indexOf('e'));
+    final TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
+    await tester.pump(const Duration(seconds: 2));
+    await tester.pumpAndSettle();
+
+    // Handles are shown
+    final Finder fadeFinder = find.byType(FadeTransition);
+    expect(fadeFinder, findsNWidgets(2)); // 2 handles, 1 toolbar
+    FadeTransition handle = tester.widget(fadeFinder.at(0));
+    expect(handle.opacity.value, equals(1.0));
+
+    // Move the gesture very slightly
+    await gesture.moveBy(const Offset(1.0, 1.0));
+    await tester.pump(TextSelectionOverlay.fadeDuration * 0.5);
+    handle = tester.widget(fadeFinder.at(0));
+
+    // The handle should still be fully opaque.
+    expect(handle.opacity.value, equals(1.0));
+  });
+
   testWidgets('Mouse long press is just like a tap', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 

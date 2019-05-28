@@ -285,7 +285,7 @@ void main() {
         );
 
         // Drag the minute picker to the next slot (03 -> 06).
-        // The `initialDateTime` and the `minuteInterval` values are specifically choosen
+        // The `initialDateTime` and the `minuteInterval` values are specifically chosen
         // so that `find.text` finds exactly one widget.
         await tester.drag(find.text('03'), _kRowOffset);
         await tester.pump();

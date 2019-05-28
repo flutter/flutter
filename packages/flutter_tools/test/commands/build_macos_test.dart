@@ -75,7 +75,7 @@ void main() {
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',
-      '-project', flutterProject.macos.xcodeProjectFile.path,
+      '-workspace', flutterProject.macos.xcodeWorkspace.path,
       '-configuration', 'Debug',
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
