@@ -24,7 +24,18 @@ const Border _kDefaultStandaloneBorder = Border(
 ///
 /// This button is used by [ToggleButtons] to implement a set of segmented controls.
 class ToggleButton extends StatelessWidget {
-  // TODO(WIP): Figure out which properties should be required
+  // TODO(WIP): Figure out which properties should be required and if
+  // additional properties are required.
+
+  /// Creates a toggle button based on [RawMaterialButton].
+  ///
+  /// This class adds some logic to determine between enabled, active, and
+  /// disabled states to determine the appropriate colors to use.
+  ///
+  /// It takes in a [shape] property to modify the borders of the button,
+  /// which is used by [ToggleButtons] to customize borders based on the
+  /// order in which this button appears in the list.
+  ///
   const ToggleButton({
     Key key,
     this.selected = false,
@@ -112,6 +123,7 @@ class ToggleButton extends StatelessWidget {
         elevation: 0.0,
         highlightElevation: 0.0,
         fillColor: selected ? fillColor : null,
+        focusColor: selected ? focusColor : null,
         highlightColor: highlightColor,
         hoverColor: hoverColor,
         splashColor: splashColor,
