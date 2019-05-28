@@ -1145,7 +1145,10 @@ void main() {
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
     );
-    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+    // TODO(justinmc): The tap to show the menu can't happen in the part of the
+    // handle that overlaps the text field. If so, it will trigger an affinity
+    // change in the selection and cause the menu to hide.
+    await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
@@ -1163,7 +1166,11 @@ void main() {
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    // Allow time for handle to appear and double tap to time out.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('e'));
     renderEditable = findRenderEditable(tester);
     endpoints = globalize(
       renderEditable.getEndpointsForSelection(controller.selection),
@@ -1172,6 +1179,9 @@ void main() {
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('e'));
 
     // PASTE right before the 'e'.
     await tester.tap(find.text('PASTE'));
@@ -1211,7 +1221,10 @@ void main() {
         renderEditable.getEndpointsForSelection(controller.selection),
         renderEditable,
       );
-      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      // TODO(justinmc): The tap to show the menu can't happen in the part of
+      // handle that overlaps the text field. If so, it will trigger an affinity
+      // change in the selection and cause the menu to hide.
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
@@ -1244,7 +1257,10 @@ void main() {
         renderEditable.getEndpointsForSelection(controller.selection),
         renderEditable,
       );
-      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      // TODO(justinmc): The tap to show the menu can't happen in the part of
+      // handle that overlaps the text field. If so, it will trigger an affinity
+      // change in the selection and cause the menu to hide.
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
