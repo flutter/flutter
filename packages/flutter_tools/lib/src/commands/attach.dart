@@ -307,9 +307,7 @@ class AttachCommand extends FlutterCommand {
             fs.currentDirectory,
             LaunchMode.attach,
           );
-          flutterUsage.sendEvent('attach', 'success');
         } catch (error) {
-          flutterUsage.sendEvent('attach', 'failure');
           throwToolExit(error.toString());
         }
         result = await app.runner.waitForAppToFinish();
@@ -318,8 +316,12 @@ class AttachCommand extends FlutterCommand {
         result = await runner.attach();
         assert(result != null);
       }
-      if (result != 0)
+      if (result == 0) {
+        flutterUsage.sendEvent('attach', 'success');
+      } else {
+        flutterUsage.sendEvent('attach', 'failure');
         throwToolExit(null, exitCode: result);
+      }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       for (ForwardedPort port in ports) {
