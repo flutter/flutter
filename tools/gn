@@ -315,6 +315,10 @@ def parse_args(args):
                       help='On the mac, the SDK is inferred from the Xcode location unless this flag is specified. ' +
                       ' Setting the FLUTTER_MAC_SDK_PATH environment variable achieves the same effect.')
 
+  parser.add_argument('--ide', default='', type=str,
+                      help='The IDE files to generate using GN. Use `gn gen help` and look for the --ide flag to' +
+                      ' see supported IDEs. If this flag is not specified, a platform specific default is selected.')
+
   return parser.parse_args(args)
 
 def main(argv):
@@ -335,19 +339,20 @@ def main(argv):
     '--check',
   ]
 
-  if sys.platform == 'darwin':
-    # On the Mac, also generate Xcode projects for ease of editing.
+  if args.ide != '':
+    command.append('--ide=%s' % args.ide)
+  elif sys.platform == 'darwin':
+    # On the Mac, generate an Xcode project by default.
     command.append('--ide=xcode')
-
-  if sys.platform.startswith('win'):
-    # On Windows, also generate Visual Studio project for ease of editing.
+  elif sys.platform.startswith('win'):
+    # On Windows, generate a Visual Studio project.
     command.append('--ide=vs')
 
   gn_args = to_command_line(to_gn_args(args))
   out_dir = get_out_dir(args)
-  print "gn gen --check in %s" % out_dir
   command.append(out_dir)
   command.append('--args=%s' % ' '.join(gn_args))
+  print "Generating GN files in: %s" % out_dir
   gn_call_result = subprocess.call(command, cwd=SRC_ROOT)
 
   if gn_call_result == 0:
