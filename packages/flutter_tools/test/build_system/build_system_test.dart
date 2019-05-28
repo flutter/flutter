@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -13,6 +15,7 @@ import '../src/testbed.dart';
 void main() {
   group(Target, () {
     Testbed testbed;
+    MockPlatform mockPlatform;
     Environment environment;
     Target fooTarget;
     Target barTarget;
@@ -23,6 +26,9 @@ void main() {
     setUp(() {
       fooInvocations = 0;
       barInvocations = 0;
+      mockPlatform = MockPlatform();
+      // Keep file paths the same.
+      when(mockPlatform.isWindows).thenReturn(false);
       testbed = Testbed(
         setup: () {
           environment = Environment(
@@ -68,6 +74,9 @@ void main() {
             fooTarget,
             barTarget,
           ]);
+        },
+        overrides: <Type, Generator>{
+          Platform: () => mockPlatform,
         }
       );
     });
@@ -159,6 +168,8 @@ void main() {
     expect(() => checkCycles(barTarget), throwsA(isInstanceOf<CycleException>()));
   });
 }
+
+class MockPlatform extends Mock implements Platform {}
 
 // Work-around for silly lint check.
 T nonconst<T>(T input) => input;
