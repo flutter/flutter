@@ -380,14 +380,15 @@ class PointerEventConverter {
                 tilt: datum.tilt,
               );
             }
+            final Offset delta = state.deltaTo(position);
             if (position != state.lastPosition) {
               yield PointerHoverEvent(
                 timeStamp: timeStamp,
                 kind: kind,
                 device: datum.device,
                 position: position,
+                delta: delta,
                 buttons: datum.buttons,
-                delta: state.deltaTo(position),
                 obscured: datum.obscured,
                 pressureMin: datum.pressureMin,
                 pressureMax: datum.pressureMax,
@@ -408,6 +409,8 @@ class PointerEventConverter {
               timeStamp: timeStamp,
               kind: kind,
               device: datum.device,
+              position: position,
+              delta: delta,
               obscured: datum.obscured,
               pressureMin: datum.pressureMin,
               pressureMax: datum.pressureMax,

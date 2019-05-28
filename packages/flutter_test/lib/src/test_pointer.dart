@@ -230,14 +230,18 @@ class TestPointer {
   ///
   /// [isDown] must be false, since hover events can't be sent when the pointer
   /// is up.
-  PointerRemovedEvent removePointer({
+  PointerRemovedEvent removePointer(Offset newLocation, {
     Duration timeStamp = Duration.zero,
   }) {
     assert(timeStamp != null);
+    final Offset delta = location != null ? newLocation - location : Offset.zero;
+    _location = newLocation;
     return PointerRemovedEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
+      position: newLocation,
+      delta: delta,
     );
   }
 
@@ -379,9 +383,9 @@ class TestGesture {
   }
 
   /// In a test, send a pointer remove event for this pointer.
-  Future<void> removePointer({ Duration timeStamp = Duration.zero }) {
+  Future<void> removePointer({ Duration timeStamp = Duration.zero}) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp), null);
+      return _dispatcher(_pointer.removePointer(_pointer.location, timeStamp: timeStamp), null);
     });
   }
 
