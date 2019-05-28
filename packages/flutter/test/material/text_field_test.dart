@@ -993,10 +993,6 @@ void main() {
     await gesture.removePointer();
   });
 
-  // TODO(justinmc): Get cursor dragging to match native, where the sensitivity
-  // is much higher and a drag immediately starts moving the cursor. Then update
-  // this test and the one below. Listeners in the text field may interfere with
-  // the listener on the handle, making drag fire later.
   testWidgets('Can drag handles to change selection', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController();
 
@@ -1145,9 +1141,9 @@ void main() {
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
     );
-    // TODO(justinmc): The tap to show the menu can't happen in the part of the
-    // handle that overlaps the text field. If so, it will trigger an affinity
-    // change in the selection and cause the menu to hide.
+    // Tapping on the part of the handle's GestureDetector where it overlaps
+    // with the text itself does not show the menu, so add a small vertical
+    // offset to tap below the text.
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
@@ -1221,9 +1217,9 @@ void main() {
         renderEditable.getEndpointsForSelection(controller.selection),
         renderEditable,
       );
-      // TODO(justinmc): The tap to show the menu can't happen in the part of
-      // handle that overlaps the text field. If so, it will trigger an affinity
-      // change in the selection and cause the menu to hide.
+      // Tapping on the part of the handle's GestureDetector where it overlaps
+      // with the text itself does not show the menu, so add a small vertical
+      // offset to tap below the text.
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
@@ -1257,9 +1253,9 @@ void main() {
         renderEditable.getEndpointsForSelection(controller.selection),
         renderEditable,
       );
-      // TODO(justinmc): The tap to show the menu can't happen in the part of
-      // handle that overlaps the text field. If so, it will trigger an affinity
-      // change in the selection and cause the menu to hide.
+      // Tapping on the part of the handle's GestureDetector where it overlaps
+      // with the text itself does not show the menu, so add a small vertical
+      // offset to tap below the text.
       await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
