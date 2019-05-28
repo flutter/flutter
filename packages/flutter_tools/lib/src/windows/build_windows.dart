@@ -3,8 +3,8 @@
 // found in the LICENSE file
 
 import '../base/common.dart';
-import '../base/io.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
