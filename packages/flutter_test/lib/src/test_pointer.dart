@@ -403,7 +403,7 @@ class TestGesture {
     return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
         assert(_result != null,
-            'Move events with the pointer down must be preceeded by a down '
+            'Move events with the pointer down must be preceded by a down '
             'event that captures a hit test result.');
         return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
       } else {

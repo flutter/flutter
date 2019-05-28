@@ -14,6 +14,7 @@ import 'constants.dart';
 import 'debug.dart';
 import 'events.dart';
 import 'pointer_router.dart';
+import 'semantics.dart';
 import 'team.dart';
 
 export 'pointer_router.dart' show PointerRouter;
@@ -139,6 +140,16 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   PointerDeviceKind getKindForPointer(int pointer) {
     assert(_pointerToKind.containsKey(pointer));
     return _pointerToKind[pointer];
+  }
+
+  /// Returns how this recognizer class should handle semantics events.
+  /// Only handlers that the recognizer is interested in need to be assigned.
+  /// Returns null if the recognizer is uninterested in any semantics events.
+  ///
+  /// Its behavior can depend on the state, but should be consistant across
+  /// different calls.
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return null;
   }
 
   /// Releases any resources used by the object.

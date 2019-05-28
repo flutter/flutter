@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -86,7 +87,7 @@ void main() {
       expect(content.isModified, isFalse);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-    });
+    }, skip: Platform.isWindows); // TODO(jonahwilliams): fix or disable this functionality.
   });
 
   group('devfs remote', () {

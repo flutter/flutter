@@ -9,6 +9,7 @@ import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
+import 'semantics.dart';
 import 'velocity_tracker.dart';
 
 enum _DragState {
@@ -120,7 +121,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   /// A pointer that is in contact with the screen with a primary button and
   /// moving has moved again.
   ///
-  /// The distance travelled by the pointer since the last update is provided in
+  /// The distance traveled by the pointer since the last update is provided in
   /// the callback's `details` argument, which is a [DragUpdateDetails] object.
   ///
   /// See also:
@@ -281,7 +282,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
           sourceTimeStamp: timestamp,
           delta: updateDelta,
           primaryDelta: _getPrimaryValueFromOffset(updateDelta),
-          globalPosition: _initialPosition + updateDelta, // Only adds delta for down behaviour
+          globalPosition: _initialPosition + updateDelta, // Only adds delta for down behavior
         );
       }
     }
@@ -423,6 +424,23 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+      onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails(primaryVelocity: 0.0));
+      },
+    );
+  }
+  SemanticsHandlerConfiguration _semanticsConfiguration;
+
+  @override
   bool _isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
@@ -462,6 +480,23 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+      onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails(primaryVelocity: 0.0));
+      },
+    );
+  }
+  SemanticsHandlerConfiguration _semanticsConfiguration;
+
+  @override
   bool _isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
@@ -493,6 +528,33 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 class PanGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for tracking movement on a plane.
   PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
+  @override
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+      onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails());
+      },
+      onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails());
+      },
+    );
+  }
+  SemanticsHandlerConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
