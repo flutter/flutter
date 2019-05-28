@@ -52,7 +52,8 @@ abstract class DevFSContent {
 
   /// Copies the content into the provided file.
   ///
-  /// Requires that the `destination` file already exists.
+  /// Requires that the `destination` directory already exists, but the target
+  /// file need not.
   void copyToFile(File destination);
 }
 

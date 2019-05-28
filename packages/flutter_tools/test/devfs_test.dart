@@ -41,12 +41,9 @@ void main() {
       final DevFSStringContent stringContent = DevFSStringContent('some string');
       final DevFSFileContent fileContent = DevFSFileContent(file);
 
-      final File byteDestination = fs.file('byte_dest')
-        ..createSync();
-      final File stringDestination = fs.file('string_dest')
-        ..createSync();
-      final File fileDestination = fs.file('file_dest')
-        ..createSync();
+      final File byteDestination = fs.file('byte_dest');
+      final File stringDestination = fs.file('string_dest');
+      final File fileDestination = fs.file('file_dest');
 
       byteContent.copyToFile(byteDestination);
       expect(byteDestination.readAsBytesSync(), <int>[4, 5, 6]);

@@ -119,7 +119,7 @@ class WebDevice extends Device {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+    writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     _package = package;
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
