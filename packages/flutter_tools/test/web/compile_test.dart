@@ -31,7 +31,7 @@ void main() {
     });
 
     test('invokes dart2js with correct arguments', () => testBed.run(() async {
-      await webCompiler.compile(target: 'lib/main.dart');
+      await webCompiler.compile(target: fs.path.join('lib', 'main.dart'));
 
       verify(mockProcessManager.start(<String>[
         fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
