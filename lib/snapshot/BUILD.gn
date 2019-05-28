@@ -58,7 +58,8 @@ compiled_action("generate_snapshot_bin") {
         rebase_path(isolate_snapshot_instructions),
   ]
 
-  if (is_debug) {
+  if (is_debug && flutter_runtime_mode != "profile" &&
+      flutter_runtime_mode != "release") {
     args += [ "--enable_asserts" ]
   }
 
