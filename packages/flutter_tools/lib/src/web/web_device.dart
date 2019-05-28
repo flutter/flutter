@@ -125,7 +125,7 @@ class WebDevice extends Device {
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     _server.listen(_basicAssetServer);
     printStatus('Serving assets from http:localhost:${_server.port}');
-    await chromeLauncher.launch('http:localhost:${_server.port}');
+    await chromeLauncher.launch('http://localhost:${_server.port}');
     return LaunchResult.succeeded(observatoryUri: null);
   }
 

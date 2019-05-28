@@ -164,7 +164,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       deleteFilesByDefault: true,
     );
     final Status status =
-        logger.startProgress('Compiling to JavaScript...', timeout: null);
+        logger.startProgress('Compiling $target for the Web...', timeout: null);
     try {
       _builder = await BuildImpl.create(
         buildOptions,
