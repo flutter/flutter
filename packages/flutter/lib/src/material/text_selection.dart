@@ -228,7 +228,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
       case TextSelectionHandleType.right:
         return const Offset(0, 0);
       default:
-        return const Offset(_kHandleSize / 2, 0);
+        return const Offset(_kHandleSize / 2, -4);
     }
   }
 }
