@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/packages.dart';
-import 'package:flutter_tools/src/usage.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
@@ -58,7 +57,7 @@ void main() {
       return projectPath;
     }
 
-    Future<PackagesCommand> runCommandIn(String projectPath, String verb, { List<String> args }) async {
+    Future<void> runCommandIn(String projectPath, String verb, { List<String> args }) async {
       final PackagesCommand command = PackagesCommand();
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
@@ -68,7 +67,6 @@ void main() {
       commandArgs.add(projectPath);
 
       await runner.run(commandArgs);
-      return command;
     }
 
     void expectExists(String projectPath, String relPath) {
@@ -217,39 +215,6 @@ void main() {
 
       expectDependenciesResolved(projectPath);
       expectZeroPluginsInjected(projectPath);
-    }, timeout: allowForCreateFlutterProject);
-
-    testUsingContext('set the number of plugins as usage value', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
-      removeGeneratedFiles(projectPath);
-
-      final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
-
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesNumberPlugins, '0'));
-    }, timeout: allowForCreateFlutterProject);
-
-    testUsingContext('indicate that the project is not a module in usage value', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub']);
-      removeGeneratedFiles(projectPath);
-
-      final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
-
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'false'));
-    }, timeout: allowForCreateFlutterProject);
-
-    testUsingContext('indicate that the project is a module in usage value', () async {
-      final String projectPath = await createProject(tempDir,
-        arguments: <String>['--no-pub', '--template=module']);
-      removeGeneratedFiles(projectPath);
-
-      final PackagesCommand command = await runCommandIn(projectPath, 'get');
-      final PackagesGetCommand getCommand = command.subcommands['get'] as PackagesGetCommand;
-
-      expect(await getCommand.usageValues, containsPair(kCommandPackagesProjectModule, 'true'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('upgrade fetches packages', () async {
