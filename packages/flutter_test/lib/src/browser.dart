@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 const bool _kIsCompiledToJavaScript = identical(0, 0.0);
-final RegExp _doubleFormatter = RegExp('([0-9]+)\.0');
+final RegExp _doubleFormatter = RegExp(r'(\d)\.0\b');
 
 /// Automatically reformats a String containing doubles for the web.
 ///
