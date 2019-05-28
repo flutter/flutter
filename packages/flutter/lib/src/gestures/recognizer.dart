@@ -12,11 +12,9 @@ import 'arena.dart';
 import 'binding.dart';
 import 'constants.dart';
 import 'debug.dart';
-import 'drag_details.dart';
 import 'events.dart';
-import 'long_press.dart';
 import 'pointer_router.dart';
-import 'tap.dart';
+import 'semantics.dart';
 import 'team.dart';
 
 export 'pointer_router.dart' show PointerRouter;
@@ -43,36 +41,6 @@ enum DragStartBehavior {
   /// Set the initial position at the position where the drag start event was
   /// detected.
   start,
-}
-
-/// Configuration of how a [GestureRecognizer] should react to semantics events.
-/// All properties are optional.
-///
-/// See also:
-///
-///  * [GestureRecognizer.semanticsConfiguration], a method that creates
-///    instances of this class.
-class GestureSemanticsConfiguration {
-  /// Initialize the gesture semantics configuration by declaring the handlers
-  /// to each kind of semantics events.
-  GestureSemanticsConfiguration({
-    this.onTap,
-    this.onLongPress,
-    this.onHorizontalDragUpdate,
-    this.onVerticalDragUpdate,
-  });
-
-  /// Called when the user taps on the object.
-  final GestureTapCallback onTap;
-
-  /// Called when the user presses on the object for a long period of time.
-  final GestureLongPressCallback onLongPress;
-
-  /// Called when the user scrolls to the left or to the right.
-  final GestureDragUpdateCallback onHorizontalDragUpdate;
-
-  /// Called when the user scrolls up or down.
-  final GestureDragUpdateCallback onVerticalDragUpdate;
 }
 
 /// The base class that all gesture recognizers inherit from.
@@ -180,7 +148,7 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   ///
   /// Its behavior can depend on the state, but should be consistant across
   /// different calls.
-  GestureSemanticsConfiguration get semanticsConfiguration {
+  SemanticsHandlerConfiguration get semanticsHandlers {
     return null;
   }
 

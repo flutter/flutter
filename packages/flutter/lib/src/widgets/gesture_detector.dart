@@ -105,36 +105,36 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
   void initializer(T instance) => _initializer(instance);
 }
 
-// Get the semantics callbacks of given recognizers, and summarize them into
+// Summarizes semantics callbacks retrieved from the given recognizers into
 // one callback for each kind of semantic events.
-// Lists of callbacks are cached and updates have to be manually called.
-class _CombinedSemanticsConfiguration {
-  _CombinedSemanticsConfiguration({
+// Callbacks are cached and updates have to be manually called.
+class _CombinedSemanticsHandlers {
+  _CombinedSemanticsHandlers({
     Iterable<GestureRecognizer> recognizers,
   }) {
     updateCallbacks(recognizers);
   }
 
-  final List<GestureTapCallback> _tapHandlers = <GestureTapCallback>[];
-  final List<GestureLongPressCallback> _longPressHandlers =
-    <GestureLongPressCallback>[];
-  final List<GestureDragUpdateCallback> _horizontalHandlers =
-    <GestureDragUpdateCallback>[];
-  final List<GestureDragUpdateCallback> _verticalHandlers =
-    <GestureDragUpdateCallback>[];
+  final List<SemanticsTapCallback> _tapHandlers = <SemanticsTapCallback>[];
+  final List<SemanticsLongPressCallback> _longPressHandlers =
+    <SemanticsLongPressCallback>[];
+  final List<SemanticsDragUpdateCallback> _horizontalHandlers =
+    <SemanticsDragUpdateCallback>[];
+  final List<SemanticsDragUpdateCallback> _verticalHandlers =
+    <SemanticsDragUpdateCallback>[];
 
   // The following getters of callbacks return null unless if any recognizers
   // show interest in the corresponding kind of events.
-  GestureTapCallback get onTap {
+  SemanticsTapCallback get onTap {
     return _tapHandlers.isEmpty ? null : _handleTap;
   }
-  GestureLongPressCallback get onLongPress {
+  SemanticsLongPressCallback get onLongPress {
     return _longPressHandlers.isEmpty ? null : _handleLongPress;
   }
-  GestureDragUpdateCallback get onHorizontalDragUpdate {
+  SemanticsDragUpdateCallback get onHorizontalDragUpdate {
     return _horizontalHandlers.isEmpty ? null : _handleHorizontalDragUpdate;
   }
-  GestureDragUpdateCallback get onVerticalDragUpdate {
+  SemanticsDragUpdateCallback get onVerticalDragUpdate {
     return _verticalHandlers.isEmpty ? null : _handleVerticalDragUpdate;
   }
 
@@ -148,8 +148,8 @@ class _CombinedSemanticsConfiguration {
     if (recognizers == null)
       return;
     for (GestureRecognizer recognizer in recognizers) {
-      final GestureSemanticsConfiguration configuration =
-        recognizer.semanticsConfiguration;
+      final SemanticsHandlerConfiguration configuration =
+        recognizer.semanticsHandlers;
       if (configuration == null)
         continue;
       if (configuration.onTap != null)
@@ -164,22 +164,22 @@ class _CombinedSemanticsConfiguration {
   }
 
   void _handleTap() {
-    for (GestureTapCallback callback in _tapHandlers)
+    for (SemanticsTapCallback callback in _tapHandlers)
       callback();
   }
 
   void _handleLongPress() {
-    for (GestureTapCallback callback in _longPressHandlers)
+    for (SemanticsTapCallback callback in _longPressHandlers)
       callback();
   }
 
   void _handleHorizontalDragUpdate(DragUpdateDetails details) {
-    for (GestureDragUpdateCallback callback in _horizontalHandlers)
+    for (SemanticsDragUpdateCallback callback in _horizontalHandlers)
       callback(details);
   }
 
   void _handleVerticalDragUpdate(DragUpdateDetails details) {
-    for (GestureDragUpdateCallback callback in _verticalHandlers)
+    for (SemanticsDragUpdateCallback callback in _verticalHandlers)
       callback(details);
   }
 }
@@ -890,8 +890,8 @@ class RawGestureDetector extends StatefulWidget {
 /// State for a [RawGestureDetector].
 class RawGestureDetectorState extends State<RawGestureDetector> {
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
-  _CombinedSemanticsConfiguration _semanticsConfiguration =
-    _CombinedSemanticsConfiguration();
+  final _CombinedSemanticsHandlers _semanticsConfiguration =
+    _CombinedSemanticsHandlers();
 
   @override
   void initState() {
@@ -1064,16 +1064,16 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     _updateHandlers(renderObject);
   }
 
-  GestureTapCallback get _onTapHandler {
+  SemanticsTapCallback get _onTapHandler {
     return owner._semanticsConfiguration.onTap;
   }
-  GestureTapCallback get _onLongPressHandler {
+  SemanticsTapCallback get _onLongPressHandler {
     return owner._semanticsConfiguration.onLongPress;
   }
-  GestureDragUpdateCallback get _onHorizontalDragUpdateHandler {
+  SemanticsDragUpdateCallback get _onHorizontalDragUpdateHandler {
     return owner._semanticsConfiguration.onHorizontalDragUpdate;
   }
-  GestureDragUpdateCallback get _onVerticalDragUpdateHandler {
+  SemanticsDragUpdateCallback get _onVerticalDragUpdateHandler {
     return owner._semanticsConfiguration.onVerticalDragUpdate;
   }
 }

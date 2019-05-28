@@ -8,6 +8,7 @@ import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
+import 'semantics.dart';
 
 /// Details for [GestureTapDownCallback], such as position
 ///
@@ -227,8 +228,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   int _initialButtons;
 
   @override
-  GestureSemanticsConfiguration get semanticsConfiguration {
-    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
       onTap: () {
         if (onTapDown != null)
           onTapDown(TapDownDetails());
@@ -239,7 +240,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       },
     );
   }
-  GestureSemanticsConfiguration _semanticsConfiguration;
+  SemanticsHandlerConfiguration _semanticsConfiguration;
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {

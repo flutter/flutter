@@ -9,6 +9,7 @@ import 'constants.dart';
 import 'drag_details.dart';
 import 'events.dart';
 import 'recognizer.dart';
+import 'semantics.dart';
 import 'velocity_tracker.dart';
 
 enum _DragState {
@@ -423,8 +424,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  GestureSemanticsConfiguration get semanticsConfiguration {
-    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
       onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
@@ -437,7 +438,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
       },
     );
   }
-  GestureSemanticsConfiguration _semanticsConfiguration;
+  SemanticsHandlerConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -479,8 +480,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  GestureSemanticsConfiguration get semanticsConfiguration {
-    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
       onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
@@ -493,7 +494,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
       },
     );
   }
-  GestureSemanticsConfiguration _semanticsConfiguration;
+  SemanticsHandlerConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -529,8 +530,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
-  GestureSemanticsConfiguration get semanticsConfiguration {
-    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
       onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
@@ -553,7 +554,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
       },
     );
   }
-  GestureSemanticsConfiguration _semanticsConfiguration;
+  SemanticsHandlerConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
