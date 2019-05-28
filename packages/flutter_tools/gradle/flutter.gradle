@@ -507,6 +507,7 @@ class FlutterPlugin implements Plugin<Project> {
                 } else {
                     dependsOn variant.mergeAssets
                     dependsOn "clean${variant.mergeAssets.name.capitalize()}"
+                    variant.mergeAssets.mustRunAfter("clean${variant.mergeAssets.name.capitalize()}")
                     into variant.mergeAssets.outputDir
                 }
                 flutterTasks.each { flutterTask -> 

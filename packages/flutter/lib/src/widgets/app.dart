@@ -374,6 +374,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.initialRoute], which is used to implement this property.
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
+  ///
   /// {@endtemplate}
   final String initialRoute;
 
