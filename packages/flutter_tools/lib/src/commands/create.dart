@@ -42,13 +42,6 @@ enum _ProjectType {
   plugin,
 }
 
-const Map<_ProjectType, String> _projectTypeNameMap =  <_ProjectType, String>{
-  _ProjectType.app: 'app',
-  _ProjectType.module: 'module',
-  _ProjectType.package: 'package',
-  _ProjectType.plugin: 'plugin',
-};
-
 _ProjectType _stringToProjectType(String value) {
   _ProjectType result;
   for (_ProjectType type in _ProjectType.values) {
@@ -158,11 +151,8 @@ class CreateCommand extends FlutterCommand {
 
   @override
   Future<Map<String, String>> get usageValues async {
-    final Directory projectDir = fs.directory(argResults.rest.first);
-    final _ProjectType template = _getProjectType(projectDir);
-
     return <String, String>{
-      kCommandCreateProjectType: _projectTypeNameMap[template],
+      kCommandCreateProjectType: argResults['template'],
       kCommandCreateAndroidLanguage: argResults['android-language'],
       kCommandCreateIosLanguage: argResults['ios-language'],
     };
