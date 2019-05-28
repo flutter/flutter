@@ -356,11 +356,11 @@ void main() {
   });
 
   test('TextStyle strut textScaleFactor', () {
-    TextStyle style0 = TextStyle(fontSize: 10);
-    ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
+    const TextStyle style0 = TextStyle(fontSize: 10);
+    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
 
-    TextStyle style1 = TextStyle(fontSize: 25);
-    ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle(textScaleFactor: 1);
+    const TextStyle style1 = TextStyle(fontSize: 25);
+    final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle(textScaleFactor: 1);
 
     expect(paragraphStyle0 == paragraphStyle1, true);
   });
