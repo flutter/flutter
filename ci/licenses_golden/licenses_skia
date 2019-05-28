@@ -1,4 +1,4 @@
-Signature: 3347012bdd8faeba39c93f1efb49115a
+Signature: 67503b56f56ec3c3c6d84decd597368d
 
 UNUSED LICENSES:
 
@@ -5345,6 +5345,8 @@ ORIGIN: ../../../third_party/skia/experimental/ffmpeg/SkVideoDecoder.cpp + ../..
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/experimental/ffmpeg/SkVideoDecoder.cpp
 FILE: ../../../third_party/skia/experimental/ffmpeg/SkVideoDecoder.h
+FILE: ../../../third_party/skia/experimental/ffmpeg/SkVideoEncoder.cpp
+FILE: ../../../third_party/skia/experimental/ffmpeg/SkVideoEncoder.h
 FILE: ../../../third_party/skia/gm/backdrop.cpp
 FILE: ../../../third_party/skia/gm/backdrop_imagefilter_croprect.cpp
 FILE: ../../../third_party/skia/gm/collapsepaths.cpp
