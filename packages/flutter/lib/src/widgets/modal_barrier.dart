@@ -3,7 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show PrimaryPointerGestureRecognizer, GestureDisposition;
+import 'package:flutter/gestures.dart' show
+  PrimaryPointerGestureRecognizer,
+  GestureDisposition,
+  SemanticsHandlerConfiguration;
 
 import 'basic.dart';
 import 'container.dart';
@@ -24,6 +27,14 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   VoidCallback onAnyTapDown;
 
   bool _sentTapDown = false;
+
+  @override
+  SemanticsHandlerConfiguration get semanticsHandlers {
+    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+      onTap: onAnyTapDown,
+    );
+  }
+  SemanticsHandlerConfiguration _semanticsConfiguration;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
