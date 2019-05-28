@@ -240,6 +240,8 @@ void main() {
         when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
         devFinder = MockFile();
         sshConfig = MockFile();
+        when(devFinder.existsSync()).thenReturn(true);
+        when(sshConfig.existsSync()).thenReturn(true);
         when(devFinder.absolute).thenReturn(devFinder);
         when(sshConfig.absolute).thenReturn(sshConfig);
       });
