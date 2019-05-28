@@ -383,6 +383,11 @@ class FlutterDriver {
   final int _driverId;
 
   /// Client connected to the Dart VM running the Flutter application
+  ///
+  /// You can use [VMServiceClient] to check VM version, flags and get
+  /// notified when a new isolate has been instantiated. That could be
+  /// useful if your application spawns multiple isolates that you
+  /// would like to instrument.
   final VMServiceClient serviceClient;
 
   /// JSON-RPC client useful for sending raw JSON requests.
@@ -390,7 +395,9 @@ class FlutterDriver {
 
   /// The main isolate hosting the Flutter application.
   ///
-  /// You can use this to invoke your custom extensions.
+  /// If you used the [registerExtension] API to instrument your application,
+  /// you can use this [VMIsolate] to call these extension methods via
+  /// [invokeExtension].
   final VMIsolate appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.
