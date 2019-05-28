@@ -14,12 +14,15 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
@@ -927,7 +930,70 @@ void main() {
     HttpClientFactory: () =>
         () => MockHttpClient(404, result: 'not found'),
   });
+
+  group('usageValues', () {
+    testUsingContext('set template type as usage value', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--no-pub', '--template=module', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'module'));
+
+      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'app'));
+
+      await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'package'));
+
+      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'plugin'));
+
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('set iOS host language type as usage value', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'objc'));
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=app',
+        '--ios-language=swift',
+        projectDir.path,
+      ]);
+      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'swift'));
+
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('set Android host language type as usage value', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'java'));
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=app',
+        '--android-language=kotlin',
+        projectDir.path,
+      ]);
+      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'kotlin'));
+
+    }, timeout: allowForCreateFlutterProject);
+  });
 }
+
 
 Future<void> _createProject(
   Directory dir,
