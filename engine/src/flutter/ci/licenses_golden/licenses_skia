@@ -1,4 +1,4 @@
-Signature: 1401d4a0d1ee0eed40328f985581b6c1
+Signature: 3347012bdd8faeba39c93f1efb49115a
 
 UNUSED LICENSES:
 
@@ -4733,6 +4733,7 @@ FILE: ../../../third_party/skia/docs/examples/Miter_Limit.cpp
 FILE: ../../../third_party/skia/docs/examples/Modulate.cpp
 FILE: ../../../third_party/skia/docs/examples/Multiply.cpp
 FILE: ../../../third_party/skia/docs/examples/Overlay.cpp
+FILE: ../../../third_party/skia/docs/examples/PDF.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_053.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_057.cpp
 FILE: ../../../third_party/skia/docs/examples/Paint_containsText.cpp
