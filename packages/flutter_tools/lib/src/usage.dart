@@ -26,19 +26,6 @@ const String kEventReloadInvalidatedSourcesCount = 'cd11';
 const String kEventReloadTransferTimeInMs = 'cd12';
 const String kEventReloadOverallTimeInMs = 'cd13';
 
-const String kCommandRunIsEmulator = 'cd3';
-const String kCommandRunTargetName = 'cd4';
-const String kCommandRunProjectType = 'cd14';
-const String kCommandRunProjectHostLanguage = 'cd15';
-const String kCommandRunProjectModule = 'cd18';
-
-const String kCommandCreateAndroidLanguage = 'cd16';
-const String kCommandCreateIosLanguage = 'cd17';
-const String kCommandCreateProjectType = 'cd19';
-
-const String kCommandPackagesNumberPlugins = 'cd20';
-const String kCommandPackagesProjectModule = 'cd21';
-
 Usage get flutterUsage => Usage.instance;
 
 class Usage {
