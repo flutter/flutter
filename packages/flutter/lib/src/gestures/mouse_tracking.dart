@@ -154,6 +154,8 @@ class MouseTracker extends ChangeNotifier {
     }
     final int deviceId = event.device;
     if (event is PointerAddedEvent) {
+      // If we are adding the device again, then we're not removing it anymore.
+      _pendingRemovals.remove(deviceId);
       _addMouseEvent(deviceId, event);
       return;
     }
