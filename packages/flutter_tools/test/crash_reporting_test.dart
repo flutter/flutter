@@ -123,6 +123,39 @@ void main() {
       Stdio: () => const _NoStderr(),
     });
 
+    testUsingContext('should not send a crash report if on a user-branch', () async {
+      String method;
+      Uri uri;
+
+      CrashReportSender.initializeWith(MockClient((Request request) async {
+        method = request.method;
+        uri = request.url;
+
+        return Response(
+          'test-report-id',
+          200,
+        );
+      }));
+
+      final int exitCode = await tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashCommand()],
+        reportCrashes: true,
+        flutterVersion: '[user-branch]/v1.2.3',
+      );
+
+      expect(exitCode, 1);
+
+      // Verify that the report wasn't sent
+      expect(method, null);
+      expect(uri, null);
+
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.statusText, '');
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
     testUsingContext('can override base URL', () async {
       Uri uri;
       CrashReportSender.initializeWith(MockClient((Request request) async {

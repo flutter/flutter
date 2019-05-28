@@ -462,9 +462,9 @@ class EventChannel {
   /// Returns a broadcast [Stream] which emits events to listeners as follows:
   ///
   /// * a decoded data event (possibly null) for each successful event
-  /// received from the platform plugin;
+  ///   received from the platform plugin;
   /// * an error event containing a [PlatformException] for each error event
-  /// received from the platform plugin.
+  ///   received from the platform plugin.
   ///
   /// Errors occurring during stream activation or deactivation are reported
   /// through the [FlutterError] facility. Stream activation happens only when

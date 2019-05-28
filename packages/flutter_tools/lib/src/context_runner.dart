@@ -27,17 +27,19 @@ import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
-import 'fuchsia/fuchsia_kernel_compiler.dart';
-import 'fuchsia/fuchsia_pm.dart';
-import 'fuchsia/fuchsia_sdk.dart';
-import 'fuchsia/fuchsia_workflow.dart';
-import 'ios/cocoapods.dart';
+import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
+import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
+import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'linux/linux_workflow.dart';
+import 'macos/cocoapods.dart';
+import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
+import 'macos/xcode.dart';
+import 'macos/xcode_validator.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
@@ -76,8 +78,7 @@ Future<T> runInContext<T>(
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
       FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
-      FuchsiaKernelCompiler: () => FuchsiaKernelCompiler(),
-      FuchsiaPM: () => FuchsiaPM(),
+      FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
       FuchsiaSdk: () => FuchsiaSdk(),
       FuchsiaWorkflow: () => FuchsiaWorkflow(),
       GenSnapshot: () => const GenSnapshot(),
@@ -101,6 +102,7 @@ Future<T> runInContext<T>(
       WebCompiler: () => const WebCompiler(),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),
+      XcodeValidator: () => const XcodeValidator(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },
   );

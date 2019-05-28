@@ -433,7 +433,7 @@ class _GestureTransformableState extends State<GestureTransformable> with Ticker
     if (gestureType == null) {
       // Decide which type of gesture this is by comparing the amount of scale
       // and rotation in the gesture, if any. Scale starts at 1 and rotation
-      // starts at 0. Translate will have 0 scale and 0 rotation becuase it uses
+      // starts at 0. Translate will have 0 scale and 0 rotation because it uses
       // only one finger.
       if ((details.scale - 1).abs() > details.rotation.abs()) {
         gestureType = _GestureType.scale;

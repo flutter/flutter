@@ -12,7 +12,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../globals.dart';
-import '../ios/mac.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
