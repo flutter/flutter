@@ -998,6 +998,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///    to the new one if the updated widget configuration requires
   ///    replacing the object.
   ///  * In [dispose], unsubscribe from the object.
+  ///
   /// {@endtemplate}
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this

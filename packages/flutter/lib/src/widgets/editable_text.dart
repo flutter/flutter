@@ -422,6 +422,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///
   /// {@endtemplate}
   final TextDirection textDirection;
 
@@ -437,6 +438,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [TextCapitalization], for a description of each capitalization behavior.
+  ///
   /// {@endtemplate}
   final TextCapitalization textCapitalization;
 
