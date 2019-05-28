@@ -674,7 +674,8 @@ Future<void> _verifyVersion(String filename) async {
     exit(1);
   }
   final RegExp pattern = RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
-  if (!version.contains(pattern)) {
+  final RegExp hotfixPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
+  if (!version.contains(pattern) && !version.contains(hotfixPattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string.');
     print('$redLine');
