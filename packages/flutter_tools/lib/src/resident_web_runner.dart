@@ -59,7 +59,7 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAfterSignal() {
-    return null;
+    return _server?.dispose();
   }
 
   @override
@@ -89,11 +89,7 @@ class ResidentWebRunner extends ResidentRunner {
     );
     printStatus(message);
     const String quitMessage = 'To quit, press "q".';
-    if (details) {
-      printStatus('To repeat this help message, press "h". $quitMessage');
-    } else {
-      printStatus('For a more detailed help message, press "h". $quitMessage');
-    }
+    printStatus('For a more detailed help message, press "h". $quitMessage');
   }
 
   @override

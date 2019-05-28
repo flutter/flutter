@@ -43,7 +43,7 @@ class BuildWebCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String target = argResults['target'];
     final Status status = logger
-        .startProgress('Compiling $target to JavaScript...', timeout: null);
+        .startProgress('Compiling $target for the Web...', timeout: null);
     final BuildInfo buildInfo = getBuildInfo();
     int result;
     switch (buildInfo.mode) {
@@ -54,6 +54,10 @@ class BuildWebCommand extends BuildSubCommand {
         result = await webCompiler.compileDart2js(target: target, minify: false);
         break;
       case BuildMode.debug:
+        throwToolExit(
+            'Debug mode is not supported as a build target. Instead use '
+            '"flutter run -d web".');
+        break;
       case BuildMode.dynamicProfile:
       case BuildMode.dynamicRelease:
         throwToolExit(

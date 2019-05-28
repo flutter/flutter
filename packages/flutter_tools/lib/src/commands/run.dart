@@ -399,10 +399,12 @@ class RunCommand extends RunCommandBase {
       );
       flutterDevices.add(flutterDevice);
     }
-    // Only support web mode on non-stable branches with a single web device.
+    // Only support "web mode" on non-stable branches with a single web device
+    // in a "hot mode".
     final bool webMode = !FlutterVersion.instance.isStable
       && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web;
+      && await devices.single.targetPlatform == TargetPlatform.web
+      && hotMode;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
