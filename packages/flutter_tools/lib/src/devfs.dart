@@ -49,6 +49,11 @@ abstract class DevFSContent {
   List<int> contentsAsCompressedBytes() {
     return gzip.encode(contentsAsBytes());
   }
+
+  /// Copies the content into the provided file.
+  ///
+  /// Requires that the `destination` file already exists.
+  void copyToFile(File destination);
 }
 
 /// File content to be copied to the device.
@@ -132,6 +137,11 @@ class DevFSFileContent extends DevFSContent {
 
   @override
   List<int> contentsAsBytes() => _getFile().readAsBytesSync().cast<int>();
+
+  @override
+  void copyToFile(File destination) {
+    _getFile().copySync(destination.path);
+  }
 }
 
 /// Byte content to be copied to the device.
@@ -169,6 +179,11 @@ class DevFSByteContent extends DevFSContent {
 
   @override
   List<int> contentsAsBytes() => _bytes;
+
+  @override
+  void copyToFile(File destination) {
+    destination.writeAsBytesSync(contentsAsBytes());
+  }
 }
 
 /// String content to be copied to the device encoded as utf8.

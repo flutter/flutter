@@ -32,6 +32,32 @@ void main() {
   });
 
   group('DevFSContent', () {
+    test('copyToFile', () {
+      final String filePath = fs.path.join('lib', 'foo.txt');
+      final File file = fs.file(filePath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync('hello, world');
+      final DevFSByteContent byteContent = DevFSByteContent(<int>[4, 5, 6]);
+      final DevFSStringContent stringContent = DevFSStringContent('some string');
+      final DevFSFileContent fileContent = DevFSFileContent(file);
+
+      final File byteDestination = fs.file('byte_dest')
+        ..createSync();
+      final File stringDestination = fs.file('string_dest')
+        ..createSync();
+      final File fileDestination = fs.file('file_dest')
+        ..createSync();
+
+      byteContent.copyToFile(byteDestination);
+      expect(byteDestination.readAsBytesSync(), <int>[4, 5, 6]);
+
+      stringContent.copyToFile(stringDestination);
+      expect(stringDestination.readAsStringSync(), 'some string');
+
+      fileContent.copyToFile(fileDestination);
+      expect(fileDestination.readAsStringSync(), 'hello, world');
+    });
+
     test('bytes', () {
       final DevFSByteContent content = DevFSByteContent(<int>[4, 5, 6]);
       expect(content.bytes, orderedEquals(<int>[4, 5, 6]));
