@@ -227,6 +227,21 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   int _initialButtons;
 
   @override
+  GestureSemanticsConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+      onTap: () {
+        if (onTapDown != null)
+          onTapDown(TapDownDetails());
+        if (onTapUp != null)
+          onTapUp(TapUpDetails());
+        if (onTap != null)
+          onTap();
+      },
+    );
+  }
+  GestureSemanticsConfiguration _semanticsConfiguration;
+
+  @override
   bool isPointerAllowed(PointerDownEvent event) {
     switch (event.buttons) {
       case kPrimaryButton:

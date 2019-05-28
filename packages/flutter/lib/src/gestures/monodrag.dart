@@ -423,6 +423,23 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
+  GestureSemanticsConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+      onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails(primaryVelocity: 0.0));
+      },
+    );
+  }
+  GestureSemanticsConfiguration _semanticsConfiguration;
+
+  @override
   bool _isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
@@ -462,6 +479,23 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
+  GestureSemanticsConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+      onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails(primaryVelocity: 0.0));
+      },
+    );
+  }
+  GestureSemanticsConfiguration _semanticsConfiguration;
+
+  @override
   bool _isFlingGesture(VelocityEstimate estimate) {
     final double minVelocity = minFlingVelocity ?? kMinFlingVelocity;
     final double minDistance = minFlingDistance ?? kTouchSlop;
@@ -493,6 +527,33 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 class PanGestureRecognizer extends DragGestureRecognizer {
   /// Create a gesture recognizer for tracking movement on a plane.
   PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+
+  @override
+  GestureSemanticsConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+      onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails());
+      },
+      onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
+        if (onDown != null)
+          onDown(DragDownDetails());
+        if (onStart != null)
+          onStart(DragStartDetails());
+        if (onUpdate != null)
+          onUpdate(updateDetails);
+        if (onEnd != null)
+          onEnd(DragEndDetails());
+      },
+    );
+  }
+  GestureSemanticsConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

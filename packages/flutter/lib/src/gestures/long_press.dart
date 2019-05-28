@@ -191,6 +191,23 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   GestureLongPressEndCallback onLongPressEnd;
 
   @override
+  GestureSemanticsConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= GestureSemanticsConfiguration(
+      onLongPress: () {
+        if (onLongPressStart != null)
+          onLongPressStart(const LongPressStartDetails());
+        if (onLongPress != null)
+          onLongPress();
+        if (onLongPressEnd != null)
+          onLongPressEnd(const LongPressEndDetails());
+        if (onLongPressUp != null)
+          onLongPressUp();
+      },
+    );
+  }
+  GestureSemanticsConfiguration _semanticsConfiguration;
+
+  @override
   bool isPointerAllowed(PointerDownEvent event) {
     switch (event.buttons) {
       case kPrimaryButton:
