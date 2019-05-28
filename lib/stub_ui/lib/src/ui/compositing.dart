@@ -875,6 +875,12 @@ class SceneHost {
   /// The scene host takes ownership of the provided export token handle.
   SceneHost(dynamic exportTokenHandle);
 
+  SceneHost.fromViewHolderToken(
+    dynamic viewHolderTokenHandle,
+    void Function() viewConnectedCallback,
+    void Function() viewDisconnectedCallback,
+    void Function(bool) viewStateChangedCallback);
+
   /// Releases the resources associated with the child scene host.
   ///
   /// After calling this function, the child scene host cannot be used further.

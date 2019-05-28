@@ -1197,7 +1197,9 @@ class PluginUtilities {
   }
 }
 
-class ImageShader {}
+class ImageShader {
+  ImageShader(Image image, TileMode tmx, TileMode tmy, Float64List matrix4);
+}
 
 class IsolateNameServer {
  static SendPort lookupPortByName(String name) {

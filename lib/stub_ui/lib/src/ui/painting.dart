@@ -962,8 +962,8 @@ class Paint {
   double get strokeMiterLimit {
     return null;
   }
-  set strokeMiterLimit(double value) {
-  }
+
+  set strokeMiterLimit(double value) {}
 
   /// Whether to paint inside shapes, the edges of shapes, or both.
   ///
@@ -1213,7 +1213,8 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
-    Float64List matrix4, // TODO(yjbanov): Implement this https://github.com/flutter/flutter/issues/32819
+    Float64List
+        matrix4, // TODO(yjbanov): Implement this https://github.com/flutter/flutter/issues/32819
   ]) =>
       _GradientLinear(from, to, colors, colorStops, tileMode);
 
@@ -1490,6 +1491,25 @@ class ColorFilter {
       : _color = color,
         _blendMode = blendMode;
 
+  /// Construct a color filter that transforms a color by a 4x5 matrix. The
+  /// matrix is in row-major order and the translation column is specified in
+  /// unnormalized, 0...255, space.
+  const ColorFilter.matrix(List<double> matrix)
+      : _color = null,
+        _blendMode = null;
+
+  /// Construct a color filter that applies the sRGB gamma curve to the RGB
+  /// channels.
+  const ColorFilter.linearToSrgbGamma()
+      : _color = null,
+        _blendMode = null;
+
+  /// Creates a color filter that applies the inverse of the sRGB gamma curve
+  /// to the RGB channels.
+  const ColorFilter.srgbToLinearGamma()
+      : _color = null,
+        _blendMode = null;
+
   final Color _color;
   final BlendMode _blendMode;
 
@@ -1632,6 +1652,14 @@ class ImageFilter {
   ImageFilter.blur({double sigmaX = 0.0, double sigmaY = 0.0}) {
     _initBlur(sigmaX, sigmaY);
   }
+
+  /// Creates an image filter that applies a matrix transformation.
+  ///
+  /// For example, applying a positive scale matrix (see [Matrix4.diagonal3])
+  /// when used with [BackdropFilter] would magnify the background image.
+  ImageFilter.matrix(Float64List matrix4,
+      {FilterQuality filterQuality = FilterQuality.low}) {}
+
   void _initBlur(double sigmaX, double sigmaY) {
     // TODO(b/128318717): Implement me.
   }

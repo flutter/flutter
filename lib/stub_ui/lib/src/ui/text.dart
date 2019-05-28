@@ -458,6 +458,7 @@ class TextStyle {
     Paint background,
     Paint foreground,
     List<Shadow> shadows,
+    List<FontFeature> fontFeatures,
   })  : assert(
             color == null || foreground == null,
             'Cannot provide both a color and a foreground\n'
