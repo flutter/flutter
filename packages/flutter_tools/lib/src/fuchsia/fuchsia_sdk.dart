@@ -46,10 +46,14 @@ class FuchsiaSdk {
   ///    $ dev_finder list -full
   ///    > 192.168.42.56 paper-pulp-bush-angel
   Future<String> listDevices() async {
-    if (fuchsiaArtifacts.devFinder == null) {
+    if (fuchsiaArtifacts.devFinder == null ||
+        !fuchsiaArtifacts.devFinder.existsSync()) {
       return null;
     }
     final List<String> devices = await fuchsiaDevFinder.list();
+    if (devices == null) {
+      return null;
+    }
     return devices.isNotEmpty ? devices[0] : null;
   }
 
@@ -61,7 +65,8 @@ class FuchsiaSdk {
           StreamController<String>(onCancel: () {
         process.kill();
       });
-      if (fuchsiaArtifacts.sshConfig == null) {
+      if (fuchsiaArtifacts.sshConfig == null ||
+          !fuchsiaArtifacts.sshConfig.existsSync()) {
         printError('Cannot read device logs: No ssh config.');
         printError('Have you set FUCHSIA_SSH_CONFIG or FUCHSIA_BUILD_DIR?');
         return null;
@@ -88,7 +93,7 @@ class FuchsiaSdk {
     } catch (exception) {
       printTrace('$exception');
     }
-    return null;
+    return const Stream<String>.empty();
   }
 }
 

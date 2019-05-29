@@ -607,7 +607,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
   });
 
-  testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) {
+  testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) async {
     void handleImage(ImageInfo image, bool synchronousCall) { }
     void handleImageDifferently(ImageInfo image, bool synchronousCall) { }
     void handleError(dynamic error, StackTrace stackTrace) { }

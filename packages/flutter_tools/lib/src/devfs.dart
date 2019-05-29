@@ -46,7 +46,7 @@ abstract class DevFSContent {
   Stream<List<int>> contentsAsStream();
 
   Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform<List<int>>(gzip.encoder);
+    return contentsAsStream().cast<List<int>>().transform<List<int>>(gzip.encoder);
   }
 
   /// Return the list of files this content depends on.
