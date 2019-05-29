@@ -15,12 +15,10 @@ import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../resident_runner.dart';
-import '../resident_web_runner.dart';
 import '../run_cold.dart';
 import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../tracing.dart';
-import '../version.dart';
 import 'daemon.dart';
 
 abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopmentArtifacts {
@@ -383,16 +381,10 @@ class RunCommand extends RunCommandBase {
       );
       flutterDevices.add(flutterDevice);
     }
-    // Only support "web mode" on non-stable branches with a single web device
-    // in a "hot mode".
-    final bool webMode = !FlutterVersion.instance.isStable
-      && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web
-      && hotMode;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
-    if (hotMode && !webMode) {
+    if (hotMode) {
       runner = HotRunner(
         flutterDevices,
         target: targetFile,
@@ -406,13 +398,6 @@ class RunCommand extends RunCommandBase {
         dillOutputPath: argResults['output-dill'],
         saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
-        ipv6: ipv6,
-      );
-    } else if (webMode) {
-      runner = ResidentWebRunner(
-        flutterDevices,
-        target: targetFile,
-        flutterProject: flutterProject,
         ipv6: ipv6,
       );
     } else {
