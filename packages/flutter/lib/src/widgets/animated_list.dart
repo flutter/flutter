@@ -355,8 +355,8 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
     /// In cases when the playback of an animation is not desired.
     /// For example: The [Dismissible] widget in an [AnimatedList] widget.
     /// In this case one has two options to skip the animation work:
-    /// 1. Pass [Duration.zero] as duration parameter.
-    /// 2. Pass 'null' as animation parameter.
+    /// 1. Pass [null] as animation parameter.
+    /// 2. Pass [Duration.zero] as duration parameter.
     else {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
