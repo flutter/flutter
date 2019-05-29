@@ -153,7 +153,6 @@ tasks:
       Check that driver will print warnings when traceAction is called in debug mode.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
-    flaky: true
 
   cull_opacity_perf__timeline_summary:
     description: >

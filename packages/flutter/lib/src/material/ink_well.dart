@@ -24,7 +24,7 @@ import 'theme.dart';
 ///
 /// Subclasses call [cancel] when an input gesture is aborted before it
 /// is recognized. For example a press event might trigger an ink feature
-/// that's cancelled when the pointer is dragged out of the reference
+/// that's canceled when the pointer is dragged out of the reference
 /// box.
 ///
 /// The [InkWell] and [InkResponse] widgets generate instances of this
