@@ -100,17 +100,27 @@ class CupertinoTabController extends ChangeNotifier {
   }
 }
 
+/// An object that holds at most one listener, who will be notified when the
+/// tab item that corresponds to the encompassing [CupertinoTabScaffold]'s
+/// current tab is tapped.
+///
+/// See also:
+///
+/// * [CupertinoTabView], a widget that listens to [CupertinoTabViewTapNotifier].
 class CupertinoTabViewTapNotifier {
+  CupertinoTabViewTapNotifier._();
   VoidCallback _onTapCurrentTab;
 
+  /// The closest [CupertinoTabViewTapNotifier] instance given the build context.
   static CupertinoTabViewTapNotifier of(BuildContext context) {
     final _TapNotifierWidget notifierWidget = context
       .inheritFromWidgetOfExactType(_TapNotifierWidget);
     return notifierWidget.notifier;
   }
 
+  /// Set the listener of this [CupertinoTabViewTapNotifier] and drop any
+  /// existing listener.
   void updateListener(VoidCallback listener) {
-    print('update listener: $listener');
     _onTapCurrentTab = listener;
   }
 }
@@ -465,6 +475,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       _controller.removeListener(_onCurrentIndexChange);
     }
 
+    _tapNotifiers = null;
     super.dispose();
   }
 }
@@ -536,7 +547,7 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         final bool active = index == widget.currentTabIndex;
 
         if (active || tabs[index] != null) {
-          widget.tapNotifiers[index] ??= CupertinoTabViewTapNotifier();
+          widget.tapNotifiers[index] ??= CupertinoTabViewTapNotifier._();
           tabs[index] = _TapNotifierWidget(
             notifier: widget.tapNotifiers[index],
             child: widget.tabBuilder(context, index)

@@ -13,8 +13,7 @@ import 'tab_scaffold.dart' show CupertinoTabViewTapNotifier;
 /// A typical tab view used as the content of each tab in a [CupertinoTabScaffold]
 /// where multiple tabs with parallel navigation states and history can
 /// co-exist.
-///
-/// [CupertinoTabView] configures the top-level [Navigator] to search for routes
+/// /// [CupertinoTabView] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
 ///  1. For the `/` route, the [builder] property, if non-null, is used.
@@ -126,13 +125,19 @@ class CupertinoTabView extends StatefulWidget {
   /// This list of observers is not shared with ancestor or descendant [Navigator]s.
   final List<NavigatorObserver> navigatorObservers;
 
+  /// Called when the corresponding item in [CupertinoTabScaffold.tabBar] is
+  /// tapped while this [CupertinoTabView] is the actively displayed tab of the
+  /// encompassing [CupertinoTabScaffold].
+  ///
+  /// The default implementation does not do anything unless a non-null
+  /// [navigatorKey] is specified, in which case it will attempt to call
+  /// [Navigator.pop] until the bottom-most route is the current route of the
+  /// [Navigator].
   @protected
   void onTapWhenActive() {
-    if (navigatorKey != null) {
-      final NavigatorState navigator = navigatorKey.currentState;
-      if (navigator.canPop()) {
-        navigator.popUntil((Route<dynamic> route) => route.isFirst);
-      }
+    final NavigatorState navigator = navigatorKey?.currentState;
+    if (navigator?.canPop() == true) {
+      navigator.popUntil((Route<dynamic> route) => route.isFirst);
     }
   }
 
@@ -145,13 +150,12 @@ class CupertinoTabView extends StatefulWidget {
 class _CupertinoTabViewState extends State<CupertinoTabView> {
   HeroController _heroController;
   List<NavigatorObserver> _navigatorObservers;
-  GlobalKey<NavigatorState> _effectiveNavigatorKey;
 
   @override
   void initState() {
     super.initState();
     _heroController = CupertinoApp.createCupertinoHeroController();
-    _updateObserversAndKey();
+    _updateObservers();
   }
 
   @override
@@ -159,7 +163,7 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     super.didUpdateWidget(oldWidget);
     if (widget.navigatorKey != oldWidget.navigatorKey
         || widget.navigatorObservers != oldWidget.navigatorObservers) {
-      _updateObserversAndKey();
+      _updateObservers();
     }
   }
 
@@ -171,17 +175,16 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     super.didChangeDependencies();
   }
 
-  void _updateObserversAndKey() {
+  void _updateObservers() {
     _navigatorObservers =
         List<NavigatorObserver>.from(widget.navigatorObservers)
           ..add(_heroController);
-    _effectiveNavigatorKey = widget.navigatorKey ?? GlobalKey<NavigatorState>();
   }
 
   @override
   Widget build(BuildContext context) {
     return Navigator(
-      key: _effectiveNavigatorKey,
+      key: widget.navigatorKey,
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,
