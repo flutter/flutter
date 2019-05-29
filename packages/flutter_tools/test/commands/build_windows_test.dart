@@ -25,7 +25,7 @@ void main() {
   final MockPlatform windowsPlatform = MockPlatform()
       ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
   final MockPlatform notWindowsPlatform = MockPlatform();
-  const String projectPath = r'windows\Runner.vcxproj';
+  const String projectPath = r'C:\windows\Runner.vcxproj';
   // A vcvars64.bat location that will be found by the lookup method.
   const String vcvarsPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat';
 
@@ -90,12 +90,11 @@ void main() {
     fs.file('.packages').createSync();
 
     when(mockProcessManager.start(<String>[
+      r'C:\packages\flutter_tools\bin\vs_build.bat',
       vcvarsPath,
-      '&&',
-      'msbuild',
-      'C:\\$projectPath',
-      '/p:Configuration=Release',
-    ], runInShell: true)).thenAnswer((Invocation invocation) async {
+      fs.path.basename(projectPath),
+      'Release',
+    ], workingDirectory: fs.path.dirname(projectPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
