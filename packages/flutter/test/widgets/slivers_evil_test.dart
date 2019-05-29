@@ -163,8 +163,8 @@ void main() {
               ),
             ),
           ),
-        )
-      )
+        ),
+      ),
     );
     final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
 

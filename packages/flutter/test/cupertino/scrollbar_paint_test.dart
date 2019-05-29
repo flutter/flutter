@@ -23,10 +23,10 @@ void main() {
           child: CupertinoScrollbar(
             child: SingleChildScrollView(
               child: SizedBox(width: 4000.0, height: 4000.0),
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     );
 
     expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
@@ -57,21 +57,21 @@ void main() {
       CupertinoApp(
         home: MediaQuery(
           data: const MediaQueryData(
-            padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
+            padding: EdgeInsets.fromLTRB(0, 20, 0, 34),
           ),
           child: CupertinoPageScaffold(
             navigationBar: const CupertinoNavigationBar(
               middle: Text('Title'),
-              backgroundColor: Color(0x11111111)
+              backgroundColor: Color(0x11111111),
             ),
             child: CupertinoScrollbar(
               child: ListView(
                 children: const <Widget> [SizedBox(width: 4000, height: 4000)]
-              )
-            )
-          )
-        )
-      )
+              ),
+            ),
+          ),
+        ),
+      ),
     );
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));

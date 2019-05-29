@@ -15,10 +15,10 @@ void main() {
         child: MediaQuery(
           data: MediaQueryData(),
           child: CupertinoScrollbar(
-            child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0))
-          )
-        )
-      )
+            child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+          ),
+        ),
+      ),
     );
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -10.0));

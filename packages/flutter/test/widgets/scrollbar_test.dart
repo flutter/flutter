@@ -69,7 +69,7 @@ void main() {
       painter = _buildPainter(
         minLength: minLen,
         minOverscrollLength: minLen,
-        scrollMetrics: metrics
+        scrollMetrics: metrics,
       );
 
       painter.paint(testCanvas, size);
@@ -110,14 +110,14 @@ void main() {
       painter = _buildPainter(
         minLength: minLen,
         minOverscrollLength: minLen,
-        scrollMetrics: defaultMetrics
+        scrollMetrics: defaultMetrics,
       );
 
       final List<ScrollMetrics> metricsList =
         <ScrollMetrics> [startingMetrics.copyWith(pixels: 0.01)]
         ..addAll(List<ScrollMetrics>.generate(
             (maxExtent/viewportDimension).round(),
-            (int index) => startingMetrics.copyWith(pixels: (index + 1) * viewportDimension)
+            (int index) => startingMetrics.copyWith(pixels: (index + 1) * viewportDimension),
           ).where((ScrollMetrics metrics) => !metrics.outOfRange))
         ..add(startingMetrics.copyWith(pixels: maxExtent - 0.01));
 
@@ -157,13 +157,13 @@ void main() {
         painter = _buildPainter(
           mainAxisMargin: margin,
           minLength: minLen,
-          scrollMetrics: defaultMetrics
+          scrollMetrics: defaultMetrics,
         );
 
         // Overscroll to double.negativeInfinity (top).
         painter.update(
           startingMetrics.copyWith(pixels: double.negativeInfinity),
-          startingMetrics.axisDirection
+          startingMetrics.axisDirection,
         );
 
         painter.paint(testCanvas, size);
@@ -172,7 +172,7 @@ void main() {
         // Overscroll to double.infinity (down).
         painter.update(
           startingMetrics.copyWith(pixels: double.infinity),
-          startingMetrics.axisDirection
+          startingMetrics.axisDirection,
         );
 
         painter.paint(testCanvas, size);
@@ -197,13 +197,13 @@ void main() {
         painter = _buildPainter(
           crossAxisMargin: margin,
           scrollMetrics: startingMetrics,
-          textDirection: textDirection
+          textDirection: textDirection,
         );
 
         for(AxisDirection direction in AxisDirection.values) {
           painter.update(
             startingMetrics.copyWith(axisDirection: direction),
-            direction
+            direction,
           );
 
           painter.paint(testCanvas, size);
@@ -235,12 +235,12 @@ void main() {
     final ScrollMetrics metrics = defaultMetrics.copyWith(
       minScrollExtent: -100,
       maxScrollExtent: 240,
-      axisDirection: AxisDirection.down
+      axisDirection: AxisDirection.down,
     );
 
     final ScrollbarPainter p = _buildPainter(
       padding: padding,
-      scrollMetrics: metrics
+      scrollMetrics: metrics,
     );
 
     testWidgets('down', (WidgetTester tester) async {
@@ -249,7 +249,7 @@ void main() {
           viewportDimension: size.height,
           pixels: double.negativeInfinity,
         ),
-        AxisDirection.down
+        AxisDirection.down,
       );
 
       // Top overscroll.
@@ -264,7 +264,7 @@ void main() {
           viewportDimension: size.height,
           pixels: double.infinity,
         ),
-        AxisDirection.down
+        AxisDirection.down,
       );
 
       p.paint(testCanvas, size);
@@ -278,9 +278,9 @@ void main() {
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.infinity,
-          axisDirection: AxisDirection.up
+          axisDirection: AxisDirection.up,
         ),
-        AxisDirection.up
+        AxisDirection.up,
       );
 
       // Top overscroll.
@@ -294,9 +294,9 @@ void main() {
         metrics.copyWith(
           viewportDimension: size.height,
           pixels: double.negativeInfinity,
-          axisDirection: AxisDirection.up
+          axisDirection: AxisDirection.up,
         ),
-        AxisDirection.up
+        AxisDirection.up,
       );
 
       p.paint(testCanvas, size);
@@ -310,9 +310,9 @@ void main() {
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.negativeInfinity,
-          axisDirection: AxisDirection.left
+          axisDirection: AxisDirection.left,
         ),
-        AxisDirection.left
+        AxisDirection.left,
       );
 
       // Right overscroll.
@@ -326,9 +326,9 @@ void main() {
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.infinity,
-          axisDirection: AxisDirection.left
+          axisDirection: AxisDirection.left,
         ),
-        AxisDirection.left
+        AxisDirection.left,
       );
 
       p.paint(testCanvas, size);
@@ -342,9 +342,9 @@ void main() {
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.infinity,
-          axisDirection: AxisDirection.right
+          axisDirection: AxisDirection.right,
         ),
-        AxisDirection.right
+        AxisDirection.right,
       );
 
       // Right overscroll.
@@ -358,9 +358,9 @@ void main() {
         metrics.copyWith(
           viewportDimension: size.width,
           pixels: double.negativeInfinity,
-          axisDirection: AxisDirection.right
+          axisDirection: AxisDirection.right,
         ),
-        AxisDirection.right
+        AxisDirection.right,
       );
 
       p.paint(testCanvas, size);
@@ -379,7 +379,7 @@ void main() {
         minScrollExtent: minScrollExtent,
         maxScrollExtent: maxScrollExtent,
         axisDirection: AxisDirection.down,
-        viewportDimension: size.height
+        viewportDimension: size.height,
       );
 
       for(double minLength in <double> [_kMinThumbExtent, double.infinity]) {
@@ -388,7 +388,7 @@ void main() {
         painter = _buildPainter(
           minLength: minLength,
           minOverscrollLength: minLength,
-          scrollMetrics: startingMetrics
+          scrollMetrics: startingMetrics,
         );
 
         final Iterable<ScrollMetrics> metricsList = Iterable<ScrollMetrics>.generate(

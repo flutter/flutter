@@ -17,9 +17,9 @@ Widget _buildSingleChildScrollViewWithScrollbar({
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
       child: Scrollbar(
-        child: SingleChildScrollView(child: child)
-      )
-    )
+        child: SingleChildScrollView(child: child),
+      ),
+    ),
   );
 }
 
@@ -54,10 +54,10 @@ void main() {
           body: Scrollbar(
             child: ListView(
               children: const <Widget>[SizedBox(width: 4000, height: 4000)]
-            )
-          )
-        )
-      )
+            ),
+          ),
+        ),
+      ),
     ));
 
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
@@ -73,8 +73,8 @@ void main() {
         0,         // the paint area starts from the bottom of the app bar
         6,         // thickness
         // 56 being the height of the app bar
-        (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20)
-      )
+        (600.0 - 56 - 34 - 20) / 4000 * (600 - 56 - 34 - 20),
+      ),
     ));
   });
 }

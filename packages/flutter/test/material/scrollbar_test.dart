@@ -28,8 +28,8 @@ Widget _buildBoilerplate({
     textDirection: textDirection,
     child: MediaQuery(
       data: MediaQueryData(padding: padding),
-      child: child
-    )
+      child: child,
+    ),
   );
 }
 
