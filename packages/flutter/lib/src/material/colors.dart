@@ -134,7 +134,7 @@ typedef ColorResolver = Color Function(Set<MaterialState> states);
 abstract class MaterialStateColor extends Color {
   /// Creates a [MaterialStateColor], a color that can return different values
   /// depending on a given [MaterialState].
-  const MaterialStateColor(int value) : super(value);
+  const MaterialStateColor(int defaultValue) : super(defaultValue);
 
   /// Creates a [MaterialStateColor] from a [ColorResolver] callback function.
   ///
