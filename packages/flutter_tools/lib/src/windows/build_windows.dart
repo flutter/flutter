@@ -3,6 +3,7 @@
 // found in the LICENSE file
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
@@ -28,12 +29,25 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     throwToolExit('Unable to build: could not find vcvars64.bat');
   }
 
+  final String buildScript = fs.path.join(
+    Cache.flutterRoot,
+    'packages',
+    'flutter_tools',
+    'bin',
+    'vs_build.bat',
+  );
+
   final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
+  final String projectPath = windowsProject.vcprojFile.path;
+  // Run the script with a relative path to the project using the enclosing
+  // directory as the workingDirectory, to avoid hitting the limit on command
+  // lengths in batch scripts if the absolute path to the project is long.
   final Process process = await processManager.start(<String>[
-    vcvarsScript, '&&', 'msbuild',
-    windowsProject.vcprojFile.path,
-    '/p:Configuration=$configuration',
-  ], runInShell: true);
+    buildScript,
+    vcvarsScript,
+    fs.path.basename(projectPath),
+    configuration,
+  ], workingDirectory: fs.path.dirname(projectPath));
   final Status status = logger.startProgress(
     'Building Windows application...',
     timeout: null,
