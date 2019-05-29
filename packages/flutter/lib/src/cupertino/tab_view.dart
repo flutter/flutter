@@ -13,7 +13,8 @@ import 'tab_scaffold.dart' show CupertinoTabViewTapNotifier;
 /// A typical tab view used as the content of each tab in a [CupertinoTabScaffold]
 /// where multiple tabs with parallel navigation states and history can
 /// co-exist.
-/// /// [CupertinoTabView] configures the top-level [Navigator] to search for routes
+///
+/// [CupertinoTabView] configures the top-level [Navigator] to search for routes
 /// in the following order:
 ///
 ///  1. For the `/` route, the [builder] property, if non-null, is used.

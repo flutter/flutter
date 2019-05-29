@@ -6,7 +6,7 @@ import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../painting/mocks_for_image_cache.dart';
+import '../painting/mocks_for_image_cache.dart' show TestImageProvider;
 
 typedef IntCallback = void Function(int);
 
