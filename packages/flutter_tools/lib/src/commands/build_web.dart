@@ -8,8 +8,7 @@ import '../base/common.dart';
 import '../base/logger.dart';
 import '../build_info.dart';
 import '../globals.dart';
-import '../runner/flutter_command.dart'
-    show DevelopmentArtifact, FlutterCommandResult;
+import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -17,15 +16,14 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand() {
     usesTargetOption();
     usesPubOption();
-    addBuildModeFlags();
+    defaultBuildMode = BuildMode.release;
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
-      const <DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
-        DevelopmentArtifact.web,
-      };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
+    DevelopmentArtifact.universal,
+    DevelopmentArtifact.web,
+  };
 
   @override
   final String name = 'web';
@@ -42,29 +40,8 @@ class BuildWebCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String target = argResults['target'];
-    final Status status = logger
-        .startProgress('Compiling $target for the Web...', timeout: null);
-    final BuildInfo buildInfo = getBuildInfo();
-    int result;
-    switch (buildInfo.mode) {
-      case BuildMode.release:
-        result = await webCompiler.compileDart2js(target: target);
-        break;
-      case BuildMode.profile:
-        result = await webCompiler.compileDart2js(target: target, minify: false);
-        break;
-      case BuildMode.debug:
-        throwToolExit(
-            'Debug mode is not supported as a build target. Instead use '
-            '"flutter run -d web".');
-        break;
-      case BuildMode.dynamicProfile:
-      case BuildMode.dynamicRelease:
-        throwToolExit(
-            'Build mode ${buildInfo.mode} is not supported with JavaScript '
-            'compilation');
-        break;
-    }
+    final Status status = logger.startProgress('Compiling $target to JavaScript...', timeout: null);
+    final int result = await webCompiler.compile(target: target);
     status.stop();
     if (result == 1) {
       throwToolExit('Failed to compile $target to JavaScript.');
