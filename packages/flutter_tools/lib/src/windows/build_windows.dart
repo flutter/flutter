@@ -26,7 +26,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
 
   final String vcvarsScript = await findVcvars();
   if (vcvarsScript == null) {
-    throwToolExit('Unable to build: could not find vcvars64.bat');
+    throwToolExit('Unable to build: could not find suitable toolchain.');
   }
 
   final String buildScript = fs.path.join(
