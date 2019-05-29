@@ -338,7 +338,12 @@ class DaemonDomain extends Domain {
       return <String, Object>{
         'platforms': result,
       };
-    } catch (err) {
+    } catch (err, stackTrace) {
+      sendEvent('log', <String, dynamic>{
+        'log': 'Failed to parse project metadata',
+        'stackTrace': stackTrace.toString(),
+        'error': true,
+      });
       // On any sort of failure, fall back to Android and iOS for backwards
       // comparability.
       return <String, Object>{
