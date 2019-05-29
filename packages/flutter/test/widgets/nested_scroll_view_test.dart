@@ -121,6 +121,7 @@ void main() {
 
     testWidgets('NestedScrollView collapsing AppBar', (
       WidgetTester tester) async {
+      print(MediaQuery());
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       await tester.pumpWidget(buildTest());
       expect(find.text('aaa2'), findsOneWidget);
