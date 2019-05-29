@@ -70,6 +70,8 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.dataRowHeight,
+    this.headingRowHeight,
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
@@ -130,6 +132,16 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// See [DataTable.onSelectAll].
   final ValueSetter<bool> onSelectAll;
+
+  /// The height of each row (excluding the row that contains column headings).
+  ///
+  /// This value is optional and defaults to 48.0 if not specified.
+  final double dataRowHeight;
+
+  /// The height of the heading row.
+  ///
+  /// This value is optional and defaults to 56.0 if not specified.
+  final double headingRowHeight;
 
   /// The index of the first row to display when the widget is first created.
   final int initialFirstRowIndex;
@@ -430,6 +442,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               sortColumnIndex: widget.sortColumnIndex,
               sortAscending: widget.sortAscending,
               onSelectAll: widget.onSelectAll,
+              dataRowHeight: widget.dataRowHeight,
+              headingRowHeight: widget.headingRowHeight,
               rows: _getRows(_firstRowIndex, widget.rowsPerPage),
             ),
           ),
