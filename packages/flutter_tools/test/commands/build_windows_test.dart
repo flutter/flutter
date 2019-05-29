@@ -27,7 +27,7 @@ void main() {
   final MockPlatform notWindowsPlatform = MockPlatform();
   const String projectPath = r'C:\windows\Runner.vcxproj';
   const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
-  final String vcvarsPath = fs.path.join(visualStudioPath, 'VC', 'Auxiliary', 'Build', 'vcvars64.bat');
+  const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
 
   when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
     return 0;
