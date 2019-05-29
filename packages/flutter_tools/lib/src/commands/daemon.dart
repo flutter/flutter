@@ -307,10 +307,12 @@ class DaemonDomain extends Domain {
   /// This does not filter based on the current workflow restrictions, such
   /// as whether command line tools are installed or whether the host platform
   /// is correct.
-  Future<List<String>> getSupportedPlatforms(Map<String, dynamic> args) async {
+  Future<Map<String, Object>> getSupportedPlatforms(Map<String, dynamic> args) async {
     final String projectRoot = _getStringArg(args, 'projectRoot', required: true);
     final List<String> result = <String>[];
     try {
+      // TODO(jonahwilliams): replace this with a project metadata check once
+      // that has been implemented.
       final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.directory(projectRoot));
       if (flutterProject.linux.existsSync()) {
         result.add('linux');
@@ -333,14 +335,18 @@ class DaemonDomain extends Domain {
       if (flutterProject.fuchsia.existsSync()) {
         result.add('fuchsia');
       }
-      return result;
+      return <String, Object>{
+        'platforms': result,
+      };
     } catch (err) {
       // On any sort of failure, fall back to Android and iOS for backwards
       // comparability.
-      return <String>[
-        'android',
-        'ios',
-      ];
+      return <String, Object>{
+        'platforms': <String>[
+          'android',
+          'ios',
+        ],
+      };
     }
   }
 }

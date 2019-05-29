@@ -62,16 +62,14 @@ The `shutdown()` command will terminate the flutter daemon. It is not necessary 
 
 ### daemon.getSupportedPlatforms
 
-The `getSupportedPlatforms()` command will enumerate all platforms supported by the project located at the provided
-`projectRoot`. It returns a List of strings which describe the set of all possibly supported platforms. Possible values
-include:
+The `getSupportedPlatforms()` command will enumerate all platforms supported by the project located at the provided `projectRoot`. It returns a Map with the key 'platforms' containing a List of strings which describe the set of all possibly supported platforms. Possible values include:
    - android
    - ios
-   - linux
-   - macos
-   - windows
-   - fuchsia
-   - web
+   - linux #experimental
+   - macos #experimental
+   - windows #experimental
+   - fuchsia #experimental
+   - web #experimental
 
 #### Events
 
