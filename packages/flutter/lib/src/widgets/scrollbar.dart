@@ -76,7 +76,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// screen the scrollbar appears in (the trailing side). Mustn't be null.
   final TextDirection textDirection;
 
-  /// Thickness of the scrollbar in its cross-axis in pixels. Mustn't be null.
+  /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
   final double thickness;
 
   /// An opacity [Animation] that dictates the opacity of the thumb.
@@ -90,7 +90,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Mustn't be null and defaults to 0.
   final double mainAxisMargin;
 
-  /// Distance from the scrollbar's side to the nearest edge in pixels.
+  /// Distance from the scrollbar's side to the nearest edge in logical pixels.
   ///
   /// Must not be null and defaults to 0.
   final double crossAxisMargin;
@@ -101,7 +101,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   final Radius radius;
 
   /// The amount of space by which to inset the scrollbar's start and end, as
-  /// well as its side to the nearest edge, in pixels.
+  /// well as its side to the nearest edge, in logical pixels.
   ///
   /// This is typically set to the current [MediaQueryData.padding] to avoid
   /// partial obstructions such as display notches. If you only want additional
