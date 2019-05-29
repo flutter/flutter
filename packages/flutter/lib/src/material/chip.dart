@@ -1403,6 +1403,8 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   bool get hasDeleteButton => widget.onDeleted != null;
   bool get hasAvatar => widget.avatar != null;
 
+  final Set<MaterialState> _states = <MaterialState>{};
+
   bool get canTap {
     return widget.isEnabled
         && widget.tapEnabled
@@ -1486,12 +1488,17 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     super.dispose();
   }
 
+  void _updateState(MaterialState state, bool value) {
+    value ? _states.add(state) : _states.remove(state);
+  }
+
   void _handleTapDown(TapDownDetails details) {
     if (!canTap) {
       return;
     }
     setState(() {
       _isTapping = true;
+      _updateState(MaterialState.pressed, true);
     });
   }
 
@@ -1501,6 +1508,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     setState(() {
       _isTapping = false;
+      _updateState(MaterialState.pressed, false);
     });
   }
 
@@ -1510,6 +1518,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     }
     setState(() {
       _isTapping = false;
+      _updateState(MaterialState.pressed, false);
     });
     // Only one of these can be set, so only one will be called.
     widget.onSelected?.call(!widget.selected);
@@ -1533,6 +1542,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
   @override
   void didUpdateWidget(RawChip oldWidget) {
     super.didUpdateWidget(oldWidget);
+    setState(() {
+      _updateState(MaterialState.selected, widget?.selected ?? false);
+    });
     if (oldWidget.isEnabled != widget.isEnabled) {
       setState(() {
         if (widget.isEnabled) {
@@ -1621,6 +1633,9 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     final Color selectedShadowColor = widget.selectedShadowColor ?? chipTheme.selectedShadowColor ?? _defaultShadowColor;
     final bool selected = widget.selected ?? false;
 
+    final TextStyle effectiveLabelStyle = widget.labelStyle ?? chipTheme.labelStyle;
+    final TextStyle resolvedTextStyle = effectiveLabelStyle?.copyWith(color: MaterialStateColor.resolveColor(effectiveLabelStyle?.color, _states));
+
     Widget result = Material(
       elevation: isTapping ? pressElevation : elevation,
       shadowColor: selected ? selectedShadowColor : shadowColor,
@@ -1653,7 +1668,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                   textAlign: TextAlign.start,
                   maxLines: 1,
                   softWrap: false,
-                  style: widget.labelStyle ?? chipTheme.labelStyle,
+                  style: resolvedTextStyle,
                   child: widget.label,
                 ),
                 avatar: AnimatedSwitcher(

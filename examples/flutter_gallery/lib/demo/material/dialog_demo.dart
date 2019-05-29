@@ -85,6 +85,13 @@ class DialogDemoState extends State<DialogDemo> {
     final ThemeData theme = Theme.of(context);
     final TextStyle dialogTextStyle = theme.textTheme.subhead.copyWith(color: theme.textTheme.caption.color);
 
+    final MaterialStateColor textColor = MaterialStateColor((states) {
+      if (states.contains(MaterialState.pressed)) {
+        return Colors.blue[900];
+      }
+      return Colors.blue[600];
+    });
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -107,10 +114,12 @@ class DialogDemoState extends State<DialogDemo> {
                   actions: <Widget>[
                     FlatButton(
                       child: const Text('CANCEL'),
+                      textColor: textColor,
                       onPressed: () { Navigator.pop(context, DialogDemoAction.cancel); },
                     ),
                     FlatButton(
                       child: const Text('DISCARD'),
+                      textColor: textColor,
                       onPressed: () { Navigator.pop(context, DialogDemoAction.discard); },
                     ),
                   ],
@@ -132,10 +141,12 @@ class DialogDemoState extends State<DialogDemo> {
                   actions: <Widget>[
                     FlatButton(
                       child: const Text('DISAGREE'),
+                      textColor: textColor,
                       onPressed: () { Navigator.pop(context, DialogDemoAction.disagree); },
                     ),
                     FlatButton(
                       child: const Text('AGREE'),
+                      textColor: textColor,
                       onPressed: () { Navigator.pop(context, DialogDemoAction.agree); },
                     ),
                   ],

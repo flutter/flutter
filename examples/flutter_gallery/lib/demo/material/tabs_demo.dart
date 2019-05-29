@@ -157,8 +157,20 @@ class TabsDemo extends StatelessWidget {
                   expandedHeight: 150.0,
                   forceElevated: innerBoxIsScrolled,
                   bottom: TabBar(
+                    labelColor: MaterialStateColor((states) {
+                      if (states.contains(MaterialState.selected)) {
+                        if (states.contains(MaterialState.pressed)) {
+                          return Colors.green.shade900;
+                        }
+                        return Colors.white;
+                      }
+                      if (states.contains(MaterialState.pressed)) {
+                        return Colors.red.shade900;
+                      }
+                      return Colors.black.withOpacity(.7);
+                    }),
                     tabs: _allPages.keys.map<Widget>(
-                      (_Page page) => Tab(text: page.label),
+                      (_Page page) => Tab(text: page.label, icon: Icon(Icons.add),),
                     ).toList(),
                   ),
                 ),
