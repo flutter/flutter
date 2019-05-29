@@ -756,7 +756,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   static Set<String> _allowedAssetKeys;
 
   void _mockFlutterAssets() {
-    if (identical(0, 0.0)) {
+    if (_kRunningInBrowser) {
       return;
     }
     if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
