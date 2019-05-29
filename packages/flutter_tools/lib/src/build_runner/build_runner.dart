@@ -27,7 +27,8 @@ import '../project.dart';
 import 'build_script_generator.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
-const String kMinimumBuildRunnerVersion = '1.2.8';
+const String kMinimumBuildRunnerVersion = '1.4.0';
+const String kSupportedBuildDaemonVersion = '0.6.1';
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
@@ -47,7 +48,7 @@ class BuildRunner extends CodeGenerator {
     final File syntheticPubspec = generatedDirectory.childFile('pubspec.yaml');
 
     // Check if contents of builders changed. If so, invalidate build script
-    // and regnerate.
+    // and regenerate.
     final YamlMap builders = flutterProject.builders;
     final List<int> appliedBuilderDigest = _produceScriptId(builders);
     if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
@@ -100,6 +101,7 @@ class BuildRunner extends CodeGenerator {
         }
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
+      stringBuffer.writeln('  build_daemon: $kSupportedBuildDaemonVersion');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
