@@ -50,6 +50,9 @@ class FuchsiaSdk {
       return null;
     }
     final List<String> devices = await fuchsiaDevFinder.list();
+    if (devices == null) {
+      return null;
+    }
     return devices.isNotEmpty ? devices[0] : null;
   }
 

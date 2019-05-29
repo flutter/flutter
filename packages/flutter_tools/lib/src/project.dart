@@ -305,7 +305,7 @@ class IosProject {
   }
 
   /// True, if the host app project is using Swift.
-  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
+  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION') ?? false;
 
   /// The build settings for the host app of this project, as a detached map.
   ///
@@ -591,7 +591,7 @@ class MacOSProject {
 
   /// The file where the Xcode build will write the name of the built app.
   ///
-  /// Ideally this will be replaced in the future with inpection of the Runner
+  /// Ideally this will be replaced in the future with inspection of the Runner
   /// scheme's target.
   File get nameFile => _cacheDirectory.childFile('.app_filename');
 }
