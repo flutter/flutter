@@ -168,8 +168,7 @@ void test(
   int retry,
 }) {
   _declarer.test(
-    description.toString(),
-    body,
+    description.toString(), body,
     testOn: testOn,
     timeout: timeout,
     skip: skip,
@@ -233,8 +232,8 @@ void test(
 /// avoid this flag if possible, and instead use the test runner flag `-n` to
 /// filter tests by name.
 @isTestGroup
-void group(Object description, Function body, { dynamic skip, dynamic tags }) {
-  _declarer.group(description.toString(), body, skip: skip, tags: tags);
+void group(Object description, Function body, { dynamic skip }) {
+  _declarer.group(description.toString(), body, skip: skip);
 }
 
 /// Registers a function to be run before tests.

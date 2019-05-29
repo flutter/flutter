@@ -154,7 +154,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// environment variables for a variable called `FLUTTER_TEST`.)
   static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null) {
-      if (identical(0, 0.0) || Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (_kRunningInBrowser || Platform.environment.containsKey('FLUTTER_TEST')) {
         AutomatedTestWidgetsFlutterBinding();
       } else {
         LiveTestWidgetsFlutterBinding();
