@@ -314,7 +314,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
   /// This method's semantics are the same as Dart's [List.remove] method:
   /// it decreases the length of the list by one and shifts all items at or
   /// before [index] towards the beginning of the list.
-  void removeItem(int index, AnimatedListRemovedItemBuilder builder, {Duration duration = _kDuration}) {
+  void removeItem(int index, AnimatedListRemovedItemBuilder builder, { Duration duration = _kDuration }) {
     assert(index != null && index >= 0);
     assert(duration != null);
 
@@ -332,7 +332,7 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         ..sort();
     });
 
-    if (builder != null) {
+    if (builder != null && duration != Duration.zero) {
       controller.reverse().then<void>((void value) {
         _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
@@ -352,10 +352,11 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
         });
       });
     }
-    /// [5/24/2019]
-    /// In cases when animation is not needed.
-    /// For example: A Dismissible widget in an AnimatedList...
-    /// In this case 'null' can be passed as animation
+    /// In cases when the playback of an animation is not desired.
+    /// For example: The [Dismissible] widget in an [AnimatedList] widget.
+    /// In this case one has two options to skip the animation work:
+    /// 1. Pass [Duration.zero] as duration parameter.
+    /// 2. Pass 'null' as animation parameter.
     else {
       _removeActiveItemAt(_outgoingItems, outgoingItem.itemIndex).controller.dispose();
 
