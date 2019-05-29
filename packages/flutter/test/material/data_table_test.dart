@@ -267,9 +267,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('DataTable custom height', (WidgetTester tester) async {
-    final List<String> log = <String>[];
-
+  testWidgets('DataTable custom row height', (WidgetTester tester) async {
     Widget buildTable({
       int sortColumnIndex,
       bool sortAscending = true,
@@ -279,9 +277,7 @@ void main() {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
-        onSelectAll: (bool value) {
-          log.add('select-all: $value');
-        },
+        onSelectAll: (bool value) {},
         dataRowHeight: dataRowHeight,
         headingRowHeight: headingRowHeight,
         columns: <DataColumn>[
@@ -293,17 +289,13 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {
-              log.add('column-sort: $columnIndex $ascending');
-            },
+            onSort: (int columnIndex, bool ascending) {},
           ),
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
             key: Key(dessert.name),
-            onSelectChanged: (bool selected) {
-              log.add('row-selected: ${dessert.name}');
-            },
+            onSelectChanged: (bool selected) {},
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -311,9 +303,7 @@ void main() {
               DataCell(
                 Text('${dessert.calories}'),
                 showEditIcon: true,
-                onTap: () {
-                  log.add('cell-tap: ${dessert.calories}');
-                },
+                onTap: () {},
               ),
             ],
           );
@@ -324,27 +314,39 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Name')).size.height, 56.0); // This is the header row height
-    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Frozen yogurt')).size.height, 48.0); // This is the data row height
-
-    await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(dataRowHeight: 30.0)),
-    ));
-    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Frozen yogurt')).size.height, 30.0);
-
-    await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(dataRowHeight: 56.0)),
-    ));
-    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Frozen yogurt')).size.height, 56.0);
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Name')
+    ).size.height, 56.0); // This is the header row height
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt')
+    ).size.height, 48.0); // This is the data row height
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(headingRowHeight: 48.0)),
     ));
-    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Name')).size.height, 48.0);
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Name')
+    ).size.height, 48.0);
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(headingRowHeight: 64.0)),
     ));
-    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Name')).size.height, 64.0);
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Name')
+    ).size.height, 64.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(dataRowHeight: 30.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt')
+    ).size.height, 30.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(dataRowHeight: 56.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt')
+    ).size.height, 56.0);
   });
 }
