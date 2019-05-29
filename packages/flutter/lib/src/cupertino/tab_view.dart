@@ -126,6 +126,16 @@ class CupertinoTabView extends StatefulWidget {
   /// This list of observers is not shared with ancestor or descendant [Navigator]s.
   final List<NavigatorObserver> navigatorObservers;
 
+  @protected
+  void onTapWhenActive() {
+    if (navigatorKey != null) {
+      final NavigatorState navigator = navigatorKey.currentState;
+      if (navigator.canPop()) {
+        navigator.popUntil((Route<dynamic> route) => route.isFirst);
+      }
+    }
+  }
+
   @override
   _CupertinoTabViewState createState() {
     return _CupertinoTabViewState();
@@ -153,6 +163,14 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     }
   }
 
+  @override
+  void didChangeDependencies() {
+    CupertinoTabViewTapNotifier.of(context)
+      ?.updateListener(widget.onTapWhenActive);
+
+    super.didChangeDependencies();
+  }
+
   void _updateObserversAndKey() {
     _navigatorObservers =
         List<NavigatorObserver>.from(widget.navigatorObservers)
@@ -162,10 +180,6 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
 
   @override
   Widget build(BuildContext context) {
-    final CupertinoTabViewTapNotifier notifier = CupertinoTabViewTapNotifier.of(context);
-    if (notifier != null) {
-      notifier.updateListener(_onTapWhenActive);
-    }
     return Navigator(
       key: _effectiveNavigatorKey,
       onGenerateRoute: _onGenerateRoute,
@@ -226,12 +240,5 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
       return true;
     }());
     return result;
-  }
-
-  void _onTapWhenActive() {
-    final NavigatorState navigator = _effectiveNavigatorKey.currentState;
-    if (navigator.canPop()) {
-      navigator.popUntil((Route<dynamic> route) => route.isFirst);
-    }
   }
 }

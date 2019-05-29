@@ -211,7 +211,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   }
 
   bool _updateColors() {
-    assert(mounted, 'This should only be called after didUpdateDependencies');
+    assert(mounted, 'This should only be called after didChangeDependencies');
     bool changed = false;
     final Color selectedColor = widget.selectedColor ?? CupertinoTheme.of(context).primaryColor;
     if (_selectedColor != selectedColor) {
@@ -250,7 +250,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
   }
 
   void _updateAnimationControllers() {
-    assert(mounted, 'This should only be called after didUpdateDependencies');
+    assert(mounted, 'This should only be called after didChangeDependencies');
     for (AnimationController controller in _selectionControllers) {
       controller.dispose();
     }

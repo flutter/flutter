@@ -105,27 +105,25 @@ class CupertinoTabViewTapNotifier {
 
   static CupertinoTabViewTapNotifier of(BuildContext context) {
     final _TapNotifierWidget notifierWidget = context
-    .ancestorWidgetOfExactType(_TapNotifierWidget);
-
+      .inheritFromWidgetOfExactType(_TapNotifierWidget);
     return notifierWidget.notifier;
   }
 
   void updateListener(VoidCallback listener) {
-    if (_onTapCurrentTab == listener) {
-      return;
-    }
+    print('update listener: $listener');
     _onTapCurrentTab = listener;
   }
 }
 
-class _TapNotifierWidget extends StatelessWidget {
-  const _TapNotifierWidget({ Key key, this.notifier, this.child }) : super(key: key);
+class _TapNotifierWidget extends InheritedWidget {
+  const _TapNotifierWidget({ Key key, @required this.notifier, Widget child })
+    : assert(notifier != null),
+      super(key: key, child: child);
 
-  final Widget child;
   final CupertinoTabViewTapNotifier notifier;
 
   @override
-  Widget build(BuildContext context) => child;
+  bool updateShouldNotify(_TapNotifierWidget oldWidget) => notifier != oldWidget.notifier;
 }
 
 /// Implements a tabbed iOS application's root layout and behavior structure.
