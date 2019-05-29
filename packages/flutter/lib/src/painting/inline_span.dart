@@ -114,8 +114,10 @@ abstract class InlineSpan extends DiagnosticableTree {
     return result;
   }
 
-  /// Performs the check at each [InlineSpan] for if the [index] falls within the range
+  /// Performs the check at each [InlineSpan] for if the `position` falls within the range
   /// of the span and returns the span if it does.
+  ///
+  /// The `offset` parameter tracks the current text byte offset from the root [InlineSpan].
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
   @protected
@@ -143,10 +145,10 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// true, then the text returned will include the [TextSpan.semanticsLabel]s
   /// instead of the text contents for [TextSpan]s.
   ///
-  /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
+  /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.
   ///
-  /// The plain-text representation of this [InlineSpan] is written into the [buffer].
+  /// The plain-text representation of this [InlineSpan] is written into the `buffer`.
   /// This method will then recursively call [computeToPlainText] on its childen
   /// [InlineSpan]s if available.
   @protected
@@ -172,19 +174,21 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Performs the check at each [InlineSpan] for if the [index] falls within the range
   /// of the span and returns the corresponding code unit. Returns null otherwise.
   ///
+  /// The `offset` parameter tracks the current text byte offset from the root [InlineSpan].
+  ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected
   int codeUnitAtVisitor(int index, Accumulator offset);
 
-  /// Populates the [semanticsOffsets] and [semanticsElements] with the appropriate data
+  /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
   /// to be able to construct a [SemanticsNode].
   ///
   /// If applicable, the beginning and end text offset are added to [semanticsOffsets].
   /// [PlaceholderSpan]s have a text length of 1, which corresponds to the object
   /// replacement character (0xFFFC) that is inserted to represent it.
   ///
-  /// Any recognizers are added to [semanticsElements]. Null is added to
-  /// [semanticsElements] for [PlaceholderSpan]s.
+  /// Any [GestureRecognizer]s are added to `semanticsElements`. Null is added to
+  /// `semanticsElements` for [PlaceholderSpan]s.
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements);
 
   /// In checked mode, throws an exception if the object is not in a
@@ -195,7 +199,6 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// ```dart
   /// assert(myInlineSpan.debugAssertIsValid());
   /// ```
-  /// 
   bool debugAssertIsValid() => true;
 
   /// Describe the difference between this span and another, in terms of

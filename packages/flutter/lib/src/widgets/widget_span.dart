@@ -27,21 +27,25 @@ import 'framework.dart';
 /// A card with `Hello World!` embedded inline within a TextSpan tree.
 ///
 /// ```dart
-/// <TextSpan>[
-///   TextSpan(text: 'Flutter is'),
-///   WidgetSpan(
-///     widget: SizedBox(
-///       width: 120,
-///       height: 50,
-///       child: Card(
-///         child: Center(
-///           child: Text('Hello World!')
+/// Text.rich(
+///   TextSpan(
+///     children: <InlineSpan>[
+///       TextSpan(text: 'Flutter is'),
+///       WidgetSpan(
+///         widget: SizedBox(
+///           width: 120,
+///           height: 50,
+///           child: Card(
+///             child: Center(
+///               child: Text('Hello World!')
+///             )
+///           ),
 ///         )
 ///       ),
-///     )
-///   ),
-///   TextSpan(text: 'the best!'),
-/// ]
+///       TextSpan(text: 'the best!'),
+///     ],
+///   )
+/// )
 /// ```
 /// {@end-tool}
 ///
