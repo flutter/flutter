@@ -104,8 +104,10 @@ typedef ColorResolver = Color Function(Set<MaterialState> states);
 /// solve this, you can use [MaterialStateColor] to make the text darker when the
 /// [FlatButton] is hovered, focused, or pressed.
 ///
-/// The [resolve] member is the callback that will be used to get the color
-/// in a given context.
+/// To use a [MaterialStateColor], you can either:
+///   1. Create a subclass of [MaterialStateColor] and implement the abstract `resolve` method.
+///   2. Use [MaterialStateColor.resolveWith] and pass in a callback that
+///      will be used to resolve the color in the given states.
 ///
 /// This should only be used as parameters when they are documented to take
 /// [MaterialStatefulColor], otherwise only the default state will be used.
@@ -126,25 +128,25 @@ typedef ColorResolver = Color Function(Set<MaterialState> states);
 ///
 /// FlatButton(
 ///   ...
-///   textColor: MaterialStateColor(getTextColor),
+///   textColor: MaterialStateColor.resolveWith(getTextColor),
 /// ),
 /// ```
-class MaterialStateColor extends Color {
+abstract class MaterialStateColor extends Color {
   /// Creates a [MaterialStateColor], a color that can return different values
   /// depending on a given [MaterialState].
-  ///
-  /// The callback must return a non-null color in the default state (empty set).
-  MaterialStateColor(this.resolve) :
-    assert(resolve(_defaultStates) != null),
-    super(resolve(_defaultStates).value);
+  const MaterialStateColor(int value) : super(value);
 
-  /// The callback that returns a [Color] for a given state.
+  /// Creates a [MaterialStateColor] from a [ColorResolver] callback function.
   ///
-  /// The callback must return a non-null color in the default state (empty set).
-  final ColorResolver resolve;
+  /// If used as a regular color, the color resolved in the default state will
+  /// be used.
+  ///
+  /// The given callback parameter must return a non-null color in the default
+  /// state (empty set).
+  factory MaterialStateColor.resolveWith(ColorResolver callback) => _MaterialStateColor(callback);
 
-  /// The default state for a Material component, the empty set of interaction states.
-  static const Set<MaterialState> _defaultStates = <MaterialState>{};
+  /// This method resolves to a [Color] based on a given set of states.
+  Color resolve(Set<MaterialState> states);
 
   /// Returns the color for the given set of states if `color` is a
   /// [MaterialStateColor], otherwise returns the color itself.
@@ -157,6 +159,24 @@ class MaterialStateColor extends Color {
     }
     return color;
   }
+}
+
+/// A [MaterialStateColor] created from a [ColorResolver] callback alone.
+///
+/// If used as a regular color, the color resolved in the default state will
+/// be used.
+///
+/// Used by [MaterialStateColor.resolveWith].
+class _MaterialStateColor extends MaterialStateColor {
+  _MaterialStateColor(this._resolve) : super(_resolve(_defaultStates).value);
+
+  final ColorResolver _resolve;
+
+  /// The default state for a Material component, the empty set of interaction states.
+  static const Set<MaterialState> _defaultStates = <MaterialState>{};
+
+  @override
+  Color resolve(Set<MaterialState> states) => _resolve(states);
 }
 
 /// [Color] and [ColorSwatch] constants which represent Material design's

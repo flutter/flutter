@@ -349,7 +349,9 @@ void main() {
         home: Scaffold(
           body: Center(
             child: ButtonTheme(
-              colorScheme: colorScheme.copyWith(primary: MaterialStateColor(getTextColor)),
+              colorScheme: colorScheme.copyWith(
+                  primary: MaterialStateColor.resolveWith(getTextColor),
+              ),
               textTheme: ButtonTextTheme.primary,
               child: FlatButton(
                 child: const Text('FlatButton'),
