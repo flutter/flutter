@@ -4,7 +4,7 @@
 
 /// The largest SMI value.
 ///
-/// See <https://www.dartlang.org/articles/numeric-computation/#smis-and-mints>
+/// See <https://dart.dev/articles/numeric-computation/#smis-and-mints>
 ///
 /// When compiling to JavaScript, this value is not supported since it is
 /// larger than the maximum safe 32bit integer.
@@ -35,7 +35,7 @@ class BitField<T extends dynamic> {
   final int _length;
   int _bits;
 
-  static const int _smiBits = 62; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
+  static const int _smiBits = 62; // see https://dart.dev/articles/numeric-computation/#smis-and-mints
   static const int _allZeros = 0;
   static const int _allOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
 
