@@ -290,6 +290,7 @@ class EditableText extends StatefulWidget {
     this.onEditingComplete,
     this.onSubmitted,
     this.onSelectionChanged,
+    this.onSelectionHandleTapped,
     List<TextInputFormatter> inputFormatters,
     this.rendererIgnoresPointer = false,
     this.cursorWidth = 2.0,
@@ -301,6 +302,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
+    this.scrollController,
     this.scrollPhysics,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -420,6 +422,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///
   /// {@endtemplate}
   final TextDirection textDirection;
 
@@ -435,6 +438,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [TextCapitalization], for a description of each capitalization behavior.
+  ///
   /// {@endtemplate}
   final TextCapitalization textCapitalization;
 
@@ -645,6 +649,9 @@ class EditableText extends StatefulWidget {
   /// location).
   final SelectionChangedCallback onSelectionChanged;
 
+  /// {@macro flutter.widgets.textSelection.onSelectionHandleTapped}
+  final VoidCallback onSelectionHandleTapped;
+
   /// {@template flutter.widgets.editableText.inputFormatters}
   /// Optional input validation and formatting overrides.
   ///
@@ -734,6 +741,15 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.widgets.editableText.scrollController}
+  /// The [ScrollController] to use when vertically scrolling the input.
+  ///
+  /// If null, it will instantiate a new ScrollController.
+  ///
+  /// See [Scrollable.controller].
+  /// {@endtemplate}
+  final ScrollController scrollController;
+
   /// {@template flutter.widgets.editableText.scrollPhysics}
   /// The [ScrollPhysics] to use when vertically scrolling the input.
   ///
@@ -768,6 +784,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
   }
 }
@@ -782,7 +799,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
-  final ScrollController _scrollController = ScrollController();
+  ScrollController _scrollController;
+
   AnimationController _cursorBlinkOpacityController;
 
   final LayerLink _layerLink = LayerLink();
@@ -812,6 +830,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
+    _scrollController = widget.scrollController ?? ScrollController();
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);
@@ -1135,10 +1154,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         selectionControls: widget.selectionControls,
         selectionDelegate: this,
         dragStartBehavior: widget.dragStartBehavior,
+        onSelectionHandleTapped: widget.onSelectionHandleTapped,
       );
-      final bool longPress = cause == SelectionChangedCause.longPress;
-      if (cause != SelectionChangedCause.keyboard && (_value.text.isNotEmpty || longPress))
-        _selectionOverlay.showHandles();
+
       if (widget.onSelectionChanged != null)
         widget.onSelectionChanged(selection, cause);
     }
@@ -1379,6 +1397,22 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   @override
   void hideToolbar() {
     _selectionOverlay?.hide();
+  }
+
+  /// Toggles the visibility of the toolbar.
+  void toggleToolbar() {
+    assert(_selectionOverlay != null);
+    if (_selectionOverlay.toolbarIsVisible) {
+      hideToolbar();
+    } else {
+      showToolbar();
+    }
+  }
+
+  /// Shows the handles at the location of the current selection.
+  void showHandles() {
+    assert(_selectionOverlay != null);
+    _selectionOverlay.showHandles();
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {

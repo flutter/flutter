@@ -6,7 +6,9 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 
@@ -463,6 +465,7 @@ flutter:
         expectedBuildNumber: null,
       );
     });
+
     test('parses no version clause', () async {
       const String manifest = '''
 name: test
@@ -477,6 +480,26 @@ flutter:
         expectedBuildName: null,
         expectedBuildNumber: null,
       );
+    });
+
+    // Regression test for https://github.com/flutter/flutter/issues/31764
+    testUsingContext('Returns proper error when font detail is malformed', () async {
+      final BufferLogger logger = context.get<Logger>();
+      const String manifest = '''
+name: test
+dependencies:
+  flutter:
+    sdk: flutter
+flutter:
+  fonts:
+    - family: foo
+      fonts:
+        -asset: a/bar
+''';
+      final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
+
+      expect(flutterManifest, null);
+      expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
     });
   });
 

@@ -263,7 +263,7 @@ void main() {
         Stopwatch: () => mockStopwatch,
       });
 
-      testUsingContext('AnsiStatus works when cancelled for $testOs', () async {
+      testUsingContext('AnsiStatus works when canceled for $testOs', () async {
         final AnsiStatus ansiStatus = _createAnsiStatus();
         bool done = false;
         FakeAsync().run((FakeAsync time) {
@@ -615,7 +615,7 @@ void main() {
       Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('SummaryStatus works when cancelled', () async {
+    testUsingContext('SummaryStatus works when canceled', () async {
       summaryStatus.start();
       List<String> lines = outputStdout();
       expect(lines[0], startsWith('Hello world              '));

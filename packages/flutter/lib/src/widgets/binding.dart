@@ -736,6 +736,12 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
     ).attachToRenderTree(buildOwner, renderViewElement);
   }
 
+  /// Whether the [renderViewElement] has been initialized.
+  ///
+  /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]
+  /// is called in the context of a [TestWidgetsFlutterBinding]).
+  bool get isRootWidgetAttached => _renderViewElement != null;
+
   @override
   Future<void> performReassemble() {
     assert(() {
@@ -937,7 +943,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
         exception: exception,
         stack: stack,
         library: 'widgets library',
-        context: 'attaching to the render tree',
+        context: ErrorDescription('attaching to the render tree'),
       );
       FlutterError.reportError(details);
       final Widget error = ErrorWidget.builder(details);

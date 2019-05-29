@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'binding.dart';
 import 'focus_scope.dart';
+import 'focus_traversal.dart';
 import 'framework.dart';
 
 /// Signature of a callback used by [Focus.onKey] and [FocusScope.onKey]
@@ -61,6 +62,9 @@ class FocusAttachment {
   void detach() {
     assert(_node != null);
     if (isAttached) {
+      if (_node.hasPrimaryFocus) {
+        _node.unfocus();
+      }
       _node._parent?._removeChild(_node);
       _node._attachment = null;
     }
@@ -93,7 +97,8 @@ class FocusAttachment {
     assert(_node != null);
     if (isAttached) {
       assert(_node.context != null);
-      parent ??= Focus.of(_node.context);
+      parent ??= Focus.of(_node.context, nullOk: true);
+      parent ??= FocusScope.of(_node.context);
       assert(parent != null);
       parent._reparent(_node);
     }
@@ -187,6 +192,30 @@ class FocusAttachment {
 /// will stop propagating the event. If it reaches the root [FocusScopeNode],
 /// [FocusManager.rootScope], the event is discarded.
 /// {@endtemplate}
+///
+/// ## Focus Traversal
+///
+/// The term _traversal_, sometimes called _tab traversal_, refers to moving the
+/// focus from one widget to the next in a particular order (also sometimes
+/// referred to as the _tab order_, since the TAB key is often bound to the
+/// action to move to the next widget).
+///
+/// To give focus to the logical _next_ or _previous_ widget in the UI, call the
+/// [nextFocus] or [previousFocus] methods. To give the focus to a widget in a
+/// particular direction, call the [focusInDirection] method.
+///
+/// The policy for what the _next_ or _previous_ widget is, or the widget in a
+/// particular direction, is determined by the [FocusTraversalPolicy] in force.
+///
+/// The ambient policy is determined by looking up the widget hierarchy for a
+/// [DefaultFocusTraversal] widget, and obtaining the focus traversal policy
+/// from it. Different focus nodes can inherit difference policies, so part of
+/// the app can go in widget order, and part can go in reading order, depending
+/// upon the use case.
+///
+/// Predefined policies include [WidgetOrderFocusTraversalPolicy],
+/// [ReadingOrderTraversalPolicy], and [DirectionalFocusTraversalPolicyMixin],
+/// but custom policies can be built based upon these policies.
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}
 /// This example shows how a FocusNode should be managed if not using the
@@ -301,6 +330,10 @@ class FocusAttachment {
 ///     widget tree.
 ///   * [FocusManager], a singleton that manages the focus and distributes key
 ///     events to focused nodes.
+///   * [FocusTraversalPolicy], a class used to determine how to move the focus
+///     to other nodes.
+///   * [DefaultFocusTraversal], a widget used to configure the default focus
+///     traversal policy for a widget subtree.
 class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a focus node.
   ///
@@ -308,10 +341,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
-  }) : _onKey = onKey {
+    this.skipTraversal = false,
+  })  : assert(skipTraversal != null),
+        _onKey = onKey {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
+
+  /// If true, tells the focus traversal policy to skip over this node for
+  /// purposes of the traversal algorithm.
+  ///
+  /// This may be used to place nodes in the focus tree that may be focused, but
+  /// not traversed, allowing them to receive key events as part of the focus
+  /// chain, but not be traversed to via focus traversal.
+  bool skipTraversal;
 
   /// The context that was supplied to [attach].
   ///
@@ -342,6 +385,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   Iterable<FocusNode> get children => _children;
   final List<FocusNode> _children = <FocusNode>[];
 
+  /// An iterator over the children that are allowed to be traversed by the
+  /// [FocusTraversalPolicy].
+  Iterable<FocusNode> get traversalChildren => children.where((FocusNode node) => !node.skipTraversal);
+
   /// A debug label that is used for diagnostic output.
   ///
   /// Will always return null in release builds.
@@ -365,6 +412,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       yield child;
     }
   }
+
+  /// Returns all descendants which do not have the [skipTraversal] flag set.
+  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal);
 
   /// An [Iterable] over the ancestors of this node.
   ///
@@ -494,13 +544,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Has no effect on nodes that return true from [hasFocus], but false from
   /// [hasPrimaryFocus].
   void unfocus() {
-    final FocusScopeNode scope = enclosingScope;
-    if (scope == null) {
-      // This node isn't part of a tree.
+    if (hasPrimaryFocus) {
+      final FocusScopeNode scope = enclosingScope;
+      assert(scope != null, 'Node has primary focus, but no enclosingScope.');
+      scope._focusedChildren.remove(this);
+      _manager?._willUnfocusNode(this);
       return;
     }
-    scope._focusedChildren.remove(this);
-    _manager?._willUnfocusNode(this);
+    if (hasFocus) {
+      // If we are in the focus chain, but not the primary focus, then unfocus
+      // the primary instead.
+      _manager._currentFocus.unfocus();
+    }
   }
 
   /// Removes the keyboard token from this focus node if it has one.
@@ -545,13 +600,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   // Removes the given FocusNode and its children as a child of this node.
   @mustCallSuper
   void _removeChild(FocusNode node) {
+    assert(node != null);
     assert(_children.contains(node), "Tried to remove a node that wasn't a child.");
     assert(node._parent == this);
     assert(node._manager == _manager);
 
-    // If the child was (or requested to be) the primary focus, then unfocus it
-    // and cancel any outstanding request to be focused.
-    node.unfocus();
+    node.enclosingScope?._focusedChildren?.remove(node);
 
     node._parent = null;
     _children.remove(node);
@@ -577,32 +631,18 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     }
     assert(_manager == null || child != _manager.rootScope, "Reparenting the root node isn't allowed.");
     assert(!ancestors.contains(child), 'The supplied child is already an ancestor of this node. Loops are not allowed.');
-    FocusNode oldPrimaryFocus;
-    if (child._manager != null) {
-      // We want to find out what the primary focus is, since the new child
-      // might be an ancestor of the primary focus, and the primary focus should
-      // move with the child.
-      oldPrimaryFocus = child.hasFocus ? child._manager._currentFocus : null;
-      assert(oldPrimaryFocus == null || oldPrimaryFocus == child || oldPrimaryFocus.ancestors.contains(child),
-        "child has focus, but primary focus isn't a descendant of it.");
-    }
-    // If the child currently has focus, we have to do some extra work to keep
-    // that focus, and to notify any scopes that used to be ancestors, and no
-    // longer have focus after we move it.
-    final Set<FocusNode> oldFocusPath = oldPrimaryFocus?.ancestors?.toSet() ?? <FocusNode>{};
+    final FocusScopeNode oldScope = child.enclosingScope;
+    final bool hadFocus = child.hasFocus;
     child._parent?._removeChild(child);
     _children.add(child);
     child._parent = this;
     child._updateManager(_manager);
-    if (oldPrimaryFocus != null) {
-      final Set<FocusNode> newFocusPath = _manager?._currentFocus?.ancestors?.toSet() ?? <FocusNode>{};
-      // Nodes that will no longer be focused need to be marked dirty.
-      for (FocusNode node in oldFocusPath.difference(newFocusPath)) {
-        node._markAsDirty();
-      }
-      // If the node used to have focus, make sure it keeps it's old primary
-      // focus when it moves.
-      oldPrimaryFocus.requestFocus();
+    if (hadFocus) {
+      // Update the focus chain for the current focus without changing it.
+      _manager?._currentFocus?._setAsFocusedChild();
+    }
+    if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
+      DefaultFocusTraversal.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
     }
   }
 
@@ -619,7 +659,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
     _context = context;
-    _onKey = onKey;
+    _onKey = onKey ?? _onKey;
     _attachment = FocusAttachment._(this);
     return _attachment;
   }
@@ -666,15 +706,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       }
       assert(node.ancestors.contains(this),
         'Focus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus(isFromPolicy: false);
+      node._doRequestFocus();
       return;
     }
-    _doRequestFocus(isFromPolicy: false);
+    _doRequestFocus();
   }
 
   // Note that this is overridden in FocusScopeNode.
-  void _doRequestFocus({@required bool isFromPolicy}) {
-    assert(isFromPolicy != null);
+  void _doRequestFocus() {
     _setAsFocusedChild();
     if (hasPrimaryFocus) {
       return;
@@ -701,6 +740,24 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       scopeFocus = ancestor;
     }
   }
+
+  /// Request to move the focus to the next focus node, by calling the
+  /// [FocusTraversalPolicy.next] method.
+  ///
+  /// Returns true if it successfully found a node and requested focus.
+  bool nextFocus() => DefaultFocusTraversal.of(context).next(this);
+
+  /// Request to move the focus to the previous focus node, by calling the
+  /// [FocusTraversalPolicy.previous] method.
+  ///
+  /// Returns true if it successfully found a node and requested focus.
+  bool previousFocus() => DefaultFocusTraversal.of(context).previous(this);
+
+  /// Request to move the focus to the nearest focus node in the given
+  /// direction, by calling the [FocusTraversalPolicy.inDirection] method.
+  ///
+  /// Returns true if it successfully found a node and requested focus.
+  bool focusInDirection(TraversalDirection direction) => DefaultFocusTraversal.of(context).inDirection(this, direction);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -792,18 +849,10 @@ class FocusScopeNode extends FocusNode {
       _reparent(scope);
     }
     assert(scope.ancestors.contains(this), '$FocusScopeNode $scope must be a child of $this to set it as first focus.');
-    // Move down the tree, checking each focusedChild until we get to a node
-    // that either isn't a scope node, or has no focused child, and then request
-    // focus on that node.
-    FocusNode descendantFocus = scope.focusedChild;
-    while (descendantFocus is FocusScopeNode && descendantFocus != null) {
-      final FocusScopeNode descendantScope = descendantFocus;
-      descendantFocus = descendantScope.focusedChild;
-    }
-    if (descendantFocus != null) {
-      descendantFocus?._doRequestFocus(isFromPolicy: false);
+    if (hasFocus) {
+      scope._doRequestFocus();
     } else {
-      scope._doRequestFocus(isFromPolicy: false);
+      scope._setAsFocusedChild();
     }
   }
 
@@ -824,13 +873,12 @@ class FocusScopeNode extends FocusNode {
       }
       assert(node.ancestors.contains(this),
         'Autofocus was requested for a node that is not a descendant of the scope from which it was requested.');
-      node._doRequestFocus(isFromPolicy: false);
+      node._doRequestFocus();
     }
   }
 
   @override
-  void _doRequestFocus({@required bool isFromPolicy}) {
-    assert(isFromPolicy != null);
+  void _doRequestFocus() {
     // Start with the primary focus as the focused child of this scope, if there
     // is one. Otherwise start with this node itself.
     FocusNode primaryFocus = focusedChild ?? this;
@@ -843,8 +891,12 @@ class FocusScopeNode extends FocusNode {
     }
     if (primaryFocus is FocusScopeNode) {
       // We didn't find a FocusNode at the leaf, so we're focusing the scope.
+      _setAsFocusedChild();
       _markAsDirty(newFocus: primaryFocus);
     } else {
+      // We found a FocusScope at the leaf, so ask it to focus itself instead of
+      // this scope. That will cause this scope to return true from hasFocus,
+      // but false from hasPrimaryFocus.
       primaryFocus.requestFocus();
     }
   }
@@ -974,6 +1026,8 @@ class FocusManager with DiagnosticableTreeMixin {
     _haveScheduledUpdate = false;
     final FocusNode previousFocus = _currentFocus;
     if (_currentFocus == null && _nextFocus == null) {
+      // If we don't have any current focus, and nobody has asked to focus yet,
+      // then pick a first one using widget order as a default.
       _nextFocus = rootScope;
     }
     if (_nextFocus != null && _nextFocus != _currentFocus) {

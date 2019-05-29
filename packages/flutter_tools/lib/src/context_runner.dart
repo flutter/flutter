@@ -27,15 +27,19 @@ import 'devfs.dart';
 import 'device.dart';
 import 'doctor.dart';
 import 'emulator.dart';
-import 'fuchsia/fuchsia_sdk.dart';
-import 'fuchsia/fuchsia_workflow.dart';
-import 'ios/cocoapods.dart';
+import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
+import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
+import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
 import 'ios/simulators.dart';
 import 'ios/xcodeproj.dart';
 import 'linux/linux_workflow.dart';
+import 'macos/cocoapods.dart';
+import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
+import 'macos/xcode.dart';
+import 'macos/xcode_validator.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
@@ -52,36 +56,37 @@ Future<T> runInContext<T>(
     body: runner,
     overrides: overrides,
     fallbacks: <Type, Generator>{
+      AndroidLicenseValidator: () => AndroidLicenseValidator(),
       AndroidSdk: AndroidSdk.locateAndroidSdk,
       AndroidStudio: AndroidStudio.latestValid,
-      AndroidWorkflow: () => AndroidWorkflow(),
       AndroidValidator: () => AndroidValidator(),
-      AndroidLicenseValidator: () => AndroidLicenseValidator(),
+      AndroidWorkflow: () => AndroidWorkflow(),
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
       BotDetector: () => const BotDetector(),
       Cache: () => Cache(),
+      ChromeLauncher: () => const ChromeLauncher(),
       CocoaPods: () => CocoaPods(),
       CocoaPodsValidator: () => const CocoaPodsValidator(),
       Config: () => Config(),
-      ChromeLauncher: () => const ChromeLauncher(),
       DevFSConfig: () => DevFSConfig(),
       DeviceManager: () => DeviceManager(),
       Doctor: () => const Doctor(),
       DoctorValidatorsProvider: () => DoctorValidatorsProvider.defaultInstance,
       EmulatorManager: () => EmulatorManager(),
-      FuchsiaSdk: () => FuchsiaSdk(),
-      FuchsiaArtifacts: () => FuchsiaArtifacts(),
-      FuchsiaWorkflow: () => FuchsiaWorkflow(),
       Flags: () => const EmptyFlags(),
       FlutterVersion: () => FlutterVersion(const SystemClock()),
+      FuchsiaArtifacts: () => FuchsiaArtifacts.find(),
+      FuchsiaDeviceTools: () => FuchsiaDeviceTools(),
+      FuchsiaSdk: () => FuchsiaSdk(),
+      FuchsiaWorkflow: () => FuchsiaWorkflow(),
       GenSnapshot: () => const GenSnapshot(),
       HotRunnerConfig: () => HotRunnerConfig(),
       IMobileDevice: () => const IMobileDevice(),
       IOSSimulatorUtils: () => IOSSimulatorUtils(),
-      IOSWorkflow: () => const IOSWorkflow(),
       IOSValidator: () => const IOSValidator(),
+      IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
@@ -89,14 +94,15 @@ Future<T> runInContext<T>(
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PlistBuddy: () => const PlistBuddy(),
       SimControl: () => SimControl(),
-      SystemClock: () => const SystemClock(),
       Stdio: () => const Stdio(),
+      SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
-      WindowsWorkflow: () => const WindowsWorkflow(),
       WebCompiler: () => const WebCompiler(),
+      WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),
+      XcodeValidator: () => const XcodeValidator(),
       XcodeProjectInterpreter: () => XcodeProjectInterpreter(),
     },
   );
