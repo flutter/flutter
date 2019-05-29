@@ -296,6 +296,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: OutlineButton(
+              onPressed: null,
               child: const Text('OutlineButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor(getTextColor),

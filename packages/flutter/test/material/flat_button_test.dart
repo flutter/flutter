@@ -293,6 +293,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: FlatButton(
+              onPressed: null,
               child: const Text('FlatButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor(getTextColor),

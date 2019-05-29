@@ -230,6 +230,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: RaisedButton(
+              onPressed: null,
               child: const Text('RaisedButton'),
               focusNode: focusNode,
               textColor: MaterialStateColor(getTextColor),
