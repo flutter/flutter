@@ -157,7 +157,7 @@ typedef ImageFrameBuilder = Widget Function(
 /// The `child` argument contains the default image widget and is guaranteed to
 /// be non-null. Typically, this builder will wrap the `child` widget in some
 /// way and return the wrapped widget. If this builder returns `child` directly,
-/// it will yield the same result as if [Image.frameBuilder] was null.
+/// it will yield the same result as if [Image.loadingBuilder] was null.
 ///
 /// The `loadingProgress` argument contains the current progress towards loading
 /// the image. This argument will be non-null while the image is loading, but it
