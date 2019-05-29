@@ -1,4 +1,4 @@
-Signature: 48c42235af26a81fc9167483f4aea348
+Signature: 135b98e5197f55547dc0c5d9eb849d73
 
 UNUSED LICENSES:
 
@@ -4884,14 +4884,12 @@ FILE: ../../../third_party/dart/runtime/vm/dart_api_impl_test.cc
 FILE: ../../../third_party/dart/runtime/vm/dart_api_message.cc
 FILE: ../../../third_party/dart/runtime/vm/dart_api_message.h
 FILE: ../../../third_party/dart/runtime/vm/dart_api_state.h
-FILE: ../../../third_party/dart/runtime/vm/dart_entry_test.cc
 FILE: ../../../third_party/dart/runtime/vm/datastream.h
 FILE: ../../../third_party/dart/runtime/vm/debugger.cc
 FILE: ../../../third_party/dart/runtime/vm/debugger.h
 FILE: ../../../third_party/dart/runtime/vm/debugger_api_impl_test.cc
 FILE: ../../../third_party/dart/runtime/vm/double_internals.h
 FILE: ../../../third_party/dart/runtime/vm/exceptions_test.cc
-FILE: ../../../third_party/dart/runtime/vm/find_code_object_test.cc
 FILE: ../../../third_party/dart/runtime/vm/flag_list.h
 FILE: ../../../third_party/dart/runtime/vm/flags.cc
 FILE: ../../../third_party/dart/runtime/vm/flags.h
@@ -4963,7 +4961,6 @@ FILE: ../../../third_party/dart/runtime/vm/proccpuinfo.h
 FILE: ../../../third_party/dart/runtime/vm/raw_object.cc
 FILE: ../../../third_party/dart/runtime/vm/raw_object.h
 FILE: ../../../third_party/dart/runtime/vm/raw_object_snapshot.cc
-FILE: ../../../third_party/dart/runtime/vm/resolver_test.cc
 FILE: ../../../third_party/dart/runtime/vm/scopes.cc
 FILE: ../../../third_party/dart/runtime/vm/scopes.h
 FILE: ../../../third_party/dart/runtime/vm/scopes_test.cc
@@ -5186,6 +5183,8 @@ FILE: ../../../third_party/dart/runtime/vm/constants_dbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_kbc.cc
 FILE: ../../../third_party/dart/runtime/vm/constants_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/elf.cc
+FILE: ../../../third_party/dart/runtime/vm/elf.h
 FILE: ../../../third_party/dart/runtime/vm/frame_layout.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist.h
 FILE: ../../../third_party/dart/runtime/vm/intrusive_dlist_test.cc
