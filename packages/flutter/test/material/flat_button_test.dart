@@ -274,6 +274,44 @@ void main() {
     await gesture.removePointer();
   });
 
+  testWidgets('FlatButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color disabledColor = Color(1);
+    const Color defaultColor = Color(2);
+    const Color unusedDisabledTextColor = Color(3);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return disabledColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: FlatButton(
+              child: const Text('FlatButton'),
+              focusNode: focusNode,
+              textColor: MaterialStateColor(getTextColor),
+              disabledTextColor: unusedDisabledTextColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style.color;
+    }
+
+    // Disabled.
+    await expectLater(textColor(), equals(disabledColor));
+    await expectLater(textColor(), isNot(unusedDisabledTextColor));
+  });
+
   testWidgets('FlatButton has no clip by default', (WidgetTester tester) async {
     await tester.pumpWidget(
       Directionality(

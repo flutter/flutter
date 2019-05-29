@@ -263,6 +263,12 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _updateState(MaterialState.disabled, !widget.enabled);
+  }
+
+  @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateState(MaterialState.disabled, !widget.enabled);

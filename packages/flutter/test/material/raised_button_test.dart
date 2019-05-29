@@ -210,6 +210,44 @@ void main() {
     await expectLater(iconColor(), pressedColor);
     await gesture.removePointer();
   });
+
+  testWidgets('RaisedButton ignores disabled text color if text color is stateful', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color disabledColor = Color(1);
+    const Color defaultColor = Color(2);
+    const Color unusedDisabledTextColor = Color(3);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled)) {
+        return disabledColor;
+      }
+      return defaultColor;
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Center(
+            child: RaisedButton(
+              child: const Text('RaisedButton'),
+              focusNode: focusNode,
+              textColor: MaterialStateColor(getTextColor),
+              disabledTextColor: unusedDisabledTextColor,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('RaisedButton')).text.style.color;
+    }
+
+    // Disabled.
+    await expectLater(textColor(), equals(disabledColor));
+    await expectLater(textColor(), isNot(unusedDisabledTextColor));
+  });
 }
 
 TextStyle _iconStyle(WidgetTester tester, IconData icon) {
