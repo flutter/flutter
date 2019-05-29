@@ -7,32 +7,23 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
-import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/doctor.dart';
-import 'package:flutter_tools/src/usage.dart';
-import 'package:flutter_tools/src/version.dart';
 
 import 'context.dart';
 
 export 'package:flutter_tools/src/base/context.dart' show Generator;
 
+// A default value should be provided if one of the following criteria is met:
+//    - The vast majority of tests should use this provider. For example,
+//      [BufferLogger], [MemoryFileSystem].
+//    - More TBD.
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
-  FileSystem: () => MemoryFileSystem(),
-  Logger: () => BufferLogger(),
-  DeviceManager: () => MockDeviceManager(),
-  Doctor: () => MockDoctor(),
-  FlutterVersion: () => MockFlutterVersion(),
-  HttpClient: () => MockHttpClient(),
-  OutputPreferences: () => OutputPreferences(showColor: false),
-  OperatingSystemUtils: () => MockOperatingSystemUtils(),
-  Usage: () => MockUsage(),
-  TimeoutConfiguration: () => const TimeoutConfiguration(),
+  FileSystem: () => MemoryFileSystem(), // Keeps tests fasts.
+  Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
+  OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger
 };
 
 /// Manages interaction with the tool injection and runner system.
