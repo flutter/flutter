@@ -122,12 +122,12 @@ typedef EvaluatorFunction = dynamic Function();
 /// Drives a Flutter Application running in another process.
 class FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [_serviceClient], [_peer] and [_appIsolate].
+  /// [serviceClient], [_peer] and [appIsolate].
   @visibleForTesting
   FlutterDriver.connectedTo(
-    this._serviceClient,
+    this.serviceClient,
     this._peer,
-    this._appIsolate, {
+    this.appIsolate, {
     bool printCommunication = false,
     bool logCommunicationToFile = true,
   }) : _printCommunication = printCommunication,
@@ -383,13 +383,22 @@ class FlutterDriver {
   final int _driverId;
 
   /// Client connected to the Dart VM running the Flutter application
-  final VMServiceClient _serviceClient;
+  ///
+  /// You can use [VMServiceClient] to check VM version, flags and get
+  /// notified when a new isolate has been instantiated. That could be
+  /// useful if your application spawns multiple isolates that you
+  /// would like to instrument.
+  final VMServiceClient serviceClient;
 
   /// JSON-RPC client useful for sending raw JSON requests.
   final rpc.Peer _peer;
 
-  /// The main isolate hosting the Flutter application
-  final VMIsolate _appIsolate;
+  /// The main isolate hosting the Flutter application.
+  ///
+  /// If you used the [registerExtension] API to instrument your application,
+  /// you can use this [VMIsolate] to call these extension methods via
+  /// [invokeExtension].
+  final VMIsolate appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
@@ -402,7 +411,7 @@ class FlutterDriver {
     try {
       final Map<String, String> serialized = command.serialize();
       _logCommunication('>>> $serialized');
-      final Future<Map<String, dynamic>> future = _appIsolate.invokeExtension(
+      final Future<Map<String, dynamic>> future = appIsolate.invokeExtension(
         _flutterExtensionMethodName,
         serialized,
       ).then<Map<String, dynamic>>((Object value) => value);
@@ -905,7 +914,7 @@ class FlutterDriver {
     try {
       await _peer
           .sendRequest(_collectAllGarbageMethodName, <String, String>{
-            'isolateId': 'isolates/${_appIsolate.numberAsString}',
+            'isolateId': 'isolates/${appIsolate.numberAsString}',
           });
     } catch (error, stackTrace) {
       throw DriverError(
@@ -921,7 +930,7 @@ class FlutterDriver {
   /// Returns a [Future] that fires once the connection has been closed.
   Future<void> close() async {
     // Don't leak vm_service_client-specific objects, if any
-    await _serviceClient.close();
+    await serviceClient.close();
     await _peer.close();
   }
 }
