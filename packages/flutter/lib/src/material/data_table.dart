@@ -221,6 +221,7 @@ class DataCell {
 /// target device), it is suggested that you use a
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
+///
 // TODO(ianh): Also suggest [ScrollingDataTable] once we have it.
 ///
 /// See also:
@@ -262,6 +263,7 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.dataRowHeight,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -311,8 +313,15 @@ class DataTable extends StatelessWidget {
   /// row is selectable.
   final ValueSetter<bool> onSelectAll;
 
+  /// The height of each row (excluding the row that contains column headings).
+  ///
+  /// This value is optional and defaults to 48.0 if not specified.
+  final double dataRowHeight;
+
   /// The data to show in each row (excluding the row that contains
-  /// the column headings). Must be non-null, but may be empty.
+  /// the column headings).
+  ///
+  /// Must be non-null, but may be empty.
   final List<DataRow> rows;
 
   // Set by the constructor to the index of the only Column that is
@@ -467,7 +476,7 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: _dataRowHeight,
+      height: dataRowHeight ?? _dataRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: TextStyle(
@@ -554,8 +563,18 @@ class DataTable extends StatelessWidget {
 
     for (int dataColumnIndex = 0; dataColumnIndex < columns.length; dataColumnIndex += 1) {
       final DataColumn column = columns[dataColumnIndex];
+
+      double paddingStart;
+      if (dataColumnIndex == 0 && showCheckboxColumn) {
+        paddingStart = _tablePadding / 2.0;
+      } else if (dataColumnIndex == 0 && !showCheckboxColumn) {
+        paddingStart = _tablePadding;
+      } else {
+        paddingStart = _columnSpacing / 2.0;
+      }
+
       final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
-        start: dataColumnIndex == 0 ? showCheckboxColumn ? _tablePadding / 2.0 : _tablePadding : _columnSpacing / 2.0,
+        start: paddingStart,
         end: dataColumnIndex == columns.length - 1 ? _tablePadding : _columnSpacing / 2.0,
       );
       if (dataColumnIndex == _onlyTextColumn) {
