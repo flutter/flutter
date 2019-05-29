@@ -133,18 +133,17 @@ class Tab extends StatelessWidget {
   }
 }
 
-class _TabStyle extends StatefulWidget{
+class _TabStyle extends AnimatedWidget {
   const _TabStyle({
     Key key,
-    this.animation,
+    Animation<double> animation,
     this.selected,
     this.labelColor,
     this.unselectedLabelColor,
     this.labelStyle,
     this.unselectedLabelStyle,
-    this.onTap,
     @required this.child,
-  }) : super(key: key);
+  }) : super(key: key, listenable: animation);
 
   final TextStyle labelStyle;
   final TextStyle unselectedLabelStyle;
@@ -152,78 +151,50 @@ class _TabStyle extends StatefulWidget{
   final Color labelColor;
   final Color unselectedLabelColor;
   final Widget child;
-  final VoidCallback onTap;
-  final Animation<double> animation;
-
-  @override
-  State<StatefulWidget> createState() => _TabStyleState();
-}
-
-class _TabStyleState extends State<_TabStyle> {
-  final Set<MaterialState> _states = <MaterialState>{};
-
-  void _updateState(MaterialState state, bool value) {
-    value ? _states.add(state) : _states.remove(state);
-  }
 
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
     final TabBarTheme tabBarTheme = TabBarTheme.of(context);
-    final Animation<double> animation = widget.animation;
+    final Animation<double> animation = listenable;
 
     // To enable TextStyle.lerp(style1, style2, value), both styles must have
     // the same value of inherit. Force that to be inherit=true here.
-    final TextStyle defaultStyle = (widget.labelStyle
-        ?? tabBarTheme.labelStyle
-        ?? themeData.primaryTextTheme.body2
+    final TextStyle defaultStyle = (labelStyle
+      ?? tabBarTheme.labelStyle
+      ?? themeData.primaryTextTheme.body2
     ).copyWith(inherit: true);
-    final TextStyle defaultUnselectedStyle = (widget.unselectedLabelStyle
-        ?? tabBarTheme.unselectedLabelStyle
-        ?? widget.labelStyle
-        ?? themeData.primaryTextTheme.body2
+    final TextStyle defaultUnselectedStyle = (unselectedLabelStyle
+      ?? tabBarTheme.unselectedLabelStyle
+      ?? labelStyle
+      ?? themeData.primaryTextTheme.body2
     ).copyWith(inherit: true);
-    final TextStyle textStyle = widget.selected
-        ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
-        : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
-    Color labelColor = widget.labelColor
-        ?? tabBarTheme.labelColor
-        ?? themeData.primaryTextTheme.body2.color;
-    Color unselectedColor = widget.unselectedLabelColor
-        ?? tabBarTheme.unselectedLabelColor
-        ?? labelColor.withAlpha(0xB2); // 70% alpha
+    final TextStyle textStyle = selected
+      ? TextStyle.lerp(defaultStyle, defaultUnselectedStyle, animation.value)
+      : TextStyle.lerp(defaultUnselectedStyle, defaultStyle, animation.value);
 
-    if (labelColor is MaterialStateColor) {
-      final MaterialStateColor unresolvedColor = labelColor;
-      final Set<MaterialState> selectedAndStates = <MaterialState>{MaterialState.selected}..addAll(_states);
-      labelColor = MaterialStateColor.resolveColor(unresolvedColor, selectedAndStates);
-      unselectedColor = MaterialStateColor.resolveColor(unresolvedColor, _states);
-    }
+    final Color selectedColor = labelColor
+       ?? tabBarTheme.labelColor
+       ?? themeData.primaryTextTheme.body2.color;
+    final Color unselectedColor = unselectedLabelColor
+      ?? tabBarTheme.unselectedLabelColor
+      ?? selectedColor.withAlpha(0xB2); // 70% alpha
+    final Color color = selected
+      ? Color.lerp(selectedColor, unselectedColor, animation.value)
+      : Color.lerp(unselectedColor, selectedColor, animation.value);
 
-    final Color color = widget.selected
-        ? Color.lerp(labelColor, unselectedColor, animation.value)
-        : Color.lerp(unselectedColor, labelColor, animation.value);
-
-
-    return InkWell(
-      onTap: widget.onTap,
-      onHighlightChanged: (bool value) => setState(() {
-        _updateState(MaterialState.pressed, value);
-      }),
-      child: DefaultTextStyle(
-        style: textStyle.copyWith(color: color),
-        child: IconTheme.merge(
-          data: IconThemeData(
-            size: 24.0,
-            color: color,
-          ),
-          child: widget.child,
+    return DefaultTextStyle(
+      style: textStyle.copyWith(color: color),
+      child: IconTheme.merge(
+        data: IconThemeData(
+          size: 24.0,
+          color: color,
         ),
+        child: child,
       ),
     );
   }
 }
-
 
 typedef _LayoutCallback = void Function(List<double> xOffsets, TextDirection textDirection, double width);
 
@@ -1001,11 +972,10 @@ class _TabBarState extends State<TabBar> {
     }
   }
 
-  Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation, int index) {
+  Widget _buildStyledTab(Widget child, bool selected, Animation<double> animation) {
     return _TabStyle(
       animation: animation,
       selected: selected,
-      onTap: () => _handleTap(index),
       labelColor: widget.labelColor,
       unselectedLabelColor: widget.unselectedLabelColor,
       labelStyle: widget.labelStyle,
@@ -1060,22 +1030,22 @@ class _TabBarState extends State<TabBar> {
         // The user tapped on a tab, the tab controller's animation is running.
         assert(_currentIndex != previousIndex);
         final Animation<double> animation = _ChangeAnimation(_controller);
-        wrappedTabs[_currentIndex] = _buildStyledTab(wrappedTabs[_currentIndex], true, animation, _currentIndex);
-        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation, previousIndex);
+        wrappedTabs[_currentIndex] = _buildStyledTab(wrappedTabs[_currentIndex], true, animation);
+        wrappedTabs[previousIndex] = _buildStyledTab(wrappedTabs[previousIndex], false, animation);
       } else {
         // The user is dragging the TabBarView's PageView left or right.
         final int tabIndex = _currentIndex;
         final Animation<double> centerAnimation = _DragAnimation(_controller, tabIndex);
-        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation, tabIndex);
+        wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], true, centerAnimation);
         if (_currentIndex > 0) {
           final int tabIndex = _currentIndex - 1;
           final Animation<double> previousAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation, tabIndex);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, previousAnimation);
         }
         if (_currentIndex < widget.tabs.length - 1) {
           final int tabIndex = _currentIndex + 1;
           final Animation<double> nextAnimation = ReverseAnimation(_DragAnimation(_controller, tabIndex));
-          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation, tabIndex);
+          wrappedTabs[tabIndex] = _buildStyledTab(wrappedTabs[tabIndex], false, nextAnimation);
         }
       }
     }
@@ -1085,16 +1055,19 @@ class _TabBarState extends State<TabBar> {
     // the same share of the tab bar's overall width.
     final int tabCount = widget.tabs.length;
     for (int index = 0; index < tabCount; index += 1) {
-      wrappedTabs[index] = Padding(
-        padding: EdgeInsets.only(bottom: widget.indicatorWeight),
-        child: Stack(
-          children: <Widget>[
-            wrappedTabs[index],
-            Semantics(
-              selected: index == _currentIndex,
-              label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
-            ),
-          ],
+      wrappedTabs[index] = InkWell(
+        onTap: () { _handleTap(index); },
+        child: Padding(
+          padding: EdgeInsets.only(bottom: widget.indicatorWeight),
+          child: Stack(
+            children: <Widget>[
+              wrappedTabs[index],
+              Semantics(
+                selected: index == _currentIndex,
+                label: localizations.tabLabel(tabIndex: index + 1, tabCount: tabCount),
+              ),
+            ],
+          ),
         ),
       );
       if (!widget.isScrollable)

@@ -243,24 +243,10 @@ class _ChipDemoState extends State<ChipDemo> {
       );
     }).toList();
 
-    final MaterialStateColor filterChipTextColor = MaterialStateColor((states) {
-      if (states.contains(MaterialState.selected)) {
-        if (states.contains(MaterialState.pressed)) {
-          return Colors.blue[900];
-        }
-        return Colors.blue[700];
-      }
-      if (states.contains(MaterialState.pressed)) {
-        return Colors.grey[900];
-      }
-      return Colors.grey[700];
-    });
-
     final List<Widget> filterChips = _defaultTools.map<Widget>((String name) {
       return FilterChip(
         key: ValueKey<String>(name),
         label: Text(_capitalize(name)),
-        labelStyle: TextStyle(color: filterChipTextColor),
         selected: _tools.contains(name) ? _selectedTools.contains(name) : false,
         onSelected: !_tools.contains(name)
             ? null
