@@ -221,7 +221,6 @@ class DataCell {
 /// target device), it is suggested that you use a
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
-///
 // TODO(ianh): Also suggest [ScrollingDataTable] once we have it.
 ///
 /// See also:
