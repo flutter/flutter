@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -22,6 +23,12 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     'PROJECT_DIR': windowsProject.project.directory.path,
     'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
   };
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    environment['FLUTTER_ENGINE'] = fs.path.dirname(fs.path.dirname(engineOutPath));
+    environment['LOCAL_ENGINE'] = fs.path.basename(engineOutPath);
+  }
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
   final String vcvarsScript = await findVcvars();
