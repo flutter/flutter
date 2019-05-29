@@ -109,7 +109,8 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// By default, text will layout with line height as defined by the font.
 /// Font-defined line height may be taller or shorter than the font size. the
 /// `height` property allows manual adjustment of the height of the line as
-/// a multiple of `fontSize`.
+/// a multiple of `fontSize`. For most fonts, setting `height` to 1.0 is not
+/// the same as omitting or setting height to `null`.
 ///
 /// {@tool sample}
 /// The [height] property can be used to change the line height. Here, the line
@@ -444,9 +445,10 @@ class TextStyle extends Diagnosticable {
 
   /// The height of this text span, as a multiple of the font size.
   ///
-  /// If applied to the root [TextSpan], this value sets the line height, which
-  /// is the minimum distance between subsequent text baselines, as multiple of
-  /// the font size.
+  /// When [height] is null or omitted, the line height will be determined
+  /// by the font's metrics directly, which may differ from the fontSize.
+  /// Otherwise, the line height of the span of text will be scaled to be
+  /// the `fontSize * height`.
   final double height;
 
   /// The locale used to select region-specific glyphs.
