@@ -215,8 +215,8 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
 
   @override
   bool canSelectAll(TextSelectionDelegate delegate) {
-    // Android allows SelectAll when selection is not collapsed, unless all
-    // have already been selected.
+    // Android allows SelectAll when selection is not collapsed, unless
+    // everything has already been selected.
     final TextEditingValue value = delegate.textEditingValue;
     return value.text.isNotEmpty &&
       !(value.selection.start == 0 && value.selection.end == value.text.length);
