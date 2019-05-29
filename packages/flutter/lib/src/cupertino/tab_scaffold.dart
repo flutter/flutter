@@ -100,24 +100,32 @@ class CupertinoTabController extends ChangeNotifier {
   }
 }
 
-class _CupertinoTabViewTapNotifier extends ChangeNotifier {
-  VoidCallback currentListener;
+class CupertinoTabViewTapNotifier {
+  VoidCallback _onTapCurrentTab;
 
-  @override
-  void addListener(VoidCallback listener) {
-    if (currentListener != null) {
-      removeListener(listener);
+  static CupertinoTabViewTapNotifier of(BuildContext context) {
+    final _TapNotifierWidget notifierWidget = context
+    .ancestorWidgetOfExactType(_TapNotifierWidget);
+
+    return notifierWidget.notifier;
+  }
+
+  void updateListener(VoidCallback listener) {
+    if (_onTapCurrentTab == listener) {
+      return;
     }
-    currentListener = listener;
-    super.addListener(listener);
+    _onTapCurrentTab = listener;
   }
+}
+
+class _TapNotifierWidget extends StatelessWidget {
+  const _TapNotifierWidget({ Key key, this.notifier, this.child }) : super(key: key);
+
+  final Widget child;
+  final CupertinoTabViewTapNotifier notifier;
 
   @override
-  void removeListener(VoidCallback listener) {
-    assert(identical(listener, currentListener));
-    currentListener = null;
-    super.removeListener(listener);
-  }
+  Widget build(BuildContext context) => child;
 }
 
 /// Implements a tabbed iOS application's root layout and behavior structure.
@@ -294,17 +302,14 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// Defaults to true and cannot be null.
   final bool resizeToAvoidBottomInset;
 
-  static ChangeNotifier of(BuildContext context) {
-
-  }
-
   @override
   _CupertinoTabScaffoldState createState() => _CupertinoTabScaffoldState();
 }
 
 class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   CupertinoTabController _controller;
-  final _CupertinoTabViewTapNotifier _notifier = _CupertinoTabViewTapNotifier();
+  List<CupertinoTabViewTapNotifier> _tapNotifiers;
+  CupertinoTabViewTapNotifier get activeTapNotifier => _tapNotifiers[_controller.index];
 
   @override
   void initState() {
@@ -347,12 +352,13 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
   @override
   void didUpdateWidget(CupertinoTabScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
+    final int numOfTabs = widget.tabBar.items.length;
     if (widget.controller != oldWidget.controller) {
       _updateTabController(shouldDisposeOldController: oldWidget.controller == null);
-    } else if (_controller.index >= widget.tabBar.items.length) {
+    } else if (_controller.index >= numOfTabs) {
       // If a new [tabBar] with less than (_controller.index + 1) items is provided,
       // clamp the current index.
-      _controller.index = widget.tabBar.items.length - 1;
+      _controller.index = numOfTabs - 1;
     }
   }
 
@@ -363,11 +369,18 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     MediaQueryData newMediaQuery = MediaQuery.of(context);
 
+    final int numOfTabs = widget.tabBar.items.length;
+    if (_tapNotifiers?.length != numOfTabs) {
+      _tapNotifiers = List<CupertinoTabViewTapNotifier>.filled(numOfTabs, null);
+    }
+
     Widget content = _TabSwitchingView(
       currentTabIndex: _controller.index,
-      tabNumber: widget.tabBar.items.length,
+      tabNumber: numOfTabs,
       tabBuilder: widget.tabBuilder,
+      tapNotifiers: _tapNotifiers,
     );
+
     EdgeInsets contentPadding = EdgeInsets.zero;
 
     if (widget.resizeToAvoidBottomInset) {
@@ -421,6 +434,11 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
         child: widget.tabBar.copyWith(
           currentIndex: _controller.index,
           onTap: (int newIndex) {
+            // Tapped on the current tab.
+            if (newIndex == _controller.index) {
+              activeTapNotifier._onTapCurrentTab();
+            }
+
             _controller.index = newIndex;
             // Chain the user's original callback.
             if (widget.tabBar.onTap != null)
@@ -460,6 +478,7 @@ class _TabSwitchingView extends StatefulWidget {
     @required this.currentTabIndex,
     @required this.tabNumber,
     @required this.tabBuilder,
+    @required this.tapNotifiers,
   }) : assert(currentTabIndex != null),
        assert(tabNumber != null && tabNumber > 0),
        assert(tabBuilder != null);
@@ -467,6 +486,7 @@ class _TabSwitchingView extends StatefulWidget {
   final int currentTabIndex;
   final int tabNumber;
   final IndexedWidgetBuilder tabBuilder;
+  final List<CupertinoTabViewTapNotifier> tapNotifiers;
 
   @override
   _TabSwitchingViewState createState() => _TabSwitchingViewState();
@@ -518,7 +538,11 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
         final bool active = index == widget.currentTabIndex;
 
         if (active || tabs[index] != null) {
-          tabs[index] = widget.tabBuilder(context, index);
+          widget.tapNotifiers[index] ??= CupertinoTabViewTapNotifier();
+          tabs[index] = _TapNotifierWidget(
+            notifier: widget.tapNotifiers[index],
+            child: widget.tabBuilder(context, index)
+          );
         }
 
         return Offstage(

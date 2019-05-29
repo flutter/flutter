@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 
 import 'app.dart' show CupertinoApp;
 import 'route.dart';
+import 'tab_scaffold.dart' show CupertinoTabViewTapNotifier;
 
 /// A single tab view with its own [Navigator] state and history.
 ///
@@ -134,12 +135,13 @@ class CupertinoTabView extends StatefulWidget {
 class _CupertinoTabViewState extends State<CupertinoTabView> {
   HeroController _heroController;
   List<NavigatorObserver> _navigatorObservers;
+  GlobalKey<NavigatorState> _effectiveNavigatorKey;
 
   @override
   void initState() {
     super.initState();
     _heroController = CupertinoApp.createCupertinoHeroController();
-    _updateObservers();
+    _updateObserversAndKey();
   }
 
   @override
@@ -147,20 +149,25 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
     super.didUpdateWidget(oldWidget);
     if (widget.navigatorKey != oldWidget.navigatorKey
         || widget.navigatorObservers != oldWidget.navigatorObservers) {
-      _updateObservers();
+      _updateObserversAndKey();
     }
   }
 
-  void _updateObservers() {
+  void _updateObserversAndKey() {
     _navigatorObservers =
         List<NavigatorObserver>.from(widget.navigatorObservers)
           ..add(_heroController);
+    _effectiveNavigatorKey = widget.navigatorKey ?? GlobalKey<NavigatorState>();
   }
 
   @override
   Widget build(BuildContext context) {
+    final CupertinoTabViewTapNotifier notifier = CupertinoTabViewTapNotifier.of(context);
+    if (notifier != null) {
+      notifier.updateListener(_onTapWhenActive);
+    }
     return Navigator(
-      key: widget.navigatorKey,
+      key: _effectiveNavigatorKey,
       onGenerateRoute: _onGenerateRoute,
       onUnknownRoute: _onUnknownRoute,
       observers: _navigatorObservers,
@@ -219,5 +226,12 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
       return true;
     }());
     return result;
+  }
+
+  void _onTapWhenActive() {
+    final NavigatorState navigator = _effectiveNavigatorKey.currentState;
+    if (navigator.canPop()) {
+      navigator.popUntil((Route<dynamic> route) => route.isFirst);
+    }
   }
 }
