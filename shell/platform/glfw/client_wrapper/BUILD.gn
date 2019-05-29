@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("$flutter_root/shell/platform/common/cpp/client_wrapper/publish.gni")
+import("$flutter_root/testing/testing.gni")
 
 _wrapper_includes = [
   "include/flutter/flutter_window.h",
@@ -63,6 +64,10 @@ source_set("client_wrapper_library_stubs_glfw") {
   ]
 }
 
+test_fixtures("client_wrapper_glfw_fixtures") {
+  fixtures = []
+}
+
 executable("client_wrapper_glfw_unittests") {
   testonly = true
 
@@ -73,6 +78,7 @@ executable("client_wrapper_glfw_unittests") {
 
   deps = [
     ":client_wrapper_glfw",
+    ":client_wrapper_glfw_fixtures",
     ":client_wrapper_library_stubs_glfw",
     "$flutter_root/shell/platform/common/cpp/client_wrapper:client_wrapper_library_stubs",
     "$flutter_root/testing",

@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("$flutter_root/testing/testing.gni")
 import("publish.gni")
 
 _wrapper_includes = [
@@ -75,6 +76,10 @@ source_set("client_wrapper_library_stubs") {
   ]
 }
 
+test_fixtures("client_wrapper_fixtures") {
+  fixtures = []
+}
+
 executable("client_wrapper_unittests") {
   testonly = true
 
@@ -91,6 +96,7 @@ executable("client_wrapper_unittests") {
 
   deps = [
     ":client_wrapper",
+    ":client_wrapper_fixtures",
     ":client_wrapper_library_stubs",
     "$flutter_root/testing",
 

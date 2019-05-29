@@ -4,6 +4,7 @@
 
 assert(is_mac || is_ios)
 
+import("$flutter_root/testing/testing.gni")
 import("framework_shared.gni")
 
 group("darwin") {
@@ -61,6 +62,10 @@ source_set("framework_shared") {
   public_configs = [ "$flutter_root:config" ]
 }
 
+test_fixtures("flutter_channels_fixtures") {
+  fixtures = []
+}
+
 executable("flutter_channels_unittests") {
   testonly = true
 
@@ -71,6 +76,7 @@ executable("flutter_channels_unittests") {
 
   deps = [
     ":flutter_channels",
+    ":flutter_channels_fixtures",
     "$flutter_root/testing",
     "//third_party/dart/runtime:libdart_jit",
   ]
