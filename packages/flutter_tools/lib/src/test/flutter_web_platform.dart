@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:path/path.dart' as p;
 import 'package:shelf/shelf.dart' as shelf;
@@ -29,76 +28,95 @@ import 'package:test_core/src/runner/suite.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../artifacts.dart';
+import '../base/file_system.dart';
 import '../cache.dart';
 import '../convert.dart';
+import '../dart/package_map.dart';
 import '../globals.dart';
 
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root) {
+    // Look up the location of the testing resources.
+    final Map<String, Uri> packageMap =
+        PackageMap(fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'))
+            .map;
+    testUri = packageMap['test'];
     final shelf.Cascade cascade = shelf.Cascade()
-      .add(_webSocketHandler.handler)
-      .add(packagesDirHandler())
-      .add(_jsHandler.handler)
-      .add(createStaticHandler(
-        fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
-        serveFilesOutsidePath: true,
-      ))
-      .add(createStaticHandler(
-          _config.suiteDefaults.precompiledPath,
-          serveFilesOutsidePath: true))
-      .add((shelf.Request request) {
-        if (request.requestedUri.path.contains('require.js')) {
-          final File result = fs.file(fs.path.join(
-            artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-            'lib', 'dev_compiler', 'amd', 'require.js',
-          ));
-          return shelf.Response.ok(result.openRead(), headers: <String, String>{'Content-Type': 'text/javascript'});
-        } else if (request.requestedUri.path.contains('Ahem.ttf')) {
-           final File result = fs.file(fs.path.join(
-              Cache.flutterRoot,
-              'packages',
-              'flutter_tools',
-              'static',
-              'Ahem.ttf',
-           ));
-           return shelf.Response.ok(result.openRead());
-        } else if (request.requestedUri.path.contains('dart_sdk.js')) {
-          final File result = fs.file(fs.path.join(
-            artifacts.getArtifactPath(Artifact.flutterWebSdk),
-            'kernel', 'amd', 'dart_sdk.js',
-          ));
-          return shelf.Response.ok(result.openRead(), headers: <String, String>{'Content-Type': 'text/javascript'});
-        } else if (request.requestedUri.path.contains('stack_trace_mapper.dart.js')) {
-          final File result = fs.file(fs.path.join(
-            artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-            'lib', 'dev_compiler', 'web', 'dart_stack_trace_mapper.js',
-          ));
-          return shelf.Response.ok(result.openRead(), headers: <String, String>{'Content-Type': 'text/javascript'});
-        } else if (request.requestedUri.path.contains('static/dart.js')) {
-          final File result = fs.file(fs.path.join(
-            Cache.flutterRoot,
-            'packages',
-            'flutter_tools',
-            'static',
-            'dart.js',
-          ));
-          return shelf.Response.ok(result.openRead(), headers: <String, String>{'Content-Type': 'text/javascript'});
-        } else {
-          return shelf.Response.notFound('Not Found');
-        }
-      })
-      .add(_wrapperHandler);
+        .add(_webSocketHandler.handler)
+        .add(packagesDirHandler())
+        .add(_jsHandler.handler)
+        .add(createStaticHandler(
+          fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
+          serveFilesOutsidePath: true,
+        ))
+        .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
+            serveFilesOutsidePath: true))
+        .add((shelf.Request request) {
+      if (request.requestedUri.path.contains('require.js')) {
+        final File result = fs.file(fs.path.join(
+          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+          'lib',
+          'dev_compiler',
+          'amd',
+          'require.js',
+        ));
+        return shelf.Response.ok(result.openRead(),
+            headers: <String, String>{'Content-Type': 'text/javascript'});
+      } else if (request.requestedUri.path.contains('Ahem.ttf')) {
+        final File result = fs.file(fs.path.join(
+          Cache.flutterRoot,
+          'packages',
+          'flutter_tools',
+          'static',
+          'Ahem.ttf',
+        ));
+        return shelf.Response.ok(result.openRead());
+      } else if (request.requestedUri.path.contains('dart_sdk.js')) {
+        final File result = fs.file(fs.path.join(
+          artifacts.getArtifactPath(Artifact.flutterWebSdk),
+          'kernel',
+          'amd',
+          'dart_sdk.js',
+        ));
+        return shelf.Response.ok(result.openRead(),
+            headers: <String, String>{'Content-Type': 'text/javascript'});
+      } else if (request.requestedUri.path
+          .contains('stack_trace_mapper.dart.js')) {
+        final File result = fs.file(fs.path.join(
+          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+          'lib',
+          'dev_compiler',
+          'web',
+          'dart_stack_trace_mapper.js',
+        ));
+        return shelf.Response.ok(result.openRead(),
+            headers: <String, String>{'Content-Type': 'text/javascript'});
+      } else if (request.requestedUri.path.contains('static/dart.js')) {
+        final File result = fs.file(fs.path.join(
+          testUri.toFilePath(),
+          'lib',
+          'dart.js',
+        ));
+        return shelf.Response.ok(result.openRead(),
+            headers: <String, String>{'Content-Type': 'text/javascript'});
+      } else {
+        return shelf.Response.notFound('Not Found');
+      }
+    }).add(_wrapperHandler);
     _server.mount(cascade.handler);
   }
 
   static Future<FlutterWebPlatform> start(String root) async {
-    final shelf_io.IOServer server = shelf_io.IOServer(await HttpMultiServer.loopback(0));
+    final shelf_io.IOServer server =
+        shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return FlutterWebPlatform._(
       server,
       Configuration.current,
       root,
     );
   }
+
+  Uri testUri;
 
   /// The test runner configuration.
   final Configuration _config;
@@ -120,7 +138,8 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   // A map from browser identifiers to futures that will complete to the
   // [BrowserManager]s for those browsers, or `null` if they failed to load.
-  final Map<Runtime, Future<BrowserManager>> _browserManagers = <Runtime, Future<BrowserManager>>{};
+  final Map<Runtime, Future<BrowserManager>> _browserManagers =
+      <Runtime, Future<BrowserManager>>{};
 
   // Mappers for Dartifying stack traces, indexed by test path.
   final Map<String, StackTraceMapper> _mappers = <String, StackTraceMapper>{};
@@ -159,9 +178,11 @@ class FlutterWebPlatform extends PlatformPlugin {
       return null;
     }
 
-    final Uri suiteUrl = url.resolveUri(
-      fs.path.toUri(p.withoutExtension(p.relative(path, from: fs.path.join(_root, 'test'))) + '.html'));
-    final RunnerSuite suite = await browserManager.load(path, suiteUrl, suiteConfig, message, mapper: _mappers[path]);
+    final Uri suiteUrl = url.resolveUri(fs.path.toUri(p.withoutExtension(
+            p.relative(path, from: fs.path.join(_root, 'test'))) +
+        '.html'));
+    final RunnerSuite suite = await browserManager
+        .load(path, suiteUrl, suiteConfig, message, mapper: _mappers[path]);
     if (_closed) {
       return null;
     }
@@ -180,12 +201,14 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (managerFuture != null) {
       return managerFuture;
     }
-    final Completer<WebSocketChannel> completer = Completer<WebSocketChannel>.sync();
-    final String path = _webSocketHandler.create(webSocketHandler(completer.complete));
+    final Completer<WebSocketChannel> completer =
+        Completer<WebSocketChannel>.sync();
+    final String path =
+        _webSocketHandler.create(webSocketHandler(completer.complete));
     final Uri webSocketUrl = url.replace(scheme: 'ws').resolve(path);
     final Uri hostUrl = url
-      .resolve('static/index.html')
-      .replace(queryParameters: <String, String>{
+        .resolve('static/index.html')
+        .replace(queryParameters: <String, String>{
       'managerUrl': webSocketUrl.toString(),
       'debug': _config.pauseAfterLoad.toString()
     });
@@ -193,7 +216,10 @@ class FlutterWebPlatform extends PlatformPlugin {
     printTrace('Serving tests at $hostUrl');
 
     final Future<BrowserManager> future = BrowserManager.start(
-      browser, hostUrl, completer.future, _browserSettings[browser],
+      browser,
+      hostUrl,
+      completer.future,
+      _browserSettings[browser],
       debug: _config.pauseAfterLoad,
     );
 
@@ -206,7 +232,8 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   @override
   Future<void> closeEphemeral() {
-    final List<Future<BrowserManager>> managers = _browserManagers.values.toList();
+    final List<Future<BrowserManager>> managers =
+        _browserManagers.values.toList();
     _browserManagers.clear();
     return Future.wait(managers.map((Future<BrowserManager> manager) async {
       final BrowserManager result = await manager;
@@ -219,16 +246,17 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   @override
   Future<void> close() => _closeMemo.runOnce(() async {
-    final List<Future<dynamic>> futures = _browserManagers.values.map<Future<dynamic>>((Future<BrowserManager> future) async {
-      final BrowserManager result = await future;
-      if (result == null) {
-        return;
-      }
-      await result.close();
-    }).toList();
-    futures.add(_server.close());
-    await Future.wait<void>(futures);
-  });
+        final List<Future<dynamic>> futures = _browserManagers.values
+            .map<Future<dynamic>>((Future<BrowserManager> future) async {
+          final BrowserManager result = await future;
+          if (result == null) {
+            return;
+          }
+          await result.close();
+        }).toList();
+        futures.add(_server.close());
+        await Future.wait<void>(futures);
+      });
 }
 
 class OneOffHandler {
@@ -261,7 +289,8 @@ class OneOffHandler {
       return shelf.Response.notFound(null);
     }
     final String path = components.removeAt(0);
-    final FutureOr<shelf.Response> Function(shelf.Request) handler = _handlers.remove(path);
+    final FutureOr<shelf.Response> Function(shelf.Request) handler =
+        _handlers.remove(path);
     if (handler == null) {
       return shelf.Response.notFound(null);
     }
