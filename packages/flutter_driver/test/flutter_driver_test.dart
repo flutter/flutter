@@ -261,6 +261,111 @@ void main() {
       });
     });
 
+    group('getOffset', () {
+      test('requires a target reference', () async {
+        expect(driver.getCenter(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopRight(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomRight(null), throwsA(isInstanceOf<DriverError>()));
+      });
+
+      test('sends the getCenter command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_offset',
+            'offsetType': 'center',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          });
+        });
+        final DriverOffset result = await driver.getCenter(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getTopLeft command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_offset',
+            'offsetType': 'topLeft',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          });
+        });
+        final DriverOffset result = await driver.getTopLeft(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getTopRight command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_offset',
+            'offsetType': 'topRight',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          });
+        });
+        final DriverOffset result = await driver.getTopRight(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getBottomLeft command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_offset',
+            'offsetType': 'bottomLeft',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          });
+        });
+        final DriverOffset result = await driver.getBottomLeft(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getBottomRight command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_offset',
+            'offsetType': 'bottomRight',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          });
+        });
+        final DriverOffset result = await driver.getBottomRight(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+    });
+
     group('clearTimeline', () {
       test('clears timeline', () async {
         bool clearWasCalled = false;

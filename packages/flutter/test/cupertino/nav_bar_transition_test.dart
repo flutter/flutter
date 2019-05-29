@@ -119,7 +119,7 @@ void checkOpacity(WidgetTester tester, Finder finder, double opacity) {
         matching: find.byType(FadeTransition),
       ),
     ).opacity.value,
-    moreOrLessEquals(opacity, epsilon: 0.000000001),
+    moreOrLessEquals(opacity),
   );
 }
 

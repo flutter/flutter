@@ -371,7 +371,10 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
           errors.add('The "androidPackage" must either be null or a string.');
         }
         if (kvp.value['iosPrefix'] != null && kvp.value['iosPrefix'] is! String) {
-          errors.add('The "iosPrefix" must eithe rbe null or a string.');
+          errors.add('The "iosPrefix" must either be null or a string.');
+        }
+        if (kvp.value['macosPrefix'] != null && kvp.value['macosPrefix'] is! String) {
+          errors.add('The "macosPrefix" must either be null or a string.');
         }
         if (kvp.value['pluginClass'] != null && kvp.value['pluginClass'] is! String) {
           errors.add('The "pluginClass" must either be null or a string..');

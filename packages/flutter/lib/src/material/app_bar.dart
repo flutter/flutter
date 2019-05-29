@@ -23,11 +23,6 @@ import 'tabs.dart';
 import 'text_theme.dart';
 import 'theme.dart';
 
-// Examples can assume:
-// void _airDress() { }
-// void _restitchDress() { }
-// void _repairDress() { }
-
 const double _kLeadingWidth = kToolbarHeight; // So the leading button is square.
 
 // Bottom justify the kToolbarHeight child which may overflow the top.
@@ -94,29 +89,65 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 /// to false. In that case a null leading widget will result in the middle/title widget
 /// stretching to start.
 ///
-/// {@tool sample}
+/// {@tool snippet --template=stateless_widget_material}
+///
+/// This sample shows an [AppBar] with two simple actions. The first action
+/// opens a [SnackBar], while the second action navigates to a new page.
+///
+/// ```dart preamble
+/// final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+/// final SnackBar snackBar = const SnackBar(content: Text('Showing Snackbar'));
+///
+/// void openPage(BuildContext context) {
+///   Navigator.push(context, MaterialPageRoute(
+///     builder: (BuildContext context) {
+///       return Scaffold(
+///         appBar: AppBar(
+///           title: const Text('Next page'),
+///         ),
+///         body: const Center(
+///           child: Text(
+///             'This is the next page',
+///             style: TextStyle(fontSize: 24),
+///           ),
+///         ),
+///       );
+///     },
+///   ));
+/// }
+/// ```
 ///
 /// ```dart
-/// AppBar(
-///   title: Text('My Fancy Dress'),
-///   actions: <Widget>[
-///     IconButton(
-///       icon: Icon(Icons.playlist_play),
-///       tooltip: 'Air it',
-///       onPressed: _airDress,
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     key: scaffoldKey,
+///     appBar: AppBar(
+///       title: const Text('AppBar Demo'),
+///       actions: <Widget>[
+///         IconButton(
+///           icon: const Icon(Icons.add_alert),
+///           tooltip: 'Show Snackbar',
+///           onPressed: () {
+///             scaffoldKey.currentState.showSnackBar(snackBar);
+///           },
+///         ),
+///         IconButton(
+///           icon: const Icon(Icons.navigate_next),
+///           tooltip: 'Next page',
+///           onPressed: () {
+///             openPage(context);
+///           },
+///         ),
+///       ],
 ///     ),
-///     IconButton(
-///       icon: Icon(Icons.playlist_add),
-///       tooltip: 'Restitch it',
-///       onPressed: _restitchDress,
+///     body: const Center(
+///       child: Text(
+///         'This is the home page',
+///         style: TextStyle(fontSize: 24),
+///       ),
 ///     ),
-///     IconButton(
-///       icon: Icon(Icons.playlist_add_check),
-///       tooltip: 'Repair it',
-///       onPressed: _repairDress,
-///     ),
-///   ],
-/// )
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///
@@ -233,31 +264,6 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// Typically these widgets are [IconButton]s representing common operations.
   /// For less common operations, consider using a [PopupMenuButton] as the
   /// last action.
-  ///
-  /// {@tool snippet --template=stateless_widget_material}
-  ///
-  /// This sample shows adding an action to an [AppBar] that opens a shopping cart.
-  ///
-  /// ```dart
-  /// Widget build(BuildContext context) {
-  ///   return Scaffold(
-  ///     appBar: AppBar(
-  ///       title: Text('Ready, Set, Shop!'),
-  ///       actions: <Widget>[
-  ///         IconButton(
-  ///           icon: Icon(Icons.shopping_cart),
-  ///           tooltip: 'Open shopping cart',
-  ///           onPressed: () {
-  ///             // Implement navigation to shopping cart page here...
-  ///             print('Shopping cart opened.');
-  ///           },
-  ///         ),
-  ///       ],
-  ///     ),
-  ///   );
-  /// }
-  /// ```
-  /// {@end-tool}
   final List<Widget> actions;
 
   /// This widget is stacked behind the toolbar and the tab bar. It's height will
@@ -1066,12 +1072,6 @@ class SliverAppBar extends StatefulWidget {
   /// Defaults to [NavigationToolbar.kMiddleSpacing].
   final double titleSpacing;
 
-  /// The material's shape as well its shadow.
-  ///
-  /// A shadow is only displayed if the [elevation] is greater than
-  /// zero.
-  final ShapeBorder shape;
-
   /// The size of the app bar when it is fully expanded.
   ///
   /// By default, the total height of the toolbar and the bottom widget (if
@@ -1128,6 +1128,12 @@ class SliverAppBar extends StatefulWidget {
   ///  * [SliverAppBar] for more animated examples of how this property changes the
   ///    behavior of the app bar in combination with [floating].
   final bool pinned;
+
+  /// The material's shape as well its shadow.
+  ///
+  /// A shadow is only displayed if the [elevation] is greater than
+  /// zero.
+  final ShapeBorder shape;
 
   /// If [snap] and [floating] are true then the floating app bar will "snap"
   /// into view.

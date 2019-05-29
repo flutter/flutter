@@ -63,6 +63,51 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleRelease');
         await project.runGradleTask('assembleRelease');
+
+        // When the platform-target isn't specified, we generate the snapshots
+        // for arm and arm64.
+        final List<String> targetPlatforms = <String>[
+          'android-arm',
+          'android-arm64'
+        ];
+        for (final String targetPlatform in targetPlatforms) {
+          final String androidArmSnapshotPath = path.join(
+              project.rootPath,
+              'build',
+              'app',
+              'intermediates',
+              'flutter',
+              'release',
+              targetPlatform);
+
+          final String isolateSnapshotData =
+              path.join(androidArmSnapshotPath, 'isolate_snapshot_data');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $isolateSnapshotData');
+          }
+
+          final String isolateSnapshotInstr =
+              path.join(androidArmSnapshotPath, 'isolate_snapshot_instr');
+          if (!File(isolateSnapshotInstr).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $isolateSnapshotInstr');
+          }
+
+          final String vmSnapshotData =
+              path.join(androidArmSnapshotPath, 'vm_snapshot_data');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $vmSnapshotData');
+          }
+
+          final String vmSnapshotInstr =
+              path.join(androidArmSnapshotPath, 'vm_snapshot_instr');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $vmSnapshotInstr');
+          }
+        }
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -311,7 +356,7 @@ class _Dependencies {
 String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final _Dependencies deps = _Dependencies(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
-          'flutter', 'debug', 'snapshot_blob.bin.d'));
+          'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
   return deps.target == expectedTarget ? null :
     'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';
 }

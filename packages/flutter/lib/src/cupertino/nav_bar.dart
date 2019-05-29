@@ -1189,6 +1189,10 @@ class _NavigationBarStaticComponents {
 /// [CupertinoSliverNavigationBar]'s `leading` slot when
 /// `automaticallyImplyLeading` is true.
 ///
+/// When manually inserted, the [CupertinoNavigationBarBackButton] should only
+/// be used in routes that can be popped unless a custom [onPressed] is
+/// provided.
+///
 /// Shows a back chevron and the previous route's title when available from
 /// the previous [CupertinoPageRoute.title]. If [previousPageTitle] is specified,
 /// it will be shown instead.
@@ -1200,6 +1204,7 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   const CupertinoNavigationBarBackButton({
     this.color,
     this.previousPageTitle,
+    this.onPressed,
   }) : _backChevron = null,
        _backLabel = null;
 
@@ -1209,7 +1214,8 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
     this._backChevron,
     this._backLabel,
   ) : previousPageTitle = null,
-      color = null;
+      color = null,
+      onPressed = null;
 
   /// The [Color] of the back button.
   ///
@@ -1223,6 +1229,15 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   /// previous routes are both [CupertinoPageRoute]s.
   final String previousPageTitle;
 
+  /// An override callback to perform instead of the default behavior which is
+  /// to pop the [Navigator].
+  ///
+  /// It can, for instance, be used to pop the platform's navigation stack
+  /// instead of Flutter's [Navigator].
+  ///
+  /// Defaults to null.
+  final VoidCallback onPressed;
+
   final Widget _backChevron;
 
   final Widget _backLabel;
@@ -1230,10 +1245,12 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ModalRoute<dynamic> currentRoute = ModalRoute.of(context);
-    assert(
-      currentRoute?.canPop == true,
-      'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
-    );
+    if (onPressed == null) {
+      assert(
+        currentRoute?.canPop == true,
+        'CupertinoNavigationBarBackButton should only be used in routes that can be popped',
+      );
+    }
 
     TextStyle actionTextStyle = CupertinoTheme.of(context).textTheme.navActionTextStyle;
     if (color != null) {
@@ -1269,7 +1286,13 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
         ),
       ),
       padding: EdgeInsets.zero,
-      onPressed: () { Navigator.maybePop(context); },
+      onPressed: () {
+        if (onPressed != null) {
+          onPressed();
+        } else {
+          Navigator.maybePop(context);
+        }
+      },
     );
   }
 }
@@ -1321,8 +1344,7 @@ class _BackLabel extends StatelessWidget {
     Key key,
     @required this.specifiedPreviousTitle,
     @required this.route,
-  }) : assert(route != null),
-       super(key: key);
+  }) : super(key: key);
 
   final String specifiedPreviousTitle;
   final ModalRoute<dynamic> route;
@@ -1355,7 +1377,7 @@ class _BackLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     if (specifiedPreviousTitle != null) {
       return _buildPreviousTitleWidget(context, specifiedPreviousTitle, null);
-    } else if (route is CupertinoPageRoute<dynamic>) {
+    } else if (route is CupertinoPageRoute<dynamic> && !route.isFirst) {
       final CupertinoPageRoute<dynamic> cupertinoRoute = route;
       // There is no timing issue because the previousTitle Listenable changes
       // happen during route modifications before the ValueListenableBuilder
@@ -2228,4 +2250,5 @@ final HeroFlightShuttleBuilder _navBarHeroFlightShuttleBuilder = (
         topNavBar: fromNavBar,
       );
   }
+  return null;
 };

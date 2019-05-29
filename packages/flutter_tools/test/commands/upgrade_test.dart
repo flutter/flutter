@@ -50,7 +50,7 @@ void main() {
       expect(await result, null);
     });
 
-    test('throws tool exit with uncommited changes', () async {
+    test('throws tool exit with uncommitted changes', () async {
       fakeCommandRunner.willHaveUncomittedChanges = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         false,
@@ -60,7 +60,7 @@ void main() {
       expect(result, throwsA(isA<ToolExit>()));
     });
 
-    test('does not throw tool exit with uncommited changes and force', () async {
+    test('does not throw tool exit with uncommitted changes and force', () async {
       fakeCommandRunner.willHaveUncomittedChanges = true;
       final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
         true,

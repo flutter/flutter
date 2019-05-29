@@ -60,6 +60,9 @@ class _ProxyLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => _layer.find(regionOffset);
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A [Canvas] that multicasts all method calls to a main canvas and a
@@ -1698,7 +1701,7 @@ mixin WidgetInspectorService {
       return true;
     }
     if (value is! Element || !isWidgetCreationTracked()) {
-      // Creation locations are not availabe so include all nodes in the
+      // Creation locations are not available so include all nodes in the
       // summary tree.
       return true;
     }
@@ -2800,6 +2803,9 @@ class _InspectorOverlayLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 const double _kScreenEdgeMargin = 10.0;

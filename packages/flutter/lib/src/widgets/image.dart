@@ -82,26 +82,29 @@ Future<void> precacheImage(
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
   final Completer<void> completer = Completer<void>();
   final ImageStream stream = provider.resolve(config);
-  void listener(ImageInfo image, bool sync) {
-    completer.complete();
-    stream.removeListener(listener);
-  }
-  void errorListener(dynamic exception, StackTrace stackTrace) {
-    completer.complete();
-    stream.removeListener(listener);
-    if (onError != null) {
-      onError(exception, stackTrace);
-    } else {
-      FlutterError.reportError(FlutterErrorDetails(
-        context: ErrorDescription('image failed to precache'),
-        library: 'image resource service',
-        exception: exception,
-        stack: stackTrace,
-        silent: true,
-      ));
-    }
-  }
-  stream.addListener(listener, onError: errorListener);
+  ImageStreamListener listener;
+  listener = ImageStreamListener(
+    (ImageInfo image, bool sync) {
+      completer.complete();
+      stream.removeListener(listener);
+    },
+    onError: (dynamic exception, StackTrace stackTrace) {
+      completer.complete();
+      stream.removeListener(listener);
+      if (onError != null) {
+        onError(exception, stackTrace);
+      } else {
+        FlutterError.reportError(FlutterErrorDetails(
+          context: ErrorDescription('image failed to precache'),
+          library: 'image resource service',
+          exception: exception,
+          stack: stackTrace,
+          silent: true,
+        ));
+      }
+    },
+  );
+  stream.addListener(listener);
   return completer.future;
 }
 
@@ -656,28 +659,30 @@ class _ImageState extends State<Image> {
     if (_imageStream?.key == newStream?.key)
       return;
 
+    final ImageStreamListener listener = ImageStreamListener(_handleImageChanged);
+
     if (_isListeningToStream)
-      _imageStream.removeListener(_handleImageChanged);
+      _imageStream.removeListener(listener);
 
     if (!widget.gaplessPlayback)
       setState(() { _imageInfo = null; });
 
     _imageStream = newStream;
     if (_isListeningToStream)
-      _imageStream.addListener(_handleImageChanged);
+      _imageStream.addListener(listener);
   }
 
   void _listenToStream() {
     if (_isListeningToStream)
       return;
-    _imageStream.addListener(_handleImageChanged);
+    _imageStream.addListener(ImageStreamListener(_handleImageChanged));
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream() {
     if (!_isListeningToStream)
       return;
-    _imageStream.removeListener(_handleImageChanged);
+    _imageStream.removeListener(ImageStreamListener(_handleImageChanged));
     _isListeningToStream = false;
   }
 
@@ -710,7 +715,7 @@ class _ImageState extends State<Image> {
     return Semantics(
       container: widget.semanticLabel != null,
       image: true,
-      label: widget.semanticLabel == null ? '' : widget.semanticLabel,
+      label: widget.semanticLabel ?? '',
       child: image,
     );
   }
