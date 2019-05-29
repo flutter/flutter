@@ -60,15 +60,15 @@ abstract class ScrollMetrics {
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value must not be null and must be less than or equal to [maxScrollExtent].
-  /// It can be negative infinity, if the scroll is unbounded.
+  /// This value should typically be non-null and less than or equal to
+  /// [maxScrollExtent]. It can be negative infinity, if the scroll is unbounded.
   double get minScrollExtent;
 
   /// The maximum in-range value for [pixels].
   ///
   /// The actual [pixels] value might be [outOfRange].
   ///
-  /// This value must not be null and must be greater than or equal to
+  /// This value should typically be non-null and greater than or equal to
   /// [minScrollExtent]. It can be infinity, if the scroll is unbounded.
   double get maxScrollExtent;
 
