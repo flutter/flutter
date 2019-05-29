@@ -41,7 +41,7 @@ class ImageInfo {
   final double scale;
 
   @override
-  String toString() => '$image @ ${scale}x';
+  String toString() => '$image @ ${scale.toStringAsFixed(1)}x';
 
   @override
   int get hashCode => hashValues(image, scale);

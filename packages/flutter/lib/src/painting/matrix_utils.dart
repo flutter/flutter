@@ -265,9 +265,13 @@ class MatrixUtils {
 List<String> debugDescribeTransform(Matrix4 transform) {
   if (transform == null)
     return const <String>['null'];
-  final List<String> matrix = transform.toString().split('\n').toList();
-  matrix.removeLast();
-  return matrix;
+  final Float64List storage = transform.storage;
+  return <String>[
+    '[0] ${storage[transform.index(0, 0)].toStringAsFixed(1)},${storage[transform.index(0, 1)].toStringAsFixed(1)},${storage[transform.index(0, 2)].toStringAsFixed(1)},${storage[transform.index(0, 3)].toStringAsFixed(1)}',
+    '[1] ${storage[transform.index(1, 0)].toStringAsFixed(1)},${storage[transform.index(1, 1)].toStringAsFixed(1)},${storage[transform.index(1, 2)].toStringAsFixed(1)},${storage[transform.index(1, 3)].toStringAsFixed(1)}',
+    '[2] ${storage[transform.index(2, 0)].toStringAsFixed(1)},${storage[transform.index(2, 1)].toStringAsFixed(1)},${storage[transform.index(2, 2)].toStringAsFixed(1)},${storage[transform.index(2, 3)].toStringAsFixed(1)}',
+    '[3] ${storage[transform.index(3, 0)].toStringAsFixed(1)},${storage[transform.index(3, 1)].toStringAsFixed(1)},${storage[transform.index(3, 2)].toStringAsFixed(1)},${storage[transform.index(3, 3)].toStringAsFixed(1)}',
+  ];
 }
 
 /// Property which handles [Matrix4] that represent transforms.
@@ -296,13 +300,14 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
-      final List<Vector4> rows = <Vector4>[
-        value.getRow(0),
-        value.getRow(1),
-        value.getRow(2),
-        value.getRow(3),
+      final Float64List storage = value.storage;
+      final List<String> values = <String>[
+        '${storage[value.index(0, 0)].toStringAsFixed(1)},${storage[value.index(0, 1)].toStringAsFixed(1)},${storage[value.index(0, 2)].toStringAsFixed(1)},${storage[value.index(0, 3)].toStringAsFixed(1)}',
+        '${storage[value.index(1, 0)].toStringAsFixed(1)},${storage[value.index(1, 1)].toStringAsFixed(1)},${storage[value.index(1, 2)].toStringAsFixed(1)},${storage[value.index(1, 3)].toStringAsFixed(1)}',
+        '${storage[value.index(2, 0)].toStringAsFixed(1)},${storage[value.index(2, 1)].toStringAsFixed(1)},${storage[value.index(2, 2)].toStringAsFixed(1)},${storage[value.index(2, 3)].toStringAsFixed(1)}',
+        '${storage[value.index(3, 0)].toStringAsFixed(1)},${storage[value.index(3, 1)].toStringAsFixed(1)},${storage[value.index(3, 2)].toStringAsFixed(1)},${storage[value.index(3, 3)].toStringAsFixed(1)}',
       ];
-      return '[${rows.join("; ")}]';
+      return '[${values.join('; ')}]';
     }
     return debugDescribeTransform(value).join('\n');
   }

@@ -122,7 +122,7 @@ class DialogTheme extends Diagnosticable {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation));
+    properties.add(DoubleProperty('elevation', elevation));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }

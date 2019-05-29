@@ -13,6 +13,8 @@ import 'assertions.dart';
 // String _name;
 // bool inherit;
 
+const bool _kIsWeb = identical(0, 0.0);
+
 /// The various priority levels used to filter which diagnostics are shown and
 /// omitted.
 ///
@@ -2506,6 +2508,15 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   /// of the property should be displayed without line breaks if possible.
   String valueToString({ TextTreeConfiguration parentConfiguration }) {
     final T v = value;
+    // Normalize web/DDC specific closure toString syntax.
+    // DDC Example: Closure: () => void from: function onClick().
+    if (_kIsWeb && v is Function) {
+      String description = v.toString();
+      if (description.contains('Closure:') && description.contains('from:')) {
+        description = description.substring(0, description.indexOf('from: ') - 1);
+      }
+      return description;
+    }
     // DiagnosticableTree values are shown using the shorter toStringShort()
     // instead of the longer toString() because the toString() for a
     // DiagnosticableTree value is likely too large to be useful.
