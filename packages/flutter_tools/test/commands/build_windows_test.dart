@@ -25,7 +25,7 @@ void main() {
   final MockPlatform windowsPlatform = MockPlatform()
       ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
   final MockPlatform notWindowsPlatform = MockPlatform();
-  const String projectPath = r'C:\windows\Runner.vcxproj';
+  const String solutionPath = r'C:\windows\Runner.sln';
   const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
   const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
 
@@ -63,7 +63,7 @@ void main() {
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(projectPath).createSync(recursive: true);
+    fs.file(solutionPath).createSync(recursive: true);
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
     ), throwsA(isInstanceOf<ToolExit>()));
@@ -87,7 +87,7 @@ void main() {
   testUsingContext('Windows build fails on non windows platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(projectPath).createSync(recursive: true);
+    fs.file(solutionPath).createSync(recursive: true);
     enableVcvarsMocking();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
@@ -103,7 +103,7 @@ void main() {
   testUsingContext('Windows build invokes msbuild and writes generated files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(projectPath).createSync(recursive: true);
+    fs.file(solutionPath).createSync(recursive: true);
     enableVcvarsMocking();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
@@ -111,9 +111,9 @@ void main() {
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',
       vcvarsPath,
-      fs.path.basename(projectPath),
+      fs.path.basename(solutionPath),
       'Release',
-    ], workingDirectory: fs.path.dirname(projectPath))).thenAnswer((Invocation invocation) async {
+    ], workingDirectory: fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
