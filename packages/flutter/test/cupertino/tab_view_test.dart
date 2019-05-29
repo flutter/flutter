@@ -38,7 +38,6 @@ class TestCupertinoTabView extends CupertinoTabView {
 final List<int> tabsPainted = <int>[];
 final List<int> selectedTabs = <int>[];
 final CupertinoTabController controller = CupertinoTabController();
-//MockNavigatorObserver mockObserver;
 int stackDepth = 0;
 
 final List<GlobalKey<NavigatorState>> keys = List<GlobalKey<NavigatorState>>.generate(
