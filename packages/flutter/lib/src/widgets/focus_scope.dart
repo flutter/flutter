@@ -2,13 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 
 import 'basic.dart';
 import 'focus_manager.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
-import 'shortcuts.dart';
 
 /// A widget that manages a [FocusNode] to allow keyboard focus to be given
 /// to this widget and its descendants.
@@ -300,36 +298,6 @@ class _FocusState extends State<Focus> {
     _initNode();
   }
 
-  bool _handleOnKey(FocusNode node, RawKeyEvent event) {
-    if (node.context == null) {
-      if (widget.onKey == null) {
-        return false;
-      }
-      // If the context is null, then we can't look up the shortcut manager or
-      // the action manager for this node, so just call the onKey alone.
-      return widget.onKey(node, event);
-    }
-    // See if the widget's onKey handled things, and guard against a closure returning null.
-    bool result = widget.onKey != null ? widget.onKey(node, event) ?? false : false;
-    if (!result) {
-      // Walk up the ancestors of this context and find shortcut managers,
-      // passing it to the next ancestor shortcut manager if not handled.
-      bool visitShortcutManagerElements(Element element) {
-        if (element.widget is! Shortcuts) {
-          return true;
-        }
-        final Shortcuts manager = element.widget;
-        result = manager.manager.handleKeypress(node.context, event);
-
-        // Don't continue visiting if the key was handled, or the shortcut
-        // map was a modal map.
-        return !(result || manager.manager.modal);
-      }
-      node.context.visitAncestorElements(visitShortcutManagerElements);
-    }
-    return result;
-  }
-
   void _initNode() {
     if (widget.focusNode == null) {
       // Only create a new node if the widget doesn't have one.
@@ -338,7 +306,7 @@ class _FocusState extends State<Focus> {
       _internalNode ??= _createNode();
     }
     focusNode.skipTraversal = widget.skipTraversal;
-    _focusAttachment = focusNode.attach(context, onKey: _handleOnKey);
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     _hasFocus = focusNode.hasFocus;
 
     // Add listener even if the _internalNode existed before, since it should

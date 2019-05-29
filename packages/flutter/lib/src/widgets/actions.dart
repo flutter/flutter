@@ -21,16 +21,16 @@ typedef ActionFactory = Action Function();
 ///
 /// If this tag is not [enabled], then its associated action will not be
 /// invoked if requested.
-class ActionTag extends Diagnosticable {
-  /// A const constructor for an [ActionTag].
+class Intent extends Diagnosticable {
+  /// A const constructor for an [Intent].
   ///
-  /// The [name] argument must not be null.
-  const ActionTag(this.name, {this.enabled = true})
-      : assert(name != null),
+  /// The [key] argument must not be null.
+  const Intent(this.key, {this.enabled = true})
+      : assert(key != null),
         assert(enabled != null);
 
-  /// The name of the action this tag labels.
-  final String name;
+  /// The key for the action this tag labels.
+  final LocalKey key;
 
   /// Returns true if the associated action is able to be executed in the
   /// current environment.
@@ -41,7 +41,7 @@ class ActionTag extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('name', name));
+    properties.add(DiagnosticsProperty<LocalKey>('key', key));
   }
 }
 
@@ -56,12 +56,13 @@ class ActionTag extends Diagnosticable {
 abstract class Action extends Diagnosticable {
   /// A const constructor for an [Action].
   ///
-  /// The [name] parameter must not be null.
-  Action(String name) : _name = name;
+  /// The [intentKey] parameter must not be null.
+  Action(this.intentKey) : assert(intentKey != null);
 
-  /// The unique name for this action.
-  String get name => _name ?? runtimeType.toString();
-  final String _name;
+  /// The unique key for this action.
+  ///
+  /// This key will be used to map to this action in an [ActionDispatcher].
+  final LocalKey intentKey;
 
   /// Called when the action is to be performed.
   ///
@@ -77,74 +78,58 @@ abstract class Action extends Diagnosticable {
   /// needed in the action, use [ActionDispatcher.invokeFocusedAction] instead.
   @protected
   @mustCallSuper
-  void invoke(FocusNode node, covariant ActionTag tag);
+  void invoke(FocusNode node, covariant Intent tag);
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(StringProperty('name', name));
+    properties.add(DiagnosticsProperty<LocalKey>('intentKey', intentKey));
   }
 }
 
 /// The signature of a callback accepted by [CallbackAction].
-typedef ActionCallback = void Function(FocusNode node, ActionTag tag);
+typedef ActionCallback = void Function(FocusNode node, Intent tag);
 
 /// An [Action] that takes a callback in order to configure it without having to
 /// subclass it.
 class CallbackAction extends Action {
   /// A const constructor for an [Action].
   ///
-  /// The [name] parameter must not be null.
-  CallbackAction({String name, @required this.onInvoke}) : super(name);
+  /// The [intentKey] parameter must not be null.
+  CallbackAction({LocalKey intentKey, @required this.onInvoke}) : super(intentKey);
 
   /// The callback to be called when invoked.
   @protected
   final ActionCallback onInvoke;
 
   @override
-  void invoke(FocusNode node, ActionTag tag) => onInvoke?.call(node, tag);
+  void invoke(FocusNode node, Intent tag) => onInvoke?.call(node, tag);
 }
 
 /// An action manager that simply invokes the actions given to it.
 class ActionDispatcher extends Diagnosticable {
-  /// Const constructor so that subclasses may be const.
-  ActionDispatcher({Map<String, ActionFactory> actions = const <String, ActionFactory>{}})
-      : assert(actions != null),
-        _actions = actions;
+  /// Const constructor so that subclasses can be const.
+  const ActionDispatcher();
 
-  /// Invokes the given action on a global basis, without regard for the
-  /// currently focused node in the focus tree.
+  /// Invokes the given action, optionally without regard for the currently
+  /// focused node in the focus tree.
   ///
-  /// Actions invoked globally may receive a null `node`.
-  Action invokeAction(ActionTag tag, {FocusNode node}) {
-    // Create an Action instance using the registered factory, if any.
-    final Action action = _actions[tag.name]?.call();
-    if (action != null && tag.enabled) {
-      action.invoke(node, tag);
+  /// Actions invoked will receive the given node, which is null by default.
+  ///
+  /// Use [invokeFocusedAction] if you wish to invoke an action using the
+  /// currently focused node.
+  ///
+  /// The `action` and `intent` arguments must not be null.
+  bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
+    assert(action != null);
+    assert(intent != null);
+    focusNode ??= WidgetsBinding.instance.focusManager.primaryFocus;
+    if (action != null && intent.enabled) {
+      action.invoke(focusNode, intent);
+      return true;
     }
-    return action;
+    return false;
   }
-
-  /// Invokes the given action after looking up the name of the `tag` in
-  /// its registry of actions.
-  Action invokeFocusedAction(ActionTag tag) {
-    return invokeAction(tag, node: WidgetsBinding.instance.focusManager.primaryFocus);
-  }
-
-  final Map<String, ActionFactory> _actions;
-
-  /// Registers an action factory for generating an action by the name `name`.
-  void registerAction(String name, ActionFactory factory) {
-    _actions[name] = factory;
-  }
-
-  /// Removes a given action from the registry.
-  void removeAction(String name) {
-    _actions.remove(name);
-  }
-
-  /// Returns true if an action by the given name is registered.
-  bool hasAction(String name) => _actions.containsKey(name);
 }
 
 /// A widget that establishes an [ActionDispatcher] to be used by its descendants
@@ -166,6 +151,7 @@ class Actions extends InheritedWidget {
   const Actions({
     Key key,
     this.dispatcher,
+    this.actions,
     @required Widget child,
   }) : super(key: key, child: child);
 
@@ -174,10 +160,19 @@ class Actions extends InheritedWidget {
   /// This is what is returned from [Actions.of].
   final ActionDispatcher dispatcher;
 
-  /// Returns the [ActionDispatcher] that most tightly encloses the given
-  /// [BuildContext].
+  /// A map of [Intent] keys to [ActionFactory] that defines which actions this
+  /// dispatcher handles.
+  final Map<LocalKey, ActionFactory> actions;
+
+  /// Returns the [ActionDispatcher] associated with the [Actions] widget that
+  /// most tightly encloses the given [BuildContext].
   ///
-  /// The [context] argument must not be null.
+  /// The `context` argument must not be null.
+  ///
+  /// Will throw if no ambient [Actions] widget is found.
+  ///
+  /// If `nullOk` is set to true, then if no ambient [Actions] widget is found,
+  /// this will return null.
   static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     final Actions inherited = context.inheritFromWidgetOfExactType(Actions);
@@ -186,13 +181,12 @@ class Actions extends InheritedWidget {
         return true;
       }
       if (inherited == null) {
-        throw FlutterError('Unable to find a DefaultFocusTraversal widget in the context.\n'
-            'DefaultFocusTraversal.of() was called with a context that does not contain a '
-            'DefaultFocusTraversal.\n'
-            'No DefaultFocusTraversal ancestor could be found starting from the context that was '
-            'passed to DefaultFocusTraversal.of(). This can happen because there is not a '
-            'WidgetsApp or MaterialApp widget (those widgets introduce a DefaultFocusTraversal), '
-            'or it can happen if the context comes from a widget above those widgets.\n'
+        throw FlutterError('Unable to find a $Actions widget in the context.\n'
+            '$Actions.of() was called with a context that does not contain an '
+            '$Actions widget.\n'
+            'No $Actions ancestor could be found starting from the context that '
+            'was passed to $Actions.of(). This can happen if the context comes '
+            'from a widget above those widgets.\n'
             'The context used was:\n'
             '  $context');
       }
@@ -201,12 +195,80 @@ class Actions extends InheritedWidget {
     return inherited?.dispatcher;
   }
 
+  /// Invokes the action associated with the given [Intent] using the the
+  /// [Actions] widget that most tightly encloses the given [BuildContext].
+  ///
+  /// The `context`, `intent` and `nullOk` arguments must not be null.
+  ///
+  /// If the given `intent` isn't found in the first [Actions.actions] map, then
+  /// it will move up to the next [Actions] widget in the hierarchy until it
+  /// reaches the root.
+  ///
+  /// Will throw if no ambient [Actions] widget is found, or if the given
+  /// `intent` doesn't map to an action in any of the the [Actions.actions] maps
+  /// that are found.
+  ///
+  /// Setting `nullOk` to true means that if no ambient [Actions] widget is
+  /// found, then this method will just return false instead of throwing.
+  static bool invoke(BuildContext context, Intent intent, {FocusNode focusNode, bool nullOk = false}) {
+    assert(context != null);
+    assert(intent != null);
+    Actions actions;
+    Action action;
+    bool visitAncestorElement(Element element) {
+      if (element.widget is! Actions) {
+        // Continue visiting.
+        return true;
+      }
+      // Below when we invoke the action, we need to use the dispatcher from the
+      // Actions widget where we found the action, in case they need to match.
+      actions = element.widget;
+      action = actions.actions[intent.key]?.call();
+      // Don't continue visiting if we successfully created an action.
+      return action == null;
+    }
+    context.visitAncestorElements(visitAncestorElement);
+    assert(() {
+      if (nullOk) {
+        return true;
+      }
+      if (actions == null) {
+        throw FlutterError('Unable to find a $Actions widget in the context.\n'
+            '$Actions.invoke() was called with a context that does not contain an '
+            '$Actions widget.\n'
+            'No $Actions ancestor could be found starting from the context that '
+            'was passed to $Actions.invoke(). This can happen if the context comes '
+            'from a widget above those widgets.\n'
+            'The context used was:\n'
+            '  $context');
+      }
+      if (action == null) {
+        throw FlutterError('Unable to find an action for an intent in the $Actions widget in the context.\n'
+            '$Actions.invoke() was called on an $Actions widget that doesn\'t '
+            'contain a mapping for the given intent.\n'
+            'The context used was:\n'
+            '  $context\n'
+            'The intent requested was:\n'
+            '  $intent');
+      }
+      return true;
+    }());
+    if (action == null) {
+      return false;
+    }
+    // Invoke the action we found using the dispatcher from the Actions we
+    // found, using the given focus node. Or null, if nullOk is true, and we
+    // didn't find something.
+    return actions?.dispatcher?.invokeAction(action, intent, focusNode: focusNode);
+  }
+
   @override
-  bool updateShouldNotify(Actions oldWidget) => dispatcher != oldWidget.dispatcher;
+  bool updateShouldNotify(Actions oldWidget) => oldWidget.dispatcher != dispatcher || oldWidget.actions != actions;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<ActionDispatcher>('manager', dispatcher));
+    properties.add(DiagnosticsProperty<ActionDispatcher>('dispatcher', dispatcher));
+    properties.add(DiagnosticsProperty<Map<LocalKey, ActionFactory>>('actions', actions));
   }
 }

@@ -23,11 +23,9 @@ class UndoableActionDispatcher extends ActionDispatcher {
   ///
   /// The [maxUndoLevels] argument must not be null.
   UndoableActionDispatcher({
-    Map<String, ActionFactory> actions = const <String, ActionFactory>{},
     int maxUndoLevels = _defaultMaxUndoLevels,
   })  : assert(maxUndoLevels != null),
-        _maxUndoLevels = maxUndoLevels,
-        super(actions: actions);
+        _maxUndoLevels = maxUndoLevels;
 
   // A stack of actions that have been performed. The most recent action
   // performed is at the end of the list.
@@ -51,15 +49,15 @@ class UndoableActionDispatcher extends ActionDispatcher {
   }
 
   @override
-  Action invokeAction(ActionTag tag, {FocusNode node}) {
-    print('Invoking $tag: $this');
-    final Action action = super.invokeAction(tag, node: node);
+  bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
+    final bool result = super.invokeAction(action, intent, focusNode: focusNode);
+    print('Invoking ${action is UndoableAction ? 'undoable ' : ''}$intent as $action: $this ');
     if (action is UndoableAction) {
       _completedActions.add(action);
       _undoneActions.clear();
       _pruneActions();
     }
-    return action;
+    return result;
   }
 
   // Enforces undo level limit.
@@ -116,9 +114,11 @@ class UndoableActionDispatcher extends ActionDispatcher {
   }
 }
 
+const LocalKey kUndoActionKey = ValueKey<String>('Undo');
+const Intent kUndoIntent = Intent(kUndoActionKey);
 final Action kUndoAction = CallbackAction(
-    name: 'Undo',
-    onInvoke: (FocusNode node, ActionTag tag) {
+    intentKey: kUndoActionKey,
+    onInvoke: (FocusNode node, Intent tag) {
       if (node?.context == null) {
         return;
       }
@@ -126,9 +126,11 @@ final Action kUndoAction = CallbackAction(
       manager?.undo();
     });
 
+const LocalKey kRedoActionKey = ValueKey<String>('Redo');
+const Intent kRedoIntent = Intent(kRedoActionKey);
 final Action kRedoAction = CallbackAction(
-    name: 'Redo',
-    onInvoke: (FocusNode node, ActionTag tag) {
+    intentKey: kRedoActionKey,
+    onInvoke: (FocusNode node, Intent tag) {
       if (node?.context == null) {
         return;
       }
@@ -140,8 +142,8 @@ final Action kRedoAction = CallbackAction(
 abstract class UndoableAction extends Action {
   /// A const constructor to [UndoableAction].
   ///
-  /// The [name] parameter must not be null.
-  UndoableAction(String name) : super(name);
+  /// The [intentKey] parameter must not be null.
+  UndoableAction(LocalKey intentKey) : super(intentKey);
 
   /// The node supplied when this command was invoked.
   FocusNode get invocationNode => _invocationNode;
@@ -150,12 +152,12 @@ abstract class UndoableAction extends Action {
   @protected
   set invocationNode(FocusNode value) => _invocationNode = value;
 
-  /// The [ActionTag] this action was originally invoked with.
-  ActionTag get invocationTag => _invocationTag;
-  ActionTag _invocationTag;
+  /// The [Intent] this action was originally invoked with.
+  Intent get invocationTag => _invocationTag;
+  Intent _invocationTag;
 
   @protected
-  set invocationTag(ActionTag value) => _invocationTag = value;
+  set invocationTag(Intent value) => _invocationTag = value;
 
   /// Returns true if the data model can be returned to the state it was in
   /// previous to this action being executed.
@@ -169,7 +171,7 @@ abstract class UndoableAction extends Action {
 
   @override
   @mustCallSuper
-  void invoke(FocusNode node, ActionTag tag) {
+  void invoke(FocusNode node, Intent tag) {
     invocationNode = node;
     invocationTag = tag;
   }
@@ -182,12 +184,12 @@ abstract class UndoableAction extends Action {
 }
 
 class SetFocusActionBase extends UndoableAction {
-  SetFocusActionBase(String name) : super(name);
+  SetFocusActionBase(LocalKey name) : super(name);
 
   FocusNode _previousFocus;
 
   @override
-  void invoke(FocusNode node, ActionTag tag) {
+  void invoke(FocusNode node, Intent tag) {
     super.invoke(node, tag);
     _previousFocus = WidgetsBinding.instance.focusManager.primaryFocus;
     node.requestFocus();
@@ -211,10 +213,12 @@ class SetFocusActionBase extends UndoableAction {
 }
 
 class SetFocusAction extends SetFocusActionBase {
-  SetFocusAction() : super('SetFocus');
+  SetFocusAction() : super(key);
+
+  static const LocalKey key = ValueKey<Type>(SetFocusAction);
 
   @override
-  void invoke(FocusNode node, ActionTag tag) {
+  void invoke(FocusNode node, Intent tag) {
     super.invoke(node, tag);
     node.requestFocus();
   }
@@ -222,40 +226,46 @@ class SetFocusAction extends SetFocusActionBase {
 
 /// Actions for manipulating focus.
 class NextFocusAction extends SetFocusActionBase {
-  NextFocusAction() : super('NextFocus');
+  NextFocusAction() : super(key);
+
+  static const LocalKey key = ValueKey<Type>(NextFocusAction);
 
   @override
-  void invoke(FocusNode node, ActionTag tag) {
+  void invoke(FocusNode node, Intent tag) {
     super.invoke(node, tag);
     node.nextFocus();
   }
 }
 
 class PreviousFocusAction extends SetFocusActionBase {
-  PreviousFocusAction() : super('PreviousFocus');
+  PreviousFocusAction() : super(key);
+
+  static const LocalKey key = ValueKey<Type>(PreviousFocusAction);
 
   @override
-  void invoke(FocusNode node, ActionTag tag) {
+  void invoke(FocusNode node, Intent tag) {
     super.invoke(node, tag);
     node.previousFocus();
   }
 }
 
-class DirectionalFocusActionTag extends ActionTag {
-  const DirectionalFocusActionTag(this.direction) : super('DirectionalFocus');
+class DirectionalFocusIntent extends Intent {
+  const DirectionalFocusIntent(this.direction) : super(DirectionalFocusAction.key);
 
   final TraversalDirection direction;
 }
 
 class DirectionalFocusAction extends SetFocusActionBase {
-  DirectionalFocusAction() : super('DirectionalFocus');
+  DirectionalFocusAction() : super(key);
+
+  static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
 
   TraversalDirection direction;
 
   @override
-  void invoke(FocusNode node, DirectionalFocusActionTag tag) {
+  void invoke(FocusNode node, DirectionalFocusIntent tag) {
     super.invoke(node, tag);
-    final DirectionalFocusActionTag args = tag;
+    final DirectionalFocusIntent args = tag;
     node.focusInDirection(args.direction);
   }
 }
@@ -281,9 +291,8 @@ class _DemoButtonState extends State<DemoButton> {
 
   void _handleOnPressed() {
     print('Button ${widget.name} pressed.');
-    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
     setState(() {
-      manager?.invokeAction(const ActionTag('SetFocus'), node: _focusNode);
+      Actions.invoke(context, const Intent(SetFocusAction.key), focusNode: _focusNode);
     });
   }
 
@@ -331,34 +340,35 @@ class _FocusDemoState extends State<FocusDemo> {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Shortcuts(
-      shortcuts: <LogicalKeySet, ActionTag>{
-        LogicalKeySet(LogicalKeyboardKey.tab): const ActionTag('NextFocus'),
-        LogicalKeySet(LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.tab): const ActionTag('PreviousFocus'),
-        LogicalKeySet(LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.tab): const ActionTag('PreviousFocus'),
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusActionTag(TraversalDirection.up),
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusActionTag(TraversalDirection.down),
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusActionTag(TraversalDirection.left),
-        LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusActionTag(TraversalDirection.right),
+      shortcuts: <LogicalKeySet, Intent>{
+        LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+        LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
       },
       child: Actions(
-        dispatcher: UndoableActionDispatcher(actions: <String, ActionFactory>{
-          'SetFocus': () => SetFocusAction(),
-          'NextFocus': () => NextFocusAction(),
-          'PreviousFocus': () => PreviousFocusAction(),
-          'DirectionalFocus': () => DirectionalFocusAction(),
-          'Undo': () => kUndoAction,
-          'Redo': () => kRedoAction,
-        }),
+        dispatcher: UndoableActionDispatcher(),
+        actions: <LocalKey, ActionFactory>{
+          SetFocusAction.key: () => SetFocusAction(),
+          NextFocusAction.key: () => NextFocusAction(),
+          PreviousFocusAction.key: () => PreviousFocusAction(),
+          DirectionalFocusAction.key: () => DirectionalFocusAction(),
+          kUndoActionKey: () => kUndoAction,
+          kRedoActionKey: () => kRedoAction,
+        },
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: Shortcuts(
-            shortcuts: <LogicalKeySet, ActionTag>{
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): const ActionTag('Redo'),
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): const ActionTag('Redo'),
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): const ActionTag('Redo'),
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): const ActionTag('Redo'),
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.keyZ): const ActionTag('Undo'),
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.keyZ): const ActionTag('Undo'),
+            shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.keyZ): kUndoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.keyZ): kUndoIntent,
             },
             child: FocusScope(
               debugLabel: 'Scope',
@@ -406,7 +416,7 @@ class _FocusDemoState extends State<FocusDemo> {
                                 child: RaisedButton(
                                   child: const Text('UNDO'),
                                   onPressed: () {
-                                    Actions.of(context)?.invokeFocusedAction(const ActionTag('Undo'));
+                                    Actions.invoke(context, kUndoIntent);
                                   },
                                 ),
                               ),
@@ -415,7 +425,7 @@ class _FocusDemoState extends State<FocusDemo> {
                                 child: RaisedButton(
                                   child: const Text('REDO'),
                                   onPressed: () {
-                                    Actions.of(context)?.invokeFocusedAction(const ActionTag('Redo'));
+                                    Actions.invoke(context, kRedoIntent);
                                   },
                                 ),
                               ),

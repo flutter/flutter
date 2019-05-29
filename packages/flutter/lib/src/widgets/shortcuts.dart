@@ -4,10 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 
 import 'actions.dart';
+import 'binding.dart';
+import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
+import 'inherited_notifier.dart';
 
 /// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
 ///
@@ -40,6 +43,8 @@ class LogicalKeySet {
 
   /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
   ///
+  /// Do not mutate the `keys` set after passing it to this object.
+  ///
   /// The `keys` must not be null or empty.
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys)
       : assert(keys != null),
@@ -68,49 +73,54 @@ class LogicalKeySet {
   int get hashCode {
     return hashList(_logicalSet);
   }
+
+  @override
+  String toString() {
+    return '[$runtimeType $_logicalSet]';
+  }
 }
 
 /// A manager of keyboard shortcut bindings.
 ///
-/// A [ShortcutManager] is obtained by calling [Shortcuts.of] on
-/// the context of the widget that you want to find a manager for.
+/// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
+/// the widget that you want to find a manager for.
 class ShortcutManager extends ChangeNotifier {
   /// Constructs a [ShortcutManager].
   ///
   /// The [shortcuts] argument must not  be null.
   ShortcutManager({
-    Map<LogicalKeySet, ActionTag> shortcuts = const <LogicalKeySet, ActionTag>{},
+    Map<LogicalKeySet, Intent> shortcuts = const <LogicalKeySet, Intent>{},
     this.modal = false,
   })  : assert(shortcuts != null),
         _shortcuts = shortcuts;
 
   /// True if this shortcut map should not pass on keys that it doesn't handle
-  /// to any [ShortcutManager]s that are ancestors to this one.
+  /// to any key-handling widgets that are ancestors to this one.
+  ///
+  /// Setting [modal] to true is the equivalent of always handling any key given
+  /// to it, even if that key doesn't appear in the [shortcuts] map.
   bool modal;
 
   /// Returns a copy of the shortcut map.
   ///
-  /// Returns a copy so that modifying the copy will not modified the stored map.
+  /// Returns a copy so that modifying the copy will not modified the stored
+  /// map.
   ///
   /// When the map is changed, listeners to this manager will be notified.
-  Map<LogicalKeySet, ActionTag> get shortcuts {
-    return _shortcuts;
-  }
-
-  set shortcuts(Map<LogicalKeySet, ActionTag> value) {
+  Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
+  Map<LogicalKeySet, Intent> _shortcuts;
+  set shortcuts(Map<LogicalKeySet, Intent> value) {
     if (value != _shortcuts) {
       _shortcuts = value;
       notifyListeners();
     }
   }
 
-  Map<LogicalKeySet, ActionTag> _shortcuts;
-
   /// Adds a shortcut mapping to the map.
   ///
   /// It the mapping is changed, then the listeners to this manager will be
   /// notified.
-  void addShortcut(LogicalKeySet keySet, ActionTag action) {
+  void addShortcut(LogicalKeySet keySet, Intent action) {
     if (!_shortcuts.containsKey(keySet) || _shortcuts[keySet] != action) {
       _shortcuts[keySet] = action;
       notifyListeners();
@@ -145,8 +155,11 @@ class ShortcutManager extends ChangeNotifier {
     assert(context != null);
     final LogicalKeySet keySet = keysPressed ?? LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
     if (_shortcuts.containsKey(keySet)) {
-      final ActionDispatcher dispatcher = Actions.of(context, nullOk: true);
-      return dispatcher.invokeFocusedAction(_shortcuts[keySet]) != null;
+      final BuildContext primaryContext = WidgetsBinding.instance.focusManager.primaryFocus?.context;
+      if (primaryContext == null) {
+        return false;
+      }
+      return Actions.invoke(primaryContext, _shortcuts[keySet], nullOk: true);
     }
     return false;
   }
@@ -165,13 +178,12 @@ class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.
   ///
   /// The [child] argument must not be null.
-  Shortcuts({
+  const Shortcuts({
     Key key,
-    ShortcutManager manager,
+    this.manager,
     this.shortcuts,
     this.child,
-  })  : manager = manager ?? ShortcutManager(),
-        super(key: key);
+  })  : super(key: key);
 
   /// The shortcut manager that will manage the mapping between key combinations
   /// and [Action]s.
@@ -190,7 +202,7 @@ class Shortcuts extends StatefulWidget {
   final ShortcutManager manager;
 
   /// The map of shortcuts that the manager will be given to manage.
-  final Map<LogicalKeySet, ActionTag> shortcuts;
+  final Map<LogicalKeySet, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
   ///
@@ -224,26 +236,65 @@ class Shortcuts extends StatefulWidget {
 
   @override
   _ShortcutsState createState() => _ShortcutsState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager));
+    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', shortcuts));
+  }
 }
 
 class _ShortcutsState extends State<Shortcuts> {
+  ShortcutManager _internalManager;
+  ShortcutManager get manager => widget.manager ?? _internalManager;
+
   @override
-  void initState() {
-    super.initState();
-    widget.manager.shortcuts = widget.shortcuts;
+  void dispose() {
+    _internalManager?.dispose();
+    super.dispose();
   }
 
   @override
-  Widget build(BuildContext context) {
-    return _ShortcutsMarker(manager: widget.manager, child: widget.child);
+  void initState() {
+    super.initState();
+    if (widget.manager == null) {
+      _internalManager = ShortcutManager();
+    }
+    manager.shortcuts = widget.shortcuts;
   }
 
   @override
   void didUpdateWidget(Shortcuts oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.manager != oldWidget.manager || widget.shortcuts != oldWidget.shortcuts) {
-      widget.manager.shortcuts = widget.shortcuts;
+      if (widget.manager != null) {
+        _internalManager?.dispose();
+        _internalManager = null;
+      } else {
+        _internalManager ??= ShortcutManager();
+      }
+      manager.shortcuts = widget.shortcuts;
     }
+  }
+
+  bool _handleOnKey(FocusNode node, RawKeyEvent event) {
+    if (node.context == null) {
+      return false;
+    }
+    return manager.handleKeypress(node.context, event) || manager.modal;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Focus(
+      skipTraversal: true,
+      onKey: _handleOnKey,
+      child: _ShortcutsMarker(
+        manager: manager,
+        child: widget.child,
+      ),
+    );
   }
 }
 
