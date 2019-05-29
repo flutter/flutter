@@ -23,7 +23,7 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   FileSystem: () => MemoryFileSystem(), // Keeps tests fasts.
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
-  OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger
+  OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
 };
 
 /// Manages interaction with the tool injection and runner system.
