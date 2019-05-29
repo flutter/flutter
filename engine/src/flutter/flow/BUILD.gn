@@ -6,6 +6,8 @@ if (is_fuchsia) {
   import("//build/fuchsia/sdk.gni")
 }
 
+import("$flutter_root/testing/testing.gni")
+
 source_set("flow") {
   sources = [
     "compositor_context.cc",
@@ -100,6 +102,10 @@ source_set("flow") {
   }
 }
 
+test_fixtures("flow_fixtures") {
+  fixtures = []
+}
+
 executable("flow_unittests") {
   testonly = true
 
@@ -114,6 +120,7 @@ executable("flow_unittests") {
 
   deps = [
     ":flow",
+    ":flow_fixtures",
     "$flutter_root/fml",
     "//third_party/dart/runtime:libdart_jit",  # for tracing
     "//third_party/googletest:gtest",

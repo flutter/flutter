@@ -3,6 +3,7 @@
 # found in the LICENSE file.
 
 import("//build/fuchsia/sdk.gni")
+import("$flutter_root/testing/testing.gni")
 
 source_set("fml") {
   sources = [
@@ -182,6 +183,10 @@ source_set("fml") {
   }
 }
 
+test_fixtures("fml_fixtures") {
+  fixtures = []
+}
+
 executable("fml_unittests") {
   testonly = true
 
@@ -208,6 +213,7 @@ executable("fml_unittests") {
   ]
 
   deps = [
+    ":fml_fixtures",
     "$flutter_root/fml",
     "$flutter_root/testing",
     "//third_party/dart/runtime:libdart_jit",
