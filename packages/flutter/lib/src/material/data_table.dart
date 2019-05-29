@@ -264,6 +264,7 @@ class DataTable extends StatelessWidget {
     this.sortAscending = true,
     this.onSelectAll,
     this.dataRowHeight,
+    this.headingRowHeight,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -317,6 +318,11 @@ class DataTable extends StatelessWidget {
   ///
   /// This value is optional and defaults to 48.0 if not specified.
   final double dataRowHeight;
+
+  /// The height of the heading row.
+  ///
+  /// This value is optional and defaults to 56.0 if not specified.
+  final double headingRowHeight;
 
   /// The data to show in each row (excluding the row that contains
   /// the column headings).
@@ -423,14 +429,14 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: _headingRowHeight,
+      height: headingRowHeight ?? _headingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
         style: TextStyle(
           // TODO(ianh): font family should match Theme; see https://github.com/flutter/flutter/issues/3116
           fontWeight: FontWeight.w500,
           fontSize: _headingFontSize,
-          height: math.min(1.0, _headingRowHeight / _headingFontSize),
+          height: math.min(1.0, (headingRowHeight ?? _headingRowHeight) / _headingFontSize),
           color: (Theme.of(context).brightness == Brightness.light)
             ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
             : ((onSort != null && sorted) ? Colors.white : Colors.white70),

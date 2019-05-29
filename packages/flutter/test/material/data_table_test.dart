@@ -270,7 +270,12 @@ void main() {
   testWidgets('DataTable custom height', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ int sortColumnIndex, bool sortAscending = true, double dataRowHeight}) {
+    Widget buildTable({
+      int sortColumnIndex,
+      bool sortAscending = true,
+      double dataRowHeight,
+      double headingRowHeight,
+    }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
@@ -278,6 +283,7 @@ void main() {
           log.add('select-all: $value');
         },
         dataRowHeight: dataRowHeight,
+        headingRowHeight: headingRowHeight,
         columns: <DataColumn>[
           const DataColumn(
             label: Text('Name'),
@@ -318,15 +324,27 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable()),
     ));
-
     expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Name')).size.height, 56.0); // This is the header row height
     expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Frozen yogurt')).size.height, 48.0); // This is the data row height
 
     await tester.pumpWidget(MaterialApp(
       home: Material(child: buildTable(dataRowHeight: 30.0)),
     ));
-
-    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Name')).size.height, 56.0);
     expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Frozen yogurt')).size.height, 30.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(dataRowHeight: 56.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Frozen yogurt')).size.height, 56.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(headingRowHeight: 48.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Name')).size.height, 48.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(headingRowHeight: 64.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(find.widgetWithText(Container, 'Name')).size.height, 64.0);
   });
 }
