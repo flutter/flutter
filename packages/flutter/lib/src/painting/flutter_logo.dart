@@ -238,7 +238,7 @@ class FlutterLogoDecoration extends Decoration {
     properties.add(DiagnosticsNode.message('$lightColor/$darkColor on $textColor'));
     properties.add(EnumProperty<FlutterLogoStyle>('style', style));
     if (_inTransition)
-      properties.add(DiagnosticsNode.message('transition ${_position.toStringAsFixed(1)}:${_opacity.toStringAsFixed(1)}'));
+      properties.add(DiagnosticsNode.message('transition ${debugFormatDouble(_position)}:${debugFormatDouble(_opacity)}'));
   }
 }
 

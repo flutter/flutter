@@ -267,10 +267,10 @@ List<String> debugDescribeTransform(Matrix4 transform) {
     return const <String>['null'];
   final Float64List storage = transform.storage;
   return <String>[
-    '[0] ${storage[transform.index(0, 0)].toStringAsFixed(1)},${storage[transform.index(0, 1)].toStringAsFixed(1)},${storage[transform.index(0, 2)].toStringAsFixed(1)},${storage[transform.index(0, 3)].toStringAsFixed(1)}',
-    '[1] ${storage[transform.index(1, 0)].toStringAsFixed(1)},${storage[transform.index(1, 1)].toStringAsFixed(1)},${storage[transform.index(1, 2)].toStringAsFixed(1)},${storage[transform.index(1, 3)].toStringAsFixed(1)}',
-    '[2] ${storage[transform.index(2, 0)].toStringAsFixed(1)},${storage[transform.index(2, 1)].toStringAsFixed(1)},${storage[transform.index(2, 2)].toStringAsFixed(1)},${storage[transform.index(2, 3)].toStringAsFixed(1)}',
-    '[3] ${storage[transform.index(3, 0)].toStringAsFixed(1)},${storage[transform.index(3, 1)].toStringAsFixed(1)},${storage[transform.index(3, 2)].toStringAsFixed(1)},${storage[transform.index(3, 3)].toStringAsFixed(1)}',
+    '[0] ${debugFormatDouble(storage[transform.index(0, 0)])},${debugFormatDouble(storage[transform.index(0, 1)])},${debugFormatDouble(storage[transform.index(0, 2)])},${debugFormatDouble(storage[transform.index(0, 3)])}',
+    '[1] ${debugFormatDouble(storage[transform.index(1, 0)])},${debugFormatDouble(storage[transform.index(1, 1)])},${debugFormatDouble(storage[transform.index(1, 2)])},${debugFormatDouble(storage[transform.index(1, 3)])}',
+    '[2] ${debugFormatDouble(storage[transform.index(2, 0)])},${debugFormatDouble(storage[transform.index(2, 1)])},${debugFormatDouble(storage[transform.index(2, 2)])},${debugFormatDouble(storage[transform.index(2, 3)])}',
+    '[3] ${debugFormatDouble(storage[transform.index(3, 0)])},${debugFormatDouble(storage[transform.index(3, 1)])},${debugFormatDouble(storage[transform.index(3, 2)])},${debugFormatDouble(storage[transform.index(3, 3)])}',
   ];
 }
 
@@ -302,10 +302,10 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
       // style.
       final Float64List storage = value.storage;
       final List<String> values = <String>[
-        '${storage[value.index(0, 0)].toStringAsFixed(1)},${storage[value.index(0, 1)].toStringAsFixed(1)},${storage[value.index(0, 2)].toStringAsFixed(1)},${storage[value.index(0, 3)].toStringAsFixed(1)}',
-        '${storage[value.index(1, 0)].toStringAsFixed(1)},${storage[value.index(1, 1)].toStringAsFixed(1)},${storage[value.index(1, 2)].toStringAsFixed(1)},${storage[value.index(1, 3)].toStringAsFixed(1)}',
-        '${storage[value.index(2, 0)].toStringAsFixed(1)},${storage[value.index(2, 1)].toStringAsFixed(1)},${storage[value.index(2, 2)].toStringAsFixed(1)},${storage[value.index(2, 3)].toStringAsFixed(1)}',
-        '${storage[value.index(3, 0)].toStringAsFixed(1)},${storage[value.index(3, 1)].toStringAsFixed(1)},${storage[value.index(3, 2)].toStringAsFixed(1)},${storage[value.index(3, 3)].toStringAsFixed(1)}',
+        '${debugFormatDouble(storage[value.index(0, 0)])},${debugFormatDouble(storage[value.index(0, 1)])},${debugFormatDouble(storage[value.index(0, 2)])},${debugFormatDouble(storage[value.index(0, 3)])}',
+        '${debugFormatDouble(storage[value.index(1, 0)])},${debugFormatDouble(storage[value.index(1, 1)])},${debugFormatDouble(storage[value.index(1, 2)])},${debugFormatDouble(storage[value.index(1, 3)])}',
+        '${debugFormatDouble(storage[value.index(2, 0)])},${debugFormatDouble(storage[value.index(2, 1)])},${debugFormatDouble(storage[value.index(2, 2)])},${debugFormatDouble(storage[value.index(2, 3)])}',
+        '${debugFormatDouble(storage[value.index(3, 0)])},${debugFormatDouble(storage[value.index(3, 1)])},${debugFormatDouble(storage[value.index(3, 2)])},${debugFormatDouble(storage[value.index(3, 3)])}',
       ];
       return '[${values.join('; ')}]';
     }

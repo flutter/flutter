@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
+import 'debug.dart';
 
 // Examples can assume:
 // int rows, columns;
@@ -1913,7 +1914,7 @@ class DoubleProperty extends _NumProperty<double> {
   );
 
   @override
-  String numberToString() => value?.toStringAsFixed(1);
+  String numberToString() => debugFormatDouble(value);
 }
 
 /// An int valued property with an optional unit the value is measured in.

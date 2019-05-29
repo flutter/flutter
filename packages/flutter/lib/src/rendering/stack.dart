@@ -215,17 +215,17 @@ class StackParentData extends ContainerBoxParentData<RenderBox> {
   String toString() {
     final List<String> values = <String>[];
     if (top != null)
-      values.add('top=${top.toStringAsFixed(1)}');
+      values.add('top=${debugFormatDouble(top)}');
     if (right != null)
-      values.add('right=${right.toStringAsFixed(1)}');
+      values.add('right=${debugFormatDouble(right)}');
     if (bottom != null)
-      values.add('bottom=${bottom.toStringAsFixed(1)}');
+      values.add('bottom=${debugFormatDouble(bottom)}');
     if (left != null)
-      values.add('left=${left.toStringAsFixed(1)}');
+      values.add('left=${debugFormatDouble(left)}');
     if (width != null)
-      values.add('width=${width.toStringAsFixed(1)}');
+      values.add('width=${debugFormatDouble(width)}');
     if (height != null)
-      values.add('height=${height.toStringAsFixed(1)}');
+      values.add('height=${debugFormatDouble(height)}');
     if (values.isEmpty)
       values.add('not positioned');
     values.add(super.toString());
