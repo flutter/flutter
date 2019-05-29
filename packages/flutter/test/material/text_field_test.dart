@@ -733,6 +733,13 @@ void main() {
     // 'def' is selected.
     expect(controller.selection.baseOffset, testValue.indexOf('d'));
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
+
+    // Tapping elsewhere immediately collapses and moves the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('h')));
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('h'));
   });
 
   testWidgets('Slight movements in longpress don\'t hide/show handles', (WidgetTester tester) async {
