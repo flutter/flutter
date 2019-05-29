@@ -434,7 +434,8 @@ void main() {
         app = FuchsiaApp.fromPrebuiltApp(far);
       } else {
         fs.file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-          .createSync(recursive: true);
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
         fs.file('.packages').createSync();
         fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
         app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);
