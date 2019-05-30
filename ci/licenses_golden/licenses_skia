@@ -1,4 +1,4 @@
-Signature: f50d17d2eda26aa3f5df06845c80d2a4
+Signature: b31a120a9a7e7f39df44470ee6f82c09
 
 UNUSED LICENSES:
 
@@ -2083,6 +2083,9 @@ FILE: ../../../third_party/skia/infra/bots/recipes/compile.expected/Build-Win-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/normal_bot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_buildstats.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/compute_test.expected/Test-Debian9-Clang-NUC7i5BNK-GPU-IntelIris640-x86_64-Debug-All-OpenCL.json
+FILE: ../../../third_party/skia/infra/bots/recipes/g3_compile.expected/g3_compile_nontrybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/g3_compile.expected/g3_compile_trybot.json
+FILE: ../../../third_party/skia/infra/bots/recipes/g3_compile.expected/g3_compile_trybot_failure.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit-Trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/housekeeper.expected/Housekeeper-PerCommit.json
 FILE: ../../../third_party/skia/infra/bots/recipes/infra.expected/infra_tests.json
@@ -3006,7 +3009,6 @@ FILE: ../../../third_party/skia/src/core/SkTInternalLList.h
 FILE: ../../../third_party/skia/src/core/SkTLList.h
 FILE: ../../../third_party/skia/src/core/SkTLS.cpp
 FILE: ../../../third_party/skia/src/core/SkTLS.h
-FILE: ../../../third_party/skia/src/core/SkTextToPathIter.h
 FILE: ../../../third_party/skia/src/core/SkWriteBuffer.cpp
 FILE: ../../../third_party/skia/src/gpu/GrMemoryPool.cpp
 FILE: ../../../third_party/skia/src/gpu/GrMemoryPool.h
