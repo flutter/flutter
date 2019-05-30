@@ -5,25 +5,4 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-void main() => runApp( MaterialApp(
-  theme: ThemeData(
-    inputDecorationTheme: InputDecorationTheme(
-      focusColor: Colors.brown
-    ),
-    iconTheme: IconThemeData(
-      color: Colors.red,
-    )
-  ),
-  home: Scaffold(
-    body: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: <Widget>[
-        TextField(
-          decoration: InputDecoration(
-            icon: Icon(Icons.ac_unit),
-          ),
-        )
-      ],
-    )
-  )
-));
+ void main() => runApp(const Center(child: Text('Hello, world!', textDirection: TextDirection.ltr))); 
