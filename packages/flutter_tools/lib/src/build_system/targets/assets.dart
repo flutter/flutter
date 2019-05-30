@@ -33,8 +33,7 @@ List<File> listOutputAssets(Environment environment) {
   final List<File> results = <File>[];
   for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
     final File file = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', entry.key));
-    file.parent.createSync(recursive: true);
-    file.writeAsBytesSync(entry.value.contentsAsBytes());
+    results.add(file);
   }
   return results;
 }
@@ -52,6 +51,7 @@ Future<void> copyAssetsInvocation(List<FileSystemEntity> inputs, Environment env
   );
   for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
     final File file = fs.file(fs.path.join(output.path, entry.key));
+    // TODO(jonahwilliams): use copyFile method once that lands on master.
     file.parent.createSync(recursive: true);
     file.writeAsBytesSync(entry.value.contentsAsBytes());
   }
