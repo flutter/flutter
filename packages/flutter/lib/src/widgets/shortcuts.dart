@@ -14,31 +14,49 @@ import 'inherited_notifier.dart';
 
 /// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
 ///
+/// A key set represents the keys that are down simultaneously that represent a
+/// shortcut.
+///
 /// This is mainly used by [ShortcutManager] to allow definition of shortcut
 /// mappings.
-class LogicalKeySet {
+class LogicalKeySet extends Diagnosticable {
   /// A constructor for making a [LogicalKeySet] of up to four keys.
   ///
   /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
   ///
-  /// The `key1` parameter must not be null.
+  /// The `key1` parameter must not be null. The same [LogicalKeyboardKey] may
+  /// not be appear more than once in the set.
   LogicalKeySet(
     LogicalKeyboardKey key1, [
     LogicalKeyboardKey key2,
     LogicalKeyboardKey key3,
     LogicalKeyboardKey key4,
   ])  : assert(key1 != null),
-        _logicalSet = <LogicalKeyboardKey>{} {
-    _logicalSet.add(key1);
+        _keys = <LogicalKeyboardKey>{ key1 } {
+    int count = 1;
     if (key2 != null) {
-      _logicalSet.add(key2);
+      _keys.add(key2);
+      assert((){
+        count++;
+        return true;
+      }());
     }
     if (key3 != null) {
-      _logicalSet.add(key3);
+      _keys.add(key3);
+      assert((){
+        count++;
+        return true;
+      }());
     }
     if (key4 != null) {
-      _logicalSet.add(key4);
+      _keys.add(key4);
+      assert((){
+        count++;
+        return true;
+      }());
     }
+    assert(_keys.length == count,
+      'Two or more provided keys are identical. Each key can appear only once.');
   }
 
   /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
@@ -49,13 +67,13 @@ class LogicalKeySet {
   LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys)
       : assert(keys != null),
         assert(keys.isNotEmpty),
-        _logicalSet = keys;
+        _keys = keys;
 
-  final Set<LogicalKeyboardKey> _logicalSet;
+  final Set<LogicalKeyboardKey> _keys;
 
   /// Convert the [LogicalKeySet] to a set of [LogicalKeyboardKey]s and return a
   /// copy.
-  Set<LogicalKeyboardKey> toSet() => _logicalSet.toSet();
+  Set<LogicalKeyboardKey> toSet() => _keys.toSet();
 
   @override
   bool operator ==(Object other) {
@@ -63,20 +81,21 @@ class LogicalKeySet {
       return false;
     }
     final LogicalKeySet typedOther = other;
-    if (_logicalSet.length != typedOther._logicalSet.length) {
+    if (_keys.length != typedOther._keys.length) {
       return false;
     }
-    return _logicalSet.difference(typedOther._logicalSet).isEmpty;
+    return _keys.difference(typedOther._keys).isEmpty;
   }
 
   @override
   int get hashCode {
-    return hashList(_logicalSet);
+    return hashList(_keys);
   }
 
   @override
-  String toString() {
-    return '[$runtimeType $_logicalSet]';
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keys', _keys));
   }
 }
 
@@ -84,7 +103,7 @@ class LogicalKeySet {
 ///
 /// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
 /// the widget that you want to find a manager for.
-class ShortcutManager extends ChangeNotifier {
+class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   /// Constructs a [ShortcutManager].
   ///
   /// The [shortcuts] argument must not  be null.
@@ -99,7 +118,7 @@ class ShortcutManager extends ChangeNotifier {
   ///
   /// Setting [modal] to true is the equivalent of always handling any key given
   /// to it, even if that key doesn't appear in the [shortcuts] map.
-  bool modal;
+  final bool modal;
 
   /// Returns a copy of the shortcut map.
   ///
@@ -108,10 +127,11 @@ class ShortcutManager extends ChangeNotifier {
   ///
   /// When the map is changed, listeners to this manager will be notified.
   Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
-  Map<LogicalKeySet, Intent> _shortcuts;
+  final Map<LogicalKeySet, Intent> _shortcuts;
   set shortcuts(Map<LogicalKeySet, Intent> value) {
     if (value != _shortcuts) {
-      _shortcuts = value;
+      _shortcuts.clear();
+      _shortcuts.addAll(value);
       notifyListeners();
     }
   }
@@ -162,6 +182,13 @@ class ShortcutManager extends ChangeNotifier {
       return Actions.invoke(primaryContext, _shortcuts[keySet], nullOk: true);
     }
     return false;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', _shortcuts));
+    properties.add(FlagProperty('modal', value: modal, ifTrue: 'modal', defaultValue: false));
   }
 }
 

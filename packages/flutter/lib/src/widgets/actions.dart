@@ -89,22 +89,27 @@ abstract class Action extends Diagnosticable {
 }
 
 /// The signature of a callback accepted by [CallbackAction].
-typedef ActionCallback = void Function(FocusNode node, Intent tag);
+typedef OnInvokeCallback = void Function(FocusNode node, Intent tag);
 
 /// An [Action] that takes a callback in order to configure it without having to
 /// subclass it.
 class CallbackAction extends Action {
   /// A const constructor for an [Action].
   ///
-  /// The [intentKey] parameter must not be null.
-  const CallbackAction({LocalKey intentKey, @required this.onInvoke}) : super(intentKey);
+  /// The `intentKey` and [onInvoke] parameters must not be null.
+  /// The [onInvoke] parameter is required.
+  const CallbackAction(LocalKey intentKey, {@required this.onInvoke})
+      : assert(onInvoke != null),
+        super(intentKey);
 
   /// The callback to be called when invoked.
+  ///
+  /// Must not be null.
   @protected
-  final ActionCallback onInvoke;
+  final OnInvokeCallback onInvoke;
 
   @override
-  void invoke(FocusNode node, Intent tag) => onInvoke?.call(node, tag);
+  void invoke(FocusNode node, Intent tag) => onInvoke.call(node, tag);
 }
 
 /// An action manager that simply invokes the actions given to it.

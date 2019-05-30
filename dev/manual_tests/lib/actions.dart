@@ -117,7 +117,7 @@ class UndoableActionDispatcher extends ActionDispatcher {
 const LocalKey kUndoActionKey = ValueKey<String>('Undo');
 const Intent kUndoIntent = Intent(kUndoActionKey);
 final Action kUndoAction = CallbackAction(
-    intentKey: kUndoActionKey,
+    kUndoActionKey,
     onInvoke: (FocusNode node, Intent tag) {
       if (node?.context == null) {
         return;
@@ -129,7 +129,7 @@ final Action kUndoAction = CallbackAction(
 const LocalKey kRedoActionKey = ValueKey<String>('Redo');
 const Intent kRedoIntent = Intent(kRedoActionKey);
 final Action kRedoAction = CallbackAction(
-    intentKey: kRedoActionKey,
+    kRedoActionKey,
     onInvoke: (FocusNode node, Intent tag) {
       if (node?.context == null) {
         return;
