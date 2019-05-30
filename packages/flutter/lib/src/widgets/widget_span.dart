@@ -134,15 +134,6 @@ class WidgetSpan extends PlaceholderSpan {
     return null;
   }
 
-  /// Describe the difference between this widget span and another [InlineSpan],
-  /// in terms of how much damage it will make to the rendering. The comparison
-  /// is deep.
-  ///
-  /// Comparing a [WidgetSpan] with a [TextSpan] will result in [RenderComparison.layout].
-  ///
-  /// See also:
-  ///
-  ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
   @override
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))

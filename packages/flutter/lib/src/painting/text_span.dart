@@ -240,14 +240,6 @@ class TextSpan extends InlineSpan {
     return null;
   }
 
-  /// Flattens the [TextSpan] tree into a single string.
-  ///
-  /// Styles are not honored in this process. If `includeSemanticsLabels` is
-  /// true, then the text returned will include the [semanticsLabel]s instead of
-  /// the text contents when they are present for [TextSpan]s.
-  ///
-  /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
-  /// represented as a 0xFFFC 'object replacement character'.
   @override
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     assert(debugAssertIsValid());
@@ -278,12 +270,6 @@ class TextSpan extends InlineSpan {
     return null;
   }
 
-  /// Populates the [semanticsOffsets] and [semanticsElements] with the appropriate data
-  /// to be able to construct a [SemanticsNode].
-  ///
-  /// The beginning and end text offset are added to [semanticsOffsets].
-  ///
-  /// Any recognizers are added to [semanticsElements].
   @override
   void describeSemantics(Accumulator offset, List<int> semanticsOffsets, List<dynamic> semanticsElements) {
     if (recognizer != null && (recognizer is TapGestureRecognizer || recognizer is LongPressGestureRecognizer)) {
@@ -322,15 +308,6 @@ class TextSpan extends InlineSpan {
     return super.debugAssertIsValid();
   }
 
-  /// Describe the difference between this text span and another, in terms of
-  /// how much damage it will make to the rendering. The comparison is deep.
-  ///
-  /// Comparing [InlineSpan] objects of different types, for example, comparing
-  /// a [TextSpan] to a [WidgetSpan], always results in [RenderComparison.layout].
-  ///
-  /// See also:
-  ///
-  ///  * [TextStyle.compareTo], which does the same thing for [TextStyle]s.
   @override
   RenderComparison compareTo(InlineSpan other) {
     if (identical(this, other))
