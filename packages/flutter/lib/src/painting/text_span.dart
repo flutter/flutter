@@ -167,7 +167,7 @@ class TextSpan extends InlineSpan {
   /// {@end-tool}
   final GestureRecognizer recognizer;
 
-  /// An alternative semantics label for this TextSpan.
+  /// An alternative semantics label for this [TextSpan].
   ///
   /// If present, the semantics of this span will contain this value instead
   /// of the actual text.
@@ -244,7 +244,7 @@ class TextSpan extends InlineSpan {
   ///
   /// Styles are not honored in this process. If `includeSemanticsLabels` is
   /// true, then the text returned will include the [semanticsLabel]s instead of
-  /// the text contents when they are present.
+  /// the text contents when they are present for [TextSpan]s.
   ///
   /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.

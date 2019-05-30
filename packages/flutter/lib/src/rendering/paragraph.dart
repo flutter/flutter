@@ -121,12 +121,14 @@ class RenderParagraph extends RenderBox
         return;
       case RenderComparison.paint:
         _textPainter.text = value;
+        _extractPlaceholderSpans(value);
         markNeedsPaint();
         markNeedsSemanticsUpdate();
         break;
       case RenderComparison.layout:
         _textPainter.text = value;
         _overflowShader = null;
+        _extractPlaceholderSpans(value);
         markNeedsLayout();
         break;
     }

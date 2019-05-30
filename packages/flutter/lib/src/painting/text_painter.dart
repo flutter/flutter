@@ -23,6 +23,8 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 /// Placeholders specify an empty space in the text layout, which is used
 /// to later render arbitrary inline widgets into defined by a [WidgetSpan].
 ///
+/// The [size] and [alignment] properties are required and cannot be null.
+///
 /// See also:
 ///
 ///  * [WidgetSpan], a subclass of [InlineSpan] and [PlaceholderSpan] that
@@ -36,15 +38,25 @@ class PlaceholderDimensions {
     @required this.alignment,
     this.baseline,
     this.baselineOffset,
-  });
+  }) : assert(size != null),
+       assert(alignment != null);
 
   /// Width and height dimensions of the placeholder.
   final Size size;
 
   /// How to align the placeholder with the text.
+  ///
+  /// See also:
+  ///
+  ///  * [baseline] the baseline to align to when using
+  ///    [ui.PlaceholderAlignment.baseline],
+  ///    [ui.PlaceholderAlignment.aboveBaseline],
+  ///    or [ui.PlaceholderAlignment.underBaseline].
+  ///  * [baselineOffset] distance of the alphabetic baseline from the edge
+  ///    of the placeholder.
   final ui.PlaceholderAlignment alignment;
 
-  /// Distance of the alphabetic baseline from the upper edge of the placeholder.
+  /// Distance of the [baseline] from the upper edge of the placeholder.
   ///
   /// Only used when [alignment] is [ui.PlaceholderAlignment.baseline].
   final double baselineOffset;
