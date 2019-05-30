@@ -16,7 +16,7 @@ import 'text_style.dart';
 ///
 /// [PlaceholderSpan] represents a placeholder that acts as a stand-in for other
 /// content. A [PlaceholderSpan] by itself does not contain useful
-/// information to change a [TextSpan]. Instead, this class should be extended
+/// information to change a [TextSpan]. Instead, this class must be extended
 /// to define contents.
 ///
 /// [WidgetSpan] from the widgets library extends [PlaceholderSpan] and may be
