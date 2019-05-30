@@ -19,8 +19,8 @@ import 'print.dart';
 /// override [debugPrint] themselves and want to check that their own custom
 /// value wasn't overridden by a test.
 ///
-/// See [https://docs.flutter.io/flutter/foundation/foundation-library.html] for
-/// a complete list.
+/// See [the foundation library](foundation/foundation-library.html)
+/// for a complete list.
 bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
   assert(() {
     if (debugPrint != debugPrintOverride ||

@@ -10,7 +10,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: 0.15.8
-  intl_translation: 0.17.4
+  intl_translation: 0.17.5
   http: 0.12.0+2
   isolate: 2.0.2
 
@@ -62,4 +62,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
-# PUBSPEC CHECKSUM: 4fb6
+# PUBSPEC CHECKSUM: 63b7
