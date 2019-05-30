@@ -229,20 +229,19 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   SemanticsGestureConfiguration get semanticsConfiguration {
-    if (_semanticsConfiguration != null)
-      return _semanticsConfiguration;
-    final bool hasAnyHandler = onTapDown != null
-                            || onTapUp != null
-                            || onTap != null;
-    return _semanticsConfiguration = SemanticsGestureConfiguration(
-      onTap: hasAnyHandler ? () {
+    // This method must always return a non-null configuration with a non-null
+    // onTap, even when there are no handlers related to semantics, because the
+    // handler properties are mutable, and assigning properties will not notify
+    // RawGestureDetector to update its combined configuration.
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
+      onTap: () {
         if (onTapDown != null)
           onTapDown(TapDownDetails());
         if (onTapUp != null)
           onTapUp(TapUpDetails());
         if (onTap != null)
           onTap();
-      } : null,
+      },
     );
   }
   SemanticsGestureConfiguration _semanticsConfiguration;

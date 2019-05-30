@@ -425,14 +425,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
 
   @override
   SemanticsGestureConfiguration get semanticsConfiguration {
-    if (_semanticsConfiguration != null)
-      return _semanticsConfiguration;
-    final bool hasAnyHandler = onDown != null
-                            || onStart != null
-                            || onUpdate != null
-                            || onEnd != null;
-    return _semanticsConfiguration = SemanticsGestureConfiguration(
-      onVerticalDragUpdate: hasAnyHandler ? (DragUpdateDetails updateDetails) {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
+      onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
         if (onStart != null)
@@ -441,7 +435,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
           onUpdate(updateDetails);
         if (onEnd != null)
           onEnd(DragEndDetails(primaryVelocity: 0.0));
-      } : null,
+      },
     );
   }
   SemanticsGestureConfiguration _semanticsConfiguration;
@@ -487,14 +481,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
 
   @override
   SemanticsGestureConfiguration get semanticsConfiguration {
-    if (_semanticsConfiguration != null)
-      return _semanticsConfiguration;
-    final bool hasAnyHandler = onDown != null
-                            || onStart != null
-                            || onUpdate != null
-                            || onEnd != null;
-    return _semanticsConfiguration = SemanticsGestureConfiguration(
-      onHorizontalDragUpdate: hasAnyHandler ? (DragUpdateDetails updateDetails) {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
+      onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
         if (onStart != null)
@@ -503,7 +491,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
           onUpdate(updateDetails);
         if (onEnd != null)
           onEnd(DragEndDetails(primaryVelocity: 0.0));
-      } : null,
+      },
     );
   }
   SemanticsGestureConfiguration _semanticsConfiguration;
@@ -543,14 +531,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
 
   @override
   SemanticsGestureConfiguration get semanticsConfiguration {
-    if (_semanticsConfiguration != null)
-      return _semanticsConfiguration;
-    final bool hasAnyHandler = onDown != null
-                            || onStart != null
-                            || onUpdate != null
-                            || onEnd != null;
-    return _semanticsConfiguration = SemanticsGestureConfiguration(
-      onHorizontalDragUpdate: hasAnyHandler ? (DragUpdateDetails updateDetails) {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
+      onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
         if (onStart != null)
@@ -559,8 +541,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
           onUpdate(updateDetails);
         if (onEnd != null)
           onEnd(DragEndDetails());
-      } : null,
-      onVerticalDragUpdate: hasAnyHandler ? (DragUpdateDetails updateDetails) {
+      },
+      onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
         if (onStart != null)
@@ -569,7 +551,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
           onUpdate(updateDetails);
         if (onEnd != null)
           onEnd(DragEndDetails());
-      } : null,
+      },
     );
   }
   SemanticsGestureConfiguration _semanticsConfiguration;
