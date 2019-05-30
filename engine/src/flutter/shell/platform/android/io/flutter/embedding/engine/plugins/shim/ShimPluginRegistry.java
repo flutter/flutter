@@ -68,6 +68,7 @@ public class ShimPluginRegistry implements PluginRegistry {
   }
 
   @Override
+  @SuppressWarnings("unchecked")
   public <T> T valuePublishedByPlugin(String pluginKey) {
     return (T) pluginMap.get(pluginKey);
   }
