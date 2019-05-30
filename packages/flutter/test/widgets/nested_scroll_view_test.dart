@@ -247,6 +247,7 @@ void main() {
   testWidgets('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);
+    expect(find.text('aaa3'), findsNothing);
     expect(find.text('bbb1'), findsNothing);
     await tester.pump(const Duration(milliseconds: 250));
     expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
