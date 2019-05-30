@@ -119,6 +119,9 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
 
+  /// True if this Flutter module should use AndroidX dependencies.
+  ///
+  /// If false the deprecated Android Support library will be used.
   bool get usesAndroidX {
     return _flutterDescriptor['module']['androidX'] ?? false;
   }
