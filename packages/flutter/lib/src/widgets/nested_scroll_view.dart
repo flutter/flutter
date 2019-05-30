@@ -274,22 +274,12 @@ class NestedScrollView extends StatefulWidget {
   List<Widget> _buildSlivers(BuildContext context, ScrollController innerController, bool bodyIsScrolled) {
     final List<Widget> slivers = <Widget>[];
     slivers.addAll(headerSliverBuilder(context, bodyIsScrolled));
-    slivers.add(
-//       SliverFillRemaining(
-//       child: PrimaryScrollController(
-//         controller: innerController,
-//         child: body,
-//       ),
-      SliverFillViewport(
-      delegate: SliverChildBuilderDelegate(
-        (BuildContext context, int index) {
-          return PrimaryScrollController(
-            controller: innerController,
-            child: body,
-          );
-        },
-        childCount: 1,
+    slivers.add(SliverFillRemaining(
+      child: PrimaryScrollController(
+        controller: innerController,
+        child: body,
       ),
+      scrollBody: true,
     ));
     return slivers;
   }

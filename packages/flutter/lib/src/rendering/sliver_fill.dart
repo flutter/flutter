@@ -113,7 +113,17 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   /// the remaining space in the viewport.
   RenderSliverFillRemaining({
     RenderBox child,
-  }) : super(child: child);
+    this.scrollBody,
+  }) : assert(scrollBody != null),
+       super(child: child);
+
+  /// Whether the child has a scrollable body
+  ///
+  /// Defaults to false such that the child will fill the remainder of the
+  /// viewport, and not extend further.
+  /// Setting this value to true will allow for the child to extend beyond the
+  /// viewport and scroll, as seen in [NestedScrollView].
+  final bool scrollBody;
 
   @override
   void performLayout() {
@@ -124,7 +134,7 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
-      scrollExtent: constraints.viewportMainAxisExtent,
+      scrollExtent: scrollBody ? constraints.scrollOffset : constraints.viewportMainAxisExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
