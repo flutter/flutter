@@ -209,39 +209,36 @@ class TestPointer {
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  ///
-  /// [isDown] must be false, since hover events can't be sent when the pointer
-  /// is up.
   PointerAddedEvent addPointer({
     Duration timeStamp = Duration.zero,
+    Offset location,
   }) {
     assert(timeStamp != null);
+    _location = location ?? _location;
     return PointerAddedEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
+      position: _location,
     );
   }
 
-  /// Create a [PointerRemovedEvent] with the kind the pointer was created with.
+  /// Create a [PointerRemovedEvent] with the [PointerDeviceKind] the pointer
+  /// was created with.
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  ///
-  /// [isDown] must be false, since hover events can't be sent when the pointer
-  /// is up.
-  PointerRemovedEvent removePointer(Offset newLocation, {
+  PointerRemovedEvent removePointer({
     Duration timeStamp = Duration.zero,
+    Offset location,
   }) {
     assert(timeStamp != null);
-    final Offset delta = location != null ? newLocation - location : Offset.zero;
-    _location = newLocation;
+    _location = location ?? _location;
     return PointerRemovedEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
-      position: newLocation,
-      delta: delta,
+      position: _location,
     );
   }
 
@@ -378,14 +375,14 @@ class TestGesture {
   /// In a test, send a pointer add event for this pointer.
   Future<void> addPointer({ Duration timeStamp = Duration.zero }) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp), null);
+      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp, location: _pointer.location), null);
     });
   }
 
   /// In a test, send a pointer remove event for this pointer.
   Future<void> removePointer({ Duration timeStamp = Duration.zero}) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.removePointer(_pointer.location, timeStamp: timeStamp), null);
+      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: _pointer.location), null);
     });
   }
 

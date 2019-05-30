@@ -292,15 +292,17 @@ void main() {
       tracker.collectMousePositions();
       expect(enter.length, equals(1), reason: 'enter contains $enter');
       expect(enter.first.position, equals(const Offset(1.0, 101.0)));
+      expect(enter.first.delta, equals(const Offset(1.0, 101.0)));
       expect(enter.first.device, equals(0));
       expect(enter.first.runtimeType, equals(PointerEnterEvent));
       expect(move.length, equals(1), reason: 'move contains $move');
       expect(move.first.position, equals(const Offset(1.0, 101.0)));
+      expect(move.first.delta, equals(const Offset(1.0, 101.0)));
       expect(move.first.device, equals(0));
       expect(move.first.runtimeType, equals(PointerHoverEvent));
       expect(exit.length, equals(1), reason: 'exit contains $exit');
       expect(exit.first.position, equals(const Offset(1.0, 201.0)));
-      expect(exit.first.delta, equals(const Offset(0.0, 100.0)));
+      expect(exit.first.delta, equals(const Offset(0.0, 0.0)));
       expect(exit.first.device, equals(0));
       expect(exit.first.runtimeType, equals(PointerExitEvent));
     });
