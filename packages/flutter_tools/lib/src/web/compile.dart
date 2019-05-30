@@ -17,7 +17,11 @@ import '../globals.dart';
 /// The [WebCompiler] instance.
 WebCompiler get webCompiler => context.get<WebCompiler>();
 
-/// A wrapper around dart2js for web compilation.
+/// The [WebCompilationProxy] instance.
+WebCompilationProxy get webCompilationProxy =>
+    context.get<WebCompilationProxy>();
+
+/// A wrapper around dart tools for web compilation.
 class WebCompiler {
   const WebCompiler();
 
@@ -25,11 +29,19 @@ class WebCompiler {
   ///
   /// `minify` controls whether minifaction of the source is enabled. Defaults to `true`.
   /// `enabledAssertions` controls whether assertions are enabled. Defaults to `false`.
-  Future<int> compile({@required String target, bool minify = true, bool enabledAssertions = false}) async {
-    final String engineDartPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
-    final String dart2jsPath = artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
-    final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-    final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
+  Future<int> compileDart2js({
+    @required String target,
+    bool minify = true,
+    bool enabledAssertions = false,
+  }) async {
+    final String engineDartPath =
+        artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String dart2jsPath =
+        artifacts.getArtifactPath(Artifact.dart2jsSnapshot);
+    final String flutterWebSdkPath =
+        artifacts.getArtifactPath(Artifact.flutterWebSdk);
+    final String librariesPath =
+        fs.path.join(flutterWebSdkPath, 'libraries.json');
     final Directory outputDir = fs.directory(getWebBuildDirectory());
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
@@ -38,6 +50,7 @@ class WebCompiler {
     if (!processManager.canRun(engineDartPath)) {
       throwToolExit('Unable to find Dart binary at $engineDartPath');
     }
+
     /// Compile Dart to JavaScript.
     final List<String> command = <String>[
       engineDartPath,
@@ -55,16 +68,35 @@ class WebCompiler {
     }
     printTrace(command.join(' '));
     final Process result = await processManager.start(command);
-    result
-        .stdout
+    result.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(printStatus);
-    result
-        .stderr
+    result.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(printError);
     return result.exitCode;
+  }
+}
+
+/// An indirection on web compilation.
+///
+/// Avoids issues with syncing build_runner_core to other repos.
+class WebCompilationProxy {
+  const WebCompilationProxy();
+
+  /// Initialize the web compiler output to `outputDirectory` from a project spawned at
+  /// `projectDirectory`.
+  Future<void> initialize({
+    @required Directory projectDirectory,
+    @required String target,
+  }) async {
+    throw UnimplementedError();
+  }
+
+  /// Invalidate the source files in `inputs` and recompile them to JavaScript.
+  Future<void> invalidate({@required List<Uri> inputs}) async {
+    throw UnimplementedError();
   }
 }

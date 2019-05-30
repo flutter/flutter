@@ -38,7 +38,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    '-project', flutterProject.macos.xcodeProjectFile.path,
+    '-workspace', flutterProject.macos.xcodeWorkspace.path,
     '-configuration', '$config',
     '-scheme', 'Runner',
     '-derivedDataPath', flutterBuildDir.absolute.path,

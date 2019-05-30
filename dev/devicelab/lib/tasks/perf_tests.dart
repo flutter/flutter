@@ -494,7 +494,7 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
-  /// To change the behaviour of the test, override this.
+  /// To change the behavior of the test, override this.
   ///
   /// Make sure to call recordStart() and recordEnd() once each in that order.
   ///
