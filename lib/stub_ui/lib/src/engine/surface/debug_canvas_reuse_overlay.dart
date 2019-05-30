@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of ui;
+part of engine;
 
 html.HtmlElement _createContainer() {
   final html.HtmlElement container = html.DivElement();
@@ -75,7 +75,7 @@ class DebugCanvasReuseOverlay {
     if (_instance == null) {
       // Only call the constructor when assertions are enabled to guard against
       // mistakingly including this class in a release build.
-      if (engine.assertionsEnabled) {
+      if (assertionsEnabled) {
         _instance = DebugCanvasReuseOverlay._();
       }
     }

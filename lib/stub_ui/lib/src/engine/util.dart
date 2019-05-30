@@ -205,3 +205,28 @@ bool rectContainsOther(ui.Rect rect, ui.Rect other) {
       rect.right >= other.right &&
       rect.bottom >= other.bottom;
 }
+
+/// Counter used for generating clip path id inside an svg <defs> tag.
+int _clipIdCounter = 0;
+
+/// Converts Path to svg element that contains a clip-path definition.
+///
+/// Calling this method updates [_clipIdCounter]. The HTML id of the generated
+/// clip is set to "svgClip${_clipIdCounter}", e.g. "svgClip123".
+String _pathToSvgClipPath(ui.Path path,
+    {double offsetX = 0, double offsetY = 0}) {
+  _clipIdCounter += 1;
+  ui.Rect bounds = path.getBounds();
+  StringBuffer sb = new StringBuffer();
+  sb.write('<svg width="${bounds.right}" height="${bounds.bottom}" '
+      'style="position:absolute">');
+  sb.write('<defs>');
+
+  String clipId = 'svgClip$_clipIdCounter';
+  sb.write('<clipPath id=${clipId}>');
+
+  sb.write('<path fill="#FFFFFF" d="');
+  pathToSvg(path, sb, offsetX: offsetX, offsetY: offsetY);
+  sb.write('"></path></clipPath></defs></svg');
+  return sb.toString();
+}

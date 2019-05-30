@@ -1,6 +1,6 @@
 // Copyright 2013 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
+// found in the LICENSE file.ile.
 
 part of engine;
 
@@ -225,4 +225,51 @@ mixin SaveStackTracking on EngineCanvas {
     _clipStack ??= [];
     _clipStack.add(new _SaveClipEntry.path(path, _currentTransform.clone()));
   }
+}
+
+html.Element _drawParagraphElement(
+  ui.Paragraph paragraph,
+  ui.Offset offset, {
+  Matrix4 transform,
+}) {
+  assert(paragraph.webOnlyIsLaidOut);
+
+  html.Element paragraphElement =
+      paragraph.webOnlyGetParagraphElement().clone(true);
+
+  final html.CssStyleDeclaration paragraphStyle = paragraphElement.style;
+  paragraphStyle
+    ..position = 'absolute'
+    ..whiteSpace = 'pre-wrap'
+    ..overflowWrap = 'break-word'
+    ..overflowY = 'hidden'
+    ..width = '${paragraph.width}px';
+
+  if (transform != null) {
+    paragraphStyle
+      ..transformOrigin = '0 0 0'
+      ..transform =
+          matrix4ToCssTransform(transformWithOffset(transform, offset));
+  }
+
+  final ParagraphGeometricStyle style =
+      paragraph.webOnlyGetParagraphGeometricStyle();
+
+  // TODO(flutter_web): https://github.com/flutter/flutter/issues/33223
+  if (style.ellipsis != null &&
+      (style.maxLines == null || style.maxLines == 1)) {
+    paragraphStyle
+      ..height = '${paragraph.webOnlyMaxLinesHeight}px'
+      ..whiteSpace = 'pre'
+      ..overflowX = 'hidden'
+      ..textOverflow = 'ellipsis';
+  } else if (paragraph.didExceedMaxLines) {
+    paragraphStyle.height = '${paragraph.webOnlyMaxLinesHeight}px';
+  } else {
+    final double height = style.maxLines != null
+        ? paragraph.webOnlyMaxLinesHeight
+        : paragraph.height;
+    paragraphStyle.height = '${height}px';
+  }
+  return paragraphElement;
 }

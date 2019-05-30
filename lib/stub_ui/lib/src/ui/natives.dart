@@ -28,3 +28,4 @@ List<int> saveCompilationTrace() {
 // here. We don't use [Endian.Host] because it's not a compile-time
 // constant and can't propagate into the set/get calls.
 const Endian _kFakeHostEndian = Endian.little;
+

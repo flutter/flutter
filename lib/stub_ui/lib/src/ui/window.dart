@@ -4,9 +4,6 @@
 
 part of ui;
 
-/// When set to true, all platform messages will be printed to the console.
-const _debugPrintPlatformMessages = false;
-
 /// Signature of callbacks that have no arguments and return no data.
 typedef VoidCallback = void Function();
 
@@ -126,7 +123,9 @@ class WindowPadding {
       const WindowPadding._(left: 0.0, top: 0.0, right: 0.0, bottom: 0.0);
 
   @override
-  String toString() => 'WindowPadding';
+  String toString() {
+    return 'WindowPadding(left: $left, top: $top, right: $right, bottom: $bottom)';
+  }
 }
 
 /// An identifier used to select a user's language and formatting preferences.
@@ -482,39 +481,15 @@ class Locale {
     return out.toString();
   }
 
-  String toLanguageTag() {
-    throw UnimplementedError();
-  }
+  // TODO(yjbanov): implement to match flutter native.
+  String toLanguageTag() => '_';
 }
 
 /// The most basic interface to the host operating system's user interface.
 ///
 /// There is a single Window instance in the system, which you can
 /// obtain from the [window] property.
-class Window {
-  Window._();
-
-  /// Handles the browser history integration to allow users to use the back
-  /// button, etc.
-  final engine.BrowserHistory _browserHistory = engine.BrowserHistory();
-
-  /// Simulates clicking the browser's back button.
-  Future<void> webOnlyBack() => _browserHistory.back();
-
-  /// Change the strategy to use for handling browser history location.
-  /// Setting this member will automatically update [_browserHistory].
-  ///
-  /// By setting this to null, the browser history will be disabled.
-  set webOnlyLocationStrategy(LocationStrategy strategy) {
-    _browserHistory.locationStrategy = strategy;
-  }
-
-  /// This setter is used by [WebNavigatorObserver] to update the url to
-  /// reflect the [Navigator]'s current route name.
-  set webOnlyRouteName(String routeName) {
-    _browserHistory.setRouteName(routeName);
-  }
-
+abstract class Window {
   /// The number of device pixels for each logical pixel. This number might not
   /// be a power of two. Indeed, it might not even be an integer. For example,
   /// the Nexus 6 has a device pixel ratio of 3.5.
@@ -538,12 +513,7 @@ class Window {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  double get devicePixelRatio => _devicePixelRatio;
-  double _devicePixelRatio = 1.0;
-  // TODO(yjbanov): Remove setter usage from engine.
-  set devicePixelRatio(double value) {
-    _devicePixelRatio = value;
-  }
+  double get devicePixelRatio;
 
   /// The dimensions of the rectangle into which the application will be drawn,
   /// in physical pixels.
@@ -562,43 +532,7 @@ class Window {
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
   ///    observe when this value changes.
-  Size get physicalSize {
-    bool override = false;
-
-    assert(() {
-      if (webOnlyDebugPhysicalSizeOverride != null) {
-        _physicalSize = webOnlyDebugPhysicalSizeOverride;
-        override = true;
-      }
-      return true;
-    }());
-
-    if (!override) {
-      final int windowInnerWidth = html.window.innerWidth;
-      final int windowInnerHeight = html.window.innerHeight;
-      if (windowInnerWidth != _lastKnownWindowInnerWidth ||
-          windowInnerHeight != _lastKnownWindowInnerHeight) {
-        _lastKnownWindowInnerWidth = windowInnerWidth;
-        _lastKnownWindowInnerHeight = windowInnerHeight;
-        _physicalSize = Size(
-          windowInnerWidth.toDouble(),
-          windowInnerHeight.toDouble(),
-        );
-      }
-    }
-
-    return _physicalSize;
-  }
-
-  Size _physicalSize = Size.zero;
-  int _lastKnownWindowInnerWidth = -1;
-  int _lastKnownWindowInnerHeight = -1;
-
-  /// Overrides the value of [physicalSize] in tests.
-  // TODO(flutter_web): Move this into a Web-specific implementation of Window.
-  Size webOnlyDebugPhysicalSizeOverride;
-
-  String get initialLifecycleState => 'AppLifecycleState.resumed';
+  Size get physicalSize;
 
   /// The number of physical pixels on each side of the display rectangle into
   /// which the application can render, but over which the operating system
@@ -632,10 +566,6 @@ class Window {
   ///  * [Scaffold], which automatically applies the padding in material design
   ///    applications.
   WindowPadding get padding => WindowPadding.zero;
-
-  void setIsolateDebugName(String name) {
-    throw UnimplementedError();
-  }
 
   /// The system-reported text scale.
   ///
@@ -875,7 +805,7 @@ class Window {
   ///  * [Navigator], a widget that handles routing.
   ///  * [SystemChannels.navigation], which handles subsequent navigation
   ///    requests from the embedder.
-  String get defaultRouteName => _browserHistory.currentPath;
+  String get defaultRouteName;
 
   /// Whether the user has requested that [updateSemantics] be called when
   /// the semantic contents of window changes.
@@ -953,18 +883,6 @@ class Window {
     engine.EngineSemanticsOwner.instance.updateSemantics(update);
   }
 
-  /// In Flutter, platform messages are exchanged between threads so the
-  /// messages and responses have to be exchanged asynchronously. We simulate
-  /// that by adding a zero-length delay to the reply.
-  _replyToPlatformMessage(
-    PlatformMessageResponseCallback callback,
-    ByteData data,
-  ) {
-    Future<void>.delayed(Duration.zero).then((_) {
-      callback(data);
-    });
-  }
-
   /// Sends a message to a platform-specific plugin.
   ///
   /// The `name` parameter determines which plugin receives the message. The
@@ -978,72 +896,7 @@ class Window {
     String name,
     ByteData data,
     PlatformMessageResponseCallback callback,
-  ) {
-    if (_debugPrintPlatformMessages) {
-      print('Sent platform message on channel: "$name"');
-    }
-    switch (name) {
-      case 'flutter/assets':
-        assert(webOnlyAssetManager != null);
-        String url = utf8.decode(data.buffer.asUint8List());
-        webOnlyAssetManager.load(url).then((assetData) {
-          _replyToPlatformMessage(callback, assetData);
-        }, onError: (e) {
-          html.window.console.warn('Error while trying to load an asset: $e');
-          _replyToPlatformMessage(callback, null);
-        });
-        return;
-
-      case 'flutter/platform':
-        engine.MethodCodec codec = const engine.JSONMethodCodec();
-        engine.MethodCall decoded = codec.decodeMethodCall(data);
-        switch (decoded.method) {
-          case 'SystemNavigator.pop':
-            _browserHistory.exit().then((_) {
-              _replyToPlatformMessage(
-                  callback, codec.encodeSuccessEnvelope(true));
-            });
-            return;
-          case 'HapticFeedback.vibrate':
-            String type = decoded.arguments;
-            engine.domRenderer.vibrate(_getHapticFeedbackDuration(type));
-            return;
-          case 'SystemChrome.setApplicationSwitcherDescription':
-            Map<String, dynamic> arguments = decoded.arguments;
-            engine.domRenderer.setTitle(arguments['label']);
-            engine.domRenderer.setThemeColor(Color(arguments['primaryColor']));
-        }
-        break;
-
-      case 'flutter/textinput':
-        engine.textEditing.handleTextInput(data);
-        break;
-    }
-
-    // TODO(flutter_web): Some Flutter widgets send platform messages that we
-    // don't handle on web. So for now, let's just ignore them. In the future,
-    // we should consider uncommenting the following "callback(null)" line.
-
-    // Passing [null] to [callback] indicates that the platform message isn't
-    // implemented. Look at [MethodChannel.invokeMethod] to see how [null] is
-    // handled.
-    // callback(null);
-  }
-
-  int _getHapticFeedbackDuration(String type) {
-    switch (type) {
-      case 'HapticFeedbackType.lightImpact':
-        return engine.DomRenderer.vibrateLightImpact;
-      case 'HapticFeedbackType.mediumImpact':
-        return engine.DomRenderer.vibrateMediumImpact;
-      case 'HapticFeedbackType.heavyImpact':
-        return engine.DomRenderer.vibrateHeavyImpact;
-      case 'HapticFeedbackType.selectionClick':
-        return engine.DomRenderer.vibrateSelectionClick;
-      default:
-        return engine.DomRenderer.vibrateLongPress;
-    }
-  }
+  );
 
   /// Additional accessibility features that may be enabled by the platform.
   AccessibilityFeatures get accessibilityFeatures => _accessibilityFeatures;
@@ -1081,18 +934,16 @@ class Window {
     }
   }
 
-  static engine.BitmapCanvas _previousCanvas;
-  static void _submitScene(engine.BitmapCanvas canvas) {
-    if (canvas == _previousCanvas) return;
-    if (_previousCanvas != null) {
-      _previousCanvas.rootElement.remove();
-    }
-    _previousCanvas = canvas;
-    engine.domRenderer
-        .append(engine.domRenderer.rootElement, canvas.rootElement);
-  }
+  final _rasterizer = engine.Rasterizer(engine.Surface(
+      (engine.BitmapCanvas canvas) =>
+          engine.domRenderer.renderScene(canvas.rootElement)));
 
-  final _rasterizer = engine.Rasterizer(engine.Surface(_submitScene));
+  String get initialLifecycleState {
+    return _initialLifecycleState;
+  }
+  String _initialLifecycleState;
+
+  void setIsolateDebugName(String name) {}
 }
 
 /// Additional accessibility features that may be enabled by the platform.
@@ -1202,7 +1053,7 @@ class ImageShader {
 }
 
 class IsolateNameServer {
- static SendPort lookupPortByName(String name) {
+ static dynamic lookupPortByName(String name) {
     assert(name != null, "'name' cannot be null.");
     throw UnimplementedError();
   }
@@ -1220,7 +1071,7 @@ class IsolateNameServer {
   /// name, as there is an inherent race condition in doing so.
   ///
   /// The `port` and `name` arguments must not be null.
-  static bool registerPortWithName(SendPort port, String name) {
+  static bool registerPortWithName(dynamic port, String name) {
     assert(port != null, "'port' cannot be null.");
     assert(name != null, "'name' cannot be null.");
     throw UnimplementedError();
@@ -1243,9 +1094,7 @@ class IsolateNameServer {
   }
 }
 
-//
-
 /// The [Window] singleton. This object exposes the size of the display, the
 /// core scheduler API, the input event callback, the graphics drawing API, and
 /// other such core services.
-final Window window = new Window._();
+Window get window => engine.window;

@@ -110,145 +110,6 @@ class FontWeight {
   }
 }
 
-/// A feature tag and value that affect the selection of glyphs in a font.
-class FontFeature {
-  /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
-  /// change how the engine selects glyphs when rendering text.
-  ///
-  /// `feature` is the four-character tag that identifies the feature.
-  /// These tags are specified by font formats such as OpenType.
-  ///
-  /// `value` is the value that the feature will be set to.  The behavior
-  /// of the value depends on the specific feature.  Many features are
-  /// flags whose value can be 1 (when enabled) or 0 (when disabled).
-  ///
-  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
-  const FontFeature(this.feature, [ this.value = 1 ]) : assert(feature != null), assert(feature.length == 4), assert(value != null), assert(value >= 0);
-
-  /// Create a [FontFeature] object that enables the feature with the given tag.
-  const FontFeature.enable(String feature) : this(feature, 1);
-
-  /// Create a [FontFeature] object that disables the feature with the given tag.
-  const FontFeature.disable(String feature) : this(feature, 0);
-
-  /// Randomize the alternate forms used in text.
-  ///
-  /// For example, this can be used with suitably-prepared handwriting fonts to
-  /// vary the forms used for each character, so that, for instance, the word
-  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
-  /// and three different "s"s.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
-  const FontFeature.randomize() : feature = 'rand', value = 1;
-
-  /// Select a stylistic set.
-  ///
-  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
-  factory FontFeature.stylisticSet(int value) {
-    assert(value >= 1);
-    assert(value <= 20);
-    return FontFeature('ss${value.toString().padLeft(2, "0")}');
-  }
-
-  /// Use the slashed zero.
-  ///
-  /// Some fonts contain both a circular zero and a zero with a slash. This
-  /// enables the use of the latter form.
-  ///
-  /// This is overridden by [FontFeature.oldstyleFigures].
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
-  const FontFeature.slashedZero() : feature = 'zero', value = 1;
-
-  /// Use oldstyle figures.
-  ///
-  /// Some fonts have variants of the figures (e.g. the digit 9) that, when
-  /// this feature is enabled, render with descenders under the baseline instead
-  /// of being entirely above the baseline.
-  ///
-  /// This overrides [FontFeature.slashedZero].
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#onum>
-  const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
-
-  /// Use proportional (varying width) figures.
-  ///
-  /// For fonts that have both proportional and tabular (monospace) figures,
-  /// this enables the proportional figures.
-  ///
-  /// This is mutually exclusive with [FontFeature.tabularFigures].
-  ///
-  /// The default behavior varies from font to font.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
-  const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
-
-  /// Use tabular (monospace) figures.
-  ///
-  /// For fonts that have both proportional (varying width) and tabular figures,
-  /// this enables the tabular figures.
-  ///
-  /// This is mutually exclusive with [FontFeature.proportionalFigures].
-  ///
-  /// The default behavior varies from font to font.
-  ///
-  /// See also:
-  ///
-  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
-  const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
-
-  /// The tag that identifies the effect of this feature.  Must consist of 4
-  /// ASCII characters (typically lowercase letters).
-  ///
-  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
-  final String feature;
-
-  /// The value assigned to this feature.
-  ///
-  /// Must be a positive integer.  Many features are Boolean values that accept
-  /// values of either 0 (feature is disabled) or 1 (feature is enabled).
-  final int value;
-
-  static const int _kEncodedSize = 8;
-
-  void _encode(ByteData byteData) {
-    assert(feature.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
-    for (int i = 0; i < 4; i++) {
-      byteData.setUint8(i, feature.codeUnitAt(i));
-    }
-    byteData.setInt32(4, value, _kFakeHostEndian);
-  }
-
-  @override
-  bool operator ==(dynamic other) {
-    if (identical(this, other))
-      return true;
-    if (other.runtimeType != runtimeType)
-      return false;
-    final FontFeature typedOther = other;
-    return feature == typedOther.feature
-           && value == typedOther.value;
-  }
-
-  @override
-  int get hashCode => hashValues(feature, value);
-
-  @override
-  String toString() => 'FontFeature($feature, $value)';
-}
-
 /// Whether and how to align text horizontally.
 // The order of this enum must match the order of the values in RenderStyleConstants.h's ETextAlign.
 enum TextAlign {
@@ -335,7 +196,9 @@ class TextDecoration {
   /// Creates a decoration that paints the union of all the given decorations.
   factory TextDecoration.combine(List<TextDecoration> decorations) {
     int mask = 0;
-    for (TextDecoration decoration in decorations) mask |= decoration._mask;
+    for (TextDecoration decoration in decorations) {
+      mask |= decoration._mask;
+    }
     return new TextDecoration._(mask);
   }
 
@@ -590,6 +453,145 @@ class TextStyle {
       return super.toString();
     }
   }
+}
+
+/// A feature tag and value that affect the selection of glyphs in a font.
+class FontFeature {
+  /// Creates a [FontFeature] object, which can be added to a [TextStyle] to
+  /// change how the engine selects glyphs when rendering text.
+  ///
+  /// `feature` is the four-character tag that identifies the feature.
+  /// These tags are specified by font formats such as OpenType.
+  ///
+  /// `value` is the value that the feature will be set to.  The behavior
+  /// of the value depends on the specific feature.  Many features are
+  /// flags whose value can be 1 (when enabled) or 0 (when disabled).
+  ///
+  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
+  const FontFeature(this.feature, [ this.value = 1 ]) : assert(feature != null), assert(feature.length == 4), assert(value != null), assert(value >= 0);
+
+  /// Create a [FontFeature] object that enables the feature with the given tag.
+  const FontFeature.enable(String feature) : this(feature, 1);
+
+  /// Create a [FontFeature] object that disables the feature with the given tag.
+  const FontFeature.disable(String feature) : this(feature, 0);
+
+  /// Randomize the alternate forms used in text.
+  ///
+  /// For example, this can be used with suitably-prepared handwriting fonts to
+  /// vary the forms used for each character, so that, for instance, the word
+  /// "cross-section" would be rendered with two different "c"s, two different "o"s,
+  /// and three different "s"s.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#rand>
+  const FontFeature.randomize() : feature = 'rand', value = 1;
+
+  /// Select a stylistic set.
+  ///
+  /// Fonts may have up to 20 stylistic sets, numbered 1 through 20.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#ssxx>
+  factory FontFeature.stylisticSet(int value) {
+    assert(value >= 1);
+    assert(value <= 20);
+    return FontFeature('ss${value.toString().padLeft(2, "0")}');
+  }
+
+  /// Use the slashed zero.
+  ///
+  /// Some fonts contain both a circular zero and a zero with a slash. This
+  /// enables the use of the latter form.
+  ///
+  /// This is overridden by [FontFeature.oldstyleFigures].
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_uz#zero>
+  const FontFeature.slashedZero() : feature = 'zero', value = 1;
+
+  /// Use oldstyle figures.
+  ///
+  /// Some fonts have variants of the figures (e.g. the digit 9) that, when
+  /// this feature is enabled, render with descenders under the baseline instead
+  /// of being entirely above the baseline.
+  ///
+  /// This overrides [FontFeature.slashedZero].
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_ko#onum>
+  const FontFeature.oldstyleFigures() : feature = 'onum', value = 1;
+
+  /// Use proportional (varying width) figures.
+  ///
+  /// For fonts that have both proportional and tabular (monospace) figures,
+  /// this enables the proportional figures.
+  ///
+  /// This is mutually exclusive with [FontFeature.tabularFigures].
+  ///
+  /// The default behavior varies from font to font.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#pnum>
+  const FontFeature.proportionalFigures() : feature = 'pnum', value = 1;
+
+  /// Use tabular (monospace) figures.
+  ///
+  /// For fonts that have both proportional (varying width) and tabular figures,
+  /// this enables the tabular figures.
+  ///
+  /// This is mutually exclusive with [FontFeature.proportionalFigures].
+  ///
+  /// The default behavior varies from font to font.
+  ///
+  /// See also:
+  ///
+  ///  * <https://docs.microsoft.com/en-us/typography/opentype/spec/features_pt#tnum>
+  const FontFeature.tabularFigures() : feature = 'tnum', value = 1;
+
+  /// The tag that identifies the effect of this feature.  Must consist of 4
+  /// ASCII characters (typically lowercase letters).
+  ///
+  /// See <https://docs.microsoft.com/en-us/typography/opentype/spec/featuretags>
+  final String feature;
+
+  /// The value assigned to this feature.
+  ///
+  /// Must be a positive integer.  Many features are Boolean values that accept
+  /// values of either 0 (feature is disabled) or 1 (feature is enabled).
+  final int value;
+
+  static const int _kEncodedSize = 8;
+
+  void _encode(ByteData byteData) {
+    assert(feature.codeUnits.every((int c) => c >= 0x20 && c <= 0x7F));
+    for (int i = 0; i < 4; i++) {
+      byteData.setUint8(i, feature.codeUnitAt(i));
+    }
+    byteData.setInt32(4, value, _kFakeHostEndian);
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other))
+      return true;
+    if (other.runtimeType != runtimeType)
+      return false;
+    final FontFeature typedOther = other;
+    return feature == typedOther.feature
+           && value == typedOther.value;
+  }
+
+  @override
+  int get hashCode => hashValues(feature, value);
+
+  @override
+  String toString() => 'FontFeature($feature, $value)';
 }
 
 /// An opaque object that determines the configuration used by
@@ -1229,16 +1231,6 @@ enum BoxHeightStyle {
   ///
   /// {@macro flutter.dart:ui.boxHeightStyle.includeLineSpacing}
   includeLineSpacingBottom,
-
-  /// Calculate box heights based on the metrics of this paragraph's [StrutStyle].
-  ///
-  /// Boxes based on the strut will have consistent heights throughout the
-  /// entire paragraph.  The top edge of each line will align with the bottom
-  /// edge of the previous line.  It is possible for glyphs to extend outside
-  /// these boxes.
-  ///
-  /// Will fall back to tight bounds if the strut is disabled or invalid.
-  strut,
 }
 
 /// Defines various ways to horizontally bound the boxes returned by
@@ -1303,48 +1295,63 @@ class Paragraph {
   /// of painting should be considered deprecated.
   html.HtmlElement webOnlyGetParagraphElement() => _paragraphElement;
 
+  /// The instance of [TextMeasurementService] to be used to measure this
+  /// paragraph.
+  engine.TextMeasurementService get _measurementService =>
+      engine.TextMeasurementService.forParagraph(this);
+
+  /// The measurement result of the last layout operation.
+  engine.MeasurementResult _measurementResult;
+
   /// The amount of horizontal space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  double get width => _width;
-  double _width = 0.0;
+  double get width => _measurementResult?.width ?? -1;
 
   /// The amount of vertical space this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  double get height => _height;
-  double _height = 0.0;
+  double get height => _measurementResult?.height ?? 0;
 
   /// The amount of vertical space one line of this paragraph occupies.
   ///
   /// Valid only after [layout] has been called.
-  double _lineHeight = 0.0;
+  double get _lineHeight => _measurementResult?.lineHeight ?? 0;
 
-  double get longestLine => 0.0;
+  /// The distance from the left edge of the leftmost glyph to the right edge of
+  /// the rightmost glyph in the paragraph.
+  ///
+  /// Valid only after [layout] has been called.
+  double get longestLine => 0;
 
+  /// {@template dart.ui.paragraph.minIntrinsicWidth}
   /// The minimum width that this paragraph could be without failing to paint
   /// its contents within itself.
+  /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double get minIntrinsicWidth => _minIntrinsicWidth;
-  double _minIntrinsicWidth = 0.0;
+  double get minIntrinsicWidth => _measurementResult?.minIntrinsicWidth ?? 0;
 
+  /// {@template dart.ui.paragraph.maxIntrinsicWidth}
   /// Returns the smallest width beyond which increasing the width never
   /// decreases the height.
+  /// {@endtemplate}
   ///
   /// Valid only after [layout] has been called.
-  double get maxIntrinsicWidth => _maxIntrinsicWidth;
-  double _maxIntrinsicWidth = 0.0;
+  double get maxIntrinsicWidth => _measurementResult?.maxIntrinsicWidth ?? 0;
 
+  /// {@template dart.ui.paragraph.alphabeticBaseline}
   /// The distance from the top of the paragraph to the alphabetic
   /// baseline of the first line, in logical pixels.
-  double get alphabeticBaseline => _alphabeticBaseline;
-  double _alphabeticBaseline = 0.0;
+  /// {@endtemplate}
+  double get alphabeticBaseline => _measurementResult?.alphabeticBaseline ?? -1;
 
+  /// {@template dart.ui.paragraph.ideographicBaseline}
   /// The distance from the top of the paragraph to the ideographic
   /// baseline of the first line, in logical pixels.
-  double get ideographicBaseline => _ideographicBaseline;
-  double _ideographicBaseline = 0.0;
+  /// {@endtemplate}
+  double get ideographicBaseline =>
+      _measurementResult?.ideographicBaseline ?? -1;
 
   /// True if there is more vertical content, but the text was truncated, either
   /// because we reached `maxLines` lines of text or because the `maxLines` was
@@ -1370,11 +1377,11 @@ class Paragraph {
       return;
     }
 
-    engine.TextMeasurementService.instance.measure(this, constraints);
+    _measurementResult = _measurementService.measure(this, constraints);
     _lastUsedConstraints = constraints;
 
     if (_paragraphGeometricStyle.maxLines != null) {
-      _didExceedMaxLines = webOnlyMaxLinesHeight < _height;
+      _didExceedMaxLines = webOnlyMaxLinesHeight < height;
     } else {
       _didExceedMaxLines = false;
     }
@@ -1382,19 +1389,19 @@ class Paragraph {
     if (_webOnlyIsSingleLine && constraints != null) {
       switch (_textAlign) {
         case TextAlign.center:
-          webOnlyAlignOffset = (constraints.width - _maxIntrinsicWidth) / 2.0;
+          webOnlyAlignOffset = (constraints.width - maxIntrinsicWidth) / 2.0;
           break;
         case TextAlign.right:
-          webOnlyAlignOffset = constraints.width - _maxIntrinsicWidth;
+          webOnlyAlignOffset = constraints.width - maxIntrinsicWidth;
           break;
         case TextAlign.start:
           webOnlyAlignOffset = _textDirection == TextDirection.rtl
-              ? constraints.width - _maxIntrinsicWidth
+              ? constraints.width - maxIntrinsicWidth
               : 0.0;
           break;
         case TextAlign.end:
           webOnlyAlignOffset = _textDirection == TextDirection.ltr
-              ? constraints.width - _maxIntrinsicWidth
+              ? constraints.width - maxIntrinsicWidth
               : 0.0;
           break;
         default:
@@ -1426,7 +1433,7 @@ class Paragraph {
   /// that there's no expected height for this paragraph in order to respect
   /// [maxLines].
   double get webOnlyMaxLinesHeight {
-    assert(_webOnlyIsLaidOut);
+    assert(webOnlyIsLaidOut);
     if (_paragraphGeometricStyle.maxLines == null) {
       return null;
     }
@@ -1438,40 +1445,8 @@ class Paragraph {
     return _paragraphGeometricStyle.maxLines * _lineHeight;
   }
 
-  /// Called by the text measurement system to report the layout attributes
-  /// computed for this paragraph.
-  ///
-  /// All of the arguments must be non-null.
-  void webOnlySetComputedLayout({
-    @required double width,
-    @required double height,
-    @required double lineHeight,
-    @required double minIntrinsicWidth,
-    @required double maxIntrinsicWidth,
-    @required double alphabeticBaseline,
-    @required double ideographicBaseline,
-    @required bool isSingleLine,
-  }) {
-    assert(width != null &&
-        height != null &&
-        minIntrinsicWidth != null &&
-        maxIntrinsicWidth != null &&
-        minIntrinsicWidth <= maxIntrinsicWidth &&
-        alphabeticBaseline != null &&
-        ideographicBaseline != null);
-    _width = width;
-    _height = height;
-    _lineHeight = lineHeight;
-    _minIntrinsicWidth = minIntrinsicWidth;
-    _maxIntrinsicWidth = maxIntrinsicWidth;
-    _alphabeticBaseline = alphabeticBaseline;
-    _ideographicBaseline = ideographicBaseline;
-    _webOnlyIsSingleLine = isSingleLine;
-    _webOnlyIsLaidOut = true;
-  }
-
   /// Whether or not this paragraph can be drawn on a single line.
-  bool _webOnlyIsSingleLine = false;
+  bool get _webOnlyIsSingleLine => _measurementResult.isSingleLine;
 
   /// Returns `true` if this paragraph can be directly painted to the canvas.
   ///
@@ -1490,8 +1465,7 @@ class Paragraph {
 
   /// Whether this paragraph has been laid out.
   // TODO(yjbanov): This is Engine-internal API. We should make it private.
-  bool get webOnlyIsLaidOut => _webOnlyIsLaidOut;
-  bool _webOnlyIsLaidOut = false;
+  bool get webOnlyIsLaidOut => _measurementResult != null;
 
   /// Asserts that the properties used to measure paragraph layout are the same
   /// as the properties of this paragraphs root style.
@@ -1540,7 +1514,7 @@ class Paragraph {
       return [];
     }
 
-    return engine.TextMeasurementService.instance.measureBoxesForRange(
+    return _measurementService.measureBoxesForRange(
       this,
       _lastUsedConstraints,
       start: start,
@@ -1550,7 +1524,7 @@ class Paragraph {
     );
   }
 
-  Paragraph _cloneWithText(String plainText) {
+  Paragraph webOnlyCloneWithText(String plainText) {
     return Paragraph._(
       plainText: plainText,
       paragraphElement: _paragraphElement.clone(true),
@@ -1572,27 +1546,13 @@ class Paragraph {
     }
 
     final double dx = offset.dx - webOnlyAlignOffset;
-    final engine.TextMeasurementService instance =
-        engine.TextMeasurementService.instance;
-
-    double _measureSingleLineWidth(String text) {
-      if (_paragraphGeometricStyle.letterSpacing != null ||
-          _paragraphGeometricStyle.wordSpacing != null ||
-          _paragraphGeometricStyle.decoration != null) {
-        // Note that measuring single-line text repeatedly with this API is
-        // very slow.
-        return instance.measureSingleLineText(_cloneWithText(text)).width;
-      } else {
-        return instance.measureSingleLineWidth(text, _paragraphGeometricStyle);
-      }
-    }
+    final engine.TextMeasurementService instance = _measurementService;
 
     int low = 0;
     int high = _plainText.length;
     do {
       final int current = (low + high) ~/ 2;
-      final double width =
-          _measureSingleLineWidth(_plainText.substring(0, current));
+      final double width = instance.measureSubstringWidth(this, 0, current);
       if (width < dx) {
         low = current;
       } else if (width > dx) {
@@ -1607,10 +1567,8 @@ class Paragraph {
       return TextPosition(offset: high, affinity: TextAffinity.upstream);
     }
 
-    final double lowWidth =
-        _measureSingleLineWidth(_plainText.substring(0, low));
-    final double highWidth =
-        _measureSingleLineWidth(_plainText.substring(0, high));
+    final double lowWidth = instance.measureSubstringWidth(this, 0, low);
+    final double highWidth = instance.measureSubstringWidth(this, 0, high);
 
     if (dx - lowWidth < highWidth - dx) {
       // The offset is closer to the low index.
@@ -1673,10 +1631,12 @@ class ParagraphBuilder {
     List<String> strutFontFamilies;
     if (style._strutStyle != null) {
       strutFontFamilies = <String>[];
-      if (style._strutStyle._fontFamily != null)
+      if (style._strutStyle._fontFamily != null) {
         strutFontFamilies.add(style._strutStyle._fontFamily);
-      if (style._strutStyle._fontFamilyFallback != null)
+      }
+      if (style._strutStyle._fontFamilyFallback != null) {
         strutFontFamilies.addAll(style._strutStyle._fontFamilyFallback);
+      }
     }
     applyParagraphStyleToElement(
         element: _paragraphElement, style: _paragraphStyle);

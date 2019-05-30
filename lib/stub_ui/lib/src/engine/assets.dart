@@ -61,3 +61,35 @@ class AssetManagerException implements Exception {
   @override
   String toString() => 'Failed to load asset at "$url" ($httpStatus)';
 }
+
+/// An asset manager that gives fake empty responses for assets.
+class WebOnlyMockAssetManager implements AssetManager {
+  String defaultAssetsDir = '';
+  String defaultAssetManifest = '{}';
+  String defaultFontManifest = '[]';
+
+  @override
+  String get assetsDir => defaultAssetsDir;
+
+  @override
+  String getAssetUrl(String asset) => '$asset';
+
+  @override
+  Future<ByteData> load(String asset) {
+    if (asset == getAssetUrl('AssetManifest.json')) {
+      return Future.value(_toByteData(utf8.encode(defaultAssetManifest)));
+    }
+    if (asset == getAssetUrl('FontManifest.json')) {
+      return Future.value(_toByteData(utf8.encode(defaultFontManifest)));
+    }
+    throw new AssetManagerException(asset, 404);
+  }
+
+  ByteData _toByteData(List<int> bytes) {
+    final byteData = ByteData(bytes.length);
+    for (var i = 0; i < bytes.length; i++) {
+      byteData.setUint8(i, bytes[i]);
+    }
+    return byteData;
+  }
+}

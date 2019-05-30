@@ -168,43 +168,8 @@ class DomCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
-    assert(paragraph.webOnlyIsLaidOut);
-
-    html.Element paragraphElement =
-        paragraph.webOnlyGetParagraphElement().clone(true);
-
-    String cssTransform =
-        matrix4ToCssTransform(transformWithOffset(currentTransform, offset));
-
-    final html.CssStyleDeclaration paragraphStyle = paragraphElement.style;
-    paragraphStyle
-      ..position = 'absolute'
-      ..transformOrigin = '0 0 0'
-      ..transform = cssTransform
-      ..whiteSpace = 'pre-wrap'
-      ..width = '${paragraph.width}px';
-
-    final ParagraphGeometricStyle style =
-        paragraph.webOnlyGetParagraphGeometricStyle();
-
-    // TODO(flutter_web): Implement the ellipsis overflow for multi-line text
-    //  too. As a pre-requisite, we need to be able to programmatically find
-    //  line breaks.
-    if (style.ellipsis != null &&
-        (style.maxLines == null || style.maxLines == 1)) {
-      paragraphStyle
-        ..height = '${paragraph.webOnlyMaxLinesHeight}px'
-        ..whiteSpace = 'pre'
-        ..overflow = 'hidden'
-        ..textOverflow = 'ellipsis';
-    } else if (paragraph.didExceedMaxLines) {
-      paragraphStyle
-        ..height = '${paragraph.webOnlyMaxLinesHeight}px'
-        ..overflowY = 'hidden';
-    } else {
-      paragraphStyle.height = '${paragraph.height}px';
-    }
-
+    final html.Element paragraphElement =
+        _drawParagraphElement(paragraph, offset, transform: currentTransform);
     currentElement.append(paragraphElement);
   }
 }

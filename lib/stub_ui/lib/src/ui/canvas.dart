@@ -46,10 +46,6 @@ enum ClipOp {
   intersect,
 }
 
-/// Defines how a list of points is interpreted when drawing a set of triangles.
-///
-/// Used by [Canvas.drawVertices].
-// These enum values must be kept in sync with SkVertices::VertexMode.
 enum VertexMode {
   /// Draw each sequence of three points as the vertices of a triangle.
   triangles,
@@ -63,15 +59,14 @@ enum VertexMode {
 
 /// A set of vertex data used by [Canvas.drawVertices].
 class Vertices {
-  Vertices(
+   Vertices(
     VertexMode mode,
     List<Offset> positions, {
     List<Offset> textureCoordinates,
     List<Color> colors,
     List<int> indices,
-  }) {
-    throw UnimplementedError();
-  }
+  }) : assert(mode != null),
+       assert(positions != null);
 
   Vertices.raw(
     VertexMode mode,
@@ -79,10 +74,10 @@ class Vertices {
     Float32List textureCoordinates,
     Int32List colors,
     Uint16List indices,
-  }) {
-    throw UnimplementedError();
-  }
+  }) : assert(mode != null),
+       assert(positions != null);
 }
+
 
 /// Records a [Picture] containing a sequence of graphical operations.
 ///
@@ -166,9 +161,10 @@ class Canvas {
   /// To end the recording, call [PictureRecorder.endRecording] on the
   /// given recorder.
   Canvas(PictureRecorder recorder, [Rect cullRect]) : assert(recorder != null) {
-    if (recorder.isRecording)
+    if (recorder.isRecording) {
       throw new ArgumentError(
           '"recorder" must not already be associated with another Canvas.');
+    }
     cullRect ??= Rect.largest;
     _canvas = recorder.beginRecording(cullRect);
   }
@@ -355,9 +351,9 @@ class Canvas {
   }
 
   /// Add an axis-aligned skew to the current transform, with the first argument
-  /// being the horizontal skew in rise over run units clockwise around the
-  /// origin, and the second argument being the vertical skew in rise over run
-  /// units clockwise around the origin.
+  /// being the horizontal skew in radians clockwise around the origin, and the
+  /// second argument being the vertical skew in radians clockwise around the
+  /// origin.
   void skew(double sx, double sy) {
     _canvas.skew(sx, sy);
   }
@@ -366,8 +362,9 @@ class Canvas {
   /// specified as a list of values in column-major order.
   void transform(Float64List matrix4) {
     assert(matrix4 != null);
-    if (matrix4.length != 16)
+    if (matrix4.length != 16) {
       throw new ArgumentError('"matrix4" must have 16 entries.');
+    }
     _transform(matrix4);
   }
 
@@ -863,8 +860,9 @@ class Canvas {
     assert(pointMode != null);
     assert(points != null);
     assert(paint != null);
-    if (points.length % 2 != 0)
+    if (points.length % 2 != 0) {
       throw new ArgumentError('"points" must have an even number of values.');
+    }
     throw new UnimplementedError();
   }
 
@@ -890,11 +888,13 @@ class Canvas {
     assert(paint != null);
 
     final int rectCount = rects.length;
-    if (transforms.length != rectCount)
+    if (transforms.length != rectCount) {
       throw new ArgumentError('"transforms" and "rects" lengths must match.');
-    if (colors.isNotEmpty && colors.length != rectCount)
+    }
+    if (colors.isNotEmpty && colors.length != rectCount) {
       throw new ArgumentError(
           'If non-null, "colors" length must match that of "transforms" and "rects".');
+    }
 
     // TODO(het): Do we need to support this?
     throw new UnimplementedError();
@@ -925,15 +925,18 @@ class Canvas {
     assert(paint != null);
 
     final int rectCount = rects.length;
-    if (rstTransforms.length != rectCount)
+    if (rstTransforms.length != rectCount) {
       throw new ArgumentError(
           '"rstTransforms" and "rects" lengths must match.');
-    if (rectCount % 4 != 0)
+    }
+    if (rectCount % 4 != 0) {
       throw new ArgumentError(
           '"rstTransforms" and "rects" lengths must be a multiple of four.');
-    if (colors != null && colors.length * 4 != rectCount)
+    }
+    if (colors != null && colors.length * 4 != rectCount) {
       throw new ArgumentError(
           'If non-null, "colors" length must be one fourth the length of "rstTransforms" and "rects".');
+    }
 
     // TODO(het): Do we need to support this?
     throw new UnimplementedError();
@@ -1095,6 +1098,7 @@ enum PathOperation {
 /// used to create clip regions using [Canvas.clipPath].
 class Path {
   final List<engine.Subpath> subpaths;
+  PathFillType _fillType = PathFillType.nonZero;
 
   engine.Subpath get _currentSubpath => subpaths.isEmpty ? null : subpaths.last;
 
@@ -1124,9 +1128,10 @@ class Path {
   /// Determines how the interior of this path is calculated.
   ///
   /// Defaults to the non-zero winding rule, [PathFillType.nonZero].
-  PathFillType _fillType = PathFillType.nonZero;
   PathFillType get fillType => _fillType;
-  set fillType(PathFillType value) {}
+  set fillType(PathFillType value) {
+    _fillType = value;
+  }
 
   /// Opens a new subpath with starting point (x, y).
   void _openNewSubpath(double x, double y) {
@@ -1157,6 +1162,9 @@ class Path {
   /// Adds a straight line segment from the current point to the given
   /// point.
   void lineTo(double x, double y) {
+    if (subpaths.isEmpty) {
+      moveTo(0.0, 0.0);
+    }
     _commands.add(new engine.LineTo(x, y));
     _setCurrentPoint(x, y);
   }
@@ -1166,7 +1174,9 @@ class Path {
   void relativeLineTo(double dx, double dy) {
     var newX = _currentX + dx;
     var newY = _currentY + dy;
-    _ensurePathStarted();
+    if (subpaths.isEmpty) {
+      moveTo(0.0, 0.0);
+    }
     _commands.add(new engine.LineTo(newX, newY));
     _setCurrentPoint(newX, newY);
   }
@@ -2106,8 +2116,8 @@ class Path {
 
   /// Serializes this path to a value that's sent to a CSS custom painter for
   /// painting.
-  List webOnlySerializeToCssPaint() {
-    final List serializedSubpaths = [];
+  List<dynamic> webOnlySerializeToCssPaint() {
+    final List serializedSubpaths = <dynamic>[];
     for (int i = 0; i < subpaths.length; i++) {
       serializedSubpaths.add(subpaths[i].serializeToCssPaint());
     }

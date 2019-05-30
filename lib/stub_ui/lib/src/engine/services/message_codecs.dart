@@ -114,8 +114,9 @@ class JSONMethodCodec implements MethodCodec {
   @override
   MethodCall decodeMethodCall(ByteData methodCall) {
     final dynamic decoded = const JSONMessageCodec().decodeMessage(methodCall);
-    if (decoded is! Map)
+    if (decoded is! Map) {
       throw new FormatException('Expected method call Map, got $decoded');
+    }
     final dynamic method = decoded['method'];
     final dynamic arguments = decoded['args'];
     if (method is String) return new MethodCall(method, arguments);
@@ -125,17 +126,19 @@ class JSONMethodCodec implements MethodCodec {
   @override
   dynamic decodeEnvelope(ByteData envelope) {
     final dynamic decoded = const JSONMessageCodec().decodeMessage(envelope);
-    if (decoded is! List)
+    if (decoded is! List) {
       throw new FormatException('Expected envelope List, got $decoded');
+    }
     if (decoded.length == 1) return decoded[0];
     if (decoded.length == 3 &&
         decoded[0] is String &&
-        (decoded[1] == null || decoded[1] is String))
+        (decoded[1] == null || decoded[1] is String)) {
       throw new PlatformException(
         code: decoded[0],
         message: decoded[1],
         details: decoded[2],
       );
+    }
     throw new FormatException('Invalid envelope: $decoded');
   }
 

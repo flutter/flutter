@@ -65,8 +65,8 @@ class PropertyTuple {
 /// (2) The codegen'd Dart file is located at:
 ///     lib/src/text/word_break_properties.dart
 void main(List<String> arguments) async {
-  final propertiesFile = arguments[0];
-  final codegenFile = path.join(
+  final String propertiesFile = arguments[0];
+  final String codegenFile = path.join(
     path.dirname(Platform.script.toFilePath()),
     '../lib/src/text/word_break_properties.dart',
   );
@@ -89,7 +89,7 @@ abstract class PropertiesSyncer {
     final List<String> header = extractHeader(lines);
     final List<PropertyTuple> data = processLines(lines);
 
-    final sink = File(_dest).openWrite();
+    final IOSink sink = File(_dest).openWrite();
     sink.write(template(header, data));
   }
 
@@ -100,6 +100,7 @@ abstract class PropertiesSyncer {
 class WordBreakPropertiesSyncer extends PropertiesSyncer {
   WordBreakPropertiesSyncer(String src, String dest) : super(src, dest);
 
+  @override
   String template(List<String> header, List<PropertyTuple> data) {
     return '''
 // AUTO-GENERATED FILE.
@@ -129,7 +130,8 @@ const UnicodePropertyLookup<CharProperty> lookup =
   }
 
   Iterable<String> getEnumValues(List<PropertyTuple> data) {
-    return Set<String>.from(data.map((tuple) => tuple.property))
+    return Set<String>.from(
+            data.map<String>((PropertyTuple tuple) => tuple.property))
         .map(normalizePropertyName);
   }
 
@@ -137,15 +139,17 @@ const UnicodePropertyLookup<CharProperty> lookup =
     data.sort(
       // Ranges don't overlap so it's safe to sort based on the start of each
       // range.
-      (tuple1, tuple2) => tuple1.start.compareTo(tuple2.start),
+      (PropertyTuple tuple1, PropertyTuple tuple2) =>
+          tuple1.start.compareTo(tuple2.start),
     );
     verifyNoOverlappingRanges(data);
     return combineAdjacentRanges(data)
-        .map((tuple) => generateLookupEntry(tuple));
+        .map((PropertyTuple tuple) => generateLookupEntry(tuple));
   }
 
   String generateLookupEntry(PropertyTuple tuple) {
-    var propertyStr = 'CharProperty.${normalizePropertyName(tuple.property)}';
+    final String propertyStr =
+        'CharProperty.${normalizePropertyName(tuple.property)}';
     return 'UnicodeRange(${toHex(tuple.start)}, ${toHex(tuple.end)}, $propertyStr)';
   }
 }
@@ -158,7 +162,7 @@ const UnicodePropertyLookup<CharProperty> lookup =
 /// will get combined into:
 ///    UnicodeRange(0x01C4, 0x02AF, CharProperty.ALetter)
 List<PropertyTuple> combineAdjacentRanges(List<PropertyTuple> data) {
-  final List<PropertyTuple> result = [data.first];
+  final List<PropertyTuple> result = <PropertyTuple>[data.first];
   for (int i = 1; i < data.length; i++) {
     if (result.last.isAdjacent(data[i])) {
       result.last = result.last.extendRange(data[i]);
@@ -193,7 +197,7 @@ void verifyNoOverlappingRanges(List<PropertyTuple> data) {
 }
 
 List<String> extractHeader(List<String> lines) {
-  final List<String> headerLines = [];
+  final List<String> headerLines = <String>[];
   for (String line in lines) {
     if (line.contains('=======')) {
       break;
@@ -208,7 +212,7 @@ List<String> extractHeader(List<String> lines) {
 List<PropertyTuple> processLines(List<String> lines) {
   return lines
       .map(removeCommentFromLine)
-      .where((line) => line.isNotEmpty)
+      .where((String line) => line.isNotEmpty)
       .map(parseLineIntoPropertyTuple)
       .toList();
 }
@@ -218,7 +222,7 @@ String normalizePropertyName(String property) {
 }
 
 String removeCommentFromLine(String line) {
-  int poundIdx = line.indexOf('#');
+  final int poundIdx = line.indexOf('#');
   return (poundIdx == -1) ? line : line.substring(0, poundIdx);
 }
 
@@ -234,12 +238,13 @@ String removeCommentFromLine(String line) {
 /// PropertyTuple(895, 895, 'ALetter');
 /// ```
 PropertyTuple parseLineIntoPropertyTuple(String line) {
-  var split = line.split(';');
-  var rangeStr = split[0].trim();
-  var propertyStr = split[1].trim();
+  final List<String> split = line.split(';');
+  final String rangeStr = split[0].trim();
+  final String propertyStr = split[1].trim();
 
-  var rangeSplit =
-      rangeStr.contains('..') ? rangeStr.split('..') : [rangeStr, rangeStr];
+  final List<String> rangeSplit = rangeStr.contains('..')
+      ? rangeStr.split('..')
+      : <String>[rangeStr, rangeStr];
   return PropertyTuple(
     int.parse(rangeSplit[0], radix: 16),
     int.parse(rangeSplit[1], radix: 16),

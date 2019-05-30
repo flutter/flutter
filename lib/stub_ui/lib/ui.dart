@@ -8,21 +8,18 @@
 library ui;
 
 import 'dart:async';
-import 'dart:convert' hide Codec;
 import 'dart:collection';
+import 'dart:html' as html;
 import 'dart:math' as math;
 import 'dart:typed_data';
-import 'dart:html' as html;
-import 'dart:js_util' as js_util;
-import 'dart:isolate' show SendPort;
-
-import 'src/engine.dart' as engine;
 
 import 'package:meta/meta.dart';
 
+import 'src/engine.dart' as engine;
+export 'src/engine.dart' show persistedPictureFactory, houdiniPictureFactory, webOnlyInitializeEngine;
+
 part 'src/ui/canvas.dart';
 part 'src/ui/compositing.dart';
-part 'src/ui/debug_canvas_reuse_overlay.dart';
 part 'src/ui/geometry.dart';
 part 'src/ui/hash_codes.dart';
 part 'src/ui/initialization.dart';
@@ -31,7 +28,7 @@ part 'src/ui/natives.dart';
 part 'src/ui/painting.dart';
 part 'src/ui/pointer.dart';
 part 'src/ui/semantics.dart';
-part 'src/ui/browser_location.dart';
+part 'src/ui/test_embedding.dart';
 part 'src/ui/text.dart';
 part 'src/ui/tile_mode.dart';
 part 'src/ui/window.dart';

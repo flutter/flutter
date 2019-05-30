@@ -647,7 +647,7 @@ class SemanticsUpdateBuilder {
   ///
   /// The `transform` is a matrix that maps this node's coordinate system into
   /// its parent's coordinate system.
-  void updateNode({
+void updateNode({
     int id,
     int flags,
     int actions,

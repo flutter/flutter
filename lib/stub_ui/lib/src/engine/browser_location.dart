@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-part of ui;
+part of engine;
 
 // TODO(mdebbar): add other strategies.
 
@@ -37,14 +37,14 @@ abstract class LocationStrategy {
 
   /// Subscribes to popstate events and returns a function that could be used to
   /// unsubscribe from popstate events.
-  VoidCallback onPopState(html.EventListener fn);
+  ui.VoidCallback onPopState(html.EventListener fn);
 
   /// The active path in the browser history.
   String get path;
 
-  /// Given a path that's [internal] to the app, create the external url that
+  /// Given a path that's internal to the app, create the external url that
   /// will be used in the browser.
-  String prepareExternalUrl(String internal);
+  String prepareExternalUrl(String internalUrl);
 
   /// Push a new history entry.
   void pushState(dynamic state, String title, String url);
@@ -79,7 +79,7 @@ class HashLocationStrategy extends LocationStrategy {
       [this._platformLocation = const BrowserPlatformLocation()]);
 
   @override
-  VoidCallback onPopState(html.EventListener fn) {
+  ui.VoidCallback onPopState(html.EventListener fn) {
     _platformLocation.onPopState(fn);
     return () => _platformLocation.offPopState(fn);
   }
@@ -98,14 +98,14 @@ class HashLocationStrategy extends LocationStrategy {
   }
 
   @override
-  String prepareExternalUrl(String url) {
+  String prepareExternalUrl(String internalUrl) {
     // It's convention that if the hash path is empty, we omit the `#`; however,
     // if the empty URL is pushed it won't replace any existing fragment. So
     // when the hash path is empty, we instead return the location's path and
     // query.
-    return url.isEmpty
+    return internalUrl.isEmpty
         ? '${_platformLocation.pathname}${_platformLocation.search}'
-        : '#$url';
+        : '#$internalUrl';
   }
 
   @override
@@ -127,8 +127,8 @@ class HashLocationStrategy extends LocationStrategy {
   /// Waits until the next popstate event is fired. This is useful for example
   /// to wait until the browser has handled the `history.back` transition.
   Future<void> _waitForPopState() {
-    Completer<void> completer = Completer<void>();
-    VoidCallback unsubscribe;
+    final Completer<void> completer = Completer<void>();
+    ui.VoidCallback unsubscribe;
     unsubscribe = onPopState((_) {
       unsubscribe();
       completer.complete();

@@ -38,8 +38,12 @@ class UnicodeRange<P> {
   /// - higher: The value is higher than the range
   /// - inside: The value is within the range.
   _ComparisonResult compare(int value) {
-    if (value < start) return _ComparisonResult.lower;
-    if (value > end) return _ComparisonResult.higher;
+    if (value < start) {
+      return _ComparisonResult.lower;
+    }
+    if (value > end) {
+      return _ComparisonResult.higher;
+    }
     return _ComparisonResult.inside;
   }
 }
@@ -61,33 +65,25 @@ class UnicodePropertyLookup<P> {
   final List<UnicodeRange<P>> ranges;
 
   P find(int value) {
-    final int index = _binarySearch(ranges, value, (a, b) {
-      final UnicodeRange<P> range = a;
-      switch (range.compare(b)) {
-        case _ComparisonResult.higher:
-          return -1;
-        case _ComparisonResult.lower:
-          return 1;
-        case _ComparisonResult.inside:
-          return 0;
-      }
-    });
+    final int index = _binarySearch(value);
     return index == -1 ? null : ranges[index].property;
   }
 
-  static int _binarySearch<T>(
-      List<T> sortedList, T value, int compare(T a, T b)) {
+  int _binarySearch(int value) {
     int min = 0;
-    int max = sortedList.length;
+    int max = ranges.length;
     while (min < max) {
-      int mid = min + ((max - min) >> 1);
-      var element = sortedList[mid];
-      int comp = compare(element, value);
-      if (comp == 0) return mid;
-      if (comp < 0) {
-        min = mid + 1;
-      } else {
-        max = mid;
+      final int mid = min + ((max - min) >> 1);
+      final UnicodeRange<P> range = ranges[mid];
+      switch (range.compare(value)) {
+        case _ComparisonResult.higher:
+          min = mid + 1;
+          break;
+        case _ComparisonResult.lower:
+          max = mid;
+          break;
+        case _ComparisonResult.inside:
+          return mid;
       }
     }
     return -1;

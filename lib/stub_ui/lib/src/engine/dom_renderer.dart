@@ -117,7 +117,7 @@ class DomRenderer {
     _debugIsInWidgetTest = value;
     if (_debugIsInWidgetTest) {
       var logicalSize = ui.Size(800.0, 600.0);
-      ui.window.webOnlyDebugPhysicalSizeOverride =
+      window.webOnlyDebugPhysicalSizeOverride =
           logicalSize * ui.window.devicePixelRatio;
     }
   }
@@ -373,7 +373,7 @@ flt-glass-pane * {
     // position, and sizes all use browser pixel as the unit (i.e. "px" in CSS).
     // Therefore, as far as the framework is concerned the device pixel ratio
     // is 1.0.
-    ui.window.devicePixelRatio = 1.0;
+    window.debugOverrideDevicePixelRatio(1.0);
 
     if (browserEngine == BrowserEngine.webkit) {
       // Safari sometimes gives us bogus innerWidth/innerHeight values when the

@@ -221,7 +221,7 @@ class PointerAdapter extends BaseAdapter {
         change: change,
         timeStamp: _eventTimeStampToDuration(event.timeStamp),
         kind: _pointerTypeToDeviceKind(event.pointerType),
-        device: _uniqueDeviceIdFromType(event.pointerType),
+        device: event.pointerId,
         physicalX: event.client.x,
         physicalY: event.client.y,
         buttons: event.buttons,
@@ -299,23 +299,30 @@ class TouchAdapter extends BaseAdapter {
     ui.PointerChange change,
     html.TouchEvent event,
   ) {
-    var touch = event.changedTouches.first;
-    return [
-      ui.PointerData(
+    final html.TouchList touches = event.changedTouches;
+    final List<ui.PointerData> data = List<ui.PointerData>(touches.length);
+    for (int i = 0, len = touches.length; i < len; i++) {
+      final html.Touch touch = touches[i];
+      data[i] = ui.PointerData(
         change: change,
         timeStamp: _eventTimeStampToDuration(event.timeStamp),
         kind: ui.PointerDeviceKind.touch,
         signalKind: ui.PointerSignalKind.none,
-        device: _uniqueDeviceIdFromType('touch'),
+        device: touch.identifier,
         physicalX: touch.client.x,
         physicalY: touch.client.y,
         pressure: 1.0,
         pressureMin: 0.0,
         pressureMax: 1.0,
-      )
-    ];
+      );
+    }
+
+    return data;
   }
 }
+
+/// Intentionally set to -1 so it doesn't conflict with other device IDs.
+const int _mouseDeviceId = -1;
 
 /// Adapter to be used with browsers that support mouse events.
 class MouseAdapter extends BaseAdapter {
@@ -361,7 +368,7 @@ class MouseAdapter extends BaseAdapter {
         timeStamp: _eventTimeStampToDuration(event.timeStamp),
         kind: ui.PointerDeviceKind.mouse,
         signalKind: ui.PointerSignalKind.none,
-        device: _uniqueDeviceIdFromType('mouse'),
+        device: _mouseDeviceId,
         physicalX: event.client.x,
         physicalY: event.client.y,
         buttons: event.buttons,
@@ -381,6 +388,8 @@ Duration _eventTimeStampToDuration(num milliseconds) {
       ((milliseconds - ms) * Duration.microsecondsPerMillisecond).toInt();
   return new Duration(milliseconds: ms, microseconds: micro);
 }
+
+bool _isWheelDeviceAdded = false;
 
 List<ui.PointerData> _convertWheelEventToPointerData(
   html.WheelEvent event,
@@ -406,13 +415,19 @@ List<ui.PointerData> _convertWheelEventToPointerData(
     default:
       break;
   }
-  return [
-    ui.PointerData(
+
+  final List<ui.PointerData> data = <ui.PointerData>[];
+  // Only send [PointerChange.add] the first time.
+  if (!_isWheelDeviceAdded) {
+    _isWheelDeviceAdded = true;
+    data.add(ui.PointerData(
       change: ui.PointerChange.add,
       timeStamp: _eventTimeStampToDuration(event.timeStamp),
       kind: ui.PointerDeviceKind.mouse,
-      signalKind: ui.PointerSignalKind.scroll,
-      device: _uniqueDeviceIdFromType('mouse'),
+      // In order for Flutter to actually add this pointer, we need to set the
+      // signal to none.
+      signalKind: ui.PointerSignalKind.none,
+      device: _mouseDeviceId,
       physicalX: event.client.x,
       physicalY: event.client.y,
       buttons: event.buttons,
@@ -421,42 +436,33 @@ List<ui.PointerData> _convertWheelEventToPointerData(
       pressureMax: 1.0,
       scrollDeltaX: deltaX,
       scrollDeltaY: deltaY,
-    ),
-    ui.PointerData(
-      change: ui.PointerChange.hover,
-      timeStamp: _eventTimeStampToDuration(event.timeStamp),
-      kind: ui.PointerDeviceKind.mouse,
-      signalKind: ui.PointerSignalKind.scroll,
-      device: _uniqueDeviceIdFromType('mouse'),
-      physicalX: event.client.x,
-      physicalY: event.client.y,
-      buttons: event.buttons,
-      pressure: 1.0,
-      pressureMin: 0.0,
-      pressureMax: 1.0,
-      scrollDeltaX: deltaX,
-      scrollDeltaY: deltaY,
-    )
-  ];
+    ));
+  }
+  data.add(ui.PointerData(
+    change: ui.PointerChange.hover,
+    timeStamp: _eventTimeStampToDuration(event.timeStamp),
+    kind: ui.PointerDeviceKind.mouse,
+    signalKind: ui.PointerSignalKind.scroll,
+    device: _mouseDeviceId,
+    physicalX: event.client.x,
+    physicalY: event.client.y,
+    buttons: event.buttons,
+    pressure: 1.0,
+    pressureMin: 0.0,
+    pressureMax: 1.0,
+    scrollDeltaX: deltaX,
+    scrollDeltaY: deltaY,
+  ));
+  return data;
 }
 
 void _addWheelEventListener(void listener(html.WheelEvent e)) {
-  var eventOptions = js_util.newObject();
+  final dynamic eventOptions = js_util.newObject();
   js_util.setProperty(eventOptions, 'passive', false);
-  js_util.callMethod(
-      PointerBinding.instance.domRenderer.glassPaneElement,
-      'addEventListener',
-      ['wheel', js.allowInterop((event) => listener(event)), eventOptions]);
-}
-
-// Unique device id for each pointer type.
-// TODO(flutter_web): Stabilize/Prepopulate device ids.
-final Map<String, int> _devices = {};
-int _uniqueDeviceIdFromType(String type) {
-  var id = _devices[type];
-  if (id == null) {
-    id = _devices.length;
-    _devices[type] = id;
-  }
-  return id;
+  js_util.callMethod(PointerBinding.instance.domRenderer.glassPaneElement,
+      'addEventListener', <dynamic>[
+    'wheel',
+    js.allowInterop((html.WheelEvent event) => listener(event)),
+    eventOptions
+  ]);
 }

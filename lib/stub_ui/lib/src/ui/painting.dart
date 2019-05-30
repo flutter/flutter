@@ -33,11 +33,11 @@ class Color {
 
   /// Construct a color from the lower 8 bits of four integers.
   const Color.fromARGB(int a, int r, int g, int b)
-      : _value = ((((a & 0xff) << 24) |
+      : _value = (((a & 0xff) << 24) |
                 ((r & 0xff) << 16) |
                 ((g & 0xff) << 8) |
                 ((b & 0xff) << 0)) &
-            0xFFFFFFFF);
+            0xFFFFFFFF;
 
   /// Create a color from red, green, blue, and opacity, similar to `rgba()` in CSS.
   ///
@@ -959,12 +959,6 @@ class Paint {
 
   BlendMode _blendMode;
 
-  double get strokeMiterLimit {
-    return null;
-  }
-
-  set strokeMiterLimit(double value) {}
-
   /// Whether to paint inside shapes, the edges of shapes, or both.
   ///
   /// If null, defaults to [PaintingStyle.fill].
@@ -1050,11 +1044,14 @@ class Paint {
   bool get invertColors {
     return false;
   }
-
   set invertColors(bool value) {
-    if (engine.assertionsEnabled) {
-      throw UnsupportedError('Paint.invertColors is not supported.');
-    }
+  }
+
+  double get strokeMiterLimit {
+    return null;
+  }
+  set strokeMiterLimit(double value) {
+    assert(value != null);
   }
 
   Color _color = _defaultPaintColor;
@@ -1213,8 +1210,7 @@ abstract class Gradient extends Shader {
     List<Color> colors, [
     List<double> colorStops,
     TileMode tileMode = TileMode.clamp,
-    Float64List
-        matrix4, // TODO(yjbanov): Implement this https://github.com/flutter/flutter/issues/32819
+    Float64List matrix4,
   ]) =>
       _GradientLinear(from, to, colors, colorStops, tileMode);
 
@@ -1384,12 +1380,12 @@ class _GradientLinear extends Gradient {
   }
 
   @override
-  List webOnlySerializeToCssPaint() {
-    List serializedColors = [];
+  List<dynamic> webOnlySerializeToCssPaint() {
+    List<dynamic> serializedColors = <dynamic>[];
     for (int i = 0; i < colors.length; i++) {
       serializedColors.add(colors[i].toCssString());
     }
-    return [
+    return <dynamic>[
       1,
       from.dx,
       from.dy,
@@ -1603,8 +1599,8 @@ class MaskFilter {
   @override
   int get hashCode => hashValues(_style, _sigma);
 
-  List webOnlySerializeToCssPaint() {
-    return [_style?.index, _sigma];
+  List<dynamic> webOnlySerializeToCssPaint() {
+    return <dynamic>[_style?.index, _sigma];
   }
 
   @override
@@ -1787,7 +1783,8 @@ class Codec {
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-Future<Codec> instantiateImageCodec(Uint8List list) {
+Future<Codec> instantiateImageCodec(Uint8List list,
+    {double decodedCacheRatioCap = double.infinity}) {
   return engine.futurize((engine.Callback<Codec> callback) =>
       _instantiateImageCodec(list, callback, null));
 }
@@ -1797,7 +1794,7 @@ Future<Codec> instantiateImageCodec(Uint8List list) {
 /// Returns an error message if the instantiation has failed, null otherwise.
 String _instantiateImageCodec(
     Uint8List list, engine.Callback<Codec> callback, _ImageInfo imageInfo) {
-  final blob = html.Blob([list.buffer]);
+  final html.Blob blob = html.Blob(<dynamic>[list.buffer]);
   callback(engine.HtmlBlobCodec(blob));
   return null;
 }

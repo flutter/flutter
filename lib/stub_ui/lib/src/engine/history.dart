@@ -33,7 +33,7 @@ bool _isFlutterEntry(dynamic state) {
 ///
 /// There should only be one global instance of this class.
 class BrowserHistory {
-  ui.LocationStrategy _locationStrategy;
+  LocationStrategy _locationStrategy;
   ui.VoidCallback _unsubscribe;
 
   /// Changing the location strategy will unsubscribe from the old strategy's
@@ -44,7 +44,7 @@ class BrowserHistory {
   ///
   /// If the given strategy is null, it will render this [BrowserHistory]
   /// instance inactive.
-  set locationStrategy(ui.LocationStrategy strategy) {
+  set locationStrategy(LocationStrategy strategy) {
     if (strategy != _locationStrategy) {
       _tearoffStrategy(_locationStrategy);
       _locationStrategy = strategy;
@@ -135,7 +135,7 @@ class BrowserHistory {
   /// This method should be called when the Origin Entry is active. It just
   /// replaces the state of the entry so that we can recognize it later using
   /// [_isOriginEntry] inside [_popStateListener].
-  void _setupOriginEntry(ui.LocationStrategy strategy) {
+  void _setupOriginEntry(LocationStrategy strategy) {
     assert(strategy != null);
     strategy.replaceState(_originState, 'origin', '');
   }
@@ -143,7 +143,7 @@ class BrowserHistory {
   /// This method is used manipulate the Flutter Entry which is always the
   /// active entry while the Flutter app is running.
   void _setupFlutterEntry(
-    ui.LocationStrategy strategy, {
+    LocationStrategy strategy, {
     bool replace = false,
     String path,
   }) {
@@ -156,7 +156,7 @@ class BrowserHistory {
     }
   }
 
-  void _setupStrategy(ui.LocationStrategy strategy) {
+  void _setupStrategy(LocationStrategy strategy) {
     if (strategy == null) {
       return;
     }
@@ -174,7 +174,7 @@ class BrowserHistory {
     _unsubscribe = strategy.onPopState(_popStateListener);
   }
 
-  void _tearoffStrategy(ui.LocationStrategy strategy) {
+  void _tearoffStrategy(LocationStrategy strategy) {
     if (strategy == null) {
       return;
     }

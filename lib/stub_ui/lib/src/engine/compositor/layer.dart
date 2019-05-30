@@ -181,8 +181,8 @@ class TransformLayer extends ContainerLayer {
 
   @override
   void preroll(PrerollContext context, Matrix4 matrix) {
-    final childMatrix = matrix * _transform;
-    final childPaintBounds = prerollChildren(context, childMatrix);
+    final Matrix4 childMatrix = matrix * _transform;
+    final ui.Rect childPaintBounds = prerollChildren(context, childMatrix);
     paintBounds = _transformRect(_transform, childPaintBounds);
   }
 
@@ -251,11 +251,11 @@ class PictureLayer extends Layer {
 
   @override
   void preroll(PrerollContext context, Matrix4 matrix) {
-    final cache = context.rasterCache;
+    final RasterCache cache = context.rasterCache;
     if (cache != null) {
       final translateMatrix = Matrix4.identity()
         ..setTranslationRaw(offset.dx, offset.dy, 0);
-      final cacheMatrix = translateMatrix * matrix;
+      final Matrix4 cacheMatrix = translateMatrix * matrix;
       cache.prepare(picture, cacheMatrix, isComplex, willChange);
     }
 

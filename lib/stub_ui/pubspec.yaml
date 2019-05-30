@@ -1,4 +1,5 @@
 name: ui
+publish_to: none
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
@@ -9,8 +10,6 @@ dependencies:
 dev_dependencies:
   test: ^1.3.0
   quiver:
-  html:
   build_runner:
-  build_web_compilers:
   build_test:
-
+  build_web_compilers:

@@ -24,6 +24,9 @@ part of engine;
 /// interactive controls, such as an `<input>` element. In such case the value
 /// is reported via that element's `value` attribute rather than rendering it
 /// separately.
+///
+/// Aria role image is not managed by this role manager. Img role and label
+/// describes the visual are added in [ImageRoleManager].
 class LabelAndValue extends RoleManager {
   LabelAndValue(SemanticsObject semanticsObject)
       : super(Role.labelAndValue, semanticsObject);

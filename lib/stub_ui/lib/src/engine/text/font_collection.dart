@@ -121,10 +121,10 @@ class _FontManager {
     String asset,
     Map<String, String> descriptors,
   ) {
-    final fontFace = html.FontFace(family, asset, descriptors);
+    final html.FontFace fontFace = html.FontFace(family, asset, descriptors);
     _fontLoadingFutures.add(fontFace
         .load()
-        .then((_) => html.document.fonts.add(fontFace), onError: (e) {
+        .then((_) => html.document.fonts.add(fontFace), onError: (dynamic e) {
       html.window.console
           .warn('Error while trying to load font family "$family":\n$e');
       return null;

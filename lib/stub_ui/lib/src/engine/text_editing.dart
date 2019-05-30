@@ -7,7 +7,7 @@ part of engine;
 /// Make the content editable span visible to facilitate debugging.
 const _debugVisibleTextEditing = false;
 
-void _emptyCallback(_) {}
+void _emptyCallback(dynamic _) {}
 
 void _styleEditingElement(html.HtmlElement domElement) {
   domElement.style

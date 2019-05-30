@@ -23,23 +23,29 @@ class Tappable extends RoleManager {
     semanticsObject.setAriaRole(
         'button', semanticsObject.hasFlag(ui.SemanticsFlag.isButton));
 
-    // Excluding text fields because text fields have browser-specific logic
-    // for recognizing taps and activating the keyboard.
-    if (semanticsObject.hasAction(ui.SemanticsAction.tap) &&
-        !semanticsObject.hasFlag(ui.SemanticsFlag.isTextField)) {
-      if (_clickListener == null) {
-        _clickListener = (_) {
-          if (semanticsObject.owner.gestureMode !=
-              GestureMode.browserGestures) {
-            return;
-          }
-          ui.window.onSemanticsAction(
-              semanticsObject.id, ui.SemanticsAction.tap, null);
-        };
-        element.addEventListener('click', _clickListener);
-      }
-    } else {
+    if (!semanticsObject.hasFlag(ui.SemanticsFlag.isEnabled) &&
+        semanticsObject.hasFlag(ui.SemanticsFlag.isButton)) {
+      semanticsObject.element.setAttribute('aria-disabled', 'true');
       _stopListening();
+    } else {
+      // Excluding text fields because text fields have browser-specific logic
+      // for recognizing taps and activating the keyboard.
+      if (semanticsObject.hasAction(ui.SemanticsAction.tap) &&
+          !semanticsObject.hasFlag(ui.SemanticsFlag.isTextField)) {
+        if (_clickListener == null) {
+          _clickListener = (_) {
+            if (semanticsObject.owner.gestureMode !=
+                GestureMode.browserGestures) {
+              return;
+            }
+            ui.window.onSemanticsAction(
+                semanticsObject.id, ui.SemanticsAction.tap, null);
+          };
+          element.addEventListener('click', _clickListener);
+        }
+      } else {
+        _stopListening();
+      }
     }
   }
 

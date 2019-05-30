@@ -22,6 +22,7 @@ part 'engine/alarm_clock.dart';
 part 'engine/assets.dart';
 part 'engine/bitmap_canvas.dart';
 part 'engine/browser_detection.dart';
+part 'engine/browser_location.dart';
 part 'engine/compositor/engine_delegate.dart';
 part 'engine/compositor/layer.dart';
 part 'engine/compositor/layer_scene_builder.dart';
@@ -45,6 +46,7 @@ part 'engine/path_to_svg.dart';
 part 'engine/pointer_binding.dart';
 part 'engine/recording_canvas.dart';
 part 'engine/semantics/checkable.dart';
+part 'engine/semantics/image.dart';
 part 'engine/semantics/incrementable.dart';
 part 'engine/semantics/label_and_value.dart';
 part 'engine/semantics/scrollable.dart';
@@ -54,7 +56,17 @@ part 'engine/semantics/text_field.dart';
 part 'engine/services/message_codec.dart';
 part 'engine/services/message_codecs.dart';
 part 'engine/shadow.dart';
+part 'engine/surface/clip.dart';
+part 'engine/surface/debug_canvas_reuse_overlay.dart';
+part 'engine/surface/offset.dart';
+part 'engine/surface/opacity.dart';
+part 'engine/surface/picture.dart';
+part 'engine/surface/scene.dart';
+part 'engine/surface/surface.dart';
+part 'engine/surface/transform.dart';
+part 'engine/test_embedding.dart';
 part 'engine/text/font_collection.dart';
+part 'engine/text/line_breaker.dart';
 part 'engine/text/measurement.dart';
 part 'engine/text/ruler.dart';
 part 'engine/text/unicode_range.dart';
@@ -64,6 +76,7 @@ part 'engine/text_editing.dart';
 part 'engine/util.dart';
 part 'engine/validators.dart';
 part 'engine/vector_math.dart';
+part 'engine/window.dart';
 
 bool _engineInitialized = false;
 
@@ -140,4 +153,8 @@ void webOnlyInitializeEngine() {
   };
 
   Keyboard.initialize();
+}
+
+class _NullTreeSanitizer implements html.NodeTreeSanitizer {
+  void sanitizeTree(html.Node node) {}
 }

@@ -50,7 +50,7 @@ class Keyboard {
   final JSONMessageCodec _messageCodec = JSONMessageCodec();
 
   void _handleHtmlEvent(html.KeyboardEvent event) {
-    final Map eventData = {
+    final Map<String, dynamic> eventData = <String, dynamic>{
       'type': event.type,
       // TODO(yjbanov): this emulates Android because that the only reasonable
       //                thing to map to right now (the other choice is fuchsia).

@@ -42,7 +42,8 @@ class LayerSceneBuilder implements ui.SceneBuilder {
   }
 
   @override
-  void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
+  void addPerformanceOverlay(int enabledOptions, ui.Rect bounds,
+      {Object webOnlyPaintedBy}) {
     // We don't plan to implement this on the web.
     throw UnimplementedError();
   }

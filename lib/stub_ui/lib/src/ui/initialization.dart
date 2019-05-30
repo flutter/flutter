@@ -9,12 +9,10 @@ Future<void> webOnlyInitializePlatform({
   engine.AssetManager assetManager,
 }) async {
   if (!engine.domRenderer.debugIsInWidgetTest) {
-    window.webOnlyLocationStrategy = const HashLocationStrategy();
+    engine.window.webOnlyLocationStrategy = const engine.HashLocationStrategy();
   }
 
-  if (assetManager == null) {
-    assetManager = new engine.AssetManager();
-  }
+  assetManager ??= const engine.AssetManager();
   await webOnlySetAssetManager(assetManager);
   await _fontCollection.ensureFontsLoaded();
   engine.webOnlyInitializeEngine();
@@ -33,7 +31,9 @@ bool get webOnlyIsInitialized => _webOnlyIsInitialized;
 /// The given asset manager is used to initialize the font collection.
 Future<void> webOnlySetAssetManager(engine.AssetManager assetManager) async {
   assert(assetManager != null, 'Cannot set assetManager to null');
-  if (assetManager == _assetManager) return;
+  if (assetManager == _assetManager) {
+    return;
+  }
 
   _assetManager = assetManager;
 
