@@ -326,7 +326,7 @@ void main() {
         columns: const <DataColumn>[
           DataColumn(label: Text('Name')),
           DataColumn(label: Text('Calories'), numeric: true),
-          DataColumn(label: Text('Fat'), numeric: true),
+          DataColumn(label: Text('Generation')),
         ],
         tablePadding: tablePadding,
         columnSpacing: columnSpacing,
