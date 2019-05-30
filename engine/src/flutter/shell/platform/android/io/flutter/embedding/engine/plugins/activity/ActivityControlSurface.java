@@ -59,16 +59,6 @@ public interface ActivityControlSurface {
   void detachFromActivityForConfigChanges();
 
   /**
-   * Call this method from the {@link Activity} that was previously attached to this
-   * {@code ActivityControlSurface}'s {@link FlutterEngine}, and was just recreated after a
-   * configuration change.
-   * <p>
-   * This method gives each {@link ActivityAware} plugin an opportunity to re-establish necessary
-   * references to the given {@link Activity}.
-   */
-  void reattachToActivityAfterConfigChange(@NonNull Activity activity, @NonNull Lifecycle lifecycle);
-
-  /**
    * Call this method from the {@link Activity} that is attached to this {@code ActivityControlSurfaces}'s
    * {@link FlutterEngine} when the {@link Activity} is about to be destroyed for non-configuration-change
    * reasons.
