@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' as ui;
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -1200,12 +1200,27 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
         curve: _caretAnimationCurve,
       );
       final Rect newCaretRect = _getCaretRectAtScrollOffset(_currentCaretRect, scrollOffsetForCaret);
-      // Enlarge newCaretRect by scrollPadding to ensure that caret is not positioned directly at the edge after scrolling. Include the height of the selection caret if it's
-      // being shown so that it remains visible.
-      final double bottomSpacing = math.max(
-        widget.scrollPadding.bottom,
-        _selectionOverlay?.selectionControls != null ? kMinimumInteractiveSize.height : 0,
-      );
+      // Enlarge newCaretRect by scrollPadding to ensure that caret is not
+      // positioned directly at the edge after scrolling.
+      double bottomSpacing = widget.scrollPadding.bottom;
+      if (_selectionOverlay?.selectionControls != null) {
+        final double handleHeight = _selectionOverlay.selectionControls
+          .getHandleSize(renderEditable.preferredLineHeight).height;
+        final double interactiveHandleHeight = math.max(
+          handleHeight,
+          kMinInteractiveSize,
+        );
+        final Offset anchor = _selectionOverlay.selectionControls
+          .getHandleAnchor(
+            TextSelectionHandleType.collapsed,
+            renderEditable.preferredLineHeight,
+          );
+        final double handleCenter = handleHeight / 2 - anchor.dy;
+        bottomSpacing = math.max(
+          handleCenter + interactiveHandleHeight / 2,
+          bottomSpacing,
+        );
+      }
       final Rect inflatedRect = Rect.fromLTRB(
           newCaretRect.left - widget.scrollPadding.left,
           newCaretRect.top - widget.scrollPadding.top,
