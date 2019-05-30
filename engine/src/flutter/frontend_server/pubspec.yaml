@@ -12,6 +12,7 @@ dependencies:
   convert: any
   crypto: any
   front_end: any
+  flutter_kernel_transformers: any
   kernel: any
   logging: any
   meta: any
