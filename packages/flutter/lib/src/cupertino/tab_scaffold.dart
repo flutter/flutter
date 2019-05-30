@@ -115,7 +115,7 @@ class CupertinoTabViewTapNotifier {
   static CupertinoTabViewTapNotifier of(BuildContext context) {
     final _TapNotifierWidget notifierWidget = context
       .inheritFromWidgetOfExactType(_TapNotifierWidget);
-    return notifierWidget.notifier;
+    return notifierWidget?.notifier;
   }
 
   /// Set the listener of this [CupertinoTabViewTapNotifier] and drop any
