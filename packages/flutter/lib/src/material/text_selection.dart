@@ -195,21 +195,15 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     // straight up or up-right depending on the handle type.
     switch (type) {
       case TextSelectionHandleType.left: // points up-right
-        return Transform(
-          transform: Matrix4.identity()
-            ..translate(_kHandleSize / 2, _kHandleSize / 2)
-            ..rotateZ(math.pi / 2.0)
-            ..translate(-_kHandleSize / 2, -_kHandleSize / 2),
+        return Transform.rotate(
+          angle: math.pi / 2.0,
           child: handle,
         );
       case TextSelectionHandleType.right: // points up-left
         return handle;
       case TextSelectionHandleType.collapsed: // points up
-        return Transform(
-          transform: Matrix4.identity()
-            ..translate(_kHandleSize / 2, _kHandleSize / 2)
-            ..rotateZ(math.pi / 4.0)
-            ..translate(-_kHandleSize / 2, -_kHandleSize / 2),
+        return Transform.rotate(
+          angle: math.pi / 4.0,
           child: handle,
         );
     }
@@ -226,7 +220,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
       case TextSelectionHandleType.left:
         return const Offset(_kHandleSize, 0);
       case TextSelectionHandleType.right:
-        return const Offset(0, 0);
+        return Offset.zero;
       default:
         return const Offset(_kHandleSize / 2, -4);
     }

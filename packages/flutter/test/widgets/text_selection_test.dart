@@ -380,32 +380,4 @@ void main() {
 
     await gesture.removePointer();
   });
-
-  test('getInteractiveRect when given rect is exactly kMinInteractiveSize, returns an equal rect', () {
-    const Rect rect = Rect.fromLTWH(0, 0, kMinInteractiveSize, kMinInteractiveSize);
-    final Rect interactiveRect = getInteractiveRect(rect);
-    expect(rect, equals(interactiveRect));
-  });
-
-  test('getInteractiveRect when given rect is bigger than kMinInteractiveSize, returns an equal rect', () {
-    const Rect rect = Rect.fromLTWH(0, 0, kMinInteractiveSize + 10, kMinInteractiveSize + 10);
-    final Rect interactiveRect = getInteractiveRect(rect);
-    expect(rect, equals(interactiveRect));
-  });
-
-  test('getInteractiveRect when given a rect too small, returns a rect with kMinInteractiveSize in each direction that was too small', () {
-    Rect rect = const Rect.fromLTWH(0, 0, kMinInteractiveSize - 10, kMinInteractiveSize - 10);
-    Rect interactiveRect = getInteractiveRect(rect);
-    expect(interactiveRect.left, rect.left - 5);
-    expect(interactiveRect.top, rect.top - 5);
-    expect(interactiveRect.width, kMinInteractiveSize);
-    expect(interactiveRect.height, kMinInteractiveSize);
-
-    rect = const Rect.fromLTWH(0, 0, kMinInteractiveSize + 10, kMinInteractiveSize - 10);
-    interactiveRect = getInteractiveRect(rect);
-    expect(interactiveRect.left, rect.left);
-    expect(interactiveRect.top, rect.top - 5);
-    expect(interactiveRect.width, rect.width);
-    expect(interactiveRect.height, kMinInteractiveSize);
-  });
 }

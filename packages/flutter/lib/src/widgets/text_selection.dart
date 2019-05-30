@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
@@ -542,32 +543,6 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
 /// with by the user.
 @visibleForTesting
 const double kMinInteractiveSize = 48.0;
-/// Interactive areas are expected to be at least a certain size in order to be
-/// easily touched by a user's finger. This method takes a Rect and returns a
-/// new Rect that has been expanded, while staying centered, to be at least this
-/// minimum interactive size in each direction.
-@visibleForTesting
-Rect getInteractiveRect(Rect rect) {
-  Rect interactiveRect = rect;
-  if (interactiveRect.width < kMinInteractiveSize) {
-    interactiveRect = Rect.fromLTWH(
-      interactiveRect.left - (kMinInteractiveSize - interactiveRect.width) / 2,
-      interactiveRect.top,
-      kMinInteractiveSize,
-      interactiveRect.height,
-    );
-  }
-  if (interactiveRect.height < kMinInteractiveSize) {
-    interactiveRect = Rect.fromLTWH(
-      interactiveRect.left,
-      interactiveRect.top - (kMinInteractiveSize - interactiveRect.height) / 2,
-      interactiveRect.width,
-      kMinInteractiveSize,
-    );
-  }
-
-  return interactiveRect;
-}
 
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
@@ -694,13 +669,15 @@ class _TextSelectionHandleOverlayState
     );
 
     // Make sure the GestureDetector is big enough to be easily interactive.
-    final Rect interactiveRect = getInteractiveRect(handleRect);
-    final double paddingHorizontal = handleRect.width < interactiveRect.width
-      ? (interactiveRect.width - handleRect.width) / 2
-      : 0;
-    final double paddingVertical = handleRect.height < interactiveRect.height
-      ? (interactiveRect.height - handleRect.height) / 2
-      : 0;
+    final Rect interactiveRect = handleRect.expandToInclude(
+      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveSize / 2),
+    );
+    final RelativeRect padding = RelativeRect.fromLTRB(
+      math.max((interactiveRect.width - handleRect.width) / 2, 0),
+      math.max((interactiveRect.height - handleRect.height) / 2, 0),
+      math.max((interactiveRect.width - handleRect.width) / 2, 0),
+      math.max((interactiveRect.height - handleRect.height) / 2, 0),
+    );
 
     return CompositedTransformFollower(
       link: widget.layerLink,
@@ -718,21 +695,17 @@ class _TextSelectionHandleOverlayState
             onPanStart: _handleDragStart,
             onPanUpdate: _handleDragUpdate,
             onTap: _handleTap,
-            // The above GestureDetector handles all interaction, so interaction
-            // further down the tree can be ignored.
-            child: IgnorePointer(
-              child: Container(
-                padding: EdgeInsets.only(
-                  left: paddingHorizontal,
-                  top: paddingVertical,
-                  right: paddingHorizontal,
-                  bottom: paddingVertical,
-                ),
-                child: widget.selectionControls.buildHandle(
-                  context,
-                  type,
-                  widget.renderObject.preferredLineHeight,
-                ),
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: padding.left,
+                top: padding.top,
+                right: padding.right,
+                bottom: padding.bottom,
+              ),
+              child: widget.selectionControls.buildHandle(
+                context,
+                type,
+                widget.renderObject.preferredLineHeight,
               ),
             ),
           ),
