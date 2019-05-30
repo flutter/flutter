@@ -10,6 +10,7 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -75,10 +76,12 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   // Intent extra arguments.
   protected static final String EXTRA_DART_ENTRYPOINT = "dart_entrypoint";
   protected static final String EXTRA_INITIAL_ROUTE = "initial_route";
+  protected static final String EXTRA_BACKGROUND_MODE = "background_mode";
 
   // Default configuration.
   protected static final String DEFAULT_DART_ENTRYPOINT = "main";
   protected static final String DEFAULT_INITIAL_ROUTE = "/";
+  protected static final String DEFAULT_BACKGROUND_MODE = BackgroundMode.opaque.name();
 
   // FlutterFragment management.
   private static final String TAG_FLUTTER_FRAGMENT = "flutter_fragment";
@@ -114,6 +117,7 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
     private final Class<? extends FlutterActivity> activityClass;
     private String dartEntrypoint = DEFAULT_DART_ENTRYPOINT;
     private String initialRoute = DEFAULT_INITIAL_ROUTE;
+    private String backgroundMode = DEFAULT_BACKGROUND_MODE;
 
     protected IntentBuilder(@NonNull Class<? extends FlutterActivity> activityClass) {
       this.activityClass = activityClass;
@@ -139,6 +143,28 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
     }
 
     /**
+     * The mode of {@code FlutterActivity}'s background, either {@link BackgroundMode#opaque} or
+     * {@link BackgroundMode#transparent}.
+     * <p>
+     * The default background mode is {@link BackgroundMode#opaque}.
+     * <p>
+     * Choosing a background mode of {@link BackgroundMode#transparent} will configure the inner
+     * {@link FlutterView} of this {@code FlutterActivity} to be configured with a
+     * {@link FlutterTextureView} to support transparency. This choice has a non-trivial performance
+     * impact. A transparent background should only be used if it is necessary for the app design
+     * being implemented.
+     * <p>
+     * A {@code FlutterActivity} that is configured with a background mode of
+     * {@link BackgroundMode#transparent} must have a theme applied to it that includes the
+     * following property: {@code <item name="android:windowIsTranslucent">true</item>}.
+     */
+    @NonNull
+    public IntentBuilder backgroundMode(@NonNull BackgroundMode backgroundMode) {
+      this.backgroundMode = backgroundMode.name();
+      return this;
+    }
+
+    /**
      * Creates and returns an {@link Intent} that will launch a {@code FlutterActivity} with
      * the desired configuration.
      */
@@ -146,7 +172,8 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
     public Intent build(@NonNull Context context) {
       return new Intent(context, activityClass)
           .putExtra(EXTRA_DART_ENTRYPOINT, dartEntrypoint)
-          .putExtra(EXTRA_INITIAL_ROUTE, initialRoute);
+          .putExtra(EXTRA_INITIAL_ROUTE, initialRoute)
+          .putExtra(EXTRA_BACKGROUND_MODE, backgroundMode);
     }
   }
 
@@ -154,10 +181,29 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   public void onCreate(Bundle savedInstanceState) {
     Log.d(TAG, "onCreate()");
     super.onCreate(savedInstanceState);
+    configureWindowForTransparency();
     setContentView(createFragmentContainer());
     showCoverView();
     configureStatusBarForFullscreenFlutterExperience();
     ensureFlutterFragmentCreated();
+  }
+
+  /**
+   * Sets this {@code Activity}'s {@code Window} background to be transparent, and hides the status
+   * bar, if this {@code Activity}'s desired {@link BackgroundMode} is {@link BackgroundMode#transparent}.
+   * <p>
+   * For {@code Activity} transparency to work as expected, the theme applied to this {@code Activity}
+   * must include {@code <item name="android:windowIsTranslucent">true</item>}.
+   */
+  private void configureWindowForTransparency() {
+    BackgroundMode backgroundMode = getBackgroundMode();
+    if (backgroundMode == BackgroundMode.transparent) {
+      getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+      getWindow().setFlags(
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+        WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+      );
+    }
   }
 
   /**
@@ -170,6 +216,11 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
    * itself transparent.
    */
   private void showCoverView() {
+    if (getBackgroundMode() == BackgroundMode.transparent) {
+      // Don't display an opaque cover view if the Activity is intended to be transparent.
+      return;
+    }
+
     // Create the coverView.
     if (coverView == null) {
       coverView = new View(this);
@@ -210,7 +261,9 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
    * for details.
    */
   private void hideCoverView() {
-    coverView.setVisibility(View.GONE);
+    if (coverView != null) {
+      coverView.setVisibility(View.GONE);
+    }
   }
 
   private void configureStatusBarForFullscreenFlutterExperience() {
@@ -267,13 +320,19 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
    */
   @NonNull
   protected FlutterFragment createFlutterFragment() {
+    BackgroundMode backgroundMode = getBackgroundMode();
+
     return new FlutterFragment.Builder()
         .dartEntrypoint(getDartEntrypoint())
         .initialRoute(getInitialRoute())
         .appBundlePath(getAppBundlePath())
         .flutterShellArgs(FlutterShellArgs.fromIntent(getIntent()))
-        .renderMode(FlutterView.RenderMode.surface)
-        .transparencyMode(FlutterView.TransparencyMode.opaque)
+        .renderMode(backgroundMode == BackgroundMode.opaque
+            ? FlutterView.RenderMode.surface
+            : FlutterView.RenderMode.texture)
+        .transparencyMode(backgroundMode == BackgroundMode.opaque
+            ? FlutterView.TransparencyMode.opaque
+            : FlutterView.TransparencyMode.transparent)
         .shouldAttachEngineToActivity(shouldAttachEngineToActivity())
         .build();
   }
@@ -433,6 +492,19 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   }
 
   /**
+   * The desired window background mode of this {@code Activity}, which defaults to
+   * {@link BackgroundMode#opaque}.
+   */
+  @NonNull
+  protected BackgroundMode getBackgroundMode() {
+    if (getIntent().hasExtra(EXTRA_BACKGROUND_MODE)) {
+      return BackgroundMode.valueOf(getIntent().getStringExtra(EXTRA_BACKGROUND_MODE));
+    } else {
+      return BackgroundMode.opaque;
+    }
+  }
+
+  /**
    * Returns true if Flutter is running in "debug mode", and false otherwise.
    * <p>
    * Debug mode allows Flutter to operate with hot reload and hot restart. Release mode does not.
@@ -444,5 +516,15 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   @Override
   public void onFirstFrameRendered() {
     hideCoverView();
+  }
+
+  /**
+   * The mode of the background of a {@code FlutterActivity}, either opaque or transparent.
+   */
+  public enum BackgroundMode {
+    /** Indicates a FlutterActivity with an opaque background. This is the default. */
+    opaque,
+    /** Indicates a FlutterActivity with a transparent background. */
+    transparent
   }
 }
