@@ -219,7 +219,7 @@ class TestPointer {
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
-      position: _location,
+      position: _location ?? Offset.zero,
     );
   }
 
@@ -238,7 +238,7 @@ class TestPointer {
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
-      position: _location,
+      position: _location ?? Offset.zero,
     );
   }
 
