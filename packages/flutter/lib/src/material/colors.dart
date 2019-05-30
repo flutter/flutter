@@ -153,7 +153,7 @@ abstract class MaterialStateColor extends Color {
   ///     if (states.contains(MaterialState.pressed)) {
   ///       return const Color(_pressedColor);
   ///     }
-  ///     return const Color(_defaultColor)
+  ///     return const Color(_defaultColor);
   ///   }
   /// }
   /// ```
