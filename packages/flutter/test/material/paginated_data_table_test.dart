@@ -9,6 +9,12 @@ import 'package:flutter/gestures.dart' show DragStartBehavior;
 import 'data_table_test_utils.dart';
 
 class TestDataSource extends DataTableSource {
+  TestDataSource({
+    this.onSelectChanged,
+  });
+
+  final Function onSelectChanged;
+
   int get generation => _generation;
   int _generation = 0;
   set generation(int value) {
@@ -29,6 +35,7 @@ class TestDataSource extends DataTableSource {
         DataCell(Text('${dessert.calories}')),
         DataCell(Text('$generation')),
       ],
+      onSelectChanged: onSelectChanged,
     );
   }
 
@@ -288,5 +295,272 @@ void main() {
     await tester.pump();
     expect(find.text('Rows per page:'), findsOneWidget);
     expect(tester.getTopLeft(find.text('Rows per page:')).dx, 18.0); // 14 padding in the footer row, 4 padding from the card
+  });
+
+  testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
+    const double _defaultTablePadding = 24.0;
+    const double _defaultColumnSpacing = 56.0;
+    const double _customTablePadding = 10.0;
+    const double _customColumnSpacing = 15.0;
+    final TestDataSource source = TestDataSource(
+      onSelectChanged: (bool value) {},
+    );
+    Finder cellContent;
+    Finder checkbox;
+    Finder padding;
+
+    Widget buildPaginatedTable({
+      double tablePadding,
+      double columnSpacing,
+    }) {
+      return PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: 2,
+        availableRowsPerPage: const <int>[
+          2, 4,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) {},
+        onPageChanged: (int rowIndex) {},
+        onSelectAll: (bool value) {},
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Fat'), numeric: true),
+        ],
+        tablePadding: tablePadding,
+        columnSpacing: columnSpacing,
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildPaginatedTable(),
+    ));
+
+    // default checkbox padding
+    checkbox = find.byType(Checkbox).first;
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
+    expect(
+      tester.getRect(checkbox).left - tester.getRect(padding).left,
+      _defaultTablePadding,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(checkbox).right,
+      _defaultTablePadding / 2,
+    );
+
+    // default first column padding
+    padding = find.widgetWithText(Padding, 'Frozen yogurt (0)').first;
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultTablePadding / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultColumnSpacing / 2,
+    );
+
+    // default middle column padding
+    padding = find.widgetWithText(Padding, '159').first;
+    cellContent = find.widgetWithText(Align, '159');
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultColumnSpacing / 2,
+    );
+
+    // default last column padding
+    padding = find.widgetWithText(Padding, '0').first;
+    cellContent = find.widgetWithText(Align, '0').first;
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultTablePadding,
+    );
+
+    // CUSTOM VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildPaginatedTable(
+        tablePadding: _customTablePadding,
+        columnSpacing: _customColumnSpacing,
+      )),
+    ));
+
+    // custom checkbox padding
+    checkbox = find.byType(Checkbox).first;
+    padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
+    expect(
+      tester.getRect(checkbox).left - tester.getRect(padding).left,
+      _customTablePadding,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(checkbox).right,
+      _customTablePadding / 2,
+    );
+
+    // custom first column padding
+    padding = find.widgetWithText(Padding, 'Frozen yogurt (0)').first;
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customTablePadding / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _customColumnSpacing / 2,
+    );
+
+    // custom middle column padding
+    padding = find.widgetWithText(Padding, '159').first;
+    cellContent = find.widgetWithText(Align, '159');
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _customColumnSpacing / 2,
+    );
+
+    // custom last column padding
+    padding = find.widgetWithText(Padding, '0').first;
+    cellContent = find.widgetWithText(Align, '0').first;
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _customTablePadding,
+    );
+  });
+
+  testWidgets('PaginatedDataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
+    const double _defaultTablePadding = 24.0;
+    const double _defaultColumnSpacing = 56.0;
+    const double _customTablePadding = 10.0;
+    const double _customColumnSpacing = 15.0;
+    final TestDataSource source = TestDataSource();
+    Finder cellContent;
+    Finder padding;
+
+    Widget buildPaginatedTable({
+      double tablePadding,
+      double columnSpacing,
+    }) {
+      return PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: 2,
+        availableRowsPerPage: const <int>[
+          2, 4, 8, 16,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) {},
+        onPageChanged: (int rowIndex) {},
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+        tablePadding: tablePadding,
+        columnSpacing: columnSpacing,
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: buildPaginatedTable(),
+    ));
+
+    // DEFAULT VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildPaginatedTable()),
+    ));
+
+    // default first column padding
+    padding = find.widgetWithText(Padding, 'Frozen yogurt (0)').first;
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultTablePadding,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultColumnSpacing / 2,
+    );
+
+    // default middle column padding
+    padding = find.widgetWithText(Padding, '159').first;
+    cellContent = find.widgetWithText(Align, '159');
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultColumnSpacing / 2,
+    );
+
+    // default last column padding
+    padding = find.widgetWithText(Padding, '0').first;
+    cellContent = find.widgetWithText(Align, '0').first;
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultTablePadding,
+    );
+
+    // CUSTOM VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildPaginatedTable(
+        tablePadding: _customTablePadding,
+        columnSpacing: _customColumnSpacing,
+      )),
+    ));
+
+    // custom first column padding
+    padding = find.widgetWithText(Padding, 'Frozen yogurt (0)').first;
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)');
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customTablePadding,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _customColumnSpacing / 2,
+    );
+
+    // custom middle column padding
+    padding = find.widgetWithText(Padding, '159').first;
+    cellContent = find.widgetWithText(Align, '159');
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _customColumnSpacing / 2,
+    );
+
+    // custom last column padding
+    padding = find.widgetWithText(Padding, '0').first;
+    cellContent = find.widgetWithText(Align, '0').first;
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _customColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _customTablePadding,
+    );
   });
 }
