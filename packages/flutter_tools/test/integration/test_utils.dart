@@ -43,7 +43,7 @@ dependencies:
 Future<void> getPackages(String folder) async {
   final List<String> command = <String>[
     fs.path.join(getFlutterRoot(), 'bin', 'flutter'),
-    'packages',
+    'pub',
     'get',
   ];
   final Process process = await processManager.start(command, workingDirectory: folder);
@@ -52,5 +52,5 @@ Future<void> getPackages(String folder) async {
   final int exitCode = await process.exitCode;
   if (exitCode != 0)
     throw Exception(
-        'flutter packages get failed: ${errorOutput.toString()}');
+        'flutter pub get failed: ${errorOutput.toString()}');
 }

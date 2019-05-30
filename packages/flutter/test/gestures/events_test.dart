@@ -20,6 +20,20 @@ void main() {
     expect(nthStylusButton(2), kSecondaryStylusButton);
   });
 
+  testGesture('smallestButton tests', (GestureTester tester) {
+    expect(smallestButton(0x0), equals(0x0));
+    expect(smallestButton(0x1), equals(0x1));
+    expect(smallestButton(0x200), equals(0x200));
+    expect(smallestButton(0x220), equals(0x20));
+  });
+
+  testGesture('isSingleButton tests', (GestureTester tester) {
+    expect(isSingleButton(0x0), isFalse);
+    expect(isSingleButton(0x1), isTrue);
+    expect(isSingleButton(0x200), isTrue);
+    expect(isSingleButton(0x220), isFalse);
+  });
+
   group('fromMouseEvent', () {
     const PointerEvent hover = PointerHoverEvent(
       timeStamp: Duration(days: 1),

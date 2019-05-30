@@ -211,9 +211,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout = firstChild;
     }
 
-    while (targetLastIndex == null || indexOf(trailingChildWithLayout) < targetLastIndex) {
+    for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       RenderBox child = childAfter(trailingChildWithLayout);
-      if (child == null) {
+      if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.
@@ -225,6 +225,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout = child;
       assert(child != null);
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index);
     }
 

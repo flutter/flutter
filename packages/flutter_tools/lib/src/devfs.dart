@@ -7,7 +7,6 @@ import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 
 import 'asset.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
@@ -39,21 +38,25 @@ abstract class DevFSContent {
   /// or if the given time is null.
   bool isModifiedAfter(DateTime time);
 
+  /// The number of bytes in this file.
   int get size;
 
-  Future<List<int>> contentsAsBytes();
+  /// Returns the raw bytes of this file.
+  List<int> contentsAsBytes();
 
-  Stream<List<int>> contentsAsStream();
-
-  Stream<List<int>> contentsAsCompressedStream() {
-    return contentsAsStream().transform<List<int>>(gzip.encoder);
+  /// Returns a gzipped representation of the contents of this file.
+  List<int> contentsAsCompressedBytes() {
+    return gzip.encode(contentsAsBytes());
   }
 
-  /// Return the list of files this content depends on.
-  List<String> get fileDependencies => <String>[];
+  /// Copies the content into the provided file.
+  ///
+  /// Requires that the `destination` directory already exists, but the target
+  /// file need not.
+  void copyToFile(File destination);
 }
 
-// File content to be copied to the device.
+/// File content to be copied to the device.
 class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
@@ -104,9 +107,6 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  List<String> get fileDependencies => <String>[_getFile().path];
-
-  @override
   bool get isModified {
     final FileStat _oldFileStat = _fileStat;
     _stat();
@@ -136,10 +136,12 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  Future<List<int>> contentsAsBytes() => _getFile().readAsBytes();
+  List<int> contentsAsBytes() => _getFile().readAsBytesSync().cast<int>();
 
   @override
-  Stream<List<int>> contentsAsStream() => _getFile().openRead();
+  void copyToFile(File destination) {
+    _getFile().copySync(destination.path);
+  }
 }
 
 /// Byte content to be copied to the device.
@@ -176,14 +178,15 @@ class DevFSByteContent extends DevFSContent {
   int get size => _bytes.length;
 
   @override
-  Future<List<int>> contentsAsBytes() async => _bytes;
+  List<int> contentsAsBytes() => _bytes;
 
   @override
-  Stream<List<int>> contentsAsStream() =>
-      Stream<List<int>>.fromIterable(<List<int>>[_bytes]);
+  void copyToFile(File destination) {
+    destination.writeAsBytesSync(contentsAsBytes());
+  }
 }
 
-/// String content to be copied to the device.
+/// String content to be copied to the device encoded as utf8.
 class DevFSStringContent extends DevFSByteContent {
   DevFSStringContent(String string)
     : _string = string,
@@ -204,76 +207,29 @@ class DevFSStringContent extends DevFSByteContent {
   }
 }
 
-/// Abstract DevFS operations interface.
-abstract class DevFSOperations {
-  Future<Uri> create(String fsName);
-  Future<dynamic> destroy(String fsName);
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content);
-}
-
-/// An implementation of [DevFSOperations] that speaks to the
-/// vm service.
-class ServiceProtocolDevFSOperations implements DevFSOperations {
-  ServiceProtocolDevFSOperations(this.vmService);
+class DevFSOperations {
+  DevFSOperations(this.vmService, this.fsName)
+      : httpAddress = vmService.httpAddress;
 
   final VMService vmService;
+  final String fsName;
+  final Uri httpAddress;
+  final HttpClient _client = HttpClient();
 
-  @override
+  static const int kMaxInFlight = 6;
+
+  int _inFlight = 0;
+  Map<Uri, DevFSContent> _outstanding;
+  Completer<void> _completer;
+
   Future<Uri> create(String fsName) async {
     final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
     return Uri.parse(response['uri']);
   }
 
-  @override
-  Future<dynamic> destroy(String fsName) async {
+  Future<void> destroy(String fsName) async {
     await vmService.vm.deleteDevFS(fsName);
   }
-
-  @override
-  Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
-    List<int> bytes;
-    try {
-      bytes = await content.contentsAsBytes();
-    } catch (e) {
-      return e;
-    }
-    final String fileContents = base64.encode(bytes);
-    try {
-      return await vmService.vm.invokeRpcRaw(
-        '_writeDevFSFile',
-        params: <String, dynamic>{
-          'fsName': fsName,
-          'uri': deviceUri.toString(),
-          'fileContents': fileContents,
-        },
-      );
-    } catch (error) {
-      printTrace('DevFS: Failed to write $deviceUri: $error');
-    }
-  }
-}
-
-class DevFSException implements Exception {
-  DevFSException(this.message, [this.error, this.stackTrace]);
-  final String message;
-  final dynamic error;
-  final StackTrace stackTrace;
-}
-
-class _DevFSHttpWriter {
-  _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-    : httpAddress = serviceProtocol.httpAddress;
-
-  final String fsName;
-  final Uri httpAddress;
-
-  static const int kMaxInFlight = 6;
-  static const int kMaxRetries = 3;
-
-  int _inFlight = 0;
-  Map<Uri, DevFSContent> _outstanding;
-  Completer<void> _completer;
-  final HttpClient _client = HttpClient();
 
   Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client.maxConnectionsPerHost = kMaxInFlight;
@@ -284,19 +240,17 @@ class _DevFSHttpWriter {
   }
 
   void _scheduleWrites() {
-    while (_inFlight < kMaxInFlight) {
-      if (_outstanding.isEmpty) {
-        // Finished.
-        break;
-      }
+    while ((_inFlight < kMaxInFlight) && (!_completer.isCompleted) && _outstanding.isNotEmpty) {
       final Uri deviceUri = _outstanding.keys.first;
       final DevFSContent content = _outstanding.remove(deviceUri);
-      _scheduleWrite(deviceUri, content);
-      _inFlight++;
+      _startWrite(deviceUri, content);
+      _inFlight += 1;
     }
+    if ((_inFlight == 0) && (!_completer.isCompleted) && _outstanding.isEmpty)
+      _completer.complete();
   }
 
-  Future<void> _scheduleWrite(
+  Future<void> _startWrite(
     Uri deviceUri,
     DevFSContent content, [
     int retry = 0,
@@ -307,32 +261,26 @@ class _DevFSHttpWriter {
       request.headers.add('dev_fs_name', fsName);
       request.headers.add('dev_fs_uri_b64',
           base64.encode(utf8.encode(deviceUri.toString())));
-      final Stream<List<int>> contents = content.contentsAsCompressedStream();
-      await request.addStream(contents);
+      request.add(content.contentsAsCompressedBytes());
       final HttpClientResponse response = await request.close();
       await response.drain<void>();
-    } on SocketException catch (socketException, stackTrace) {
-      // We have one completer and can get up to kMaxInFlight errors.
-      if (!_completer.isCompleted)
-        _completer.completeError(socketException, stackTrace);
-      return;
-    } catch (e) {
-      if (retry < kMaxRetries) {
-        printTrace('Retrying writing "$deviceUri" to DevFS due to error: $e');
-        // Synchronization is handled by the _completer below.
-        unawaited(_scheduleWrite(deviceUri, content, retry + 1));
-        return;
-      } else {
-        printError('Error writing "$deviceUri" to DevFS: $e');
+    } catch (error, trace) {
+      if (!_completer.isCompleted) {
+        printTrace('Error writing "$deviceUri" to DevFS: $error');
+        _completer.completeError(error, trace);
       }
     }
-    _inFlight--;
-    if ((_outstanding.isEmpty) && (_inFlight == 0)) {
-      _completer.complete();
-    } else {
-      _scheduleWrites();
-    }
+    _inFlight -= 1;
+    _scheduleWrites();
   }
+}
+
+class DevFSException implements Exception {
+  DevFSException(this.message, [this.error, this.stackTrace]);
+
+  final String message;
+  final dynamic error;
+  final StackTrace stackTrace;
 }
 
 // Basic statistics for DevFS update operation.
@@ -371,8 +319,7 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     String packagesFilePath,
-  }) : _operations = ServiceProtocolDevFSOperations(serviceProtocol),
-       _httpWriter = _DevFSHttpWriter(fsName, serviceProtocol),
+  }) : _operations = DevFSOperations(serviceProtocol, fsName),
        _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   DevFS.operations(
@@ -380,11 +327,9 @@ class DevFS {
     this.fsName,
     this.rootDirectory, {
     String packagesFilePath,
-  }) : _httpWriter = null,
-       _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
+  }) : _packagesFilePath = packagesFilePath ?? fs.path.join(rootDirectory.path, kPackagesFileName);
 
   final DevFSOperations _operations;
-  final _DevFSHttpWriter _httpWriter;
   final String fsName;
   final Directory rootDirectory;
   String _packagesFilePath;
@@ -507,7 +452,7 @@ class DevFS {
     printTrace('Updating files');
     if (dirtyEntries.isNotEmpty) {
       try {
-        await _httpWriter.write(dirtyEntries);
+        await _operations.write(dirtyEntries);
       } on SocketException catch (socketException, stackTrace) {
         printTrace('DevFS sync failed. Lost connection to device: $socketException');
         throw DevFSException('Lost connection to device.', socketException, stackTrace);

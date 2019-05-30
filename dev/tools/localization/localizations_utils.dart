@@ -23,7 +23,7 @@ class LocaleInfo implements Comparable<LocaleInfo> {
   });
 
   /// Simple parser. Expects the locale string to be in the form of 'language_script_COUNTRY'
-  /// where the langauge is 2 characters, script is 4 characters with the first uppercase,
+  /// where the language is 2 characters, script is 4 characters with the first uppercase,
   /// and country is 2-3 characters and all uppercase.
   ///
   /// 'language_COUNTRY' or 'language_script' are also valid. Missing fields will be null.

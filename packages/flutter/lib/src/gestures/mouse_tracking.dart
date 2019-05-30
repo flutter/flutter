@@ -125,7 +125,9 @@ class MouseTracker extends ChangeNotifier {
     final _TrackedAnnotation trackedAnnotation = _findAnnotation(annotation);
     for (int deviceId in trackedAnnotation.activeDevices) {
       if (annotation.onExit != null) {
-        annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+        final PointerEvent event = _lastMouseEvent[deviceId] ?? _pendingRemovals[deviceId];
+        assert(event != null);
+        annotation.onExit(PointerExitEvent.fromMouseEvent(event));
       }
     }
     _trackedAnnotations.remove(annotation);
@@ -153,11 +155,13 @@ class MouseTracker extends ChangeNotifier {
     }
     final int deviceId = event.device;
     if (event is PointerAddedEvent) {
+      // If we are adding the device again, then we're not removing it anymore.
+      _pendingRemovals.remove(deviceId);
       _addMouseEvent(deviceId, event);
       return;
     }
     if (event is PointerRemovedEvent) {
-      _removeMouseEvent(deviceId);
+      _removeMouseEvent(deviceId, event);
       // If the mouse was removed, then we need to schedule one more check to
       // exit any annotations that were active.
       _scheduleMousePositionCheck();
@@ -205,7 +209,9 @@ class MouseTracker extends ChangeNotifier {
   void collectMousePositions() {
     void exitAnnotation(_TrackedAnnotation trackedAnnotation, int deviceId) {
       if (trackedAnnotation.annotation?.onExit != null && trackedAnnotation.activeDevices.contains(deviceId)) {
-        trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(_lastMouseEvent[deviceId]));
+        final PointerEvent event = _lastMouseEvent[deviceId] ?? _pendingRemovals[deviceId];
+        assert(event != null);
+        trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(event));
         trackedAnnotation.activeDevices.remove(deviceId);
       }
     }
@@ -219,74 +225,88 @@ class MouseTracker extends ChangeNotifier {
       }
     }
 
-    // This indicates that all mouse pointers were removed, or none have been
-    // connected yet. If no mouse is connected, then we want to make sure that
-    // all active annotations are exited.
-    if (!mouseIsConnected) {
-      _trackedAnnotations.values.forEach(exitAllDevices);
-      return;
-    }
-
-    for (int deviceId in _lastMouseEvent.keys) {
-      final PointerEvent lastEvent = _lastMouseEvent[deviceId];
-      final Iterable<MouseTrackerAnnotation> hits = annotationFinder(lastEvent.position);
-
-      // No annotations were found at this position for this deviceId, so send an
-      // exit to all active tracked annotations, since none of them were hit.
-      if (hits.isEmpty) {
-        // Send an exit to all tracked animations tracking this deviceId.
-        for (_TrackedAnnotation trackedAnnotation in _trackedAnnotations.values) {
-          exitAnnotation(trackedAnnotation, deviceId);
-        }
-        continue;
+    try {
+      // This indicates that all mouse pointers were removed, or none have been
+      // connected yet. If no mouse is connected, then we want to make sure that
+      // all active annotations are exited.
+      if (!mouseIsConnected) {
+        _trackedAnnotations.values.forEach(exitAllDevices);
+        return;
       }
 
-      final Set<_TrackedAnnotation> hitAnnotations = hits.map<_TrackedAnnotation>((MouseTrackerAnnotation hit) => _findAnnotation(hit)).toSet();
-      for (_TrackedAnnotation hitAnnotation in hitAnnotations) {
-        if (!hitAnnotation.activeDevices.contains(deviceId)) {
-          // A tracked annotation that just became active and needs to have an enter
-          // event sent to it.
-          hitAnnotation.activeDevices.add(deviceId);
-          if (hitAnnotation.annotation?.onEnter != null) {
-            hitAnnotation.annotation.onEnter(PointerEnterEvent.fromMouseEvent(lastEvent));
+      for (int deviceId in _lastMouseEvent.keys) {
+        final PointerEvent lastEvent = _lastMouseEvent[deviceId];
+        final Iterable<MouseTrackerAnnotation> hits = annotationFinder(lastEvent.position);
+
+        // No annotations were found at this position for this deviceId, so send an
+        // exit to all active tracked annotations, since none of them were hit.
+        if (hits.isEmpty) {
+          // Send an exit to all tracked animations tracking this deviceId.
+          for (_TrackedAnnotation trackedAnnotation in _trackedAnnotations.values) {
+            exitAnnotation(trackedAnnotation, deviceId);
           }
-        }
-        if (hitAnnotation.annotation?.onHover != null && lastEvent is PointerHoverEvent) {
-          hitAnnotation.annotation.onHover(lastEvent);
+          continue;
         }
 
-        // Tell any tracked annotations that weren't hit that they are no longer
-        // active.
-        for (_TrackedAnnotation trackedAnnotation in _trackedAnnotations.values) {
-          if (hitAnnotations.contains(trackedAnnotation)) {
-            continue;
-          }
-          if (trackedAnnotation.activeDevices.contains(deviceId)) {
-            if (trackedAnnotation.annotation?.onExit != null) {
-              trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(lastEvent));
+        final Set<_TrackedAnnotation> hitAnnotations = hits.map<_TrackedAnnotation>((MouseTrackerAnnotation hit) => _findAnnotation(hit)).toSet();
+        for (_TrackedAnnotation hitAnnotation in hitAnnotations) {
+          if (!hitAnnotation.activeDevices.contains(deviceId)) {
+            // A tracked annotation that just became active and needs to have an enter
+            // event sent to it.
+            hitAnnotation.activeDevices.add(deviceId);
+            if (hitAnnotation.annotation?.onEnter != null) {
+              hitAnnotation.annotation.onEnter(PointerEnterEvent.fromMouseEvent(lastEvent));
             }
-            trackedAnnotation.activeDevices.remove(deviceId);
+          }
+          if (hitAnnotation.annotation?.onHover != null && lastEvent is PointerHoverEvent) {
+            hitAnnotation.annotation.onHover(lastEvent);
+          }
+
+          // Tell any tracked annotations that weren't hit that they are no longer
+          // active.
+          for (_TrackedAnnotation trackedAnnotation in _trackedAnnotations.values) {
+            if (hitAnnotations.contains(trackedAnnotation)) {
+              continue;
+            }
+            if (trackedAnnotation.activeDevices.contains(deviceId)) {
+              if (trackedAnnotation.annotation?.onExit != null) {
+                trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(lastEvent));
+              }
+              trackedAnnotation.activeDevices.remove(deviceId);
+            }
           }
         }
       }
+    } finally {
+      _pendingRemovals.clear();
     }
   }
 
   void _addMouseEvent(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
+    if (event is PointerAddedEvent) {
+      // If we are adding the device again, then we're not removing it anymore.
+      _pendingRemovals.remove(deviceId);
+    }
     _lastMouseEvent[deviceId] = event;
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
   }
 
-  void _removeMouseEvent(int deviceId) {
+  void _removeMouseEvent(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
+    assert(event is PointerRemovedEvent);
+    _pendingRemovals[deviceId] = event;
     _lastMouseEvent.remove(deviceId);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
     }
   }
+
+  // A list of device IDs that should be removed and notified when scheduling a
+  // mouse position check.
+  final Map<int, PointerRemovedEvent> _pendingRemovals = <int, PointerRemovedEvent>{};
 
   /// The most recent mouse event observed for each mouse device ID observed.
   ///

@@ -102,7 +102,7 @@ Future<Map<String, double>> _readJsonResults(Process process) {
       final String jsonOutput = jsonBuf.toString();
 
       // If we end up here and have already parsed the results, it suggests that
-      // we have recieved output from another test because our `flutter run`
+      // we have received output from another test because our `flutter run`
       // process did not terminate correctly.
       // https://github.com/flutter/flutter/issues/19096#issuecomment-402756549
       if (resultsHaveBeenParsed) {
