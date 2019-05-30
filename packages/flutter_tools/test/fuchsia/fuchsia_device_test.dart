@@ -240,6 +240,8 @@ void main() {
         when(mockProcess.stderr).thenAnswer((Invocation _) => stderr.stream);
         devFinder = MockFile();
         sshConfig = MockFile();
+        when(devFinder.existsSync()).thenReturn(true);
+        when(sshConfig.existsSync()).thenReturn(true);
         when(devFinder.absolute).thenReturn(devFinder);
         when(sshConfig.absolute).thenReturn(sshConfig);
       });
@@ -434,7 +436,8 @@ void main() {
         app = FuchsiaApp.fromPrebuiltApp(far);
       } else {
         fs.file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-          .createSync(recursive: true);
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
         fs.file('.packages').createSync();
         fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
         app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);

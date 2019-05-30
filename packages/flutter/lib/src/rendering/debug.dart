@@ -140,7 +140,7 @@ bool debugCheckIntrinsicSizes = false;
 ///
 /// For details on how to use [dart:developer.Timeline] events in the Dart
 /// Observatory to optimize your app, see:
-/// <https://fuchsia.googlesource.com/sysui/+/master/docs/performance.md>
+/// <https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md>
 ///
 /// See also:
 ///

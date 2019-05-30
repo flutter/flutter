@@ -615,6 +615,9 @@ class WindowsProject {
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
 
+  // The MSBuild solution file.
+  File get solutionFile => _editableDirectory.childFile('Runner.sln');
+
   /// The file where the VS build will write the name of the built app.
   ///
   /// Ideally this will be replaced in the future with inspection of the project.
