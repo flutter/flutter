@@ -52,7 +52,7 @@ Future<void> _buildAssets(
 
   final Map<String, DevFSContent> assetEntries =
       Map<String, DevFSContent>.from(assets.entries);
-  await writeBundle(fs.directory(assetDir), assetEntries);
+  writeBundle(fs.directory(assetDir), assetEntries);
 
   final String appName = fuchsiaProject.project.manifest.appName;
   final String outDir = getFuchsiaBuildDirectory();
