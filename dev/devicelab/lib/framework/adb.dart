@@ -470,10 +470,7 @@ class IosDevice implements Device {
 
 /// Path to the `adb` executable.
 String get adbPath {
-  final String androidHome =
-      Platform.environment['ANDROID_HOME'] != null
-          ? Platform.environment['ANDROID_HOME']
-          : Platform.environment['ANDROID_SDK_ROOT'];
+  final String androidHome = Platform.environment['ANDROID_HOME'] ?? Platform.environment['ANDROID_SDK_ROOT'];
 
   if (androidHome == null)
     throw 'The ANDROID_SDK_ROOT and ANDROID_HOME environment variables are '

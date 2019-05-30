@@ -196,6 +196,73 @@ void main() {
     expect(find.text('BOTTOM'), findsOneWidget);
   });
 
+  testWidgets('SliverGrid Correctly layout children after rearranging', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestSliverGrid(
+        <Widget>[
+          Text('item0', key: Key('0')),
+          Text('item1', key: Key('1')),
+        ]
+      ));
+      await tester.pumpWidget(const TestSliverGrid(
+        <Widget>[
+          Text('item0', key: Key('0')),
+          Text('item3', key: Key('3')),
+          Text('item4', key: Key('4')),
+          Text('item1', key: Key('1')),
+        ]
+      ));
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item3'), findsOneWidget);
+      expect(find.text('item4'), findsOneWidget);
+      expect(find.text('item1'), findsOneWidget);
+
+      final Offset item0Location = tester.getCenter(find.text('item0'));
+      final Offset item3Location = tester.getCenter(find.text('item3'));
+      final Offset item4Location = tester.getCenter(find.text('item4'));
+      final Offset item1Location = tester.getCenter(find.text('item1'));
+
+      expect(isRight(item0Location, item3Location) && sameHorizontal(item0Location, item3Location), true);
+      expect(isBelow(item0Location, item4Location) && sameVertical(item0Location, item4Location), true);
+      expect(isBelow(item0Location, item1Location) && isRight(item0Location, item1Location), true);
+    },
+  );
+
+  testWidgets('SliverFixedExtentList Correctly layout children after rearranging', (WidgetTester tester) async {
+      await tester.pumpWidget(const TestSliverFixedExtentList(
+          <Widget>[
+            Text('item0', key: Key('0')),
+            Text('item2', key: Key('2')),
+            Text('item1', key: Key('1')),
+          ]
+      ));
+      await tester.pumpWidget(const TestSliverFixedExtentList(
+          <Widget>[
+            Text('item0', key: Key('0')),
+            Text('item3', key: Key('3')),
+            Text('item1', key: Key('1')),
+            Text('item4', key: Key('4')),
+            Text('item2', key: Key('2')),
+          ]
+      ));
+      expect(find.text('item0'), findsOneWidget);
+      expect(find.text('item3'), findsOneWidget);
+      expect(find.text('item1'), findsOneWidget);
+      expect(find.text('item4'), findsOneWidget);
+      expect(find.text('item2'), findsOneWidget);
+
+      final Offset item0Location = tester.getCenter(find.text('item0'));
+      final Offset item3Location = tester.getCenter(find.text('item3'));
+      final Offset item1Location = tester.getCenter(find.text('item1'));
+      final Offset item4Location = tester.getCenter(find.text('item4'));
+      final Offset item2Location = tester.getCenter(find.text('item2'));
+
+      expect(isBelow(item0Location, item3Location) && sameVertical(item0Location, item3Location), true);
+      expect(isBelow(item3Location, item1Location) && sameVertical(item3Location, item1Location), true);
+      expect(isBelow(item1Location, item4Location) && sameVertical(item1Location, item4Location), true);
+      expect(isBelow(item4Location, item2Location) && sameVertical(item4Location, item2Location), true);
+    },
+  );
+
   testWidgets('Can override ErrorWidget.build', (WidgetTester tester) async {
     const Text errorText = Text('error');
     final ErrorWidgetBuilder oldBuilder = ErrorWidget.builder;
@@ -211,4 +278,57 @@ void main() {
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;
   });
+}
+
+bool isRight(Offset a, Offset b) => b.dx > a.dx;
+bool isBelow(Offset a, Offset b) => b.dy > a.dy;
+bool sameHorizontal(Offset a, Offset b) => b.dy == a.dy;
+bool sameVertical(Offset a, Offset b) => b.dx == a.dx;
+
+class TestSliverGrid extends StatelessWidget {
+  const TestSliverGrid(this.children);
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: CustomScrollView(
+        slivers: <Widget> [
+          SliverGrid(
+            delegate: SliverChildListDelegate(
+              children,
+            ),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+            ),
+          ),
+        ],
+      )
+    );
+  }
+}
+
+class TestSliverFixedExtentList extends StatelessWidget {
+  const TestSliverFixedExtentList(this.children);
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget> [
+            SliverFixedExtentList(
+              itemExtent: 10.0,
+              delegate: SliverChildListDelegate(
+                children,
+              ),
+            ),
+          ],
+        )
+    );
+  }
 }

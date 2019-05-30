@@ -97,7 +97,8 @@ class FocusAttachment {
     assert(_node != null);
     if (isAttached) {
       assert(_node.context != null);
-      parent ??= Focus.of(_node.context);
+      parent ??= Focus.of(_node.context, nullOk: true);
+      parent ??= FocusScope.of(_node.context);
       assert(parent != null);
       parent._reparent(_node);
     }
@@ -340,10 +341,20 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
-  }) : _onKey = onKey {
+    this.skipTraversal = false,
+  })  : assert(skipTraversal != null),
+        _onKey = onKey {
     // Set it via the setter so that it does nothing on release builds.
     this.debugLabel = debugLabel;
   }
+
+  /// If true, tells the focus traversal policy to skip over this node for
+  /// purposes of the traversal algorithm.
+  ///
+  /// This may be used to place nodes in the focus tree that may be focused, but
+  /// not traversed, allowing them to receive key events as part of the focus
+  /// chain, but not be traversed to via focus traversal.
+  bool skipTraversal;
 
   /// The context that was supplied to [attach].
   ///
@@ -374,6 +385,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   Iterable<FocusNode> get children => _children;
   final List<FocusNode> _children = <FocusNode>[];
 
+  /// An iterator over the children that are allowed to be traversed by the
+  /// [FocusTraversalPolicy].
+  Iterable<FocusNode> get traversalChildren => children.where((FocusNode node) => !node.skipTraversal);
+
   /// A debug label that is used for diagnostic output.
   ///
   /// Will always return null in release builds.
@@ -397,6 +412,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       yield child;
     }
   }
+
+  /// Returns all descendants which do not have the [skipTraversal] flag set.
+  Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal);
 
   /// An [Iterable] over the ancestors of this node.
   ///
@@ -641,7 +659,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
     _context = context;
-    _onKey = onKey;
+    _onKey = onKey ?? _onKey;
     _attachment = FocusAttachment._(this);
     return _attachment;
   }

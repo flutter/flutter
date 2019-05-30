@@ -41,7 +41,7 @@ fi
 
 # Copy the framework and handle local engine builds.
 framework_name="FlutterMacOS.framework"
-derived_dir="${SOURCE_ROOT}/../build/macos/Build/Products/flutter_framework"
+derived_dir="${SOURCE_ROOT}/Flutter"
 framework_path="${FLUTTER_ROOT}/bin/cache/artifacts/engine/darwin-x64"
 flutter_framework="${framework_path}/${framework_name}"
 

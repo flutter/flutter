@@ -65,6 +65,7 @@ void main() {
       viewport.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
         'RenderSliverFillViewport#00000 relayoutBoundary=up1\n'
+        ' │ needs compositing\n'
         ' │ parentData: paintOffset=Offset(0.0, 0.0) (can use size)\n'
         ' │ constraints: SliverConstraints(AxisDirection.down,\n'
         ' │   GrowthDirection.forward, ScrollDirection.idle, scrollOffset:\n'
@@ -78,6 +79,7 @@ void main() {
         ' │ currently live children: 0 to 1\n'
         ' │\n'
         ' ├─child with index 0: RenderRepaintBoundary#00000\n'
+        ' │ │ needs compositing\n'
         ' │ │ parentData: index=0; layoutOffset=0.0\n'
         ' │ │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         ' │ │ layer: OffsetLayer#00000\n'
@@ -101,6 +103,7 @@ void main() {
         ' │     ║   "0"\n'
         ' │     ╚═══════════\n'
         ' └─child with index 1: RenderRepaintBoundary#00000\n'
+        '   │ needs compositing\n'
         '   │ parentData: index=1; layoutOffset=600.0\n'
         '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
         '   │ layer: OffsetLayer#00000 DETACHED\n'

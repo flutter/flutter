@@ -11,9 +11,6 @@ import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
 
-// Padding around the line at the edge of the text selection that has 0 width and
-// the height of the text font.
-const double _kHandlesPadding = 18.0;
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
@@ -25,10 +22,8 @@ const Color _kToolbarDividerColor = Color(0xFFB9B9B9);
 // application's theme color.
 const Color _kHandlesColor = Color(0xFF136FE0);
 
-// This offset is used to determine the center of the selection during a drag.
-// It's slightly below the center of the text so the finger isn't entirely
-// covering the text being selected.
-const Size _kSelectionOffset = Size(20.0, 30.0);
+const double _kSelectionHandleOverlap = 1.5;
+const double _kSelectionHandleRadius = 5.5;
 const Size _kToolbarTriangleSize = Size(18.0, 9.0);
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
 const BorderRadius _kToolbarBorderRadius = BorderRadius.all(Radius.circular(7.5));
@@ -229,40 +224,46 @@ class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
 }
 
 /// Draws a single text selection handle with a bar and a ball.
-///
-/// Draws from a point of origin somewhere inside the size of the painter
-/// such that the ball is below the point of origin and the bar is above the
-/// point of origin.
 class _TextSelectionHandlePainter extends CustomPainter {
-  _TextSelectionHandlePainter({this.origin});
-
-  final Offset origin;
+  const _TextSelectionHandlePainter();
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()
         ..color = _kHandlesColor
         ..strokeWidth = 2.0;
-    // Draw circle below the origin that slightly overlaps the bar.
-    canvas.drawCircle(origin.translate(0.0, 4.0), 5.5, paint);
-    // Draw up from origin leaving 10 pixels of margin on top.
+    canvas.drawCircle(
+      const Offset(_kSelectionHandleRadius, _kSelectionHandleRadius),
+      _kSelectionHandleRadius,
+      paint,
+    );
+    // Draw line so it slightly overlaps the circle.
     canvas.drawLine(
-      origin,
-      origin.translate(
-        0.0,
-        -(size.height - 2.0 * _kHandlesPadding),
+      const Offset(
+        _kSelectionHandleRadius,
+        2 * _kSelectionHandleRadius - _kSelectionHandleOverlap,
+      ),
+      Offset(
+        _kSelectionHandleRadius,
+        size.height,
       ),
       paint,
     );
   }
 
   @override
-  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => origin != oldPainter.origin;
+  bool shouldRepaint(_TextSelectionHandlePainter oldPainter) => false;
 }
 
 class _CupertinoTextSelectionControls extends TextSelectionControls {
+  /// Returns the size of the Cupertino handle.
   @override
-  Size handleSize = _kSelectionOffset; // Used for drag selection offset.
+  Size getHandleSize(double textLineHeight) {
+    return Size(
+      _kSelectionHandleRadius * 2,
+      textLineHeight + _kSelectionHandleRadius * 2 - _kSelectionHandleOverlap,
+    );
+  }
 
   /// Builder for iOS-style copy/paste text selection toolbar.
   @override
@@ -319,22 +320,12 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight) {
     // We want a size that's a vertical line the height of the text plus a 18.0
     // padding in every direction that will constitute the selection drag area.
-    final Size desiredSize = Size(
-      2.0 * _kHandlesPadding,
-      textLineHeight + 2.0 * _kHandlesPadding,
-    );
+    final Size desiredSize = getHandleSize(textLineHeight);
 
     final Widget handle = SizedBox.fromSize(
       size: desiredSize,
-      child: CustomPaint(
-        painter: _TextSelectionHandlePainter(
-          // We give the painter a point of origin that's at the bottom baseline
-          // of the selection cursor position.
-          //
-          // We give it in the form of an offset from the top left of the
-          // SizedBox.
-          origin: Offset(_kHandlesPadding, textLineHeight + _kHandlesPadding),
-        ),
+      child: const CustomPaint(
+        painter: _TextSelectionHandlePainter(),
       ),
     );
 
@@ -342,26 +333,53 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     // baseline. We transform the handle such that the SizedBox is superimposed
     // on top of the text selection endpoints.
     switch (type) {
-      case TextSelectionHandleType.left: // The left handle is upside down on iOS.
-        return Transform(
-          transform: Matrix4.rotationZ(math.pi)
-              ..translate(-_kHandlesPadding, -_kHandlesPadding),
-          child: handle,
-        );
+      case TextSelectionHandleType.left:
+        return handle;
       case TextSelectionHandleType.right:
+        // Right handle is a vertical mirror of the left.
         return Transform(
-          transform: Matrix4.translationValues(
-            -_kHandlesPadding,
-            -(textLineHeight + _kHandlesPadding),
-            0.0,
-          ),
+          transform: Matrix4.identity()
+            ..translate(desiredSize.width / 2, desiredSize.height / 2)
+            ..rotateZ(math.pi)
+            ..translate(-desiredSize.width / 2, -desiredSize.height / 2),
           child: handle,
         );
-      case TextSelectionHandleType.collapsed: // iOS doesn't draw anything for collapsed selections.
+      // iOS doesn't draw anything for collapsed selections.
+      case TextSelectionHandleType.collapsed:
         return Container();
     }
     assert(type != null);
     return null;
+  }
+
+  /// Gets anchor for cupertino-style text selection handles.
+  ///
+  /// See [TextSelectionControls.getHandleAnchor].
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    final Size handleSize = getHandleSize(textLineHeight);
+    switch (type) {
+      // The circle is at the top for the left handle, and the anchor point is
+      // all the way at the bottom of the line.
+      case TextSelectionHandleType.left:
+        return Offset(
+          handleSize.width / 2,
+          handleSize.height,
+        );
+      // The right handle is vertically flipped, and the anchor point is near
+      // the top of the circle to give slight overlap.
+      case TextSelectionHandleType.right:
+        return Offset(
+          handleSize.width / 2,
+          handleSize.height - 2 * _kSelectionHandleRadius + _kSelectionHandleOverlap,
+        );
+      // A collapsed handle anchors itself so that it's centered.
+      default:
+        return Offset(
+          handleSize.width / 2,
+          textLineHeight + (handleSize.height - textLineHeight) / 2,
+        );
+    }
   }
 }
 

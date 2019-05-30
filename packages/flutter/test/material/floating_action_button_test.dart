@@ -36,12 +36,12 @@ void main() {
 
   testWidgets('Floating Action Button tooltip', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
@@ -54,12 +54,12 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
         ),
       ),
@@ -75,10 +75,10 @@ void main() {
   // Regression test for: https://github.com/flutter/flutter/pull/21084
   testWidgets('Floating Action Button tooltip (long press button edge - no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MaterialApp(
+      MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
-            onPressed: null,
+            onPressed: () {},
             tooltip: 'Add',
           ),
         ),
@@ -94,6 +94,41 @@ void main() {
 
   testWidgets('Floating Action Button tooltip (no child)', (WidgetTester tester) async {
     await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          floatingActionButton: FloatingActionButton(
+            onPressed: () {},
+            tooltip: 'Add',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test hover for tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+
+    await gesture.moveTo(Offset.zero);
+    await gesture.removePointer();
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test long press for tooltip.
+    await tester.longPress(find.byType(FloatingActionButton));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsOneWidget);
+  });
+
+  testWidgets('Floating Action Button tooltip reacts when disabled', (WidgetTester tester) async {
+    await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
           floatingActionButton: FloatingActionButton(
@@ -105,8 +140,28 @@ void main() {
     );
 
     expect(find.text('Add'), findsNothing);
+
+    // Test hover for tooltip.
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    try {
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(FloatingActionButton)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Add'), findsOneWidget);
+
+      await gesture.moveTo(Offset.zero);
+    } finally {
+      await gesture.removePointer();
+    }
+    await tester.pumpAndSettle();
+
+    expect(find.text('Add'), findsNothing);
+
+    // Test long press for tooltip.
     await tester.longPress(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
+
     expect(find.text('Add'), findsOneWidget);
   });
 
@@ -687,20 +742,25 @@ void main() {
   });
 
   testWidgets('Floating Action Button has no clip by default', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
     await tester.pumpWidget(
       Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: FloatingActionButton(
-              onPressed: () { /* to make sure the button is enabled */ },
-            ),
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: FloatingActionButton(
+            focusNode: focusNode,
+            onPressed: () { /* to make sure the button is enabled */ },
           ),
+        ),
       ),
     );
 
+    focusNode.unfocus();
+    await tester.pump();
+
     expect(
-        tester.renderObject(find.byType(FloatingActionButton)),
-        paintsExactlyCountTimes(#clipPath, 0),
+      tester.renderObject(find.byType(FloatingActionButton)),
+      paintsExactlyCountTimes(#clipPath, 0),
     );
   });
 }

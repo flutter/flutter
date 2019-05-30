@@ -35,6 +35,7 @@ import 'will_pop_scope.dart';
 ///             if (value.isEmpty) {
 ///               return 'Please enter some text';
 ///             }
+///             return null;
 ///           },
 ///         ),
 ///         Padding(
