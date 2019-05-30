@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file
 
+import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
@@ -22,6 +23,12 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     'PROJECT_DIR': windowsProject.project.directory.path,
     'TRACK_WIDGET_CREATION': (buildInfo?.trackWidgetCreation == true).toString(),
   };
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    environment['FLUTTER_ENGINE'] = fs.path.dirname(fs.path.dirname(engineOutPath));
+    environment['LOCAL_ENGINE'] = fs.path.basename(engineOutPath);
+  }
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
   final String vcvarsScript = await findVcvars();
@@ -38,16 +45,16 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   );
 
   final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
-  final String projectPath = windowsProject.vcprojFile.path;
+  final String solutionPath = windowsProject.solutionFile.path;
   // Run the script with a relative path to the project using the enclosing
   // directory as the workingDirectory, to avoid hitting the limit on command
   // lengths in batch scripts if the absolute path to the project is long.
   final Process process = await processManager.start(<String>[
     buildScript,
     vcvarsScript,
-    fs.path.basename(projectPath),
+    fs.path.basename(solutionPath),
     configuration,
-  ], workingDirectory: fs.path.dirname(projectPath));
+  ], workingDirectory: fs.path.dirname(solutionPath));
   final Status status = logger.startProgress(
     'Building Windows application...',
     timeout: null,

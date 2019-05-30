@@ -378,7 +378,7 @@ class FuchsiaDevice extends Device {
     const String findCommand = 'find /hub -name vmservice-port';
     final RunResult findResult = await shell(findCommand);
     if (findResult.exitCode != 0) {
-      throwToolExit("'$findCommand' on device $id failed");
+      throwToolExit("'$findCommand' on device $id failed. stderr: '${findResult.stderr}'");
       return null;
     }
     final String findOutput = findResult.stdout;
