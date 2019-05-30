@@ -100,8 +100,8 @@ class CupertinoTabController extends ChangeNotifier {
   }
 }
 
-/// An object that holds at most one listener, who will be notified when the
-/// tab item that corresponds to the encompassing [CupertinoTabScaffold]'s
+/// An object that holds at most one listener. The current listener will be notified
+/// when the tab item that corresponds to the encompassing [CupertinoTabScaffold]'s
 /// current tab is tapped.
 ///
 /// See also:

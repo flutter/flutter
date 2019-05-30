@@ -162,8 +162,13 @@ class _CupertinoTabViewState extends State<CupertinoTabView> {
   @override
   void didUpdateWidget(CupertinoTabView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.navigatorKey != oldWidget.navigatorKey
-        || widget.navigatorObservers != oldWidget.navigatorObservers) {
+    if (widget.navigatorKey != oldWidget.navigatorKey && _heroController.navigator != null) {
+      // If the existing `_heroController` already has a navigator, replace it
+      // with a new controller.
+      _heroController = CupertinoApp.createCupertinoHeroController();
+      _updateObservers();
+    }
+    if (widget.navigatorObservers != oldWidget.navigatorObservers) {
       _updateObservers();
     }
   }

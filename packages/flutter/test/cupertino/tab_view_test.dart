@@ -26,8 +26,9 @@ class TestCupertinoTabView extends CupertinoTabView {
   const TestCupertinoTabView({
     Key key,
     WidgetBuilder builder,
+    GlobalKey<NavigatorState> navigatorKey,
     this.onTap,
-  }) : super(key: key, builder: builder);
+  }) : super(key: key, builder: builder, navigatorKey: navigatorKey);
 
   final VoidCallback onTap;
 
@@ -172,7 +173,144 @@ void main() {
       await tester.pump();
   });
 
-  testWidgets('Overriding onTapWhenActive works', (WidgetTester tester) async {
+  testWidgets('does not crash if the tabs are replaced by different tabs, '
+              'and the correct listener should be notified on tap',
+    (WidgetTester tester) async {
+      final List<int> tapCount = List<int>.filled(11, 0);
+      await tester.pumpWidget(buildBoilerplate(
+        numOfTabs: 10,
+        tabBuilder: (BuildContext context, int index) {
+          return TestCupertinoTabView(
+            builder: defaultBuilder,
+            navigatorKey: keys[index],
+            onTap: () => tapCount[index] += 1,
+          );
+        },
+      ));
+
+      await tester.tap(find.text('Tab 1'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(tapCount[0], 1);
+      expect(tapCount[4], 0);
+
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tapCount[4], 1);
+
+      // Build with shifted navigatorKey.
+      await tester.pumpWidget(buildBoilerplate(
+        numOfTabs: 10,
+        tabBuilder: (BuildContext context, int index) {
+          return TestCupertinoTabView(
+            builder: defaultBuilder,
+            navigatorKey: keys[index + 5],
+            onTap: () => tapCount[index] += 1,
+          );
+        },
+      ));
+
+      expect(tapCount[0], 1);
+      expect(tapCount[4], 1);
+
+      // Switch back to Tab 1.
+      await tester.tap(find.text('Tab 1'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 1'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(tapCount[0], 2);
+      expect(tapCount[4], 1);
+
+      // Switch back to Tab 5.
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tapCount[4], 2);
+
+      // TODO(LongCatIsLooong): uncomment after fixing #33455
+      // Build with 1 more tab.
+      /*
+      await tester.pumpWidget(buildBoilerplate(
+        numOfTabs: 11,
+        tabBuilder: (BuildContext context, int index) {
+          return TestCupertinoTabView(
+            builder: defaultBuilder,
+            // Shift navigatorKey.
+            navigatorKey: keys[index + 5],
+            onTap: () => tapCount[index] += 1,
+          );
+        },
+      ));
+
+      // Switch back to Tab 1.
+      await tester.tap(find.text('Tab 1'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 1'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(tapCount[0], 3);
+
+      // Switch back to Tab 5.
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tapCount[4], 3);
+
+      // Switch to Tab 11
+      await tester.tap(find.text('Tab 10'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 10'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tapCount[10], 1);
+      */
+
+      // Build with less tabs.
+      await tester.pumpWidget(buildBoilerplate(
+        numOfTabs: 5,
+        tabBuilder: (BuildContext context, int index) {
+          return TestCupertinoTabView(
+            builder: defaultBuilder,
+            // Shift navigatorKey.
+            navigatorKey: keys[index + 5],
+            onTap: () => tapCount[index] += 1,
+          );
+        },
+      ));
+
+      // Switch back to Tab 1.
+      await tester.tap(find.text('Tab 1'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 1'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+      expect(tapCount[0], 3);
+      expect(tapCount[4], 2);
+
+      // Switch back to Tab 5.
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.tap(find.text('Tab 5'));
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tapCount[4], 3);
+    }
+  );
+
+  testWidgets('overriding onTapWhenActive works', (WidgetTester tester) async {
     int tapCount = 0;
     await tester.pumpWidget(buildBoilerplate(
       tabBuilder: (BuildContext context, int index) {
