@@ -102,7 +102,6 @@ tasks:
       Ensures that an error thrown into the zone can be caught by the ImageStream
       completer
     stage: devicelab
-    flaky: true
     required_agent_capabilities: ["linux/android"]
 
   flutter_gallery_android__compile:
