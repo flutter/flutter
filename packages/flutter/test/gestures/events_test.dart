@@ -370,6 +370,7 @@ void main() {
       timeStamp: Duration(seconds: 2),
       kind: PointerDeviceKind.mouse,
       device: 1,
+      position: Offset(20, 30),
       obscured: true,
       pressureMin: 10,
       pressureMax: 60,
@@ -380,6 +381,7 @@ void main() {
     _expectTransformedEvent(
       original: removed,
       transform: transform,
+      localPosition: localPosition,
     );
 
     const PointerScrollEvent scroll = PointerScrollEvent(
