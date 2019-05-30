@@ -87,7 +87,7 @@ void main() {
     );
     expect(find.byType(Container), findsNWidgets(2));
     controller.jumpTo(200.0);
-    await tester.pump();
+    await tester.pumpAndSettle();
     expect(find.byType(Container), findsNWidgets(2));
   });
 }
