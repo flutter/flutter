@@ -10,6 +10,7 @@ import 'dart:io' hide FileSystemEntity;
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
 
+import 'package:flutter_kernel_transformers/track_widget_constructor_locations.dart';
 import 'package:vm/incremental_compiler.dart';
 import 'package:vm/frontend_server.dart' as frontend show FrontendCompiler,
     CompilerInterface, listenAndCompile, argParser, usage;
@@ -20,8 +21,9 @@ class _FlutterFrontendCompiler implements frontend.CompilerInterface{
   final frontend.CompilerInterface _compiler;
 
   _FlutterFrontendCompiler(StringSink output,
-      {bool unsafePackageSerialization}) :
+      {bool trackWidgetCreation = false, bool unsafePackageSerialization}) :
           _compiler = frontend.FrontendCompiler(output,
+          transformer: trackWidgetCreation ? WidgetCreatorTracker() : null,
           unsafePackageSerialization: unsafePackageSerialization);
 
   @override
@@ -100,10 +102,8 @@ Future<int> starter(
         '--incremental',
         '--sdk-root=$sdkRoot',
         '--output-dill=$outputTrainingDill',
-        '--target=flutter',
-        '--track-widget-creation',
-      ]);
-      compiler ??= _FlutterFrontendCompiler(output);
+        '--target=flutter']);
+      compiler ??= _FlutterFrontendCompiler(output, trackWidgetCreation: true);
 
       await compiler.compile(Platform.script.toFilePath(), options);
       compiler.acceptLastDelta();
@@ -121,6 +121,7 @@ Future<int> starter(
   }
 
   compiler ??= _FlutterFrontendCompiler(output,
+      trackWidgetCreation: options['track-widget-creation'],
       unsafePackageSerialization: options['unsafe-package-serialization']);
 
   if (options.rest.isNotEmpty) {
