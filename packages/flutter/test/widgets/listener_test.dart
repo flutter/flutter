@@ -594,5 +594,50 @@ void main() {
 
       await gesture.removePointer();
     });
+    testWidgets('Exit event when unplugging mouse should have a position', (WidgetTester tester) async {
+      final List<PointerEnterEvent> enter = <PointerEnterEvent>[];
+      final List<PointerHoverEvent> hover = <PointerHoverEvent>[];
+      final List<PointerExitEvent> exit = <PointerExitEvent>[];
+
+      await tester.pumpWidget(
+        Center(
+          child: Listener(
+            onPointerEnter: (PointerEnterEvent e) => enter.add(e),
+            onPointerHover: (PointerHoverEvent e) => hover.add(e),
+            onPointerExit: (PointerExitEvent e) => exit.add(e),
+            child: Container(
+              height: 100.0,
+              width: 100.0,
+            ),
+          ),
+        ),
+      );
+
+      // Plug-in a mouse and move it to the center of the container.
+      final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await gesture.addPointer();
+      await gesture.moveTo(tester.getCenter(find.byType(Container)));
+      await tester.pumpAndSettle();
+
+      expect(enter.length, 1);
+      expect(enter.single.position, const Offset(400.0, 300.0));
+      expect(hover.length, 1);
+      expect(hover.single.position, const Offset(400.0, 300.0));
+      expect(exit.length, 0);
+
+      enter.clear();
+      hover.clear();
+      exit.clear();
+
+      // Unplug the mouse.
+      await gesture.removePointer();
+      await tester.pumpAndSettle();
+
+      expect(enter.length, 0);
+      expect(hover.length, 0);
+      expect(exit.length, 1);
+      expect(exit.single.position, const Offset(400.0, 300.0));
+      expect(exit.single.delta, const Offset(0.0, 0.0));
+    });
   });
 }
