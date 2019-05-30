@@ -172,6 +172,18 @@ abstract class MaterialStateColor extends Color {
   factory MaterialStateColor.resolveWith(ColorResolver callback) => _MaterialStateColor(callback);
 
   /// This method resolves to a [Color] based on a given set of states.
+  ///
+  /// Example:
+  ///
+  /// ```dart
+  /// @override
+  /// Color resolve(Set<MaterialState> states) {
+  ///   if (states.contains(MaterialState.pressed)) {
+  ///     return Colors.grey[900];
+  ///   }
+  ///   return Colors.grey[600];
+  /// }
+  /// ```
   Color resolve(Set<MaterialState> states);
 
   /// Returns the color for the given set of states if `color` is a
