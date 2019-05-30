@@ -70,6 +70,8 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.tablePadding,
+    this.columnSpacing,
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
@@ -130,6 +132,20 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// See [DataTable.onSelectAll].
   final ValueSetter<bool> onSelectAll;
+
+  /// The horizontal padding between the edges of the table and the content
+  /// in the first and last cells of each row.
+  ///
+  /// When a checkbox is displayed, it is also the padding between the checkbox
+  /// the content in the first data column.
+  ///
+  /// This value is optional and defaults to 24.0.
+  final double tablePadding;
+
+  /// The horizontal padding between the contents of each data column.
+  ///
+  /// This value is optional and defaults to 56.0.
+  final double columnSpacing;
 
   /// The index of the first row to display when the widget is first created.
   final int initialFirstRowIndex;
@@ -430,6 +446,8 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               sortColumnIndex: widget.sortColumnIndex,
               sortAscending: widget.sortAscending,
               onSelectAll: widget.onSelectAll,
+              tablePadding: widget.tablePadding,
+              columnSpacing: widget.columnSpacing,
               rows: _getRows(_firstRowIndex, widget.rowsPerPage),
             ),
           ),
