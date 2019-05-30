@@ -424,8 +424,8 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  SemanticsHandlerConfiguration get semanticsHandlers {
-    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+  SemanticsGestureConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
       onVerticalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
@@ -438,7 +438,7 @@ class VerticalDragGestureRecognizer extends DragGestureRecognizer {
       },
     );
   }
-  SemanticsHandlerConfiguration _semanticsConfiguration;
+  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -480,8 +480,8 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
   }) : super(debugOwner: debugOwner, kind: kind);
 
   @override
-  SemanticsHandlerConfiguration get semanticsHandlers {
-    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+  SemanticsGestureConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
       onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
@@ -494,7 +494,7 @@ class HorizontalDragGestureRecognizer extends DragGestureRecognizer {
       },
     );
   }
-  SemanticsHandlerConfiguration _semanticsConfiguration;
+  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {
@@ -530,8 +530,8 @@ class PanGestureRecognizer extends DragGestureRecognizer {
   PanGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
 
   @override
-  SemanticsHandlerConfiguration get semanticsHandlers {
-    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+  SemanticsGestureConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
       onHorizontalDragUpdate: (DragUpdateDetails updateDetails) {
         if (onDown != null)
           onDown(DragDownDetails());
@@ -554,7 +554,7 @@ class PanGestureRecognizer extends DragGestureRecognizer {
       },
     );
   }
-  SemanticsHandlerConfiguration _semanticsConfiguration;
+  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   bool _isFlingGesture(VelocityEstimate estimate) {

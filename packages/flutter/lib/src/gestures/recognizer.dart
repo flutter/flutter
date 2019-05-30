@@ -142,13 +142,18 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
     return _pointerToKind[pointer];
   }
 
-  /// Returns how this recognizer class should handle semantics events.
-  /// Only handlers that the recognizer is interested in need to be assigned.
-  /// Returns null if the recognizer is uninterested in any semantics events.
+  /// Returns the semantics configuration of this gesture recognizer, for example
+  /// for accessibility purposes. It is queried by the recognizer's
+  /// [RawGestureDetector] to build a collective semantics annotation.
   ///
-  /// Its behavior can depend on the state, but should be consistant across
-  /// different calls.
-  SemanticsHandlerConfiguration get semanticsHandlers {
+  /// This method should be overridden by subclasses that are interested in
+  /// semantic gestures.
+  ///
+  /// The returned [SemanticsGestureConfiguration] object should be annotated in
+  /// a manner that describes the current state, and should remain consistant
+  /// behaviors across different calls. It is recommended to cache the returned
+  /// object.
+  SemanticsGestureConfiguration get semanticsConfiguration {
     return null;
   }
 

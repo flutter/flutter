@@ -228,8 +228,8 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   int _initialButtons;
 
   @override
-  SemanticsHandlerConfiguration get semanticsHandlers {
-    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+  SemanticsGestureConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
       onTap: () {
         if (onTapDown != null)
           onTapDown(TapDownDetails());
@@ -240,7 +240,7 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
       },
     );
   }
-  SemanticsHandlerConfiguration _semanticsConfiguration;
+  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
