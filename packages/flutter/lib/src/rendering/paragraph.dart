@@ -279,15 +279,8 @@ class RenderParagraph extends RenderBox
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    if (_needsLayout) {
-      _computeChildrenWidthWithMinIntrinsics(height);
-      _layoutText();
-      // Purposefully not markNeedsLayout(). markNeedsLayout() calls
-      // super.markNeedsLayout(), which we do not want to do as this
-      // layout run is temporary and not a real layout run. It does
-      // not effect the final layout of parents.
-      _needsLayout = true;
-    }
+    _computeChildrenWidthWithMinIntrinsics(height);
+    _layoutText();
     return _textPainter.minIntrinsicWidth;
   }
 
@@ -296,15 +289,8 @@ class RenderParagraph extends RenderBox
     if (!_canComputeIntrinsics()) {
       return 0.0;
     }
-    if (_needsLayout) {
-      _computeChildrenWidthWithMaxIntrinsics(height);
-      _layoutText(); // layout with infinite width.
-      // Purposefully not markNeedsLayout(). markNeedsLayout() calls
-      // super.markNeedsLayout(), which we do not want to do as this
-      // layout run is temporary and not a real layout run. It does
-      // not effect the final layout of parents.
-      _needsLayout = true;
-    }
+    _computeChildrenWidthWithMaxIntrinsics(height);
+    _layoutText(); // layout with infinite width.
     return _textPainter.maxIntrinsicWidth;
   }
 
@@ -314,11 +300,6 @@ class RenderParagraph extends RenderBox
     }
     _computeChildrenHeightWithMinIntrinsics(width);
     _layoutText(minWidth: width, maxWidth: width);
-    // Purposefully not markNeedsLayout(). markNeedsLayout() calls
-    // super.markNeedsLayout(), which we do not want to do as this
-    // layout run is temporary and not a real layout run. It does
-    // not effect the final layout of parents.
-    _needsLayout = true;
     return _textPainter.height;
   }
 
@@ -442,16 +423,6 @@ class RenderParagraph extends RenderBox
       child = childAfter(child);
     }
     return false;
-    // while (child != null) {
-    //   final TextParentData textParentData = child.parentData;
-    //   final Offset adjustedPosition = position - textParentData.offset;
-    //   if (child.hitTest(result, position: adjustedPosition)) {
-    //     result.add(BoxHitTestEntry(child, adjustedPosition));
-    //     return true;
-    //   }
-    //   child = childAfter(child);
-    // }
-    // return false;
   }
 
   @override
@@ -553,7 +524,6 @@ class RenderParagraph extends RenderBox
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();
-
 
     _needsLayout = false;
 
