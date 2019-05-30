@@ -38,17 +38,22 @@ const String _kEllipsis = '\u2026';
 
 /// Parent data for use with [RenderParagraph].
 class TextParentData extends ContainerBoxParentData<RenderBox> {
+  /// The scaling of the text.
+  double scale;
+
   @override
   String toString() {
     final List<String> values = <String>[];
     if (offset != null)
       values.add('offset=$offset');
+    if (scale != null)
+      values.add('scale=$scale');
     values.add(super.toString());
     return values.join('; ');
   }
 }
 
-/// A render object that displays a paragraph of text
+/// A render object that displays a paragraph of text.
 class RenderParagraph extends RenderBox
     with ContainerRenderObjectMixin<RenderBox, TextParentData>,
              RenderBoxContainerDefaultsMixin<RenderBox, TextParentData> {
@@ -283,8 +288,7 @@ class RenderParagraph extends RenderBox
       // not effect the final layout of parents.
       _needsLayout = true;
     }
-    final double minWidth = _textPainter.minIntrinsicWidth;
-    return minWidth;
+    return _textPainter.minIntrinsicWidth;
   }
 
   @override
@@ -301,8 +305,7 @@ class RenderParagraph extends RenderBox
       // not effect the final layout of parents.
       _needsLayout = true;
     }
-    final double maxWidth = _textPainter.maxIntrinsicWidth;
-    return maxWidth;
+    return _textPainter.maxIntrinsicWidth;
   }
 
   double _computeIntrinsicHeight(double width) {
@@ -316,8 +319,7 @@ class RenderParagraph extends RenderBox
     // layout run is temporary and not a real layout run. It does
     // not effect the final layout of parents.
     _needsLayout = true;
-    final double height = _textPainter.height;
-    return height;
+    return _textPainter.height;
   }
 
   @override
@@ -339,9 +341,9 @@ class RenderParagraph extends RenderBox
     return _textPainter.computeDistanceToActualBaseline(baseline);
   }
 
-  /// Intrinsics cannot be calculated without a full layout for
-  /// alignments that require the baseline (baseline, aboveBaseline,
-  /// belowBaseline)
+  // Intrinsics cannot be calculated without a full layout for
+  // alignments that require the baseline (baseline, aboveBaseline,
+  // belowBaseline).
   bool _canComputeIntrinsics() {
     for (PlaceholderSpan span in _placeholderSpans) {
       switch (span.alignment) {
@@ -421,18 +423,35 @@ class RenderParagraph extends RenderBox
   bool hitTestSelf(Offset position) => true;
 
   @override
-  bool hitTestChildren(HitTestResult result, { Offset position }) {
+  bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     RenderBox child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData;
-      final Offset adjustedPosition = position - textParentData.offset;
-      if (child.hitTest(result, position: adjustedPosition)) {
-        result.add(BoxHitTestEntry(child, adjustedPosition));
+      final double scale = textParentData.scale;
+      final bool isHit = result.addWithPaintOffset(
+        offset: textParentData.offset,
+        position: position,
+        hitTest: (BoxHitTestResult result, Offset transformed) {
+          assert(transformed == position - textParentData.offset);
+          return child.hitTest(result, position: transformed / scale);
+        },
+      );
+      if (isHit) {
         return true;
       }
       child = childAfter(child);
     }
     return false;
+    // while (child != null) {
+    //   final TextParentData textParentData = child.parentData;
+    //   final Offset adjustedPosition = position - textParentData.offset;
+    //   if (child.hitTest(result, position: adjustedPosition)) {
+    //     result.add(BoxHitTestEntry(child, adjustedPosition));
+    //     return true;
+    //   }
+    //   child = childAfter(child);
+    // }
+    // return false;
   }
 
   @override
@@ -517,6 +536,7 @@ class RenderParagraph extends RenderBox
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
         _textPainter.inlinePlaceholderBoxes[childIndex].top
       );
+      textParentData.scale = _textPainter.inlinePlaceholderScales[childIndex];
       child = childAfter(child);
       childIndex += 1;
     }
@@ -650,7 +670,7 @@ class RenderParagraph extends RenderBox
       assert(childIndex < _textPainter.inlinePlaceholderBoxes.length);
       final TextParentData textParentData = child.parentData;
 
-      final double scale = _textPainter.inlinePlaceholderScales[childIndex];
+      final double scale = textParentData.scale;
       context.pushTransform(
         needsCompositing,
         offset + textParentData.offset,
@@ -737,7 +757,7 @@ class RenderParagraph extends RenderBox
     return _textPainter.size;
   }
 
-  // The byte offsets for each span that requires custom semantics.
+  // The offsets for each span that requires custom semantics.
   final List<int> _inlineSemanticsOffsets = <int>[];
   // Holds either [GestureRecognizer] or null (for placeholders) to generate
   // proper semnatics configurations.

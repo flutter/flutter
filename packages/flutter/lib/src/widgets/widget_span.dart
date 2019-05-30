@@ -19,8 +19,8 @@ import 'framework.dart';
 /// independently and occupy a rectangular space in the parent text layout.
 ///
 /// [WidgetSpan]s will be ignored when passed into a [TextPainter] directly.
-/// To properly layout and paint the [widget], [WidgetSpan] should be passed
-/// into a [Text.rich] widget.
+/// To properly layout and paint the [child] widget, [WidgetSpan] should be
+/// passed into a [Text.rich] widget.
 ///
 /// {@tool sample}
 ///
@@ -64,7 +64,8 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// The [child] property must be non-null. [WidgetSpan] is a leaf node in
   /// the [InlineSpan] tree. Child widgets are constrained by the width of the
-  /// paragraph they occupy.
+  /// paragraph they occupy. Child widget heights are unconstrained, and may
+  /// cause the text to overflow and be ellipsized/truncated.
   ///
   /// A [TextStyle] may be provided with the [style] property, but only the
   /// decoration, foreground, background, and spacing options will be used.
@@ -89,15 +90,14 @@ class WidgetSpan extends PlaceholderSpan {
   /// Adds a placeholder box to the paragraph builder if a size has been
   /// calculated for the widget.
   ///
-  /// Sizes are provided through 'dimensions', which should contain a 1:1
+  /// Sizes are provided through `dimensions`, which should contain a 1:1
   /// in-order mapping of widget to laid-out dimensions. If no such dimension
   /// is provided, the widget will be skipped.
   ///
-  /// The 'textScaleFactor' will be applied to the laid-out size of the widget.
+  /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
-
     assert(dimensions != null);
     final bool hasStyle = style != null;
     if (hasStyle) {

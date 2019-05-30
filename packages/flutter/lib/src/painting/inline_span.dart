@@ -21,7 +21,7 @@ class Accumulator {
   int get value => _value;
   int _value;
 
-  /// Increases the [value] by the 'addend'.
+  /// Increases the [value] by the `addend`.
   void increment(int addend) {
     assert(addend >= 0);
     _value += addend;
@@ -39,7 +39,7 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 ///  * The subclass [PlaceholderSpan] represents a placeholder that may be
 ///    filled with non-text content. [PlaceholderSpan] itself defines a
 ///    [ui.PlaceholderAlignemnt] and a [TextBaseline]. To be useful,
-///    [PlaceholderSpan] should be extended to define content. An instance of
+///    [PlaceholderSpan] must be extended to define content. An instance of
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
 ///
@@ -92,6 +92,14 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
   ///
+  /// The `textScaleFactor` parameter specifies a scale that the text and
+  /// placeholders will be scaled by. The scaling is performed before layout,
+  /// so the text will be laid out with the scaled glyphs and placeholders.
+  ///
+  /// The `dimensions` parameter specifies the sizes of the placeholders.
+  /// Each [PlaceholderSpan] must be paired with a [PlaceholderDimensions]
+  /// in the same order as defined in the [InlineSpan] tree.
+  ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
 
@@ -129,7 +137,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// true, then the text returned will include the [TextSpan.semanticsLabel]s
   /// instead of the text contents for [TextSpan]s.
   ///
-  /// When [includePlaceholders] is true, [PlaceholderSpan]s in the tree will be
+  /// When `includePlaceholders` is true, [PlaceholderSpan]s in the tree will be
   /// represented as a 0xFFFC 'object replacement character'.
   String toPlainText({bool includeSemanticsLabels = true, bool includePlaceholders = true}) {
     final StringBuffer buffer = StringBuffer();

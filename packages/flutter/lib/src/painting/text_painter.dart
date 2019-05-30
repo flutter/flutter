@@ -11,6 +11,7 @@ import 'package:flutter/services.dart';
 
 import 'basic_types.dart';
 import 'inline_span.dart';
+import 'placeholder_span.dart';
 import 'strut_style.dart';
 import 'text_span.dart';
 
@@ -326,6 +327,9 @@ class TextPainter {
 
   /// An ordered list of scales for each placeholder in the paragraph.
   ///
+  /// The scale is used as a multiplier on the height, width and baselineOffset of
+  /// the placeholder. Scale is primarily used to handle accessibility scaling.
+  ///
   /// Each scale corresponds to a [PlaceholderSpan] in the order they were defined
   /// in the [InlineSpan] tree.
   List<double> get inlinePlaceholderScales => _inlinePlaceholderScales;
@@ -340,6 +344,16 @@ class TextPainter {
   /// placeholders will be ignored in the text layout and no valid
   /// [inlinePlaceholderBoxes] will be returned.
   void setPlaceholderDimensions(List<PlaceholderDimensions> value) {
+    assert(() {
+      int placeholderCount = 0;
+      text.visitChildren((InlineSpan span) {
+        if (span is PlaceholderSpan) {
+          placeholderCount += 1;
+        }
+        return true;
+      });
+      return placeholderCount;
+    }() == value.length);
     _placeholderDimensions = value;
     _needsLayout = true;
     _paragraph = null;
