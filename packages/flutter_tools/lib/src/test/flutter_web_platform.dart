@@ -8,7 +8,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_packages_handler/shelf_packages_handler.dart';
@@ -178,8 +178,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       return null;
     }
 
-    final Uri suiteUrl = url.resolveUri(fs.path.toUri(p.withoutExtension(
-            p.relative(path, from: fs.path.join(_root, 'test'))) +
+    final Uri suiteUrl = url.resolveUri(fs.path.toUri(fs.path.withoutExtension(
+            fs.path.relative(path, from: fs.path.join(_root, 'test'))) +
         '.html'));
     final RunnerSuite suite = await browserManager
         .load(path, suiteUrl, suiteConfig, message, mapper: _mappers[path]);
