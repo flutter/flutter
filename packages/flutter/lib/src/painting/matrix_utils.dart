@@ -265,12 +265,11 @@ class MatrixUtils {
 List<String> debugDescribeTransform(Matrix4 transform) {
   if (transform == null)
     return const <String>['null'];
-  final Float64List storage = transform.storage;
   return <String>[
-    '[0] ${debugFormatDouble(storage[transform.index(0, 0)])},${debugFormatDouble(storage[transform.index(0, 1)])},${debugFormatDouble(storage[transform.index(0, 2)])},${debugFormatDouble(storage[transform.index(0, 3)])}',
-    '[1] ${debugFormatDouble(storage[transform.index(1, 0)])},${debugFormatDouble(storage[transform.index(1, 1)])},${debugFormatDouble(storage[transform.index(1, 2)])},${debugFormatDouble(storage[transform.index(1, 3)])}',
-    '[2] ${debugFormatDouble(storage[transform.index(2, 0)])},${debugFormatDouble(storage[transform.index(2, 1)])},${debugFormatDouble(storage[transform.index(2, 2)])},${debugFormatDouble(storage[transform.index(2, 3)])}',
-    '[3] ${debugFormatDouble(storage[transform.index(3, 0)])},${debugFormatDouble(storage[transform.index(3, 1)])},${debugFormatDouble(storage[transform.index(3, 2)])},${debugFormatDouble(storage[transform.index(3, 3)])}',
+    '[0] ${debugFormatDouble(transform.entry(0, 0))},${debugFormatDouble(transform.entry(0, 1))},${debugFormatDouble(transform.entry(0, 2))},${debugFormatDouble(transform.entry(0, 3))}',
+    '[1] ${debugFormatDouble(transform.entry(1, 0))},${debugFormatDouble(transform.entry(1, 1))},${debugFormatDouble(transform.entry(1, 2))},${debugFormatDouble(transform.entry(1, 3))}',
+    '[2] ${debugFormatDouble(transform.entry(2, 0))},${debugFormatDouble(transform.entry(2, 1))},${debugFormatDouble(transform.entry(2, 2))},${debugFormatDouble(transform.entry(2, 3))}',
+    '[3] ${debugFormatDouble(transform.entry(3, 0))},${debugFormatDouble(transform.entry(3, 1))},${debugFormatDouble(transform.entry(3, 2))},${debugFormatDouble(transform.entry(3, 3))}',
   ];
 }
 
@@ -300,12 +299,11 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
-      final Float64List storage = value.storage;
       final List<String> values = <String>[
-        '${debugFormatDouble(storage[value.index(0, 0)])},${debugFormatDouble(storage[value.index(0, 1)])},${debugFormatDouble(storage[value.index(0, 2)])},${debugFormatDouble(storage[value.index(0, 3)])}',
-        '${debugFormatDouble(storage[value.index(1, 0)])},${debugFormatDouble(storage[value.index(1, 1)])},${debugFormatDouble(storage[value.index(1, 2)])},${debugFormatDouble(storage[value.index(1, 3)])}',
-        '${debugFormatDouble(storage[value.index(2, 0)])},${debugFormatDouble(storage[value.index(2, 1)])},${debugFormatDouble(storage[value.index(2, 2)])},${debugFormatDouble(storage[value.index(2, 3)])}',
-        '${debugFormatDouble(storage[value.index(3, 0)])},${debugFormatDouble(storage[value.index(3, 1)])},${debugFormatDouble(storage[value.index(3, 2)])},${debugFormatDouble(storage[value.index(3, 3)])}',
+        '${debugFormatDouble(value.entry(0, 0))},${debugFormatDouble(value.entry(0, 1))},${debugFormatDouble(value.entry(0, 2))},${debugFormatDouble(value.entry(0, 3))}',
+        '${debugFormatDouble(value.entry(1, 0))},${debugFormatDouble(value.entry(1, 1))},${debugFormatDouble(value.entry(1, 2))},${debugFormatDouble(value.entry(1, 3))}',
+        '${debugFormatDouble(value.entry(2, 0))},${debugFormatDouble(value.entry(2, 1))},${debugFormatDouble(value.entry(2, 2))},${debugFormatDouble(value.entry(2, 3))}',
+        '${debugFormatDouble(value.entry(3, 0))},${debugFormatDouble(value.entry(3, 1))},${debugFormatDouble(value.entry(3, 2))},${debugFormatDouble(value.entry(3, 3))}',
       ];
       return '[${values.join('; ')}]';
     }

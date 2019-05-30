@@ -75,9 +75,9 @@ const Map<String, String> timelineWhitelistArguments = <String, String>{
   'mode': 'basic',
 };
 
-/// Configure `debugFormatDouble` using [num.toStringAsPrecision].
+/// Configure [debugFormatDouble] using [num.toStringAsPrecision].
 ///
-/// Defaults to `null`, which uses the default logic of `debugFormatDouble`.
+/// Defaults to null, which uses the default logic of [debugFormatDouble].
 int debugDoublePrecision;
 
 /// Formats a double to have standard formatting.
