@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
@@ -19,7 +21,7 @@ typedef InputFunction = List<FileSystemEntity> Function(Environment environment)
 
 /// The function signature of a build target which can be invoked to perform
 /// the underlying task.
-typedef BuildInvocation = Future<void> Function(List<FileSystemEntity> inputs, Environment environment);
+typedef BuildInvocation = FutureOr<void> Function(List<FileSystemEntity> inputs, Environment environment);
 
 /// An exception thrown when a rule declares an output that was not produced
 /// by the invocation.

@@ -64,12 +64,12 @@ class Testbed {
   /// `overrides` provides more overrides in addition to the test defaults.
   /// `setup` may be provided to apply mocks within the tool managed zone,
   /// including any specified overrides.
-  Testbed({Future<void> Function() setup, Map<Type, Generator> overrides})
+  Testbed({FutureOr<void> Function() setup, Map<Type, Generator> overrides})
     : _setup = setup,
       _overrides = overrides;
 
 
-  final Future<void> Function() _setup;
+  final FutureOr<void> Function() _setup;
   final Map<Type, Generator> _overrides;
 
   /// Runs `test` within a tool zone.
