@@ -3,8 +3,14 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterAppDelegate.h"
+#include "flutter/fml/logging.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterPluginAppLifeCycleDelegate.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
+#include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPluginAppLifeCycleDelegate_internal.h"
+
+static NSString* kUIBackgroundMode = @"UIBackgroundModes";
+static NSString* kRemoteNotificationCapabitiliy = @"remote-notification";
+static NSString* kBackgroundFetchCapatibility = @"fetch";
 
 @implementation FlutterAppDelegate {
   FlutterPluginAppLifeCycleDelegate* _lifeCycleDelegate;
@@ -87,14 +93,6 @@
 }
 
 - (void)application:(UIApplication*)application
-    didReceiveRemoteNotification:(NSDictionary*)userInfo
-          fetchCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  [_lifeCycleDelegate application:application
-      didReceiveRemoteNotification:userInfo
-            fetchCompletionHandler:completionHandler];
-}
-
-- (void)application:(UIApplication*)application
     didReceiveLocalNotification:(UILocalNotification*)notification {
   [_lifeCycleDelegate application:application didReceiveLocalNotification:notification];
 }
@@ -147,11 +145,6 @@
                         completionHandler:completionHandler];
 }
 
-- (void)application:(UIApplication*)application
-    performFetchWithCompletionHandler:(void (^)(UIBackgroundFetchResult result))completionHandler {
-  [_lifeCycleDelegate application:application performFetchWithCompletionHandler:completionHandler];
-}
-
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 120000
 - (BOOL)application:(UIApplication*)application
     continueUserActivity:(NSUserActivity*)userActivity
@@ -195,10 +188,60 @@
   return nil;
 }
 
-#pragma mark - FlutterAppLifeCycleProvider methods
+#pragma mark - Selectors handling
 
 - (void)addApplicationLifeCycleDelegate:(NSObject<FlutterPlugin>*)delegate {
   [_lifeCycleDelegate addDelegate:delegate];
+}
+
+#pragma mark - UIApplicationDelegate method dynamic implementation
+
+- (BOOL)respondsToSelector:(SEL)selector {
+  if ([_lifeCycleDelegate isSelectorAddedDynamically:selector]) {
+    return [self delegateRespondsSelectorToPlugins:selector];
+  }
+  return [super respondsToSelector:selector];
+}
+
+- (BOOL)delegateRespondsSelectorToPlugins:(SEL)selector {
+  if ([_lifeCycleDelegate hasPluginThatRespondsToSelector:selector]) {
+    return [_lifeCycleDelegate respondsToSelector:selector];
+  } else {
+    return NO;
+  }
+}
+
+- (id)forwardingTargetForSelector:(SEL)aSelector {
+  if ([_lifeCycleDelegate isSelectorAddedDynamically:aSelector]) {
+    [self logCapabilityConfigurationWarningIfNeeded:aSelector];
+    return _lifeCycleDelegate;
+  }
+  return [super forwardingTargetForSelector:aSelector];
+}
+
+// Mimic the logging from Apple when the capability is not set for the selectors.
+// However the difference is that Apple logs these message when the app launches, we only
+// log it when the method is invoked. We can possibly also log it when the app launches, but
+// it will cause an additional scan over all the plugins.
+- (void)logCapabilityConfigurationWarningIfNeeded:(SEL)selector {
+  NSArray* backgroundModesArray =
+      [[NSBundle mainBundle] objectForInfoDictionaryKey:kUIBackgroundMode];
+  NSSet* backgroundModesSet = [[[NSSet alloc] initWithArray:backgroundModesArray] autorelease];
+  if (selector == @selector(application:didReceiveRemoteNotification:fetchCompletionHandler:)) {
+    if (![backgroundModesSet containsObject:kRemoteNotificationCapabitiliy]) {
+      NSLog(
+          @"You've implemented -[<UIApplicationDelegate> "
+          @"application:didReceiveRemoteNotification:fetchCompletionHandler:], but you still need "
+          @"to add \"remote-notification\" to the list of your supported UIBackgroundModes in your "
+          @"Info.plist.");
+    }
+  } else if (selector == @selector(application:performFetchWithCompletionHandler:)) {
+    if (![backgroundModesSet containsObject:kBackgroundFetchCapatibility]) {
+      NSLog(@"You've implemented -[<UIApplicationDelegate> "
+            @"application:performFetchWithCompletionHandler:], but you still need to add \"fetch\" "
+            @"to the list of your supported UIBackgroundModes in your Info.plist.");
+    }
+  }
 }
 
 @end

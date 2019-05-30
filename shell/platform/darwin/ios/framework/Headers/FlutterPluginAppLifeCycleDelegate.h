@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 FLUTTER_EXPORT
 @interface FlutterPluginAppLifeCycleDelegate : NSObject
+
 /**
  * Registers `delegate` to receive life cycle callbacks via this FlutterPluginAppLifecycleDelegate
  * as long as it is alive.
