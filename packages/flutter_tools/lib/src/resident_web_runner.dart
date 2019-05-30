@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math' as math;
 
-import 'package:dwds/service.dart';
 import 'package:meta/meta.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import 'asset.dart';
 import 'base/common.dart';
@@ -23,7 +22,6 @@ import 'run_hot.dart';
 import 'web/asset_server.dart';
 import 'web/chrome.dart';
 import 'web/compile.dart';
-import 'web/debug.dart';
 
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
@@ -47,9 +45,8 @@ class ResidentWebRunner extends ResidentRunner {
   WebAssetServer _server;
   ProjectFileInvalidator projectFileInvalidator;
   DateTime _lastCompiled;
-  WebdevVmClient _webdevVmClient;
+  WipConnection _connection;
   final FlutterProject flutterProject;
-  final String _identifer = 'flutter${math.Random().nextDouble()}';
 
   @override
   Future<int> attach(
@@ -64,13 +61,13 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAfterSignal() async {
-     await _webdevVmClient.close();
+    await _connection.close();
     return _server?.dispose();
   }
 
   @override
   Future<void> cleanupAtFinish() async {
-    await _webdevVmClient.close();
+    await _connection.close();
     return _server?.dispose();
   }
 
@@ -135,18 +132,15 @@ class ResidentWebRunner extends ResidentRunner {
     await _server.initialize();
 
     // Step 3: Spawn an instance of Chrome and direct it to the created server.
-    final Chrome chrome = await chromeLauncher.launch('http:localhost:${_server.port}');
-
-    // Step 4: Connect to the VM service proxy.
-    final DebugService debugService = await DebugService.start(
-      'localhost',
-      chrome.chromeConnection,
-      (String something) async {
-        print('something');
-      },
-      _identifer,
-    );
-    _webdevVmClient = await WebdevVmClient.create(debugService);
+    final String url = 'http://localhost:${_server.port}';
+    final Chrome chrome = await chromeLauncher.launch(url);
+    final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+      return chromeTab.url == url;
+    });
+    _connection = await chromeTab.connect();
+    _connection.onClose.listen((WipConnection connection) {
+      appFinished();
+    });
 
     // We don't support the debugging proxy yet.
     appStartedCompleter?.complete();
@@ -173,7 +167,7 @@ class ResidentWebRunner extends ResidentRunner {
       packagesPath: PackageMap.globalPackagesPath,
     );
     await webCompilationProxy.invalidate(inputs: invalidatedSources);
-    printStatus('Sources updated, refresh browser');
+    await _connection.sendCommand('Page.reload');
     return OperationResult.ok;
   }
 }
