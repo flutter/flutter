@@ -132,8 +132,34 @@ typedef ColorResolver = Color Function(Set<MaterialState> states);
 /// ),
 /// ```
 abstract class MaterialStateColor extends Color {
-  /// Creates a [MaterialStateColor], a color that can return different values
-  /// depending on a given [MaterialState].
+  /// Creates a [MaterialStateColor].
+  ///
+  /// If you want a `const` [MaterialStateColor], you'll need to extend
+  /// [MaterialStateColor] and override the [resolve] method. You'll also need
+  /// to provide a `defaultValue` to the super constructor, so that we can know
+  /// at compile-time what the value of the default [Color] is.
+  ///
+  /// Example (`const`):
+  ///
+  /// ```dart
+  /// class TextColor extends MaterialStateColor {
+  ///   static const int _defaultColor = 0xcafefeed;
+  ///   static const int _pressedColor = 0xdeadbeef;
+  ///
+  ///   const TextColor() : super(_defaultColor);
+  ///
+  ///   @override
+  ///   Color resolve(Set<MaterialState> states) {
+  ///     if (states.contains(MaterialState.pressed)) {
+  ///       return const Color(_pressedColor);
+  ///     }
+  ///     return const Color(_defaultColor)
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// If you don't need your [MaterialStateColor] to be `const`, consider using
+  /// [MaterialStateColor.resolveWith].
   const MaterialStateColor(int defaultValue) : super(defaultValue);
 
   /// Creates a [MaterialStateColor] from a [ColorResolver] callback function.
