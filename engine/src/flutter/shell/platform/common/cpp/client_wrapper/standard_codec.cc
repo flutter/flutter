@@ -109,7 +109,7 @@ EncodableValue StandardCodecSerializer::ReadValue(
     }
     case EncodedType::kLargeInt:
     case EncodedType::kString: {
-      int32_t size = ReadSize(stream);
+      size_t size = ReadSize(stream);
       std::string string_value;
       string_value.resize(size);
       stream->ReadBytes(reinterpret_cast<uint8_t*>(&string_value[0]), size);
@@ -124,18 +124,18 @@ EncodableValue StandardCodecSerializer::ReadValue(
     case EncodedType::kFloat64List:
       return ReadVector<double>(stream);
     case EncodedType::kList: {
-      int32_t length = ReadSize(stream);
+      size_t length = ReadSize(stream);
       EncodableList list_value;
       list_value.reserve(length);
-      for (int32_t i = 0; i < length; ++i) {
+      for (size_t i = 0; i < length; ++i) {
         list_value.push_back(ReadValue(stream));
       }
       return EncodableValue(list_value);
     }
     case EncodedType::kMap: {
-      int32_t length = ReadSize(stream);
+      size_t length = ReadSize(stream);
       EncodableMap map_value;
-      for (int32_t i = 0; i < length; ++i) {
+      for (size_t i = 0; i < length; ++i) {
         EncodableValue key = ReadValue(stream);
         EncodableValue value = ReadValue(stream);
         map_value.emplace(std::move(key), std::move(value));
@@ -208,8 +208,7 @@ void StandardCodecSerializer::WriteValue(const EncodableValue& value,
   }
 }
 
-uint32_t StandardCodecSerializer::ReadSize(
-    ByteBufferStreamReader* stream) const {
+size_t StandardCodecSerializer::ReadSize(ByteBufferStreamReader* stream) const {
   uint8_t byte = stream->ReadByte();
   if (byte < 254) {
     return byte;
@@ -224,7 +223,7 @@ uint32_t StandardCodecSerializer::ReadSize(
   }
 }
 
-void StandardCodecSerializer::WriteSize(uint32_t size,
+void StandardCodecSerializer::WriteSize(size_t size,
                                         ByteBufferStreamWriter* stream) const {
   if (size < 254) {
     stream->WriteByte(static_cast<uint8_t>(size));
@@ -234,17 +233,18 @@ void StandardCodecSerializer::WriteSize(uint32_t size,
     stream->WriteBytes(reinterpret_cast<uint8_t*>(&value), 2);
   } else {
     stream->WriteByte(255);
-    stream->WriteBytes(reinterpret_cast<uint8_t*>(&size), 4);
+    uint32_t value = static_cast<uint32_t>(size);
+    stream->WriteBytes(reinterpret_cast<uint8_t*>(&value), 4);
   }
 }
 
 template <typename T>
 EncodableValue StandardCodecSerializer::ReadVector(
     ByteBufferStreamReader* stream) const {
-  int32_t count = ReadSize(stream);
+  size_t count = ReadSize(stream);
   std::vector<T> vector;
   vector.resize(count);
-  size_t type_size = sizeof(T);
+  uint8_t type_size = static_cast<uint8_t>(sizeof(T));
   if (type_size > 1) {
     stream->ReadAlignment(type_size);
   }
@@ -259,7 +259,7 @@ void StandardCodecSerializer::WriteVector(
     ByteBufferStreamWriter* stream) const {
   size_t count = vector.size();
   WriteSize(count, stream);
-  size_t type_size = sizeof(T);
+  uint8_t type_size = static_cast<uint8_t>(sizeof(T));
   if (type_size > 1) {
     stream->WriteAlignment(type_size);
   }

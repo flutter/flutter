@@ -30,10 +30,10 @@ class StandardCodecSerializer {
 
  protected:
   // Reads the variable-length size from the current position in |stream|.
-  uint32_t ReadSize(ByteBufferStreamReader* stream) const;
+  size_t ReadSize(ByteBufferStreamReader* stream) const;
 
   // Writes the variable-length size encoding to |stream|.
-  void WriteSize(uint32_t size, ByteBufferStreamWriter* stream) const;
+  void WriteSize(size_t size, ByteBufferStreamWriter* stream) const;
 
   // Reads a fixed-type list whose values are of type T from the current
   // position in |stream|, and returns it as the corresponding EncodableValue.
