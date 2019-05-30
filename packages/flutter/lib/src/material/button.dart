@@ -253,12 +253,10 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   void _handleHighlightChanged(bool value) {
     if (_pressed != value) {
-      setState(() {
-        _updateState(MaterialState.pressed, value);
-        if (widget.onHighlightChanged != null) {
-          widget.onHighlightChanged(value);
-        }
-      });
+      _updateState(MaterialState.pressed, value);
+      if (widget.onHighlightChanged != null) {
+        widget.onHighlightChanged(value);
+      }
     }
   }
 
@@ -272,11 +270,6 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateState(MaterialState.disabled, !widget.enabled);
-    if (_pressed && _disabled) {
-      if (widget.onHighlightChanged != null) {
-        widget.onHighlightChanged(false);
-      }
-    }
   }
 
   double get _effectiveElevation {
@@ -317,7 +310,15 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           animationDuration: widget.animationDuration,
           clipBehavior: widget.clipBehavior,
           child: InkWell(
-            onHighlightChanged: _handleHighlightChanged,
+            onHighlightChanged: (bool value) {
+              // InkWell.onHighlightChanged is called in the middle of a build
+              // if the button is disabled during a gesture. When that happens,
+              // calling setState would cause a crash, so we only call setState
+              // when the component is not disabled.
+              _disabled
+                  ? _handleHighlightChanged(value)
+                  : setState(() => _handleHighlightChanged(value));
+            },
             splashColor: widget.splashColor,
             highlightColor: widget.highlightColor,
             focusColor: widget.focusColor,
