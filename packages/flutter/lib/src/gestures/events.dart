@@ -240,7 +240,7 @@ abstract class PointerEvent extends Diagnosticable {
   final Offset position;
 
   /// Distance in logical pixels that the pointer moved since the last
-  /// [PointerMoveEvent].
+  /// [PointerMoveEvent] or [PointerHoverEvent].
   ///
   /// This value is always 0.0 for down, up, and cancel events.
   final Offset delta;
@@ -477,6 +477,7 @@ class PointerRemovedEvent extends PointerEvent {
     Duration timeStamp = Duration.zero,
     PointerDeviceKind kind = PointerDeviceKind.touch,
     int device = 0,
+    Offset position = Offset.zero,
     bool obscured = false,
     double pressureMin = 1.0,
     double pressureMax = 1.0,
@@ -487,7 +488,7 @@ class PointerRemovedEvent extends PointerEvent {
          timeStamp: timeStamp,
          kind: kind,
          device: device,
-         position: null,
+         position: position,
          obscured: obscured,
          pressure: 0.0,
          pressureMin: pressureMin,

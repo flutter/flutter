@@ -166,7 +166,7 @@ class SnackBarThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('actionTextColor', actionTextColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('disabledActionTextColor', disabledActionTextColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<SnackBarBehavior>('behavior', behavior, defaultValue: null));
   }
