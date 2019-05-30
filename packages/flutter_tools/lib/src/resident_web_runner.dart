@@ -10,7 +10,9 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'base/terminal.dart';
+import 'base/utils.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'dart/package_map.dart';
@@ -61,13 +63,15 @@ class ResidentWebRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAfterSignal() async {
-    await _connection.close();
+    await _connection.sendCommand('Browser.close');
+    _connection = null;
     return _server?.dispose();
   }
 
   @override
   Future<void> cleanupAtFinish() async {
-    await _connection.close();
+    await _connection?.sendCommand('Browser.close');
+    _connection = null;
     return _server?.dispose();
   }
 
@@ -135,7 +139,7 @@ class ResidentWebRunner extends ResidentRunner {
     final String url = 'http://localhost:${_server.port}';
     final Chrome chrome = await chromeLauncher.launch(url);
     final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-      return chromeTab.url == url;
+      return chromeTab.url.contains(url); // we don't care about trailing slashes or #
     });
     _connection = await chromeTab.connect();
     _connection.onClose.listen((WipConnection connection) {
@@ -151,23 +155,39 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  Future<OperationResult> restart(
-      {bool fullRestart = false,
-      bool pauseAfterRestart = false,
-      String reason,
-      bool benchmarkMode = false}) async {
-    final List<Uri> invalidatedSources = ProjectFileInvalidator.findInvalidated(
-      lastCompiled: _lastCompiled,
-      urisToMonitor: <Uri>[
-        for (FileSystemEntity entity in flutterProject.directory
-            .childDirectory('lib')
-            .listSync(recursive: true))
-          if (entity is File && entity.path.endsWith('.dart')) entity.uri
-      ], // Add new class to track this for web.
-      packagesPath: PackageMap.globalPackagesPath,
+  Future<OperationResult> restart({
+    bool fullRestart = false,
+    bool pauseAfterRestart = false,
+    String reason,
+    bool benchmarkMode = false,
+  }) async {
+    final Stopwatch timer = Stopwatch()..start();
+    final Status status = logger.startProgress(
+      'Performing hot restart...',
+      timeout: timeoutConfiguration.fastOperation,
+      progressId: 'hot.restart',
     );
-    await webCompilationProxy.invalidate(inputs: invalidatedSources);
-    await _connection.sendCommand('Page.reload');
-    return OperationResult.ok;
+    OperationResult result = OperationResult.ok;
+    try {
+      final List<Uri> invalidatedSources = ProjectFileInvalidator.findInvalidated(
+        lastCompiled: _lastCompiled,
+        urisToMonitor: <Uri>[
+          for (FileSystemEntity entity in flutterProject.directory
+              .childDirectory('lib')
+              .listSync(recursive: true))
+            if (entity is File && entity.path.endsWith('.dart')) entity.uri
+        ], // Add new class to track this for web.
+        packagesPath: PackageMap.globalPackagesPath,
+      );
+      await webCompilationProxy.invalidate(inputs: invalidatedSources);
+      await _connection.sendCommand('Page.reload');
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+    } catch (err) {
+      result = OperationResult(1, err.toString());
+    } finally {
+      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+      status.cancel();
+    }
+    return result;
   }
 }
