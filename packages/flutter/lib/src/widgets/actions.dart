@@ -42,6 +42,7 @@ class Intent extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<LocalKey>('key', key));
+    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled', defaultValue: true));
   }
 }
 
@@ -57,7 +58,7 @@ abstract class Action extends Diagnosticable {
   /// A const constructor for an [Action].
   ///
   /// The [intentKey] parameter must not be null.
-  Action(this.intentKey) : assert(intentKey != null);
+  const Action(this.intentKey) : assert(intentKey != null);
 
   /// The unique key for this action.
   ///
@@ -96,7 +97,7 @@ class CallbackAction extends Action {
   /// A const constructor for an [Action].
   ///
   /// The [intentKey] parameter must not be null.
-  CallbackAction({LocalKey intentKey, @required this.onInvoke}) : super(intentKey);
+  const CallbackAction({LocalKey intentKey, @required this.onInvoke}) : super(intentKey);
 
   /// The callback to be called when invoked.
   @protected
@@ -132,47 +133,51 @@ class ActionDispatcher extends Diagnosticable {
   }
 }
 
-/// A widget that establishes an [ActionDispatcher] to be used by its descendants
-/// when invoking an [Action].
+/// A widget that establishes an [ActionDispatcher] and a map of [Intent] to
+/// [Action] to be used by its descendants when invoking an [Action].
+///
+/// Actions are typically invoked using [invoke] with the context where the
+/// ambient [Actions] widget should be found.
 ///
 /// See also:
 ///
 ///   * [ActionDispatcher], the object that this widget uses to manage actions.
 ///   * [Action], a class for containing and defining an invocation of a user
 ///     action.
-///   * [UndoableActionManager], the object that this widget uses to manage
-///     actions.
-///   * [UndoableAction], a class for containing and defining an invocation of
-///     an undoable user action.
+///   * [Intent], a class that holds a unique [LocalKey] identifying an action,
+///     as well as configuration information for running the [Action].
+///   * [Shortcuts], a widget used to bind key combinations to [Intent]s.
 class Actions extends InheritedWidget {
-  /// Creates a ActionManager object.
+  /// Creates an [Actions] widget.
   ///
-  /// The [child] argument must not be null.
+  /// The [child], [actions], and [dispatcher] arguments must not be null.
   const Actions({
     Key key,
-    this.dispatcher,
-    this.actions,
+    this.dispatcher = const ActionDispatcher(),
+    @required this.actions,
     @required Widget child,
-  }) : super(key: key, child: child);
+  })  : assert(dispatcher != null),
+        assert(actions != null),
+        super(key: key, child: child);
 
-  /// The [ActionDispatcher] object that actually invokes actions.
+  /// The [ActionDispatcher] object that invokes actions.
   ///
-  /// This is what is returned from [Actions.of].
+  /// This is what is returned from [Actions.of], and used by [Actions.invoke].
   final ActionDispatcher dispatcher;
 
-  /// A map of [Intent] keys to [ActionFactory] that defines which actions this
-  /// dispatcher handles.
+  /// A map of [Intent] keys to [ActionFactory] factory methods that defines
+  /// which actions this widget knows about.
   final Map<LocalKey, ActionFactory> actions;
 
   /// Returns the [ActionDispatcher] associated with the [Actions] widget that
   /// most tightly encloses the given [BuildContext].
   ///
-  /// The `context` argument must not be null.
-  ///
   /// Will throw if no ambient [Actions] widget is found.
   ///
   /// If `nullOk` is set to true, then if no ambient [Actions] widget is found,
   /// this will return null.
+  ///
+  /// The `context` argument must not be null.
   static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     final Actions inherited = context.inheritFromWidgetOfExactType(Actions);
@@ -181,7 +186,7 @@ class Actions extends InheritedWidget {
         return true;
       }
       if (inherited == null) {
-        throw FlutterError('Unable to find a $Actions widget in the context.\n'
+        throw FlutterError('Unable to find an $Actions widget in the context.\n'
             '$Actions.of() was called with a context that does not contain an '
             '$Actions widget.\n'
             'No $Actions ancestor could be found starting from the context that '
@@ -209,7 +214,7 @@ class Actions extends InheritedWidget {
   /// that are found.
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
-  /// found, then this method will just return false instead of throwing.
+  /// found, then this method will return false instead of throwing.
   static bool invoke(BuildContext context, Intent intent, {FocusNode focusNode, bool nullOk = false}) {
     assert(context != null);
     assert(intent != null);
@@ -227,6 +232,7 @@ class Actions extends InheritedWidget {
       // Don't continue visiting if we successfully created an action.
       return action == null;
     }
+
     context.visitAncestorElements(visitAncestorElement);
     assert(() {
       if (nullOk) {
@@ -254,6 +260,7 @@ class Actions extends InheritedWidget {
       return true;
     }());
     if (action == null) {
+      // Will only get here if nullOk is true.
       return false;
     }
     // Invoke the action we found using the dispatcher from the Actions we
@@ -263,7 +270,9 @@ class Actions extends InheritedWidget {
   }
 
   @override
-  bool updateShouldNotify(Actions oldWidget) => oldWidget.dispatcher != dispatcher || oldWidget.actions != actions;
+  bool updateShouldNotify(Actions oldWidget) {
+    return oldWidget.dispatcher != dispatcher || oldWidget.actions != actions;
+  }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
