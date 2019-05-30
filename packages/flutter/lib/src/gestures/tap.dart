@@ -229,15 +229,20 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   SemanticsGestureConfiguration get semanticsConfiguration {
-    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
-      onTap: () {
+    if (_semanticsConfiguration != null)
+      return _semanticsConfiguration;
+    final bool hasAnyHandler = onTapDown != null
+                            || onTapUp != null
+                            || onTap != null;
+    return _semanticsConfiguration = SemanticsGestureConfiguration(
+      onTap: hasAnyHandler ? () {
         if (onTapDown != null)
           onTapDown(TapDownDetails());
         if (onTapUp != null)
           onTapUp(TapUpDetails());
         if (onTap != null)
           onTap();
-      },
+      } : null,
     );
   }
   SemanticsGestureConfiguration _semanticsConfiguration;

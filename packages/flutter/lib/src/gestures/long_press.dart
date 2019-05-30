@@ -193,8 +193,14 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
 
   @override
   SemanticsGestureConfiguration get semanticsConfiguration {
-    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
-      onLongPress: () {
+    if (_semanticsConfiguration != null)
+      return _semanticsConfiguration;
+    final bool hasAnyHandler = onLongPressStart != null
+                            || onLongPress != null
+                            || onLongPressEnd!= null
+                            || onLongPressUp != null;
+    return _semanticsConfiguration = SemanticsGestureConfiguration(
+      onLongPress: hasAnyHandler ? () {
         if (onLongPressStart != null)
           onLongPressStart(const LongPressStartDetails());
         if (onLongPress != null)
@@ -203,7 +209,7 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
           onLongPressEnd(const LongPressEndDetails());
         if (onLongPressUp != null)
           onLongPressUp();
-      },
+      } : null,
     );
   }
   SemanticsGestureConfiguration _semanticsConfiguration;
