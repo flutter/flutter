@@ -936,7 +936,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
-    assert(_frameNumber == null || !synchronousCall);
     setState(() {
       _imageInfo = imageInfo;
       _loadingProgress = null;
