@@ -6,6 +6,8 @@ package io.flutter.embedding.android;
 
 import static android.content.ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW;
 
+import android.arch.lifecycle.Lifecycle;
+import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -349,8 +351,14 @@ public class FlutterFragment extends Fragment {
     if (shouldAttachEngineToActivity()) {
       // Notify any plugins that are currently attached to our FlutterEngine that they
       // are now attached to an Activity.
-      // TODO(mattcarroll): send in a real lifecycle.
-      flutterEngine.getActivityControlSurface().attachToActivity(getActivity(), null);
+      //
+      // Passing this Fragment's Lifecycle should be sufficient because as long as this Fragment
+      // is attached to its Activity, the lifecycles should be in sync. Once this Fragment is
+      // detached from its Activity, that Activity will be detached from the FlutterEngine, too,
+      // which means there shouldn't be any possibility for the Fragment Lifecycle to get out of
+      // sync with the Activity. We use the Fragment's Lifecycle because it is possible that the
+      // attached Activity is not a LifecycleOwner.
+      flutterEngine.getActivityControlSurface().attachToActivity(getActivity(), getLifecycle());
     }
   }
 
@@ -590,8 +598,11 @@ public class FlutterFragment extends Fragment {
 
     if (shouldAttachEngineToActivity()) {
       // Notify plugins that they are no longer attached to an Activity.
-      // TODO(mattcarroll): differentiate between detaching for config changes and otherwise.
-      flutterEngine.getActivityControlSurface().detachFromActivity();
+      if (getActivity().isChangingConfigurations()) {
+        flutterEngine.getActivityControlSurface().detachFromActivityForConfigChanges();
+      } else {
+        flutterEngine.getActivityControlSurface().detachFromActivity();
+      }
     }
 
     // Null out the platformPlugin to avoid a possible retain cycle between the plugin, this Fragment,

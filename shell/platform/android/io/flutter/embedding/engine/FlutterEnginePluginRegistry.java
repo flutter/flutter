@@ -53,6 +53,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   private final Map<Class<? extends FlutterPlugin>, ActivityAware> activityAwarePlugins = new HashMap<>();
   private Activity activity;
   private FlutterEngineActivityPluginBinding activityPluginBinding;
+  private boolean isWaitingForActivityReattachment = false;
 
   // ServiceAware
   private final Map<Class<? extends FlutterPlugin>, ServiceAware> serviceAwarePlugins = new HashMap<>();
@@ -259,7 +260,8 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   @Override
   public void attachToActivity(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
-    Log.d(TAG, "Attaching to an Activity.");
+    Log.v(TAG, "Attaching to an Activity."
+        + (isWaitingForActivityReattachment ? " This is after a config change." : ""));
     // If we were already attached to an Android component, detach from it.
     detachFromAndroidComponent();
 
@@ -269,14 +271,21 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
     // Notify all ActivityAware plugins that they are now attached to a new Activity.
     for (ActivityAware activityAware : activityAwarePlugins.values()) {
-      activityAware.onAttachedToActivity(activityPluginBinding);
+      if (isWaitingForActivityReattachment) {
+        activityAware.onReattachedToActivityForConfigChanges(activityPluginBinding);
+      } else {
+        activityAware.onAttachedToActivity(activityPluginBinding);
+      }
     }
+    isWaitingForActivityReattachment = false;
   }
 
   @Override
   public void detachFromActivityForConfigChanges() {
-    Log.d(TAG, "Detaching from an Activity for config changes.");
+    Log.v(TAG, "Detaching from an Activity for config changes.");
     if (isAttachedToActivity()) {
+      isWaitingForActivityReattachment = true;
+
       for (ActivityAware activityAware : activityAwarePlugins.values()) {
         activityAware.onDetachedFromActivityForConfigChanges();
       }
@@ -290,24 +299,8 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
   }
 
   @Override
-  public void reattachToActivityAfterConfigChange(@NonNull Activity activity, @NonNull Lifecycle lifecycle) {
-    Log.d(TAG, "Re-attaching to an Activity after config change.");
-    if (!isAttachedToActivity()) {
-      this.activity = activity;
-      activityPluginBinding = new FlutterEngineActivityPluginBinding(activity);
-      this.flutterEngineAndroidLifecycle.setBackingLifecycle(lifecycle);
-
-      for (ActivityAware activityAware : activityAwarePlugins.values()) {
-        activityAware.onReattachedToActivityForConfigChanges(activityPluginBinding);
-      }
-    } else {
-      Log.e(TAG, "Attempted to reattach plugins to an Activity after config changes, but an Activity was already attached.");
-    }
-  }
-
-  @Override
   public void detachFromActivity() {
-    Log.d(TAG, "Detaching from an Activity.");
+    Log.v(TAG, "Detaching from an Activity.");
     if (isAttachedToActivity()) {
       for (ActivityAware activityAware : activityAwarePlugins.values()) {
         activityAware.onDetachedFromActivity();
@@ -323,7 +316,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   @Override
   public boolean onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResult) {
-    Log.d(TAG, "Forwarding onRequestPermissionsResult() to plugins.");
+    Log.v(TAG, "Forwarding onRequestPermissionsResult() to plugins.");
     if (isAttachedToActivity()) {
       return activityPluginBinding.onRequestPermissionsResult(requestCode, permissions, grantResult);
     } else {
@@ -334,7 +327,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   @Override
   public boolean onActivityResult(int requestCode, int resultCode, @NonNull Intent data) {
-    Log.d(TAG, "Forwarding onActivityResult() to plugins.");
+    Log.v(TAG, "Forwarding onActivityResult() to plugins.");
     if (isAttachedToActivity()) {
       return activityPluginBinding.onActivityResult(requestCode, resultCode, data);
     } else {
@@ -345,7 +338,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   @Override
   public void onNewIntent(@NonNull Intent intent) {
-    Log.d(TAG, "Forwarding onNewIntent() to plugins.");
+    Log.v(TAG, "Forwarding onNewIntent() to plugins.");
     if (isAttachedToActivity()) {
       activityPluginBinding.onNewIntent(intent);
     } else {
@@ -355,7 +348,7 @@ class FlutterEnginePluginRegistry implements PluginRegistry,
 
   @Override
   public void onUserLeaveHint() {
-    Log.d(TAG, "Forwarding onUserLeaveHint() to plugins.");
+    Log.v(TAG, "Forwarding onUserLeaveHint() to plugins.");
     if (isAttachedToActivity()) {
       activityPluginBinding.onUserLeaveHint();
     } else {
