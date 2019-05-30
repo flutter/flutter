@@ -265,11 +265,11 @@ class Poller {
   final Duration initialDelay;
   final Duration pollingInterval;
 
-  bool _cancelled = false;
+  bool _canceled = false;
   Timer _timer;
 
   Future<void> _handleCallback() async {
-    if (_cancelled)
+    if (_canceled)
       return;
 
     try {
@@ -278,13 +278,13 @@ class Poller {
       printTrace('Error from poller: $error');
     }
 
-    if (!_cancelled)
+    if (!_canceled)
       _timer = Timer(pollingInterval, _handleCallback);
   }
 
   /// Cancels the poller.
   void cancel() {
-    _cancelled = true;
+    _canceled = true;
     _timer?.cancel();
     _timer = null;
   }

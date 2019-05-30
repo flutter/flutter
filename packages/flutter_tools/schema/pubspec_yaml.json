@@ -58,6 +58,7 @@
                     "properties": {
                         "androidPackage": { "type": "string" },
                         "iosPrefix": { "type": "string" },
+                        "macosPrefix": { "type": "string" },
                         "pluginClass": { "type": "string" }
                     }
                 }

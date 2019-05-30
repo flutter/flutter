@@ -305,7 +305,7 @@ class IosProject {
   }
 
   /// True, if the host app project is using Swift.
-  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
+  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION') ?? false;
 
   /// The build settings for the host app of this project, as a detached map.
   ///
@@ -397,6 +397,7 @@ class AndroidProject {
   final FlutterProject parent;
 
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'\"]kotlin-android[\'\"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -418,6 +419,12 @@ class AndroidProject {
 
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+    return _firstMatchInFile(gradleFile, _kotlinPluginPattern) != null;
+  }
 
   File get appManifestFile {
     return isUsingGradle
@@ -571,6 +578,8 @@ class MacOSProject {
 
   final FlutterProject project;
 
+  static const String _hostAppBundleName = 'Runner';
+
   bool existsSync() => project.directory.childDirectory('macos').existsSync();
 
   Directory get _editableDirectory => project.directory.childDirectory('macos');
@@ -582,11 +591,14 @@ class MacOSProject {
   File get generatedXcodePropertiesFile => _cacheDirectory.childFile('Generated.xcconfig');
 
   /// The Xcode project file.
-  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
+  Directory get xcodeProject => _editableDirectory.childDirectory('$_hostAppBundleName.xcodeproj');
+
+  /// The Xcode workspace file.
+  Directory get xcodeWorkspace => _editableDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
 
   /// The file where the Xcode build will write the name of the built app.
   ///
-  /// Ideally this will be replaced in the future with inpection of the Runner
+  /// Ideally this will be replaced in the future with inspection of the Runner
   /// scheme's target.
   File get nameFile => _cacheDirectory.childFile('.app_filename');
 }
@@ -609,6 +621,9 @@ class WindowsProject {
 
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
+
+  // The MSBuild solution file.
+  File get solutionFile => _editableDirectory.childFile('Runner.sln');
 
   /// The file where the VS build will write the name of the built app.
   ///

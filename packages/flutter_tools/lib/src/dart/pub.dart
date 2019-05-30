@@ -93,7 +93,7 @@ Future<void> pubGet({
   if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
     final String command = upgrade ? 'upgrade' : 'get';
     final Status status = logger.startProgress(
-      'Running "flutter packages $command" in ${fs.path.basename(directory)}...',
+      'Running "flutter pub $command" in ${fs.path.basename(directory)}...',
       timeout: timeoutConfiguration.slowOperation,
     );
     final List<String> args = <String>['--verbosity=warning'];
