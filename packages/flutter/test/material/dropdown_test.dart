@@ -612,6 +612,33 @@ void main() {
     checkSelectedItemTextGeometry(tester, 'two');
   });
 
+  testWidgets('Dropdown button can have a text style with no fontSize specified', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/33425
+    const String value = 'foo';
+    final UniqueKey itemKey = UniqueKey();
+
+    await tester.pumpWidget(TestApp(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: DropdownButton<String>(
+          value: value,
+          items: <DropdownMenuItem<String>>[
+            DropdownMenuItem<String>(
+              key: itemKey,
+              value: 'foo',
+              child: const Text(value),
+            ),
+          ],
+          isDense: true,
+          onChanged: (_) { },
+          style: const TextStyle(color: Colors.blue),
+        ),
+      ),
+    ));
+
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
     // Open the dropdown menu
     final Key buttonKey = UniqueKey();

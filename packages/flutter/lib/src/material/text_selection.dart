@@ -212,6 +212,15 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
     assert(type != null);
     return null;
   }
+
+  @override
+  bool canSelectAll(TextSelectionDelegate delegate) {
+    // Android allows SelectAll when selection is not collapsed, unless
+    // everything has already been selected.
+    final TextEditingValue value = delegate.textEditingValue;
+    return value.text.isNotEmpty &&
+      !(value.selection.start == 0 && value.selection.end == value.text.length);
+  }
 }
 
 /// Text selection controls that follow the Material Design specification.
