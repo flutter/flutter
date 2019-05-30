@@ -596,6 +596,7 @@ void main() {
 
       await gesture.removePointer();
     });
+
     testWidgets('Exit event when unplugging mouse should have a position', (WidgetTester tester) async {
       final List<PointerEnterEvent> enter = <PointerEnterEvent>[];
       final List<PointerHoverEvent> hover = <PointerHoverEvent>[];
@@ -1186,7 +1187,7 @@ void main() {
       await gesture.removePointer();
     });
 
-    testWidgets('rotated for  hover', (WidgetTester tester) async {
+    testWidgets('rotated for hover', (WidgetTester tester) async {
       final List<PointerEvent> events = <PointerEvent>[];
       final Key key = UniqueKey();
 

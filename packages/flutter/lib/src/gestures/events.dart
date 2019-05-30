@@ -611,7 +611,7 @@ class PointerAddedEvent extends PointerEvent {
 
   @override
   PointerAddedEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     return PointerAddedEvent(
@@ -676,7 +676,7 @@ class PointerRemovedEvent extends PointerEvent {
 
   @override
   PointerRemovedEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     return PointerRemovedEvent(
@@ -765,7 +765,7 @@ class PointerHoverEvent extends PointerEvent {
 
   @override
   PointerHoverEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
@@ -905,7 +905,7 @@ class PointerEnterEvent extends PointerEvent {
 
   @override
   PointerEnterEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
@@ -1045,7 +1045,7 @@ class PointerExitEvent extends PointerEvent {
 
   @override
   PointerExitEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
@@ -1137,7 +1137,7 @@ class PointerDownEvent extends PointerEvent {
 
   @override
   PointerDownEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     return PointerDownEvent(
@@ -1235,7 +1235,7 @@ class PointerMoveEvent extends PointerEvent {
 
   @override
   PointerMoveEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     final Offset transformedPosition = PointerEvent.transformPosition(transform, position);
@@ -1333,7 +1333,7 @@ class PointerUpEvent extends PointerEvent {
 
   @override
   PointerUpEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     return PointerUpEvent(
@@ -1429,7 +1429,7 @@ class PointerScrollEvent extends PointerSignalEvent {
 
   @override
   PointerScrollEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     return PointerScrollEvent(
@@ -1506,7 +1506,7 @@ class PointerCancelEvent extends PointerEvent {
 
   @override
   PointerCancelEvent transformed(Matrix4 transform) {
-    if (transform == this.transform) {
+    if (transform == null || transform == this.transform) {
       return this;
     }
     return PointerCancelEvent(
