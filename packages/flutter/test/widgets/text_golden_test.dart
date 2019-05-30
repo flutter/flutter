@@ -656,7 +656,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidget.2.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidget.2.1.png'),
     );
   }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 
@@ -785,7 +785,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.1.png'),
     );
   }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
 
