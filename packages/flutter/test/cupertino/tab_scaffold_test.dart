@@ -533,6 +533,62 @@ void main() {
     expect(find.text('Page 4', skipOffstage: false), findsNothing);
   });
 
+  // Regression test for #33455
+  testWidgets('Adding new tabs does not crash the app', (WidgetTester tester) async {
+    final List<int> tabsPainted = <int>[];
+    final CupertinoTabController controller = CupertinoTabController(initialIndex: 0);
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(10, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder: (BuildContext context, int index) {
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
+                onPaint: () { tabsPainted.add(index); }
+              ),
+            );
+          }
+        ),
+      )
+    );
+
+    expect(tabsPainted, <int> [0]);
+
+    // Increase the num of tabs to 20.
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: CupertinoTabScaffold(
+          tabBar: CupertinoTabBar(
+            items: List<BottomNavigationBarItem>.generate(20, tabGenerator),
+          ),
+          controller: controller,
+          tabBuilder:
+          (BuildContext context, int index) {
+            return CustomPaint(
+              child: Text('Page ${index + 1}'),
+              painter: TestCallbackPainter(
+                onPaint: () { tabsPainted.add(index); }
+              ),
+            );
+          }
+        ),
+      )
+    );
+
+    expect(tabsPainted, <int> [0, 0]);
+
+    await tester.tap(find.text('Tab 19'));
+    await tester.pump();
+
+    // Tapping the tabs should still work.
+    expect(tabsPainted, <int>[0, 0, 18]);
+  });
+
   testWidgets('If a controller is initially provided then the parent stops doing so for rebuilds, '
               'a new instance of CupertinoTabController should be created and used by the widget, '
               "while preserving the previous controller's tab index",
