@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
+import 'package:dwds/service.dart';
 import 'package:meta/meta.dart';
 
 import 'asset.dart';
@@ -19,8 +21,9 @@ import 'project.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'web/asset_server.dart';
+import 'web/chrome.dart';
 import 'web/compile.dart';
-import 'web/web_device.dart';
+import 'web/debug.dart';
 
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
@@ -44,7 +47,9 @@ class ResidentWebRunner extends ResidentRunner {
   WebAssetServer _server;
   ProjectFileInvalidator projectFileInvalidator;
   DateTime _lastCompiled;
+  WebdevVmClient _webdevVmClient;
   final FlutterProject flutterProject;
+  final String _identifer = 'flutter${math.Random().nextDouble()}';
 
   @override
   Future<int> attach(
@@ -58,12 +63,14 @@ class ResidentWebRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> cleanupAfterSignal() {
+  Future<void> cleanupAfterSignal() async {
+     await _webdevVmClient.close();
     return _server?.dispose();
   }
 
   @override
-  Future<void> cleanupAtFinish() {
+  Future<void> cleanupAtFinish() async {
+    await _webdevVmClient.close();
     return _server?.dispose();
   }
 
@@ -128,7 +135,18 @@ class ResidentWebRunner extends ResidentRunner {
     await _server.initialize();
 
     // Step 3: Spawn an instance of Chrome and direct it to the created server.
-    await chromeLauncher.launch('http:localhost:${_server.port}');
+    final Chrome chrome = await chromeLauncher.launch('http:localhost:${_server.port}');
+
+    // Step 4: Connect to the VM service proxy.
+    final DebugService debugService = await DebugService.start(
+      'localhost',
+      chrome.chromeConnection,
+      (String something) async {
+        print('something');
+      },
+      _identifer,
+    );
+    _webdevVmClient = await WebdevVmClient.create(debugService);
 
     // We don't support the debugging proxy yet.
     appStartedCompleter?.complete();

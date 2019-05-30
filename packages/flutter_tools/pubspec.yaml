@@ -33,6 +33,8 @@ dependencies:
   usage: 3.4.1
   vm_service_client: 0.2.6+2
   web_socket_channel: 1.0.13
+  webkit_inspection_protocol:
+  dwds:
   xml: 3.5.0
   yaml: 2.1.15
   flutter_goldens_client:
@@ -102,7 +104,7 @@ dev_dependencies:
   collection: 1.14.11
   mockito: 4.0.0
   file_testing: 2.1.0
-  vm_service_lib: 3.17.0
+  vm_service_lib:
   test: 1.6.3
   build_runner: 1.4.0
   build_vm_compilers: 1.0.0
