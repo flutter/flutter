@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/test/flutter_web_platform.dart';
 import 'package:meta/meta.dart';
 import 'package:test_api/backend.dart';
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
@@ -21,6 +20,7 @@ import '../globals.dart';
 import '../project.dart';
 import '../web/compile.dart';
 import 'flutter_platform.dart' as loader;
+import 'flutter_web_platform.dart';
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.

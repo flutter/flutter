@@ -17,7 +17,6 @@ import 'package:build_test/src/debug_test_builder.dart';
 import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -27,6 +26,7 @@ import 'package:watcher/watcher.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -358,7 +358,8 @@ StreamChannel postMessageChannel() {
   return controller.foreign;
 }
 
-void setStackTraceMapper(StackTraceMapper mapper) {
+void setStackTraceMap
+per(StackTraceMapper mapper) {
   var formatter = StackTraceFormatter.current;
   if (formatter == null) {
     throw StateError(
