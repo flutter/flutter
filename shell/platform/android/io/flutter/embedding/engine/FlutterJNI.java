@@ -11,7 +11,6 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
-import android.util.Log;
 import android.view.Surface;
 
 import java.nio.ByteBuffer;
@@ -19,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.flutter.BuildConfig;
+import io.flutter.Log;
 import io.flutter.embedding.engine.dart.PlatformMessageHandler;
 import io.flutter.embedding.engine.FlutterEngine.EngineLifecycleListener;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;

@@ -114,6 +114,7 @@ action("flutter_shell_java") {
   jar_path = "$root_out_dir/flutter_java.jar"
 
   sources = [
+    "io/flutter/Log.java",
     "io/flutter/app/FlutterActivity.java",
     "io/flutter/app/FlutterActivityDelegate.java",
     "io/flutter/app/FlutterActivityEvents.java",
