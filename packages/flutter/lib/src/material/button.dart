@@ -271,7 +271,12 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   @override
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _updateState(MaterialState.disabled, !widget.enabled);
+    if (widget.enabled) {
+      _updateState(MaterialState.disabled, false);
+    } else {
+      _states.clear();
+      _states.add(MaterialState.disabled);
+    }
     if (_pressed && _disabled) {
       if (widget.onHighlightChanged != null) {
         widget.onHighlightChanged(false);
