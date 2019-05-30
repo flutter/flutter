@@ -4995,8 +4995,8 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(FlatButton), findsNWidgets(3));
+      // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
+      expect(find.byType(FlatButton), findsNWidgets(4));
     },
   );
 
