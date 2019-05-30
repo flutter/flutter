@@ -228,7 +228,7 @@ void main() {
     expect(boxDecoration.color, const Color(0x00FF00));
   });
 
-  testWidgets('Botton respects themes', (WidgetTester tester) async {
+  testWidgets('Button respects themes', (WidgetTester tester) async {
     TextStyle textStyle;
 
     await tester.pumpWidget(

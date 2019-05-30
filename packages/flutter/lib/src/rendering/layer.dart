@@ -125,39 +125,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     parent?._removeChild(this);
   }
 
-  /// Replaces this layer with the given layer in the parent layer's child list.
-  void replaceWith(Layer newLayer) {
-    assert(parent != null);
-    assert(attached == parent.attached);
-    assert(newLayer.parent == null);
-    assert(newLayer._nextSibling == null);
-    assert(newLayer._previousSibling == null);
-    assert(!newLayer.attached);
-    newLayer._nextSibling = nextSibling;
-    if (_nextSibling != null)
-      _nextSibling._previousSibling = newLayer;
-    newLayer._previousSibling = previousSibling;
-    if (_previousSibling != null)
-      _previousSibling._nextSibling = newLayer;
-    assert(() {
-      Layer node = this;
-      while (node.parent != null)
-        node = node.parent;
-      assert(node != newLayer); // indicates we are about to create a cycle
-      return true;
-    }());
-    parent.adoptChild(newLayer);
-    assert(newLayer.attached == parent.attached);
-    if (parent.firstChild == this)
-      parent._firstChild = newLayer;
-    if (parent.lastChild == this)
-      parent._lastChild = newLayer;
-    _nextSibling = null;
-    _previousSibling = null;
-    parent.dropChild(this);
-    assert(!attached);
-  }
-
   /// Returns the value of [S] that corresponds to the point described by
   /// [regionOffset].
   ///
@@ -330,9 +297,9 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
 ///    for how to create and manage backend textures on Android.
-///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
 ///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
@@ -551,7 +518,7 @@ class ContainerLayer extends Layer {
   List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: FlutterError('Painting order is out of order with respect to elevation.\n'
-                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevations.html '
+                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
                               'for more details.'),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
@@ -634,11 +601,15 @@ class ContainerLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
+    Layer current = lastChild;
+    while (current != null) {
+      final Object value = current.find<S>(regionOffset);
+      if (value != null) {
+        return value;
+      }
+      current = current.previousSibling;
     }
-    return all.first;
+    return null;
   }
 
   @override
@@ -1224,7 +1195,8 @@ class TransformLayer extends OffsetLayer {
   /// The [transform] and [offset] properties must be non-null before the
   /// compositing phase of the pipeline.
   TransformLayer({ Matrix4 transform, Offset offset = Offset.zero })
-    : _transform = transform,
+    : assert(transform.storage.every((double value) => value.isFinite)),
+      _transform = transform,
       super(offset: offset);
 
   /// The matrix to apply.
@@ -1263,26 +1235,31 @@ class TransformLayer extends OffsetLayer {
     return null; // this does not return an engine layer yet.
   }
 
-  @override
-  S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
-    }
-    return all.first;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+  Offset _transformOffset(Offset regionOffset) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(transform);
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
-      return;
+      return null;
     final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
-    yield* super.findAll<S>(Offset(result[0], result[1]));
+    return Offset(result[0], result[1]);
+  }
+
+  @override
+  S find<S>(Offset regionOffset) {
+    final Offset transformedOffset = _transformOffset(regionOffset);
+    return transformedOffset == null ? null : super.find<S>(transformedOffset);
+  }
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) sync* {
+    final Offset transformedOffset = _transformOffset(regionOffset);
+    if (transformedOffset == null) {
+      return;
+    }
+    yield* super.findAll<S>(transformedOffset);
   }
 
   @override
@@ -1482,7 +1459,7 @@ class BackdropFilterLayer extends ContainerLayer {
 /// A composited layer that uses a physical model to producing lighting effects.
 ///
 /// For example, the layer casts a shadow according to its geometry and the
-/// relative position of lights and other physically modelled objects in the
+/// relative position of lights and other physically modeled objects in the
 /// scene.
 ///
 /// When debugging, setting [debugDisablePhysicalShapeLayers] to true will cause this
@@ -1588,11 +1565,9 @@ class PhysicalModelLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
+    if (!clipPath.contains(regionOffset))
       return null;
-    }
-    return all.first;
+    return super.find<S>(regionOffset);
   }
 
   @override
@@ -1844,11 +1819,11 @@ class FollowerLayer extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
-      return null;
+    if (link.leader == null) {
+      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
     }
-    return all.first;
+    final Offset transformedOffset = _transformOffset<S>(regionOffset);
+    return transformedOffset == null ? null : super.find<S>(transformedOffset);
   }
 
   @override
@@ -1856,7 +1831,11 @@ class FollowerLayer extends ContainerLayer {
     if (link.leader == null) {
       return showWhenUnlinked ? super.findAll<S>(regionOffset - unlinkedOffset) : <S>[];
     }
-    return super.findAll<S>(_transformOffset<S>(regionOffset));
+    final Offset transformedOffset = _transformOffset<S>(regionOffset);
+    if (transformedOffset == null) {
+      return <S>[];
+    }
+    return super.findAll<S>(transformedOffset);
   }
 
   /// The transform that was used during the last composition phase.
@@ -2031,11 +2010,17 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
 
   @override
   S find<S>(Offset regionOffset) {
-    final Iterable<S> all = findAll<S>(regionOffset);
-    if (all.isEmpty) {
+    final S result = super.find<S>(regionOffset);
+    if (result != null)
+      return result;
+    if (size != null && !(offset & size).contains(regionOffset))
       return null;
+    if (T == S) {
+      final Object untypedResult = value;
+      final S typedResult = untypedResult;
+      return typedResult;
     }
-    return all.first;
+    return super.find<S>(regionOffset);
   }
 
   @override

@@ -10,7 +10,7 @@ import 'package:flutter/gestures.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
-  testWidgets('Verify that a tap dismisses a modal BottomSheet', (WidgetTester tester) async {
+  testWidgets('Tapping on a modal BottomSheet should not dismiss it', (WidgetTester tester) async {
     BuildContext savedContext;
 
     await tester.pumpWidget(MaterialApp(
@@ -33,28 +33,41 @@ void main() {
       showBottomSheetThenCalled = true;
     });
 
-    await tester.pump(); // bottom sheet show animation starts
-    await tester.pump(const Duration(seconds: 1)); // animation done
+    await tester.pumpAndSettle();
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Tap on the bottom sheet itself to dismiss it.
+    // Tap on the bottom sheet itself, it should not be dismissed
     await tester.tap(find.text('BottomSheet'));
-    await tester.pump(); // bottom sheet dismiss animation starts
-    expect(showBottomSheetThenCalled, isTrue);
-    await tester.pump(const Duration(seconds: 1)); // last frame of animation (sheet is entirely off-screen, but still present)
-    await tester.pump(const Duration(seconds: 1)); // frame after the animation (sheet has been removed)
+    await tester.pumpAndSettle();
+    expect(find.text('BottomSheet'), findsOneWidget);
+    expect(showBottomSheetThenCalled, isFalse);
+  });
+
+  testWidgets('Tapping outside a modal BottomSheet should dismiss it', (WidgetTester tester) async {
+    BuildContext savedContext;
+
+    await tester.pumpWidget(MaterialApp(
+      home: Builder(
+          builder: (BuildContext context) {
+            savedContext = context;
+            return Container();
+          }
+      ),
+    ));
+
+    await tester.pump();
     expect(find.text('BottomSheet'), findsNothing);
 
-    showBottomSheetThenCalled = false;
+    bool showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
       builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
     });
-    await tester.pump(); // bottom sheet show animation starts
-    await tester.pump(const Duration(seconds: 1)); // animation done
+
+    await tester.pumpAndSettle();
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 

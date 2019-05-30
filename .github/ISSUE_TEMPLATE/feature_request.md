@@ -30,7 +30,7 @@ assignees: ''
      concise description of what the problem is.
 
      Describe alternative solutions you've considered. Is there a package
-     on pub.dartlang.org that already solves this?
+     on pub.dev/flutter that already solves this?
 -->
 
 ## Proposal
@@ -41,6 +41,6 @@ assignees: ''
      Consider attaching images showing what you are imagining.
 
      Does this have to be provided by Flutter directly, or can it be provided
-     by a package on pub.dartlang.org? If so, maybe consider implementing and
+     by a package on pub.dev/flutter? If so, maybe consider implementing and
      publishing such a package rather than filing a bug.
 -->
