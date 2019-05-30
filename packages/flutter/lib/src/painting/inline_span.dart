@@ -145,7 +145,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     return buffer.toString();
   }
 
-  /// Walks the [InlineSpan] tree and writes the plain text representation to [buffer].
+  /// Walks the [InlineSpan] tree and writes the plain text representation to `buffer`.
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
   /// 
@@ -162,7 +162,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   @protected
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
 
-  /// Returns the UTF-16 code unit at the given index in the flattened string.
+  /// Returns the UTF-16 code unit at the given `index` in the flattened string.
   ///
   /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
   ///
@@ -179,7 +179,7 @@ abstract class InlineSpan extends DiagnosticableTree {
     return result;
   }
 
-  /// Performs the check at each [InlineSpan] for if the [index] falls within the range
+  /// Performs the check at each [InlineSpan] for if the `index` falls within the range
   /// of the span and returns the corresponding code unit. Returns null otherwise.
   ///
   /// The `offset` parameter tracks the current text byte offset from the root [InlineSpan].
