@@ -9,6 +9,9 @@ import android.arch.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.support.annotation.NonNull;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
@@ -84,11 +87,13 @@ public class FlutterEngine implements LifecycleOwner {
   @NonNull
   private final TextInputChannel textInputChannel;
 
+  private final Set<EngineLifecycleListener> engineLifecycleListeners = new HashSet<>();
   private final EngineLifecycleListener engineLifecycleListener = new EngineLifecycleListener() {
     @SuppressWarnings("unused")
     public void onPreEngineRestart() {
-      // TODO(mattcarroll): work into plugin API. should probably loop through each plugin.
-//      pluginRegistry.onPreEngineRestart();
+      for (EngineLifecycleListener lifecycleListener : engineLifecycleListeners) {
+        lifecycleListener.onPreEngineRestart();
+      }
     }
   };
 
@@ -163,6 +168,22 @@ public class FlutterEngine implements LifecycleOwner {
     dartExecutor.onDetachedFromJNI();
     flutterJNI.removeEngineLifecycleListener(engineLifecycleListener);
     flutterJNI.detachFromNativeAndReleaseResources();
+  }
+
+  /**
+   * Adds a {@code listener} to be notified of Flutter engine lifecycle events, e.g.,
+   * {@code onPreEngineStart()}.
+   */
+  public void addEngineLifecycleListener(@NonNull EngineLifecycleListener listener) {
+    engineLifecycleListeners.add(listener);
+  }
+
+  /**
+   * Removes a {@code listener} that was previously added with
+   * {@link #addEngineLifecycleListener(EngineLifecycleListener)}.
+   */
+  public void removeEngineLifecycleListener(@NonNull EngineLifecycleListener listener) {
+    engineLifecycleListeners.remove(listener);
   }
 
   /**

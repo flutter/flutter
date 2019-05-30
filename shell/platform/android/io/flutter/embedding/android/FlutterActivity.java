@@ -178,7 +178,7 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   }
 
   @Override
-  public void onCreate(Bundle savedInstanceState) {
+  protected void onCreate(Bundle savedInstanceState) {
     Log.d(TAG, "onCreate()");
     super.onCreate(savedInstanceState);
     configureWindowForTransparency();
