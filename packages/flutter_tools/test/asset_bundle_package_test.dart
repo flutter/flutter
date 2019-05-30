@@ -79,14 +79,14 @@ $assetsSection
         final String entryKey = Uri.encodeFull('packages/$packageName/$asset');
         expect(bundle.entries.containsKey(entryKey), true, reason: 'Cannot find key on bundle: $entryKey');
         expect(
-          utf8.decode(await bundle.entries[entryKey].contentsAsBytes()),
+          utf8.decode(bundle.entries[entryKey].contentsAsBytes()),
           asset,
         );
       }
     }
 
     expect(
-      utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+      utf8.decode(bundle.entries['AssetManifest.json'].contentsAsBytes()),
       expectedAssetManifest,
     );
   }
@@ -126,11 +126,11 @@ $assetsSection
       expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        utf8.decode(bundle.entries['FontManifest.json'].contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{
@@ -153,11 +153,11 @@ $assetsSection
       expect(bundle.entries.length, 3); // LICENSE, AssetManifest, FontManifest
       const String expectedAssetManifest = '{}';
       expect(
-        utf8.decode(await bundle.entries['AssetManifest.json'].contentsAsBytes()),
+        utf8.decode(bundle.entries['AssetManifest.json'].contentsAsBytes()),
         expectedAssetManifest,
       );
       expect(
-        utf8.decode(await bundle.entries['FontManifest.json'].contentsAsBytes()),
+        utf8.decode(bundle.entries['FontManifest.json'].contentsAsBytes()),
         '[]',
       );
     }, overrides: <Type, Generator>{
