@@ -422,11 +422,12 @@ public class PlatformViewsController implements MethodChannel.MethodCallHandler,
     private void validateVirtualDisplayDimensions(int width, int height) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         if (height > metrics.heightPixels || width > metrics.widthPixels) {
-            String error = "Creating a virtual display of size: "
-                +  "[" + width + ", " + height + "]"
-                + " is not supported. It is larger than the device screen size: "
+            String message = "Creating a virtual display of size: "
+                +  "[" + width + ", " + height + "] may result in problems"
+                +  "(https://github.com/flutter/flutter/issues/2897)."
+                +  "It is larger than the device screen size: "
                 +  "[" + metrics.widthPixels + ", " + metrics.heightPixels + "].";
-            throw new IllegalArgumentException(error);
+            Log.w(TAG, message);
         }
     }
 
