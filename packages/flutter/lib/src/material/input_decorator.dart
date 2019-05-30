@@ -1870,8 +1870,6 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     if (!decoration.enabled)
       return themeData.disabledColor;
 
-    print(themeData.iconTheme.color);
-
       // Checks if iconTheme.color property is not one of the defaults and returns based on the result
     if (themeData.iconTheme.color != Colors.black54 && themeData.iconTheme.color != Colors.white70){
       return themeData.iconTheme.color;
