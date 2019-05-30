@@ -483,7 +483,7 @@ void main() {
     await expectLater(
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
-      matchesGoldenFile('text_field_opacity_test.0.1.png'),
+      matchesGoldenFile('text_field_opacity_test.0.2.png'),
       skip: !Platform.isLinux,
     );
   });
@@ -4921,8 +4921,8 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(FlatButton), findsNWidgets(3));
+      // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
+      expect(find.byType(FlatButton), findsNWidgets(4));
     },
   );
 
@@ -5086,8 +5086,8 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Collapsed toolbar shows 3 buttons.
-      expect(find.byType(FlatButton), findsNWidgets(3));
+      // Collapsed toolbar shows 4 buttons: cut, copy, paste, select all
+      expect(find.byType(FlatButton), findsNWidgets(4));
     },
   );
 
