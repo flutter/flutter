@@ -446,7 +446,6 @@ void main() {
     const double _customTablePadding = 10.0;
     const double _customColumnSpacing = 15.0;
     Finder cellContent;
-    Finder checkbox;
     Finder padding;
 
     Widget buildTable({
