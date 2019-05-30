@@ -141,7 +141,7 @@ class FixedColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '$runtimeType(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column to a fraction of the table's constraints' maxWidth.
@@ -210,7 +210,7 @@ class FlexColumnWidth extends TableColumnWidth {
   }
 
   @override
-  String toString() => '$runtimeType($value)';
+  String toString() => '$runtimeType(${debugFormatDouble(value)})';
 }
 
 /// Sizes the column such that it is the size that is the maximum of
@@ -1178,8 +1178,8 @@ class RenderTable extends RenderBox {
     properties.add(DiagnosticsProperty<Map<int, TableColumnWidth>>('specified column widths', _columnWidths, level: _columnWidths.isEmpty ? DiagnosticLevel.hidden : DiagnosticLevel.info));
     properties.add(DiagnosticsProperty<TableColumnWidth>('default column width', defaultColumnWidth));
     properties.add(MessageProperty('table size', '$columns\u00D7$rows'));
-    properties.add(IterableProperty<double>('column offsets', _columnLefts, ifNull: 'unknown'));
-    properties.add(IterableProperty<double>('row offsets', _rowTops, ifNull: 'unknown'));
+    properties.add(IterableProperty<String>('column offsets', _columnLefts?.map(debugFormatDouble), ifNull: 'unknown'));
+    properties.add(IterableProperty<String>('row offsets', _rowTops?.map(debugFormatDouble), ifNull: 'unknown'));
   }
 
   @override
