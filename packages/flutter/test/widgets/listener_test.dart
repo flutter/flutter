@@ -637,7 +637,7 @@ void main() {
     expect(enter.length, 0);
     expect(hover.length, 0);
     expect(exit.length, 1);
-    expect(exit.single.position, const Offset(400.0, 300.0)); // <-- This fails, it is null.
+    expect(exit.single.position, const Offset(400.0, 300.0));
     expect(exit.single.delta, const Offset(0.0, 0.0));
   });
 }

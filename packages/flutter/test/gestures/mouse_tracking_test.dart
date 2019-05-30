@@ -230,7 +230,7 @@ void main() {
       expect(exit.first.device, equals(0));
       expect(exit.first.runtimeType, equals(PointerExitEvent));
 
-      // Actually detatch annotation. Shouldn't receive hit.
+      // Actually detach annotation. Shouldn't receive hit.
       tracker.detachAnnotation(annotation);
       clear();
       isInHitRegionOne = false;

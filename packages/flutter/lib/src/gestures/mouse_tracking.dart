@@ -126,6 +126,7 @@ class MouseTracker extends ChangeNotifier {
     for (int deviceId in trackedAnnotation.activeDevices) {
       if (annotation.onExit != null) {
         final PointerEvent event = _lastMouseEvent[deviceId] ?? _pendingRemovals[deviceId];
+        assert(event != null);
         annotation.onExit(PointerExitEvent.fromMouseEvent(event));
       }
     }
@@ -209,6 +210,7 @@ class MouseTracker extends ChangeNotifier {
     void exitAnnotation(_TrackedAnnotation trackedAnnotation, int deviceId) {
       if (trackedAnnotation.annotation?.onExit != null && trackedAnnotation.activeDevices.contains(deviceId)) {
         final PointerEvent event = _lastMouseEvent[deviceId] ?? _pendingRemovals[deviceId];
+        assert(event != null);
         trackedAnnotation.annotation.onExit(PointerExitEvent.fromMouseEvent(event));
         trackedAnnotation.activeDevices.remove(deviceId);
       }
@@ -294,9 +296,8 @@ class MouseTracker extends ChangeNotifier {
 
   void _removeMouseEvent(int deviceId, PointerEvent event) {
     final bool wasConnected = mouseIsConnected;
-    if (event is PointerRemovedEvent) {
-      _pendingRemovals[deviceId] = event;
-    }
+    assert(event is PointerRemovedEvent);
+    _pendingRemovals[deviceId] = event;
     _lastMouseEvent.remove(deviceId);
     if (mouseIsConnected != wasConnected) {
       notifyListeners();
