@@ -424,7 +424,7 @@ class AndroidProject {
   bool get isModule => parent.isModule;
 
   /// True if the Flutter project is using the AndroidX support library
-  bool get usesAndroidX => parent.manifest.usesAndroidX;
+  bool get usesAndroidX => parent.usesAndroidX;
 
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
