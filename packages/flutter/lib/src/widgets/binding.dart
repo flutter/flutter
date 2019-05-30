@@ -399,30 +399,38 @@ mixin WidgetsBinding on BindingBase, SchedulerBinding, GestureBinding, RendererB
 
   @override
   void handleMetricsChanged() {
-    super.handleMetricsChanged();
-    for (WidgetsBindingObserver observer in _observers)
-      observer.didChangeMetrics();
+    afterWarmUpFrame(() {
+      super.handleMetricsChanged();
+      for (WidgetsBindingObserver observer in _observers)
+        observer.didChangeMetrics();
+    });
   }
 
   @override
   void handleTextScaleFactorChanged() {
-    super.handleTextScaleFactorChanged();
-    for (WidgetsBindingObserver observer in _observers)
-      observer.didChangeTextScaleFactor();
+    afterWarmUpFrame(() {
+      super.handleTextScaleFactorChanged();
+      for (WidgetsBindingObserver observer in _observers)
+        observer.didChangeTextScaleFactor();
+    });
   }
 
   @override
   void handlePlatformBrightnessChanged() {
-    super.handlePlatformBrightnessChanged();
-    for (WidgetsBindingObserver observer in _observers)
-      observer.didChangePlatformBrightness();
+    afterWarmUpFrame(() {
+      super.handlePlatformBrightnessChanged();
+      for (WidgetsBindingObserver observer in _observers)
+        observer.didChangePlatformBrightness();
+    });
   }
 
   @override
   void handleAccessibilityFeaturesChanged() {
-    super.handleAccessibilityFeaturesChanged();
-    for (WidgetsBindingObserver observer in _observers)
-      observer.didChangeAccessibilityFeatures();
+    afterWarmUpFrame(() {
+      super.handleAccessibilityFeaturesChanged();
+      for (WidgetsBindingObserver observer in _observers)
+        observer.didChangeAccessibilityFeatures();
+    });
   }
 
   /// Called when the system locale changes.

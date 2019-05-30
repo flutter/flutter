@@ -741,6 +741,12 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   bool _warmUpFrame = false;
 
+  final Completer<void> _warmUpFrameCompleter = Completer<void>();
+
+  void afterWarmUpFrame(void Function() callback) {
+    _warmUpFrameCompleter.future.then<void>((_) { callback(); });
+  }
+
   /// Schedule a frame to run as soon as possible, rather than waiting for
   /// the engine to request a frame in response to a system "Vsync" signal.
   ///
@@ -764,12 +770,10 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     Timeline.startSync('Warm-up frame');
     final bool hadScheduledFrame = _hasScheduledFrame;
 
-    final Completer<void> warmUpFrameCompleter = Completer<void>();
-
     // Lock events so touch events etc don't insert themselves until the
     // scheduled frame has finished.
     lockEvents(() async {
-      await warmUpFrameCompleter.future;
+      await _warmUpFrameCompleter.future;
       Timeline.finishSync();
     });
 
@@ -791,7 +795,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       // then skipping every frame and finishing in the new time.
       resetEpoch();
       _warmUpFrame = false;
-      warmUpFrameCompleter.complete();
+      _warmUpFrameCompleter.complete();
       if (hadScheduledFrame)
         scheduleFrame();
     });
