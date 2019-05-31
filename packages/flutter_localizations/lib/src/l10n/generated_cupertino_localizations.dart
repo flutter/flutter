@@ -2995,7 +2995,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get cutButtonLabel => r'Leikkaa';
 
   @override
-  String get datePickerDateOrderString => r'mdy';
+  String get datePickerDateOrderString => r'dmy';
 
   @override
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
@@ -3037,7 +3037,7 @@ class CupertinoLocalizationFi extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => r'Liitä';
+  String get pasteButtonLabel => r'Sijoita';
 
   @override
   String get postMeridiemAbbreviation => r'ip';
