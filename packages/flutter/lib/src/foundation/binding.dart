@@ -6,17 +6,16 @@ import 'dart:async';
 import 'dart:convert' show json;
 import 'dart:developer' as developer;
 import 'dart:io' show exit;
-// Before adding any more dart:ui imports, pleaes read the README.
 import 'dart:ui' as ui show saveCompilationTrace, Window, window;
 
 import 'package:meta/meta.dart';
 
+import '_core_stub.dart'
+  if (dart.library.html) '_core_web.dart'
+  if (dart.library.io) '_core_io.dart';
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
-import 'core_stub.dart'
-  if (dart.library.html) 'core_web.dart'
-  if (dart.library.io) 'core_io.dart';
 import 'debug.dart';
 import 'platform.dart';
 import 'print.dart';

@@ -10,9 +10,9 @@ import 'dart:isolate';
 
 import 'package:meta/meta.dart';
 
+import '_core_stub.dart' as core;
 import 'assertions.dart';
 import 'constants.dart';
-import 'core_stub.dart' as core;
 import 'platform.dart';
 
 TargetPlatform get defaultTargetPlatform {

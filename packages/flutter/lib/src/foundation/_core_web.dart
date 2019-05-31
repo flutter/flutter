@@ -7,7 +7,7 @@
 import 'dart:async';
 import 'dart:html' as html; // ignore: uri_does_not_exist
 
-import 'core_stub.dart' as core;
+import '_core_stub.dart' as core;
 import 'platform.dart';
 
 TargetPlatform get defaultTargetPlatform {

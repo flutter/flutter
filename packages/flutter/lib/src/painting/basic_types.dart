@@ -44,7 +44,7 @@ export 'dart:ui' show
   hashValues,
   hashList;
 
-export '../foundation/basic_types.dart';
+export 'package:flutter/foundation.dart' show VoidCallback;
 
 // Intentionally not exported:
 //  - Image, instantiateImageCodec, decodeImageFromList:
