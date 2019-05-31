@@ -337,7 +337,7 @@ class FadeInImage extends StatelessWidget {
         if (wasSynchronouslyLoaded)
           return child;
         return _AnimatedFadeOutFadeIn(
-          image: child,
+          target: child,
           placeholder: _image(image: placeholder),
           isTargetLoaded: frame != null,
           fadeInDuration: fadeInDuration,
@@ -364,14 +364,14 @@ class FadeInImage extends StatelessWidget {
 class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
   const _AnimatedFadeOutFadeIn({
     Key key,
-    @required this.image,
+    @required this.target,
     @required this.placeholder,
     @required this.isTargetLoaded,
     @required this.fadeOutDuration,
     @required this.fadeOutCurve,
     @required this.fadeInDuration,
     @required this.fadeInCurve,
-  }) : assert(image != null),
+  }) : assert(target != null),
        assert(placeholder != null),
        assert(isTargetLoaded != null),
        assert(fadeOutDuration != null),
@@ -380,7 +380,7 @@ class _AnimatedFadeOutFadeIn extends ImplicitlyAnimatedWidget {
        assert(fadeInCurve != null),
        super(key: key, duration: fadeInDuration + fadeOutDuration);
 
-  final Widget image;
+  final Widget target;
   final Widget placeholder;
   final bool isTargetLoaded;
   final Duration fadeInDuration;
@@ -438,7 +438,6 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       // Jump (don't fade) back to the placeholder image, so as to be ready
       // for the full animation when the new target image becomes ready.
       controller.value = controller.upperBound;
-      controller.stop();
     }
   }
 
@@ -457,7 +456,7 @@ class _AnimatedFadeOutFadeInState extends ImplicitlyAnimatedWidgetState<_Animate
       children: <Widget>[
         FadeTransition(
           opacity: _targetOpacityAnimation,
-          child: widget.image,
+          child: widget.target,
         ),
         FadeTransition(
           opacity: _placeholderOpacityAnimation,
