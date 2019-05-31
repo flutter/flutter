@@ -48,12 +48,12 @@ class PlaceholderDimensions {
   ///
   /// See also:
   ///
-  ///  * [baseline] the baseline to align to when using
+  ///  * [baseline], the baseline to align to when using
   ///    [ui.PlaceholderAlignment.baseline],
   ///    [ui.PlaceholderAlignment.aboveBaseline],
   ///    or [ui.PlaceholderAlignment.underBaseline].
-  ///  * [baselineOffset] distance of the alphabetic baseline from the edge
-  ///    of the placeholder.
+  ///  * [baselineOffset], the distance of the alphabetic baseline from the upper
+  ///    edge of the placeholder.
   final ui.PlaceholderAlignment alignment;
 
   /// Distance of the [baseline] from the upper edge of the placeholder.

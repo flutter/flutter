@@ -108,8 +108,6 @@ class RenderParagraph extends RenderBox
   }
 
   final TextPainter _textPainter;
-  bool _needsLayout = true;
-
 
   /// The text to display
   InlineSpan get text => _textPainter.text;
@@ -280,7 +278,7 @@ class RenderParagraph extends RenderBox
       return 0.0;
     }
     _computeChildrenWidthWithMinIntrinsics(height);
-    _layoutText();
+    _layoutText(); // layout with infinite width.
     return _textPainter.minIntrinsicWidth;
   }
 
@@ -409,12 +407,14 @@ class RenderParagraph extends RenderBox
     while (child != null) {
       final TextParentData textParentData = child.parentData;
       final double scale = textParentData.scale;
-      final bool isHit = result.addWithPaintOffset(
-        offset: textParentData.offset,
+      Matrix4 localPosTrans = Matrix4.translation(Vector3(textParentData.offset.dx, textParentData.offset.dy, 0));
+      Matrix4 scaleTrans = Matrix4.diagonal3Values(scale, scale, scale);
+      Matrix4 transform = localPosTrans * scaleTrans;
+      final bool isHit = result.addWithPaintTransform(
+        transform: transform,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
-          assert(transformed == position - textParentData.offset);
-          return child.hitTest(result, position: transformed / scale);
+          return child.hitTest(result, position: transformed);
         },
       );
       if (isHit) {
@@ -514,18 +514,10 @@ class RenderParagraph extends RenderBox
   }
 
   @override
-  void markNeedsLayout() {
-    super.markNeedsLayout();
-    _needsLayout = true;
-  }
-
-  @override
   void performLayout() {
     _layoutChildren(constraints);
     _layoutTextWithConstraints(constraints);
     _setParentData();
-
-    _needsLayout = false;
 
     // We grab _textPainter.size and _textPainter.didExceedMaxLines here because
     // assigning to `size` will trigger us to validate our intrinsic sizes,

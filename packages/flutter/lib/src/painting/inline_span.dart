@@ -125,9 +125,10 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Performs the check at each [InlineSpan] for if the `position` falls within the range
   /// of the span and returns the span if it does.
   ///
-  /// The `offset` parameter tracks the current text byte offset from the root [InlineSpan].
+  /// The `offset` parameter tracks the current index offset in the concatenated text buffer
+  /// from the root [InlineSpan].
   ///
-  /// This method should not be directly called. Use [toPlainText] instead.
+  /// This method should not be directly called. Use [getSpanForPosition] instead.
   @protected
   InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset);
 
@@ -182,7 +183,8 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Performs the check at each [InlineSpan] for if the `index` falls within the range
   /// of the span and returns the corresponding code unit. Returns null otherwise.
   ///
-  /// The `offset` parameter tracks the current text byte offset from the root [InlineSpan].
+  /// The `offset` parameter tracks the current index offset in the concatenated text buffer
+  /// from the root [InlineSpan].
   ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
   @protected

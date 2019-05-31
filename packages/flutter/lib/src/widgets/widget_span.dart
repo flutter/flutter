@@ -118,7 +118,7 @@ class WidgetSpan extends PlaceholderSpan {
     }
   }
 
-  /// Calls 'visitor' on this [WidgetSpan]. There are no children spans to walk.
+  /// Calls `visitor` on this [WidgetSpan]. There are no children spans to walk.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     return visitor(this);
