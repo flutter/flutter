@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 
 final List<String> results = <String>[];
 
@@ -501,6 +502,52 @@ void main() {
       observer.didPush(nextPageRoute, pageRoute);
       observer.didPop(nextPageRoute, pageRoute);
       verifyNoMoreInteractions(pageRouteAware);
+    });
+  });
+
+  group('ModalRoute', () {
+    testWidgets('should resume focus when the next route is popped', (WidgetTester tester) async {
+      // TODO(tongmu): It's currently using PageRoute (from MaterialApp)
+      // instead of ModalRoute, which might leave a risk but avoids building
+      // everything from scratch by using the existing setup by MaterialApp and
+      // TextField as a focusable widget. We might want to write a better test.
+
+      final FocusNode node = FocusNode();
+      BuildContext pageContext;
+      final Widget widget = MaterialApp(
+        theme: ThemeData(),
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              pageContext = context;
+              return Column(
+                children: <Widget>[
+                  const TextField(),
+                  TextField(focusNode: node),
+                ],
+              );
+            }
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+      expect(node.hasFocus, false);
+
+      node.requestFocus();
+      await tester.pumpAndSettle();
+      expect(node.hasFocus, true);
+
+      showDialog<void>(
+        context: pageContext,
+        builder: (BuildContext _) => const Center(),
+      );
+      await tester.pumpAndSettle();
+      expect(node.hasFocus, false);
+
+      Navigator.of(pageContext).pop();
+      await tester.pumpAndSettle();
+      expect(node.hasFocus, true);
     });
   });
 }
