@@ -441,31 +441,37 @@ class GalleryOptionsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
+    final MediaQueryData data = MediaQuery.of(context);
 
     return DefaultTextStyle(
       style: theme.primaryTextTheme.subhead,
-      child: ListView(
-        padding: const EdgeInsets.only(bottom: 124.0),
-        children: <Widget>[
-          const _Heading('Display'),
-          _ThemeItem(options, onOptionsChanged),
-          _TextScaleFactorItem(options, onOptionsChanged),
-          _TextDirectionItem(options, onOptionsChanged),
-          _TimeDilationItem(options, onOptionsChanged),
-          const Divider(),
-          const _Heading('Platform mechanics'),
-          _PlatformItem(options, onOptionsChanged),
-        ]..addAll(
-          _enabledDiagnosticItems(),
-        )..addAll(
-          <Widget>[
-            const Divider(),
-            const _Heading('Flutter gallery'),
-            _ActionItem('About Flutter Gallery', () {
-              showGalleryAboutDialog(context);
-            }),
-            _ActionItem('Send feedback', onSendFeedback),
-          ],
+      child: MediaQuery(
+        data: data.copyWith(padding: data.padding.copyWith(bottom: 94)),
+        child: Scrollbar(
+          child: ListView(
+            padding: const EdgeInsets.only(bottom: 124.0),
+            children: <Widget>[
+              const _Heading('Display'),
+              _ThemeItem(options, onOptionsChanged),
+              _TextScaleFactorItem(options, onOptionsChanged),
+              _TextDirectionItem(options, onOptionsChanged),
+              _TimeDilationItem(options, onOptionsChanged),
+              const Divider(),
+              const _Heading('Platform mechanics'),
+              _PlatformItem(options, onOptionsChanged),
+            ]..addAll(
+              _enabledDiagnosticItems(),
+            )..addAll(
+              <Widget>[
+                const Divider(),
+                const _Heading('Flutter gallery'),
+                _ActionItem('About Flutter Gallery', () {
+                  showGalleryAboutDialog(context);
+                }),
+                _ActionItem('Send feedback', onSendFeedback),
+              ],
+            ),
+          ),
         ),
       ),
     );
