@@ -242,7 +242,7 @@ class TestCommand extends FastFlutterCommand {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needRebuild(assetBundle.entries)) {
-      await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
+      writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
           assetBundle.entries);
     }
   }

@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/convert.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -65,5 +66,5 @@ void main() {
 }
 
 Future<String> getValueAsString(String key, AssetBundle asset) async {
-  return String.fromCharCodes(await asset.entries[key].contentsAsBytes());
+  return utf8.decode(asset.entries[key].contentsAsBytes());
 }
