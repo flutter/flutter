@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:flutter_goldens_client/client.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
