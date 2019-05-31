@@ -41,10 +41,10 @@ import 'text_style.dart';
 /// [fontFamily] or [fontFamilyFallback] is provided, then the platform's
 /// default family will be used.
 ///
-/// When `height` is omitted or null, then the font's ascent and descent
+/// When [height] is omitted or null, then the font's ascent and descent
 /// will be used. The font's combined ascent and descent may be taller or
-/// shorter than the `fontSize`. When height is provided, the `ascent + decent`
-/// is normalized before multipling by the `height` in order to ensure
+/// shorter than the [fontSize]. When height is provided, the `ascent + decent`
+/// is normalized before multipling by the [height] in order to ensure
 /// the total line height is exactly the `height * fontSize`.
 ///
 /// Each line's spacing above the baseline will be at least as tall as the
@@ -84,8 +84,8 @@ import 'text_style.dart';
 ///
 ///  * [height]: the multiple of [fontSize] the line's height should be.
 ///    The line's height will take the font's ascent and descent values if
-///    `height` is omitted or null. If provided, the ascent plus descent is
-///    scaled to match the `fontSize` before being multiplied by the `height`.
+///    [height] is omitted or null. If provided, the ascent plus descent is
+///    scaled to match the [fontSize] before being multiplied by the [height].
 ///    The [height] will impact the spacing above and below the baseline
 ///    differently depending on the ratios between the font's ascent and
 ///    descent. This property is separate from the leading multiplier, which
