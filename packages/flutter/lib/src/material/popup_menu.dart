@@ -37,7 +37,6 @@ const double _kMenuVerticalPadding = 8.0;
 const double _kMenuWidthStep = 56.0;
 const double _kMenuScreenPadding = 8.0;
 
-
 /// A base class for entries in a material design popup menu.
 ///
 /// The popup menu widget uses this interface to interact with the menu items.

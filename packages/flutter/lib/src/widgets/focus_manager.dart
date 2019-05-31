@@ -1048,7 +1048,6 @@ class FocusManager with DiagnosticableTreeMixin {
       _dirtyNodes.addAll(nextPath.difference(previousPath));
       // Notify nodes that are no longer focused
       _dirtyNodes.addAll(previousPath.difference(nextPath));
-
       _nextFocus = null;
     }
     if (previousFocus != _currentFocus) {
