@@ -112,7 +112,7 @@ class ResidentWebRunner extends ResidentRunner {
     // Start the web compiler and build the assets.
     await webCompilationProxy.initialize(
       projectDirectory: currentProject.directory,
-      target: target,
+      targets: <String>[target],
     );
     _lastCompiled = DateTime.now();
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
