@@ -125,7 +125,8 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Performs the check at each [InlineSpan] for if the `position` falls within the range
   /// of the span and returns the span if it does.
   ///
-  /// The `offset` parameter tracks the current index offset in the concatenated text buffer
+  /// The `offset` parameter tracks the current index offset in the text buffer formed
+  /// if the contents of the [InlineSpan] tree were concatenated together starting
   /// from the root [InlineSpan].
   ///
   /// This method should not be directly called. Use [getSpanForPosition] instead.
@@ -183,7 +184,8 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Performs the check at each [InlineSpan] for if the `index` falls within the range
   /// of the span and returns the corresponding code unit. Returns null otherwise.
   ///
-  /// The `offset` parameter tracks the current index offset in the concatenated text buffer
+  /// The `offset` parameter tracks the current index offset in the text buffer formed
+  /// if the contents of the [InlineSpan] tree were concatenated together starting
   /// from the root [InlineSpan].
   ///
   /// This method should not be directly called. Use [codeUnitAt] instead.
@@ -239,8 +241,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    // Properties on style are added as if they were properties directly on
-    // this InlineSpan.
+
     if (style != null) {
       style.debugFillProperties(properties);
     }
