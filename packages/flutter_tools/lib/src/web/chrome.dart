@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../base/common.dart';
@@ -14,6 +13,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
+import '../base/process_manager.dart';
 
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
