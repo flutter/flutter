@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -330,18 +331,22 @@ void main() {
   testWidgets('button theme with stateful color changes color in states', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode();
 
-    final ColorScheme colorScheme = ColorScheme.fromSwatch(primarySwatch: Colors.blue);
+    const Color pressedColor = Color(1);
+    const Color hoverColor = Color(2);
+    const Color focusedColor = Color(3);
+    const Color defaultColor = Color(4);
 
     Color getTextColor(Set<MaterialState> states) {
-      final Set<MaterialState> interactiveStates = <MaterialState>{
-        MaterialState.pressed,
-        MaterialState.hovered,
-        MaterialState.focused,
-      };
-      if(states.any(interactiveStates.contains)) {
-        return Colors.blue[900];
+      if (states.contains(MaterialState.pressed)) {
+        return pressedColor;
       }
-      return Colors.blue[800];
+      if (states.contains(MaterialState.hovered)) {
+        return hoverColor;
+      }
+      if (states.contains(MaterialState.focused)) {
+        return focusedColor;
+      }
+      return defaultColor;
     }
 
     await tester.pumpWidget(
@@ -349,7 +354,7 @@ void main() {
         home: Scaffold(
           body: Center(
             child: ButtonTheme(
-              colorScheme: colorScheme.copyWith(
+              colorScheme: ColorScheme.light().copyWith(
                   primary: MaterialStateColor.resolveWith(getTextColor),
               ),
               textTheme: ButtonTextTheme.primary,
@@ -364,13 +369,17 @@ void main() {
       ),
     );
 
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('FlatButton')).text.style.color;
+    }
+
     // Default, not disabled.
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(textColor(), equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(textColor(), focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(FlatButton));
@@ -380,13 +389,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(textColor(), hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-    await expectLater(tester, meetsGuideline(textContrastGuideline));
+    await expectLater(textColor(), pressedColor);
     await gesture.removePointer();
   },
     semanticsEnabled: true,

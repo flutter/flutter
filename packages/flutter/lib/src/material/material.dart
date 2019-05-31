@@ -14,64 +14,6 @@ import 'theme.dart';
 /// Used by [InkHighlight] and [InkSplash], for example.
 typedef RectCallback = Rect Function();
 
-/// Interactive states that some of the Material widgets can take on when
-/// receiving input from the user.
-///
-/// States are defined by https://material.io/design/interaction/states.html#usage.
-///
-/// Some Material widgets track their current state in a `Set<MaterialState>`.
-///
-/// See also:
-///  * [MaterialStateColor], a color that takes a callback function that can
-///    return a different color depending on the state of the widget that it
-///    is used in.
-enum MaterialState {
-  /// The state when the user drags their mouse cursor over the given widget.
-  ///
-  /// See: https://material.io/design/interaction/states.html#hover.
-  hovered,
-
-  /// The state when the user navigates with the keyboard to a given widget.
-  ///
-  /// This can also sometimes be triggered when a widget is tapped. For example,
-  /// when a [TextField] is tapped, it becomes [focused].
-  ///
-  /// See: https://material.io/design/interaction/states.html#focus.
-  focused,
-
-  /// The state when the user is actively pressing down on the given widget.
-  ///
-  /// See: https://material.io/design/interaction/states.html#pressed.
-  pressed,
-
-  /// The state when this widget is being dragged from one place to another by
-  /// the user.
-  ///
-  /// https://material.io/design/interaction/states.html#dragged.
-  dragged,
-
-  /// The state when this item has been selected.
-  ///
-  /// This applies to things that can be toggled (such as chips and checkboxes)
-  /// and things that are selected from a set of options (such as tabs and radio buttons).
-  ///
-  /// See: https://material.io/design/interaction/states.html#selected.
-  selected,
-
-  /// The state when this widget disabled and can not be interacted with.
-  ///
-  /// Disabled widgets should not respond to hover, focus, press, or drag
-  /// interactions.
-  ///
-  /// See: https://material.io/design/interaction/states.html#disabled.
-  disabled,
-
-  /// The state when the widget has entered some form of invalid state.
-  ///
-  /// See https://material.io/design/interaction/states.html#usage.
-  error,
-}
-
 /// The various kinds of material in material design. Used to
 /// configure the default behavior of [Material] widgets.
 ///

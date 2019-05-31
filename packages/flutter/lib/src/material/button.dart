@@ -7,10 +7,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/material/material_state.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_theme.dart';
-import 'colors.dart';
 import 'constants.dart';
 import 'ink_well.dart';
 import 'material.dart';
@@ -253,10 +253,28 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
   void _handleHighlightChanged(bool value) {
     if (_pressed != value) {
-      _updateState(MaterialState.pressed, value);
-      if (widget.onHighlightChanged != null) {
-        widget.onHighlightChanged(value);
-      }
+      setState(() {
+        _updateState(MaterialState.pressed, value);
+        if (widget.onHighlightChanged != null) {
+          widget.onHighlightChanged(value);
+        }
+      });
+    }
+  }
+
+  void _handleHoveredChanged(bool value) {
+    if (_hovered != value) {
+      setState(() {
+        _updateState(MaterialState.hovered, value);
+      });
+    }
+  }
+
+  void _handleFocusedChanged(bool value) {
+    if (_focused != value) {
+      setState(() {
+        _updateState(MaterialState.focused, value);
+      });
     }
   }
 
@@ -270,6 +288,13 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
   void didUpdateWidget(RawMaterialButton oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateState(MaterialState.disabled, !widget.enabled);
+    // If the button is disabled while a press gesture is currently ongoing,
+    // InkWell makes a call to handleHighlightChanged. This causes an exception
+    // because it calls setState in the middle of a build. To preempt this, we
+    // manually update pressed to false when this situation occurs.
+    if (_disabled && _pressed) {
+      _handleHighlightChanged(false);
+    }
   }
 
   double get _effectiveElevation {
@@ -296,9 +321,7 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
 
     final Widget result = Focus(
       focusNode: widget.focusNode,
-      onFocusChange: (bool focused) => setState(() {
-        _updateState(MaterialState.focused, focused);
-      }),
+      onFocusChange: _handleFocusedChanged,
       child: ConstrainedBox(
         constraints: widget.constraints,
         child: Material(
@@ -310,22 +333,12 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           animationDuration: widget.animationDuration,
           clipBehavior: widget.clipBehavior,
           child: InkWell(
-            onHighlightChanged: (bool value) {
-              // InkWell.onHighlightChanged is called in the middle of a build
-              // if the button is disabled during a gesture. When that happens,
-              // calling setState would cause a crash, so we only call setState
-              // when the component is not disabled.
-              _disabled
-                  ? _handleHighlightChanged(value)
-                  : setState(() => _handleHighlightChanged(value));
-            },
+            onHighlightChanged: _handleHighlightChanged,
             splashColor: widget.splashColor,
             highlightColor: widget.highlightColor,
             focusColor: widget.focusColor,
             hoverColor: widget.hoverColor,
-            onHover: (bool hovering) => setState(() {
-              _updateState(MaterialState.hovered, hovering);
-            }),
+            onHover: _handleHoveredChanged,
             onTap: widget.onPressed,
             customBorder: widget.shape,
             child: IconTheme.merge(

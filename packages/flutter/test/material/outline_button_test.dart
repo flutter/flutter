@@ -92,7 +92,7 @@ void main() {
         MaterialState.hovered,
         MaterialState.focused,
       };
-      if(states.any(interactiveStates.contains)) {
+      if (states.any(interactiveStates.contains)) {
         return Colors.blue[900];
       }
       return Colors.blue[800];
@@ -154,13 +154,13 @@ void main() {
     const Color defaultColor = Color(4);
 
     Color getTextColor(Set<MaterialState> states) {
-      if(states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.pressed)) {
         return pressedColor;
       }
-      if(states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.hovered)) {
         return hoverColor;
       }
-      if(states.contains(MaterialState.focused)) {
+      if (states.contains(MaterialState.focused)) {
         return focusedColor;
       }
       return defaultColor;
@@ -221,13 +221,13 @@ void main() {
     const Color defaultColor = Color(4);
 
     Color getTextColor(Set<MaterialState> states) {
-      if(states.contains(MaterialState.pressed)) {
+      if (states.contains(MaterialState.pressed)) {
         return pressedColor;
       }
-      if(states.contains(MaterialState.hovered)) {
+      if (states.contains(MaterialState.hovered)) {
         return hoverColor;
       }
-      if(states.contains(MaterialState.focused)) {
+      if (states.contains(MaterialState.focused)) {
         return focusedColor;
       }
       return defaultColor;
