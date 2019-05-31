@@ -411,6 +411,48 @@ class Locale {
 ///
 /// There is a single Window instance in the system, which you can
 /// obtain from the [window] property.
+///
+/// ## Insets and Padding
+///
+/// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/window_padding.mp4}
+///
+/// In this diagram, the black areas represent system UI that the app cannot
+/// draw over. The red area represents view padding that the application may not
+/// be able to detect gestures in and may not want to draw in. The grey area
+/// represents the system keyboard, which can cover over the bottom view
+/// padding when visible.
+///
+/// The [Window.viewInsets] are the physical pixels which the operating
+/// system reserves for system UI, such as the keyboard, which would fully
+/// obscure any content drawn in that area.
+///
+/// The [Window.viewPadding] are the physical pixels on each side of the display
+/// that may be partially obscured by system UI or by physical intrusions into
+/// the display, such as an overscan region on a television or a "notch" on a
+/// phone. Unlike the insets, these areas may have portions that show the user
+/// application painted pixels without being obscured, such as a notch at the
+/// top of a phone that covers only a subset of the area. Insets, on the other
+/// hand, either partially or fully obscure the window, such as an opaque
+/// keyboard or a partially transluscent statusbar, which cover an area without
+/// gaps.
+///
+/// The [Window.padding] property is computed from both [Window.viewInsets] and
+/// [Window.viewPadding]. It will allow a view inset to consume view padding
+/// where appropriate, such as when a phone's keyboard is covering the bottom
+/// view padding and so "absorbs" it.
+///
+/// Clients that want to position elements relative to the view padding
+/// regardless of the view insets should use the [Window.viewPadding] property,
+/// e.g. if you wish to draw a widget at the center of the screen with respect
+/// to the iPhone "safe area" regardless of whether the keyboard is showing.
+///
+/// [Window.padding] is useful for clients that want to know how much padding
+/// should be accounted for without concern for the current inset(s) state, e.g.
+/// determining whether a gesture should be considered for scrolling purposes.
+/// This value varies based on the current state of the insets. For example, a
+/// visible keyboard will consume all gestures in the bottom part of the
+/// [Window.viewPadding] anyway, so there is no need to account for that in the
+/// [Window.padding], which is always safe to use for such calculations.
 class Window {
   Window._();
 
@@ -467,6 +509,10 @@ class Window {
   ///
   /// When this changes, [onMetricsChanged] is called.
   ///
+  /// The relationship between this [Window.viewInsets], [Window.viewPadding],
+  /// and [Window.padding] are described in more detail in the documentation for
+  /// [Window].
+  ///
   /// See also:
   ///
   ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
@@ -483,7 +529,46 @@ class Window {
   /// intrusions in the display (e.g. overscan regions on television screens or
   /// phone sensor housings).
   ///
+  /// Unlike [Window.padding], this value does not change relative to
+  /// [Window.viewInsets]. For example, on an iPhone X, it will not change in
+  /// response to the soft keyboard being visible or hidden, whereas
+  /// [Window.padding] will.
+  ///
   /// When this changes, [onMetricsChanged] is called.
+  ///
+  /// The relationship between this [Window.viewInsets], [Window.viewPadding],
+  /// and [Window.padding] are described in more detail in the documentation for
+  /// [Window].
+  ///
+  /// See also:
+  ///
+  ///  * [WidgetsBindingObserver], for a mechanism at the widgets layer to
+  ///    observe when this value changes.
+  ///  * [MediaQuery.of], a simpler mechanism for the same.
+  ///  * [Scaffold], which automatically applies the padding in material design
+  ///    applications.
+  WindowPadding get viewPadding => _viewPadding;
+  WindowPadding _viewPadding = WindowPadding.zero;
+
+  /// The number of physical pixels on each side of the display rectangle into
+  /// which the application can render, but which may be partially obscured by
+  /// system UI (such as the system notification area), or or physical
+  /// intrusions in the display (e.g. overscan regions on television screens or
+  /// phone sensor housings).
+  ///
+  /// This value is calculated by taking
+  /// `max(0.0, Window.viewPadding - Window.viewInsets)`. This will treat a
+  /// system IME that increases the bottom inset as consuming that much of the
+  /// bottom padding. For example, on an iPhone X, [Window.padding.bottom] is
+  /// the same as [Window.viewPadding.bottom] when the soft keyboard is not
+  /// drawn (to account for the bottom soft button area), but will be `0.0` when
+  /// the soft keyboard is visible.
+  ///
+  /// When this changes, [onMetricsChanged] is called.
+  ///
+  /// The relationship between this [Window.viewInsets], [Window.viewPadding],
+  /// and [Window.padding] are described in more detail in the documentation for
+  /// [Window].
   ///
   /// See also:
   ///
