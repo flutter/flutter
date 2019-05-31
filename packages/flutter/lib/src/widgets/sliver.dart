@@ -1375,7 +1375,38 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
 }
 
-/// A sliver lays out multiple sliver children along the main axis of the viewport.
+/// A sliver that lays out multiple sliver children along the main axis of the viewport.
+///
+/// {@tool sample}
+///
+/// This example uses a [SliverGroup] to apply the same padding to several slivers
+///
+/// ```dart
+/// CustomScrollView(
+///   slivers: <Widget>[
+///     SliverAppBar(
+///       title: const Text('Example'),
+///       pinned: true,
+///     ),
+///     SliverPadding(
+///       padding: const EdgeInsets.symmetric(horizontal: 16),
+///       sliver: SliverGroup(
+///         slivers: <Widget>[
+///           const SliverToBoxAdapter(child: Text('Favorites')),
+///           SliverList(
+///             delegate: SliverChildListDelegate(favorites),
+///           ),
+///           const SliverToBoxAdapter(child: Text('All items')),
+///           SliverList(
+///             delegate: SliverChildListDelegate(items),
+///           ),
+///         ],
+///       ),
+///     ),
+///   ],
+/// );
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
