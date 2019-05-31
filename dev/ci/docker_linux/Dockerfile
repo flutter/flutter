@@ -1,4 +1,4 @@
-# Flutter (https://flutter.dev) Developement Environment for Linux
+# Flutter (https://flutter.dev) Development Environment for Linux
 # ===============================================================
 #
 # This environment passes all Linux Flutter Doctor checks and is sufficient

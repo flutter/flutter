@@ -26,7 +26,9 @@ import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
 import 'linux/linux_workflow.dart';
+import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
+import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
@@ -58,8 +60,11 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (androidWorkflow.appliesToHostPlatform)
         _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
 
+      if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
+        _validators.add(GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]));
+
       if (iosWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[iosValidator, cocoapodsValidator]));
+        _validators.add(iosValidator);
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);

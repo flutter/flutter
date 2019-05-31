@@ -959,7 +959,7 @@ class TextStyle extends Diagnosticable {
       strutStyle: strutStyle == null ? null : ui.StrutStyle(
         fontFamily: strutStyle.fontFamily,
         fontFamilyFallback: strutStyle.fontFamilyFallback,
-        fontSize: strutStyle.fontSize,
+        fontSize: strutStyle.fontSize == null ? null : strutStyle.fontSize * textScaleFactor,
         height: strutStyle.height,
         leading: strutStyle.leading,
         fontWeight: strutStyle.fontWeight,

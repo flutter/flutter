@@ -171,6 +171,7 @@ void main() {
       FileSystem: () => MemoryFileSystem(),
       IOSWorkflow: () => MockIosWorkFlow(),
       Platform: _kNoColorTerminalPlatform,
+      OperatingSystemUtils: () => MockOperatingSystemUtils(),
     };
     testUsingContext('Error on non-existing file', () {
       final PrebuiltIOSApp iosApp =
@@ -493,3 +494,5 @@ const String badPlistData = '''
 const String plistData = '''
 {"CFBundleIdentifier": "fooBundleId"}
 ''';
+
+class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils { }

@@ -165,6 +165,7 @@ class TextField extends StatefulWidget {
     this.enableInteractiveSelection,
     this.onTap,
     this.buildCounter,
+    this.scrollController,
     this.scrollPhysics,
   }) : assert(textAlign != null),
        assert(autofocus != null),
@@ -463,6 +464,9 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.edtiableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
+  /// {@macro flutter.widgets.editableText.scrollController}
+  final ScrollController scrollController;
+
   @override
   _TextFieldState createState() => _TextFieldState();
 
@@ -493,6 +497,7 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
+    properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
   }
 }
@@ -509,9 +514,13 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   FocusNode _focusNode;
   FocusNode get _effectiveFocusNode => widget.focusNode ?? (_focusNode ??= FocusNode());
 
+  bool _isHovering = false;
+
   bool get needsCounter => widget.maxLength != null
     && widget.decoration != null
     && widget.decoration.counterText == null;
+
+  bool _shouldShowSelectionToolbar = true;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -605,22 +614,53 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     super.dispose();
   }
 
+  EditableTextState get _editableText => _editableTextKey.currentState;
+
   void _requestKeyboard() {
-    _editableTextKey.currentState?.requestKeyboard();
+    _editableText?.requestKeyboard();
+  }
+
+  bool _shouldShowSelectionHandles(SelectionChangedCause cause) {
+    // When the text field is activated by something that doesn't trigger the
+    // selection overlay, we shouldn't show the handles either.
+    if (!_shouldShowSelectionToolbar)
+      return false;
+
+    if (cause == SelectionChangedCause.keyboard)
+      return false;
+
+    if (cause == SelectionChangedCause.longPress)
+      return true;
+
+    if (_effectiveController.text.isNotEmpty)
+      return true;
+
+    return false;
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
     // iOS cursor doesn't move via a selection handle. The scroll happens
     // directly from new text selection changes.
+    if (_shouldShowSelectionHandles(cause)) {
+      _editableText?.showHandles();
+    }
+
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
         if (cause == SelectionChangedCause.longPress) {
-          _editableTextKey.currentState?.bringIntoView(selection.base);
+          _editableText?.bringIntoView(selection.base);
         }
         return;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         // Do nothing.
+    }
+  }
+
+  /// Toggle the toolbar when a selection handle is tapped.
+  void _handleSelectionHandleTapped() {
+    if (_effectiveController.selection.isCollapsed) {
+      _editableText.toggleToolbar();
     }
   }
 
@@ -663,6 +703,16 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleTapDown(TapDownDetails details) {
     _renderEditable.handleTapDown(details);
     _startSplash(details.globalPosition);
+
+    // The selection overlay should only be shown when the user is interacting
+    // through a touch screen (via either a finger or a stylus). A mouse shouldn't
+    // trigger the selection overlay.
+    // For backwards-compatibility, we treat a null kind the same as touch.
+    final PointerDeviceKind kind = details.kind;
+    _shouldShowSelectionToolbar =
+        kind == null ||
+        kind == PointerDeviceKind.touch ||
+        kind == PointerDeviceKind.stylus;
   }
 
   void _handleForcePressStarted(ForcePressDetails details) {
@@ -671,7 +721,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         from: details.globalPosition,
         cause: SelectionChangedCause.forcePress,
       );
-      _editableTextKey.currentState.showToolbar();
+      if (_shouldShowSelectionToolbar)
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -738,13 +789,15 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    _editableTextKey.currentState.showToolbar();
+    if (_shouldShowSelectionToolbar)
+      _editableTextKey.currentState.showToolbar();
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      _editableTextKey.currentState.showToolbar();
+      if (_shouldShowSelectionToolbar)
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -800,6 +853,17 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     }
     assert(_currentSplash == null);
     super.deactivate();
+  }
+
+  void _handlePointerEnter(PointerEnterEvent event) => _handleHover(true);
+  void _handlePointerExit(PointerExitEvent event) => _handleHover(false);
+
+  void _handleHover(bool hovering) {
+    if (hovering != _isHovering) {
+      setState(() {
+        return _isHovering = hovering;
+      });
+    }
   }
 
   @override
@@ -884,6 +948,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         onSelectionChanged: _handleSelectionChanged,
         onEditingComplete: widget.onEditingComplete,
         onSubmitted: widget.onSubmitted,
+        onSelectionHandleTapped: _handleSelectionHandleTapped,
         inputFormatters: formatters,
         rendererIgnoresPointer: true,
         cursorWidth: widget.cursorWidth,
@@ -897,6 +962,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         keyboardAppearance: keyboardAppearance,
         enableInteractiveSelection: widget.enableInteractiveSelection,
         dragStartBehavior: widget.dragStartBehavior,
+        scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,
       ),
     );
@@ -909,6 +975,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
+            isHovering: _isHovering,
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
             expands: widget.expands,
@@ -925,21 +992,25 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
           _effectiveController.selection = TextSelection.collapsed(offset: _effectiveController.text.length);
         _requestKeyboard();
       },
-      child: IgnorePointer(
-        ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
-        child: TextSelectionGestureDetector(
-          onTapDown: _handleTapDown,
-          onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
-          onSingleTapUp: _handleSingleTapUp,
-          onSingleTapCancel: _handleSingleTapCancel,
-          onSingleLongTapStart: _handleSingleLongTapStart,
-          onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-          onSingleLongTapEnd: _handleSingleLongTapEnd,
-          onDoubleTapDown: _handleDoubleTapDown,
-          onDragSelectionStart: _handleMouseDragSelectionStart,
-          onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-          behavior: HitTestBehavior.translucent,
-          child: child,
+      child: Listener(
+        onPointerEnter: _handlePointerEnter,
+        onPointerExit: _handlePointerExit,
+        child: IgnorePointer(
+          ignoring: !(widget.enabled ?? widget.decoration?.enabled ?? true),
+          child: TextSelectionGestureDetector(
+            onTapDown: _handleTapDown,
+            onForcePressStart: forcePressEnabled ? _handleForcePressStarted : null,
+            onSingleTapUp: _handleSingleTapUp,
+            onSingleTapCancel: _handleSingleTapCancel,
+            onSingleLongTapStart: _handleSingleLongTapStart,
+            onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+            onSingleLongTapEnd: _handleSingleLongTapEnd,
+            onDoubleTapDown: _handleDoubleTapDown,
+            onDragSelectionStart: _handleMouseDragSelectionStart,
+            onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+            behavior: HitTestBehavior.translucent,
+            child: child,
+          ),
         ),
       ),
     );

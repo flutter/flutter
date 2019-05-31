@@ -91,22 +91,32 @@ class FlutterProject {
   }
 
   /// The iOS sub project of this project.
-  IosProject get ios => IosProject.fromFlutter(this);
+  IosProject _ios;
+  IosProject get ios => _ios ??= IosProject.fromFlutter(this);
 
   /// The Android sub project of this project.
-  AndroidProject get android => AndroidProject._(this);
+  AndroidProject _android;
+  AndroidProject get android => _android ??= AndroidProject._(this);
 
   /// The web sub project of this project.
-  WebProject get web => WebProject._(this);
+  WebProject _web;
+  WebProject get web => _web ??= WebProject._(this);
 
-  /// The macos sub project of this project.
-  MacOSProject get macos => MacOSProject._(this);
+  /// The MacOS sub project of this project.
+  MacOSProject _macos;
+  MacOSProject get macos => _macos ??= MacOSProject._(this);
 
-  /// The linux sub project of this project.
-  LinuxProject get linux => LinuxProject._(this);
+  /// The Linux sub project of this project.
+  LinuxProject _linux;
+  LinuxProject get linux => _linux ??= LinuxProject._(this);
 
-  /// The windows sub project of this project.
-  WindowsProject get windows => WindowsProject._(this);
+  /// The Windows sub project of this project.
+  WindowsProject _windows;
+  WindowsProject get windows => _windows ??= WindowsProject._(this);
+
+  /// The Fuchsia sub project of this project.
+  FuchsiaProject _fuchsia;
+  FuchsiaProject get fuchsia => _fuchsia ??= FuchsiaProject._(this);
 
   /// The `pubspec.yaml` file of this project.
   File get pubspecFile => directory.childFile('pubspec.yaml');
@@ -295,7 +305,7 @@ class IosProject {
   }
 
   /// True, if the host app project is using Swift.
-  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
+  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION') ?? false;
 
   /// The build settings for the host app of this project, as a detached map.
   ///
@@ -387,6 +397,7 @@ class AndroidProject {
   final FlutterProject parent;
 
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'\"]kotlin-android[\'\"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -408,6 +419,12 @@ class AndroidProject {
 
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+    return _firstMatchInFile(gradleFile, _kotlinPluginPattern) != null;
+  }
 
   File get appManifestFile {
     return isUsingGradle
@@ -561,19 +578,40 @@ class MacOSProject {
 
   final FlutterProject project;
 
-  bool existsSync() => project.directory.childDirectory('macos').existsSync();
+  static const String _hostAppBundleName = 'Runner';
 
-  Directory get _editableDirectory => project.directory.childDirectory('macos');
+  bool existsSync() => _macOSDirectory.existsSync();
+
+  Directory get _macOSDirectory => project.directory.childDirectory('macos');
+
+  /// The directory in the project that is managed by Flutter. As much as
+  /// possible, files that are edited by Flutter tooling after initial project
+  /// creation should live here.
+  Directory get managedDirectory => _macOSDirectory.childDirectory('Flutter');
+
+  /// The subdirectory of [managedDirectory] that contains files that are
+  /// generated on the fly. All generated files that are not intended to be
+  /// checked in should live here.
+  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
   /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
   /// the Xcode build.
-  File get generatedXcodePropertiesFile => _editableDirectory.childDirectory('Flutter').childFile('Generated.xcconfig');
+  File get generatedXcodePropertiesFile => ephemeralDirectory.childFile('Flutter-Generated.xcconfig');
+
+  /// The Flutter-managed Xcode config file for [mode].
+  File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
 
   /// The Xcode project file.
-  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
+  Directory get xcodeProject => _macOSDirectory.childDirectory('$_hostAppBundleName.xcodeproj');
 
-  // Note: The name script file exists as a temporary shim.
-  File get nameScript => project.directory.childDirectory('macos').childFile('name_output.sh');
+  /// The Xcode workspace file.
+  Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
+
+  /// The file where the Xcode build will write the name of the built app.
+  ///
+  /// Ideally this will be replaced in the future with inspection of the Runner
+  /// scheme's target.
+  File get nameFile => ephemeralDirectory.childFile('.app_filename');
 }
 
 /// The Windows sub project
@@ -582,13 +620,26 @@ class WindowsProject {
 
   final FlutterProject project;
 
-  bool existsSync() => project.directory.childDirectory('windows').existsSync();
+  bool existsSync() => _editableDirectory.existsSync();
 
-  // Note: The build script file exists as a temporary shim.
-  File get buildScript => project.directory.childDirectory('windows').childFile('build.bat');
+  Directory get _editableDirectory => project.directory.childDirectory('windows');
 
-  // Note: The name script file exists as a temporary shim.
-  File get nameScript => project.directory.childDirectory('windows').childFile('name_output.bat');
+  Directory get _cacheDirectory => _editableDirectory.childDirectory('flutter');
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the build.
+  File get generatedPropertySheetFile => _cacheDirectory.childFile('Generated.props');
+
+  // The MSBuild project file.
+  File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
+
+  // The MSBuild solution file.
+  File get solutionFile => _editableDirectory.childFile('Runner.sln');
+
+  /// The file where the VS build will write the name of the built app.
+  ///
+  /// Ideally this will be replaced in the future with inspection of the project.
+  File get nameFile => _cacheDirectory.childFile('exe_filename');
 }
 
 /// The Linux sub project.
@@ -599,8 +650,27 @@ class LinuxProject {
 
   Directory get editableHostAppDirectory => project.directory.childDirectory('linux');
 
+  Directory get cacheDirectory => editableHostAppDirectory.childDirectory('flutter');
+
   bool existsSync() => editableHostAppDirectory.existsSync();
 
   /// The Linux project makefile.
   File get makeFile => editableHostAppDirectory.childFile('Makefile');
+}
+
+/// The Fuchisa sub project
+class FuchsiaProject {
+  FuchsiaProject._(this.project);
+
+  final FlutterProject project;
+
+  Directory _editableHostAppDirectory;
+  Directory get editableHostAppDirectory =>
+      _editableHostAppDirectory ??= project.directory.childDirectory('fuchsia');
+
+  bool existsSync() => editableHostAppDirectory.existsSync();
+
+  Directory _meta;
+  Directory get meta =>
+      _meta ??= editableHostAppDirectory.childDirectory('meta');
 }
