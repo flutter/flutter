@@ -103,7 +103,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   bool get canRedo {
     if (_undoneActions.isNotEmpty) {
       final Intent lastIntent = _undoneActions.last.invocationIntent;
-      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus.context);
+      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus?.context);
     }
     return false;
   }
@@ -257,6 +257,16 @@ class SetFocusActionBase extends UndoableAction {
     if (_previousFocus == null) {
       WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
       return;
+    }
+    if (_previousFocus is FocusScopeNode) {
+      // The only way a scope can be the _previousFocus is if there was no
+      // focusedChild for the scope when we invoked this action, so we need to
+      // return to that state.
+
+      // Unfocus the current node to remove it from the focused child list of
+      // the scope.
+      WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+      // and then let the scope node be focused...
     }
     _previousFocus.requestFocus();
     _previousFocus = null;
@@ -420,8 +430,7 @@ class _FocusDemoState extends State<FocusDemo> {
     return Shortcuts(
       shortcuts: <LogicalKeySet, Intent>{
         LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
         LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
         LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
@@ -441,12 +450,8 @@ class _FocusDemoState extends State<FocusDemo> {
           policy: ReadingOrderTraversalPolicy(),
           child: Shortcuts(
             shortcuts: <LogicalKeySet, Intent>{
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.keyZ): kUndoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.keyZ): kUndoIntent,
+              LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ): kUndoIntent,
             },
             child: FocusScope(
               debugLabel: 'Scope',

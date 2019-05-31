@@ -5,7 +5,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
-import 'package:meta/meta.dart';
 
 import 'actions.dart';
 import 'binding.dart';
@@ -19,12 +18,14 @@ import 'inherited_notifier.dart';
 /// A key set contains the keys that are down simultaneously to represent a
 /// shortcut.
 ///
-/// This is mainly used by [ShortcutManager] to allow the definition of shortcut
-/// mappings.
-///
 /// This is a thin wrapper around a [Set], but changes the equality comparison
 /// from an identity comparison to a contents comparison so that non-identical
 /// sets with the same keys in them will compare as equal.
+///
+/// See also:
+///
+///  - [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
+///    define its key map.
 class KeySet<T extends KeyboardKey> extends Diagnosticable {
   /// A constructor for making a [KeySet] of up to four keys.
   ///
@@ -188,12 +189,29 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
     }
     assert(context != null);
     final LogicalKeySet keySet = keysPressed ?? LogicalKeySet.fromSet(RawKeyboard.instance.keysPressed);
-    if (_shortcuts.containsKey(keySet)) {
+    Intent matchedIntent = _shortcuts[keySet];
+    if (matchedIntent == null) {
+      // If there's not a more specific match, We also look for any keys that
+      // have synonyms in the map.  This is for things like left and right shift
+      // keys mapping to just the "shift" pseudo-key.
+      Set<LogicalKeyboardKey> pseudoKeys;
+      for (LogicalKeyboardKey setKey in keySet.keys) {
+        final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
+        if (synonyms.isNotEmpty) {
+          // There currently aren't any synonyms that match more than one key.
+          pseudoKeys.add(synonyms.first);
+        } else {
+          pseudoKeys.add(setKey);
+        }
+      }
+      matchedIntent = _shortcuts[LogicalKeySet.fromSet(pseudoKeys)];
+    }
+    if (matchedIntent != null) {
       final BuildContext primaryContext = WidgetsBinding.instance.focusManager.primaryFocus?.context;
       if (primaryContext == null) {
         return false;
       }
-      return Actions.invoke(primaryContext, _shortcuts[keySet], nullOk: true);
+      return Actions.invoke(primaryContext, matchedIntent, nullOk: true);
     }
     return false;
   }
@@ -226,8 +244,8 @@ class Shortcuts extends StatefulWidget {
     this.child,
   }) : super(key: key);
 
-  /// The [ShortcutManager] that will manage the mapping between key combinations
-  /// and [Action]s.
+  /// The [ShortcutManager] that will manage the mapping between key
+  /// combinations and [Action]s.
   ///
   /// If not specified, uses a default-constructed [ShortcutManager].
   ///
@@ -235,7 +253,7 @@ class Shortcuts extends StatefulWidget {
   /// [shortcuts] change materially.
   final ShortcutManager manager;
 
-  /// The map of shortcuts that the manager will be given to manage.
+  /// The map of shortcuts that the [manager] will be given to manage.
   final Map<LogicalKeySet, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
@@ -257,7 +275,7 @@ class Shortcuts extends StatefulWidget {
       if (inherited == null) {
         throw FlutterError('Unable to find a $Shortcuts widget in the context.\n'
             '$Shortcuts.of() was called with a context that does not contain a '
-            '$Shortcuts.\n'
+            '$Shortcuts widget.\n'
             'No $Shortcuts ancestor could be found starting from the context that was '
             'passed to $Shortcuts.of().\n'
             'The context used was:\n'

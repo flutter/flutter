@@ -453,9 +453,6 @@ class Key {
   /// The code prefix for keys which have a Unicode representation.
   static const int unicodePlane = 0x00000000000;
 
-  /// The code prefix for pseudo-keys which represent collections of key synonyms.
-  static const int synonymPlane = 0x20000000000;
-
   /// The code prefix for keys which do not have a Unicode representation, but
   /// do have a USB HID ID.
   static const int hidPlane = 0x00100000000;

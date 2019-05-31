@@ -15,24 +15,23 @@ typedef ActionFactory = Action Function();
 
 /// A class representing a particular configuration of an action.
 ///
-/// This class is what a key mapping in a [ShortcutMap] maps to, and is used
-/// by the [ActionDispatcher] to look up an action and invoke it, giving it this
-/// object.
+/// This class is what a key map in a [ShortcutMap] has as values, and is used
+/// by an [ActionDispatcher] to look up an action and invoke it, giving it this
+/// object to extract configuration information from.
 ///
-/// If this tag returns false from [isEnabled], then its associated action will
+/// If this intent returns false from [isEnabled], then its associated action will
 /// not be invoked if requested.
 class Intent extends Diagnosticable {
   /// A const constructor for an [Intent].
   ///
   /// The [key] argument must not be null.
-  const Intent(this.key)
-      : assert(key != null);
+  const Intent(this.key) : assert(key != null);
 
-  /// The key for the action this tag labels.
+  /// The key for the action this intent is associated with.
   final LocalKey key;
 
   /// Returns true if the associated action is able to be executed in the
-  /// current environment.
+  /// given `context`.
   ///
   /// Returns true by default.
   bool isEnabled(BuildContext context) => true;
@@ -48,10 +47,21 @@ class Intent extends Diagnosticable {
 ///
 /// As the name implies, an [Action] is an action or command to be performed.
 /// They are typically invoked as a result of a user action, such as a keyboard
-/// shortcut.
+/// shortcut in a [Shortcuts] widget, which is used to look up an [Intent],
+/// which is given to an [ActionDispatcher] to map the [Intent] to an [Action]
+/// and invoke it.
 ///
-/// The [ActionDispatcher] can invoke actions on the primary focus, or without
-/// regard for focus.
+/// The [ActionDispatcher] can invoke an [Action] on the primary focus, or
+/// without regard for focus.
+///
+/// See also:
+///
+///  - [Shortcuts], which is a widget that contains a key map, in which it looks
+///    up key combinations in order to invoke actions.
+///  - [Actions], which is a widget that defines a map of [Intent] to [Action]
+///    and allows redefining of actions for its descendants.
+///  - [ActionDispatcher], a class that takes an [Action] and invokes it using a
+///    [FocusNode] for context.
 abstract class Action extends Diagnosticable {
   /// A const constructor for an [Action].
   ///
@@ -91,6 +101,15 @@ typedef OnInvokeCallback = void Function(FocusNode node, Intent tag);
 
 /// An [Action] that takes a callback in order to configure it without having to
 /// subclass it.
+///
+/// See also:
+///
+///  - [Shortcuts], which is a widget that contains a key map, in which it looks
+///    up key combinations in order to invoke actions.
+///  - [Actions], which is a widget that defines a map of [Intent] to [Action]
+///    and allows redefining of actions for its descendants.
+///  - [ActionDispatcher], a class that takes an [Action] and invokes it using a
+///    [FocusNode] for context.
 class CallbackAction extends Action {
   /// A const constructor for an [Action].
   ///
@@ -118,10 +137,8 @@ class ActionDispatcher extends Diagnosticable {
   /// Invokes the given action, optionally without regard for the currently
   /// focused node in the focus tree.
   ///
-  /// Actions invoked will receive the given node, which is null by default.
-  ///
-  /// Use [invokeFocusedAction] if you wish to invoke an action using the
-  /// currently focused node.
+  /// Actions invoked will receive the given `focusNode`, or the
+  /// [FocusManager.primaryFocus] if the given `focusNode` is null.
   ///
   /// The `action` and `intent` arguments must not be null.
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
@@ -139,8 +156,8 @@ class ActionDispatcher extends Diagnosticable {
 /// A widget that establishes an [ActionDispatcher] and a map of [Intent] to
 /// [Action] to be used by its descendants when invoking an [Action].
 ///
-/// Actions are typically invoked using [invoke] with the context where the
-/// ambient [Actions] widget should be found.
+/// Actions are typically invoked using [Actions.invoke] with the context
+/// containing the ambient [Actions] widget.
 ///
 /// See also:
 ///
@@ -218,7 +235,12 @@ class Actions extends InheritedWidget {
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
   /// found, then this method will return false instead of throwing.
-  static bool invoke(BuildContext context, Intent intent, {FocusNode focusNode, bool nullOk = false}) {
+  static bool invoke(
+    BuildContext context,
+    Intent intent, {
+    FocusNode focusNode,
+    bool nullOk = false,
+  }) {
     assert(context != null);
     assert(intent != null);
     Actions actions;
