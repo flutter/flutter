@@ -168,7 +168,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// This only accounts for the [TextSpan.text] values and ignores [PlaceholderSpans].
   ///
-  /// Returns null if the [index] is out of bounds.
+  /// Returns null if the `index` is out of bounds.
   int codeUnitAt(int index) {
     if (index < 0)
       return null;

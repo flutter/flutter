@@ -412,8 +412,15 @@ class RenderParagraph extends RenderBox
         transform: transform,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
-          transform.invert();
-          assert(transformed == MatrixUtils.transformPoint(transform, position));
+          assert(() {
+            final Offset manualPosition = (position - textParentData.offset) / textParentData.scale;
+            // Compare the two offsets ignoring floating point error.
+            final double epsilon = 0.00001;
+            return transformed.dx - manualPosition.dx < epsilon
+              && transformed.dx - manualPosition.dx > -epsilon
+              && transformed.dy - manualPosition.dy < epsilon
+              && transformed.dy - manualPosition.dy > -epsilon;
+          }());
           return child.hitTest(result, position: transformed);
         },
       );
