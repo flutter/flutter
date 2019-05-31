@@ -2,24 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
-// ignore_for_file: avoid_unused_constructor_parameters
-
+// Can remove once analyzer summary includes dart:html.
 import 'dart:html' as html; // ignore: uri_does_not_exist
-import 'platform.dart';
+import 'platform.dart' as platform;
 
-TargetPlatform get defaultTargetPlatform {
-  TargetPlatform result;
+/// The dart:html implementation of [platform.defaultTargetPlatform].
+platform.TargetPlatform get defaultTargetPlatform {
+  platform.TargetPlatform result;
   // The existence of this method is tested via the dart2js compile test.
   final String userAgent = html.window.navigator.userAgent;
   if (userAgent.contains('iPhone')
     || userAgent.contains('iPad')
     || userAgent.contains('iPod')) {
-    result = TargetPlatform.iOS;
+    result = platform.TargetPlatform.iOS;
   } else {
-    result = TargetPlatform.android;
+    result = platform.TargetPlatform.android;
   }
-  if (debugDefaultTargetPlatformOverride != null)
-    result = debugDefaultTargetPlatformOverride;
+  if (platform.debugDefaultTargetPlatformOverride != null)
+    result = platform.debugDefaultTargetPlatformOverride;
   return result;
 }

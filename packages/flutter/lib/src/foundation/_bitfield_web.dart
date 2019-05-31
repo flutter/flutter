@@ -10,10 +10,12 @@ const int kMaxUnsignedSMI = 0;
 /// The dart:html implementation of [bitfield.Bitfield].
 class BitField<T extends dynamic> implements bitfield.BitField<T> {
   /// The dart:html implementation of [bitfield.Bitfield].
+  // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
   BitField(int length);
 
   /// The dart:html implementation of [bitfield.Bitfield.filled].
+  // Can remove when we have metaclasses.
   // ignore: avoid_unused_constructor_parameters
   BitField.filled(int length, bool value);
 
