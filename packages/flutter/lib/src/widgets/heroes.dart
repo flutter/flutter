@@ -358,35 +358,30 @@ class _HeroState extends State<Hero> {
       'A Hero widget cannot be the descendant of another Hero widget.'
     );
 
-    final Widget keyedChild = KeyedSubtree(
-      key: _key,
-      child: widget.child,
-    );
+    final bool isHeroInFlight = _placeholderSize != null;
 
-    // If the hero is not in flight, build its child widget.
-    if (_placeholderSize == null) {
-      return keyedChild;
-    }
-
-    if (widget.placeholderBuilder != null) {
+    if (isHeroInFlight && widget.placeholderBuilder != null) {
       return widget.placeholderBuilder(context, _placeholderSize, widget.child);
     }
 
-    return _shouldIncludeChild
-      ? SizedBox(
+    if (isHeroInFlight && !_shouldIncludeChild) {
+      return SizedBox(
         width: _placeholderSize.width,
         height: _placeholderSize.height,
-        child: Offstage(
-          child: TickerMode(
-            enabled: false,
-            child: keyedChild,
-          )
-        ),
-      )
-      : SizedBox(
-          width: _placeholderSize.width,
-          height: _placeholderSize.height,
-        );
+      );
+    }
+
+    return SizedBox(
+      width: _placeholderSize?.width,
+      height: _placeholderSize?.height,
+      child: Offstage(
+        offstage: isHeroInFlight,
+        child: TickerMode(
+          enabled: !isHeroInFlight,
+          child: KeyedSubtree(key: _key, child: widget.child),
+        )
+      ),
+    );
   }
 }
 
