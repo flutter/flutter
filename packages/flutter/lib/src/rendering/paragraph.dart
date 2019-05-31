@@ -786,6 +786,7 @@ class RenderParagraph extends RenderBox
     }
 
     int childIndex = 0;
+    RenderBox child = firstChild;
     for (int i = 0, j = 0; i < _inlineSemanticsOffsets.length; i += 2, j++) {
       final int start = _inlineSemanticsOffsets[i];
       final int end = _inlineSemanticsOffsets[i + 1];
@@ -817,8 +818,18 @@ class RenderParagraph extends RenderBox
       } else if (childIndex < children.length) {
         // Add semantics for this placeholder. Semantics are precomputed in the children
         // argument.
+        final SemanticsNode childNode = children.elementAt(childIndex);
+        final TextParentData parentData = child.parentData;
+        final double scale = parentData.scale;
+        childNode.rect = Rect.fromLTWH(
+          childNode.rect.left,
+          childNode.rect.top,
+          childNode.rect.width * scale,
+          childNode.rect.height * scale,
+        );
         newChildren.add(children.elementAt(childIndex));
         childIndex += 1;
+        child = childAfter(child);
       }
       current = end;
     }
