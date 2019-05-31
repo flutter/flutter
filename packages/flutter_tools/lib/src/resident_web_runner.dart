@@ -120,7 +120,8 @@ class ResidentWebRunner extends ResidentRunner {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+    await writeBundle(
+        fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Step 2: Start an HTTP server
     _server = WebAssetServer(flutterProject, target, ipv6);
