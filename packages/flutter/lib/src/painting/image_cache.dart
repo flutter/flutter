@@ -7,7 +7,7 @@ import 'image_stream.dart';
 const int _kDefaultSize = 1000;
 const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 
-/// Class for the [imageCache] object.
+/// Class for caching images.
 ///
 /// Implements a least-recently-used cache of up to 1000 images, and up to 100
 /// MB. The maximum size can be adjusted using [maximumSize] and
@@ -25,6 +25,9 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///
 /// Generally this class is not used directly. The [ImageProvider] class and its
 /// subclasses automatically handle the caching of images.
+///
+/// A shared instance of this cache is retained by [PaintingBinding] and can be
+/// obtained via the [imageCache] top-level property in the [painting] library.
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};

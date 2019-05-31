@@ -367,13 +367,14 @@ void main() {
 
     const String testValue = 'A short phrase';
     await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pump();
 
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.1.png'),
+      matchesGoldenFile('text_field_cursor_test.0.2.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -395,14 +396,15 @@ void main() {
 
     const String testValue = 'A short phrase';
     await tester.enterText(find.byType(CupertinoTextField), testValue);
+    await tester.pump();
 
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.1.png'),
+      matchesGoldenFile('text_field_cursor_test.1.2.png'),
     );
   }, skip: !Platform.isLinux);
 
@@ -1264,6 +1266,49 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'double tap selects word and first tap of double tap moves cursor',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      final TestGesture gesture =
+        await tester.startGesture(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 3 toolbar buttons.
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
 

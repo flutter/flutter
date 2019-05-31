@@ -16,7 +16,7 @@ import 'dart:typed_data';
 ///
 /// The `total` parameter will contain the _expected_ total number of bytes to
 /// be received across the wire (extracted from the value of the
-/// `Content-Length` HTTP response header), or -1 if the size of the response
+/// `Content-Length` HTTP response header), or null if the size of the response
 /// body is not known in advance (this is common for HTTP chunked transfer
 /// encoding, which itself is common when a large amount of data is being
 /// returned to the client and the total size of the response may not be known
@@ -56,11 +56,13 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   final _OutputBuffer output = _OutputBuffer();
   ByteConversionSink sink = output;
   int expectedContentLength = response.contentLength;
+  if (expectedContentLength == -1)
+    expectedContentLength = null;
   if (response.headers?.value(HttpHeaders.contentEncodingHeader) == 'gzip') {
     if (client?.autoUncompress ?? true) {
       // response.contentLength will not match our bytes stream, so we declare
       // that we don't know the expected content length.
-      expectedContentLength = -1;
+      expectedContentLength = null;
     } else if (autoUncompress) {
       // We need to un-compress the bytes as they come in.
       sink = gzip.decoder.startChunkedConversion(output);

@@ -350,6 +350,7 @@ class EditableText extends StatefulWidget {
     this.keyboardAppearance = Brightness.light,
     this.dragStartBehavior = DragStartBehavior.start,
     this.enableInteractiveSelection,
+    this.scrollController,
     this.scrollPhysics,
   }) : assert(controller != null),
        assert(focusNode != null),
@@ -469,6 +470,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///
   /// {@endtemplate}
   final TextDirection textDirection;
 
@@ -484,6 +486,7 @@ class EditableText extends StatefulWidget {
   /// See also:
   ///
   ///  * [TextCapitalization], for a description of each capitalization behavior.
+  ///
   /// {@endtemplate}
   final TextCapitalization textCapitalization;
 
@@ -795,6 +798,15 @@ class EditableText extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// {@template flutter.widgets.editableText.scrollController}
+  /// The [ScrollController] to use when vertically scrolling the input.
+  ///
+  /// If null, it will instantiate a new ScrollController.
+  ///
+  /// See [Scrollable.controller].
+  /// {@endtemplate}
+  final ScrollController scrollController;
+
   /// {@template flutter.widgets.editableText.scrollPhysics}
   /// The [ScrollPhysics] to use when vertically scrolling the input.
   ///
@@ -829,6 +841,7 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<TextInputType>('keyboardType', keyboardType, defaultValue: null));
+    properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
   }
 }
@@ -843,7 +856,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextInputConnection _textInputConnection;
   TextSelectionOverlay _selectionOverlay;
 
-  final ScrollController _scrollController = ScrollController();
+  ScrollController _scrollController;
+
   AnimationController _cursorBlinkOpacityController;
 
   final LayerLink _layerLink = LayerLink();
@@ -875,6 +889,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     widget.controller.addListener(_didChangeTextEditingValue);
     _focusAttachment = widget.focusNode.attach(context);
     widget.focusNode.addListener(_handleFocusChanged);
+    _scrollController = widget.scrollController ?? ScrollController();
     _scrollController.addListener(() { _selectionOverlay?.updateForScroll(); });
     _cursorBlinkOpacityController = AnimationController(vsync: this, duration: _fadeDuration);
     _cursorBlinkOpacityController.addListener(_onCursorColorTick);

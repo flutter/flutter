@@ -86,6 +86,7 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///
 /// For details on how to use [Timeline] events in the Dart Observatory to
 /// optimize your app, see https://flutter.dev/docs/testing/debugging#tracing-any-dart-code-performance
+/// and https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md
 ///
 /// See also [debugProfilePaintsEnabled], which does something similar but for
 /// painting, and [debugPrintRebuildDirtyWidgets], which does something similar
@@ -292,8 +293,7 @@ void debugWidgetBuilderValue(Widget widget, Widget built) {
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.io/flutter/widgets/widgets-library.html] for
-/// a complete list.
+/// See [the widgets library](widgets/widgets-library.html) for a complete list.
 bool debugAssertAllWidgetVarsUnset(String reason) {
   assert(() {
     if (debugPrintRebuildDirtyWidgets ||

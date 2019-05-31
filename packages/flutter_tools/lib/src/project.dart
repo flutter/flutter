@@ -13,6 +13,7 @@ import 'base/file_system.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
 import 'cache.dart';
+import 'desktop.dart';
 import 'flutter_manifest.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
@@ -179,6 +180,11 @@ class FlutterProject {
     if ((ios.existsSync() && checkProjects) || !checkProjects) {
       await ios.ensureReadyForPlatformSpecificTooling();
     }
+    // TODO(stuartmorgan): Add checkProjects logic once a create workflow exists
+    // for macOS. For now, always treat checkProjects as true for macOS.
+    if (flutterDesktopEnabled && macos.existsSync()) {
+      await macos.ensureReadyForPlatformSpecificTooling();
+    }
     if (flutterWebEnabled) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
@@ -205,14 +211,53 @@ class FlutterProject {
   }
 }
 
+/// Represents an Xcode-based sub-project.
+///
+/// This defines interfaces common to iOS and macOS projects.
+abstract class XcodeBasedProject {
+  /// The parent of this project.
+  FlutterProject get parent;
+
+  /// Whether the subproject (either iOS or macOS) exists in the Flutter project.
+  bool existsSync();
+
+  /// The Xcode project (.xcodeproj directory) of the host app.
+  Directory get xcodeProject;
+
+  /// The 'project.pbxproj' file of [xcodeProject].
+  File get xcodeProjectInfoFile;
+
+  /// The Xcode workspace (.xcworkspace directory) of the host app.
+  Directory get xcodeWorkspace;
+
+  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
+  /// the Xcode build.
+  File get generatedXcodePropertiesFile;
+
+  /// The Flutter-managed Xcode config file for [mode].
+  File xcodeConfigFor(String mode);
+
+  /// The CocoaPods 'Podfile'.
+  File get podfile;
+
+  /// The CocoaPods 'Podfile.lock'.
+  File get podfileLock;
+
+  /// The CocoaPods 'Manifest.lock'.
+  File get podManifestLock;
+
+  /// True if the host app project is using Swift.
+  bool get isSwift;
+}
+
 /// Represents the iOS sub-project of a Flutter project.
 ///
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
-class IosProject {
+class IosProject implements XcodeBasedProject {
   IosProject.fromFlutter(this.parent);
 
-  /// The parent of this project.
+  @override
   final FlutterProject parent;
 
   static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
@@ -246,28 +291,28 @@ class IosProject {
   /// Whether the flutter application has an iOS project.
   bool get exists => hostAppRoot.existsSync();
 
-  /// The xcode config file for [mode].
+  @override
   File xcodeConfigFor(String mode) => _flutterLibRoot.childDirectory('Flutter').childFile('$mode.xcconfig');
 
-  /// The 'Podfile'.
+  @override
   File get podfile => hostAppRoot.childFile('Podfile');
 
-  /// The 'Podfile.lock'.
+  @override
   File get podfileLock => hostAppRoot.childFile('Podfile.lock');
 
-  /// The 'Manifest.lock'.
+  @override
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
   /// The 'Info.plist' file of the host app.
   File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
 
-  /// '.xcodeproj' folder of the host app.
+  @override
   Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppBundleName.xcodeproj');
 
-  /// The '.pbxproj' file of the host app.
+  @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
-  /// Xcode workspace directory of the host app.
+  @override
   Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppBundleName.xcworkspace');
 
   /// Xcode workspace shared data directory for the host app.
@@ -276,7 +321,7 @@ class IosProject {
   /// Xcode workspace shared workspace settings file for the host app.
   File get xcodeWorkspaceSharedSettings => xcodeWorkspaceSharedData.childFile('WorkspaceSettings.xcsettings');
 
-  /// Whether the current flutter project has an iOS subproject.
+  @override
   bool existsSync()  {
     return parent.isModule || _editableDirectory.existsSync();
   }
@@ -304,8 +349,8 @@ class IosProject {
     return null;
   }
 
-  /// True, if the host app project is using Swift.
-  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION');
+  @override
+  bool get isSwift => buildSettings?.containsKey('SWIFT_VERSION') ?? false;
 
   /// The build settings for the host app of this project, as a detached map.
   ///
@@ -364,6 +409,7 @@ class IosProject {
     await injectPlugins(parent);
   }
 
+  @override
   File get generatedXcodePropertiesFile => _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
 
   Directory get pluginRegistrantHost {
@@ -397,6 +443,7 @@ class AndroidProject {
   final FlutterProject parent;
 
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
+  static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'\"]kotlin-android[\'\"]\\s*\$');
   static final RegExp _groupPattern = RegExp('^\\s*group\\s+[\'\"](.*)[\'\"]\\s*\$');
 
   /// The Gradle root directory of the Android host app. This is the directory
@@ -418,6 +465,12 @@ class AndroidProject {
 
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
+
+  /// True, if the app project is using Kotlin.
+  bool get isKotlin {
+    final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
+    return _firstMatchInFile(gradleFile, _kotlinPluginPattern) != null;
+  }
 
   File get appManifestFile {
     return isUsingGradle
@@ -566,29 +619,77 @@ Match _firstMatchInFile(File file, RegExp regExp) {
 }
 
 /// The macOS sub project.
-class MacOSProject {
-  MacOSProject._(this.project);
+class MacOSProject implements XcodeBasedProject {
+  MacOSProject._(this.parent);
 
-  final FlutterProject project;
+  @override
+  final FlutterProject parent;
 
-  bool existsSync() => project.directory.childDirectory('macos').existsSync();
+  static const String _hostAppBundleName = 'Runner';
 
-  Directory get _editableDirectory => project.directory.childDirectory('macos');
+  @override
+  bool existsSync() => _macOSDirectory.existsSync();
 
-  Directory get _cacheDirectory => _editableDirectory.childDirectory('Flutter');
+  Directory get _macOSDirectory => parent.directory.childDirectory('macos');
 
-  /// Contains definitions for FLUTTER_ROOT, LOCAL_ENGINE, and more flags for
-  /// the Xcode build.
-  File get generatedXcodePropertiesFile => _cacheDirectory.childFile('Generated.xcconfig');
+  /// The directory in the project that is managed by Flutter. As much as
+  /// possible, files that are edited by Flutter tooling after initial project
+  /// creation should live here.
+  Directory get managedDirectory => _macOSDirectory.childDirectory('Flutter');
 
-  /// The Xcode project file.
-  Directory get xcodeProjectFile => _editableDirectory.childDirectory('Runner.xcodeproj');
+  /// The subdirectory of [managedDirectory] that contains files that are
+  /// generated on the fly. All generated files that are not intended to be
+  /// checked in should live here.
+  Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
+
+  @override
+  File get generatedXcodePropertiesFile => ephemeralDirectory.childFile('Flutter-Generated.xcconfig');
+
+  @override
+  File xcodeConfigFor(String mode) => managedDirectory.childFile('Flutter-$mode.xcconfig');
+
+  @override
+  File get podfile => _macOSDirectory.childFile('Podfile');
+
+  @override
+  File get podfileLock => _macOSDirectory.childFile('Podfile.lock');
+
+  @override
+  File get podManifestLock => _macOSDirectory.childDirectory('Pods').childFile('Manifest.lock');
+
+  @override
+  Directory get xcodeProject => _macOSDirectory.childDirectory('$_hostAppBundleName.xcodeproj');
+
+  @override
+  File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
+
+  @override
+  Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
+
+  @override
+  bool get isSwift => true;
 
   /// The file where the Xcode build will write the name of the built app.
   ///
-  /// Ideally this will be replaced in the future with inpection of the Runner
+  /// Ideally this will be replaced in the future with inspection of the Runner
   /// scheme's target.
-  File get nameFile => _cacheDirectory.childFile('.app_filename');
+  File get nameFile => ephemeralDirectory.childFile('.app_filename');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {
+    // TODO(stuartmorgan): Add create-from-template logic here.
+    await _updateGeneratedXcodeConfigIfNeeded();
+  }
+
+  Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
+    if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+      await xcode.updateGeneratedXcodeProperties(
+        project: parent,
+        buildInfo: BuildInfo.debug,
+        useMacOSConfig: true,
+        setSymroot: false,
+      );
+    }
+  }
 }
 
 /// The Windows sub project
@@ -609,6 +710,9 @@ class WindowsProject {
 
   // The MSBuild project file.
   File get vcprojFile => _editableDirectory.childFile('Runner.vcxproj');
+
+  // The MSBuild solution file.
+  File get solutionFile => _editableDirectory.childFile('Runner.sln');
 
   /// The file where the VS build will write the name of the built app.
   ///

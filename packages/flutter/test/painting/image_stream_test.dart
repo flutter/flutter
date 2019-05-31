@@ -9,6 +9,7 @@ import 'dart:ui';
 import 'package:flutter/painting.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 
 class FakeFrameInfo implements FrameInfo {
   FakeFrameInfo(int width, int height, this._duration)
@@ -125,6 +126,85 @@ void main() {
     completer.complete(mockCodec);
     await tester.idle();
     expect(mockCodec.numFramesAsked, 1);
+  });
+
+  testWidgets('Chunk events are delivered', (WidgetTester tester) async {
+    final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
+    final Completer<Codec> completer = Completer<Codec>();
+    final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      chunkEvents: streamController.stream,
+      scale: 1.0,
+    );
+
+    imageStream.addListener(ImageStreamListener(
+      (ImageInfo image, bool synchronousCall) { },
+      onChunk: (ImageChunkEvent event) {
+        chunkEvents.add(event);
+      },
+    ));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
+    await tester.idle();
+
+    expect(chunkEvents.length, 2);
+    expect(chunkEvents[0].cumulativeBytesLoaded, 1);
+    expect(chunkEvents[0].expectedTotalBytes, 3);
+    expect(chunkEvents[1].cumulativeBytesLoaded, 2);
+    expect(chunkEvents[1].expectedTotalBytes, 3);
+  });
+
+  testWidgets('Chunk events are not buffered before listener registration', (WidgetTester tester) async {
+    final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
+    final Completer<Codec> completer = Completer<Codec>();
+    final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      chunkEvents: streamController.stream,
+      scale: 1.0,
+    );
+
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 1, expectedTotalBytes: 3));
+    await tester.idle();
+    imageStream.addListener(ImageStreamListener(
+      (ImageInfo image, bool synchronousCall) { },
+      onChunk: (ImageChunkEvent event) {
+        chunkEvents.add(event);
+      },
+    ));
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
+    await tester.idle();
+
+    expect(chunkEvents.length, 1);
+    expect(chunkEvents[0].cumulativeBytesLoaded, 2);
+    expect(chunkEvents[0].expectedTotalBytes, 3);
+  });
+
+  testWidgets('Chunk errors are reported', (WidgetTester tester) async {
+    final List<ImageChunkEvent> chunkEvents = <ImageChunkEvent>[];
+    final Completer<Codec> completer = Completer<Codec>();
+    final StreamController<ImageChunkEvent> streamController = StreamController<ImageChunkEvent>();
+    final ImageStreamCompleter imageStream = MultiFrameImageStreamCompleter(
+      codec: completer.future,
+      chunkEvents: streamController.stream,
+      scale: 1.0,
+    );
+
+    imageStream.addListener(ImageStreamListener(
+      (ImageInfo image, bool synchronousCall) { },
+      onChunk: (ImageChunkEvent event) {
+        chunkEvents.add(event);
+      },
+    ));
+    streamController.addError(Error());
+    streamController.add(const ImageChunkEvent(cumulativeBytesLoaded: 2, expectedTotalBytes: 3));
+    await tester.idle();
+
+    expect(tester.takeException(), isNotNull);
+    expect(chunkEvents.length, 1);
+    expect(chunkEvents[0].cumulativeBytesLoaded, 2);
+    expect(chunkEvents[0].expectedTotalBytes, 3);
   });
 
   testWidgets('getNextFrame future fails', (WidgetTester tester) async {
@@ -525,6 +605,38 @@ void main() {
     await tester.pump(); // first animation frame shows on first app frame.
 
     await tester.pump(const Duration(milliseconds: 200)); // emit 2nd frame.
+  });
+
+  testWidgets('ImageStreamListener hashCode and equals', (WidgetTester tester) async {
+    void handleImage(ImageInfo image, bool synchronousCall) { }
+    void handleImageDifferently(ImageInfo image, bool synchronousCall) { }
+    void handleError(dynamic error, StackTrace stackTrace) { }
+    void handleChunk(ImageChunkEvent event) { }
+
+    void compare({
+      @required ImageListener onImage1,
+      @required ImageListener onImage2,
+      ImageChunkListener onChunk1,
+      ImageChunkListener onChunk2,
+      ImageErrorListener onError1,
+      ImageErrorListener onError2,
+      bool areEqual = true,
+    }) {
+      final ImageStreamListener l1 = ImageStreamListener(onImage1, onChunk: onChunk1, onError: onError1);
+      final ImageStreamListener l2 = ImageStreamListener(onImage2, onChunk: onChunk2, onError: onError2);
+      Matcher comparison(dynamic expected) => areEqual ? equals(expected) : isNot(equals(expected));
+      expect(l1, comparison(l2));
+      expect(l1.hashCode, comparison(l2.hashCode));
+    }
+
+    compare(onImage1: handleImage, onImage2: handleImage);
+    compare(onImage1: handleImage, onImage2: handleImageDifferently, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onImage2: handleImage, onChunk2: handleChunk);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onChunk2: handleChunk, onError2: handleError);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onImage2: handleImage, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onChunk2: handleChunk, areEqual: false);
+    compare(onImage1: handleImage, onChunk1: handleChunk, onError1: handleError, onImage2: handleImage, onError2: handleError, areEqual: false);
   });
 
   // TODO(amirh): enable this once WidgetTester supports flushTimers.

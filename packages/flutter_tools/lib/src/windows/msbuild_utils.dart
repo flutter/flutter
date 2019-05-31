@@ -8,45 +8,70 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
-
-/// The supported versions of Visual Studio.
-const List<String> _visualStudioVersions = <String>['2017', '2019'];
-
-/// The supported flavors of Visual Studio.
-const List<String> _visualStudioFlavors = <String>[
-  'Community',
-  'Professional',
-  'Enterprise',
-  'Preview'
-];
+import '../globals.dart';
 
 /// Returns the path to an installed vcvars64.bat script if found, or null.
 Future<String> findVcvars() async {
-  final String programDir = platform.environment['PROGRAMFILES(X86)'];
-  final String pathPrefix = fs.path.join(programDir, 'Microsoft Visual Studio');
-  const String vcvarsScriptName = 'vcvars64.bat';
-  final String pathSuffix =
-      fs.path.join('VC', 'Auxiliary', 'Build', vcvarsScriptName);
-  for (final String version in _visualStudioVersions) {
-    for (final String flavor in _visualStudioFlavors) {
-      final String testPath =
-          fs.path.join(pathPrefix, version, flavor, pathSuffix);
-      if (fs.file(testPath).existsSync()) {
-        return testPath;
-      }
-    }
+  final String vswherePath = fs.path.join(
+    platform.environment['PROGRAMFILES(X86)'],
+    'Microsoft Visual Studio',
+    'Installer',
+    'vswhere.exe',
+  );
+  // The "Desktop development with C++" workload. This is a coarse check, since
+  // it doesn't validate that the specific pieces are available, but should be
+  // a reasonable first-pass approximation.
+  // In the future, a set of more targetted checks will be used to provide
+  // clear validation feedback (e.g., VS is installed, but missing component X).
+  const String requiredComponent = 'Microsoft.VisualStudio.Workload.NativeDesktop';
+
+  const String visualStudioInstallMessage =
+      'Ensure that you have Visual Studio 2017 or later installed, including '
+      'the "Desktop development with C++" workload.';
+
+  if (!fs.file(vswherePath).existsSync()) {
+    printError(
+      'Unable to locate Visual Studio: vswhere.exe not found\n'
+      '$visualStudioInstallMessage',
+      emphasis: true,
+    );
+    return null;
   }
 
-  // If it can't be found manually, check the path.
   final ProcessResult whereResult = await processManager.run(<String>[
-    'where.exe',
-    vcvarsScriptName,
+    vswherePath,
+    '-latest',
+    '-requires', requiredComponent,
+    '-property', 'installationPath',
   ]);
-  if (whereResult.exitCode == 0) {
-    return whereResult.stdout.trim();
+  if (whereResult.exitCode != 0) {
+    printError(
+      'Unable to locate Visual Studio:\n'
+      '${whereResult.stdout}\n'
+      '$visualStudioInstallMessage',
+      emphasis: true,
+    );
+    return null;
+  }
+  final String visualStudioPath = whereResult.stdout.trim();
+  if (visualStudioPath.isEmpty) {
+    printError(
+      'No suitable Visual Studio found. $visualStudioInstallMessage\n',
+      emphasis: true,
+    );
+    return null;
+  }
+  final String vcvarsPath =
+      fs.path.join(visualStudioPath, 'VC', 'Auxiliary', 'Build', 'vcvars64.bat');
+  if (!fs.file(vcvarsPath).existsSync()) {
+    printError(
+      'vcvars64.bat does not exist at $vcvarsPath.\n',
+      emphasis: true,
+    );
+    return null;
   }
 
-  return null;
+  return vcvarsPath;
 }
 
 /// Writes a property sheet (.props) file to expose all of the key/value

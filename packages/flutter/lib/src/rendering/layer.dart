@@ -125,39 +125,6 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     parent?._removeChild(this);
   }
 
-  /// Replaces this layer with the given layer in the parent layer's child list.
-  void replaceWith(Layer newLayer) {
-    assert(parent != null);
-    assert(attached == parent.attached);
-    assert(newLayer.parent == null);
-    assert(newLayer._nextSibling == null);
-    assert(newLayer._previousSibling == null);
-    assert(!newLayer.attached);
-    newLayer._nextSibling = nextSibling;
-    if (_nextSibling != null)
-      _nextSibling._previousSibling = newLayer;
-    newLayer._previousSibling = previousSibling;
-    if (_previousSibling != null)
-      _previousSibling._nextSibling = newLayer;
-    assert(() {
-      Layer node = this;
-      while (node.parent != null)
-        node = node.parent;
-      assert(node != newLayer); // indicates we are about to create a cycle
-      return true;
-    }());
-    parent.adoptChild(newLayer);
-    assert(newLayer.attached == parent.attached);
-    if (parent.firstChild == this)
-      parent._firstChild = newLayer;
-    if (parent.lastChild == this)
-      parent._lastChild = newLayer;
-    _nextSibling = null;
-    _previousSibling = null;
-    parent.dropChild(this);
-    assert(!attached);
-  }
-
   /// Returns the value of [S] that corresponds to the point described by
   /// [regionOffset].
   ///
@@ -330,9 +297,9 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
 ///    for how to create and manage backend textures on Android.
-///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
 ///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
@@ -551,7 +518,7 @@ class ContainerLayer extends Layer {
   List<PictureLayer> _processConflictingPhysicalLayers(PhysicalModelLayer predecessor, PhysicalModelLayer child) {
     FlutterError.reportError(FlutterErrorDetails(
       exception: FlutterError('Painting order is out of order with respect to elevation.\n'
-                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevations.html '
+                              'See https://api.flutter.dev/flutter/rendering/debugCheckElevationsEnabled.html '
                               'for more details.'),
       library: 'rendering library',
       context: ErrorDescription('during compositing'),
@@ -1492,7 +1459,7 @@ class BackdropFilterLayer extends ContainerLayer {
 /// A composited layer that uses a physical model to producing lighting effects.
 ///
 /// For example, the layer casts a shadow according to its geometry and the
-/// relative position of lights and other physically modelled objects in the
+/// relative position of lights and other physically modeled objects in the
 /// scene.
 ///
 /// When debugging, setting [debugDisablePhysicalShapeLayers] to true will cause this

@@ -19,6 +19,7 @@ import '../bundle.dart' as bundle;
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';

@@ -368,6 +368,18 @@ class RenderEditable extends RenderBox {
   static const int _kShiftMask = 1; // https://developer.android.com/reference/android/view/KeyEvent.html#META_SHIFT_ON
   static const int _kControlMask = 1 << 12; // https://developer.android.com/reference/android/view/KeyEvent.html#META_CTRL_ON
 
+  // Call through to onSelectionChanged only if the given nextSelection is
+  // different from the existing selection.
+  void _handlePotentialSelectionChange(
+    TextSelection nextSelection,
+    SelectionChangedCause cause,
+  ) {
+    if (nextSelection == selection) {
+      return;
+    }
+    onSelectionChanged(nextSelection, this, cause);
+  }
+
   // TODO(goderbauer): doesn't handle extended grapheme clusters with more than one Unicode scalar value (https://github.com/flutter/flutter/issues/13404).
   void _handleKeyEvent(RawKeyEvent keyEvent) {
     // Only handle key events on Android.
@@ -502,21 +514,19 @@ class RenderEditable extends RenderBox {
     // base offset is always less than the extent offset.
     if (shift) {
       if (_baseOffset < newOffset) {
-        onSelectionChanged(
+        _handlePotentialSelectionChange(
           TextSelection(
             baseOffset: _baseOffset,
             extentOffset: newOffset,
           ),
-          this,
           SelectionChangedCause.keyboard,
         );
       } else {
-        onSelectionChanged(
+        _handlePotentialSelectionChange(
           TextSelection(
             baseOffset: newOffset,
             extentOffset: _baseOffset,
           ),
-          this,
           SelectionChangedCause.keyboard,
         );
       }
@@ -529,13 +539,12 @@ class RenderEditable extends RenderBox {
         else if (rightArrow)
           newOffset = _baseOffset > _extentOffset ? _baseOffset : _extentOffset;
       }
-      onSelectionChanged(
+      _handlePotentialSelectionChange(
         TextSelection.fromPosition(
           TextPosition(
             offset: newOffset
           )
         ),
-        this,
         SelectionChangedCause.keyboard,
       );
     }
@@ -582,12 +591,11 @@ class RenderEditable extends RenderBox {
       case _kAKeyCode:
         _baseOffset = 0;
         _extentOffset = textSelectionDelegate.textEditingValue.text.length;
-        onSelectionChanged(
+        _handlePotentialSelectionChange(
           TextSelection(
             baseOffset: 0,
             extentOffset: textSelectionDelegate.textEditingValue.text.length,
           ),
-          this,
           SelectionChangedCause.keyboard,
         );
         break;
@@ -985,7 +993,7 @@ class RenderEditable extends RenderBox {
   }
 
   void _handleSetSelection(TextSelection selection) {
-    onSelectionChanged(selection, this, SelectionChangedCause.keyboard);
+    _handlePotentialSelectionChange(selection, SelectionChangedCause.keyboard);
   }
 
   void _handleMoveCursorForwardByCharacter(bool extentSelection) {
@@ -993,8 +1001,8 @@ class RenderEditable extends RenderBox {
     if (extentOffset == null)
       return;
     final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
-    onSelectionChanged(
-      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+    _handlePotentialSelectionChange(
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), SelectionChangedCause.keyboard,
     );
   }
 
@@ -1003,8 +1011,8 @@ class RenderEditable extends RenderBox {
     if (extentOffset == null)
       return;
     final int baseOffset = !extentSelection ? extentOffset : _selection.baseOffset;
-    onSelectionChanged(
-      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), this, SelectionChangedCause.keyboard,
+    _handlePotentialSelectionChange(
+      TextSelection(baseOffset: baseOffset, extentOffset: extentOffset), SelectionChangedCause.keyboard,
     );
   }
 
@@ -1016,12 +1024,11 @@ class RenderEditable extends RenderBox {
     if (nextWord == null)
       return;
     final int baseOffset = extentSelection ? _selection.baseOffset : nextWord.start;
-    onSelectionChanged(
+    _handlePotentialSelectionChange(
       TextSelection(
         baseOffset: baseOffset,
         extentOffset: nextWord.start,
       ),
-      this,
       SelectionChangedCause.keyboard,
     );
   }
@@ -1034,12 +1041,11 @@ class RenderEditable extends RenderBox {
     if (previousWord == null)
       return;
     final int baseOffset = extentSelection ?  _selection.baseOffset : previousWord.start;
-    onSelectionChanged(
+    _handlePotentialSelectionChange(
       TextSelection(
         baseOffset: baseOffset,
         extentOffset: previousWord.start,
       ),
-      this,
       SelectionChangedCause.keyboard,
     );
   }
@@ -1437,7 +1443,7 @@ class RenderEditable extends RenderBox {
       );
       // Call [onSelectionChanged] only when the selection actually changed.
       if (newSelection != _selection) {
-        onSelectionChanged(newSelection, this, cause);
+        _handlePotentialSelectionChange(newSelection, cause);
       }
     }
   }
@@ -1465,12 +1471,13 @@ class RenderEditable extends RenderBox {
       final TextSelection lastWord = to == null ?
         firstWord : _selectWordAtOffset(_textPainter.getPositionForOffset(globalToLocal(to - _paintOffset)));
 
-      onSelectionChanged(
+      _handlePotentialSelectionChange(
         TextSelection(
           baseOffset: firstWord.base.offset,
           extentOffset: lastWord.extent.offset,
           affinity: firstWord.affinity,
-        ), this, cause,
+        ),
+        cause,
       );
     }
   }
@@ -1486,15 +1493,13 @@ class RenderEditable extends RenderBox {
       final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition - _paintOffset));
       final TextRange word = _textPainter.getWordBoundary(position);
       if (position.offset - word.start <= 1) {
-        onSelectionChanged(
+        _handlePotentialSelectionChange(
           TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
-          this,
           cause,
         );
       } else {
-        onSelectionChanged(
+        _handlePotentialSelectionChange(
           TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
-          this,
           cause,
         );
       }

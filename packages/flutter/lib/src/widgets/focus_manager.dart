@@ -459,6 +459,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _manager._currentFocus.ancestors.contains(this);
   }
 
+  /// TODO
   bool get hasInactiveFocus {
     if (_manager == null) {
       return false;
@@ -668,7 +669,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   @mustCallSuper
   FocusAttachment attach(BuildContext context, {FocusOnKeyCallback onKey}) {
     _context = context;
-    _onKey = onKey;
+    _onKey = onKey ?? _onKey;
     _attachment = FocusAttachment._(this);
     return _attachment;
   }
