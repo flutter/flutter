@@ -54,7 +54,6 @@ void main() {
         matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
       );
     },
-    skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -106,7 +105,6 @@ void main() {
         matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
       );
     },
-    skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -150,7 +148,6 @@ void main() {
         matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
       );
     },
-    skip: !Platform.isLinux,
   );
 
 }

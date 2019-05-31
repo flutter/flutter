@@ -18,6 +18,8 @@ const String _kRepositoryRoot = '$_kFlutterRoot/bin/cache/pkg/goldens';
 const String _kVersionFile = '$_kFlutterRoot/bin/internal/goldens.version';
 const String _kGoldensVersion = '123456abcdef';
 
+// TODO(Piinks): Write tests for SkiaGold path, update GoldClient path if necessary
+
 void main() {
   MemoryFileSystem fs;
   FakePlatform platform;

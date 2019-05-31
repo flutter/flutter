@@ -180,7 +180,6 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('opacity_test.offset.1.png'),
-      skip: !Platform.isLinux,
     );
   });
 

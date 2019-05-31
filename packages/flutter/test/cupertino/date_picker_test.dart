@@ -845,7 +845,6 @@ void main() {
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.initial.1.png'),
-        skip: !Platform.isLinux
       );
 
       // Slightly drag the hour component to make the current hour off-center.
@@ -855,7 +854,6 @@ void main() {
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.drag.1.png'),
-        skip: !Platform.isLinux
       );
     });
   });

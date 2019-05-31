@@ -142,7 +142,6 @@ void main() {
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
       matchesGoldenFile('dropdown_test.default.0.png'),
-      skip: !Platform.isLinux,
     );
   });
 
@@ -155,7 +154,6 @@ void main() {
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
       matchesGoldenFile('dropdown_test.expanded.0.png'),
-      skip: !Platform.isLinux,
     );
   });
 

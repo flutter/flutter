@@ -405,7 +405,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.0.0.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -434,7 +434,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.1.0.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -484,7 +484,6 @@ void main() {
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.2.png'),
-      skip: !Platform.isLinux,
     );
   });
 

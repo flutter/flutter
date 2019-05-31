@@ -81,7 +81,7 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  });
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(

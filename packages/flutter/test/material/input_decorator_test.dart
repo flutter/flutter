@@ -2031,17 +2031,14 @@ void main() {
       await expectLater(
         find.byType(InputDecorator),
         matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-        skip: !Platform.isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
         matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-        skip: !Platform.isLinux,
       );
     },
-    skip: !Platform.isLinux,
   );
 
   testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {

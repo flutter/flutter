@@ -1436,7 +1436,6 @@ void main() {
       await expectLater(
         find.byType(BottomNavigationBar),
         matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
-        skip: !Platform.isLinux,
       );
     }
   });

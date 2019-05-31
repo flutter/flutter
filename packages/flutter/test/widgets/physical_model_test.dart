@@ -112,7 +112,6 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('physical_model_overflow.png'),
-      skip: !Platform.isLinux,
     );
   });
 

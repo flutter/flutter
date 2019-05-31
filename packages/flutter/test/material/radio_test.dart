@@ -278,7 +278,6 @@ void main() {
     await expectLater(
       find.byKey(painterKey),
       matchesGoldenFile('radio.ink_ripple.png'),
-      skip: !Platform.isLinux,
     );
   });
 }

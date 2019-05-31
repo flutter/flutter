@@ -133,7 +133,6 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
-      skip: !Platform.isLinux,
     );
   });
 

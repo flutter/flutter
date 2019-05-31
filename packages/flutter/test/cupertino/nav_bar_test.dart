@@ -804,9 +804,6 @@ void main() {
         matchesGoldenFile('nav_bar_test.standard_title.1.png'),
       );
     },
-    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
-    // is fixed.
-    skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -838,10 +835,7 @@ void main() {
         matchesGoldenFile('nav_bar_test.large_title.1.png'),
       );
     },
-    // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
-    // is fixed.
-    skip: !Platform.isLinux,
-   );
+  );
 
 
   testWidgets('NavBar draws a light system bar for a dark background', (WidgetTester tester) async {

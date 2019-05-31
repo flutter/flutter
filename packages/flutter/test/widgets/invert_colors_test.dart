@@ -23,7 +23,6 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('invert_colors_test.0.png'),
-      skip: !Platform.isLinux,
     );
   });
 
@@ -42,7 +41,6 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('invert_colors_test.1.png'),
-      skip: !Platform.isLinux,
     );
   });
 }

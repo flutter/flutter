@@ -44,7 +44,6 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('backdrop_filter_test.cull_rect.1.png'),
-      skip: !Platform.isLinux,
     );
   });
 }
