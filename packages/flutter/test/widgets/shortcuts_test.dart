@@ -94,17 +94,22 @@ void main() {
 
       final List<String> description = builder.properties
           .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
+            return !node.isFiltered(DiagnosticLevel.info);
+          })
           .map((DiagnosticsNode node) => node.toString())
           .toList();
 
       expect(description.length, equals(1));
-      expect(description[0], equalsIgnoringHashCodes('keys: {LogicalKeyboardKey#00000(keyId: "0x00000061", keyLabel: "a", debugName: "Key A"), LogicalKeyboardKey#00000(keyId: "0x00000062", keyLabel: "b", debugName: "Key B")}'));
+      expect(
+          description[0],
+          equalsIgnoringHashCodes(
+              'keys: {LogicalKeyboardKey#00000(keyId: "0x00000061", keyLabel: "a", debugName: "Key A"), LogicalKeyboardKey#00000(keyId: "0x00000062", keyLabel: "b", debugName: "Key B")}'));
     });
   });
   group(ShortcutManager, () {
+    test('$ShortcutManager .', () {
 
+    });
   });
   group(Shortcuts, () {});
 }

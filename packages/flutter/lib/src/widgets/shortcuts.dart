@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:collection';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:meta/meta.dart';
 
 import 'actions.dart';
 import 'binding.dart';
@@ -32,31 +35,30 @@ class LogicalKeySet extends Diagnosticable {
     LogicalKeyboardKey key3,
     LogicalKeyboardKey key4,
   ])  : assert(key1 != null),
-        _keys = <LogicalKeyboardKey>{ key1 } {
+        _keys = <LogicalKeyboardKey>{key1} {
     int count = 1;
     if (key2 != null) {
       _keys.add(key2);
-      assert((){
+      assert(() {
         count++;
         return true;
       }());
     }
     if (key3 != null) {
       _keys.add(key3);
-      assert((){
+      assert(() {
         count++;
         return true;
       }());
     }
     if (key4 != null) {
       _keys.add(key4);
-      assert((){
+      assert(() {
         count++;
         return true;
       }());
     }
-    assert(_keys.length == count,
-      'Two or more provided keys are identical. Each key can appear only once.');
+    assert(_keys.length == count, 'Two or more provided keys are identical. Each key can appear only once.');
   }
 
   /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
@@ -111,7 +113,16 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
     Map<LogicalKeySet, Intent> shortcuts = const <LogicalKeySet, Intent>{},
     this.modal = false,
   })  : assert(shortcuts != null),
-        _shortcuts = shortcuts;
+        _shortcuts = _makeComparable(shortcuts);
+
+  static LinkedHashMap<LogicalKeySet, Intent> _makeComparable(Map<LogicalKeySet, Intent> value) {
+    final LinkedHashMap<LogicalKeySet, Intent> comparisonMap = LinkedHashMap<LogicalKeySet, Intent>(
+      equals: (LogicalKeySet a, LogicalKeySet b) => a == b,
+      hashCode: (LogicalKeySet a) => a.hashCode,
+    );
+    comparisonMap.addAll(value);
+    return comparisonMap;
+  }
 
   /// True if this shortcut map should not pass on keys that it doesn't handle
   /// to any key-handling widgets that are ancestors to this one.
@@ -120,43 +131,22 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   /// to it, even if that key doesn't appear in the [shortcuts] map.
   final bool modal;
 
-  /// Returns a copy of the shortcut map.
-  ///
-  /// Returns a copy so that modifying the copy will not modified the stored
-  /// map.
+  /// Returns the shortcut map.
   ///
   /// When the map is changed, listeners to this manager will be notified.
-  Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
-  final Map<LogicalKeySet, Intent> _shortcuts;
+  ///
+  /// The returned map is not modifiable.
+  Map<LogicalKeySet, Intent> get shortcuts => UnmodifiableMapView<LogicalKeySet, Intent>(_shortcuts);
+  LinkedHashMap<LogicalKeySet, Intent> _shortcuts;
   set shortcuts(Map<LogicalKeySet, Intent> value) {
-    if (value != _shortcuts) {
-      _shortcuts.clear();
-      _shortcuts.addAll(value);
-      notifyListeners();
-    }
-  }
-
-  /// Adds a shortcut mapping to the map.
-  ///
-  /// It the mapping is changed, then the listeners to this manager will be
-  /// notified.
-  void addShortcut(LogicalKeySet keySet, Intent action) {
-    if (!_shortcuts.containsKey(keySet) || _shortcuts[keySet] != action) {
-      _shortcuts[keySet] = action;
-      notifyListeners();
-    }
-  }
-
-  /// Removes a shortcut mapping to the map.
-  ///
-  /// It the mapping is changed, then the listeners to this manager will be
-  /// notified.
-  void removeShortcut(LogicalKeySet keySet) {
-    if (!_shortcuts.containsKey(keySet)) {
+    if (_shortcuts == value) {
       return;
     }
-    _shortcuts.remove(keySet);
-    notifyListeners();
+    final LinkedHashMap<LogicalKeySet, Intent> comparisonMap = _makeComparable(value);
+    if (_shortcuts != comparisonMap) {
+      _shortcuts = comparisonMap;
+      notifyListeners();
+    }
   }
 
   /// Handles a key pressed `event` in the given `context`.
@@ -164,6 +154,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   /// The optional `keysPressed` argument provides an override to keys that the
   /// [RawKeyboard] reports. If not specified, uses [RawKeyboard.keysPressed]
   /// instead.
+  @protected
   bool handleKeypress(
     BuildContext context,
     RawKeyEvent event, {
@@ -210,7 +201,7 @@ class Shortcuts extends StatefulWidget {
     this.manager,
     this.shortcuts,
     this.child,
-  })  : super(key: key);
+  }) : super(key: key);
 
   /// The shortcut manager that will manage the mapping between key combinations
   /// and [Action]s.
