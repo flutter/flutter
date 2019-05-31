@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
 import '../base/common.dart';
@@ -36,9 +37,14 @@ class ChromeLauncher {
 
   /// Launch the chrome browser to a particular `host` page.
   Future<Chrome> launch(String url) async {
+    final String chromeExecutable = _findExecutable();
+    if (!fs.file(chromeExecutable).existsSync()) {
+      throwToolExit('Chrome executable not found at $chromeExecutable');
+    }
     final Directory dataDir = fs.systemTempDirectory.createTempSync();
     final int port = await os.findFreePort();
     final List<String> args = <String>[
+      chromeExecutable,
       // Using a tmp directory ensures that a new instance of chrome launches
       // allowing for the remote debug port to be enabled.
       '--user-data-dir=${dataDir.path}',
@@ -56,16 +62,17 @@ class ChromeLauncher {
       '--disable-translate',
       url,
     ];
-    final Process process = await Process.start(_executable, args);
+    final Process process = await processManager.start(args);
 
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .firstWhere((String line) => line.startsWith('DevTools listening'))
-        .timeout(Duration(seconds: 60),
-            onTimeout: () =>
-                throw Exception('Unable to connect to Chrome DevTools.'));
+        .timeout(const Duration(seconds: 60), onTimeout: () {
+          throwToolExit('Unable to connect to Chrome DevTools.');
+          return null;
+        });
 
     return _connect(Chrome._(
       port,
@@ -97,35 +104,35 @@ class ChromeLauncher {
       _connect(Chrome._(port, ChromeConnection('localhost', port)));
 
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
-}
 
-String get _executable {
-  if (platform.environment.containsKey(_kChromeEnvironment)) {
-    return platform.environment[_kChromeEnvironment];
+  static String _findExecutable() {
+    if (platform.environment.containsKey(_kChromeEnvironment)) {
+      return platform.environment[_kChromeEnvironment];
+    }
+    if (platform.isLinux) {
+      return _kLinuxExecutable;
+    }
+    if (platform.isMacOS) {
+      return _kMacOSExecutable;
+    }
+    if (platform.isWindows) {
+      final String windowsPrefix = _kWindowsPrefixes.firstWhere((String prefix) {
+        if (prefix == null) {
+          return false;
+        }
+        final String path = fs.path.join(prefix, _kWindowsExecutable);
+        return fs.file(path).existsSync();
+      }, orElse: () => '.');
+      return fs.path.join(windowsPrefix, _kWindowsExecutable);
+    }
+    throwToolExit('Platform ${platform.operatingSystem} is not supported.');
+    return null;
   }
-  if (platform.isLinux) {
-    return _kLinuxExecutable;
-  }
-  if (platform.isMacOS) {
-    return _kMacOSExecutable;
-  }
-  if (platform.isWindows) {
-    return fs.path.join(
-        _kWindowsPrefixes.firstWhere((String prefix) {
-          if (prefix == null) {
-            return false;
-          }
-          final String path = fs.path.join(prefix, _kWindowsExecutable);
-          return fs.file(path).existsSync();
-        }, orElse: () => '.'),
-        _kWindowsExecutable);
-  }
-  throw StateError('Unexpected platform type.');
 }
 
 /// A class for managing an instance of Chrome.
 class Chrome {
-  Chrome._(
+  const Chrome._(
     this.debugPort,
     this.chromeConnection, {
     Process process,
@@ -151,7 +158,7 @@ class Chrome {
       // Chrome starts another process as soon as it dies that modifies the
       // profile information. Give it some time before attempting to delete
       // the directory.
-      await Future<void>.delayed(Duration(milliseconds: 500));
+      await Future<void>.delayed(const Duration(milliseconds: 500));
       await _dataDir?.delete(recursive: true);
     } catch (_) {
       // Silently fail if we can't clean up the profile information.
