@@ -2,87 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: public_member_api_docs
 import 'dart:async';
-import 'dart:developer' show Timeline, Flow;
-import 'dart:io';
+import 'dart:developer';
 import 'dart:isolate';
-
 import 'package:meta/meta.dart';
 
-import '_core_stub.dart' as core;
-import 'assertions.dart';
 import 'constants.dart';
-import 'platform.dart';
+import 'isolates.dart' as isolates;
 
-TargetPlatform get defaultTargetPlatform {
-  TargetPlatform result;
-  if (Platform.isIOS) {
-    result = TargetPlatform.iOS;
-  } else if (Platform.isAndroid) {
-    result = TargetPlatform.android;
-  } else if (Platform.isFuchsia) {
-    result = TargetPlatform.fuchsia;
-  }
-  assert(() {
-    if (Platform.environment.containsKey('FLUTTER_TEST'))
-      result = TargetPlatform.android;
-    return true;
-  }());
-  if (debugDefaultTargetPlatformOverride != null)
-    result = debugDefaultTargetPlatformOverride;
-  if (result == null) {
-    throw FlutterError(
-      'Unknown platform.\n'
-      '${Platform.operatingSystem} was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
-    );
-  }
-  return result;
-}
-
-const int kMaxUnsignedSMI = 0x3FFFFFFFFFFFFFFF;
-
-class BitField<T extends dynamic> implements core.BitField<T> {
-  BitField(this._length)
-    : assert(_length <= _smiBits),
-      _bits = _allZeros;
-
-  BitField.filled(this._length, bool value)
-    : assert(_length <= _smiBits),
-      _bits = value ? _allOnes : _allZeros;
-
-  final int _length;
-  int _bits;
-
-  static const int _smiBits = 62; // see https://www.dartlang.org/articles/numeric-computation/#smis-and-mints
-  static const int _allZeros = 0;
-  static const int _allOnes = kMaxUnsignedSMI; // 2^(_kSMIBits+1)-1
-
-  @override
-  bool operator [](T index) {
-    assert(index.index < _length);
-    return (_bits & 1 << index.index) > 0;
-  }
-
-  @override
-  void operator []=(T index, bool value) {
-    assert(index.index < _length);
-    if (value)
-      _bits = _bits | (1 << index.index);
-    else
-      _bits = _bits & ~(1 << index.index);
-  }
-
-  @override
-  void reset([ bool value = false ]) {
-    _bits = value ? _allOnes : _allZeros;
-  }
-}
-
-typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
-
-Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
+/// The dart:io implementation of [isolate.compute].
+Future<R> compute<Q, R>(isolates.ComputeCallback<Q, R> callback, Q message, { String debugLabel }) async {
   if (!kReleaseMode) {
     debugLabel ??= callback.toString();
   }
@@ -139,7 +68,7 @@ class _IsolateConfiguration<Q, R> {
     this.debugLabel,
     this.flowId,
   );
-  final ComputeCallback<Q, R> callback;
+  final isolates.ComputeCallback<Q, R> callback;
   final Q message;
   final SendPort resultPort;
   final String debugLabel;

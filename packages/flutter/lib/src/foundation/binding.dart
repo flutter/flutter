@@ -10,9 +10,6 @@ import 'dart:ui' as ui show saveCompilationTrace, Window, window;
 
 import 'package:meta/meta.dart';
 
-import '_core_stub.dart'
-  if (dart.library.html) '_core_web.dart'
-  if (dart.library.io) '_core_io.dart';
 import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';

@@ -31,19 +31,18 @@ export 'package:meta/meta.dart' show
 // dynamic _last;
 // dynamic _selection;
 
-export 'src/foundation/_core_stub.dart'
-  if (dart.library.html) 'src/foundation/_core_web.dart'
-  if (dart.library.io) 'src/foundation/_core_io.dart';
 export 'src/foundation/annotations.dart';
 export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
+export 'src/foundation/bitfield.dart';
 export 'src/foundation/change_notifier.dart';
 export 'src/foundation/collections.dart';
 export 'src/foundation/consolidate_response.dart';
 export 'src/foundation/constants.dart';
 export 'src/foundation/debug.dart';
 export 'src/foundation/diagnostics.dart';
+export 'src/foundation/isolates.dart';
 export 'src/foundation/key.dart';
 export 'src/foundation/licenses.dart';
 export 'src/foundation/node.dart';
