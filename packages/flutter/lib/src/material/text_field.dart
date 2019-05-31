@@ -62,6 +62,10 @@ typedef InputCounterWidgetBuilder = Widget Function(
 /// tapped an ink splash that paints on the material is triggered, see
 /// [ThemeData.splashFactory].
 ///
+/// Remember to [dispose] the TextEditingController when it is no longer needed. 
+/// This will ensure we discard any resources used by the object. 
+/// 
+///
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
