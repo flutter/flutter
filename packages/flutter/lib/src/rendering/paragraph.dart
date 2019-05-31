@@ -406,11 +406,14 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData;
+      final Matrix4 transform = Matrix4.translationValues(textParentData.offset.dx, textParentData.offset.dy, 0.0)
+        ..scale(textParentData.scale, textParentData.scale, textParentData.scale);
       final bool isHit = result.addWithPaintTransform(
-        transform: Matrix4.translationValues(textParentData.offset.dx, textParentData.offset.dy, 0.0)
-          .. scale(textParentData.scale, textParentData.scale, textParentData.scale),
+        transform: transform,
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
+          transform.invert();
+          assert(transformed == MatrixUtils.transformPoint(transform, position));
           return child.hitTest(result, position: transformed);
         },
       );
