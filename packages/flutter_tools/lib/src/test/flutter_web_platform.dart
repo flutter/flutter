@@ -34,12 +34,15 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 
+// TODO(jonahwilliams): remove shelf and test dependencies.
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root) {
     // Look up the location of the testing resources.
-    final Map<String, Uri> packageMap =
-        PackageMap(fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'))
-            .map;
+    final Map<String, Uri> packageMap = PackageMap(fs.path.join(
+      Cache.flutterRoot,
+      'packages',
+      'flutter_tools',
+    )).map;
     testUri = packageMap['test'];
     final shelf.Cascade cascade = shelf.Cascade()
         .add(_webSocketHandler.handler)
@@ -51,58 +54,8 @@ class FlutterWebPlatform extends PlatformPlugin {
         ))
         .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
             serveFilesOutsidePath: true))
-        .add((shelf.Request request) {
-      if (request.requestedUri.path.contains('require.js')) {
-        final File result = fs.file(fs.path.join(
-          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-          'lib',
-          'dev_compiler',
-          'amd',
-          'require.js',
-        ));
-        return shelf.Response.ok(result.openRead(),
-            headers: <String, String>{'Content-Type': 'text/javascript'});
-      } else if (request.requestedUri.path.contains('Ahem.ttf')) {
-        final File result = fs.file(fs.path.join(
-          Cache.flutterRoot,
-          'packages',
-          'flutter_tools',
-          'static',
-          'Ahem.ttf',
-        ));
-        return shelf.Response.ok(result.openRead());
-      } else if (request.requestedUri.path.contains('dart_sdk.js')) {
-        final File result = fs.file(fs.path.join(
-          artifacts.getArtifactPath(Artifact.flutterWebSdk),
-          'kernel',
-          'amd',
-          'dart_sdk.js',
-        ));
-        return shelf.Response.ok(result.openRead(),
-            headers: <String, String>{'Content-Type': 'text/javascript'});
-      } else if (request.requestedUri.path
-          .contains('stack_trace_mapper.dart.js')) {
-        final File result = fs.file(fs.path.join(
-          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-          'lib',
-          'dev_compiler',
-          'web',
-          'dart_stack_trace_mapper.js',
-        ));
-        return shelf.Response.ok(result.openRead(),
-            headers: <String, String>{'Content-Type': 'text/javascript'});
-      } else if (request.requestedUri.path.contains('static/dart.js')) {
-        final File result = fs.file(fs.path.join(
-          testUri.toFilePath(),
-          'lib',
-          'dart.js',
-        ));
-        return shelf.Response.ok(result.openRead(),
-            headers: <String, String>{'Content-Type': 'text/javascript'});
-      } else {
-        return shelf.Response.notFound('Not Found');
-      }
-    }).add(_wrapperHandler);
+        .add(_handleStaticArtifact)
+        .add(_wrapperHandler);
     _server.mount(cascade.handler);
   }
 
@@ -126,6 +79,77 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   /// The URL for this server.
   Uri get url => _server.url;
+
+  /// The ahem text file.
+  File get ahem => fs.file(fs.path.join(
+        Cache.flutterRoot,
+        'packages',
+        'flutter_tools',
+        'static',
+        'Ahem.ttf',
+      ));
+
+  /// The require js binary.
+  File get requireJs => fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'amd',
+        'require.js',
+      ));
+
+  /// The ddc to dart stack trace mapper.
+  File get stackTraceMapper => fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'web',
+        'dart_stack_trace_mapper.js',
+      ));
+
+  /// The precompiled dart sdk.
+  File get dartSdk => fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        'kernel',
+        'amd',
+        'dart_sdk.js',
+      ));
+
+  /// The precompiled test javascript.
+  File get testDartJs => fs.file(fs.path.join(
+        testUri.toFilePath(),
+        'lib',
+        'dart.js',
+      ));
+
+  Future<shelf.Response> _handleStaticArtifact(shelf.Request request) async {
+    if (request.requestedUri.path.contains('require.js')) {
+      return shelf.Response.ok(
+        requireJs.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path.contains('Ahem.ttf')) {
+      return shelf.Response.ok(ahem.openRead());
+    } else if (request.requestedUri.path.contains('dart_sdk.js')) {
+      return shelf.Response.ok(
+        dartSdk.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path
+        .contains('stack_trace_mapper.dart.js')) {
+      return shelf.Response.ok(
+        stackTraceMapper.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else if (request.requestedUri.path.contains('static/dart.js')) {
+      return shelf.Response.ok(
+        testDartJs.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
+    } else {
+      return shelf.Response.notFound('Not Found');
+    }
+  }
 
   final OneOffHandler _webSocketHandler = OneOffHandler();
   final PathHandler _jsHandler = PathHandler();

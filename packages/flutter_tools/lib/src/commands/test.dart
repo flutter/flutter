@@ -103,6 +103,7 @@ class TestCommand extends FastFlutterCommand {
       ..addOption('platform',
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
+        help: 'The platform to run the unit tests on. Defaults to "tester".'
       );
   }
 
