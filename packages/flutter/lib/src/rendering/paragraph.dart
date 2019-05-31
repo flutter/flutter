@@ -415,11 +415,8 @@ class RenderParagraph extends RenderBox
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale;
             // Compare the two offsets ignoring floating point error.
-            final double epsilon = 0.00001;
-            return transformed.dx - manualPosition.dx < epsilon
-              && transformed.dx - manualPosition.dx > -epsilon
-              && transformed.dy - manualPosition.dy < epsilon
-              && transformed.dy - manualPosition.dy > -epsilon;
+            return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
+              && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
           return child.hitTest(result, position: transformed);
         },
