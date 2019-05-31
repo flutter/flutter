@@ -27,7 +27,8 @@ import '../project.dart';
 import 'build_script_generator.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
-const String kMinimumBuildRunnerVersion = '1.2.8';
+const String kMinimumBuildRunnerVersion = '1.4.0';
+const String kSupportedBuildDaemonVersion = '0.6.1';
 
 /// A wrapper for a build_runner process which delegates to a generated
 /// build script.
@@ -47,7 +48,7 @@ class BuildRunner extends CodeGenerator {
     final File syntheticPubspec = generatedDirectory.childFile('pubspec.yaml');
 
     // Check if contents of builders changed. If so, invalidate build script
-    // and regnerate.
+    // and regenerate.
     final YamlMap builders = flutterProject.builders;
     final List<int> appliedBuilderDigest = _produceScriptId(builders);
     if (scriptIdFile.existsSync() && buildSnapshot.existsSync()) {
@@ -83,10 +84,24 @@ class BuildRunner extends CodeGenerator {
       if (builders != null) {
         for (String name in builders.keys) {
           final Object node = builders[name];
-          stringBuffer.writeln('  $name: $node');
+          // For relative paths, make sure it is accounted for
+          // parent directories.
+          if (node is YamlMap && node['path'] != null) {
+            final String path = node['path'];
+            if (fs.path.isRelative(path)) {
+              final String convertedPath = fs.path.join('..', '..', node['path']);
+              stringBuffer.writeln('  $name:');
+              stringBuffer.writeln('    path: $convertedPath');
+            } else {
+              stringBuffer.writeln('  $name: $node');
+            }
+          } else {
+            stringBuffer.writeln('  $name: $node');
+          }
         }
       }
       stringBuffer.writeln('  build_runner: ^$kMinimumBuildRunnerVersion');
+      stringBuffer.writeln('  build_daemon: $kSupportedBuildDaemonVersion');
       await syntheticPubspec.writeAsString(stringBuffer.toString());
 
       await pubGet(
@@ -140,6 +155,7 @@ class BuildRunner extends CodeGenerator {
         .path;
     final Status status = logger.startProgress('starting build daemon...', timeout: null);
     BuildDaemonClient buildDaemonClient;
+    final String path = cache.getArtifactDirectory('web-sdk').path;
     try {
       final List<String> command = <String>[
         engineDartBinaryPath,
@@ -147,14 +163,24 @@ class BuildRunner extends CodeGenerator {
         buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
-         '--delete-conflicting-outputs'
+         '--delete-conflicting-outputs',
+         '--define', 'build|ddc=flutter_sdk_dir=$path',
       ];
-      buildDaemonClient = await BuildDaemonClient.connect(flutterProject.directory.path, command, logHandler: (ServerLog log) => printTrace(log.toString()));
+      buildDaemonClient = await BuildDaemonClient.connect(
+        flutterProject.directory.path,
+        command,
+        logHandler: (ServerLog log) {
+          printTrace(log.toString());
+        }
+      );
     } finally {
       status.stop();
     }
     buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
       builder.target = flutterProject.manifest.appName;
+    }));
+    buildDaemonClient.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder builder) {
+      builder.target = 'test';
     }));
     return _BuildRunnerCodegenDaemon(buildDaemonClient);
   }
@@ -195,10 +221,15 @@ List<int> _produceScriptId(YamlMap builders) {
   if (builders == null || builders.isEmpty) {
     return md5.convert(platform.version.codeUnits).bytes;
   }
-  final List<String> orderedBuilders = builders.keys
+  final List<String> orderedBuilderNames = builders.keys
     .cast<String>()
     .toList()..sort();
-  return md5.convert(orderedBuilders
-    .followedBy(<String>[platform.version])
-    .join('').codeUnits).bytes;
+  final List<String> orderedBuilderValues = builders.values
+    .map((dynamic value) => value.toString())
+    .toList()..sort();
+  return md5.convert(<String>[
+    ...orderedBuilderNames,
+    ...orderedBuilderValues,
+    platform.version,
+  ].join('').codeUnits).bytes;
 }

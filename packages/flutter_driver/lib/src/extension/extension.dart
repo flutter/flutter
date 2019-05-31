@@ -142,6 +142,8 @@ class FlutterDriverExtension {
       'ByValueKey': (SerializableFinder finder) => _createByValueKeyFinder(finder),
       'ByType': (SerializableFinder finder) => _createByTypeFinder(finder),
       'PageBack': (SerializableFinder finder) => _createPageBackFinder(),
+      'Ancestor': (SerializableFinder finder) => _createAncestorFinder(finder),
+      'Descendant': (SerializableFinder finder) => _createDescendantFinder(finder),
     });
   }
 
@@ -181,6 +183,8 @@ class FlutterDriverExtension {
       if (commandHandler == null || commandDeserializer == null)
         throw 'Extension $_extensionMethod does not support command $commandKind';
       final Command command = commandDeserializer(params);
+      assert(WidgetsBinding.instance.isRootWidgetAttached || !command.requiresRootWidgetAttached,
+          'No root widget is attached; have you remembered to call runApp()?');
       Future<Result> responseFuture = commandHandler(command);
       if (command.timeout != null)
         responseFuture = responseFuture.timeout(command.timeout);
@@ -205,7 +209,7 @@ class FlutterDriverExtension {
     };
   }
 
-  Future<Health> _getHealth(Command command) async => Health(HealthStatus.ok);
+  Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
 
   Future<RenderTree> _getRenderTree(Command command) async {
     return RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
@@ -310,6 +314,22 @@ class FlutterDriverExtension {
     }, description: 'Material or Cupertino back button');
   }
 
+  Finder _createAncestorFinder(Ancestor arguments) {
+    return find.ancestor(
+      of: _createFinder(arguments.of),
+      matching: _createFinder(arguments.matching),
+      matchRoot: arguments.matchRoot,
+    );
+  }
+
+  Finder _createDescendantFinder(Descendant arguments) {
+    return find.descendant(
+      of: _createFinder(arguments.of),
+      matching: _createFinder(arguments.matching),
+      matchRoot: arguments.matchRoot,
+    );
+  }
+
   Finder _createFinder(SerializableFinder finder) {
     final FinderConstructor constructor = _finders[finder.finderType];
 
@@ -325,19 +345,19 @@ class FlutterDriverExtension {
       _createFinder(tapCommand.finder).hitTestable()
     );
     await _prober.tap(computedFinder);
-    return TapResult();
+    return const TapResult();
   }
 
   Future<WaitForResult> _waitFor(Command command) async {
     final WaitFor waitForCommand = command;
     await _waitForElement(_createFinder(waitForCommand.finder));
-    return WaitForResult();
+    return const WaitForResult();
   }
 
   Future<WaitForAbsentResult> _waitForAbsent(Command command) async {
     final WaitForAbsent waitForAbsentCommand = command;
     await _waitForAbsentElement(_createFinder(waitForAbsentCommand.finder));
-    return WaitForAbsentResult();
+    return const WaitForAbsentResult();
   }
 
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
@@ -409,14 +429,14 @@ class FlutterDriverExtension {
     }
     _prober.binding.dispatchEvent(pointer.up(), hitTest);
 
-    return ScrollResult();
+    return const ScrollResult();
   }
 
   Future<ScrollResult> _scrollIntoView(Command command) async {
     final ScrollIntoView scrollIntoViewCommand = command;
     final Finder target = await _waitForElement(_createFinder(scrollIntoViewCommand.finder));
     await Scrollable.ensureVisible(target.evaluate().single, duration: const Duration(milliseconds: 100), alignment: scrollIntoViewCommand.alignment ?? 0.0);
-    return ScrollResult();
+    return const ScrollResult();
   }
 
   Future<GetTextResult> _getText(Command command) async {
@@ -434,7 +454,7 @@ class FlutterDriverExtension {
     } else {
       _testTextInput.unregister();
     }
-    return SetTextEntryEmulationResult();
+    return const SetTextEntryEmulationResult();
   }
 
   Future<EnterTextResult> _enterText(Command command) async {
@@ -444,7 +464,7 @@ class FlutterDriverExtension {
     }
     final EnterText enterTextCommand = command;
     _testTextInput.enterText(enterTextCommand.text);
-    return EnterTextResult();
+    return const EnterTextResult();
   }
 
   Future<RequestDataResult> _requestData(Command command) async {
@@ -455,7 +475,7 @@ class FlutterDriverExtension {
   Future<SetFrameSyncResult> _setFrameSync(Command command) async {
     final SetFrameSync setFrameSyncCommand = command;
     _frameSync = setFrameSyncCommand.enabled;
-    return SetFrameSyncResult();
+    return const SetFrameSyncResult();
   }
 
   SemanticsHandle _semantics;

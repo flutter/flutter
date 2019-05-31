@@ -265,9 +265,12 @@ class MatrixUtils {
 List<String> debugDescribeTransform(Matrix4 transform) {
   if (transform == null)
     return const <String>['null'];
-  final List<String> matrix = transform.toString().split('\n').toList();
-  matrix.removeLast();
-  return matrix;
+  return <String>[
+    '[0] ${debugFormatDouble(transform.entry(0, 0))},${debugFormatDouble(transform.entry(0, 1))},${debugFormatDouble(transform.entry(0, 2))},${debugFormatDouble(transform.entry(0, 3))}',
+    '[1] ${debugFormatDouble(transform.entry(1, 0))},${debugFormatDouble(transform.entry(1, 1))},${debugFormatDouble(transform.entry(1, 2))},${debugFormatDouble(transform.entry(1, 3))}',
+    '[2] ${debugFormatDouble(transform.entry(2, 0))},${debugFormatDouble(transform.entry(2, 1))},${debugFormatDouble(transform.entry(2, 2))},${debugFormatDouble(transform.entry(2, 3))}',
+    '[3] ${debugFormatDouble(transform.entry(3, 0))},${debugFormatDouble(transform.entry(3, 1))},${debugFormatDouble(transform.entry(3, 2))},${debugFormatDouble(transform.entry(3, 3))}',
+  ];
 }
 
 /// Property which handles [Matrix4] that represent transforms.
@@ -296,13 +299,13 @@ class TransformProperty extends DiagnosticsProperty<Matrix4> {
     if (parentConfiguration != null && !parentConfiguration.lineBreakProperties) {
       // Format the value on a single line to be compatible with the parent's
       // style.
-      final List<Vector4> rows = <Vector4>[
-        value.getRow(0),
-        value.getRow(1),
-        value.getRow(2),
-        value.getRow(3),
+      final List<String> values = <String>[
+        '${debugFormatDouble(value.entry(0, 0))},${debugFormatDouble(value.entry(0, 1))},${debugFormatDouble(value.entry(0, 2))},${debugFormatDouble(value.entry(0, 3))}',
+        '${debugFormatDouble(value.entry(1, 0))},${debugFormatDouble(value.entry(1, 1))},${debugFormatDouble(value.entry(1, 2))},${debugFormatDouble(value.entry(1, 3))}',
+        '${debugFormatDouble(value.entry(2, 0))},${debugFormatDouble(value.entry(2, 1))},${debugFormatDouble(value.entry(2, 2))},${debugFormatDouble(value.entry(2, 3))}',
+        '${debugFormatDouble(value.entry(3, 0))},${debugFormatDouble(value.entry(3, 1))},${debugFormatDouble(value.entry(3, 2))},${debugFormatDouble(value.entry(3, 3))}',
       ];
-      return '[${rows.join("; ")}]';
+      return '[${values.join('; ')}]';
     }
     return debugDescribeTransform(value).join('\n');
   }

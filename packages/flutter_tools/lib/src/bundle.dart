@@ -147,7 +147,7 @@ Future<void> build({
   if (assets == null)
     throwToolExit('Error building assets', exitCode: 1);
 
-  await assemble(
+  assemble(
     buildMode: buildMode,
     assetBundle: assets,
     kernelContent: kernelContent,
@@ -182,14 +182,14 @@ Future<AssetBundle> buildAssets({
   return assetBundle;
 }
 
-Future<void> assemble({
+void assemble({
   BuildMode buildMode,
   AssetBundle assetBundle,
   DevFSContent kernelContent,
   String privateKeyPath = defaultPrivateKeyPath,
   String assetDirPath,
   String compilationTraceFilePath,
-}) async {
+}) {
   assetDirPath ??= getAssetBuildDirectory();
   printTrace('Building bundle');
 
@@ -214,22 +214,21 @@ Future<void> assemble({
   printTrace('Writing asset files to $assetDirPath');
   ensureDirectoryExists(assetDirPath);
 
-  await writeBundle(fs.directory(assetDirPath), assetEntries);
+  writeBundle(fs.directory(assetDirPath), assetEntries);
   printTrace('Wrote $assetDirPath');
 }
 
-Future<void> writeBundle(
+void writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-) async {
+) {
   if (bundleDir.existsSync())
     bundleDir.deleteSync(recursive: true);
   bundleDir.createSync(recursive: true);
 
-  await Future.wait<void>(
-    assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-      final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
-      file.parent.createSync(recursive: true);
-      await file.writeAsBytes(await entry.value.contentsAsBytes());
-    }));
+  for (MapEntry<String, DevFSContent> entry in assetEntries.entries) {
+    final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+    file.parent.createSync(recursive: true);
+    entry.value.copyToFile(file);
+  }
 }

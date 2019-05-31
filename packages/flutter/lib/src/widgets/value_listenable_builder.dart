@@ -25,6 +25,8 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 /// listener of the [ValueListenable] and call the [builder] with updated values
 /// when the value changes.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=s-ZG-jS5QHQ}
+///
 /// ## Performance optimizations
 ///
 /// If your [builder] function contains a subtree that does not depend on the
