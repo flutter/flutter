@@ -126,7 +126,7 @@ class ChromeLauncher {
       }, orElse: () => '.');
       final String path = fs.path.join(windowsPrefix, _kWindowsExecutable);
       if (!fs.file(path).existsSync()) {
-        throwToolExit('Chrome executable not found at $_kMacOSExecutable');
+        throwToolExit('Chrome executable not found at $path');
       }
       return path;
     }
