@@ -86,8 +86,6 @@ PlatformView::PlatformView(
     fit::closure session_listener_error_callback,
     OnMetricsUpdate session_metrics_did_change_callback,
     OnSizeChangeHint session_size_change_hint_callback,
-    fidl::InterfaceHandle<fuchsia::modular::ContextWriter>
-        accessibility_context_writer,
     zx_handle_t vsync_event_handle)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
@@ -97,7 +95,6 @@ PlatformView::PlatformView(
       metrics_changed_callback_(std::move(session_metrics_did_change_callback)),
       size_change_hint_callback_(std::move(session_size_change_hint_callback)),
       ime_client_(this),
-      context_writer_bridge_(std::move(accessibility_context_writer)),
       surface_(std::make_unique<Surface>(debug_label_)),
       vsync_event_handle_(vsync_event_handle) {
   // Register all error handlers.
@@ -595,9 +592,6 @@ void PlatformView::HandlePlatformMessage(
 void PlatformView::UpdateSemantics(
     flutter::SemanticsNodeUpdates update,
     flutter::CustomAccessibilityActionUpdates actions) {
-  // TODO(MI4-1262): Figure out if the context_writer_bridge should be removed
-  // as it is unused.
-  // context_writer_bridge_.UpdateSemantics(update);
   // TODO(MIT-1539): Uncomment/Reimplement following code, to add A11y support.
   // semantics_bridge_.UpdateSemantics(update);
 }

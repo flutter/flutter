@@ -839,8 +839,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/component.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/compositor_context.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/context_writer_bridge.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/context_writer_bridge.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/engine.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/fuchsia_font_manager.cc
