@@ -10,7 +10,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -21,9 +20,8 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart';
-import '../macos/cocoapods.dart';
+import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../services.dart';
 import 'code_signing.dart';
@@ -274,29 +272,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  refreshPluginsList(project);
-  if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
-    // If the Xcode project, Podfile, or Generated.xcconfig have changed since
-    // last run, pods should be updated.
-    final Fingerprinter fingerprinter = Fingerprinter(
-      fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
-      paths: <String>[
-        app.project.xcodeProjectInfoFile.path,
-        app.project.podfile.path,
-        app.project.generatedXcodePropertiesFile.path,
-      ],
-      properties: <String, String>{},
-    );
-
-    final bool didPodInstall = await cocoaPods.processPods(
-      iosProject: project.ios,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
-    );
-    if (didPodInstall)
-      await fingerprinter.writeFingerprint();
-  }
+  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
