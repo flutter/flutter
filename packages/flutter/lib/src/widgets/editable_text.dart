@@ -65,6 +65,9 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// The [text] or [selection] properties can be set from within a listener
 /// added to this controller. If both properties need to be changed then the
 /// controller's [value] should be set instead.
+/// 
+/// Remember to [dispose] the TextEditingController when it is no longer needed. 
+/// This will ensure we discard any resources used by the object.
 ///
 /// {@tool snippet --template=stateful_widget_material}
 /// This example creates a [TextField] with a [TextEditingController] whose
