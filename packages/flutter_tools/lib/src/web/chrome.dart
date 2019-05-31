@@ -38,9 +38,6 @@ class ChromeLauncher {
   /// Launch the chrome browser to a particular `host` page.
   Future<Chrome> launch(String url) async {
     final String chromeExecutable = _findExecutable();
-    if (!fs.file(chromeExecutable).existsSync()) {
-      throwToolExit('Chrome executable not found at $chromeExecutable');
-    }
     final Directory dataDir = fs.systemTempDirectory.createTempSync();
     final int port = await os.findFreePort();
     final List<String> args = <String>[
@@ -110,9 +107,13 @@ class ChromeLauncher {
       return platform.environment[_kChromeEnvironment];
     }
     if (platform.isLinux) {
+      // Don't check if this exists, it isn't a file.
       return _kLinuxExecutable;
     }
     if (platform.isMacOS) {
+      if (!fs.file(_kMacOSExecutable).existsSync()) {
+        throwToolExit('Chrome executable not found at $_kMacOSExecutable');
+      }
       return _kMacOSExecutable;
     }
     if (platform.isWindows) {
@@ -123,7 +124,11 @@ class ChromeLauncher {
         final String path = fs.path.join(prefix, _kWindowsExecutable);
         return fs.file(path).existsSync();
       }, orElse: () => '.');
-      return fs.path.join(windowsPrefix, _kWindowsExecutable);
+      final String path = fs.path.join(windowsPrefix, _kWindowsExecutable);
+      if (!fs.file(path).existsSync()) {
+        throwToolExit('Chrome executable not found at $_kMacOSExecutable');
+      }
+      return path;
     }
     throwToolExit('Platform ${platform.operatingSystem} is not supported.');
     return null;
