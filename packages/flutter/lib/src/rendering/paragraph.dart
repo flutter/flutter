@@ -406,12 +406,9 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     while (child != null) {
       final TextParentData textParentData = child.parentData;
-      final double scale = textParentData.scale;
-      Matrix4 localPosTrans = Matrix4.translation(Vector3(textParentData.offset.dx, textParentData.offset.dy, 0));
-      Matrix4 scaleTrans = Matrix4.diagonal3Values(scale, scale, scale);
-      Matrix4 transform = localPosTrans * scaleTrans;
       final bool isHit = result.addWithPaintTransform(
-        transform: transform,
+        transform: Matrix4.translationValues(textParentData.offset.dx, textParentData.offset.dy, 0.0)
+          .. scale(textParentData.scale, textParentData.scale, textParentData.scale),
         position: position,
         hitTest: (BoxHitTestResult result, Offset transformed) {
           return child.hitTest(result, position: transformed);
