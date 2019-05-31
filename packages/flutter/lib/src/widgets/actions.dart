@@ -19,15 +19,14 @@ typedef ActionFactory = Action Function();
 /// by the [ActionDispatcher] to look up an action and invoke it, giving it this
 /// object.
 ///
-/// If this tag is not [enabled], then its associated action will not be
-/// invoked if requested.
+/// If this tag returns false from [isEnabled], then its associated action will
+/// not be invoked if requested.
 class Intent extends Diagnosticable {
   /// A const constructor for an [Intent].
   ///
   /// The [key] argument must not be null.
-  const Intent(this.key, {this.enabled = true})
-      : assert(key != null),
-        assert(enabled != null);
+  const Intent(this.key)
+      : assert(key != null);
 
   /// The key for the action this tag labels.
   final LocalKey key;
@@ -36,13 +35,12 @@ class Intent extends Diagnosticable {
   /// current environment.
   ///
   /// Returns true by default.
-  final bool enabled;
+  bool isEnabled(BuildContext context) => true;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<LocalKey>('key', key));
-    properties.add(FlagProperty('enabled', value: enabled, ifFalse: 'disabled', defaultValue: true));
   }
 }
 
@@ -130,7 +128,7 @@ class ActionDispatcher extends Diagnosticable {
     assert(action != null);
     assert(intent != null);
     focusNode ??= WidgetsBinding.instance.focusManager.primaryFocus;
-    if (action != null && intent.enabled) {
+    if (action != null && intent.isEnabled(focusNode.context)) {
       action.invoke(focusNode, intent);
       return true;
     }

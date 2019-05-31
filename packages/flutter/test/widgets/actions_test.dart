@@ -234,20 +234,6 @@ void main() {
 
       expect(description, equals(<String>['key: [<\'foo\'>]']));
     });
-    testWidgets('$Intent debugFillProperties', (WidgetTester tester) async {
-      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-
-      const Intent(ValueKey<String>('foo'), enabled: false).debugFillProperties(builder);
-
-      final List<String> description = builder.properties
-          .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.info);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
-
-      expect(description, equals(<String>['key: [<\'foo\'>]', 'disabled']));
-    });
     testWidgets('$CallbackAction debugFillProperties', (WidgetTester tester) async {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 

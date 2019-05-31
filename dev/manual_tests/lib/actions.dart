@@ -18,7 +18,7 @@ void main() {
 
 /// An [ActionDispatcher] subclass that manages the invocation of undoable
 /// actions.
-class UndoableActionDispatcher extends ActionDispatcher {
+class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   /// Constructs a new [UndoableActionDispatcher].
   ///
   /// The [maxUndoLevels] argument must not be null.
@@ -48,6 +48,28 @@ class UndoableActionDispatcher extends ActionDispatcher {
     _pruneActions();
   }
 
+  final Set<VoidCallback> _listeners = <VoidCallback>{};
+
+  @override
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+
+  @override
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+
+  /// Notifies listeners that the [ActionDispatcher] has changed state.
+  ///
+  /// May only be called by subclasses.
+  @protected
+  void notifyListeners() {
+    for (VoidCallback callback in _listeners) {
+      callback();
+    }
+  }
+
   @override
   bool invokeAction(Action action, Intent intent, {FocusNode focusNode}) {
     final bool result = super.invokeAction(action, intent, focusNode: focusNode);
@@ -56,6 +78,7 @@ class UndoableActionDispatcher extends ActionDispatcher {
       _completedActions.add(action);
       _undoneActions.clear();
       _pruneActions();
+      notifyListeners();
     }
     return result;
   }
@@ -69,11 +92,21 @@ class UndoableActionDispatcher extends ActionDispatcher {
 
   /// Returns true if there is an action on the stack that can be undone.
   bool get canUndo {
-    return _completedActions.isNotEmpty ? _completedActions.last.undoable && _completedActions.last.invocationTag.enabled : false;
+    if (_completedActions.isNotEmpty) {
+      final Intent lastIntent = _completedActions.last.invocationIntent;
+      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus.context);
+    }
+    return false;
   }
 
   /// Returns true if an action that has been undone can be re-invoked.
-  bool get canRedo => _undoneActions.isNotEmpty ? _undoneActions.last.invocationTag.enabled : false;
+  bool get canRedo {
+    if (_undoneActions.isNotEmpty) {
+      final Intent lastIntent = _undoneActions.last.invocationIntent;
+      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus.context);
+    }
+    return false;
+  }
 
   /// Undoes the last action executed if possible.
   ///
@@ -86,6 +119,7 @@ class UndoableActionDispatcher extends ActionDispatcher {
     final UndoableAction action = _completedActions.removeLast();
     action.undo();
     _undoneActions.add(action);
+    notifyListeners();
     return true;
   }
 
@@ -98,9 +132,10 @@ class UndoableActionDispatcher extends ActionDispatcher {
       return false;
     }
     final UndoableAction action = _undoneActions.removeLast();
-    action.invoke(action.invocationNode, action.invocationTag);
+    action.invoke(action.invocationNode, action.invocationIntent);
     _completedActions.add(action);
     _pruneActions();
+    notifyListeners();
     return true;
   }
 
@@ -114,29 +149,51 @@ class UndoableActionDispatcher extends ActionDispatcher {
   }
 }
 
+class UndoIntent extends Intent {
+  const UndoIntent() : super(kUndoActionKey);
+
+  @override
+  bool isEnabled(BuildContext context) {
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    return manager.canUndo;
+  }
+}
+
+class RedoIntent extends Intent {
+  const RedoIntent() : super(kRedoActionKey);
+
+  @override
+  bool isEnabled(BuildContext context) {
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    return manager.canRedo;
+  }
+}
+
 const LocalKey kUndoActionKey = ValueKey<String>('Undo');
-const Intent kUndoIntent = Intent(kUndoActionKey);
+const Intent kUndoIntent = UndoIntent();
 final Action kUndoAction = CallbackAction(
-    kUndoActionKey,
-    onInvoke: (FocusNode node, Intent tag) {
-      if (node?.context == null) {
-        return;
-      }
-      final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
-      manager?.undo();
-    });
+  kUndoActionKey,
+  onInvoke: (FocusNode node, Intent tag) {
+    if (node?.context == null) {
+      return;
+    }
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    manager?.undo();
+  },
+);
 
 const LocalKey kRedoActionKey = ValueKey<String>('Redo');
-const Intent kRedoIntent = Intent(kRedoActionKey);
+const Intent kRedoIntent = RedoIntent();
 final Action kRedoAction = CallbackAction(
-    kRedoActionKey,
-    onInvoke: (FocusNode node, Intent tag) {
-      if (node?.context == null) {
-        return;
-      }
-      final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
-      manager?.redo();
-    });
+  kRedoActionKey,
+  onInvoke: (FocusNode node, Intent tag) {
+    if (node?.context == null) {
+      return;
+    }
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    manager?.redo();
+  },
+);
 
 /// An action that can be undone.
 abstract class UndoableAction extends Action {
@@ -153,11 +210,11 @@ abstract class UndoableAction extends Action {
   set invocationNode(FocusNode value) => _invocationNode = value;
 
   /// The [Intent] this action was originally invoked with.
-  Intent get invocationTag => _invocationTag;
+  Intent get invocationIntent => _invocationTag;
   Intent _invocationTag;
 
   @protected
-  set invocationTag(Intent value) => _invocationTag = value;
+  set invocationIntent(Intent value) => _invocationTag = value;
 
   /// Returns true if the data model can be returned to the state it was in
   /// previous to this action being executed.
@@ -173,7 +230,7 @@ abstract class UndoableAction extends Action {
   @mustCallSuper
   void invoke(FocusNode node, Intent tag) {
     invocationNode = node;
-    invocationTag = tag;
+    invocationIntent = tag;
   }
 
   @override
@@ -323,15 +380,36 @@ class FocusDemo extends StatefulWidget {
 
 class _FocusDemoState extends State<FocusDemo> {
   FocusNode outlineFocus;
+  UndoableActionDispatcher dispatcher;
+  bool canUndo;
+  bool canRedo;
 
   @override
   void initState() {
     super.initState();
     outlineFocus = FocusNode(debugLabel: 'Demo Focus Node');
+    dispatcher = UndoableActionDispatcher();
+    canUndo = dispatcher.canUndo;
+    canRedo = dispatcher.canRedo;
+    dispatcher.addListener(_handleUndoStateChange);
+  }
+
+  void _handleUndoStateChange() {
+    if (dispatcher.canUndo != canUndo) {
+      setState(() {
+        canUndo = dispatcher.canUndo;
+      });
+    }
+    if (dispatcher.canRedo != canRedo) {
+      setState(() {
+        canRedo = dispatcher.canRedo;
+      });
+    }
   }
 
   @override
   void dispose() {
+    dispatcher.removeListener(_handleUndoStateChange);
     outlineFocus.dispose();
     super.dispose();
   }
@@ -340,7 +418,7 @@ class _FocusDemoState extends State<FocusDemo> {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Shortcuts(
-      shortcuts: LogicalKeyMap(<LogicalKeySet, Intent>{
+      shortcuts: <LogicalKeySet, Intent>{
         LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
         LogicalKeySet(LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
         LogicalKeySet(LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
@@ -348,9 +426,9 @@ class _FocusDemoState extends State<FocusDemo> {
         LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      }),
+      },
       child: Actions(
-        dispatcher: UndoableActionDispatcher(),
+        dispatcher: dispatcher,
         actions: <LocalKey, ActionFactory>{
           SetFocusAction.key: () => SetFocusAction(),
           NextFocusAction.key: () => NextFocusAction(),
@@ -362,14 +440,14 @@ class _FocusDemoState extends State<FocusDemo> {
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: Shortcuts(
-            shortcuts: LogicalKeyMap(<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
-    LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
-    LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
-    LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
-    LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.keyZ): kUndoIntent,
-    LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.keyZ): kUndoIntent,
-            }),
+            shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.keyZ): kUndoIntent,
+              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.keyZ): kUndoIntent,
+            },
             child: FocusScope(
               debugLabel: 'Scope',
               autofocus: true,
@@ -415,18 +493,22 @@ class _FocusDemoState extends State<FocusDemo> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: RaisedButton(
                                   child: const Text('UNDO'),
-                                  onPressed: () {
-                                    Actions.invoke(context, kUndoIntent);
-                                  },
+                                  onPressed: canUndo
+                                      ? () {
+                                          Actions.invoke(context, kUndoIntent);
+                                        }
+                                      : null,
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: RaisedButton(
                                   child: const Text('REDO'),
-                                  onPressed: () {
-                                    Actions.invoke(context, kRedoIntent);
-                                  },
+                                  onPressed: canRedo
+                                      ? () {
+                                          Actions.invoke(context, kRedoIntent);
+                                        }
+                                      : null,
                                 ),
                               ),
                             ],
