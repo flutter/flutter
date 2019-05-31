@@ -12,6 +12,7 @@ import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
+import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcode build.
 // TODO(jonahwilliams): support target option.
@@ -28,6 +29,8 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     useMacOSConfig: true,
     setSymroot: false,
   );
+  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+
   // Set debug or release mode.
   String config = 'Debug';
   if (buildInfo.isRelease) {
