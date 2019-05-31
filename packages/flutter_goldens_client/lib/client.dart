@@ -10,8 +10,6 @@ import 'package:file/local.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
-import 'package:flutter_goldens_client/skia_client.dart';
-
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
 // https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package%3Aflutter
@@ -174,5 +172,26 @@ class GoldensClient {
   Future<void> _releaseLock() async {
     await _lock.close();
     _lock = null;
+  }
+}
+
+/// Exception that signals a process' exit with a non-zero exit code.
+class NonZeroExitCode implements Exception {
+  /// Create an exception that represents a non-zero exit code.
+  ///
+  /// The first argument must be non-zero.
+  const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
+
+  /// The code that the process will signal to the operating system.
+  ///
+  /// By definiton, this is not zero.
+  final int exitCode;
+
+  /// The message to show on standard error.
+  final String stderr;
+
+  @override
+  String toString() {
+    return 'Exit code $exitCode: $stderr';
   }
 }
