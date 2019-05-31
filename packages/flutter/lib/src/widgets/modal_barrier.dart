@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart' show PrimaryPointerGestureRecognizer, GestureDisposition;
 
 import 'basic.dart';
 import 'container.dart';
@@ -12,108 +11,6 @@ import 'framework.dart';
 import 'gesture_detector.dart';
 import 'navigator.dart';
 import 'transitions.dart';
-
-// Recognizes tap down by any pointer button unconditionally. When it receives a
-// PointerDownEvent, it immediately claims victor of arena and calls
-// `onAnyTapDown` without any checks.
-//
-// It is used by ModalBarrier to detect any taps on the overlay.
-class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  _AnyTapGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
-
-  VoidCallback onAnyTapDown;
-
-  bool _sentTapDown = false;
-
-  @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    resolve(GestureDisposition.accepted);
-  }
-
-  @override
-  void handlePrimaryPointer(PointerEvent event) {
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    super.acceptGesture(pointer);
-    _checkDown(pointer);
-  }
-
-  void _checkDown(int pointer) {
-    if (_sentTapDown) {
-      return;
-    }
-    if (onAnyTapDown != null)
-      onAnyTapDown();
-    _sentTapDown = true;
-  }
-
-  void _reset() {
-    _sentTapDown = false;
-  }
-
-  @override
-  void didStopTrackingLastPointer(int pointer) {
-    _reset();
-    super.didStopTrackingLastPointer(pointer);
-  }
-
-  @override
-  String get debugDescription => 'anyTap';
-}
-
-// A GestureDetector used by ModalBarrier. It only has one callback,
-// `onAnyTapDown`, which recognizes tap down unconditionally.
-class _ModalBarrierGestureDetector extends StatelessWidget {
-  _ModalBarrierGestureDetector({
-    Key key,
-    this.child,
-    this.onAnyTapDown,
-    this.behavior,
-    this.excludeFromSemantics = false,
-  }) : assert(excludeFromSemantics != null),
-       super(key: key);
-
-  /// The widget below this widget in the tree.
-  /// See [RawGestureDetector.child].
-  final Widget child;
-
-  /// Immediately called when a pointer causes a tap down.
-  /// See [_AnyTapGestureRecognizer.onAnyTapDown].
-  final VoidCallback onAnyTapDown;
-
-  /// How this gesture detector should behave during hit testing.
-  /// See [RawGestureDetector.behavior].
-  final HitTestBehavior behavior;
-
-  /// Whether to exclude these gestures from the semantics tree.
-  /// See [RawGestureDetector.excludeFromSemantics].
-  final bool excludeFromSemantics;
-
-  @override
-  Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-
-    if (onAnyTapDown != null) {
-      gestures[_AnyTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_AnyTapGestureRecognizer>(
-        () => _AnyTapGestureRecognizer(debugOwner: this),
-        (_AnyTapGestureRecognizer instance) {
-          instance
-            ..onAnyTapDown = onAnyTapDown;
-        },
-      );
-    }
-
-    return RawGestureDetector(
-      gestures: gestures,
-      behavior: behavior,
-      excludeFromSemantics: excludeFromSemantics,
-      child: child,
-    );
-  }
-}
 
 /// A widget that prevents the user from interacting with widgets behind itself.
 ///
@@ -184,8 +81,8 @@ class ModalBarrier extends StatelessWidget {
         // On Android, the back button is used to dismiss a modal. On iOS, some
         // modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
-        child: _ModalBarrierGestureDetector(
-          onAnyTapDown: () {
+        child: GestureDetector(
+          onTapDown: (TapDownDetails details) {
             if (dismissible)
               Navigator.maybePop(context);
           },

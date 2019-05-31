@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter/gestures.dart' show kSecondaryButton;
 
 import 'semantics_tester.dart';
 
@@ -78,32 +77,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // end transition
 
     // Tap on the barrier to dismiss it
-    await tester.press(find.byKey(const ValueKey<String>('barrier')));
-    await tester.pump(); // begin transition
-    await tester.pump(const Duration(seconds: 1)); // end transition
-
-    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing,
-      reason: 'The route should have been dismissed by tapping the barrier.');
-  });
-
-  testWidgets('ModalBarrier pops the Navigator when dismissed by non-primary buttons', (WidgetTester tester) async {
-    final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(),
-      '/modal': (BuildContext context) => SecondWidget(),
-    };
-
-    await tester.pumpWidget(MaterialApp(routes: routes));
-
-    // Initially the barrier is not visible
-    expect(find.byKey(const ValueKey<String>('barrier')), findsNothing);
-
-    // Tapping on X routes to the barrier
-    await tester.tap(find.text('X'));
-    await tester.pump(); // begin transition
-    await tester.pump(const Duration(seconds: 1)); // end transition
-
-    // Tap on the barrier to dismiss it
-    await tester.press(find.byKey(const ValueKey<String>('barrier')), buttons: kSecondaryButton);
+    await tester.tap(find.byKey(const ValueKey<String>('barrier')));
     await tester.pump(); // begin transition
     await tester.pump(const Duration(seconds: 1)); // end transition
 
