@@ -820,12 +820,11 @@ class RenderParagraph extends RenderBox
         // argument.
         final SemanticsNode childNode = children.elementAt(childIndex);
         final TextParentData parentData = child.parentData;
-        final double scale = parentData.scale;
         childNode.rect = Rect.fromLTWH(
           childNode.rect.left,
           childNode.rect.top,
-          childNode.rect.width * scale,
-          childNode.rect.height * scale,
+          childNode.rect.width * parentData.scale,
+          childNode.rect.height * parentData.scale,
         );
         newChildren.add(children.elementAt(childIndex));
         childIndex += 1;
