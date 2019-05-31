@@ -53,7 +53,7 @@ abstract class DevFSContent {
   ///
   /// Requires that the `destination` directory already exists, but the target
   /// file need not.
-  void copyToFile(File destination);
+  Future<void> copyToFile(File destination);
 }
 
 /// File content to be copied to the device.
@@ -139,8 +139,8 @@ class DevFSFileContent extends DevFSContent {
   List<int> contentsAsBytes() => _getFile().readAsBytesSync().cast<int>();
 
   @override
-  void copyToFile(File destination) {
-    _getFile().copySync(destination.path);
+  Future<void> copyToFile(File destination) async {
+    await _getFile().copy(destination.path);
   }
 }
 
@@ -181,8 +181,8 @@ class DevFSByteContent extends DevFSContent {
   List<int> contentsAsBytes() => _bytes;
 
   @override
-  void copyToFile(File destination) {
-    destination.writeAsBytesSync(contentsAsBytes());
+  Future<void> copyToFile(File destination) async {
+    await destination.writeAsBytes(contentsAsBytes());
   }
 }
 

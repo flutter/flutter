@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
 import 'artifacts.dart';
 import 'asset.dart';
@@ -218,17 +219,29 @@ void assemble({
   printTrace('Wrote $assetDirPath');
 }
 
-void writeBundle(
+Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
-) {
-  if (bundleDir.existsSync())
+) async {
+  if (bundleDir.existsSync()) {
     bundleDir.deleteSync(recursive: true);
+  }
   bundleDir.createSync(recursive: true);
+  // macOS has limited file descriptors, so attempting to copy all files using
+  // the async methods has a risk of exhausting them. Instead we use a pool to
+  // limit ourselves to 100 at a time.
+  final Pool pool = Pool(100);
 
-  for (MapEntry<String, DevFSContent> entry in assetEntries.entries) {
+  final Iterable<Future<void>> futures = assetEntries.entries
+    .map((MapEntry<String, DevFSContent> entry) async {
     final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
     file.parent.createSync(recursive: true);
-    entry.value.copyToFile(file);
-  }
+    final PoolResource resource = await pool.request();
+    try {
+      await entry.value.copyToFile(file);
+    } finally {
+      resource.release();
+    }
+  });
+  await Future.wait(futures);
 }
