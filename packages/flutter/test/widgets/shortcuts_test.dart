@@ -34,25 +34,25 @@ void main() {
         LogicalKeyboardKey.keyD,
       });
       expect(
-          set1.toSet(),
+          set1.keys,
           equals(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
           }));
       expect(
-          set2.toSet(),
+          set2.keys,
           equals(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
           }));
       expect(
-          set3.toSet(),
+          set3.keys,
           equals(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
             LogicalKeyboardKey.keyC,
           }));
       expect(
-          set4.toSet(),
+          set4.keys,
           equals(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
@@ -60,7 +60,7 @@ void main() {
             LogicalKeyboardKey.keyD,
           }));
       expect(
-          setFromSet.toSet(),
+          setFromSet.keys,
           equals(<LogicalKeyboardKey>{
             LogicalKeyboardKey.keyA,
             LogicalKeyboardKey.keyB,
@@ -84,7 +84,7 @@ void main() {
             LogicalKeyboardKey.keyB,
           })));
     });
-    test('$LogicalKeySet diagnostics work.', () {
+    test('$KeySet diagnostics work.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       LogicalKeySet(

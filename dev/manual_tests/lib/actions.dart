@@ -340,7 +340,7 @@ class _FocusDemoState extends State<FocusDemo> {
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
     return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
+      shortcuts: LogicalKeyMap(<LogicalKeySet, Intent>{
         LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
         LogicalKeySet(LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
         LogicalKeySet(LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
@@ -348,7 +348,7 @@ class _FocusDemoState extends State<FocusDemo> {
         LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
         LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
         LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      },
+      }),
       child: Actions(
         dispatcher: UndoableActionDispatcher(),
         actions: <LocalKey, ActionFactory>{
@@ -362,14 +362,14 @@ class _FocusDemoState extends State<FocusDemo> {
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: Shortcuts(
-            shortcuts: <LogicalKeySet, Intent>{
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.keyZ): kUndoIntent,
-              LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.keyZ): kUndoIntent,
-            },
+            shortcuts: LogicalKeyMap(<LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
+    LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
+    LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyZ): kRedoIntent,
+    LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.shiftRight, LogicalKeyboardKey.keyZ): kRedoIntent,
+    LogicalKeySet(LogicalKeyboardKey.controlLeft, LogicalKeyboardKey.keyZ): kUndoIntent,
+    LogicalKeySet(LogicalKeyboardKey.controlRight, LogicalKeyboardKey.keyZ): kUndoIntent,
+            }),
             child: FocusScope(
               debugLabel: 'Scope',
               autofocus: true,

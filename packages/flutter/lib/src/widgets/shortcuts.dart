@@ -4,6 +4,7 @@
 
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:meta/meta.dart';
@@ -15,27 +16,31 @@ import 'focus_scope.dart';
 import 'framework.dart';
 import 'inherited_notifier.dart';
 
-/// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
+/// A set of [KeyboardKey]s that can be used as the keys in a [Map].
 ///
-/// A key set represents the keys that are down simultaneously that represent a
+/// A key set contains the keys that are down simultaneously to represent a
 /// shortcut.
 ///
-/// This is mainly used by [ShortcutManager] to allow definition of shortcut
+/// This is mainly used by [ShortcutManager] to allow the definition of shortcut
 /// mappings.
-class LogicalKeySet extends Diagnosticable {
-  /// A constructor for making a [LogicalKeySet] of up to four keys.
+///
+/// This is a thin wrapper around a [Set], but changes the equality comparison
+/// from an identity comparison to a contents comparison so that non-identical
+/// sets with the same keys in them will compare as equal.
+class KeySet<T extends KeyboardKey> extends Diagnosticable {
+  /// A constructor for making a [KeySet] of up to four keys.
   ///
-  /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
+  /// If you need a set of more than four keys, use [KeySet.fromSet].
   ///
-  /// The `key1` parameter must not be null. The same [LogicalKeyboardKey] may
+  /// The `key1` parameter must not be null. The same [KeyboardKey] may
   /// not be appear more than once in the set.
-  LogicalKeySet(
-    LogicalKeyboardKey key1, [
-    LogicalKeyboardKey key2,
-    LogicalKeyboardKey key3,
-    LogicalKeyboardKey key4,
+  KeySet(
+    T key1, [
+    T key2,
+    T key3,
+    T key4,
   ])  : assert(key1 != null),
-        _keys = <LogicalKeyboardKey>{key1} {
+        _keys = <T>{key1} {
     int count = 1;
     if (key2 != null) {
       _keys.add(key2);
@@ -58,35 +63,31 @@ class LogicalKeySet extends Diagnosticable {
         return true;
       }());
     }
-    assert(_keys.length == count, 'Two or more provided keys are identical. Each key can appear only once.');
+    assert(_keys.length == count, 'Two or more provided keys are identical. Each key must appear only once.');
   }
 
-  /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
+  /// Create  a [KeySet] from a set of [KeyboardKey]s.
   ///
   /// Do not mutate the `keys` set after passing it to this object.
   ///
-  /// The `keys` must not be null or empty.
-  LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys)
+  /// The `keys` set must not be null, contain nulls, or be empty.
+  KeySet.fromSet(Set<T> keys)
       : assert(keys != null),
         assert(keys.isNotEmpty),
+        assert(!keys.contains(null)),
         _keys = keys;
 
-  final Set<LogicalKeyboardKey> _keys;
-
-  /// Convert the [LogicalKeySet] to a set of [LogicalKeyboardKey]s and return a
-  /// copy.
-  Set<LogicalKeyboardKey> toSet() => _keys.toSet();
+  /// Returns an unmodifiable view of the [KeyboardKey]s in this [KeySet].
+  Set<T> get keys => UnmodifiableSetView<T>(_keys);
+  final Set<T> _keys;
 
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final LogicalKeySet typedOther = other;
-    if (_keys.length != typedOther._keys.length) {
-      return false;
-    }
-    return _keys.difference(typedOther._keys).isEmpty;
+    final KeySet<T> typedOther = other;
+    return _keys.length == typedOther._keys.length && _keys.containsAll(typedOther._keys);
   }
 
   @override
@@ -97,8 +98,108 @@ class LogicalKeySet extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Set<LogicalKeyboardKey>>('keys', _keys));
+    properties.add(DiagnosticsProperty<Set<T>>('keys', _keys));
   }
+}
+
+/// A set of [LogicalKeyboardKey]s that can be used as the keys in a map.
+///
+/// A key set contains the keys that are down simultaneously to represent a
+/// shortcut.
+///
+/// This is mainly used by [ShortcutManager] to allow the definition of shortcut
+/// mappings.
+///
+/// This is a thin wrapper around a [Set], but changes the equality comparison
+/// from an identity comparison to a contents comparison so that non-identical
+/// sets with the same keys in them will compare as equal.
+class LogicalKeySet extends KeySet<LogicalKeyboardKey> {
+  /// A constructor for making a [LogicalKeySet] of up to four keys.
+  ///
+  /// If you need a set of more than four keys, use [LogicalKeySet.fromSet].
+  ///
+  /// The `key1` parameter must not be null. The same [LogicalKeyboardKey] may
+  /// not be appear more than once in the set.
+  LogicalKeySet(
+    LogicalKeyboardKey key1, [
+    LogicalKeyboardKey key2,
+    LogicalKeyboardKey key3,
+    LogicalKeyboardKey key4,
+  ]) : super(key1, key2, key3, key4);
+
+  /// Create  a [LogicalKeySet] from a set of [LogicalKeyboardKey]s.
+  ///
+  /// Do not mutate the `keys` set after passing it to this object.
+  ///
+  /// The `keys` must not be null.
+  LogicalKeySet.fromSet(Set<LogicalKeyboardKey> keys) : super.fromSet(keys);
+}
+
+/// A map of [KeySet] to [Intent] for use in defining key maps for a
+/// [ShortcutManager].
+///
+/// This is a thin wrapper around a [Map] that allows the comparison to be a
+/// contents comparison instead of an identity comparison, so that a
+/// [ShortcutManager] can minimize its change notification by detecting maps
+/// that aren't identical objects, but don't change the key mapping.
+///
+/// See also:
+///
+///  * [ShortcutManager], a class that can be subclassed to provide custom
+///    management for keyboard shortcuts in a [Shortcuts] widget.
+class KeyMap<T extends KeySet<KeyboardKey>, U extends Intent> {
+  /// A const constructor for a [KeyMap].
+  ///
+  /// The `map` argument must not be null.
+  const KeyMap(this._map) : assert(_map != null);
+
+  final Map<T, U> _map;
+
+  /// Returns the [Intent] corresponding to the [KeySet] `key`, if any.
+  ///
+  /// Returns null if the `key` doesn't exist in the map.
+  U operator [](T key) => UnmodifiableMapView<T, U>(_map)[key];
+
+  /// Returns true if an [Intent] corresponding to the [KeySet] `key` exists in
+  /// the key map.
+  bool containsKey(T key) => _map.containsKey(key);
+
+  @override
+  bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType) {
+      return false;
+    }
+    final LogicalKeyMap typedOther = other;
+    if (_map == typedOther._map) {
+      return true;
+    }
+    if (_map.length != typedOther._map.length) {
+      return false;
+    }
+    for (MapEntry<T, Intent> entry in _map.entries) {
+      if (typedOther._map[entry.key] != entry.value) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @override
+  int get hashCode {
+    return hashValues(hashList(_map.keys), hashList(_map.values));
+  }
+}
+
+/// A [KeyMap] of [LogicalKeyboardKey]s.
+///
+/// This is a convenience class to make defining key maps more concise in the
+/// code. It is a thin wrapper around [KeyMap], but specialized for
+/// [LogicalKeyboardKey]s and [Intent]s.
+class LogicalKeyMap extends KeyMap<LogicalKeySet, Intent> {
+  /// A const constructor for a [LogicalKeyMap].
+  ///
+  /// The `map` parameter must not be null.
+  const LogicalKeyMap(Map<LogicalKeySet, Intent> map) : super(map);
 }
 
 /// A manager of keyboard shortcut bindings.
@@ -110,41 +211,32 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   ///
   /// The [shortcuts] argument must not  be null.
   ShortcutManager({
-    Map<LogicalKeySet, Intent> shortcuts = const <LogicalKeySet, Intent>{},
+    LogicalKeyMap shortcuts = const LogicalKeyMap(<LogicalKeySet, Intent>{}),
     this.modal = false,
   })  : assert(shortcuts != null),
-        _shortcuts = _makeComparable(shortcuts);
+        _shortcuts = shortcuts;
 
-  static LinkedHashMap<LogicalKeySet, Intent> _makeComparable(Map<LogicalKeySet, Intent> value) {
-    final LinkedHashMap<LogicalKeySet, Intent> comparisonMap = LinkedHashMap<LogicalKeySet, Intent>(
-      equals: (LogicalKeySet a, LogicalKeySet b) => a == b,
-      hashCode: (LogicalKeySet a) => a.hashCode,
-    );
-    comparisonMap.addAll(value);
-    return comparisonMap;
-  }
-
-  /// True if this shortcut map should not pass on keys that it doesn't handle
-  /// to any key-handling widgets that are ancestors to this one.
+  /// True if the [ShortcutManager] should not pass on keys that it doesn't
+  /// handle to any key-handling widgets that are ancestors to this one.
   ///
   /// Setting [modal] to true is the equivalent of always handling any key given
-  /// to it, even if that key doesn't appear in the [shortcuts] map.
+  /// to it, even if that key doesn't appear in the [shortcuts] map. Keys that
+  /// don't appear in the map will be dropped.
   final bool modal;
 
   /// Returns the shortcut map.
   ///
   /// When the map is changed, listeners to this manager will be notified.
   ///
-  /// The returned map is not modifiable.
-  Map<LogicalKeySet, Intent> get shortcuts => UnmodifiableMapView<LogicalKeySet, Intent>(_shortcuts);
-  LinkedHashMap<LogicalKeySet, Intent> _shortcuts;
-  set shortcuts(Map<LogicalKeySet, Intent> value) {
+  /// The returned [LogicalKeyMap] should not be modified.
+  LogicalKeyMap get shortcuts => _shortcuts;
+  LogicalKeyMap _shortcuts;
+  set shortcuts(LogicalKeyMap value) {
     if (_shortcuts == value) {
       return;
     }
-    final LinkedHashMap<LogicalKeySet, Intent> comparisonMap = _makeComparable(value);
-    if (_shortcuts != comparisonMap) {
-      _shortcuts = comparisonMap;
+    if (_shortcuts != value) {
+      _shortcuts = value;
       notifyListeners();
     }
   }
@@ -178,20 +270,20 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', _shortcuts));
+    properties.add(DiagnosticsProperty<LogicalKeyMap>('shortcuts', _shortcuts));
     properties.add(FlagProperty('modal', value: modal, ifTrue: 'modal', defaultValue: false));
   }
 }
 
-/// A widget that establishes an [ActionDispatcher] to be used by its descendants
-/// when invoking an [Action].
+/// A widget that establishes an [ShortcutManager] to be used by its descendants
+/// when invoking an [Action] via a keyboard key combination that maps to an
+/// [Intent].
 ///
 /// See also:
 ///
-///   * [Action], a class for containing and defining an invocation of a user
-///     action.
-///   * [UndoableAction], a class for containing and defining an invocation of
-///     an undoable user action.
+///   * [Intent], a class for containing a description of a user
+///     action to be invoked.
+///   * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.
   ///
@@ -203,24 +295,17 @@ class Shortcuts extends StatefulWidget {
     this.child,
   }) : super(key: key);
 
-  /// The shortcut manager that will manage the mapping between key combinations
+  /// The [ShortcutManager] that will manage the mapping between key combinations
   /// and [Action]s.
   ///
-  /// If not specified, uses an empty [ShortcutManager].
+  /// If not specified, uses a default-constructed [ShortcutManager].
   ///
-  /// See also:
-  ///
-  ///  * [FocusTraversalPolicy] for the API used to impose traversal order
-  ///    policy.
-  ///  * [WidgetOrderFocusTraversalPolicy] for a traversal policy that traverses
-  ///    nodes in the order they are added to the widget tree.
-  ///  * [ReadingOrderTraversalPolicy] for a traversal policy that traverses
-  ///    nodes in the reading order defined in the widget tree, and then top to
-  ///    bottom.
+  /// This manager will be given new [shortcuts] to manage whenever the
+  /// [shortcuts] change materially.
   final ShortcutManager manager;
 
   /// The map of shortcuts that the manager will be given to manage.
-  final Map<LogicalKeySet, Intent> shortcuts;
+  final LogicalKeyMap shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
   ///
@@ -259,7 +344,7 @@ class Shortcuts extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager));
-    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', shortcuts));
+    properties.add(DiagnosticsProperty<LogicalKeyMap>('shortcuts', shortcuts));
   }
 }
 
