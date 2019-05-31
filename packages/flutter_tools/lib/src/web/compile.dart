@@ -90,7 +90,8 @@ class WebCompilationProxy {
   /// `projectDirectory`.
   Future<void> initialize({
     @required Directory projectDirectory,
-    @required String target,
+    @required List<String> targets,
+    String testOutputDir,
   }) async {
     throw UnimplementedError();
   }

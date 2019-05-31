@@ -120,7 +120,7 @@ class ResidentWebRunner extends ResidentRunner {
     // Start the web compiler and build the assets.
     await webCompilationProxy.initialize(
       projectDirectory: currentProject.directory,
-      target: target,
+      targets: <String>[target],
     );
     _lastCompiled = DateTime.now();
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -128,7 +128,8 @@ class ResidentWebRunner extends ResidentRunner {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+    await writeBundle(
+        fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Step 2: Start an HTTP server
     _server = WebAssetServer(flutterProject, target, ipv6);

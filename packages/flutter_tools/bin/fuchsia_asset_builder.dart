@@ -36,9 +36,10 @@ Future<void> main(List<String> args) {
   });
 }
 
-void writeFile(libfs.File outputFile, DevFSContent content) {
+Future<void> writeFile(libfs.File outputFile, DevFSContent content) async {
   outputFile.createSync(recursive: true);
-  content.copyToFile(outputFile);
+  final List<int> data = await content.contentsAsBytes();
+  outputFile.writeAsBytesSync(data);
 }
 
 Future<void> run(List<String> args) async {
@@ -70,10 +71,12 @@ Future<void> run(List<String> args) async {
     exit(1);
   }
 
+  final List<Future<void>> calls = <Future<void>>[];
   assets.entries.forEach((String fileName, DevFSContent content) {
     final libfs.File outputFile = libfs.fs.file(libfs.fs.path.join(assetDir, fileName));
-    writeFile(outputFile, content);
+    calls.add(writeFile(outputFile, content));
   });
+  await Future.wait<void>(calls);
 
   final String outputMan = argResults[_kOptionAssetManifestOut];
   await writeFuchsiaManifest(assets, argResults[_kOptionAsset], outputMan, argResults[_kOptionComponentName]);

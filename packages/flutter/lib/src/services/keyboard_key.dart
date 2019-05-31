@@ -1403,6 +1403,11 @@ class LogicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey mailSend = LogicalKeyboardKey(0x001000c028c, debugName: kReleaseMode ? null : 'Mail Send');
 
+  /// Represents the logical "Keyboard Layout Select" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey keyboardLayoutSelect = LogicalKeyboardKey(0x001000c029d, debugName: kReleaseMode ? null : 'Keyboard Layout Select');
+
   /// Represents the logical "Show All Windows" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
@@ -1643,6 +1648,7 @@ class LogicalKeyboardKey extends Diagnosticable {
     0x01000c0289: mailReply,
     0x01000c028b: mailForward,
     0x01000c028c: mailSend,
+    0x01000c029d: keyboardLayoutSelect,
     0x01000c029f: showAllWindows,
   };
 }
@@ -3035,6 +3041,12 @@ class PhysicalKeyboardKey extends Diagnosticable {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey mailSend = PhysicalKeyboardKey(0x000c028c, debugName: kReleaseMode ? null : 'Mail Send');
 
+  /// Represents the location of the "Keyboard Layout Select" key on a
+  /// generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey keyboardLayoutSelect = PhysicalKeyboardKey(0x000c029d, debugName: kReleaseMode ? null : 'Keyboard Layout Select');
+
   /// Represents the location of the "Show All Windows" key on a generalized
   /// keyboard.
   ///
@@ -3276,6 +3288,7 @@ class PhysicalKeyboardKey extends Diagnosticable {
     0x000c0289: mailReply,
     0x000c028b: mailForward,
     0x000c028c: mailSend,
+    0x000c029d: keyboardLayoutSelect,
     0x000c029f: showAllWindows,
   };
 }
