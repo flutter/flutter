@@ -15,8 +15,6 @@ if (using_fuchsia_sdk) {
       "component.h",
       "compositor_context.cc",
       "compositor_context.h",
-      "context_writer_bridge.cc",
-      "context_writer_bridge.h",
       "engine.cc",
       "engine.h",
       "fuchsia_font_manager.cc",

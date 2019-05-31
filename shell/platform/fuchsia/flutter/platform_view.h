@@ -20,7 +20,6 @@
 #include "lib/fidl/cpp/binding.h"
 #include "lib/ui/scenic/cpp/id.h"
 
-#include "context_writer_bridge.h"
 #include "surface.h"
 
 namespace flutter_runner {
@@ -49,16 +48,12 @@ class PlatformView final : public flutter::PlatformView,
                fit::closure on_session_listener_error_callback,
                OnMetricsUpdate session_metrics_did_change_callback,
                OnSizeChangeHint session_size_change_hint_callback,
-               fidl::InterfaceHandle<fuchsia::modular::ContextWriter>
-                   accessibility_context_writer,
                zx_handle_t vsync_event_handle);
   PlatformView(PlatformView::Delegate& delegate,
                std::string debug_label,
                flutter::TaskRunners task_runners,
                fidl::InterfaceHandle<fuchsia::sys::ServiceProvider>
                    parent_environment_service_provider,
-               fidl::InterfaceHandle<fuchsia::modular::ContextWriter>
-                   accessibility_context_writer,
                zx_handle_t vsync_event_handle);
 
   ~PlatformView();
@@ -80,7 +75,6 @@ class PlatformView final : public flutter::PlatformView,
 
   fuchsia::sys::ServiceProviderPtr parent_environment_service_provider_;
   fuchsia::modular::ClipboardPtr clipboard_;
-  ContextWriterBridge context_writer_bridge_;
   std::unique_ptr<Surface> surface_;
   flutter::LogicalMetrics metrics_;
   fuchsia::ui::gfx::Metrics scenic_metrics_;
