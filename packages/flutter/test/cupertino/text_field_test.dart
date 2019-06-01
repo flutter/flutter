@@ -260,7 +260,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-        findsOneWidget,
+        findsNothing,
       );
     },
   );
@@ -2589,5 +2589,31 @@ void main() {
     expect(right.opacity.value, equals(1.0));
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('disabled state golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: DecoratedBox(
+          decoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: CupertinoTextField(
+                controller: TextEditingController(text: 'lorem'),
+                enabled: false,
+              ),
+            )
+          )
+        )
+      )
+    );
+
+    await expectLater(
+      find.byType(CupertinoTextField),
+      matchesGoldenFile('text_field_test.disabled.0.png'),
+      skip: !Platform.isLinux,
+    );
   });
 }
