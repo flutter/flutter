@@ -200,9 +200,20 @@ action("_generate_symlinks") {
   ]
 }
 
+copy("copy_framework_podspec") {
+  visibility = [ ":*" ]
+  sources = [
+    "framework/FlutterMacOS.podspec",
+  ]
+  outputs = [
+    "$root_out_dir/FlutterMacOS.podspec",
+  ]
+}
+
 group("flutter_framework") {
   deps = [
     ":_generate_symlinks",
+    ":copy_framework_podspec",
   ]
 }
 
