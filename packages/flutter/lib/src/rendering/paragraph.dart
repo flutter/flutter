@@ -414,7 +414,6 @@ class RenderParagraph extends RenderBox
         hitTest: (BoxHitTestResult result, Offset transformed) {
           assert(() {
             final Offset manualPosition = (position - textParentData.offset) / textParentData.scale;
-            // Compare the two offsets ignoring floating point error.
             return (transformed.dx - manualPosition.dx).abs() < precisionErrorTolerance
               && (transformed.dy - manualPosition.dy).abs() < precisionErrorTolerance;
           }());
