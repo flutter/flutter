@@ -125,13 +125,6 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
-  windows_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_win
-    required_agent_capabilities: ["windows/android"]
-    flaky: true
-
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -331,13 +324,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  linux_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-    flaky: true
-
   # iOS on-device tests
 
   flavors_test_ios:
@@ -434,13 +420,6 @@ tasks:
       Builds sample catalog markdown pages and iOS screenshots
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
-
-  macos_chrome_dev_mode:
-    description: >
-      Run flutter web on the devicelab and hot restart.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
-    flaky: true
 
   # Tests running on Windows host
 
