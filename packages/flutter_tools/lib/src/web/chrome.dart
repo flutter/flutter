@@ -18,16 +18,52 @@ import '../convert.dart';
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
-const String _kChromeEnvironment = 'CHROME_EXECUTABLE';
-const String _kLinuxExecutable = 'google-chrome';
-const String _kMacOSExecutable =
+/// An environment variable used to override the location of chrome.
+const String kChromeEnvironment = 'CHROME_EXECUTABLE';
+
+/// The expected executable name on linux.
+const String kLinuxExecutable = 'google-chrome';
+
+/// The expected executable name on macOS.
+const String kMacOSExecutable =
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const String _kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
-final List<String> _kWindowsPrefixes = <String>[
+
+/// The expected executable name on Windows.
+const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+
+/// The possible locations where the chrome executable can be located on windows.
+final List<String> kWindowsPrefixes = <String>[
   platform.environment['LOCALAPPDATA'],
   platform.environment['PROGRAMFILES'],
   platform.environment['PROGRAMFILES(X86)']
 ];
+
+/// Find the chrome executable on the current platform.
+///
+/// Does not verify whether the executable exists.
+String findChromeExecutable() {
+  if (platform.environment.containsKey(kChromeEnvironment)) {
+    return platform.environment[kChromeEnvironment];
+  }
+  if (platform.isLinux) {
+    return kLinuxExecutable;
+  }
+  if (platform.isMacOS) {
+    return kMacOSExecutable;
+  }
+  if (platform.isWindows) {
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
+      if (prefix == null) {
+        return false;
+      }
+      final String path = fs.path.join(prefix, kWindowsExecutable);
+      return fs.file(path).existsSync();
+    }, orElse: () => '.');
+    return fs.path.join(windowsPrefix, kWindowsExecutable);
+  }
+  throwToolExit('Platform ${platform.operatingSystem} is not supported.');
+  return null;
+}
 
 // Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
@@ -37,7 +73,7 @@ class ChromeLauncher {
 
   /// Launch the chrome browser to a particular `host` page.
   Future<Chrome> launch(String url) async {
-    final String chromeExecutable = _findExecutable();
+    final String chromeExecutable = findChromeExecutable();
     final Directory dataDir = fs.systemTempDirectory.createTempSync();
     final int port = await os.findFreePort();
     final List<String> args = <String>[
@@ -101,38 +137,6 @@ class ChromeLauncher {
       _connect(Chrome._(port, ChromeConnection('localhost', port)));
 
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
-
-  static String _findExecutable() {
-    if (platform.environment.containsKey(_kChromeEnvironment)) {
-      return platform.environment[_kChromeEnvironment];
-    }
-    if (platform.isLinux) {
-      // Don't check if this exists, it isn't a file.
-      return _kLinuxExecutable;
-    }
-    if (platform.isMacOS) {
-      if (!fs.file(_kMacOSExecutable).existsSync()) {
-        throwToolExit('Chrome executable not found at $_kMacOSExecutable');
-      }
-      return _kMacOSExecutable;
-    }
-    if (platform.isWindows) {
-      final String windowsPrefix = _kWindowsPrefixes.firstWhere((String prefix) {
-        if (prefix == null) {
-          return false;
-        }
-        final String path = fs.path.join(prefix, _kWindowsExecutable);
-        return fs.file(path).existsSync();
-      }, orElse: () => '.');
-      final String path = fs.path.join(windowsPrefix, _kWindowsExecutable);
-      if (!fs.file(path).existsSync()) {
-        throwToolExit('Chrome executable not found at $path');
-      }
-      return path;
-    }
-    throwToolExit('Platform ${platform.operatingSystem} is not supported.');
-    return null;
-  }
 }
 
 /// A class for managing an instance of Chrome.

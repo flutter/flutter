@@ -23,6 +23,7 @@ import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
+import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
