@@ -1258,6 +1258,11 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   String get reasonPhrase => '<reason phrase>';
 
   @override
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
+
+  @override
   StreamSubscription<List<int>> listen(
     void onData(List<int> event), {
     Function onError,
