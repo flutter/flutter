@@ -2,11 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/file_system.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../doctor.dart';
 import 'chrome.dart';
+import 'workflow.dart';
 
 /// A validator that checks whether chrome is installed and can run.
 class WebValidator extends DoctorValidator {
@@ -15,15 +14,8 @@ class WebValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final String chrome = findChromeExecutable();
+    final bool canRunChrome = canFindChrome();
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    bool canRunChrome = false;
-    if (platform.isLinux) {
-      canRunChrome = processManager.canRun(chrome);
-    } else if (platform.isMacOS) {
-      canRunChrome = fs.file(chrome).existsSync();
-    } else if (platform.isWindows) {
-      canRunChrome = fs.file(chrome).existsSync();
-    }
     if (platform.environment.containsKey(kChromeEnvironment)) {
       messages.add(ValidationMessage('$kChromeEnvironment = $chrome'));
     } else {
