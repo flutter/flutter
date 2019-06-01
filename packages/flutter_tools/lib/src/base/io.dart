@@ -47,6 +47,7 @@ export 'dart:io'
         HttpClient,
         HttpClientRequest,
         HttpClientResponse,
+        HttpClientResponseCompressionState,
         HttpHeaders,
         HttpRequest,
         HttpServer,
