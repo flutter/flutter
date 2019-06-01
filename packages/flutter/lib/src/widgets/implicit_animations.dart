@@ -212,11 +212,17 @@ class TextStyleTween extends Tween<TextStyle> {
   TextStyle lerp(double t) => TextStyle.lerp(begin, end, t);
 }
 
-/// An abstract class for building widgets that respond to changes in their
-/// values by animating the changes over a specified duration.
+/// An abstract class for building widgets that animate changes to their
+/// properties.
 ///
-/// Subclasses' States must extend [ImplicitlyAnimatedWidgetState] and provide
-/// a way to visit the subclass's relevant fields to animate.
+/// Widgets of this type will not animate when they are first added to the
+/// widget tree. Rather, when they are rebuilt with different values, they will
+/// respond to those _changes_ by animating the changes over a specified
+/// [duration].
+///
+/// Which properties are animated is left up to the subclass. Subclasses' States
+/// must extend [ImplicitlyAnimatedWidgetState] and provide a way to visit the
+/// relevant fields to animate.
 abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
   /// Initializes fields for subclasses.
   ///
@@ -260,38 +266,41 @@ abstract class ImplicitlyAnimatedWidget extends StatefulWidget {
 ///
 /// Instances of this function are expected to take a value and return a tween
 /// beginning at that value.
-/// beginning at that value.
 typedef TweenConstructor<T> = Tween<T> Function(T targetValue);
 
 /// Signature for callbacks passed to [ImplicitlyAnimatedWidgetState.forEachTween].
 ///
-/// [ImplicitlyAnimatedWidgetState.forEachTween] will be passed an instance of
-/// this visitor and is expected to call the visitor with the appropriate
-/// arguments for each tween that the state manages -- and to set the tween
-/// value to the return value of this visitor.
-///
+/// {@template flutter.widgets.implicit_animations.tweenVisitorArguments}
 /// The `tween` argument should contain the current tween value. This will
 /// initially be null when the state is first initialized.
 ///
 /// The `targetValue` argument should contain the value toward which the state
-/// is animating. For instance, if the state was animating its widget's
-/// "opacity" value, then this argument should contain the widget's current
+/// is animating. For instance, if the state is animating its widget's
+/// opacity value, then this argument should contain the widget's current
 /// opacity value.
 ///
 /// The `constructor` argument should contain a function that takes a value
 /// (the widget's value being animated) and returns a tween beginning at that
 /// value.
+///
+/// {@endtemplate}
+///
+/// `forEachTween()` is expected to update its tween value to the return value
+/// of this visitor.
+///
+/// The `<T>` parameter specifies the type of value that's being animated.
 typedef TweenVisitor<T> = Tween<T> Function(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
 
-/// A base class for widgets with implicit animations.
+/// A base class for the `State` of widgets with implicit animations.
 ///
 /// [ImplicitlyAnimatedWidgetState] requires that subclasses respond to the
 /// animation themselves. If you would like `setState()` to be called
 /// automatically as the animation changes, use [AnimatedWidgetBaseState].
 ///
-/// Subclasses must implement the [forEachTween] method to allow
-/// [ImplicitlyAnimatedWidgetState] to iterate through the subclasses' widget's
-/// fields and animate them.
+/// Properties that subclasses choose to animate are represented by [Tween]
+/// instances. Subclasses must implement the [forEachTween] method to allow
+/// [ImplicitlyAnimatedWidgetState] to iterate through the widget's fields and
+/// animate them.
 abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget> extends State<T> with SingleTickerProviderStateMixin<T> {
   /// The animation controller driving this widget's implicit animations.
   @protected
@@ -375,21 +384,36 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
     return shouldStartAnimation;
   }
 
-  /// Subclasses must implement this function by running through the following
-  /// steps for each animatable facet in the class:
+  /// Visits each tween controlled by this state with the specified `visitor`
+  /// function.
   ///
-  /// 1. Call the visitor callback with three arguments, the first argument
-  /// being the current value of the Tween<T> object that represents the
-  /// tween (initially null), the second argument, of type T, being the value
-  /// on the Widget that represents the current target value of the
-  /// tween, and the third being a callback that takes a value T (which will
-  /// be the second argument to the visitor callback), and that returns an
-  /// Tween<T> object for the tween, configured with the given value
-  /// as the begin value.
+  /// ### Subclass responsibility
   ///
-  /// 2. Take the value returned from the callback, and store it. This is the
-  /// value to use as the current value the next time that the [forEachTween]
-  /// method is called.
+  /// Properties to be animated are represented by [Tween] member variables in
+  /// the state. For each such tween, [forEachTween] implementations are
+  /// expected to call `visitor` with the appropriate arguments and store the
+  /// result back into the member variable. The arguments to `visitor` are as
+  /// follows:
+  ///
+  /// {@macro flutter.widgets.implicit_animations.tweenVisitorArguments}
+  ///
+  /// ### When this method will be called
+  ///
+  /// [forEachTween] is initially called during [initState]. It is expected that
+  /// the visitor's `tween` argument will be set to null, causing the visitor to
+  /// call its `constructor` argument to construct the tween for the first time.
+  /// The resulting tween will have its `begin` value set to the target value
+  /// and will have its `end` value set to null. The animation will not be
+  /// started.
+  ///
+  /// When this state's [widget] is updated (thus triggering the
+  /// [didUpdateWidget] method to be called), [forEachTween] will be called
+  /// again to check if the target value has changed. If the target value has
+  /// changed, signaling that the [animation] should start, then the visitor
+  /// will update the tween's `start` and `end` values accordingly, and the
+  /// animation will be started.
+  ///
+  /// ### Other member variables
   ///
   /// Subclasses that contain properties based on tweens created by
   /// [forEachTween] should override [didUpdateTweens] to update those
@@ -398,7 +422,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   ///
   /// {@tool sample}
   ///
-  /// Sample code implementing an implicitly animated widget's `State`.
+  /// This sample implements an implicitly animated widget's `State`.
   /// The widget animates between colors whenever `widget.targetColor`
   /// changes.
   ///
