@@ -607,4 +607,33 @@ void main() {
     expect(themeBeforeBrightnessChange.brightness, Brightness.light);
     expect(themeAfterBrightnessChange.brightness, Brightness.dark);
   });
+
+  testWidgets('Navigator routes wrapper builder', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    bool didBuild = false;
+
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: const Placeholder(),
+          navigatorRoutesWrapperBuilder: (BuildContext context, Widget child) {
+            expect(context.ancestorWidgetOfExactType(MaterialApp), isNotNull);
+            expect(context.ancestorWidgetOfExactType(WidgetsApp), isNotNull);
+            expect(context.ancestorWidgetOfExactType(Navigator), isNotNull);
+            didBuild = true;
+
+            return Container(key: key, child: child,);
+          },
+        ),
+    );
+    expect(didBuild, isTrue);
+
+    expect(find.byType(MaterialApp), isNotNull);
+    expect(find.byType(WidgetsApp), isNotNull);
+    expect(find.byType(Overlay), isNotNull);
+    expect(find.byType(Navigator), isNotNull);
+    expect(find.byKey(key), findsOneWidget);
+  });
 }

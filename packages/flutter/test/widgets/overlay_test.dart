@@ -612,4 +612,59 @@ void main() {
 
     expect(buildOrder, <int>[3, 4, 1, 2, 0]);
   });
+
+  testWidgets('Onstage wrapper', (WidgetTester tester) async {
+    final GlobalKey overlayKey = GlobalKey();
+    bool didBuild = false;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          onstageWrapperBuilder: (BuildContext context, Widget child) {
+            final Directionality directionality =
+            context.ancestorWidgetOfExactType(Directionality);
+            expect(directionality, isNotNull);
+
+            didBuild = true;
+            return Opacity(
+              child: child, opacity: 1.0,
+            );
+          },
+        ),
+      ),
+    );
+    expect(didBuild, isTrue);
+    final RenderObject theater = overlayKey.currentContext.findRenderObject();
+
+    expect(theater, hasAGoodToStringDeep);
+    expect(
+      theater.toStringDeep(minLevel: DiagnosticLevel.fine),
+      equalsIgnoringHashCodes(
+          'RenderOpacity#88d39\n'
+              ' │ parentData: <none>\n'
+              ' │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+              ' │ size: Size(800.0, 600.0)\n'
+              ' │ opacity: 1.0\n'
+              ' │\n'
+              ' └─child: _RenderTheatre#60e1b\n'
+              '   │ parentData: <none> (can use size)\n'
+              '   │ constraints: BoxConstraints(w=800.0, h=600.0)\n'
+              '   │ size: Size(800.0, 600.0)\n'
+              '   │\n'
+              '   ├─onstage: RenderStack#90d61\n'
+              '   ╎   parentData: not positioned; offset=Offset(0.0, 0.0) (can use\n'
+              '   ╎     size)\n'
+              '   ╎   constraints: BoxConstraints(w=800.0, h=600.0)\n'
+              '   ╎   size: Size(800.0, 600.0)\n'
+              '   ╎   alignment: AlignmentDirectional.topStart\n'
+              '   ╎   textDirection: ltr\n'
+              '   ╎   fit: expand\n'
+              '   ╎   overflow: clip\n'
+              '   ╎\n'
+              '   └╌no offstage children\n'
+              ''
+      ),
+    );
+  });
 }

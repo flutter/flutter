@@ -163,6 +163,7 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
     this.inspectorSelectButtonBuilder,
+    this.navigatorRoutesWrapperBuilder,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -676,6 +677,11 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
 
+  /// A builder that builds a widget that a wraps routes of Navigator.
+  ///
+  /// The child must be part of the returned widget tree.
+  final TransitionBuilder navigatorRoutesWrapperBuilder;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -1096,6 +1102,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         onGenerateRoute: _onGenerateRoute,
         onUnknownRoute: _onUnknownRoute,
         observers: widget.navigatorObservers,
+        routesWrapperBuilder: widget.navigatorRoutesWrapperBuilder,
       );
     }
 

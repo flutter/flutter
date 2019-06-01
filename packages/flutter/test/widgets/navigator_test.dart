@@ -10,6 +10,18 @@ import 'package:flutter/material.dart';
 
 import 'semantics_tester.dart';
 
+class RoutesWrapperWidget extends StatelessWidget {
+
+  const RoutesWrapperWidget({Key key, this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+}
+
 class FirstWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1013,5 +1025,34 @@ void main() {
     expect(find.text('/D'), findsOneWidget);
     expect(arguments.single, 'pushReplacementNamed');
     arguments.clear();
+  });
+
+  testWidgets('Onstage wrapper', (WidgetTester tester) async {
+    final GlobalKey routeKey = GlobalKey();
+    bool didBuild = false;
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: Navigator(
+          routesWrapperBuilder: (BuildContext context, Widget child) {
+            expect(context.ancestorWidgetOfExactType(Material), isNotNull);
+            didBuild = true;
+            return RoutesWrapperWidget(
+              child: child,
+            );
+          },
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute<dynamic>(builder: (BuildContext context) {
+              return Placeholder(key: routeKey,);
+            });
+          },
+        ),
+      ),
+    ));
+
+    expect(didBuild, isTrue);
+
+    expect(find.byType(Overlay), isNotNull);
+    expect(find.byType(Navigator), isNotNull);
+    expect(find.byType(RoutesWrapperWidget), isNotNull);
   });
 }

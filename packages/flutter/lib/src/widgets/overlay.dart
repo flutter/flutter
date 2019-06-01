@@ -203,6 +203,7 @@ class Overlay extends StatefulWidget {
   const Overlay({
     Key key,
     this.initialEntries = const <OverlayEntry>[],
+    this.onstageWrapperBuilder,
   }) : assert(initialEntries != null),
        super(key: key);
 
@@ -220,6 +221,11 @@ class Overlay extends StatefulWidget {
   ///
   /// To remove an entry from an [Overlay], use [OverlayEntry.remove].
   final List<OverlayEntry> initialEntries;
+
+  /// A builder that builds a widget that a wraps all Entries of Overlay.
+  ///
+  /// The child must be part of the returned widget tree.
+  final TransitionBuilder onstageWrapperBuilder;
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
@@ -460,13 +466,22 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
         offstageChildren.add(TickerMode(enabled: false, child: _OverlayEntry(entry)));
       }
     }
-    return _Theatre(
+
+    Widget result = _Theatre(
       onstage: Stack(
         fit: StackFit.expand,
         children: onstageChildren.reversed.toList(growable: false),
       ),
       offstage: offstageChildren,
     );
+
+    final Function(BuildContext context, Widget child) onstageWrapperBuilder =
+        widget.onstageWrapperBuilder;
+    if (onstageWrapperBuilder != null) {
+      result = onstageWrapperBuilder(context, result);
+    }
+
+    return result;
   }
 
   @override

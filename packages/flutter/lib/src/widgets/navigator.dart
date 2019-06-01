@@ -752,6 +752,7 @@ class Navigator extends StatefulWidget {
     @required this.onGenerateRoute,
     this.onUnknownRoute,
     this.observers = const <NavigatorObserver>[],
+    this.routesWrapperBuilder,
   }) : assert(onGenerateRoute != null),
        super(key: key);
 
@@ -784,6 +785,11 @@ class Navigator extends StatefulWidget {
 
   /// A list of observers for this navigator.
   final List<NavigatorObserver> observers;
+
+  /// A builder that builds a widget that a wraps routes of Navigator.
+  ///
+  /// The child must be part of the returned widget tree.
+  final TransitionBuilder routesWrapperBuilder;
 
   /// The default name for the [initialRoute].
   ///
@@ -2195,6 +2201,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
           node: focusScopeNode,
           autofocus: true,
           child: Overlay(
+            onstageWrapperBuilder: widget.routesWrapperBuilder,
             key: _overlayKey,
             initialEntries: _initialOverlayEntries,
           ),

@@ -90,6 +90,7 @@ class CupertinoApp extends StatefulWidget {
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowCheckedModeBanner = true,
+    this.navigatorRoutesWrapperBuilder,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -190,6 +191,11 @@ class CupertinoApp extends StatefulWidget {
 
   /// {@macro flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   final bool debugShowCheckedModeBanner;
+
+  /// A builder that builds a widget that a wraps routes of Navigator.
+  ///
+  /// The child must be part of the returned widget tree.
+  final TransitionBuilder navigatorRoutesWrapperBuilder;
 
   @override
   _CupertinoAppState createState() => _CupertinoAppState();
@@ -307,6 +313,7 @@ class _CupertinoAppState extends State<CupertinoApp> {
               onPressed: onPressed,
             );
           },
+          navigatorRoutesWrapperBuilder: widget.navigatorRoutesWrapperBuilder,
         ),
       ),
     );

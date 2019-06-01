@@ -110,6 +110,7 @@ class MaterialApp extends StatefulWidget {
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowCheckedModeBanner = true,
+    this.navigatorRoutesWrapperBuilder,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -357,6 +358,11 @@ class MaterialApp extends StatefulWidget {
   ///  * <https://material.io/design/layout/spacing-methods.html>
   final bool debugShowMaterialGrid;
 
+  /// A builder that builds a widget that a wraps routes of Navigator.
+  ///
+  /// The child must be part of the returned widget tree.
+  final TransitionBuilder navigatorRoutesWrapperBuilder;
+
   @override
   _MaterialAppState createState() => _MaterialAppState();
 }
@@ -515,6 +521,7 @@ class _MaterialAppState extends State<MaterialApp> {
           mini: true,
         );
       },
+      navigatorRoutesWrapperBuilder: widget.navigatorRoutesWrapperBuilder,
     );
 
     assert(() {

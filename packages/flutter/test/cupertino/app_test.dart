@@ -62,4 +62,30 @@ void main() {
     expect(find.text('Select All'), findsOneWidget);
     expect(find.text('Thu Oct 4 '), findsOneWidget);
   });
+
+  testWidgets('Navigator routes wrapper builder', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    bool didBuild = false;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: const Placeholder(),
+        navigatorRoutesWrapperBuilder: (BuildContext context, Widget child) {
+          expect(context.ancestorWidgetOfExactType(CupertinoApp), isNotNull);
+          expect(context.ancestorWidgetOfExactType(WidgetsApp), isNotNull);
+          expect(context.ancestorWidgetOfExactType(Navigator), isNotNull);
+          didBuild = true;
+
+          return Container(key: key, child: child,);
+        },
+      ),
+    );
+    expect(didBuild, isTrue);
+
+    expect(find.byType(CupertinoApp), isNotNull);
+    expect(find.byType(WidgetsApp), isNotNull);
+    expect(find.byType(Overlay), isNotNull);
+    expect(find.byType(Navigator), isNotNull);
+    expect(find.byKey(key), findsOneWidget);
+  });
 }
