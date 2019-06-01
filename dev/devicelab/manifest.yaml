@@ -334,7 +334,7 @@ tasks:
   linux_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
-    stage: devicelab_win
+    stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
@@ -438,7 +438,7 @@ tasks:
   macos_chrome_dev_mode:
     description: >
       Run flutter web on the devicelab and hot restart.
-    stage: devicelab_win
+    stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     flaky: true
 
