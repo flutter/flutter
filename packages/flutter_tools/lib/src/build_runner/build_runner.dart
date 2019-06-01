@@ -155,6 +155,7 @@ class BuildRunner extends CodeGenerator {
         .path;
     final Status status = logger.startProgress('starting build daemon...', timeout: null);
     BuildDaemonClient buildDaemonClient;
+    final String path = cache.getArtifactDirectory('web-sdk').path;
     try {
       final List<String> command = <String>[
         engineDartBinaryPath,
@@ -162,7 +163,8 @@ class BuildRunner extends CodeGenerator {
         buildSnapshot.path,
         'daemon',
          '--skip-build-script-check',
-         '--delete-conflicting-outputs'
+         '--delete-conflicting-outputs',
+         '--define', 'build|ddc=flutter_sdk_dir=$path',
       ];
       buildDaemonClient = await BuildDaemonClient.connect(
         flutterProject.directory.path,

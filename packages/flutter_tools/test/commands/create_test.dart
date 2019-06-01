@@ -14,12 +14,15 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/usage.dart';
 import 'package:flutter_tools/src/version.dart';
+
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
@@ -374,6 +377,91 @@ void main() {
       'ios/',
     ]);
   }, timeout: allowForRemotePubInvocation);
+
+
+  testUsingContext('androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
 
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
@@ -927,7 +1015,70 @@ void main() {
     HttpClientFactory: () =>
         () => MockHttpClient(404, result: 'not found'),
   });
+
+  group('usageValues', () {
+    testUsingContext('set template type as usage value', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--no-pub', '--template=module', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'module'));
+
+      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'app'));
+
+      await runner.run(<String>['create', '--no-pub', '--template=package', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'package'));
+
+      await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateProjectType, 'plugin'));
+
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('set iOS host language type as usage value', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'objc'));
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=app',
+        '--ios-language=swift',
+        projectDir.path,
+      ]);
+      expect(await command.usageValues, containsPair(kCommandCreateIosLanguage, 'swift'));
+
+    }, timeout: allowForCreateFlutterProject);
+
+    testUsingContext('set Android host language type as usage value', () async {
+      Cache.flutterRoot = '../..';
+
+      final CreateCommand command = CreateCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+
+      await runner.run(<String>['create', '--no-pub', '--template=app', projectDir.path]);
+      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'java'));
+
+      await runner.run(<String>[
+        'create',
+        '--no-pub',
+        '--template=app',
+        '--android-language=kotlin',
+        projectDir.path,
+      ]);
+      expect(await command.usageValues, containsPair(kCommandCreateAndroidLanguage, 'kotlin'));
+
+    }, timeout: allowForCreateFlutterProject);
+  });
 }
+
 
 Future<void> _createProject(
   Directory dir,

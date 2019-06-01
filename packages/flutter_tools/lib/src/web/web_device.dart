@@ -5,12 +5,10 @@
 import '../application_package.dart';
 import '../asset.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../device.dart';
@@ -18,8 +16,7 @@ import '../globals.dart';
 import '../project.dart';
 import '../version.dart';
 import '../web/compile.dart';
-
-ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
+import 'chrome.dart';
 
 /// Only launch or display web devices if `FLUTTER_WEB`
 /// environment variable is set to true.
@@ -50,10 +47,10 @@ class WebDevice extends Device {
   WebApplicationPackage _package;
 
   @override
-  bool get supportsHotReload => false;
+  bool get supportsHotReload => true;
 
   @override
-  bool get supportsHotRestart => false;
+  bool get supportsHotRestart => true;
 
   @override
   bool get supportsStartPaused => true;
@@ -108,7 +105,7 @@ class WebDevice extends Device {
     bool ipv6 = false,
   }) async {
     final Status status = logger.startProgress('Compiling ${package.name} to JavaScript...', timeout: null);
-    final int result = await webCompiler.compile(target: mainPath, minify: false, enabledAssertions: true);
+    final int result = await webCompiler.compileDart2js(target: mainPath, minify: false, enabledAssertions: true);
     status.stop();
     if (result != 0) {
       printError('Failed to compile ${package.name} to JavaScript');
@@ -125,7 +122,7 @@ class WebDevice extends Device {
     _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
     _server.listen(_basicAssetServer);
     printStatus('Serving assets from http:localhost:${_server.port}');
-    await chromeLauncher.launch('http:localhost:${_server.port}');
+    await chromeLauncher.launch('http://localhost:${_server.port}');
     return LaunchResult.succeeded(observatoryUri: null);
   }
 
@@ -201,22 +198,4 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform => flutterWebEnabled;
-
-}
-
-// Responsible for launching chrome with devtools configured.
-class ChromeLauncher {
-  const ChromeLauncher();
-
-  static const String _kMacosLocation = '/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome';
-
-  Future<void> launch(String host) async {
-    if (platform.isMacOS) {
-      return processManager.start(<String>[
-        _kMacosLocation,
-        host,
-      ]);
-    }
-    throw UnsupportedError('$platform is not supported');
-  }
 }

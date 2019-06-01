@@ -429,7 +429,7 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   if (buildInfo.fileSystemScheme != null)
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
+  if (buildInfo.buildSharedLibrary) {
     command.add('-Pbuild-shared-library=true');
   }
   if (buildInfo.targetPlatform != null)

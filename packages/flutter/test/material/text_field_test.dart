@@ -482,7 +482,7 @@ void main() {
     await expectLater(
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
-      matchesGoldenFile('text_field_opacity_test.0.1.png'),
+      matchesGoldenFile('text_field_opacity_test.0.2.png'),
       skip: !isLinux,
     );
   });
@@ -732,6 +732,13 @@ void main() {
     // 'def' is selected.
     expect(controller.selection.baseOffset, testValue.indexOf('d'));
     expect(controller.selection.extentOffset, testValue.indexOf('f')+1);
+
+    // Tapping elsewhere immediately collapses and moves the cursor.
+    await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('h')));
+    await tester.pump();
+
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('h'));
   });
 
   testWidgets('Slight movements in longpress don\'t hide/show handles', (WidgetTester tester) async {
@@ -1031,7 +1038,7 @@ void main() {
     // We use a small offset because the endpoint is on the very corner
     // of the handle.
     Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, 9); // Position of 'h'.
+    Offset newHandlePos = textOffsetToPosition(tester, testValue.length);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -1040,11 +1047,11 @@ void main() {
     await tester.pump();
 
     expect(controller.selection.baseOffset, 4);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection.extentOffset, 11);
 
     // Drag the left handle 2 letters to the left.
     handlePos = endpoints[0].point + const Offset(-1.0, 1.0);
-    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    newHandlePos = textOffsetToPosition(tester, 0);
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -1052,8 +1059,8 @@ void main() {
     await gesture.up();
     await tester.pump();
 
-    expect(controller.selection.baseOffset, 2);
-    expect(controller.selection.extentOffset, 9);
+    expect(controller.selection.baseOffset, 0);
+    expect(controller.selection.extentOffset, 11);
   });
 
   testWidgets('Cannot drag one handle past the other', (WidgetTester tester) async {
@@ -1073,7 +1080,7 @@ void main() {
     await skipPastScrollingAnimation(tester);
 
     // Long press the 'e' to select 'def'.
-    final Offset ePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    final Offset ePos = textOffsetToPosition(tester, 5); // Position before 'e'.
     TestGesture gesture = await tester.startGesture(ePos, pointer: 7);
     await tester.pump(const Duration(seconds: 2));
     await gesture.up();
@@ -1094,8 +1101,8 @@ void main() {
     // Drag the right handle until there's only 1 char selected.
     // We use a small offset because the endpoint is on the very corner
     // of the handle.
-    final Offset handlePos = endpoints[1].point + const Offset(1.0, 1.0);
-    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position of 'e'.
+    final Offset handlePos = endpoints[1].point + const Offset(4.0, 0.0);
+    Offset newHandlePos = textOffsetToPosition(tester, 5); // Position before 'e'.
     gesture = await tester.startGesture(handlePos, pointer: 7);
     await tester.pump();
     await gesture.moveTo(newHandlePos);
@@ -1104,7 +1111,7 @@ void main() {
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 5);
 
-    newHandlePos = textOffsetToPosition(tester, 2); // Position of 'c'.
+    newHandlePos = textOffsetToPosition(tester, 2); // Position before 'c'.
     await gesture.moveTo(newHandlePos);
     await tester.pump();
     await gesture.up();
@@ -1140,7 +1147,10 @@ void main() {
       renderEditable.getEndpointsForSelection(controller.selection),
       renderEditable,
     );
-    await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+    // Tapping on the part of the handle's GestureDetector where it overlaps
+    // with the text itself does not show the menu, so add a small vertical
+    // offset to tap below the text.
+    await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
@@ -1158,7 +1168,11 @@ void main() {
     // Tap again to bring back the menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    // Allow time for handle to appear and double tap to time out.
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('e'));
     renderEditable = findRenderEditable(tester);
     endpoints = globalize(
       renderEditable.getEndpointsForSelection(controller.selection),
@@ -1167,6 +1181,9 @@ void main() {
     await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    expect(controller.selection.isCollapsed, true);
+    expect(controller.selection.baseOffset, testValue.indexOf('e'));
+    expect(controller.selection.extentOffset, testValue.indexOf('e'));
 
     // PASTE right before the 'e'.
     await tester.tap(find.text('PASTE'));
@@ -1206,7 +1223,10 @@ void main() {
         renderEditable.getEndpointsForSelection(controller.selection),
         renderEditable,
       );
-      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      // Tapping on the part of the handle's GestureDetector where it overlaps
+      // with the text itself does not show the menu, so add a small vertical
+      // offset to tap below the text.
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
@@ -1239,7 +1259,10 @@ void main() {
         renderEditable.getEndpointsForSelection(controller.selection),
         renderEditable,
       );
-      await tester.tapAt(endpoints[0].point + const Offset(1.0, 1.0));
+      // Tapping on the part of the handle's GestureDetector where it overlaps
+      // with the text itself does not show the menu, so add a small vertical
+      // offset to tap below the text.
+      await tester.tapAt(endpoints[0].point + const Offset(1.0, 13.0));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
 
@@ -1268,7 +1291,8 @@ void main() {
     // Tap the selection handle to bring up the "paste / select all" menu.
     await tester.tapAt(textOffsetToPosition(tester, testValue.indexOf('e')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200)); // skip past the frame where the opacity is zero
+    // Allow time for the handle to appear and for a double tap to time out.
+    await tester.pump(const Duration(milliseconds: 600));
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(controller.selection),
@@ -4920,8 +4944,58 @@ void main() {
         const TextSelection(baseOffset: 8, extentOffset: 12),
       );
 
-      // Selected text shows 3 toolbar buttons.
-      expect(find.byType(FlatButton), findsNWidgets(3));
+      // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
+      expect(find.byType(FlatButton), findsNWidgets(4));
+    },
+  );
+
+  testWidgets(
+    'double tap on top of cursor also selects word (Android)',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Tap to put the cursor after the "w".
+      const int index = 3;
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+
+      // First tap doesn't change the selection
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Second tap selects the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 4 toolbar buttons: cut, copy, paste, select all
+      expect(find.byType(FlatButton), findsNWidgets(4));
     },
   );
 
@@ -5085,8 +5159,8 @@ void main() {
         const TextSelection(baseOffset: 0, extentOffset: 7),
       );
 
-      // Collapsed toolbar shows 3 buttons.
-      expect(find.byType(FlatButton), findsNWidgets(3));
+      // Collapsed toolbar shows 4 buttons: cut, copy, paste, select all
+      expect(find.byType(FlatButton), findsNWidgets(4));
     },
   );
 
