@@ -44,7 +44,7 @@ Future<int> runTests(
   FlutterProject flutterProject,
   String icudtlPath,
   Directory coverageDirectory,
-  bool web,
+  bool web = false,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
