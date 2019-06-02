@@ -3003,7 +3003,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// (which defaults to the top-left corner in left-to-right environments and the
 /// top-right corner in right-to-left environments). The positioned children are
 /// then placed relative to the stack according to their top, right, bottom, and
-/// left properties.
+/// left properties. 
 ///
 /// The stack paints its children in order with the first child being at the
 /// bottom. If you want to change the order in which the children paint, you
