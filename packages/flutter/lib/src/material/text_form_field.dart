@@ -28,6 +28,9 @@ import 'theme.dart';
 ///
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
+/// 
+  /// Remember to [dispose] the [TextEditingController] when it is no longer needed. 
+  /// This will ensure we discard any resources used by the object.
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
@@ -60,6 +63,7 @@ import 'theme.dart';
 ///    integration.
 ///  * [InputDecorator], which shows the labels and other visual elements that
 ///    surround the actual text editing widget.
+///  * <https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller>
 class TextFormField extends FormField<String> {
   /// Creates a [FormField] that contains a [TextField].
   ///

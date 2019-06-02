@@ -116,6 +116,9 @@ enum OverlayVisibilityMode {
 /// The text field has an overridable [decoration] that, by default, draws a
 /// rounded rectangle border around the text field. If you set the [decoration]
 /// property to null, the decoration will be removed entirely.
+/// 
+/// Remember to [dispose] the [TextEditingController] when it is no longer needed. 
+/// This will ensure we discard any resources used by the object.
 ///
 /// See also:
 ///
@@ -124,6 +127,7 @@ enum OverlayVisibilityMode {
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
+///  * <https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller>
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
   ///
