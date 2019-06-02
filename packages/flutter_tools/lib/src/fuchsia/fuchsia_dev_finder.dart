@@ -23,7 +23,8 @@ class FuchsiaDevFinder {
   /// formatted as follows:
   /// 192.168.42.172 scare-cable-skip-joy
   Future<List<String>> list() async {
-    if (fuchsiaArtifacts.devFinder == null) {
+    if (fuchsiaArtifacts.devFinder == null ||
+        !fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia dev_finder tool not found.');
     }
     final List<String> command = <String>[
@@ -45,7 +46,8 @@ class FuchsiaDevFinder {
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
   Future<String> resolve(String deviceName) async {
-    if (fuchsiaArtifacts.devFinder == null) {
+    if (fuchsiaArtifacts.devFinder == null ||
+        !fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia dev_finder tool not found.');
     }
     final List<String> command = <String>[

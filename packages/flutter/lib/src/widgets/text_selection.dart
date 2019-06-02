@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show kDoubleTapTimeout, kDoubleTapSlop;
@@ -94,6 +95,11 @@ abstract class TextSelectionControls {
   /// selection position.
   Widget buildHandle(BuildContext context, TextSelectionHandleType type, double textLineHeight);
 
+  /// Get the anchor point of the handle relative to itself. The anchor point is
+  /// the point that is aligned with a specific point in the text. A handle
+  /// often visually "points to" that location.
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight);
+
   /// Builds a toolbar near a text selection.
   ///
   /// Typically displays buttons for copying and pasting text.
@@ -113,7 +119,7 @@ abstract class TextSelectionControls {
   );
 
   /// Returns the size of the selection handle.
-  Size get handleSize;
+  Size getHandleSize(double textLineHeight);
 
   /// Whether the current selection of the text field managed by the given
   /// `delegate` can be removed from the text field and placed into the
@@ -533,6 +539,11 @@ class _TextSelectionHandleOverlay extends StatefulWidget {
   }
 }
 
+/// The minimum size that a widget should be in order to be easily interacted
+/// with by the user.
+@visibleForTesting
+const double kMinInteractiveSize = 48.0;
+
 class _TextSelectionHandleOverlayState
     extends State<_TextSelectionHandleOverlay> with SingleTickerProviderStateMixin {
   Offset _dragPosition;
@@ -574,7 +585,10 @@ class _TextSelectionHandleOverlayState
   }
 
   void _handleDragStart(DragStartDetails details) {
-    _dragPosition = details.globalPosition + Offset(0.0, -widget.selectionControls.handleSize.height);
+    final Size handleSize = widget.selectionControls.getHandleSize(
+      widget.renderObject.preferredLineHeight,
+    );
+    _dragPosition = details.globalPosition + Offset(0.0, -handleSize.height);
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
@@ -639,31 +653,61 @@ class _TextSelectionHandleOverlayState
       point.dy.clamp(0.0, viewport.height),
     );
 
+    final Offset handleAnchor = widget.selectionControls.getHandleAnchor(
+      type,
+      widget.renderObject.preferredLineHeight,
+    );
+    final Size handleSize = widget.selectionControls.getHandleSize(
+      widget.renderObject.preferredLineHeight,
+    );
+    final Rect handleRect = Rect.fromLTWH(
+      // Put handleAnchor on top of point
+      point.dx - handleAnchor.dx,
+      point.dy - handleAnchor.dy,
+      handleSize.width,
+      handleSize.height,
+    );
+
+    // Make sure the GestureDetector is big enough to be easily interactive.
+    final Rect interactiveRect = handleRect.expandToInclude(
+      Rect.fromCircle(center: handleRect.center, radius: kMinInteractiveSize / 2),
+    );
+    final RelativeRect padding = RelativeRect.fromLTRB(
+      math.max((interactiveRect.width - handleRect.width) / 2, 0),
+      math.max((interactiveRect.height - handleRect.height) / 2, 0),
+      math.max((interactiveRect.width - handleRect.width) / 2, 0),
+      math.max((interactiveRect.height - handleRect.height) / 2, 0),
+    );
+
     return CompositedTransformFollower(
       link: widget.layerLink,
+      offset: interactiveRect.topLeft,
       showWhenUnlinked: false,
       child: FadeTransition(
         opacity: _opacity,
-        child: GestureDetector(
-          dragStartBehavior: widget.dragStartBehavior,
-          onPanStart: _handleDragStart,
-          onPanUpdate: _handleDragUpdate,
-          onTap: _handleTap,
-          child: Stack(
-            // Always let the selection handles draw outside of the conceptual
-            // box where (0,0) is the top left corner of the RenderEditable.
-            overflow: Overflow.visible,
-            children: <Widget>[
-              Positioned(
-                left: point.dx,
-                top: point.dy,
-                child: widget.selectionControls.buildHandle(
-                  context,
-                  type,
-                  widget.renderObject.preferredLineHeight,
-                ),
+        child: Container(
+          alignment: Alignment.topLeft,
+          width: interactiveRect.width,
+          height: interactiveRect.height,
+          child: GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            dragStartBehavior: widget.dragStartBehavior,
+            onPanStart: _handleDragStart,
+            onPanUpdate: _handleDragUpdate,
+            onTap: _handleTap,
+            child: Padding(
+              padding: EdgeInsets.only(
+                left: padding.left,
+                top: padding.top,
+                right: padding.right,
+                bottom: padding.bottom,
               ),
-            ],
+              child: widget.selectionControls.buildHandle(
+                context,
+                type,
+                widget.renderObject.preferredLineHeight,
+              ),
+            ),
           ),
         ),
       ),
@@ -944,9 +988,12 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
 
-    gestures[TapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
-      () => TapGestureRecognizer(debugOwner: this),
-      (TapGestureRecognizer instance) {
+    // Use _TransparentTapGestureRecognizer so that TextSelectionGestureDetector
+    // can receive the same tap events that a selection handle placed visually
+    // on top of it also receives.
+    gestures[_TransparentTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_TransparentTapGestureRecognizer>(
+      () => _TransparentTapGestureRecognizer(debugOwner: this),
+      (_TransparentTapGestureRecognizer instance) {
         instance
           ..onTapDown = _handleTapDown
           ..onTapUp = _handleTapUp
@@ -1004,5 +1051,34 @@ class _TextSelectionGestureDetectorState extends State<TextSelectionGestureDetec
       behavior: widget.behavior,
       child: widget.child,
     );
+  }
+}
+
+// A TapGestureRecognizer which allows other GestureRecognizers to win in the
+// GestureArena. This means both _TransparentTapGestureRecognizer and other
+// GestureRecognizers can handle the same event.
+//
+// This enables proper handling of events on both the selection handle and the
+// underlying input, since there is significant overlap between the two given
+// the handle's padded hit area.  For example, the selection handle needs to
+// handle single taps on itself, but double taps need to be handled by the
+// underlying input.
+class _TransparentTapGestureRecognizer extends TapGestureRecognizer {
+  _TransparentTapGestureRecognizer({
+    Object debugOwner,
+  }) : super(debugOwner: debugOwner);
+
+  @override
+  void rejectGesture(int pointer) {
+    // Accept new gestures that another recognizer has already won.
+    // Specifically, this needs to accept taps on the text selection handle on
+    // behalf of the text field in order to handle double tap to select. It must
+    // not accept other gestures like longpresses and drags that end outside of
+    // the text field.
+    if (state == GestureRecognizerState.ready) {
+      acceptGesture(pointer);
+    } else {
+      super.rejectGesture(pointer);
+    }
   }
 }
