@@ -29,8 +29,8 @@ import 'theme.dart';
 /// If a [controller] is not specified, [initialValue] can be used to give
 /// the automatically generated controller an initial value.
 /// 
-  /// Remember to [dispose] the [TextEditingController] when it is no longer needed. 
-  /// This will ensure we discard any resources used by the object.
+/// Remember to [dispose] the [TextEditingController] when it is no longer needed. 
+/// This will ensure we discard any resources used by the object.
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
