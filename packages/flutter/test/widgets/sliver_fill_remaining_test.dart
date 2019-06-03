@@ -64,7 +64,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(500.0));
   });
 
-  testWidgets('SliverFillRemaining does not extend past viewport by default.', (WidgetTester tester) async {
+  testWidgets('SliverFillRemaining does not extend past viewport.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -80,6 +80,7 @@ void main() {
             ),
             SliverFillRemaining(
               child: Container(color: Colors.white),
+              hasScrollBody: false,
             ),
           ],
         ),
@@ -90,7 +91,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(Container), findsNWidgets(2));
   });
-  testWidgets('SliverFillRemaining scrolls beyond viewport.', (WidgetTester tester) async {
+
+  testWidgets('SliverFillRemaining scrolls beyond viewport by default.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     await tester.pumpWidget(
       Directionality(
@@ -105,7 +107,6 @@ void main() {
               ),
             ),
             SliverFillRemaining(
-              scrollBody: true,
               child: Container(color: Colors.white),
             ),
           ],

@@ -113,137 +113,127 @@ Widget buildTest({ ScrollController controller, String title = 'TTTTTTTT' }) {
 
 void main() {
 
-  group('iOS Platform Override', () {
+  testWidgets('NestedScrollView collapsing AppBar', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(buildTest());
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 250));
+    final Offset point1 = tester.getCenter(find.text('aaa1'));
+    await tester.dragFrom(point1, const Offset(0.0, 200.0));
+    await tester.pump();
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
+    await tester.flingFrom(point1, const Offset(0.0, -80.0), 50000.0);
+    await tester.pump(const Duration(milliseconds: 20));
+    final Offset point2 = tester.getCenter(find.text('aaa1'));
+    expect(point2.dy, greaterThan(point1.dy));
+    // TODO(ianh): Once we improve how we handle scrolling down from overscroll,
+    // the following expectation should switch to 200.0.
+    expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 120.0);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
-    setUp(() => debugDefaultTargetPlatformOverride = TargetPlatform.iOS);
+  testWidgets('NestedScrollView overscroll and release and hold', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(buildTest());
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 250));
+    final Offset point = tester.getCenter(find.text('aaa1'));
+    await tester.flingFrom(point, const Offset(0.0, 200.0), 5000.0);
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('aaa2'), findsNothing);
+    final TestGesture gesture1 = await tester.startGesture(point);
+    await tester.pump(const Duration(milliseconds: 5000));
+    expect(find.text('aaa2'), findsNothing);
+    await gesture1.moveBy(const Offset(0.0, 50.0));
+    await tester.pump(const Duration(milliseconds: 10));
+    await tester.pump(const Duration(milliseconds: 10));
+    expect(find.text('aaa2'), findsNothing);
+    await tester.pump(const Duration(milliseconds: 1000));
+    debugDefaultTargetPlatformOverride = null;
+  });
 
-    tearDown(() => debugDefaultTargetPlatformOverride = null);
+  testWidgets('NestedScrollView overscroll and release', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(buildTest());
+    expect(find.text('aaa2'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 500));
+    final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('aaa1')));
+    await gesture1.moveBy(const Offset(0.0, 200.0));
+    await tester.pumpAndSettle();
+    expect(find.text('aaa2'), findsNothing);
+    await tester.pump(const Duration(seconds: 1));
+    await gesture1.up();
+    await tester.pumpAndSettle();
+    expect(find.text('aaa2'), findsOneWidget);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
-    testWidgets('NestedScrollView collapsing AppBar', (
-      WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-      await tester.pumpWidget(buildTest());
-      expect(find.text('aaa2'), findsOneWidget);
-      await tester.pump(const Duration(milliseconds: 250));
-      final Offset point1 = tester.getCenter(find.text('aaa1'));
-      await tester.dragFrom(point1, const Offset(0.0, 200.0));
-      await tester.pump();
-      expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 200.0);
-      await tester.flingFrom(point1, const Offset(0.0, -80.0), 50000.0);
-      await tester.pump(const Duration(milliseconds: 20));
-      final Offset point2 = tester.getCenter(find.text('aaa1'));
-      expect(point2.dy, greaterThan(point1.dy));
-      // TODO(ianh): Once we improve how we handle scrolling down from overscroll,
-      // the following expectation should switch to 200.0.
-      expect(tester.renderObject<RenderBox>(find.byType(AppBar)).size.height, 120.0);
-      debugDefaultTargetPlatformOverride = null;
-    });
-    testWidgets('NestedScrollView overscroll and release and hold', (
-      WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-      await tester.pumpWidget(buildTest());
-      expect(find.text('aaa2'), findsOneWidget);
-      await tester.pump(const Duration(milliseconds: 250));
-      final Offset point = tester.getCenter(find.text('aaa1'));
-      await tester.flingFrom(point, const Offset(0.0, 300.0), 5000.0);
-      await tester.pump(const Duration(milliseconds: 10));
-      await tester.pump(const Duration(milliseconds: 10));
-      await tester.pump(const Duration(milliseconds: 10));
-      expect(find.text('aaa2'), findsNothing);
-      final TestGesture gesture1 = await tester.startGesture(point);
-      await tester.pump(const Duration(milliseconds: 5000));
-      expect(find.text('aaa2'), findsNothing);
-      await gesture1.moveBy(const Offset(0.0, 50.0));
-      await tester.pump(const Duration(milliseconds: 10));
-      await tester.pump(const Duration(milliseconds: 10));
-      expect(find.text('aaa2'), findsNothing);
-      await tester.pump(const Duration(milliseconds: 1000));
-      debugDefaultTargetPlatformOverride = null;
-    });
-    testWidgets('NestedScrollView overscroll and release', (
-      WidgetTester tester) async {
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-      await tester.pumpWidget(buildTest());
-      expect(find.text('aaa2'), findsOneWidget);
-      await tester.pump(const Duration(milliseconds: 500));
-      final TestGesture gesture1 = await tester.startGesture(tester.getCenter(find.text('aaa1')));
-      await gesture1.moveBy(const Offset(0.0, 200.0));
-      await tester.pumpAndSettle();
-      expect(find.text('aaa2'), findsNothing);
-      await tester.pump(const Duration(seconds: 1));
-      await gesture1.up();
-      await tester.pumpAndSettle();
-      expect(find.text('aaa2'), findsOneWidget);
-      debugDefaultTargetPlatformOverride = null;
-    });
-    testWidgets('NestedScrollView and iOS bouncing', (
-      WidgetTester tester) async {
-      // This verifies that overscroll bouncing works correctly on iOS. For
-      // example, this checks that if you pull to overscroll, friction is applied;
-      // it also makes sure that if you scroll back the other way, the scroll
-      // positions of the inner and outer list don't have a discontinuity.
-      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-      const Key key1 = ValueKey<int>(1);
-      const Key key2 = ValueKey<int>(2);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Material(
-            child: DefaultTabController(
-              length: 1,
-              child: NestedScrollView(
-                dragStartBehavior: DragStartBehavior.down,
-                headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-                  return <Widget>[
-                    const SliverPersistentHeader(
-                      delegate: TestHeader(key: key1),
-                    ),
-                  ];
+  testWidgets('NestedScrollView and iOS bouncing', (WidgetTester tester) async {
+    // This verifies that overscroll bouncing works correctly on iOS. For
+    // example, this checks that if you pull to overscroll, friction is applied;
+    // it also makes sure that if you scroll back the other way, the scroll
+    // positions of the inner and outer list don't have a discontinuity.
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    const Key key1 = ValueKey<int>(1);
+    const Key key2 = ValueKey<int>(2);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DefaultTabController(
+            length: 1,
+            child: NestedScrollView(
+              dragStartBehavior: DragStartBehavior.down,
+              headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+                return <Widget>[const SliverPersistentHeader(delegate: TestHeader(key: key1)),
+                ];
                 },
-                body: SingleChildScrollView(
-                  dragStartBehavior: DragStartBehavior.down,
-                  child: Container(
-                    height: 1000.0,
-                    child: const Placeholder(key: key2),
-                  ),
+              body: SingleChildScrollView(
+                dragStartBehavior: DragStartBehavior.down,
+                child: Container(
+                  height: 1000.0,
+                  child: const Placeholder(key: key2),
                 ),
               ),
             ),
           ),
         ),
-      );
-      expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-      expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
-      final TestGesture gesture = await tester.startGesture(const Offset(10.0, 10.0));
-      await gesture.moveBy(const Offset(0.0, -10.0)); // scroll up
-      await tester.pump();
-      expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -10.0, 800.0, 100.0));
-      expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 90.0, 800.0, 1000.0));
-      await gesture.moveBy(const Offset(0.0, 10.0)); // scroll back to origin
-      await tester.pump();
-      expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-      expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
-      await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
-      await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
-      await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
-      await tester.pump();
-      expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-      expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
-      expect(tester.getRect(find.byKey(key2)).top, lessThan(130.0));
-      await gesture.moveBy(const Offset(0.0, -1.0)); // scroll back a little
-      await tester.pump();
-      expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -1.0, 800.0, 100.0));
-      expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
-      expect(tester.getRect(find.byKey(key2)).top, lessThan(129.0));
-      await gesture.moveBy(const Offset(0.0, -10.0)); // scroll back a lot
-      await tester.pump();
-      expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -11.0, 800.0, 100.0));
-      await gesture.moveBy(const Offset(0.0, 20.0)); // overscroll again
-      await tester.pump();
-      expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
-      await gesture.up();
-      debugDefaultTargetPlatformOverride = null;
-    });
+      ),
+    );
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    final TestGesture gesture = await tester.startGesture(const Offset(10.0, 10.0));
+    await gesture.moveBy(const Offset(0.0, -10.0)); // scroll up
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -10.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 90.0, 800.0, 1000.0));
+    await gesture.moveBy(const Offset(0.0, 10.0)); // scroll back to origin
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)), const Rect.fromLTWH(0.0, 100.0, 800.0, 1000.0));
+    await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
+    await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
+    await gesture.moveBy(const Offset(0.0, 10.0)); // overscroll
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
+    expect(tester.getRect(find.byKey(key2)).top, lessThan(130.0));
+    await gesture.moveBy(const Offset(0.0, -1.0)); // scroll back a little
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -1.0, 800.0, 100.0));
+    expect(tester.getRect(find.byKey(key2)).top, greaterThan(100.0));
+    expect(tester.getRect(find.byKey(key2)).top, lessThan(129.0));
+    await gesture.moveBy(const Offset(0.0, -10.0)); // scroll back a lot
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, -11.0, 800.0, 100.0));
+    await gesture.moveBy(const Offset(0.0, 20.0)); // overscroll again
+    await tester.pump();
+    expect(tester.getRect(find.byKey(key1)), const Rect.fromLTWH(0.0, 0.0, 800.0, 100.0));
+    await gesture.up();
+    debugDefaultTargetPlatformOverride = null;
   });
+
   testWidgets('NestedScrollView', (WidgetTester tester) async {
     await tester.pumpWidget(buildTest());
     expect(find.text('aaa2'), findsOneWidget);

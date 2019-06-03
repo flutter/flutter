@@ -1368,20 +1368,24 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   const SliverFillRemaining({
     Key key,
     Widget child,
-    this.scrollBody = false,
-  }) : assert(scrollBody != null),
+    this.hasScrollBody = true,
+  }) : assert(hasScrollBody != null),
        super(key: key, child: child);
 
-  /// Whether the child should be scrollable
+  /// Whether the child has a scrollable body, this value cannot be null.
   ///
-  /// Defaults to false such that the child will fill the remainder of the
-  /// viewport, and not extend further.
-  /// Setting this value to true will allow for the child to extend beyond the
-  /// viewport and scroll, as seen in [NestedScrollView].
-  final bool scrollBody;
+  /// Defaults to true such that the child will extend beyond the viewport and
+  /// scroll, as seen in [NestedScrollView].
+  ///
+  /// Setting this value to false will allow the child to fill the remainder of
+  /// the viewport and not extend further.
+  final bool hasScrollBody;
 
   @override
-  RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining(scrollBody: scrollBody);
+  RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining(hasScrollBody: hasScrollBody);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverFillRemaining renderObject) => renderObject.hasScrollBody = hasScrollBody;
 }
 
 /// Mark a child as needing to stay alive even when it's in a lazy list that

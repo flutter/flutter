@@ -279,7 +279,6 @@ class NestedScrollView extends StatefulWidget {
         controller: innerController,
         child: body,
       ),
-      scrollBody: true,
     ));
     return slivers;
   }
