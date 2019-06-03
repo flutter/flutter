@@ -4,17 +4,16 @@
 
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
-import 'package:flutter_test/flutter_test.dart' show nonconst;
 import '../flutter_test_alternative.dart';
 
 void main() {
   test('TextSpan equals', () {
-    final TextSpan a1 = TextSpan(text: nonconst('a'));
-    final TextSpan a2 = TextSpan(text: nonconst('a'));
-    final TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
-    final TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
-    final TextSpan c1 = TextSpan(text: nonconst(null));
-    final TextSpan c2 = TextSpan(text: nonconst(null));
+    const TextSpan a1 = TextSpan(text: 'a');
+    const TextSpan a2 = TextSpan(text: 'a');
+    const TextSpan b1 = TextSpan(children: <TextSpan>[ a1 ]);
+    const TextSpan b2 = TextSpan(children: <TextSpan>[ a2 ]);
+    const TextSpan c1 = TextSpan(text: null);
+    const TextSpan c2 = TextSpan(text: null);
 
     expect(a1 == a2, isTrue);
     expect(b1 == b2, isTrue);
@@ -75,11 +74,11 @@ void main() {
   });
 
   test('WidgetSpan toPlainText', () {
-    TextSpan textSpan = TextSpan(
+    const TextSpan textSpan = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
-        WidgetSpan(child: Container(width: 10, height: 10)),
+        WidgetSpan(child: SizedBox(width: 10, height: 10)),
         TextSpan(text: 'c'),
       ],
     );
@@ -99,29 +98,29 @@ void main() {
   });
 
   test('TextSpan widget change test', () {
-    TextSpan textSpan1 = TextSpan(
+    const TextSpan textSpan1 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
-        WidgetSpan(child: Container(width: 10, height: 10)),
+        WidgetSpan(child: SizedBox(width: 10, height: 10)),
         TextSpan(text: 'c'),
       ],
     );
 
-    TextSpan textSpan2 = TextSpan(
+    const TextSpan textSpan2 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
-        WidgetSpan(child: Container(width: 10, height: 10, color: Color.fromARGB(255, 66, 165, 245))),
+        WidgetSpan(child: SizedBox(width: 10, height: 10)),
         TextSpan(text: 'c'),
       ],
     );
 
-    TextSpan textSpan3 = TextSpan(
+    const TextSpan textSpan3 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
-        WidgetSpan(child: Container(width: 11, height: 10)),
+        WidgetSpan(child: SizedBox(width: 11, height: 10)),
         TextSpan(text: 'c'),
       ],
     );
@@ -144,26 +143,26 @@ void main() {
       ],
     );
 
-    TextSpan textSpan6 = TextSpan(
+    const TextSpan textSpan6 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
         WidgetSpan(
-          child: Container(width: 10, height: 10),
+          child: SizedBox(width: 10, height: 10),
           alignment: PlaceholderAlignment.top,
         ),
         TextSpan(text: 'c'),
       ],
     );
 
-    expect(textSpan1.compareTo(textSpan2), RenderComparison.layout);
+    expect(textSpan1.compareTo(textSpan2), RenderComparison.identical);
     expect(textSpan1.compareTo(textSpan3), RenderComparison.layout);
     expect(textSpan1.compareTo(textSpan4), RenderComparison.layout);
     expect(textSpan1.compareTo(textSpan1), RenderComparison.identical);
     expect(textSpan2.compareTo(textSpan2), RenderComparison.identical);
     expect(textSpan3.compareTo(textSpan3), RenderComparison.identical);
     expect(textSpan2.compareTo(textSpan3), RenderComparison.layout);
-    expect(textSpan2.compareTo(textSpan1), RenderComparison.layout);
+    expect(textSpan2.compareTo(textSpan1), RenderComparison.identical);
     expect(textSpan4.compareTo(textSpan5), RenderComparison.layout);
     expect(textSpan3.compareTo(textSpan5), RenderComparison.layout);
     expect(textSpan2.compareTo(textSpan5), RenderComparison.layout);
@@ -172,7 +171,7 @@ void main() {
   });
 
   test('TextSpan nested widget change test', () {
-    TextSpan textSpan1 = TextSpan(
+    const TextSpan textSpan1 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -180,7 +179,7 @@ void main() {
           child: Text.rich(
             TextSpan(
               children: <InlineSpan>[
-                WidgetSpan(child: Container(width: 10, height: 10)),
+                WidgetSpan(child: SizedBox(width: 10, height: 10)),
                 TextSpan(text: 'The sky is falling :)')
               ],
             )
@@ -190,7 +189,7 @@ void main() {
       ],
     );
 
-    TextSpan textSpan2 = TextSpan(
+    const TextSpan textSpan2 = TextSpan(
       text: 'a',
       children: <InlineSpan>[
         TextSpan(text: 'b'),
@@ -198,7 +197,7 @@ void main() {
           child: Text.rich(
             TextSpan(
               children: <InlineSpan>[
-                WidgetSpan(child: Container(width: 10, height: 11)),
+                WidgetSpan(child: SizedBox(width: 10, height: 11)),
                 TextSpan(text: 'The sky is falling :)')
               ],
             )

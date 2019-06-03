@@ -326,7 +326,7 @@ void main() {
   });
 
   test('inline widgets test', () {
-    final TextSpan text = const TextSpan(
+    const TextSpan text = TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <InlineSpan>[
@@ -339,9 +339,9 @@ void main() {
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
     final List<RenderBox> renderBoxes = <RenderBox>[];
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
 
     final RenderParagraph paragraph = RenderParagraph(
       text,
@@ -355,16 +355,16 @@ void main() {
     );
 
     expect(boxes.length, equals(5));
-    expect(boxes[0], TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
-    expect(boxes[1], TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
-    expect(boxes[2], TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
-    expect(boxes[3], TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
-    expect(boxes[4], TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  }, skip: Platform.isWindows || Platform.isMacOS);
+  }, skip: isWindows || isMacOS);
 
   test('inline widgets multiline test', () {
-    final TextSpan text = const TextSpan(
+    const TextSpan text = TextSpan(
       text: 'a',
       style: TextStyle(fontSize: 10.0),
       children: <InlineSpan>[
@@ -381,13 +381,13 @@ void main() {
     // Fake the render boxes that correspond to the WidgetSpans. We use
     // RenderParagraph to reduce dependencies this test has.
     final List<RenderBox> renderBoxes = <RenderBox>[];
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
-    renderBoxes.add(RenderParagraph(TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
 
     final RenderParagraph paragraph = RenderParagraph(
       text,
@@ -401,17 +401,17 @@ void main() {
     );
 
     expect(boxes.length, equals(9));
-    expect(boxes[0], TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
-    expect(boxes[1], TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
-    expect(boxes[2], TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
-    expect(boxes[3], TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
     // Wraps
-    expect(boxes[4], TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
-    expect(boxes[5], TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
-    expect(boxes[6], TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
+    expect(boxes[5], const TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
+    expect(boxes[6], const TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
     // Wraps
-    expect(boxes[7], TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
-    expect(boxes[8], TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
+    expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
+    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
   // Ahem-based tests don't yet quite work on Windows or some MacOS environments
-  }, skip: Platform.isWindows || Platform.isMacOS);
+  }, skip: isWindows || isMacOS);
 }

@@ -151,9 +151,8 @@ void main() {
             decoration: const BoxDecoration(
               color: Colors.green,
             ),
-            child: RichText(
-              textDirection: TextDirection.ltr,
-              text: TextSpan(
+            child: Text.rich(
+              TextSpan(
                 text: 'text1 ',
                 style: TextStyle(
                   color: translucentGreen,
@@ -171,6 +170,7 @@ void main() {
                   ),
                 ],
               ),
+              textDirection: TextDirection.ltr,
             ),
           ),
         ),
@@ -533,19 +533,19 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'C ',
                       style: TextStyle(
                         fontSize: 16,
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          child: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: null),
                         ),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
@@ -553,7 +553,7 @@ void main() {
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
@@ -561,7 +561,7 @@ void main() {
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
                                   )
@@ -572,17 +572,17 @@ void main() {
                         ),
                         TextSpan(text: 'hello world! sieze the day!'),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                           alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic
                         ),
@@ -590,7 +590,7 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
@@ -626,9 +626,9 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'My name is: ',
                       style: TextStyle(
                         fontSize: 20,
@@ -658,7 +658,7 @@ void main() {
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
-  // This tests if multiple RichText widgets are able to inline nest within each other.
+  // This tests if multiple Text.rich widgets are able to inline nest within each other.
   testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
@@ -672,23 +672,23 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'outer',
                       style: TextStyle(
                         fontSize: 20,
                       ),
                       children: <InlineSpan>[
                         WidgetSpan(
-                          child: RichText(
-                            text: TextSpan(
+                          child: Text.rich(
+                            TextSpan(
                               text: 'inner',
                               style: TextStyle(color: Color(0xff402f4ff)),
                               children: <InlineSpan>[
                                 WidgetSpan(
-                                  child: RichText(
-                                    text: TextSpan(
+                                  child: Text.rich(
+                                    TextSpan(
                                       text: 'inner2',
                                       style: TextStyle(color: Color(0xff003ffff)),
                                       children: <InlineSpan>[
@@ -697,7 +697,7 @@ void main() {
                                             width: 50.0,
                                             height: 55.0,
                                             child: DecoratedBox(
-                                              decoration: const BoxDecoration(
+                                              decoration: BoxDecoration(
                                                 color: Color(0xffffff30),
                                               ),
                                               child: Center(
@@ -705,7 +705,7 @@ void main() {
                                                   width: 10.0,
                                                   height: 15.0,
                                                   child: DecoratedBox(
-                                                    decoration: const BoxDecoration(
+                                                    decoration: BoxDecoration(
                                                       color: Color(0xff5f00f0),
                                                     ),
                                                   )
@@ -723,7 +723,7 @@ void main() {
                                     width: 50.0,
                                     height: 55.0,
                                     child: DecoratedBox(
-                                      decoration: const BoxDecoration(
+                                      decoration: BoxDecoration(
                                         color: Color(0xff5fff00),
                                       ),
                                       child: Center(
@@ -731,7 +731,7 @@ void main() {
                                           width: 10.0,
                                           height: 15.0,
                                           child: DecoratedBox(
-                                            decoration: const BoxDecoration(
+                                            decoration: BoxDecoration(
                                               color: Color(0xff5f0000),
                                             ),
                                           )
@@ -753,7 +753,7 @@ void main() {
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(0xffff00ff),
                               ),
                               child: Center(
@@ -761,7 +761,7 @@ void main() {
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xff0000ff),
                                     ),
                                   )
@@ -801,9 +801,9 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'C ',
                       style: TextStyle(
                         fontSize: 16,
@@ -812,10 +812,10 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: null),
                         ),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
@@ -825,7 +825,7 @@ void main() {
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
@@ -833,7 +833,7 @@ void main() {
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
                                   )
@@ -846,7 +846,7 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
@@ -854,13 +854,13 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.baseline,
@@ -868,7 +868,7 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
@@ -908,9 +908,9 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'C ',
                       style: TextStyle(
                         fontSize: 16,
@@ -919,10 +919,10 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: null),
                         ),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
@@ -932,7 +932,7 @@ void main() {
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
@@ -940,7 +940,7 @@ void main() {
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
                                   )
@@ -953,7 +953,7 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
@@ -961,13 +961,13 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.aboveBaseline,
@@ -975,7 +975,7 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
@@ -1015,9 +1015,9 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'C ',
                       style: TextStyle(
                         fontSize: 16,
@@ -1026,10 +1026,10 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: null),
                         ),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
@@ -1039,7 +1039,7 @@ void main() {
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
@@ -1047,7 +1047,7 @@ void main() {
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
                                   )
@@ -1060,7 +1060,7 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
@@ -1068,13 +1068,13 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.belowBaseline,
@@ -1082,7 +1082,7 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
@@ -1122,9 +1122,9 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'C ',
                       style: TextStyle(
                         fontSize: 16,
@@ -1133,10 +1133,10 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: null),
                         ),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
@@ -1146,7 +1146,7 @@ void main() {
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
@@ -1154,7 +1154,7 @@ void main() {
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
                                   )
@@ -1167,7 +1167,7 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
@@ -1175,13 +1175,13 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.top,
@@ -1189,7 +1189,7 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
@@ -1229,9 +1229,9 @@ void main() {
                   color: Color(0xff00ff00),
                 ),
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
-                  child: RichText(
-                    text: TextSpan(
+                  constraints: const BoxConstraints(minWidth: 0, maxWidth: 200, minHeight: 0, maxHeight: 100),
+                  child: const Text.rich(
+                    TextSpan(
                       text: 'C ',
                       style: TextStyle(
                         fontSize: 16,
@@ -1240,10 +1240,10 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: true, onChanged: (bool value) {}),
+                          child: Checkbox(value: true, onChanged: null),
                         ),
                         WidgetSpan(
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         TextSpan(text: 'He ', style: TextStyle(fontSize: 20)),
                         WidgetSpan(
@@ -1253,7 +1253,7 @@ void main() {
                             width: 50.0,
                             height: 55.0,
                             child: DecoratedBox(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 color: Color(0xffffff00),
                               ),
                               child: Center(
@@ -1261,7 +1261,7 @@ void main() {
                                   width: 10.0,
                                   height: 15.0,
                                   child: DecoratedBox(
-                                    decoration: const BoxDecoration(
+                                    decoration: BoxDecoration(
                                       color: Color(0xffff0000),
                                     ),
                                   )
@@ -1274,7 +1274,7 @@ void main() {
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
@@ -1282,13 +1282,13 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
                           baseline: TextBaseline.alphabetic,
-                          child: Checkbox(value: false, onChanged: (bool value) {}),
+                          child: Checkbox(value: false, onChanged: null),
                         ),
                         WidgetSpan(
                           alignment: PlaceholderAlignment.middle,
@@ -1296,7 +1296,7 @@ void main() {
                           child: SizedBox(
                             width: 20,
                             height: 20,
-                            child: Checkbox(value: true, onChanged: (bool value) {}),
+                            child: Checkbox(value: true, onChanged: null),
                           )
                         ),
                         WidgetSpan(

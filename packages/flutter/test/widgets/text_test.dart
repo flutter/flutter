@@ -310,7 +310,7 @@ void main() {
                 height: 40,
                 child: Card(
                   child: RichText(
-                    text: TextSpan(text: 'INTERRUPTION'),
+                    text: const TextSpan(text: 'INTERRUPTION'),
                     textDirection: TextDirection.rtl,
                   ),
                 ),
@@ -374,7 +374,7 @@ void main() {
                 height: 40,
                 child: Card(
                   child: RichText(
-                    text: TextSpan(text: 'INTERRUPTION'),
+                    text: const TextSpan(text: 'INTERRUPTION'),
                     textDirection: TextDirection.rtl,
                   ),
                 ),
@@ -391,12 +391,12 @@ void main() {
     final TestSemantics expectedSemantics = TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          rect: Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
+          rect: const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0),
           children: <TestSemantics>[
             TestSemantics(
               label: 'a ',
               textDirection: TextDirection.ltr,
-              rect: Rect.fromLTRB(-4.0, 48.0, 60.0, 84.0),
+              rect: const Rect.fromLTRB(-4.0, 48.0, 60.0, 84.0),
             ),
             TestSemantics(
               label: 'pebble',
@@ -404,22 +404,22 @@ void main() {
               actions: <SemanticsAction>[
                 SemanticsAction.tap,
               ],
-              rect: Rect.fromLTRB(52.0, 48.0, 228.0, 84.0),
+              rect: const Rect.fromLTRB(52.0, 48.0, 228.0, 84.0),
             ),
             TestSemantics(
               label: ' in the ',
               textDirection: TextDirection.ltr,
-              rect: Rect.fromLTRB(220.0, 48.0, 452.0, 84.0),
+              rect: const Rect.fromLTRB(220.0, 48.0, 452.0, 84.0),
             ),
             TestSemantics(
               label: 'INTERRUPTION',
               textDirection: TextDirection.rtl,
-              rect: Rect.fromLTRB(448.0, 0.0, 488.0, 80.0),
+              rect: const Rect.fromLTRB(448.0, 0.0, 488.0, 80.0),
             ),
             TestSemantics(
               label: 'sky',
               textDirection: TextDirection.ltr,
-              rect: Rect.fromLTRB(484.0, 48.0, 576.0, 84.0),
+              rect: const Rect.fromLTRB(484.0, 48.0, 576.0, 84.0),
             ),
           ],
         ),
