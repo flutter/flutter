@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/animation.dart';
 import 'package:flutter/widgets.dart';
@@ -83,7 +85,7 @@ void main() {
       ),
       moreOrLessEquals(0.0),
     );
-  }, skip: isWindows); // floating point math not quite deterministic on Windows?
+  }, skip: Platform.isWindows); // floating point math not quite deterministic on Windows?
 
   test('ConstantTween', () {
     final ConstantTween<double> tween = ConstantTween<double>(100.0);

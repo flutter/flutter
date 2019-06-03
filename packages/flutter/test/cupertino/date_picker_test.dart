@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'dart:ui';
 
 import 'package:flutter/cupertino.dart';
@@ -844,7 +845,7 @@ void main() {
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.initial.1.png'),
-        skip: !isLinux
+        skip: !Platform.isLinux
       );
 
       // Slightly drag the hour component to make the current hour off-center.
@@ -854,7 +855,7 @@ void main() {
       await expectLater(
         find.byType(CupertinoDatePicker),
         matchesGoldenFile('date_picker_test.datetime.drag.1.png'),
-        skip: !isLinux
+        skip: !Platform.isLinux
       );
     });
   });
