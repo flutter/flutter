@@ -68,7 +68,7 @@ typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 /// Defines a [Color] whose value depends on changes in the state of a Material
 /// component, based on a given set of [MaterialState]s.
 ///
-/// This is useful for preserving the accessibility of text in different states
+/// This is useful for improving the accessibility of text in different states
 /// of a component. For example, in a [FlatButton] with blue text, the text will
 /// become more difficult to read when the button is hovered, focused, or pressed,
 /// because the contrast ratio between the button and the text will decrease. To
@@ -87,10 +87,10 @@ typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 ///
 /// This example shows how you could pass a `MaterialStateColor` to `FlatButton.textColor`.
 /// Here, the text color will be `Colors.blue[900]` when the button is being
-/// pressed, hovered, or focused. Otherwise, the text color will be `Colors.blue[900]`.
+/// pressed, hovered, or focused. Otherwise, the text color will be `Colors.blue[600]`.
 ///
 /// ```dart
-/// Color getTextColor(Set<MaterialSet> states) {
+/// Color getTextColor(Set<MaterialState> states) {
 ///   final Set<MaterialState> interactiveStates = <MaterialState>{
 ///     MaterialState.pressed,
 ///     MaterialState.hovered,
@@ -103,7 +103,8 @@ typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 /// }
 ///
 /// FlatButton(
-///   ...
+///   child: Text('FlatButton'),
+///   onPressed: () {},
 ///   textColor: MaterialStateColor.resolveWith(getTextColor),
 /// ),
 /// ```
