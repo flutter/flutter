@@ -65,7 +65,7 @@ String findChromeExecutable() {
   return null;
 }
 
-// Responsible for launching chrome with devtools configured.
+/// Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
   const ChromeLauncher();
 
