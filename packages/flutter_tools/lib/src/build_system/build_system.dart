@@ -117,9 +117,9 @@ class Target {
       }
     }
 
-    // For each input type, first determine if we've already compute the hash
-    // for it. If not, if it is a directory we skip hashing and instead use a
-    // timestamp. If it is a file we store it to be sent of for hashing as
+    // For each input type, first determine if we've already computed the hash
+    // for it. If not and it is a directory we skip hashing and instead use a
+    // timestamp. If it is a file we collect it to be sent of for hashing as
     // a group.
     final List<File> filesToHash = <File>[];
     for (FileSystemEntity entity in inputs) {
@@ -176,10 +176,8 @@ class Target {
         updates[previousInput] = ChangeType.Removed;
       }
     }
-
     return updates;
   }
-
 
   void _writeStamp(
     List<FileSystemEntity> inputs,
@@ -233,8 +231,8 @@ class Target {
   /// Convert the target to a JSON structure appropriate for consumption by
   /// external systems.
   ///
-  /// This requires an environment variable to resolve the paths of inputs
-  /// and outputs.
+  /// This requires constants from the [Environment] to resolve the paths of
+  /// inputs and the output stamp.
   Map<String, Object> toJson(Environment environment) {
     return <String, Object>{
       'name': name,
@@ -242,7 +240,7 @@ class Target {
       'inputs': resolveInputs(environment)
           .map((FileSystemEntity file) => file.absolute.path)
           .toList(),
-      'stamp': _findStampFile(name, environment),
+      'stamp': _findStampFile(name, environment).absolute.path,
     };
   }
 
@@ -484,6 +482,5 @@ void checkCycles(Target initial) {
     }
     stack.remove(target);
   }
-
   checkInternal(initial, <Target>{}, <Target>{});
 }
