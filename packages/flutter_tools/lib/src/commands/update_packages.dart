@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:flutter_goldens_client/client.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -23,6 +22,7 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.8', // See //examples/flutter_gallery/pubspec.yaml
+  'build_daemon': '0.6.1',
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -134,17 +134,6 @@ class UpdatePackagesCommand extends FlutterCommand {
           return directory.path.endsWith('packages${fs.path.separator}$package');
         });
       });
-    }
-
-    // The dev/integration_tests/android_views integration test depends on an assets
-    // package that is in the goldens repository. We need to make sure that the goldens
-    // repository is cloned locally before we verify or update pubspecs.
-    printStatus('Cloning goldens repository...');
-    try {
-      final GoldensClient goldensClient = GoldensClient();
-      await goldensClient.prepare();
-    } on NonZeroExitCode catch (e) {
-      throwToolExit(e.stderr, exitCode: e.exitCode);
     }
 
     if (isVerifyOnly) {

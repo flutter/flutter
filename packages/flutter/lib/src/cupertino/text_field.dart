@@ -785,48 +785,69 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final TextStyle placeholderStyle = textStyle.merge(widget.placeholderStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
     final Color cursorColor = widget.cursorColor ?? themeData.primaryColor;
+    final Color disabledColor = CupertinoTheme.of(context).brightness == Brightness.light
+      ? _kDisabledBackground
+      : CupertinoColors.darkBackgroundGray;
 
-    final Widget paddedEditable = Padding(
-      padding: widget.padding,
-      child: RepaintBoundary(
-        child: EditableText(
-          key: _editableTextKey,
-          controller: controller,
-          focusNode: _effectiveFocusNode,
-          keyboardType: widget.keyboardType,
-          textInputAction: widget.textInputAction,
-          textCapitalization: widget.textCapitalization,
-          style: textStyle,
-          strutStyle: widget.strutStyle,
-          textAlign: widget.textAlign,
-          autofocus: widget.autofocus,
-          obscureText: widget.obscureText,
-          autocorrect: widget.autocorrect,
-          maxLines: widget.maxLines,
-          minLines: widget.minLines,
-          expands: widget.expands,
-          selectionColor: _kSelectionHighlightColor,
-          selectionControls: widget.selectionEnabled
-            ? cupertinoTextSelectionControls : null,
-          onChanged: widget.onChanged,
-          onSelectionChanged: _handleSelectionChanged,
-          onEditingComplete: widget.onEditingComplete,
-          onSubmitted: widget.onSubmitted,
-          inputFormatters: formatters,
-          rendererIgnoresPointer: true,
-          cursorWidth: widget.cursorWidth,
-          cursorRadius: widget.cursorRadius,
-          cursorColor: cursorColor,
-          cursorOpacityAnimates: true,
-          cursorOffset: cursorOffset,
-          paintCursorAboveText: true,
-          backgroundCursorColor: CupertinoColors.inactiveGray,
-          scrollPadding: widget.scrollPadding,
-          keyboardAppearance: keyboardAppearance,
-          dragStartBehavior: widget.dragStartBehavior,
-          scrollController: widget.scrollController,
-          scrollPhysics: widget.scrollPhysics,
-          enableInteractiveSelection: widget.enableInteractiveSelection,
+    final BoxDecoration effectiveDecoration = enabled
+      ? widget.decoration
+      : widget.decoration?.copyWith(color: widget.decoration?.color ?? disabledColor);
+
+    final Widget paddedEditable = TextSelectionGestureDetector(
+      onTapDown: _handleTapDown,
+      onForcePressStart: _handleForcePressStarted,
+      onForcePressEnd: _handleForcePressEnded,
+      onSingleTapUp: _handleSingleTapUp,
+      onSingleLongTapStart: _handleSingleLongTapStart,
+      onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
+      onSingleLongTapEnd: _handleSingleLongTapEnd,
+      onDoubleTapDown: _handleDoubleTapDown,
+      onDragSelectionStart: _handleMouseDragSelectionStart,
+      onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
+      onDragSelectionEnd: _handleMouseDragSelectionEnd,
+      behavior: HitTestBehavior.translucent,
+      child: Padding(
+        padding: widget.padding,
+        child: RepaintBoundary(
+          child: EditableText(
+            key: _editableTextKey,
+            controller: controller,
+            focusNode: _effectiveFocusNode,
+            keyboardType: widget.keyboardType,
+            textInputAction: widget.textInputAction,
+            textCapitalization: widget.textCapitalization,
+            style: textStyle,
+            strutStyle: widget.strutStyle,
+            textAlign: widget.textAlign,
+            autofocus: widget.autofocus,
+            obscureText: widget.obscureText,
+            autocorrect: widget.autocorrect,
+            maxLines: widget.maxLines,
+            minLines: widget.minLines,
+            expands: widget.expands,
+            selectionColor: _kSelectionHighlightColor,
+            selectionControls: widget.selectionEnabled
+              ? cupertinoTextSelectionControls : null,
+            onChanged: widget.onChanged,
+            onSelectionChanged: _handleSelectionChanged,
+            onEditingComplete: widget.onEditingComplete,
+            onSubmitted: widget.onSubmitted,
+            inputFormatters: formatters,
+            rendererIgnoresPointer: true,
+            cursorWidth: widget.cursorWidth,
+            cursorRadius: widget.cursorRadius,
+            cursorColor: cursorColor,
+            cursorOpacityAnimates: true,
+            cursorOffset: cursorOffset,
+            paintCursorAboveText: true,
+            backgroundCursorColor: CupertinoColors.inactiveGray,
+            scrollPadding: widget.scrollPadding,
+            keyboardAppearance: keyboardAppearance,
+            dragStartBehavior: widget.dragStartBehavior,
+            scrollController: widget.scrollController,
+            scrollPhysics: widget.scrollPhysics,
+            enableInteractiveSelection: widget.enableInteractiveSelection,
+          ),
         ),
       ),
     );
@@ -841,30 +862,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(
-          decoration: widget.decoration,
-          // The main decoration and the disabled scrim exists separately.
-          child: Container(
-            color: enabled
-                ? null
-                : CupertinoTheme.of(context).brightness == Brightness.light
-                    ? _kDisabledBackground
-                    : CupertinoColors.darkBackgroundGray,
-            child: TextSelectionGestureDetector(
-              onTapDown: _handleTapDown,
-              onForcePressStart: _handleForcePressStarted,
-              onForcePressEnd: _handleForcePressEnded,
-              onSingleTapUp: _handleSingleTapUp,
-              onSingleLongTapStart: _handleSingleLongTapStart,
-              onSingleLongTapMoveUpdate: _handleSingleLongTapMoveUpdate,
-              onSingleLongTapEnd: _handleSingleLongTapEnd,
-              onDoubleTapDown: _handleDoubleTapDown,
-              onDragSelectionStart: _handleMouseDragSelectionStart,
-              onDragSelectionUpdate: _handleMouseDragSelectionUpdate,
-              onDragSelectionEnd: _handleMouseDragSelectionEnd,
-              behavior: HitTestBehavior.translucent,
-              child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
-            ),
-          ),
+          decoration: effectiveDecoration,
+          child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
         ),
       ),
     );
