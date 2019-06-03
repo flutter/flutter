@@ -256,6 +256,8 @@ abstract class RawKeyEvent extends Diagnosticable {
           plainCodePoint: message['plainCodePoint'] ?? 0,
           scanCode: message['scanCode'] ?? 0,
           metaState: message['metaState'] ?? 0,
+          source: message['source'] ?? 0,
+          isGamepad: message['isGamepad'] ?? false,
         );
         break;
       case 'fuchsia':

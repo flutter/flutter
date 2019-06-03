@@ -33,6 +33,8 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.keyCode = 0,
     this.scanCode = 0,
     this.metaState = 0,
+    this.source = 0,
+    this.isGamepad = false,
   }) : assert(flags != null),
        assert(codePoint != null),
        assert(keyCode != null),
@@ -104,6 +106,8 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   ///  * [isAltPressed], to see if an ALT key is pressed.
   ///  * [isMetaPressed], to see if a META key is pressed.
   final int metaState;
+  final int source;
+  final bool isGamepad;
 
   // Android only reports a single code point for the key label.
   @override

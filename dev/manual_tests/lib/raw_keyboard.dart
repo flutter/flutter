@@ -88,6 +88,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('scanCode: ${data.scanCode} (${_asHex(data.scanCode)})'));
             dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
             dataText.add(Text('flags: ${data.flags} (${_asHex(data.flags)})'));
+            dataText.add(Text('source: ${data.source}'));
+            dataText.add(Text('isGamepad: ${data.isGamepad}'));
           } else if (data is RawKeyEventDataFuchsia) {
             dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
             dataText.add(Text('hidUsage: ${data.hidUsage} (${_asHex(data.hidUsage)})'));
