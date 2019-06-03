@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:ui' show window;
 
@@ -141,7 +142,7 @@ void main() {
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
       matchesGoldenFile('dropdown_test.default.0.png'),
-      skip: !isLinux,
+      skip: !Platform.isLinux,
     );
   });
 
@@ -154,7 +155,7 @@ void main() {
     await expectLater(
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
       matchesGoldenFile('dropdown_test.expanded.0.png'),
-      skip: !isLinux,
+      skip: !Platform.isLinux,
     );
   });
 

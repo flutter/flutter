@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
@@ -28,11 +30,13 @@ void main() {
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
-      skip: !isLinux
-    ); // shadows render differently on different platforms
+    if (Platform.isLinux) {
+      // TODO(ianh): use the skip argument instead once that doesn't hang, https://github.com/dart-lang/test/issues/830
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
+      ); // shadows render differently on different platforms
+    }
     debugDisableShadows = true;
   });
 
@@ -61,7 +65,7 @@ void main() {
       );
     }
     debugDisableShadows = true;
-  }, skip: !isLinux); // shadows render differently on different platforms
+  }, skip: !Platform.isLinux); // shadows render differently on different platforms
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -89,11 +93,13 @@ void main() {
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
-    await expectLater(
-      find.byType(Container),
-      matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
-      skip: !isLinux,
-    ); // shadows render differently on different platforms
+    if (Platform.isLinux) {
+      // TODO(ianh): use the skip argument instead once that doesn't hang, https://github.com/dart-lang/test/issues/830
+      await expectLater(
+        find.byType(Container),
+        matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
+      ); // shadows render differently on different platforms
+    }
     debugDisableShadows = true;
   });
 
@@ -126,5 +132,5 @@ void main() {
       );
     }
     debugDisableShadows = true;
-  }, skip: !isLinux); // shadows render differently on different platforms
+  }, skip: !Platform.isLinux); // shadows render differently on different platforms
 }

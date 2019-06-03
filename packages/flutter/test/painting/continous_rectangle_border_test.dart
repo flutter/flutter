@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -72,7 +73,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_even_radii.png'),
-      skip: !isLinux,
+      skip: !Platform.isLinux,
     );
   });
 
@@ -94,7 +95,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
-      skip: !isLinux,
+      skip: !Platform.isLinux,
     );
   });
 
@@ -113,7 +114,7 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
-      skip: !isLinux,
+      skip: !Platform.isLinux,
     );
   });
 

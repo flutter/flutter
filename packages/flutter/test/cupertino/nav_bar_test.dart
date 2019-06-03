@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -804,7 +806,7 @@ void main() {
     },
     // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
     // is fixed.
-    skip: !isLinux,
+    skip: !Platform.isLinux,
   );
 
   testWidgets(
@@ -838,7 +840,7 @@ void main() {
     },
     // TODO(xster): remove once https://github.com/flutter/flutter/issues/17483
     // is fixed.
-    skip: !isLinux,
+    skip: !Platform.isLinux,
    );
 
 
