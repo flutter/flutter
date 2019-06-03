@@ -5,9 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test_api/backend.dart';
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -18,9 +16,7 @@ import '../base/terminal.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../web/compile.dart';
 import 'flutter_platform.dart' as loader;
-import 'flutter_web_platform.dart';
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
@@ -44,7 +40,6 @@ Future<int> runTests(
   FlutterProject flutterProject,
   String icudtlPath,
   Directory coverageDirectory,
-  bool web = false,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -66,32 +61,6 @@ Future<int> runTests(
 
   for (String plainName in plainNames) {
     testArgs..add('--plain-name')..add(plainName);
-  }
-  if (web) {
-    final String tempBuildDir = fs.systemTempDirectory
-      .createTempSync('_flutter_test')
-      .absolute
-      .uri
-      .toFilePath();
-    await webCompilationProxy.initialize(
-      projectDirectory: flutterProject.directory,
-      testOutputDir: tempBuildDir,
-      targets: testFiles.map((String testFile) {
-        return fs.path.relative(testFile, from: flutterProject.directory.path);
-      }).toList(),
-    );
-    testArgs.add('--platform=chrome');
-    testArgs.add('--precompiled=$tempBuildDir');
-    testArgs.add('--');
-    testArgs.addAll(testFiles);
-    hack.registerPlatformPlugin(
-      <Runtime>[Runtime.chrome],
-      () {
-        return FlutterWebPlatform.start(flutterProject.directory.path);
-      }
-    );
-    await test.main(testArgs);
-    return exitCode;
   }
 
   testArgs.add('--');
