@@ -6314,6 +6314,27 @@
       "glfw": null
     }
   },
+  "keyboardLayoutSelect": {
+    "names": {
+      "domkey": "KeyboardLayoutSelect",
+      "android": null,
+      "english": "Keyboard Layout Select",
+      "chromium": "keyboardLayoutSelect",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 787101,
+      "linux": 584,
+      "xkb": 592,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
+      "glfw": null
+    }
+  },
   "showAllWindows": {
     "names": {
       "domkey": "ShowAllWindows",

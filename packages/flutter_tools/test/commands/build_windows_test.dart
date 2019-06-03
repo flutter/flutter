@@ -25,9 +25,9 @@ void main() {
   final MockPlatform windowsPlatform = MockPlatform()
       ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
   final MockPlatform notWindowsPlatform = MockPlatform();
-  const String projectPath = r'windows\Runner.vcxproj';
-  // A vcvars64.bat location that will be found by the lookup method.
-  const String vcvarsPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvars64.bat';
+  const String solutionPath = r'C:\windows\Runner.sln';
+  const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
+  const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
 
   when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
     return 0;
@@ -41,10 +41,29 @@ void main() {
   when(windowsPlatform.isWindows).thenReturn(true);
   when(notWindowsPlatform.isWindows).thenReturn(false);
 
+  // Sets up the mock environment so that lookup of vcvars64.bat will succeed.
+  void enableVcvarsMocking() {
+    const String vswherePath = r'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe';
+    fs.file(vswherePath).createSync(recursive: true);
+    fs.file(vcvarsPath).createSync(recursive: true);
+
+    final MockProcessResult result = MockProcessResult();
+    when(result.exitCode).thenReturn(0);
+    when<String>(result.stdout).thenReturn(visualStudioPath);
+    when(mockProcessManager.run(<String>[
+      vswherePath,
+      '-latest',
+      '-requires', 'Microsoft.VisualStudio.Workload.NativeDesktop',
+      '-property', 'installationPath',
+    ])).thenAnswer((Invocation invocation) async {
+      return result;
+    });
+  }
+
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(projectPath).createSync(recursive: true);
+    fs.file(solutionPath).createSync(recursive: true);
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
     ), throwsA(isInstanceOf<ToolExit>()));
@@ -56,7 +75,7 @@ void main() {
   testUsingContext('Windows build fails when there is no windows project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(vcvarsPath).createSync(recursive: true);
+    enableVcvarsMocking();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
     ), throwsA(isInstanceOf<ToolExit>()));
@@ -68,8 +87,8 @@ void main() {
   testUsingContext('Windows build fails on non windows platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(projectPath).createSync(recursive: true);
-    fs.file(vcvarsPath).createSync(recursive: true);
+    fs.file(solutionPath).createSync(recursive: true);
+    enableVcvarsMocking();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
@@ -84,18 +103,17 @@ void main() {
   testUsingContext('Windows build invokes msbuild and writes generated files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(projectPath).createSync(recursive: true);
-    fs.file(vcvarsPath).createSync(recursive: true);
+    fs.file(solutionPath).createSync(recursive: true);
+    enableVcvarsMocking();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
     when(mockProcessManager.start(<String>[
+      r'C:\packages\flutter_tools\bin\vs_build.bat',
       vcvarsPath,
-      '&&',
-      'msbuild',
-      'C:\\$projectPath',
-      '/p:Configuration=Release',
-    ], runInShell: true)).thenAnswer((Invocation invocation) async {
+      fs.path.basename(solutionPath),
+      'Release',
+    ], workingDirectory: fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
@@ -103,7 +121,7 @@ void main() {
       const <String>['build', 'windows']
     );
 
-    // Spot-check important elemenst from the properties file.
+    // Spot-check important elements from the properties file.
     final File propsFile = fs.file(r'C:\windows\flutter\Generated.props');
     expect(propsFile.existsSync(), true);
     final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
@@ -119,6 +137,7 @@ void main() {
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
+class MockProcessResult extends Mock implements ProcessResult {}
 class MockPlatform extends Mock implements Platform {
   @override
   Map<String, String> environment = <String, String>{

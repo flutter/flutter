@@ -1772,9 +1772,20 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
   @override
   int get contentLength => -1;
 
-  // @override
-  // TODO(tvolkert): Uncomment @override annotation once SDK change lands.
-  bool get autoUncompress => true;
+  // TODO(tvolkert): Update (flutter/flutter#33791)
+  /*
+  @override
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
+  */
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #compressionState) {
+      return null;
+    }
+    return super.noSuchMethod(invocation);
+  }
 
   @override
   List<Cookie> get cookies => null;

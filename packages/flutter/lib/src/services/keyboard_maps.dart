@@ -606,6 +606,7 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
   0x1000c0289: LogicalKeyboardKey.mailReply,
   0x1000c028b: LogicalKeyboardKey.mailForward,
   0x1000c028c: LogicalKeyboardKey.mailSend,
+  0x1000c029d: LogicalKeyboardKey.keyboardLayoutSelect,
   0x1000c029f: LogicalKeyboardKey.showAllWindows,
 };
 
@@ -844,6 +845,7 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
   0x000c0289: PhysicalKeyboardKey.mailReply,
   0x000c028b: PhysicalKeyboardKey.mailForward,
   0x000c028c: PhysicalKeyboardKey.mailSend,
+  0x000c029d: PhysicalKeyboardKey.keyboardLayoutSelect,
   0x000c029f: PhysicalKeyboardKey.showAllWindows,
 };
 
@@ -1343,6 +1345,7 @@ const Map<int, PhysicalKeyboardKey> kLinuxToPhysicalKey = <int, PhysicalKeyboard
   0x000000f0: PhysicalKeyboardKey.mailReply,
   0x000000f1: PhysicalKeyboardKey.mailForward,
   0x000000ef: PhysicalKeyboardKey.mailSend,
+  0x00000250: PhysicalKeyboardKey.keyboardLayoutSelect,
   0x00000080: PhysicalKeyboardKey.showAllWindows,
 };
 
