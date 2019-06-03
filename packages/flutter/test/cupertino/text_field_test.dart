@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -376,7 +375,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.0.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -406,7 +405,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.1.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets(
     'can control text content via controller',
@@ -1150,6 +1149,43 @@ void main() {
     expect(text.style.fontSize, 14);
     expect(text.style.letterSpacing, -0.11);
     expect(text.style.fontWeight, FontWeight.w300);
+  });
+
+  testWidgets('Read only text field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              readOnly: true,
+            ),
+          ],
+        ),
+      ),
+    );
+    // Read only text field cannot open keyboard.
+    await tester.showKeyboard(find.byType(CupertinoTextField));
+    expect(tester.testTextInput.hasAnyClients, false);
+
+    await tester.longPressAt(
+        tester.getTopRight(find.text('readonly'))
+    );
+
+    await tester.pump();
+
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsOneWidget);
+
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
+
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('copy paste', (WidgetTester tester) async {
@@ -2016,7 +2052,7 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
     await tester.tapAt(ePos, pointer: 7);
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 7);
 
@@ -2036,7 +2072,6 @@ void main() {
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
-
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 5);
 
@@ -2613,7 +2648,7 @@ void main() {
     await expectLater(
       find.byType(CupertinoTextField),
       matchesGoldenFile('text_field_test.disabled.0.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 }
