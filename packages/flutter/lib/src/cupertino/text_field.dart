@@ -127,7 +127,7 @@ enum OverlayVisibilityMode {
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
-///  * <https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller>
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
   ///
