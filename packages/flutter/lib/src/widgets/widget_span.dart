@@ -32,7 +32,7 @@ import 'framework.dart';
 ///     children: <InlineSpan>[
 ///       TextSpan(text: 'Flutter is'),
 ///       WidgetSpan(
-///         widget: SizedBox(
+///         child: SizedBox(
 ///           width: 120,
 ///           height: 50,
 ///           child: Card(
