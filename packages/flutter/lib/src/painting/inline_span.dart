@@ -57,7 +57,7 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 ///       WidgetSpan(
 ///         alignment: PlaceholderAlignment.baseline,
 ///         baseline: TextBaseline.alphabetic,
-///         widget: ConstrainedBox(
+///         child: ConstrainedBox(
 ///           constraints: BoxConstraints(maxWidth: 100),
 ///           child: TextField(),
 ///         )
