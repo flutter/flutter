@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
@@ -19,7 +20,7 @@ void main() {
   },
     // Skip on Windows because this test is quite flaky when run on Windows,
     // until https://github.com/flutter/flutter/issues/19696 is fixed.
-    skip: isWindows,
+    skip: Platform.isWindows,
   );
 }
 

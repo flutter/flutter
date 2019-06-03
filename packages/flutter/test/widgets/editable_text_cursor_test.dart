@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -92,7 +94,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.0.3.png'),
     );
-  }, skip: !isLinux);
+  }, skip: !Platform.isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -143,7 +145,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.1.3.png'),
     );
-  }, skip: !isLinux);
+  }, skip: !Platform.isLinux);
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
@@ -722,6 +724,6 @@ void main() {
       matchesGoldenFile('editable_text_test.2.0.png'),
     );
     debugDefaultTargetPlatformOverride = null;
-  }, skip: !isLinux);
+  }, skip: !Platform.isLinux);
 
 }
