@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'dart:math' as math show pi;
 
 import 'package:flutter/material.dart';
@@ -112,7 +111,7 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('physical_model_overflow.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 
