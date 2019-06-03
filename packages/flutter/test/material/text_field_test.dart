@@ -5001,6 +5001,40 @@ void main() {
   );
 
   testWidgets(
+    'double double tap toggles selection menu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: '',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on the same location shows the selection menu.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+
+      // Double tap again hides the selection menu.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsNWidgets(0));
+    },
+  );
+
+  testWidgets(
     'double tap hold selects word (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
