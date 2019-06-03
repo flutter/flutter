@@ -1195,8 +1195,9 @@ enum BoxHeightStyle {
   tight,
 
   /// The height of the boxes will be the maximum height of all runs in the
-  /// line. All boxes in the same line will be the same height. This does not
-  /// guarantee that the boxes will cover the entire vertical height of the line
+  /// line. All boxes in the same line will be the same height.
+  ///
+  /// This does not guarantee that the boxes will cover the entire vertical height of the line
   /// when there is additional line spacing.
   ///
   /// See [RectHeightStyle.includeLineSpacingTop], [RectHeightStyle.includeLineSpacingMiddle],
@@ -1242,10 +1243,55 @@ enum BoxWidthStyle {
 
   /// Adds up to two additional boxes as needed at the beginning and/or end
   /// of each line so that the widths of the boxes in line are the same width
-  /// as the widest line in the paragraph. The additional boxes on each line
-  /// are only added when the relevant box at the relevant edge of that line
-  /// does not span the maximum width of the paragraph.
+  /// as the widest line in the paragraph.
+  ///
+  /// The additional boxes on each line are only added when the relevant box
+  /// at the relevant edge of that line does not span the maximum width of
+  /// the paragraph.
   max,
+}
+
+/// Where to vertically align the placeholder relative to the surrounding text.
+///
+/// Used by [ParagraphBuilder.addPlaceholder].
+enum PlaceholderAlignment {
+  /// Match the baseline of the placeholder with the baseline.
+  ///
+  /// The [TextBaseline] to use must be specified and non-null when using this
+  /// alignment mode.
+  baseline,
+
+  /// Align the bottom edge of the placeholder with the baseline such that the
+  /// placeholder sits on top of the baseline.
+  ///
+  /// The [TextBaseline] to use must be specified and non-null when using this
+  /// alignment mode.
+  aboveBaseline,
+
+  /// Align the top edge of the placeholder with the baseline specified
+  /// such that the placeholder hangs below the baseline.
+  ///
+  /// The [TextBaseline] to use must be specified and non-null when using this
+  /// alignment mode.
+  belowBaseline,
+
+  /// Align the top edge of the placeholder with the top edge of the font.
+  ///
+  /// When the placeholder is very tall, the extra space will hang from
+  /// the top and extend through the bottom of the line.
+  top,
+
+  /// Align the bottom edge of the placeholder with the top edge of the font.
+  ///
+  /// When the placeholder is very tall, the extra space will rise from the
+  /// bottom and extend through the top of the line.
+  bottom,
+
+  /// Align the middle of the placeholder with the middle of the text.
+  ///
+  /// When the placeholder is very tall, the extra space will grow equally
+  /// from the top and bottom of the line.
+  middle,
 }
 
 /// A paragraph of text.
@@ -1490,6 +1536,9 @@ class Paragraph {
   /// parameters default to the tight option, which will provide close-fitting
   /// boxes and will not account for any line spacing.
   ///
+  /// Coordinates of the TextBox are relative to the upper-left corner of the paragraph,
+  /// where positive y values indicate down.
+  ///
   /// The [boxHeightStyle] and [boxWidthStyle] parameters must not be null.
   ///
   /// See [BoxHeightStyle] and [BoxWidthStyle] for full descriptions of each option.
@@ -1534,6 +1583,17 @@ class Paragraph {
       textDirection: _textDirection,
       background: _background,
     );
+  }
+
+  /// Returns a list of text boxes that enclose all placeholders in the paragraph.
+  ///
+  /// The order of the boxes are in the same order as passed in through [addPlaceholder].
+  ///
+  /// Coordinates of the [TextBox] are relative to the upper-left corner of the paragraph,
+  /// where positive y values indicate down.
+  List<TextBox> getBoxesForPlaceholders() {
+    // TODO(garyq): Implement stub_ui version of this.
+    throw UnimplementedError();
   }
 
   /// Returns the text position closest to the given offset.
@@ -1628,6 +1688,7 @@ class ParagraphBuilder {
   /// [Paragraph].
   ParagraphBuilder(ParagraphStyle style) : _paragraphStyle = style {
     // TODO(b/128317744): Implement support for strut font families.
+    _placeholderCount = 0;
     List<String> strutFontFamilies;
     if (style._strutStyle != null) {
       strutFontFamilies = <String>[];
@@ -1642,6 +1703,14 @@ class ParagraphBuilder {
         element: _paragraphElement, style: _paragraphStyle);
   }
 
+  /// The number of placeholders currently in the paragraph.
+  int get placeholderCount => _placeholderCount;
+  int _placeholderCount;
+
+   /// The scales of the placeholders in the paragraph.
+  List<double> get placeholderScales => _placeholderScales;
+  List<double> _placeholderScales = <double>[];
+
   /// Applies the given style to the added text until [pop] is called.
   ///
   /// See [pop] for details.
@@ -1650,7 +1719,7 @@ class ParagraphBuilder {
   }
 
   // TODO(yjbanov): do we need to do this?
-//  static String _encodeLocale(Locale locale) => locale?.toString() ?? '';
+  //  static String _encodeLocale(Locale locale) => locale?.toString() ?? '';
 
   /// Ends the effect of the most recent call to [pushStyle].
   ///
@@ -1667,6 +1736,58 @@ class ParagraphBuilder {
   /// The text will be styled according to the current stack of text styles.
   void addText(String text) {
     _ops.add(text);
+  }
+
+  /// Adds an inline placeholder space to the paragraph.
+  ///
+  /// The paragraph will contain a rectangular space with no text of the dimensions
+  /// specified.
+  ///
+  /// The `width` and `height` parameters specify the size of the placeholder rectangle.
+  ///
+  /// The `alignment` parameter specifies how the placeholder rectangle will be vertically
+  /// aligned with the surrounding text. When [PlaceholderAlignment.baseline],
+  /// [PlaceholderAlignment.aboveBaseline], and [PlaceholderAlignment.belowBaseline]
+  /// alignment modes are used, the baseline needs to be set with the `baseline`.
+  /// When using [PlaceholderAlignment.baseline], `baselineOffset` indicates the distance
+  /// of the baseline down from the top of of the rectangle. The default `baselineOffset`
+  /// is the `height`.
+  ///
+  /// Examples:
+  ///
+  /// * For a 30x50 placeholder with the bottom edge aligned with the bottom of the text, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.bottom);`
+  /// * For a 30x50 placeholder that is vertically centered around the text, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.middle);`.
+  /// * For a 30x50 placeholder that sits completely on top of the alphabetic baseline, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.aboveBaseline, baseline: TextBaseline.alphabetic)`.
+  /// * For a 30x50 placeholder with 40 pixels above and 10 pixels below the alphabetic baseline, use:
+  /// `addPlaceholder(30, 50, PlaceholderAlignment.baseline, baseline: TextBaseline.alphabetic, baselineOffset: 40)`.
+  ///
+  /// Lines are permitted to break around each placeholder.
+  ///
+  /// Decorations will be drawn based on the font defined in the most recently
+  /// pushed [TextStyle]. The decorations are drawn as if unicode text were present
+  /// in the placeholder space, and will draw the same regardless of the height and
+  /// alignment of the placeholder. To hide or manually adjust decorations to fit,
+  /// a text style with the desired decoration behavior should be pushed before
+  /// adding a placeholder.
+  ///
+  /// Any decorations drawn through a placeholder will exist on the same canvas/layer
+  /// as the text. This means any content drawn on top of the space reserved by
+  /// the placeholder will be drawn over the decoration, possibly obscuring the
+  /// decoration.
+  ///
+  /// Placeholders are represented by a unicode 0xFFFC "object replacement character"
+  /// in the text buffer. For each placeholder, one object replacement character is
+  /// added on to the text buffer.
+  void addPlaceholder(double width, double height, PlaceholderAlignment alignment, {
+    double scale,
+    double baselineOffset,
+    TextBaseline baseline,
+  }) {
+    // TODO(garyq): Implement stub_ui version of this.
+    throw UnimplementedError();
   }
 
   /// Applies the given paragraph style and returns a [Paragraph] containing the

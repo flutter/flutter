@@ -34,6 +34,7 @@ class ParagraphImplTxt : public ParagraphImpl {
       unsigned end,
       txt::Paragraph::RectHeightStyle rect_height_style,
       txt::Paragraph::RectWidthStyle rect_width_style) override;
+  std::vector<TextBox> getRectsForPlaceholders() override;
   Dart_Handle getPositionForOffset(double dx, double dy) override;
   Dart_Handle getWordBoundary(unsigned offset) override;
 

@@ -6,6 +6,7 @@
 #define FLUTTER_LIB_UI_TEXT_PARAGRAPH_BUILDER_H_
 
 #include <memory>
+
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/paint.h"
 #include "flutter/lib/ui/text/paragraph.h"
@@ -55,6 +56,18 @@ class ParagraphBuilder : public RefCountedDartWrappable<ParagraphBuilder> {
   void pop();
 
   Dart_Handle addText(const std::u16string& text);
+
+  // Pushes the information requried to leave an open space, where Flutter may
+  // draw a custom placeholder into.
+  //
+  // Internally, this method adds a single object replacement character (0xFFFC)
+  // and emplaces a new PlaceholderRun instance to the vector of inline
+  // placeholders.
+  Dart_Handle addPlaceholder(double width,
+                             double height,
+                             unsigned alignment,
+                             double baseline_offset,
+                             unsigned baseline);
 
   fml::RefPtr<Paragraph> build();
 

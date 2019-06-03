@@ -77,11 +77,21 @@ void ParagraphBuilder::AddText(const char* text) {
   AddText(u16_text);
 }
 
+void ParagraphBuilder::AddPlaceholder(PlaceholderRun& span) {
+  obj_replacement_char_indexes_.insert(text_.size());
+  runs_.StartRun(PeekStyleIndex(), text_.size());
+  AddText(std::u16string(1ull, objReplacementChar));
+  runs_.StartRun(PeekStyleIndex(), text_.size());
+  inline_placeholders_.push_back(span);
+}
+
 std::unique_ptr<Paragraph> ParagraphBuilder::Build() {
   runs_.EndRunIfNeeded(text_.size());
 
   std::unique_ptr<Paragraph> paragraph = std::make_unique<Paragraph>();
   paragraph->SetText(std::move(text_), std::move(runs_));
+  paragraph->SetInlinePlaceholders(std::move(inline_placeholders_),
+                                   std::move(obj_replacement_char_indexes_));
   paragraph->SetParagraphStyle(paragraph_style_);
   paragraph->SetFontCollection(font_collection_);
   SetParagraphStyle(paragraph_style_);
