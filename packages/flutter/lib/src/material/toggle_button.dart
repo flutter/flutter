@@ -24,7 +24,7 @@ const Border _kDefaultStandaloneBorder = Border(
 /// An individual toggle button, otherwise known as a segmented button.
 ///
 /// This button is used by [ToggleButtons] to implement a set of segmented controls.
-class ToggleButton extends StatelessWidget {
+class _ToggleButton extends StatelessWidget {
   // TODO(WIP): Figure out which properties should be required and if
   // additional properties are required.
 
@@ -37,7 +37,7 @@ class ToggleButton extends StatelessWidget {
   /// which is used by [ToggleButtons] to customize borders based on the
   /// order in which this button appears in the list.
   ///
-  const ToggleButton({
+  const _ToggleButton({
     Key key,
     this.selected = false,
     this.color,
@@ -139,7 +139,7 @@ class ToggleButton extends StatelessWidget {
 }
 
 class ToggleButtons extends StatelessWidget {
-  ToggleButtons({
+  const ToggleButtons({
     this.children,
     this.isSelected,
     this.onPressed,
@@ -168,8 +168,8 @@ class ToggleButtons extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        children: List.generate(children.length, (int index) {
-          return ToggleButton(
+        children: List<Widget>.generate(children.length, (int index) {
+          return _ToggleButton(
             onPressed: () {
               onPressed(index);
             },
