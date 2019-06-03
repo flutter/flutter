@@ -265,62 +265,42 @@ class Target {
   }
 }
 
-/// The [Environment] contains special paths configured by the user.
+/// The [Environment] defines several constants for use during the build.
 ///
-/// These are defined by a top level configuration or build arguments
-/// passed to the flutter tool. The intention is that  it makes it easier
-/// to integrate it into existing arbitrary build systems, while keeping
-/// the build backwards compatible.
+/// The environment contains configuration and file paths that are safe to
+/// depend on and reference during the build. Introducing additional config that
+/// is not from the environment or an input may result in non-reproducible
+/// builds.
 ///
-/// # Environment Values:
+/// Example:
 ///
-/// ## PROJECT_DIR
+/// Writing an output file during a build invocation.
 ///
-///   The root of the flutter project where a pubspec and dart files can be
-///   found.
+///    environment.buildDir.childFile('output')
+///      ..createSync()
+///      ..writeAsStringSync('output data');
 ///
-///   This value is computed from the location of the relevant pubspec. Most
-///   other defaults are defined relative to this directory.
 ///
-/// ## BUILD_DIR
+/// Example:
 ///
-///   The root of the output directory where build step intermediates and
-///   products are written.
+/// Using the build mode to produce different output. Note that the invocation
+/// is still responsible for outputting a different file, as defined by the
+/// corresponding output [Source].
 ///
-///   Defaults to {PROJECT_DIR}/build/
-///
-/// ## CACHE_DIR
-///
-///   The root of the artifact cache for the flutter tool. Defaults to
-///   FLUTTER_ROOT/bin/cache/artifacts/. Can be overriden with local-engine
-///   flags.
-///
-/// # Build local values
-///
-/// These are defined by the particular invocation of the target itself.
-///
-/// ## platform
-///
-/// The current platform the target is being executed for. Certain targets do
-/// not require a target at all, in which case this value will be null and
-/// substitution will fail.
-///
-/// ## mode
-///
-/// The current build mode the target is being executed for, one of `release`,
-/// `debug`, and `profile`. Defaults to `debug` if not specified.
-///
-/// ## flavor
-///
-/// The current flavor name, or 'none' if not specified.
+///    if (environment.buildMode == BuildMode.debug) {
+///      environment.buildDir.childFile('debug.output)
+///        ..createSync()
+///        ..writeAsStringSync('debug');
+///    } else {
+///      environment.buildDir.childFile('non_debug.output)
+///        ..createSync()
+///        ..writeAsStringSync('non_debug');
+///    }
 class Environment {
   /// Create a new [Environment] object.
   ///
   /// Only [projectDir] is required. The remaining environment locations have
   /// defaults based on it.
-  ///
-  /// If [targetPlatform] and/or [buildMode] are not defined, they will often
-  /// default to `any`.
   factory Environment({
     @required Directory projectDir,
     Directory buildDir,
@@ -351,22 +331,30 @@ class Environment {
   });
 
   /// The `PROJECT_DIR` environment variable.
+  ///
+  /// This should be root of the flutter project where a pubspec and dart files
+  /// can be located.
   final Directory projectDir;
 
   /// The `BUILD_DIR` environment variable.
   ///
-  /// Defaults to `{PROJECT_ROOT}/build`.
+  /// Defaults to `{PROJECT_ROOT}/build`. The root of the output directory where
+  /// build step intermediates and outputs are written.
   final Directory buildDir;
 
   /// The `CACHE_DIR` environment variable.
   ///
-  /// Defaults to `{FLUTTER_ROOT}/bin/cache`.
+  /// Defaults to `{FLUTTER_ROOT}/bin/cache`. The root of the artifact cache for
+  /// the flutter tool.
   final Directory cacheDir;
 
   /// The currently selected build mode.
   final BuildMode buildMode;
 
   /// The current target platform, or `null` if none.
+  ///
+  /// Certain targets do not require a [TargetPlatform], while others will fail
+  /// if paired with an incorrect [TargetPlatform].
   final TargetPlatform targetPlatform;
 
   /// The current flavor, or 'none' if none.

@@ -8,7 +8,7 @@ import 'build_system.dart';
 import 'exceptions.dart';
 
 /// An input function produces a list of additional input files for an
-/// environment.
+/// [Environment].
 typedef InputFunction = List<FileSystemEntity> Function(
     Environment environment);
 
@@ -35,13 +35,16 @@ class SourceVisitor {
   /// The entities are populated after visiting each source.
   final List<FileSystemEntity> sources = <FileSystemEntity>[];
 
-  /// Visit a source which contains a file uri with some magic environment
-  /// variables.
+  /// Visit a [Source] which contains a function.
+  ///
+  /// The function is expected to produce a list of [FileSystemEntities]s.
   void visitFunction(InputFunction function) {
     sources.addAll(function(environment));
   }
 
-  /// Visit a source which contains a function.
+  /// Visit a [Source] which contains a file uri.
+  ///
+  /// The uri may that may include constants defined in an [Environment].
   void visitPattern(String pattern) {
     // perform substitution of the environmental values and then
     // of the local values.
@@ -113,7 +116,7 @@ class SourceVisitor {
     }
   }
 
-  /// Visit a source which contains a behavior delegate.
+  /// Visit a [Source] which contains a [SourceBehavior].
   void visitBehavior(SourceBehavior sourceBehavior) {
     if (inputs) {
       sources.addAll(sourceBehavior.inputs(environment));
