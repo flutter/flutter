@@ -459,7 +459,7 @@ void main() {
       expect(placeholder.textAlign, inputText.textAlign);
     },
   );
-  
+
   testWidgets(
     'placeholders are lightly colored and disappears once typing starts',
     (WidgetTester tester) async {
