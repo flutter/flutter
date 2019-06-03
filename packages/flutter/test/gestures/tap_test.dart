@@ -799,4 +799,33 @@ void main() {
       expect(recognized, <String>['secondaryCancel']);
     });
   });
+
+  test('Semantic onTap correctly calls handlers', () {
+    final List<String> logs = <String>[];
+    final TapGestureRecognizer tap = TapGestureRecognizer()
+      ..onTapDown = (_) { logs.add('onTapDown'); }
+      ..onTapUp = (_) { logs.add('onTapUp'); }
+      ..onTap = () { logs.add('onTap'); };
+    final SemanticsGestureConfiguration configuration = tap.semanticsConfiguration;
+
+    expect(configuration, isNotNull);
+    expect(configuration.onTap, isNotNull);
+    expect(configuration.onLongPress, isNull);
+    expect(configuration.onHorizontalDragUpdate, isNull);
+    expect(configuration.onVerticalDragUpdate, isNull);
+
+    configuration.onTap();
+    expect(logs, <String>['onTapDown', 'onTapUp', 'onTap']);
+    logs.clear();
+
+    // Assigning handler should update the configuration handler's behavior but
+    // keep the configuration object
+    tap..onTapDown = null
+       ..onTapUp = null
+       ..onTap = null;
+    final SemanticsGestureConfiguration configuration2 = tap.semanticsConfiguration;
+    expect(configuration, same(configuration2));
+    configuration.onTap();
+    expect(logs, <String>[]);
+  });
 }

@@ -6,6 +6,7 @@ import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
+import 'semantics.dart';
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPress].
 ///
@@ -213,6 +214,23 @@ class LongPressGestureRecognizer extends PrimaryPointerGestureRecognizer {
   ///  * [LongPressEndDetails], which is passed as an argument to this
   ///    callback.
   GestureLongPressEndCallback onLongPressEnd;
+
+  @override
+  SemanticsGestureConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
+      onLongPress: () {
+        if (onLongPressStart != null)
+          onLongPressStart(const LongPressStartDetails());
+        if (onLongPress != null)
+          onLongPress();
+        if (onLongPressEnd != null)
+          onLongPressEnd(const LongPressEndDetails());
+        if (onLongPressUp != null)
+          onLongPressUp();
+      },
+    );
+  }
+  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
