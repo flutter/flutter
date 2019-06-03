@@ -318,6 +318,34 @@ void main() {
     EditableText.debugDeterministicCursor = false;
   });
 
+  testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
+    const Widget widget = MaterialApp(
+      home: Material(
+        child: TextField(
+          showCursor: false,
+          maxLines: 3,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    // Make sure it does not paint for a period of time.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+  });
+
   testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
       theme: ThemeData(platform: TargetPlatform.iOS),

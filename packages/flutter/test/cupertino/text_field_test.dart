@@ -1151,6 +1151,43 @@ void main() {
     expect(text.style.fontWeight, FontWeight.w300);
   });
 
+  testWidgets('Read only text field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              readOnly: true,
+            ),
+          ],
+        ),
+      ),
+    );
+    // Read only text field cannot open keyboard.
+    await tester.showKeyboard(find.byType(CupertinoTextField));
+    expect(tester.testTextInput.hasAnyClients, false);
+
+    await tester.longPressAt(
+        tester.getTopRight(find.text('readonly'))
+    );
+
+    await tester.pump();
+
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsOneWidget);
+
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
+
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+  });
+
   testWidgets('copy paste', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -2015,7 +2052,7 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
     await tester.tapAt(ePos, pointer: 7);
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 7);
 
@@ -2035,7 +2072,6 @@ void main() {
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
-
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 5);
 
