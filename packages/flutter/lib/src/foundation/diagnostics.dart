@@ -2829,7 +2829,10 @@ class DiagnosticPropertiesBuilder {
 ///
 ///  * [DiagnosticableTree], which extends this class to also describe the
 ///    children of a tree structured object.
-///  * [Diagnosticable.debugFillProperties], which lists best practices
+///  * [DiagnosticableMixin], which provides the implementation for
+///    [Diagnosticable], and can be used to add diagnostics to classes which
+///    already have a base class.
+///  * [DiagnosticableMixin.debugFillProperties], which lists best practices
 ///    for specifying the properties of a [DiagnosticsNode]. The most common use
 ///    case is to override [debugFillProperties] defining custom properties for
 ///    a subclass of [DiagnosticableTreeMixin] using the existing
@@ -2841,11 +2844,39 @@ class DiagnosticPropertiesBuilder {
 ///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
 ///    nodes without properties or children. There are many
 ///    [DiagnosticsProperty] subclasses to handle common use cases.
-abstract class Diagnosticable {
+abstract class Diagnosticable with DiagnosticableMixin {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const Diagnosticable();
+}
 
+/// A mixin class that provides the implementation for [Diagnosticable].
+///
+/// This mixin can be used to add diagnostics to a class which already has an
+/// base class.
+///
+/// The string debug representation is generated from the intermediate
+/// [DiagnosticsNode] representation. The [DiagnosticsNode] representation is
+/// also used by debugging tools displaying interactive trees of objects and
+/// properties.
+///
+/// See also:
+///
+///  * [debugFillProperties], which lists best practices for specifying the
+///    properties of a [DiagnosticsNode]. The most common use case is to
+///    override [debugFillProperties] defining custom properties for a subclass
+///    of [DiagnosticableTreeMixin] using the existing [DiagnosticsProperty]
+///    subclasses.
+///  * [DiagnosticableTree], which extends this class to also describe the
+///    children of a tree structured object.
+///  * [DiagnosticableTree.debugDescribeChildren], which lists best practices
+///    for describing the children of a [DiagnosticsNode]. Typically the base
+///    class already describes the children of a node properly or a node has
+///    no children.
+///  * [DiagnosticsProperty], which should be used to create leaf diagnostic
+///    nodes without properties or children. There are many
+///    [DiagnosticsProperty] subclasses to handle common use cases.
+mixin DiagnosticableMixin {
   /// A brief description of this object, usually just the [runtimeType] and the
   /// [hashCode].
   ///

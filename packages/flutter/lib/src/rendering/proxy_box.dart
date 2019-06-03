@@ -3234,10 +3234,10 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// The [scrollFactor] argument must not be null.
   RenderSemanticsGestureHandler({
     RenderBox child,
-    GestureTapCallback onTap,
-    GestureLongPressCallback onLongPress,
-    GestureDragUpdateCallback onHorizontalDragUpdate,
-    GestureDragUpdateCallback onVerticalDragUpdate,
+    SemanticsTapCallback onTap,
+    SemanticsLongPressCallback onLongPress,
+    SemanticsDragUpdateCallback onHorizontalDragUpdate,
+    SemanticsDragUpdateCallback onVerticalDragUpdate,
     this.scrollFactor = 0.8,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
@@ -3269,9 +3269,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user taps on the render object.
-  GestureTapCallback get onTap => _onTap;
-  GestureTapCallback _onTap;
-  set onTap(GestureTapCallback value) {
+  SemanticsTapCallback get onTap => _onTap;
+  SemanticsTapCallback _onTap;
+  set onTap(SemanticsTapCallback value) {
     if (_onTap == value)
       return;
     final bool hadHandler = _onTap != null;
@@ -3281,9 +3281,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user presses on the render object for a long period of time.
-  GestureLongPressCallback get onLongPress => _onLongPress;
-  GestureLongPressCallback _onLongPress;
-  set onLongPress(GestureLongPressCallback value) {
+  SemanticsLongPressCallback get onLongPress => _onLongPress;
+  SemanticsLongPressCallback _onLongPress;
+  set onLongPress(SemanticsLongPressCallback value) {
     if (_onLongPress == value)
       return;
     final bool hadHandler = _onLongPress != null;
@@ -3293,9 +3293,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user scrolls to the left or to the right.
-  GestureDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
-  GestureDragUpdateCallback _onHorizontalDragUpdate;
-  set onHorizontalDragUpdate(GestureDragUpdateCallback value) {
+  SemanticsDragUpdateCallback get onHorizontalDragUpdate => _onHorizontalDragUpdate;
+  SemanticsDragUpdateCallback _onHorizontalDragUpdate;
+  set onHorizontalDragUpdate(SemanticsDragUpdateCallback value) {
     if (_onHorizontalDragUpdate == value)
       return;
     final bool hadHandler = _onHorizontalDragUpdate != null;
@@ -3305,9 +3305,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   }
 
   /// Called when the user scrolls up or down.
-  GestureDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
-  GestureDragUpdateCallback _onVerticalDragUpdate;
-  set onVerticalDragUpdate(GestureDragUpdateCallback value) {
+  SemanticsDragUpdateCallback get onVerticalDragUpdate => _onVerticalDragUpdate;
+  SemanticsDragUpdateCallback _onVerticalDragUpdate;
+  set onVerticalDragUpdate(SemanticsDragUpdateCallback value) {
     if (_onVerticalDragUpdate == value)
       return;
     final bool hadHandler = _onVerticalDragUpdate != null;

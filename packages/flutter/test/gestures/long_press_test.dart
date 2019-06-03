@@ -588,4 +588,35 @@ void main() {
     longPress.dispose();
     recognized.clear();
   });
+
+  test('Semantic onLongPress correctly calls handlers', () {
+    final List<String> logs = <String>[];
+    final LongPressGestureRecognizer longPress = LongPressGestureRecognizer()
+      ..onLongPressStart = (_) { logs.add('onLongPressStart'); }
+      ..onLongPress = () { logs.add('onLongPress'); }
+      ..onLongPressEnd = (_) { logs.add('onLongPressEnd'); }
+      ..onLongPressUp = () { logs.add('onLongPressUp'); };
+    final SemanticsGestureConfiguration configuration = longPress.semanticsConfiguration;
+
+    expect(configuration, isNotNull);
+    expect(configuration.onTap, isNull);
+    expect(configuration.onLongPress, isNotNull);
+    expect(configuration.onHorizontalDragUpdate, isNull);
+    expect(configuration.onVerticalDragUpdate, isNull);
+
+    configuration.onLongPress();
+    expect(logs, <String>['onLongPressStart', 'onLongPress', 'onLongPressEnd', 'onLongPressUp']);
+    logs.clear();
+
+    // Assigning handler should update the configuration handler's behavior but
+    // keep the configuration object
+    longPress..onLongPressStart = null
+             ..onLongPress = null
+             ..onLongPressEnd = null
+             ..onLongPressUp = null;
+    final SemanticsGestureConfiguration configuration2 = longPress.semanticsConfiguration;
+    expect(configuration, same(configuration2));
+    configuration.onLongPress();
+    expect(logs, <String>[]);
+  });
 }

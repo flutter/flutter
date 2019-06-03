@@ -844,12 +844,12 @@ void main() {
     expect(lastFrame, isNull);
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: await nextFrame()));
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
     await tester.pump();
     expect(lastFrame, 0);
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: await nextFrame()));
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
     await tester.pump();
     expect(lastFrame, 1);
     expect(find.byType(Center), findsOneWidget);
@@ -877,7 +877,7 @@ void main() {
     expect(lastFrame, isNull);
     expect(lastFrameWasSync, isFalse);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: image));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     await tester.pump();
     expect(lastFrame, 0);
     expect(lastFrameWasSync, isFalse);
@@ -904,7 +904,7 @@ void main() {
     expect(lastFrame, 0);
     expect(lastFrameWasSync, isTrue);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: image));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     await tester.pump();
     expect(lastFrame, 1);
     expect(lastFrameWasSync, isTrue);
@@ -942,6 +942,79 @@ void main() {
     expect(tester.state(find.byType(Image)), same(state));
   });
 
+  testWidgets('Image state handles enabling and disabling of tickers', (WidgetTester tester) async {
+    final ui.Codec codec = await tester.runAsync(() {
+      return ui.instantiateImageCodec(Uint8List.fromList(kAnimatedGif));
+    });
+
+    Future<ui.Image> nextFrame() async {
+      final ui.FrameInfo frameInfo = await tester.runAsync(codec.getNextFrame);
+      return frameInfo.image;
+    }
+
+    final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
+    final TestImageProvider imageProvider = TestImageProvider(streamCompleter: streamCompleter);
+    int lastFrame;
+    int buildCount = 0;
+
+    Widget buildFrame(BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+      lastFrame = frame;
+      buildCount++;
+      return child;
+    }
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: true,
+        child: Image(
+          image: imageProvider,
+          frameBuilder: buildFrame,
+        ),
+      ),
+    );
+
+    final State<Image> state = tester.state(find.byType(Image));
+    expect(lastFrame, isNull);
+    expect(buildCount, 1);
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 2);
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: false,
+        child: Image(
+          image: imageProvider,
+          frameBuilder: buildFrame,
+        ),
+      ),
+    );
+
+    expect(tester.state(find.byType(Image)), same(state));
+    expect(lastFrame, 0);
+    expect(buildCount, 3);
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    streamCompleter.setData(imageInfo: ImageInfo(image: await nextFrame()));
+    await tester.pump();
+    expect(lastFrame, 0);
+    expect(buildCount, 3);
+
+    await tester.pumpWidget(
+      TickerMode(
+        enabled: true,
+        child: Image(
+          image: imageProvider,
+          frameBuilder: buildFrame,
+        ),
+      ),
+    );
+
+    expect(tester.state(find.byType(Image)), same(state));
+    expect(lastFrame, 1); // missed a frame because we weren't animating at the time
+    expect(buildCount, 4);
+  });
+
   testWidgets('Image invokes loadingBuilder on chunk event notification', (WidgetTester tester) async {
     final ui.Image image = await tester.runAsync(createTestImage);
     final TestImageStreamCompleter streamCompleter = TestImageStreamCompleter();
@@ -966,19 +1039,19 @@ void main() {
     expect(chunkEvents.length, 1);
     expect(chunkEvents.first, isNull);
     expect(tester.binding.hasScheduledFrame, isFalse);
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(chunkEvents.length, 2);
     expect(find.text('loading 10 / 100'), findsOneWidget);
     expect(find.byType(RawImage), findsNothing);
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 30, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 30, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(chunkEvents.length, 3);
     expect(find.text('loading 30 / 100'), findsOneWidget);
     expect(find.byType(RawImage), findsNothing);
-    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: image));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     await tester.pump();
     expect(chunkEvents.length, 4);
     expect(find.byType(Text), findsNothing);
@@ -998,12 +1071,12 @@ void main() {
     );
 
     expect(tester.binding.hasScheduledFrame, isFalse);
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
-    streamCompleter.notifyListeners(imageInfo: ImageInfo(image: image));
+    streamCompleter.setData(imageInfo: ImageInfo(image: image));
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(find.byType(RawImage), findsOneWidget);
   });
@@ -1029,7 +1102,7 @@ void main() {
     expect(find.byType(Padding), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
     expect(tester.widget<Padding>(find.byType(Padding)).child, isInstanceOf<RawImage>());
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(Padding), findsOneWidget);
@@ -1047,7 +1120,7 @@ void main() {
     );
 
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
     final State<Image> state = tester.state(find.byType(Image));
 
@@ -1063,7 +1136,7 @@ void main() {
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
     expect(tester.state(find.byType(Image)), same(state));
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
@@ -1085,7 +1158,7 @@ void main() {
 
     expect(find.byType(Center), findsOneWidget);
     expect(find.byType(RawImage), findsOneWidget);
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isTrue);
     await tester.pump();
     expect(find.byType(Center), findsOneWidget);
@@ -1099,7 +1172,7 @@ void main() {
     expect(find.byType(Center), findsNothing);
     expect(find.byType(RawImage), findsOneWidget);
     expect(tester.state(find.byType(Image)), same(state));
-    streamCompleter.notifyListeners(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
+    streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
   });
 }
@@ -1141,16 +1214,17 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
 }
 
 class TestImageStreamCompleter extends ImageStreamCompleter {
-  TestImageStreamCompleter([this.synchronousImage]);
+  TestImageStreamCompleter([this._currentImage]);
 
-  final ImageInfo synchronousImage;
+  ImageInfo _currentImage;
   final Set<ImageStreamListener> listeners = <ImageStreamListener>{};
 
   @override
   void addListener(ImageStreamListener listener) {
     listeners.add(listener);
-    if (synchronousImage != null)
-      listener.onImage(synchronousImage, true);
+    if (_currentImage != null) {
+      listener.onImage(_currentImage, true);
+    }
   }
 
   @override
@@ -1158,10 +1232,13 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
     listeners.remove(listener);
   }
 
-  void notifyListeners({
+  void setData({
     ImageInfo imageInfo,
     ImageChunkEvent chunkEvent,
   }) {
+    if (imageInfo != null) {
+      _currentImage = imageInfo;
+    }
     final List<ImageStreamListener> localListeners = listeners.toList();
     for (ImageStreamListener listener in localListeners) {
       if (imageInfo != null) {
