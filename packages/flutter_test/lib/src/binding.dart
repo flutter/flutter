@@ -1763,9 +1763,10 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
   @override
   int get contentLength => -1;
 
-  // @override
-  // TODO(tvolkert): Uncomment @override annotation once SDK change lands.
-  bool get autoUncompress => true;
+  @override
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
 
   @override
   List<Cookie> get cookies => null;

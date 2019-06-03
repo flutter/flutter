@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -376,7 +375,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.0.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -406,7 +405,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.1.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets(
     'can control text content via controller',
@@ -2589,5 +2588,31 @@ void main() {
     expect(right.opacity.value, equals(1.0));
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('disabled state golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: DecoratedBox(
+          decoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: CupertinoTextField(
+                controller: TextEditingController(text: 'lorem'),
+                enabled: false,
+              ),
+            )
+          )
+        )
+      )
+    );
+
+    await expectLater(
+      find.byType(CupertinoTextField),
+      matchesGoldenFile('text_field_test.disabled.0.png'),
+      skip: !isLinux,
+    );
   });
 }

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -57,7 +55,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Centered.wrap.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
@@ -133,7 +131,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
@@ -183,7 +181,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Background.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -219,7 +217,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('text_golden.Fade.1.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -244,7 +242,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.StrutDefault.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+  }, skip: true); // Should only be on linux (skip: !isLinux).
                   // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text 1', (WidgetTester tester) async {
@@ -272,7 +270,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.1.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+  }, skip: true); // Should only be on linux (skip: !isLinux).
                   // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text 2', (WidgetTester tester) async {
@@ -301,7 +299,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.2.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+  }, skip: true); // Should only be on linux (skip: !isLinux).
                   // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text rich', (WidgetTester tester) async {
@@ -353,7 +351,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.3.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+  }, skip: true); // Should only be on linux (skip: !isLinux).
                   // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text font fallback', (WidgetTester tester) async {
@@ -389,7 +387,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Strut.4.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+  }, skip: true); // Should only be on linux (skip: !isLinux).
                   // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Strut text rich forceStrutHeight', (WidgetTester tester) async {
@@ -441,7 +439,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.StrutForce.1.1.png'),
     );
-  }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
+  }, skip: true); // Should only be on linux (skip: !isLinux).
                   // Disabled for now until font inconsistency is resolved.
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
@@ -480,7 +478,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Decoration.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -519,7 +517,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.DecorationThickness.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -613,7 +611,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidget.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget textfield', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -658,7 +656,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidget.2.1.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   // This tests if multiple RichText widgets are able to inline nest within each other.
   testWidgets('Text Inline widget nesting', (WidgetTester tester) async {
@@ -787,7 +785,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidgetNest.1.1.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget baseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -894,7 +892,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidgetBaseline.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget aboveBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1001,7 +999,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidgetAboveBaseline.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget belowBaseline', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1108,7 +1106,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidgetBelowBaseline.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget top', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1215,7 +1213,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidgetTop.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Text Inline widget middle', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1322,5 +1320,5 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 }
