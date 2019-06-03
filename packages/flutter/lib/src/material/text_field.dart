@@ -721,8 +721,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         from: details.globalPosition,
         cause: SelectionChangedCause.forcePress,
       );
-      if (_shouldShowSelectionToolbar)
+      if (_shouldShowSelectionToolbar) {
         _editableTextKey.currentState.showToolbar();
+      }
     }
   }
 
@@ -796,8 +797,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleDoubleTapDown(TapDownDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      if (_shouldShowSelectionToolbar)
-        _editableTextKey.currentState.showToolbar();
+      if (_shouldShowSelectionToolbar) {
+        _editableText.toggleToolbar();
+      }
     }
   }
 
