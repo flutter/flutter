@@ -41,6 +41,8 @@ class ParagraphImpl {
       txt::Paragraph::RectHeightStyle rect_height_style,
       txt::Paragraph::RectWidthStyle rect_width_style) = 0;
 
+  virtual std::vector<TextBox> getRectsForPlaceholders() = 0;
+
   virtual Dart_Handle getPositionForOffset(double dx, double dy) = 0;
 
   virtual Dart_Handle getWordBoundary(unsigned offset) = 0;

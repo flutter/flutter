@@ -95,6 +95,8 @@ source_set("txt") {
     "src/txt/paragraph_builder.h",
     "src/txt/paragraph_style.cc",
     "src/txt/paragraph_style.h",
+    "src/txt/placeholder_run.cc",
+    "src/txt/placeholder_run.h",
     "src/txt/platform.h",
     "src/txt/styled_runs.cc",
     "src/txt/styled_runs.h",

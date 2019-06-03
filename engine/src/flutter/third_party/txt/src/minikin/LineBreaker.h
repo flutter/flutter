@@ -149,6 +149,13 @@ class LineBreaker {
 
   size_t computeBreaks();
 
+  // libtxt: Add ability to set custom char widths. This allows manual
+  // definition of the widths of arbitrary glyphs. To linebreak properly, call
+  // addStyleRun with nullptr as the paint property, which will lead it to
+  // assume the width has already been calculated. Used for properly breaking
+  // inline placeholders.
+  void setCustomCharWidth(size_t offset, float width);
+
   const int* getBreaks() const { return mBreaks.data(); }
 
   const float* getWidths() const { return mWidths.data(); }

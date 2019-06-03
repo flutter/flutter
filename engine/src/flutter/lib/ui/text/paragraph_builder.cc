@@ -14,6 +14,7 @@
 #include "flutter/third_party/txt/src/txt/font_style.h"
 #include "flutter/third_party/txt/src/txt/font_weight.h"
 #include "flutter/third_party/txt/src/txt/paragraph_style.h"
+#include "flutter/third_party/txt/src/txt/text_baseline.h"
 #include "flutter/third_party/txt/src/txt/text_decoration.h"
 #include "flutter/third_party/txt/src/txt/text_style.h"
 #include "third_party/icu/source/common/unicode/ustring.h"
@@ -132,10 +133,11 @@ static void ParagraphBuilder_constructor(Dart_NativeArguments args) {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, ParagraphBuilder);
 
-#define FOR_EACH_BINDING(V)      \
-  V(ParagraphBuilder, pushStyle) \
-  V(ParagraphBuilder, pop)       \
-  V(ParagraphBuilder, addText)   \
+#define FOR_EACH_BINDING(V)           \
+  V(ParagraphBuilder, pushStyle)      \
+  V(ParagraphBuilder, pop)            \
+  V(ParagraphBuilder, addText)        \
+  V(ParagraphBuilder, addPlaceholder) \
   V(ParagraphBuilder, build)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
@@ -455,6 +457,20 @@ Dart_Handle ParagraphBuilder::addText(const std::u16string& text) {
     return tonic::ToDart("string is not well-formed UTF-16");
 
   m_paragraphBuilder->AddText(text);
+
+  return Dart_Null();
+}
+
+Dart_Handle ParagraphBuilder::addPlaceholder(double width,
+                                             double height,
+                                             unsigned alignment,
+                                             double baseline_offset,
+                                             unsigned baseline) {
+  txt::PlaceholderRun placeholder_run(
+      width, height, static_cast<txt::PlaceholderAlignment>(alignment),
+      static_cast<txt::TextBaseline>(baseline), baseline_offset);
+
+  m_paragraphBuilder->AddPlaceholder(placeholder_run);
 
   return Dart_Null();
 }

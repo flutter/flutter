@@ -79,6 +79,17 @@ std::vector<TextBox> ParagraphImplTxt::getRectsForRange(
   return result;
 }
 
+std::vector<TextBox> ParagraphImplTxt::getRectsForPlaceholders() {
+  std::vector<TextBox> result;
+  std::vector<txt::Paragraph::TextBox> boxes =
+      m_paragraph->GetRectsForPlaceholders();
+  for (const txt::Paragraph::TextBox& box : boxes) {
+    result.emplace_back(box.rect,
+                        static_cast<flutter::TextDirection>(box.direction));
+  }
+  return result;
+}
+
 Dart_Handle ParagraphImplTxt::getPositionForOffset(double dx, double dy) {
   Dart_Handle result = Dart_NewListOf(Dart_CoreType_Int, 2);
   txt::Paragraph::PositionWithAffinity pos =

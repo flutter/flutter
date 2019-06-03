@@ -47,6 +47,7 @@ class Paragraph : public RefCountedDartWrappable<Paragraph> {
                                         unsigned end,
                                         unsigned boxHeightStyle,
                                         unsigned boxWidthStyle);
+  std::vector<TextBox> getRectsForPlaceholders();
   Dart_Handle getPositionForOffset(double dx, double dy);
   Dart_Handle getWordBoundary(unsigned offset);
 

@@ -356,6 +356,14 @@ void LineBreaker::pushBreak(int offset, float width, uint8_t hyphenEdit) {
   mFirstTabIndex = INT_MAX;
 }
 
+// libtxt: Add ability to set custom char widths. This allows manual definition
+// of the widths of arbitrary glyphs. To linebreak properly, call addStyleRun
+// with nullptr as the paint property, which will lead it to assume the width
+// has already been calculated. Used for properly breaking inline widgets.
+void LineBreaker::setCustomCharWidth(size_t offset, float width) {
+  mCharWidths[offset] = (width);
+}
+
 void LineBreaker::addReplacement(size_t start, size_t end, float width) {
   mCharWidths[start] = width;
   std::fill(&mCharWidths[start + 1], &mCharWidths[end], 0.0f);

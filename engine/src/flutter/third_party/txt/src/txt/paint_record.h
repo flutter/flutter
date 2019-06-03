@@ -19,6 +19,7 @@
 
 #include "flutter/fml/logging.h"
 #include "flutter/fml/macros.h"
+#include "placeholder_run.h"
 #include "text_style.h"
 #include "third_party/skia/include/core/SkFontMetrics.h"
 #include "third_party/skia/include/core/SkTextBlob.h"
@@ -42,6 +43,16 @@ class PaintRecord {
               double x_start,
               double x_end,
               bool is_ghost);
+
+  PaintRecord(TextStyle style,
+              SkPoint offset,
+              sk_sp<SkTextBlob> text,
+              SkFontMetrics metrics,
+              size_t line,
+              double x_start,
+              double x_end,
+              bool is_ghost,
+              PlaceholderRun* placeholder_run);
 
   PaintRecord(TextStyle style,
               sk_sp<SkTextBlob> text,
@@ -71,7 +82,11 @@ class PaintRecord {
   double x_end() const { return x_end_; }
   double GetRunWidth() const { return x_end_ - x_start_; }
 
+  PlaceholderRun* GetPlaceholderRun() const { return placeholder_run_; }
+
   bool isGhost() const { return is_ghost_; }
+
+  bool isPlaceholder() const { return placeholder_run_ == nullptr; }
 
  private:
   TextStyle style_;
@@ -87,6 +102,10 @@ class PaintRecord {
   // 'Ghost' runs represent trailing whitespace. 'Ghost' runs should not have
   // decorations painted on them and do not impact layout of visible glyphs.
   bool is_ghost_ = false;
+  // Stores the corresponding PlaceholderRun that the record corresponds to.
+  // When this is nullptr, then the record is of normal text and does not
+  // represent an inline placeholder.
+  PlaceholderRun* placeholder_run_ = nullptr;
 
   FML_DISALLOW_COPY_AND_ASSIGN(PaintRecord);
 };
