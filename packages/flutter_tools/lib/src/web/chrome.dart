@@ -14,6 +14,7 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../convert.dart';
+import '../globals.dart';
 
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
@@ -171,7 +172,11 @@ class Chrome {
     } catch (_) {
       // Silently fail if we can't clean up the profile information.
     } finally {
-      await _dataDir?.delete(recursive: true);
+      try {
+        await _dataDir?.delete(recursive: true);
+      } on FileSystemException {
+        printError('failed to delete temporary profile at ${_dataDir.path}');
+      }
     }
   }
 }
