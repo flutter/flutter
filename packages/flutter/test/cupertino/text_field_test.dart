@@ -2612,7 +2612,7 @@ void main() {
     await expectLater(
       find.byType(CupertinoTextField),
       matchesGoldenFile('text_field_test.disabled.0.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 }
