@@ -33,6 +33,10 @@ export 'package:flutter/services.dart' show TextRange, TextSelection;
 ///  * [RichText], a text widget that supports text inline widgets.
 @immutable
 class PlaceholderDimensions {
+  /// Constructs a [PlaceholderDimensions] with the specified parameters.
+  ///
+  /// The `size` and `alignment` are required as a placeholder's dimensions
+  /// require at least `size` and `alignment` to be fully defined.
   const PlaceholderDimensions({
     @required this.size,
     @required this.alignment,
