@@ -436,6 +436,31 @@ void main() {
   );
 
   testWidgets(
+    'placeholder textAlign is equal to inputText',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              placeholder: 'placeholder',
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      );
+
+      final Text placeholder = tester.widget(find.text('placeholder'));
+      expect(placeholder.textAlign, TextAlign.right);
+
+      await tester.enterText(find.byType(CupertinoTextField), 'input');
+      await tester.pump();
+
+      final EditableText inputText = tester.widget(find.text('input'));
+      expect(placeholder.textAlign, inputText.textAlign);
+    },
+  );
+
+  testWidgets(
     'placeholders are lightly colored and disappears once typing starts',
     (WidgetTester tester) async {
       await tester.pumpWidget(
