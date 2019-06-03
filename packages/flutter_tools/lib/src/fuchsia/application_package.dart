@@ -7,6 +7,7 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../globals.dart';
 import '../project.dart';
 
 abstract class FuchsiaApp extends ApplicationPackage {
@@ -14,6 +15,11 @@ abstract class FuchsiaApp extends ApplicationPackage {
 
   /// Creates a new [FuchsiaApp] from a fuchsia sub project.
   factory FuchsiaApp.fromFuchsiaProject(FuchsiaProject project) {
+    if (!project.existsSync()) {
+      // If the project doesn't exist at all the current hint to run flutter
+      // create is accurate.
+      return null;
+    }
     return BuildableFuchsiaApp(
       project: project,
     );
@@ -23,6 +29,11 @@ abstract class FuchsiaApp extends ApplicationPackage {
   ///
   /// [applicationBinary] is the path to the .far archive.
   factory FuchsiaApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
+    final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
+    if (entityType != FileSystemEntityType.file) {
+      printError('File "${applicationBinary.path}" does not exist or is not a .far file. Use far archive.');
+      return null;
+    }
     return PrebuiltFuchsiaApp(
       farArchive: applicationBinary.path,
     );
