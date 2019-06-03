@@ -664,7 +664,7 @@ void main() {
     );
 
     // We provide dimensions for the widgets
-    painter.setPlaceholderDimensions(<PlaceholderDimensions>[
+    painter.setPlaceholderDimensions(const <PlaceholderDimensions>[
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
       PlaceholderDimensions(size: Size(50, 30), baselineOffset: 25, alignment: ui.PlaceholderAlignment.bottom),
@@ -716,17 +716,17 @@ void main() {
     expect(caretOffset.dx, 250);
 
     expect(painter.inlinePlaceholderBoxes.length, 14);
-    expect(painter.inlinePlaceholderBoxes[0], TextBox.fromLTRBD(56, 0, 106, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[2], TextBox.fromLTRBD(212, 0, 262, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[3], TextBox.fromLTRBD(318, 0, 368, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[4], TextBox.fromLTRBD(368, 0, 418, 30, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[5], TextBox.fromLTRBD(418, 0, 468, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[0], const TextBox.fromLTRBD(56, 0, 106, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[2], const TextBox.fromLTRBD(212, 0, 262, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[3], const TextBox.fromLTRBD(318, 0, 368, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[4], const TextBox.fromLTRBD(368, 0, 418, 30, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[5], const TextBox.fromLTRBD(418, 0, 468, 30, TextDirection.ltr));
     // line should break here
-    expect(painter.inlinePlaceholderBoxes[6], TextBox.fromLTRBD(0, 30, 50, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[7], TextBox.fromLTRBD(50, 30, 100, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[10], TextBox.fromLTRBD(200, 30, 250, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[11], TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[12], TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
-    expect(painter.inlinePlaceholderBoxes[13], TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[6], const TextBox.fromLTRBD(0, 30, 50, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[7], const TextBox.fromLTRBD(50, 30, 100, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[10], const TextBox.fromLTRBD(200, 30, 250, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[11], const TextBox.fromLTRBD(250, 30, 300, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[12], const TextBox.fromLTRBD(300, 30, 351, 60, TextDirection.ltr));
+    expect(painter.inlinePlaceholderBoxes[13], const TextBox.fromLTRBD(351, 30, 401, 60, TextDirection.ltr));
   });
 }

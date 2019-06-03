@@ -75,9 +75,9 @@ class WidgetSpan extends PlaceholderSpan {
     TextBaseline baseline,
     TextStyle style,
   }) : assert(child != null),
-       assert((alignment == ui.PlaceholderAlignment.aboveBaseline ||
-               alignment == ui.PlaceholderAlignment.belowBaseline ||
-               alignment == ui.PlaceholderAlignment.baseline) ? baseline != null : true),
+       assert((identical(alignment, ui.PlaceholderAlignment.aboveBaseline) ||
+              identical(alignment, ui.PlaceholderAlignment.belowBaseline) ||
+              identical(alignment, ui.PlaceholderAlignment.baseline)) ? baseline != null : true),
        super(
          alignment: alignment,
          baseline: baseline,
@@ -96,7 +96,7 @@ class WidgetSpan extends PlaceholderSpan {
   ///
   /// The `textScaleFactor` will be applied to the laid-out size of the widget.
   @override
-  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions }) {
+  void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, @required List<PlaceholderDimensions> dimensions }) {
     assert(debugAssertIsValid());
     assert(dimensions != null);
     final bool hasStyle = style != null;
@@ -142,7 +142,7 @@ class WidgetSpan extends PlaceholderSpan {
       return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
-    WidgetSpan typedOther = other;
+    final WidgetSpan typedOther = other;
     if (child != typedOther.child || alignment != typedOther.alignment) {
       return RenderComparison.layout;
     }
