@@ -8,6 +8,7 @@ import 'arena.dart';
 import 'constants.dart';
 import 'events.dart';
 import 'recognizer.dart';
+import 'semantics.dart';
 
 /// Details for [GestureTapDownCallback], such as position
 ///
@@ -236,6 +237,25 @@ class TapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
   // different set of buttons, the gesture is canceled.
   int _initialButtons;
+
+  @override
+  SemanticsGestureConfiguration get semanticsConfiguration {
+    // This method must always return a non-null configuration with a non-null
+    // onTap, even when there are no handlers related to semantics, because the
+    // handler properties are mutable, and assigning properties will not notify
+    // RawGestureDetector to update its combined configuration.
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
+      onTap: () {
+        if (onTapDown != null)
+          onTapDown(TapDownDetails());
+        if (onTapUp != null)
+          onTapUp(TapUpDetails());
+        if (onTap != null)
+          onTap();
+      },
+    );
+  }
+  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   bool isPointerAllowed(PointerDownEvent event) {
