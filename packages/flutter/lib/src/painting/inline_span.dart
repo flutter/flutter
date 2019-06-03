@@ -110,7 +110,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// false, then the walk will end.
   bool visitChildren(InlineSpanVisitor visitor);
 
-  /// Returns the text span that contains the given position in the text. 
+  /// Returns the text span that contains the given position in the text.
   InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     final Accumulator offset = Accumulator();
@@ -150,7 +150,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// Walks the [InlineSpan] tree and writes the plain text representation to `buffer`.
   ///
   /// This method should not be directly called. Use [toPlainText] instead.
-  /// 
+  ///
   /// Styles are not honored in this process. If `includeSemanticsLabels` is
   /// true, then the text returned will include the [TextSpan.semanticsLabel]s
   /// instead of the text contents for [TextSpan]s.
