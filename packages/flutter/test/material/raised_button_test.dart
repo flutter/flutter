@@ -119,12 +119,12 @@ void main() {
     }
 
     // Default, not disabled.
-    await expectLater(textColor(), equals(defaultColor));
+    expect(textColor(), equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    await expectLater(textColor(), focusedColor);
+    expect(textColor(), focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(RaisedButton));
@@ -134,13 +134,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    await expectLater(textColor(), hoverColor);
+    expect(textColor(), hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-    await expectLater(textColor(), pressedColor);
+    expect(textColor(), pressedColor);
     await gesture.removePointer();
   });
 
@@ -186,12 +186,12 @@ void main() {
 
     Color iconColor() => _iconStyle(tester, Icons.add).color;
     // Default, not disabled.
-    await expectLater(iconColor(), equals(defaultColor));
+    expect(iconColor(), equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    await expectLater(iconColor(), focusedColor);
+    expect(iconColor(), focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byKey(buttonKey));
@@ -201,13 +201,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    await expectLater(iconColor(), hoverColor);
+    expect(iconColor(), hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-    await expectLater(iconColor(), pressedColor);
+    expect(iconColor(), pressedColor);
     await gesture.removePointer();
   });
 
@@ -246,8 +246,8 @@ void main() {
     }
 
     // Disabled.
-    await expectLater(textColor(), equals(disabledColor));
-    await expectLater(textColor(), isNot(unusedDisabledTextColor));
+    expect(textColor(), equals(disabledColor));
+    expect(textColor(), isNot(unusedDisabledTextColor));
   });
 }
 

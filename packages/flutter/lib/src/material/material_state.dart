@@ -65,8 +65,8 @@ enum MaterialState {
 /// Signature for the function that returns a color based on a given set of states.
 typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 
-/// Defines a [Color] whose value depends on changes in the state of a Material
-/// component, based on a given set of [MaterialState]s.
+/// Defines a [Color] whose value depends a set of [MaterialState]s which
+/// represent the interactive state of a component.
 ///
 /// This is useful for improving the accessibility of text in different states
 /// of a component. For example, in a [FlatButton] with blue text, the text will
@@ -91,7 +91,7 @@ typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 ///
 /// ```dart
 /// Color getTextColor(Set<MaterialState> states) {
-///   final Set<MaterialState> interactiveStates = <MaterialState>{
+///   const Set<MaterialState> interactiveStates = <MaterialState>{
 ///     MaterialState.pressed,
 ///     MaterialState.hovered,
 ///     MaterialState.focused,

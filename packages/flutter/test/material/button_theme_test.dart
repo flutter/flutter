@@ -355,7 +355,7 @@ void main() {
           body: Center(
             child: ButtonTheme(
               colorScheme: ColorScheme.light().copyWith(
-                  primary: MaterialStateColor.resolveWith(getTextColor),
+                primary: MaterialStateColor.resolveWith(getTextColor),
               ),
               textTheme: ButtonTextTheme.primary,
               child: FlatButton(
@@ -374,12 +374,12 @@ void main() {
     }
 
     // Default, not disabled.
-    await expectLater(textColor(), equals(defaultColor));
+    expect(textColor(), equals(defaultColor));
 
     // Focused.
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    await expectLater(textColor(), focusedColor);
+    expect(textColor(), focusedColor);
 
     // Hovered.
     final Offset center = tester.getCenter(find.byType(FlatButton));
@@ -389,13 +389,13 @@ void main() {
     await gesture.addPointer();
     await gesture.moveTo(center);
     await tester.pumpAndSettle();
-    await expectLater(textColor(), hoverColor);
+    expect(textColor(), hoverColor);
 
     // Highlighted (pressed).
     await gesture.down(center);
     await tester.pump(); // Start the splash and highlight animations.
     await tester.pump(const Duration(milliseconds: 800)); // Wait for splash and highlight to be well under way.
-    await expectLater(textColor(), pressedColor);
+    expect(textColor(), pressedColor);
     await gesture.removePointer();
   },
     semanticsEnabled: true,

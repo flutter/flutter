@@ -118,8 +118,7 @@ class MaterialButton extends StatelessWidget {
   /// [ThemeData.disabledColor].
   ///
   /// If [textColor] is a [MaterialStateColor], [disabledTextColor] will be
-  /// ignored. Instead, [textColor] resolved in the [MaterialState.disabled] state
-  /// will be used.
+  /// ignored.
   ///
   /// See also:
   ///
