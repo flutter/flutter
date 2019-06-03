@@ -27,7 +27,7 @@ const String _kSkiaGoldInstance = 'SKIA_GOLD_INSTANCE';
 
 /// A class that represents the Skia Gold client for golden file testing.
 class SkiaGoldClient {
-  /// Create a handle to a local workspace for the Skai Gold Client
+  /// Create a handle to a local workspace for the Skia Gold Client
   SkiaGoldClient({
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),

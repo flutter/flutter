@@ -40,9 +40,9 @@ Future<void> main(FutureOr<void> testMain()) async {
 /// the `$FLUTTER_ROOT/bin/cache/pkg/goldens` folder using the [GoldensClient],
 /// then perform the comparison against the files therein.
 ///
-/// For testing across platforms, the [SkiaGoldClient] is used to upload widgets
-/// for framework-related golden tests and process results. Currently these
-/// tests are designed to be run in CI post-submit.
+/// For testing across all platforms, the [SkiaGoldClient] is used to upload
+/// widgets for framework-related golden tests and process results. Currently
+/// these tests are designed to be run in CI post-submit.
 ///
 /// This comparator will instantiate [GoldensClient] and [SkiaGoldClient].
 class FlutterGoldenFileComparator implements GoldenFileComparator {
@@ -74,6 +74,9 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   final SkiaGoldClient _skiaClient = SkiaGoldClient();
 
   /// Flag to test golden images via [GoldensClient] or [SkiaGoldClient].
+  ///
+  /// Currently, testing is executed via Skia Gold in environments where a
+  /// service account key is available for authentication.
   bool get testingWithSkia => platform.environment[_kServiceAccountKey] != null ? true : false;
 
   /// Creates a new [FlutterGoldenFileComparator] that mirrors the relative
@@ -143,7 +146,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       // Not executing test.
       print('Skipping golden file test for "$golden"');
       print('Skia Gold unavailable && !Platform.isLinux');
-      return true; // TODO(Piinks): Clean-up, skip here
+      return true; // TODO(Piinks): Clean-up, place skip here
     }
   }
 
