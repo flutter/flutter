@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2018 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,6 +41,4 @@ typedef ComputeCallback<Q, R> = FutureOr<R> Function(Q message);
 ///
 /// The `debugLabel` argument can be specified to provide a name to add to the
 /// [Timeline]. This is useful when profiling an application.
-Future<R> compute<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) {
-  return _isolates.compute(callback, message, debugLabel: debugLabel);
-}
+const Future<R> Function<Q, R>(ComputeCallback<Q, R> callback, Q message, { String debugLabel }) compute = _isolates.compute;

@@ -14,7 +14,7 @@ import 'package:flutter/services.dart';
 import 'debug.dart';
 import 'priority.dart';
 
-export 'dart:ui' show AppLifecycleState;
+export 'dart:ui' show AppLifecycleState, VoidCallback;
 
 /// Slows down animations by this factor to help in development.
 double get timeDilation => _timeDilation;
