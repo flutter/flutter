@@ -75,5 +75,4 @@ class InvalidBuildException implements Exception {
     return 'Target $target cannot build with ${environment.buildMode} and '
       '${environment.targetPlatform}.';
   }
-
 }

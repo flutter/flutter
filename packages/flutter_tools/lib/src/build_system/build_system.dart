@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
@@ -193,8 +194,7 @@ class Target {
     final List<String> outputStamps = <String>[];
     for (FileSystemEntity output in outputs) {
       if (!output.existsSync()) {
-        throw Exception(
-            '$name: Did not produce expected output ${output.path}');
+        throw MissingOutputException(output, name);
       }
       outputStamps.add(output.absolute.path);
     }
@@ -242,6 +242,7 @@ class Target {
       'inputs': resolveInputs(environment)
           .map((FileSystemEntity file) => file.absolute.path)
           .toList(),
+      'stamp': _findStampFile(name, environment),
     };
   }
 
@@ -279,7 +280,7 @@ class Target {
 ///   found.
 ///
 ///   This value is computed from the location of the relevant pubspec. Most
-///   other ambient value defaults are defined relative to this directory.
+///   other defaults are defined relative to this directory.
 ///
 /// ## BUILD_DIR
 ///
@@ -409,42 +410,40 @@ class BuildSystem {
     }
 
     final Pool resourcePool = Pool(platform?.numberOfProcessors ?? 1);
-    final Set<Target> pending = <Target>{};
+    final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
 
     Future<void> invokeTarget(Target target) async {
-      if (pending.contains(target)) {
-        return;
-      }
-      pending.add(target);
-
       await Future.wait(target.dependencies.map(invokeTarget));
-      final PoolResource resource = await resourcePool.request();
-      try {
-        final List<FileSystemEntity> inputs = target.resolveInputs(environment);
-        final Map<String, ChangeType> updates = await target.computeChanges(inputs, environment, fileCache);
-        if (updates.isEmpty) {
-          printTrace('Skipping target: ${target.name}');
-        } else {
-          printTrace('${target.name}: Starting');
-          await target.invocation(updates, environment);
-          printTrace('${target.name}: Complete');
 
-          final List<FileSystemEntity> outputs = target.resolveOutputs(environment);
-          target._writeStamp(inputs, outputs, environment);
+      final AsyncMemoizer<void> memoizer = pending[target.name] ??= AsyncMemoizer<void>();
+      await memoizer.runOnce(() async {
+        final PoolResource resource = await resourcePool.request();
+        try {
+          final List<FileSystemEntity> inputs = target.resolveInputs(
+              environment);
+          final Map<String, ChangeType> updates = await target.computeChanges(
+              inputs, environment, fileCache);
+          if (updates.isEmpty) {
+            printTrace('Skipping target: ${target.name}');
+          } else {
+            printTrace('${target.name}: Starting');
+            await target.invocation(updates, environment);
+            printTrace('${target.name}: Complete');
+
+            final List<FileSystemEntity> outputs = target.resolveOutputs(
+                environment);
+            target._writeStamp(inputs, outputs, environment);
+          }
+        } finally {
+          resource.release();
         }
-      } catch (err) {
-        rethrow;
-      } finally {
-        resource.release();
-      }
+      });
     }
 
     try {
       await invokeTarget(target);
-    } catch (err) {
-      rethrow;
     } finally {
-      // Persist the file cache to disk.
+      // Always persist the file cache to disk.
       fileCache.persist();
     }
   }
