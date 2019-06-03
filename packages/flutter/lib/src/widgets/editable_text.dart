@@ -66,7 +66,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// added to this controller. If both properties need to be changed then the
 /// controller's [value] should be set instead.
 /// 
-/// Remember to [dispose] the [TextEditingController] when it is no longer needed. 
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
 /// This will ensure we discard any resources used by the object.
 /// {@tool snippet --template=stateful_widget_material}
 /// This example creates a [TextField] with a [TextEditingController] whose
@@ -114,7 +114,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///    with a [TextEditingController].
 ///  * [EditableText], which is a raw region of editable text that can be
 ///    controlled with a [TextEditingController].
-///  * <https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller>
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class TextEditingController extends ValueNotifier<TextEditingValue> {
   /// Creates a controller for an editable text field.
   ///
