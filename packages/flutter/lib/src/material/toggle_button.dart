@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/src/material/debug.dart';
+import 'package:flutter/src/material/theme_data.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -127,9 +128,55 @@ class ToggleButton extends StatelessWidget {
         highlightColor: highlightColor,
         hoverColor: hoverColor,
         splashColor: splashColor,
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         onPressed: onPressed,
-        shape: shape,
         child: child,
+      ),
+    );
+  }
+
+  // TODO(WIP): include debugFillProperties method
+}
+
+class ToggleButtons extends StatelessWidget {
+  ToggleButtons({
+    this.children,
+    this.isSelected,
+    this.onPressed,
+    this.border,
+    this.borderRadius,
+  });
+
+  final List<Widget> children;
+
+  final List<bool> isSelected;
+
+  final Function onPressed;
+
+  final Border border;
+
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: border ?? Border.all(),
+        borderRadius: borderRadius ?? const BorderRadius.all(
+          Radius.circular(5.0),
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(children.length, (int index) {
+          return ToggleButton(
+            onPressed: () {
+              onPressed(index);
+            },
+            selected: isSelected[index],
+            child: children[index],
+          );
+        }),
       ),
     );
   }
