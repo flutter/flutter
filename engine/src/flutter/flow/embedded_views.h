@@ -18,6 +18,10 @@ class EmbeddedViewParams {
  public:
   SkPoint offsetPixels;
   SkSize sizePoints;
+
+  bool operator==(const EmbeddedViewParams& other) const {
+    return offsetPixels == other.offsetPixels && sizePoints == other.sizePoints;
+  }
 };
 
 // This is only used on iOS when running in a non headless mode,

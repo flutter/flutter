@@ -88,6 +88,8 @@ class FlutterPlatformViewsController {
   std::map<std::string, fml::scoped_nsobject<NSObject<FlutterPlatformViewFactory>>> factories_;
   std::map<int64_t, fml::scoped_nsobject<NSObject<FlutterPlatformView>>> views_;
   std::map<int64_t, fml::scoped_nsobject<FlutterTouchInterceptingView>> touch_interceptors_;
+  // Mapping a platform view ID to its latest composition params.
+  std::map<int64_t, EmbeddedViewParams> current_composition_params_;
   std::map<int64_t, std::unique_ptr<FlutterPlatformViewLayer>> overlays_;
   // The GrContext that is currently used by all of the overlay surfaces.
   // We track this to know when the GrContext for the Flutter app has changed
