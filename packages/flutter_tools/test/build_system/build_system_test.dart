@@ -144,7 +144,8 @@ void main() {
           '/foo.dart'
         ],
         'dependencies': <Object>[],
-        'name':  'foo'
+        'name':  'foo',
+        'stamp': fs.path.join('build', 'foo.debug.android-arm.none'),
       });
     }));
 
