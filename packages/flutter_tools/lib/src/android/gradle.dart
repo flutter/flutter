@@ -20,6 +20,8 @@ import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../runner/flutter_command.dart';
+import '../usage.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -468,6 +470,11 @@ Future<void> _buildGradleProjectV2(
       printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
       printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
       printError('*******************************************************************************************');
+      String commandName = '';
+      if (FlutterCommand.current != null) {
+        commandName = '-${FlutterCommand.current.name}';
+      }
+      flutterUsage.sendEvent('build$commandName', 'android-x-failure');
     }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
   }
