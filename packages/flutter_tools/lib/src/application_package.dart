@@ -56,7 +56,7 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
         return applicationBinary == null
@@ -408,7 +408,7 @@ class ApplicationPackageStore {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         return null;
     }
     return null;

@@ -19,7 +19,7 @@ void main() {
     File template;
 
     setUp(() {
-      tmpDir = Directory.systemTemp.createTempSync('snippets_test');
+      tmpDir = Directory.systemTemp.createTempSync('flutter_snippets_test.');
       configuration = Configuration(flutterRoot: Directory(path.join(
           tmpDir.absolute.path, 'flutter')));
       configuration.createOutputDirectory();

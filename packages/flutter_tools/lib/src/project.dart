@@ -20,7 +20,7 @@ import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
-import 'web/web_device.dart';
+import 'web/workflow.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 ///
@@ -149,6 +149,9 @@ class FlutterProject {
   /// True if this project is a Flutter module project.
   bool get isModule => manifest.isModule;
 
+  /// True if the Flutter project is using the AndroidX support library
+  bool get usesAndroidX => manifest.usesAndroidX;
+
   /// True if this project has an example application.
   bool get hasExampleApp => _exampleDirectory(directory).existsSync();
 
@@ -185,7 +188,7 @@ class FlutterProject {
     if (flutterDesktopEnabled && macos.existsSync()) {
       await macos.ensureReadyForPlatformSpecificTooling();
     }
-    if (flutterWebEnabled) {
+    if (flutterWebEnabled && web.existsSync()) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(this, checkProjects: checkProjects);
@@ -466,6 +469,9 @@ class AndroidProject {
   /// True if the parent Flutter project is a module.
   bool get isModule => parent.isModule;
 
+  /// True if the Flutter project is using the AndroidX support library
+  bool get usesAndroidX => parent.usesAndroidX;
+
   /// True, if the app project is using Kotlin.
   bool get isKotlin {
     final File gradleFile = hostAppGradleRoot.childDirectory('app').childFile('build.gradle');
@@ -558,6 +564,7 @@ class AndroidProject {
       <String, dynamic>{
         'projectName': parent.manifest.appName,
         'androidIdentifier': parent.manifest.androidPackage,
+        'androidX': usesAndroidX,
       },
       printStatusWhenWriting: false,
       overwriteExisting: true,
