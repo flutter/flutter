@@ -1193,7 +1193,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       if (_currentCaretRect == null || !_scrollController.hasClients) {
         return;
       }
-      final double scrollOffsetForCaret =  _getScrollOffsetForCaret(_currentCaretRect);
+      final double scrollOffsetForCaret = _getScrollOffsetForCaret(_currentCaretRect);
       _scrollController.animateTo(
         scrollOffsetForCaret,
         duration: _caretAnimationDuration,

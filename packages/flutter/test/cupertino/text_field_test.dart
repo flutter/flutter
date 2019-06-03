@@ -2618,4 +2618,30 @@ void main() {
     // visible.
     expect(scrollController.offset, 26.0);
   });
+
+  testWidgets('disabled state golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: DecoratedBox(
+          decoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: CupertinoTextField(
+                controller: TextEditingController(text: 'lorem'),
+                enabled: false,
+              ),
+            )
+          )
+        )
+      )
+    );
+
+    await expectLater(
+      find.byType(CupertinoTextField),
+      matchesGoldenFile('text_field_test.disabled.0.png'),
+      skip: !Platform.isLinux,
+    );
+  });
 }

@@ -447,6 +447,8 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   @override
   bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    assert(minScrollExtent != null);
+    assert(maxScrollExtent != null);
     if (!nearEqual(_minScrollExtent, minScrollExtent, Tolerance.defaultTolerance.distance) ||
         !nearEqual(_maxScrollExtent, maxScrollExtent, Tolerance.defaultTolerance.distance) ||
         _didChangeViewportDimensionOrReceiveCorrection) {

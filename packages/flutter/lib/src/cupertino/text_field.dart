@@ -785,6 +785,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final TextStyle placeholderStyle = textStyle.merge(widget.placeholderStyle);
     final Brightness keyboardAppearance = widget.keyboardAppearance ?? themeData.brightness;
     final Color cursorColor = widget.cursorColor ?? themeData.primaryColor;
+    final Color disabledColor = CupertinoTheme.of(context).brightness == Brightness.light
+      ? _kDisabledBackground
+      : CupertinoColors.darkBackgroundGray;
+
+    final BoxDecoration effectiveDecoration = enabled
+      ? widget.decoration
+      : widget.decoration?.copyWith(color: widget.decoration?.color ?? disabledColor);
 
     final Widget paddedEditable = TextSelectionGestureDetector(
       onTapDown: _handleTapDown,
@@ -855,16 +862,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       child: IgnorePointer(
         ignoring: !enabled,
         child: Container(
-          decoration: widget.decoration,
-          // The main decoration and the disabled scrim exists separately.
-          child: Container(
-            color: enabled
-                ? null
-                : CupertinoTheme.of(context).brightness == Brightness.light
-                    ? _kDisabledBackground
-                    : CupertinoColors.darkBackgroundGray,
-            child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
-          ),
+          decoration: effectiveDecoration,
+          child: _addTextDependentAttachments(paddedEditable, textStyle, placeholderStyle),
         ),
       ),
     );
