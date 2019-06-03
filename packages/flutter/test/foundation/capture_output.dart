@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show VoidCallback;
+import 'package:flutter/foundation.dart';
 
 List<String> captureOutput(VoidCallback fn) {
   final List<String> log = <String>[];
