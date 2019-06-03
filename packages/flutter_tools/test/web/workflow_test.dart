@@ -23,11 +23,12 @@ void main() {
     MockPlatform linux;
     MockPlatform macos;
     MockProcessManager mockProcessManager;
-    MockFlutterVersion unstable = MockFlutterVersion(false);
-    MockFlutterVersion stable = MockFlutterVersion(true);
+    MockFlutterVersion unstable;
+    MockFlutterVersion stable;
     WebWorkflow workflow;
 
     setUpAll(() {
+      unstable = MockFlutterVersion(false);
       noEnvironment = MockPlatform(environment: const <String, String>{});
       notSupported = MockPlatform(linux: false, windows: false, macos: false);
       windows = MockPlatform(windows: true);
