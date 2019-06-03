@@ -95,6 +95,23 @@ class TestWindow implements Window {
     onMetricsChanged();
   }
 
+  // TODO(dnfield): Remove this ignore once custom embedders have had time to catch up
+  // And make this property actually wrap _window.viewPadding.
+  // @override
+  // ignore: annotate_overrides, public_member_api_docs
+  WindowPadding get viewPadding => _viewPaddingTestValue ?? _window.padding;
+  WindowPadding _viewPaddingTestValue;
+  /// Hides the real padding and reports the given [paddingTestValue] instead.
+  set viewPaddingTestValue(WindowPadding viewPaddingTestValue) {
+    _viewPaddingTestValue = viewPaddingTestValue;
+    onMetricsChanged();
+  }
+  /// Deletes any existing test padding and returns to using the real padding.
+  void clearViewPaddingTestValue() {
+    _viewPaddingTestValue = null;
+    onMetricsChanged();
+  }
+
   @override
   WindowPadding get padding => _paddingTestValue ?? _window.padding;
   WindowPadding _paddingTestValue;

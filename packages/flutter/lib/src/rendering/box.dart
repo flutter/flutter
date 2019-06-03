@@ -657,8 +657,10 @@ class BoxHitTestResult extends HitTestResult {
   /// provided `hitTest` callback, which is invoked with the transformed
   /// `position` as argument.
   ///
-  /// Since the provided paint `transform` describes the transform from the
-  /// child to the parent, the matrix is inverted before it is used to transform
+  /// The provided paint `transform` (which describes the transform from the
+  /// child to the parent in 3D) is processed by
+  /// [PointerEvent.removePerspectiveTransform] to remove the
+  /// perspective component and inverted before it is used to transform
   /// `position` from the coordinate system of the parent to the system of the
   /// child.
   ///
@@ -674,7 +676,8 @@ class BoxHitTestResult extends HitTestResult {
   /// position is not required to do the actual hit testing in that protocol.
   ///
   /// {@tool sample}
-  /// This method is used in [RenderBox.hitTestChildren]:
+  /// This method is used in [RenderBox.hitTestChildren] when the child and
+  /// parent don't share the same origin.
   ///
   /// ```dart
   /// abstract class Foo extends RenderBox {
@@ -713,7 +716,7 @@ class BoxHitTestResult extends HitTestResult {
   }) {
     assert(hitTest != null);
     if (transform != null) {
-      transform = Matrix4.tryInvert(transform);
+      transform = Matrix4.tryInvert(PointerEvent.removePerspectiveTransform(transform));
       if (transform == null) {
         // Objects are not visible on screen and cannot be hit-tested.
         return false;
@@ -788,7 +791,14 @@ class BoxHitTestResult extends HitTestResult {
     final Offset transformedPosition = position == null || transform == null
         ? position
         : MatrixUtils.transformPoint(transform, position);
-    return hitTest(this, transformedPosition);
+    if (transform != null) {
+      pushTransform(transform);
+    }
+    final bool isHit = hitTest(this, transformedPosition);
+    if (transform != null) {
+      popTransform();
+    }
+    return isHit;
   }
 }
 
@@ -797,7 +807,7 @@ class BoxHitTestEntry extends HitTestEntry {
   /// Creates a box hit test entry.
   ///
   /// The [localPosition] argument must not be null.
-  const BoxHitTestEntry(RenderBox target, this.localPosition)
+  BoxHitTestEntry(RenderBox target, this.localPosition)
     : assert(localPosition != null),
       super(target);
 
@@ -2057,10 +2067,11 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
-  /// If transforming is necessary, [BoxHitTestResult.addWithPaintTransform],
-  /// [BoxHitTestResult.addWithPaintOffset], or
-  /// [BoxHitTestResult.addWithRawTransform] should be used to transform
-  /// `position` to the local coordinate system.
+  /// If transforming is necessary, [HitTestResult.addWithPaintTransform],
+  /// [HitTestResult.addWithPaintOffset], or [HitTestResult.addWithRawTransform] need
+  /// to be invoked by the caller to record the required transform operations
+  /// in the [HitTestResult]. These methods will also help with applying the
+  /// transform to `position`.
   ///
   /// Hit testing requires layout to be up-to-date but does not require painting
   /// to be up-to-date. That means a render object can rely upon [performLayout]
@@ -2130,10 +2141,11 @@ abstract class RenderBox extends RenderObject {
   /// This [RenderBox] is responsible for checking whether the given position is
   /// within its bounds.
   ///
-  /// If transforming is necessary, [BoxHitTestResult.addWithPaintTransform],
-  /// [BoxHitTestResult.addWithPaintOffset], or
-  /// [BoxHitTestResult.addWithRawTransform] should be used to transform
-  /// `position` to the local coordinate system.
+  /// If transforming is necessary, [HitTestResult.addWithPaintTransform],
+  /// [HitTestResult.addWithPaintOffset], or [HitTestResult.addWithRawTransform] need
+  /// to be invoked by the caller to record the required transform operations
+  /// in the [HitTestResult]. These methods will also help with applying the
+  /// transform to `position`.
   ///
   /// Used by [hitTest]. If you override [hitTest] and do not call this
   /// function, then you don't need to implement this function.

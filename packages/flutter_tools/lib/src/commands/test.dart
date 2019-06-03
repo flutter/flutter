@@ -99,6 +99,11 @@ class TestCommand extends FastFlutterCommand {
         negatable: true,
         help: 'Whether to build the assets bundle for testing.\n'
               'Consider using --no-test-assets if assets are not required.',
+      )
+      ..addOption('platform',
+        allowed: const <String>['tester', 'chrome'],
+        defaultsTo: 'tester',
+        help: 'The platform to run the unit tests on. Defaults to "tester".'
       );
   }
 
@@ -166,6 +171,16 @@ class TestCommand extends FastFlutterCommand {
             'Test files must be in that directory and end with the pattern "_test.dart".'
         );
       }
+    } else {
+      final List<String> fileCopy = <String>[];
+      for (String file in files) {
+        if (file.endsWith(platform.pathSeparator)) {
+          fileCopy.addAll(_findTests(fs.directory(file)));
+        } else {
+          fileCopy.add(file);
+        }
+      }
+      files = fileCopy;
     }
 
     CoverageCollector collector;
@@ -222,6 +237,7 @@ class TestCommand extends FastFlutterCommand {
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
+      web: argResults['platform'] == 'chrome',
     );
 
     if (collector != null) {
@@ -242,7 +258,7 @@ class TestCommand extends FastFlutterCommand {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needRebuild(assetBundle.entries)) {
-      writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
+      await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
           assetBundle.entries);
     }
   }

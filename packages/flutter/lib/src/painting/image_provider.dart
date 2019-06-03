@@ -552,7 +552,6 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,
-        client: _httpClient,
         onBytesReceived: (int cumulative, int total) {
           chunkEvents.add(ImageChunkEvent(
             cumulativeBytesLoaded: cumulative,
