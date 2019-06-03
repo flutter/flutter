@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show
   PrimaryPointerGestureRecognizer,
   GestureDisposition,
-  SemanticsHandlerConfiguration;
+  SemanticsGestureConfiguration;
 
 import 'basic.dart';
 import 'container.dart';
@@ -29,12 +29,12 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   bool _sentTapDown = false;
 
   @override
-  SemanticsHandlerConfiguration get semanticsHandlers {
-    return _semanticsConfiguration ??= SemanticsHandlerConfiguration(
+  SemanticsGestureConfiguration get semanticsConfiguration {
+    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
       onTap: onAnyTapDown,
     );
   }
-  SemanticsHandlerConfiguration _semanticsConfiguration;
+  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
