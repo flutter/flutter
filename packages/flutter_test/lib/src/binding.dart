@@ -1770,6 +1770,7 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
     return HttpClientResponseCompressionState.decompressed;
   }
   */
+  @override
   dynamic noSuchMethod(Invocation invocation) {
     if (invocation.memberName == #compressionState) {
       return null;

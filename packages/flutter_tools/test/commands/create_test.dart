@@ -1264,12 +1264,6 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
     return HttpClientResponseCompressionState.decompressed;
   }
   */
-  dynamic noSuchMethod(Invocation invocation) {
-    if (invocation.memberName == #compressionState) {
-      return null;
-    }
-    return super.noSuchMethod(invocation);
-  }
 
   @override
   StreamSubscription<List<int>> listen(
@@ -1284,6 +1278,10 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
+    // TODO(tvolkert): Update (flutter/flutter#33791)
+    if (invocation.memberName == #compressionState) {
+      return null;
+    }
     throw 'io.HttpClientResponse - $invocation';
   }
 }
