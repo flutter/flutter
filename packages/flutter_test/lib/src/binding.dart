@@ -23,13 +23,11 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vector_math/vector_math_64.dart';
 
 import 'goldens.dart';
+import 'platform.dart';
 import 'stack_manipulation.dart';
 import 'test_async_utils.dart';
 import 'test_exception_reporter.dart';
 import 'test_text_input.dart';
-
-// Whether this test is running in the browser.
-const bool _kRunningInBrowser = identical(0, 0.0);
 
 /// Phases that can be reached by [WidgetTester.pumpWidget] and
 /// [TestWidgetsFlutterBinding.pump].
@@ -154,7 +152,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// environment variables for a variable called `FLUTTER_TEST`.)
   static WidgetsBinding ensureInitialized() {
     if (WidgetsBinding.instance == null) {
-      if (_kRunningInBrowser || Platform.environment.containsKey('FLUTTER_TEST')) {
+      if (isBrowser || Platform.environment.containsKey('FLUTTER_TEST')) {
         AutomatedTestWidgetsFlutterBinding();
       } else {
         LiveTestWidgetsFlutterBinding();
@@ -251,7 +249,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     return TestAsyncUtils.guard<void>(() async {
       assert(inTest);
       final Locale locale = Locale(languageCode, countryCode == '' ? null : countryCode);
-      if (_kRunningInBrowser) {
+      if (isBrowser) {
         return;
       }
       dispatchLocalesChanged(<Locale>[locale]);
@@ -592,7 +590,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
 
-    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !_kRunningInBrowser;
+    final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
     final ErrorWidgetBuilder errorWidgetBuilderBeforeTest = ErrorWidget.builder;
 
@@ -607,7 +605,7 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
       runApp(Container(key: UniqueKey(), child: _postTestMessage)); // Unmount any remaining widgets.
       await pump();
       invariantTester();
-      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !_kRunningInBrowser);
+      _verifyAutoUpdateGoldensUnset(autoUpdateGoldensBeforeTest && !isBrowser);
       _verifyReportTestExceptionUnset(reportTestExceptionBeforeTest);
       _verifyErrorWidgetBuilderUnset(errorWidgetBuilderBeforeTest);
       _verifyInvariants();
@@ -756,7 +754,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   static Set<String> _allowedAssetKeys;
 
   void _mockFlutterAssets() {
-    if (_kRunningInBrowser) {
+    if (isBrowser) {
       return;
     }
     if (!Platform.environment.containsKey('UNIT_TEST_ASSETS')) {
