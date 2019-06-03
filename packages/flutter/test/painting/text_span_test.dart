@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart' show nonconst;
 import '../flutter_test_alternative.dart';
 
@@ -73,6 +74,18 @@ void main() {
     expect(textSpan.toPlainText(), 'abc');
   });
 
+  test('WidgetSpan toPlainText', () {
+    TextSpan textSpan = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(child: Container(width: 10, height: 10)),
+        TextSpan(text: 'c'),
+      ],
+    );
+    expect(textSpan.toPlainText(), 'ab\uFFFCc');
+  });
+
   test('TextSpan toPlainText with semanticsLabel', () {
     const TextSpan textSpan = TextSpan(
       text: 'a',
@@ -83,5 +96,120 @@ void main() {
     );
     expect(textSpan.toPlainText(), 'afooc');
     expect(textSpan.toPlainText(includeSemanticsLabels: false), 'abc');
+  });
+
+  test('TextSpan widget change test', () {
+    TextSpan textSpan1 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(child: Container(width: 10, height: 10)),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    TextSpan textSpan2 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(child: Container(width: 10, height: 10, color: Color.fromARGB(255, 66, 165, 245))),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    TextSpan textSpan3 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(child: Container(width: 11, height: 10)),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    const TextSpan textSpan4 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(child: Text('test')),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    const TextSpan textSpan5 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(child: Text('different!')),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    TextSpan textSpan6 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(
+          child: Container(width: 10, height: 10),
+          alignment: PlaceholderAlignment.top,
+        ),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    expect(textSpan1.compareTo(textSpan2), RenderComparison.layout);
+    expect(textSpan1.compareTo(textSpan3), RenderComparison.layout);
+    expect(textSpan1.compareTo(textSpan4), RenderComparison.layout);
+    expect(textSpan1.compareTo(textSpan1), RenderComparison.identical);
+    expect(textSpan2.compareTo(textSpan2), RenderComparison.identical);
+    expect(textSpan3.compareTo(textSpan3), RenderComparison.identical);
+    expect(textSpan2.compareTo(textSpan3), RenderComparison.layout);
+    expect(textSpan2.compareTo(textSpan1), RenderComparison.layout);
+    expect(textSpan4.compareTo(textSpan5), RenderComparison.layout);
+    expect(textSpan3.compareTo(textSpan5), RenderComparison.layout);
+    expect(textSpan2.compareTo(textSpan5), RenderComparison.layout);
+    expect(textSpan1.compareTo(textSpan5), RenderComparison.layout);
+    expect(textSpan1.compareTo(textSpan6), RenderComparison.layout);
+  });
+
+  test('TextSpan nested widget change test', () {
+    TextSpan textSpan1 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(
+          child: Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(child: Container(width: 10, height: 10)),
+                TextSpan(text: 'The sky is falling :)')
+              ],
+            )
+          ),
+        ),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    TextSpan textSpan2 = TextSpan(
+      text: 'a',
+      children: <InlineSpan>[
+        TextSpan(text: 'b'),
+        WidgetSpan(
+          child: Text.rich(
+            TextSpan(
+              children: <InlineSpan>[
+                WidgetSpan(child: Container(width: 10, height: 11)),
+                TextSpan(text: 'The sky is falling :)')
+              ],
+            )
+          ),
+        ),
+        TextSpan(text: 'c'),
+      ],
+    );
+
+    expect(textSpan1.compareTo(textSpan2), RenderComparison.layout);
+    expect(textSpan1.compareTo(textSpan1), RenderComparison.identical);
+    expect(textSpan2.compareTo(textSpan2), RenderComparison.identical);
   });
 }
