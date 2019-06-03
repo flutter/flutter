@@ -1,4 +1,4 @@
-Signature: 29a9beb7d2262cbb885fc5c4a3b8d25c
+Signature: 5cd62fdc4723bca36eae3a03b3fa8a5a
 
 UNUSED LICENSES:
 
@@ -1564,7 +1564,6 @@ FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayList.cpp
 FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListPriv.h
 FILE: ../../../third_party/skia/src/core/SkDraw_text.cpp
-FILE: ../../../third_party/skia/src/core/SkFontPriv.cpp
 FILE: ../../../third_party/skia/src/core/SkFontPriv.h
 FILE: ../../../third_party/skia/src/core/SkGlyph.cpp
 FILE: ../../../third_party/skia/src/core/SkIPoint16.h
@@ -2411,6 +2410,7 @@ FILE: ../../../third_party/skia/bench/RectBench.cpp
 FILE: ../../../third_party/skia/bench/RegionBench.cpp
 FILE: ../../../third_party/skia/bench/RepeatTileBench.cpp
 FILE: ../../../third_party/skia/bench/ScalarBench.cpp
+FILE: ../../../third_party/skia/bench/SkSLBench.cpp
 FILE: ../../../third_party/skia/bench/VertBench.cpp
 FILE: ../../../third_party/skia/experimental/Networking/SkSockets.cpp
 FILE: ../../../third_party/skia/experimental/Networking/SkSockets.h
