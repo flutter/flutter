@@ -1525,7 +1525,7 @@ class GridView extends BoxScrollView {
 
   /// A delegate that controls the layout of the children within the [GridView].
   ///
-  /// The [GridView] and [GridView.custom] constructors let you specify this
+  /// The [GridView], [GridView.builder], and [GridView.custom] constructors let you specify this
   /// delegate explicitly. The other constructors create a [gridDelegate]
   /// implicitly.
   final SliverGridDelegate gridDelegate;
