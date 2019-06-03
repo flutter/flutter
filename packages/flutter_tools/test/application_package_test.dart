@@ -323,6 +323,7 @@ void main() {
         'File "not_existing.far" does not exist or is not a .far file. Use far archive.\n',
       );
     }, overrides: overrides);
+
     testUsingContext('Error on non-far file', () {
       fs.directory('regular_folder').createSync();
       final PrebuiltFuchsiaApp fuchsiaApp =
@@ -334,6 +335,7 @@ void main() {
         'File "regular_folder" does not exist or is not a .far file. Use far archive.\n',
       );
     }, overrides: overrides);
+
     testUsingContext('Success with far file', () {
       fs.file('bundle.far').createSync();
       final PrebuiltFuchsiaApp fuchsiaApp = FuchsiaApp.fromPrebuiltApp(fs.file('bundle.far'));
@@ -341,6 +343,7 @@ void main() {
       expect(logger.errorText, isEmpty);
       expect(fuchsiaApp.id, 'bundle.far');
     }, overrides: overrides);
+
     testUsingContext('returns null when there is no fuchsia', () async {
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
