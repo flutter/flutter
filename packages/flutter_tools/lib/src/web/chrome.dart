@@ -168,10 +168,10 @@ class Chrome {
       // profile information. Give it some time before attempting to delete
       // the directory.
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      await _dataDir?.delete(recursive: true);
     } catch (_) {
       // Silently fail if we can't clean up the profile information.
-      // It is a system tmp directory so it should get cleaned up eventually.
+    } finally {
+      await _dataDir?.delete(recursive: true);
     }
   }
 }
