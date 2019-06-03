@@ -528,6 +528,13 @@ tasks:
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
+  flutter_gallery__image_cache_memory:
+    description: >
+      Measures memory usage for a list of large red squares in smaller containers.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
   analyzer_benchmark:
     description: >
       Measures the speed of Dart analyzer.
