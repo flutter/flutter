@@ -7,39 +7,50 @@ import '../../base/file_system.dart';
 import '../../devfs.dart';
 import '../build_system.dart';
 
-/// List all asset files in a project by parsing the asset manfiest.
-List<File> listAssets(Environment environment) {
-  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-  assetBundle.build(
-    manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
-    packagesPath: environment.projectDir.childFile('.packages').path,
-  );
-  final List<File> results = <File>[];
-  final Iterable<DevFSFileContent> files = assetBundle.entries.values.whereType<DevFSFileContent>();
-  for (DevFSFileContent devFsContent in files) {
-    results.add(fs.file(devFsContent.file.path));
-  }
-  return results;
-}
+/// The copying logic for flutter assets.
+// TODO(jonahwilliams): combine the asset bundle logic with this rule so that
+// we can compute the key for deleted assets. This is required to remove assets
+// from build directories that are no longer part of the manifest and to unify
+// the update/diff logic.
+class AssetBehavior extends SourceBehavior {
+  const AssetBehavior();
 
-/// List all output files in a project by parsing the asset manfiest and
-/// replacing the path with the output directory.
-List<File> listOutputAssets(Environment environment) {
-  final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-  assetBundle.build(
-    manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
-    packagesPath: environment.projectDir.childFile('.packages').path,
-  );
-  final List<File> results = <File>[];
-  for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
-    final File file = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', entry.key));
-    results.add(file);
+  @override
+  List<FileSystemEntity> inputs(Environment environment) {
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    assetBundle.build(
+      manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+    );
+    final List<File> results = <File>[];
+    final Iterable<DevFSFileContent> files = assetBundle.entries.values.whereType<DevFSFileContent>();
+    for (DevFSFileContent devFsContent in files) {
+      results.add(fs.file(devFsContent.file.path));
+    }
+    return results;
   }
-  return results;
+
+  @override
+  List<FileSystemEntity> outputs(Environment environment) {
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    assetBundle.build(
+      manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
+      packagesPath: environment.projectDir.childFile('.packages').path,
+    );
+    final List<File> results = <File>[];
+    for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
+      final File file = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', entry.key));
+      results.add(file);
+    }
+    return results;
+  }
 }
 
 /// Copies the asset files from the [copyAssets] rule into place.
-Future<void> copyAssetsInvocation(List<FileSystemEntity> inputs, Environment environment) async {
+///
+/// Based on the contents of [updates], we copy the file in the case of
+/// [ChangeType.Added] and [ChangeType.Modified].
+Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment environment) async {
   final Directory output = environment.buildDir.childDirectory('flutter_assets');
   if (!output.existsSync()) {
     output.createSync(recursive: true);
@@ -51,24 +62,40 @@ Future<void> copyAssetsInvocation(List<FileSystemEntity> inputs, Environment env
   );
   for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
     final File file = fs.file(fs.path.join(output.path, entry.key));
-    // TODO(jonahwilliams): use copyFile method once that lands on master.
-    file.parent.createSync(recursive: true);
-    file.writeAsBytesSync(entry.value.contentsAsBytes());
+    final DevFSContent content = entry.value;
+    if (content is DevFSFileContent) {
+      final String path = content.file.absolute.path;
+      final ChangeType changeType = updates[path];
+      switch (changeType) {
+        case ChangeType.Modified:
+        case ChangeType.Added:
+          file.parent.createSync(recursive: true);
+          file.writeAsBytesSync(entry.value.contentsAsBytes());
+          break;
+        case ChangeType.Removed:
+          // This clause won't currently be hit because the manifest logic
+          // is unaware of them once they are removed from the pubspec.
+          file.deleteSync();
+      }
+    } else {
+      file.parent.createSync(recursive: true);
+      file.writeAsBytesSync(entry.value.contentsAsBytes());
+    }
   }
 }
 
-/// Assemble the assets used in the application into a build directory.
+/// Copy the assets used in the application into a build directory.
 const Target copyAssets = Target(
   name: 'copy_assets',
   inputs: <Source>[
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.function(listAssets),
+    Source.behavior(AssetBehavior()),
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/flutter_assets/AssetManifest.json'),
     Source.pattern('{BUILD_DIR}/flutter_assets/FontManifest.json'),
     Source.pattern('{BUILD_DIR}/flutter_assets/LICENSE'),
-    Source.function(listOutputAssets), // <- everything in this subdirectory.
+    Source.behavior(AssetBehavior()), // <- everything in this subdirectory.
   ],
   dependencies: <Target>[],
   invocation: copyAssetsInvocation,

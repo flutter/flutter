@@ -31,13 +31,15 @@ class AssembleCommand extends FlutterCommand {
     addSubcommand(AssembleRun());
     addSubcommand(AssembleDescribe());
     addSubcommand(AssembleListInputs());
-    addSubcommand(AssembleListOutputs());
   }
   @override
   String get description => 'Assemble and build flutter resources.';
 
   @override
   String get name => 'assemble';
+
+  @override
+  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -77,7 +79,7 @@ abstract class AssembleBase extends FlutterCommand {
   /// Throws a [ToolExit] if none is provided. This intentionally has no
   /// default.
   TargetPlatform get targetPlatform {
-    final String value = argResults['target-platform'];
+    final String value = argResults['target-platform'] ?? 'darwin-x64';
     if (value == null) {
       throwToolExit('--target-platform is required for flutter assemble.');
     }
@@ -89,7 +91,7 @@ abstract class AssembleBase extends FlutterCommand {
   /// Throws a [ToolExit] if none is provided. This intentionally has no
   /// default.
   BuildMode get buildMode {
-    final String value = argResults['build-mode'];
+    final String value = argResults['build-mode'] ?? 'debug';
     if (value == null) {
       throwToolExit('--build-mode is required for flutter assemble.');
     }
@@ -112,7 +114,6 @@ abstract class AssembleBase extends FlutterCommand {
       projectDir: flutterProject.directory,
       buildMode: buildMode,
       targetPlatform: targetPlatform,
-      stampDir: fs.directory(getBuildDirectory()),
     );
     return result;
   }
@@ -125,6 +126,9 @@ class AssembleRun extends AssembleBase {
 
   @override
   String get name => 'run';
+
+  @override
+  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -144,6 +148,9 @@ class AssembleDescribe extends AssembleBase {
 
   @override
   String get name => 'describe';
+
+  @override
+  bool get isExperimental => true;
 
   @override
   Future<FlutterCommandResult> runCommand() {
@@ -167,6 +174,9 @@ class AssembleListInputs extends AssembleBase {
   String get name => 'inputs';
 
   @override
+  bool get isExperimental => true;
+
+  @override
   Future<FlutterCommandResult> runCommand() {
     try {
       final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
@@ -183,27 +193,3 @@ class AssembleListInputs extends AssembleBase {
   }
 }
 
-/// List output files for a target.
-class AssembleListOutputs extends AssembleBase {
-  @override
-  String get description => 'List the outputs for a particular target.';
-
-  @override
-  String get name => 'outputs';
-
-  @override
-  Future<FlutterCommandResult> runCommand() {
-    try {
-      final List<Map<String, Object>> results = buildSystem.describe(targetName, environment);
-      for (Map<String, Object> result in results) {
-        if (result['name'] == targetName) {
-          final List<String> inputs = result['outputs'];
-          inputs.forEach(print);
-        }
-      }
-    } on Exception catch (err) {
-      throwToolExit(err.toString());
-    }
-    return null;
-  }
-}

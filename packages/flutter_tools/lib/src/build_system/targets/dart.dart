@@ -11,7 +11,9 @@ import '../../project.dart';
 import '../build_system.dart';
 
 /// Supports compiling dart source to kernel with a subset of flags.
-Future<void> compileKernel(List<FileSystemEntity> inputs, Environment environment) async {
+///
+/// This is a non-incremental compile so the specific [updates] are ignored.
+Future<void> compileKernel(Map<String, ChangeType> updates, Environment environment) async {
   final KernelCompiler compiler = await kernelCompilerFactory.create(
     FlutterProject.fromDirectory(environment.projectDir),
   );
@@ -35,8 +37,6 @@ Future<void> compileKernel(List<FileSystemEntity> inputs, Environment environmen
 ///
 /// This does not attempt to determine if a file is used or imported, so it
 /// may otherwise report more files than strictly necessary.
-// TODO(jonahwilliams): we should separate this process into user sources/pubspec
-// and dependencies, so that we don't have to compute as many hashes.
 List<FileSystemEntity> listDartSources(Environment environment) {
   final Map<String, Uri> packageMap = PackageMap(PackageMap.globalPackagesPath).map;
   final List<File> dartFiles = <File>[];
@@ -55,7 +55,7 @@ List<FileSystemEntity> listDartSources(Environment environment) {
 const Target kernelSnapshot = Target(
   name: 'kernel_snapshot',
   inputs: <Source>[
-    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib
+    Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and .packages
   ],
   outputs: <Source>[
     Source.pattern('{BUILD_DIR}/{mode}/main.app.dill'),

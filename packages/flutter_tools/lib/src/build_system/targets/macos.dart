@@ -15,21 +15,24 @@ import '../build_system.dart';
 ///
 /// Removes any previous version of the framework that already exists in the
 /// target directory.
-Future<void> copyFramework(List<FileSystemEntity> input, Environment environment) async {
+Future<void> copyFramework(Map<String, ChangeType> updates, Environment environment) async {
   // Ensure that the path is a framework, to minimize the potential for
   // catastrophic deletion bugs with bad arguments.
-  if (fs.path.extension(input.single.path) != '.framework') {
-    throw Exception('Attempted to delete a non-framework directory: $input.single.path');
+  if (fs.path.extension(updates.keys.single) != '.framework') {
+    throw Exception('Attempted to delete a non-framework directory: ${updates.keys.single}');
   }
+  final Directory input = fs.directory(updates.keys.single);
   final Directory targetDirectory = environment
-    .copyDir
+    .projectDir
+    .childDirectory('macos')
+    .childDirectory('Flutter')
     .childDirectory('FlutterMacOS.framework');
   if (targetDirectory.existsSync()) {
     targetDirectory.deleteSync(recursive: true);
   }
 
   final ProcessResult result = processManager
-      .runSync(<String>['cp', '-R', input.single.path, targetDirectory.path]);
+      .runSync(<String>['cp', '-R', input.path, targetDirectory.path]);
   if (result.exitCode != 0) {
     throw Exception(
       'Failed to copy framework (exit ${result.exitCode}:\n'
@@ -45,7 +48,7 @@ const Target unpackMacos = Target(
     Source.pattern('{CACHE_DIR}/{platform}/FlutterMacOS.framework/'),
   ],
   outputs: <Source>[
-    Source.pattern('{COPY_DIR}/FlutterMacOS.framework/'),
+    Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/'),
   ],
   dependencies: <Target>[],
   platforms: <TargetPlatform>[

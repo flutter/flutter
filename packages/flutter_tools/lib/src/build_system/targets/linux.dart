@@ -7,7 +7,7 @@ import '../build_system.dart';
 // TODO(jonahwilliams): remove import when target uses specific file paths.
 import 'windows.dart';
 
-/// Copies the Linux desktop embedder files to the copy directory.
+/// Copies the Linux desktop embedding files to the copy directory.
 const Target unpackLinux = Target(
   name: 'unpack_linux',
   inputs: <Source>[
@@ -17,16 +17,16 @@ const Target unpackLinux = Target(
     Source.pattern('{CACHE_DIR}/{platform}/flutter_plugin_registrar.h'),
     Source.pattern('{CACHE_DIR}/{platform}/flutter_glfw.h'),
     Source.pattern('{CACHE_DIR}/{platform}/icudtl.dat'),
-    Source.function(listClientWrapperInput),
+    Source.pattern('{CACHE_DIR}/{platform}/cpp_client_wrapper/*'),
   ],
   outputs: <Source>[
-    Source.pattern('{COPY_DIR}/libflutter_linux.so'),
-    Source.pattern('{COPY_DIR}/flutter_export.h'),
-    Source.pattern('{COPY_DIR}/flutter_messenger.h'),
-    Source.pattern('{COPY_DIR}/flutter_plugin_registrar.h'),
-    Source.pattern('{COPY_DIR}/flutter_glfw.h'),
-    Source.pattern('{COPY_DIR}/icudtl.dat'),
-    Source.function(listClientWrapperOutput),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/libflutter_linux.so'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_export.h'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_messenger.h'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_plugin_registrar.h'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/flutter_glfw.h'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/icudtl.dat'),
+    Source.pattern('{PROJECT_DIR}/linux/flutter/cpp_client_wrapper/*'),
   ],
   dependencies: <Target>[],
   platforms: <TargetPlatform>[
