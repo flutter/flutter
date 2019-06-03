@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -57,7 +55,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Centered.wrap.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
 
   testWidgets('Text Foreground', (WidgetTester tester) async {
@@ -133,7 +131,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   // TODO(garyq): This test requires an update when the background
   // drawing from the beginning of the line bug is fixed. The current
@@ -183,7 +181,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('text_golden.Background.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('Text Fade', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -219,7 +217,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('text_golden.Fade.1.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('Default Strut text', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -480,7 +478,7 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.Decoration.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
   testWidgets('Decoration thickness', (WidgetTester tester) async {
     final TextDecoration allDecorations = TextDecoration.combine(
@@ -519,5 +517,5 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('text_golden.DecorationThickness.1.0.png'),
     );
-  }, skip: !Platform.isLinux); // Coretext uses different thicknesses for decoration
+  }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 }

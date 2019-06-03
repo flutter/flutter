@@ -12,17 +12,21 @@ typedef SemanticsLongPressCallback = void Function();
 /// Called when the user drags with a semantics device.
 typedef SemanticsDragUpdateCallback = void Function(DragUpdateDetails details);
 
-/// Describes the callbacks to handle each kind of semantics events respectively.
-/// All properties are optional.
+/// Describes the semantics configuration of a gesture recognizer, for example
+/// for accessibility purposes. It is queried by the recognizer's
+/// [RawGestureDetector] to build a collective semantics annotation.
+///
+/// When a [RawGestureDetector] receives a semantics gesture, it will invoke
+/// the corresponding method that each recognizer reports in the configuration.
 ///
 /// See also:
 ///
-///  * [GestureRecognizer.semanticsHandlers], a method that returns
-///    an instance of this class.
-class SemanticsHandlerConfiguration {
+///  * [GestureRecognizer.semanticsConfiguration], a method that returns this
+///    class.
+class SemanticsGestureConfiguration {
   /// Initialize the semantics handler configuration by declaring the handlers
   /// for each kind of semantics events.
-  SemanticsHandlerConfiguration({
+  SemanticsGestureConfiguration({
     this.onTap,
     this.onLongPress,
     this.onHorizontalDragUpdate,
