@@ -80,7 +80,7 @@ public class FlutterPluginRegistry
     public void attach(FlutterView flutterView, Activity activity) {
         mFlutterView = flutterView;
         mActivity = activity;
-        mPlatformViewsController.attach(activity, flutterView, flutterView);
+        mPlatformViewsController.attach(activity, flutterView, flutterView.getDartExecutor());
     }
 
     public void detach() {

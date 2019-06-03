@@ -15,6 +15,8 @@ import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.os.Build;
 import android.os.Handler;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.os.LocaleList;
 import android.support.annotation.RequiresApi;
 import android.support.annotation.UiThread;
@@ -197,7 +199,7 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
         sendLocalesToDart(getResources().getConfiguration());
         sendUserPlatformSettingsToDart();
     }
-    
+
     private static Activity getActivity(Context context) {
         if (context == null) {
             return null;
@@ -210,6 +212,11 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
             return getActivity(((ContextWrapper) context).getBaseContext());
         }
         return null;
+    }
+
+    @NonNull
+    public DartExecutor getDartExecutor() {
+        return dartExecutor;
     }
 
     @Override

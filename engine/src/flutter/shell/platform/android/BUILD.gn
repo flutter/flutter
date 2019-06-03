@@ -160,6 +160,7 @@ action("flutter_shell_java") {
     "io/flutter/embedding/engine/systemchannels/LocalizationChannel.java",
     "io/flutter/embedding/engine/systemchannels/NavigationChannel.java",
     "io/flutter/embedding/engine/systemchannels/PlatformChannel.java",
+    "io/flutter/embedding/engine/systemchannels/PlatformViewsChannel.java",
     "io/flutter/embedding/engine/systemchannels/SettingsChannel.java",
     "io/flutter/embedding/engine/systemchannels/SystemChannel.java",
     "io/flutter/embedding/engine/systemchannels/TextInputChannel.java",
