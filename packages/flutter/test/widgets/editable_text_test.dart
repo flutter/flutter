@@ -1870,8 +1870,9 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
     expect(renderEditable.text.children.length, 3);
-    expect(renderEditable.text.children[1].text, 'composing');
-    expect(renderEditable.text.children[1].style.decoration, TextDecoration.underline);
+    final TextSpan textSpan = renderEditable.text.children[1];
+    expect(textSpan.text, 'composing');
+    expect(textSpan.style.decoration, TextDecoration.underline);
 
     focusNode.unfocus();
     await tester.pump();
@@ -1893,6 +1894,7 @@ void main() {
         child: SizedBox(
           width: 100,
           child: EditableText(
+            showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -2003,7 +2005,7 @@ void main() {
             throw TestFailure('HandlePositionInViewport can\'t be null.');
         }
       }
-
+      expect(state.selectionOverlay.handlesAreVisible, isTrue);
       testPosition(container[0].offset.dx, leftPosition);
       testPosition(container[1].offset.dx, rightPosition);
     }
@@ -2011,7 +2013,6 @@ void main() {
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
@@ -2033,7 +2034,6 @@ void main() {
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
@@ -2060,6 +2060,7 @@ void main() {
           width: 100,
           child: EditableText(
             controller: controller,
+            showSelectionHandles: true,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
             cursorColor: Colors.blue,
@@ -2078,7 +2079,6 @@ void main() {
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     final List<CompositedTransformFollower> container =
       find.byType(CompositedTransformFollower)
@@ -2100,6 +2100,7 @@ void main() {
         70.0 + kMinInteractiveSize,
       ),
     );
+    expect(state.selectionOverlay.handlesAreVisible, isTrue);
     expect(controller.selection.base.offset, 0);
     expect(controller.selection.extent.offset, 5);
   });
@@ -2119,6 +2120,7 @@ void main() {
           child: SizedBox(
             width: 100,
             child: EditableText(
+              showSelectionHandles: true,
               controller: controller,
               focusNode: FocusNode(),
               style: Typography(platform: TargetPlatform.iOS).black.subhead,
@@ -2228,7 +2230,7 @@ void main() {
             throw TestFailure('HandlePositionInViewport can\'t be null.');
         }
       }
-
+      expect(state.selectionOverlay.handlesAreVisible, isTrue);
       testPosition(container[0].offset.dx, leftPosition);
       testPosition(container[1].offset.dx, rightPosition);
     }
@@ -2236,7 +2238,6 @@ void main() {
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
@@ -2258,7 +2259,6 @@ void main() {
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 

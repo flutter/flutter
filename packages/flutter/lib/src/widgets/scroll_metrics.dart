@@ -104,6 +104,7 @@ abstract class ScrollMetrics {
   ///
   /// The value is always non-negative, and less than or equal to [viewportDimension].
   double get extentInside {
+    assert(minScrollExtent <= maxScrollExtent);
     return viewportDimension
       // "above" overscroll value
       - (minScrollExtent - pixels).clamp(0, viewportDimension)

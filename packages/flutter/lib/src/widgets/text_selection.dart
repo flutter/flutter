@@ -20,6 +20,7 @@ import 'gesture_detector.dart';
 import 'overlay.dart';
 import 'ticker_provider.dart';
 import 'transitions.dart';
+import 'visibility.dart';
 
 export 'package:flutter/services.dart' show TextSelectionDelegate;
 
@@ -130,7 +131,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the cut
   /// functionality to the user.
   bool canCut(TextSelectionDelegate delegate) {
-    return !delegate.textEditingValue.selection.isCollapsed;
+    return delegate.cutEnabled && !delegate.textEditingValue.selection.isCollapsed;
   }
 
   /// Whether the current selection of the text field managed by the given
@@ -141,7 +142,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the copy
   /// functionality to the user.
   bool canCopy(TextSelectionDelegate delegate) {
-    return !delegate.textEditingValue.selection.isCollapsed;
+    return delegate.copyEnabled && !delegate.textEditingValue.selection.isCollapsed;
   }
 
   /// Whether the current [Clipboard] content can be pasted into the text field
@@ -151,7 +152,7 @@ abstract class TextSelectionControls {
   /// functionality to the user.
   bool canPaste(TextSelectionDelegate delegate) {
     // TODO(goderbauer): return false when clipboard is empty, https://github.com/flutter/flutter/issues/11254
-    return true;
+    return delegate.pasteEnabled;
   }
 
   /// Whether the current selection of the text field managed by the given
@@ -161,7 +162,7 @@ abstract class TextSelectionControls {
   /// Subclasses can use this to decide if they should expose the select all
   /// functionality to the user.
   bool canSelectAll(TextSelectionDelegate delegate) {
-    return delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
+    return delegate.selectAllEnabled && delegate.textEditingValue.text.isNotEmpty && delegate.textEditingValue.selection.isCollapsed;
   }
 
   /// Copy the current selection of the text field managed by the given
@@ -267,11 +268,14 @@ class TextSelectionOverlay {
     @required this.layerLink,
     @required this.renderObject,
     this.selectionControls,
+    bool handlesVisible = false,
     this.selectionDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSelectionHandleTapped,
   }) : assert(value != null),
        assert(context != null),
+       assert(handlesVisible != null),
+       _handlesVisible = handlesVisible,
        _value = value {
     final OverlayState overlay = Overlay.of(context);
     assert(overlay != null,
@@ -337,6 +341,10 @@ class TextSelectionOverlay {
   AnimationController _toolbarController;
   Animation<double> get _toolbarOpacity => _toolbarController.view;
 
+  /// Retrieve current value.
+  @visibleForTesting
+  TextEditingValue get value => _value;
+
   TextEditingValue _value;
 
   /// A pair of handles. If this is non-null, there are always 2, though the
@@ -348,14 +356,56 @@ class TextSelectionOverlay {
 
   TextSelection get _selection => _value.selection;
 
-  /// Shows the handles by inserting them into the [context]'s overlay.
+  /// Whether selection handles are visible.
+  ///
+  /// Set to false if you want to hide the handles. Use this property to show or
+  /// hide the handle without rebuilding them.
+  ///
+  /// If this method is called while the [SchedulerBinding.schedulerPhase] is
+  /// [SchedulerPhase.persistentCallbacks], i.e. during the build, layout, or
+  /// paint phases (see [WidgetsBinding.drawFrame]), then the update is delayed
+  /// until the post-frame callbacks phase. Otherwise the update is done
+  /// synchronously. This means that it is safe to call during builds, but also
+  /// that if you do call this during a build, the UI will not update until the
+  /// next frame (i.e. many milliseconds later).
+  ///
+  /// Defaults to false.
+  bool get handlesVisible => _handlesVisible;
+  bool _handlesVisible = false;
+  set handlesVisible(bool visible) {
+    assert(visible != null);
+    if (_handlesVisible == visible)
+      return;
+    _handlesVisible = visible;
+    // If we are in build state, it will be too late to update visibility.
+    // We will need to schedule the build in next frame.
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback(_markNeedsBuild);
+    } else {
+      _markNeedsBuild();
+    }
+  }
+
+  /// Builds the handles by inserting them into the [context]'s overlay.
   void showHandles() {
     assert(_handles == null);
     _handles = <OverlayEntry>[
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.start)),
       OverlayEntry(builder: (BuildContext context) => _buildHandle(context, _TextSelectionHandlePosition.end)),
     ];
+
+
+
     Overlay.of(context, debugRequiredFor: debugRequiredFor).insertAll(_handles);
+  }
+
+  /// Destroys the handles by removing them from overlay.
+  void hideHandles() {
+    if (_handles != null) {
+      _handles[0].remove();
+      _handles[1].remove();
+      _handles = null;
+    }
   }
 
   /// Shows the toolbar by inserting it into the [context]'s overlay.
@@ -403,7 +453,7 @@ class TextSelectionOverlay {
   }
 
   /// Whether the handles are currently visible.
-  bool get handlesAreVisible => _handles != null;
+  bool get handlesAreVisible => _handles != null && handlesVisible;
 
   /// Whether the toolbar is currently visible.
   bool get toolbarIsVisible => _toolbar != null;
@@ -440,16 +490,18 @@ class TextSelectionOverlay {
     if ((_selection.isCollapsed && position == _TextSelectionHandlePosition.end) ||
          selectionControls == null)
       return Container(); // hide the second handle when collapsed
-    return _TextSelectionHandleOverlay(
-      onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
-      onSelectionHandleTapped: onSelectionHandleTapped,
-      layerLink: layerLink,
-      renderObject: renderObject,
-      selection: _selection,
-      selectionControls: selectionControls,
-      position: position,
-      dragStartBehavior: dragStartBehavior,
-    );
+    return Visibility(
+      visible: handlesVisible,
+      child: _TextSelectionHandleOverlay(
+        onSelectionHandleChanged: (TextSelection newSelection) { _handleSelectionHandleChanged(newSelection, position); },
+        onSelectionHandleTapped: onSelectionHandleTapped,
+        layerLink: layerLink,
+        renderObject: renderObject,
+        selection: _selection,
+        selectionControls: selectionControls,
+        position: position,
+        dragStartBehavior: dragStartBehavior,
+    ));
   }
 
   Widget _buildToolbar(BuildContext context) {

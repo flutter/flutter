@@ -40,6 +40,11 @@ void main() {
     Navigator.of(tester.element(find.text('Dialog'))).pop();
     await tester.pump();
 
+    expect(tester.testTextInput.isVisible, isFalse);
+
+    await tester.tap(find.byType(TextField));
+    await tester.idle();
+
     expect(tester.testTextInput.isVisible, isTrue);
 
     await tester.pumpWidget(Container());

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -54,7 +52,7 @@ void main() {
         matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
       );
     },
-    skip: !Platform.isLinux,
+    skip: !isLinux,
   );
 
   testWidgets(
@@ -106,7 +104,7 @@ void main() {
         matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
       );
     },
-    skip: !Platform.isLinux,
+    skip: !isLinux,
   );
 
   testWidgets(
@@ -150,7 +148,7 @@ void main() {
         matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
       );
     },
-    skip: !Platform.isLinux,
+    skip: !isLinux,
   );
 
 }
