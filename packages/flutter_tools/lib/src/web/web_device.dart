@@ -27,21 +27,18 @@ ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 @visibleForTesting
 bool debugDisableWeb = false;
 
-/// Only launch or display web devices if `FLUTTER_WEB`
-/// environment variable is set to true. When launched from the command line
-/// instead of the daemon this becomes opt out.
+/// Only launch or display web devices when launched from the command line, or
+/// when the environment variable `FLUTTER_WEB` is set to 'true`.
 bool get flutterWebEnabled {
   if (debugDisableWeb) {
     return false;
   }
   if (isRunningFromDaemon) {
-    _flutterWebEnabled ??= platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  } else {
-    _flutterWebEnabled ??= platform.environment['FLUTTER_WEB']?.toLowerCase() != 'false';
+    _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
   }
   return _flutterWebEnabled && !FlutterVersion.instance.isStable;
 }
-bool _flutterWebEnabled;
+bool _flutterWebEnabled = true;
 
 
 class WebApplicationPackage extends ApplicationPackage {

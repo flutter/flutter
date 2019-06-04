@@ -17,21 +17,18 @@ import 'version.dart';
 @visibleForTesting
 bool debugDisableDesktop = false;
 
-/// Only launch or display desktop embedding devices if
-/// `ENABLE_FLUTTER_DESKTOP` environment variable is set to true.
-/// when launched from flutter run instead of the daemon this becomes opt out.
+/// Only launch or display desktop embedding devices from the command line
+/// or if `ENABLE_FLUTTER_DESKTOP` environment variable is set to true.
 bool get flutterDesktopEnabled {
   if (debugDisableDesktop) {
     return false;
   }
   if (isRunningFromDaemon) {
-    _flutterDesktopEnabled ??= platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
-  } else {
-    _flutterDesktopEnabled ??= platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() != 'false';
+    _flutterDesktopEnabled = platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
   }
   return _flutterDesktopEnabled && !FlutterVersion.instance.isStable;
 }
-bool _flutterDesktopEnabled;
+bool _flutterDesktopEnabled = true;
 
 /// Kills a process on linux or macOS.
 Future<bool> killProcess(String executable) async {
