@@ -69,15 +69,15 @@ void main() {
       when(mockProcessManager.run(<String>[
         'reg',
         'query',
-        '"HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon"',
+        r'"HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon"',
         '/v',
         'version',
       ])).thenAnswer((Invocation invocation) async {
-        return MockProcessResult(0, 'ABC');
+        return MockProcessResult(0, r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0');
       });
       final WebDevice webDevice = WebDevice();
 
-      expect(await webDevice.sdkNameAndVersion, 'ABC');
+      expect(await webDevice.sdkNameAndVersion, 'Google Chrome 74.0.0');
     }, overrides: <Type, Generator>{
       Platform: () => mockPlatform,
       ProcessManager: () => mockProcessManager,
