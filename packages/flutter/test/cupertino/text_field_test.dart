@@ -350,7 +350,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('cursor android golden', (WidgetTester tester) async {
+  testWidgets('Cupertino cursor android golden', (WidgetTester tester) async {
     final Widget widget = CupertinoApp(
       home: Center(
         child: RepaintBoundary(
@@ -373,11 +373,11 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.2.png'),
+      matchesGoldenFile('text_field_cursor_test.cupertino.0.2.png'),
     );
   }, skip: !isLinux);
 
-  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+  testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final Widget widget = CupertinoApp(
@@ -403,7 +403,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.2.png'),
+      matchesGoldenFile('text_field_cursor_test.cupertino.1.2.png'),
     );
   }, skip: !isLinux);
 
