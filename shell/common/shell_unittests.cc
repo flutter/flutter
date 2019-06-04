@@ -8,6 +8,7 @@
 #include <future>
 #include <memory>
 
+#include "flutter/fml/command_line.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -15,6 +16,7 @@
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_test.h"
+#include "flutter/shell/common/switches.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/testing/testing.h"
 
@@ -272,6 +274,43 @@ TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   shell.reset();
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST_F(ShellTest, BlacklistedDartVMFlag) {
+  // Run this test in a thread-safe manner, otherwise gtest will complain.
+  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
+
+  const std::vector<fml::CommandLine::Option> options = {
+      fml::CommandLine::Option("dart-flags", "--verify_after_gc")};
+  fml::CommandLine command_line("", options, std::vector<std::string>());
+
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && \
+    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
+  // Upon encountering a non-whitelisted Dart flag the process terminates.
+  const char* expected =
+      "Encountered blacklisted Dart VM flag: --verify_after_gc";
+  ASSERT_DEATH(flutter::SettingsFromCommandLine(command_line), expected);
+#else
+  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
+  EXPECT_EQ(settings.dart_flags.size(), 0u);
+#endif
+}
+
+TEST_F(ShellTest, WhitelistedDartVMFlag) {
+  const std::vector<fml::CommandLine::Option> options = {
+      fml::CommandLine::Option("dart-flags",
+                               "--max_profile_depth 1,--trace_service")};
+  fml::CommandLine command_line("", options, std::vector<std::string>());
+  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
+
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && \
+    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
+  EXPECT_EQ(settings.dart_flags.size(), 2u);
+  EXPECT_EQ(settings.dart_flags[0], "--max_profile_depth 1");
+  EXPECT_EQ(settings.dart_flags[1], "--trace_service");
+#else
+  EXPECT_EQ(settings.dart_flags.size(), 0u);
+#endif
 }
 
 }  // namespace testing
