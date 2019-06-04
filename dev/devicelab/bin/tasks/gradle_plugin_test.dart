@@ -83,8 +83,7 @@ Future<void> main() async {
           final String isolateSnapshotData =
               path.join(androidArmSnapshotPath, 'app.so');
           if (!File(isolateSnapshotData).existsSync()) {
-            throw TaskResult.failure(
-                'Shared library doesn\'t exist');
+            throw TaskResult.failure('Shared library doesn\'t exist');
           }
         }
       });
