@@ -385,7 +385,7 @@ void main() {
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
 
-  testWidgets('cursor android golden', (WidgetTester tester) async {
+  testWidgets('Material cursor android golden', (WidgetTester tester) async {
     final Widget widget = overlay(
       child: const RepaintBoundary(
         key: ValueKey<int>(1),
@@ -407,11 +407,11 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.0.png'),
+      matchesGoldenFile('text_field_cursor_test.material.0.0.png'),
     );
   }, skip: !isLinux);
 
-  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+  testWidgets('Material cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final Widget widget = overlay(
@@ -436,7 +436,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.0.png'),
+      matchesGoldenFile('text_field_cursor_test.material.1.0.png'),
     );
   }, skip: !isLinux);
 
