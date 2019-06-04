@@ -118,7 +118,7 @@ class FlutterPlugin implements Plugin<Project> {
         return result
     }
 
-    private String getBasePlatformJar(Project project) {
+    private String getBasePlatformArch(Project project) {
         if ('android-arm64' in getTargetPlatforms(project)) {
             return 'android-arm64';
         }
@@ -196,14 +196,14 @@ class FlutterPlugin implements Plugin<Project> {
             dynamicProfileFlutterJar = flutterJar
             dynamicReleaseFlutterJar = flutterJar
         } else {
-            String basePlatformJar = getBasePlatformJar(project)
+            String basePlatformArch = getBasePlatformArch(project)
             // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
             baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            debugFlutterJar = baseEnginePath.resolve("${basePlatformJar}").resolve("flutter.jar").toFile()
-            profileFlutterJar = baseEnginePath.resolve("${basePlatformJar}-profile").resolve("flutter.jar").toFile()
-            releaseFlutterJar = baseEnginePath.resolve("${basePlatformJar}-release").resolve("flutter.jar").toFile()
-            dynamicProfileFlutterJar = baseEnginePath.resolve("${basePlatformJar}-dynamic-profile").resolve("flutter.jar").toFile()
-            dynamicReleaseFlutterJar = baseEnginePath.resolve("${basePlatformJar}-dynamic-release").resolve("flutter.jar").toFile()
+            debugFlutterJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
+            profileFlutterJar = baseEnginePath.resolve("${basePlatformArch}-profile").resolve("flutter.jar").toFile()
+            releaseFlutterJar = baseEnginePath.resolve("${basePlatformArch}-release").resolve("flutter.jar").toFile()
+            dynamicProfileFlutterJar = baseEnginePath.resolve("${basePlatformArch}-dynamic-profile").resolve("flutter.jar").toFile()
+            dynamicReleaseFlutterJar = baseEnginePath.resolve("${basePlatformArch}-dynamic-release").resolve("flutter.jar").toFile()
         }
 
         if (!debugFlutterJar.isFile()) {
@@ -470,7 +470,7 @@ class FlutterPlugin implements Plugin<Project> {
                     // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
                     // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
                     // is included as an implementation dependency, which causes duplicated `libflutter.so`.
-                    if (getBasePlatformJar(project) != targetArch) {
+                    if (getBasePlatformArch(project) != targetArch) {
                         def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
                         // Include `libflutter.so`.
                         // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
