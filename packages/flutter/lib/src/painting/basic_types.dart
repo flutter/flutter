@@ -41,10 +41,9 @@ export 'dart:ui' show
   TextPosition,
   TileMode,
   VertexMode,
+  VoidCallback,
   hashValues,
   hashList;
-
-export 'package:flutter/foundation.dart' show VoidCallback;
 
 // Intentionally not exported:
 //  - Image, instantiateImageCodec, decodeImageFromList:
