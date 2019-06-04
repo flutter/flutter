@@ -88,6 +88,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('scanCode: ${data.scanCode} (${_asHex(data.scanCode)})'));
             dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
             dataText.add(Text('source: ${data.eventSource} (${_asHex(data.eventSource)})'));
+            dataText.add(Text('vendorId: ${data.vendorId} (${_asHex(data.vendorId)})'));
+            dataText.add(Text('productId: ${data.productId} (${_asHex(data.productId)})'));
             dataText.add(Text('flags: ${data.flags} (${_asHex(data.flags)})'));
           } else if (data is RawKeyEventDataFuchsia) {
             dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
@@ -119,7 +121,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             }
           }
           return DefaultTextStyle(
-            style: textTheme.headline,
+            style: textTheme.subhead,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: dataText,

@@ -34,6 +34,8 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.scanCode = 0,
     this.metaState = 0,
     this.eventSource = 0,
+    this.vendorId = 0,
+    this.productId = 0,
   }) : assert(flags != null),
        assert(codePoint != null),
        assert(keyCode != null),
@@ -112,6 +114,18 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// for the numerical values of the `source`. Many of these constants are also
   /// replicated as static constants in this class.
   final int eventSource;
+
+  /// The vendor ID of the device that produced the event.
+  ///
+  /// See <https://developer.android.com/reference/android/view/InputDevice.html#getVendorId()>
+  /// for the numerical values of the `vendorId`.
+  final int vendorId;
+
+  /// The product ID of the device that produced the event.
+  ///
+  /// See <https://developer.android.com/reference/android/view/InputDevice.html#getProductId()>
+  /// for the numerical values of the `productId`.
+  final int productId;
 
   // The source code that indicates that an event came from a joystick.
   // from https://developer.android.com/reference/android/view/InputDevice.html#SOURCE_JOYSTICK
