@@ -15,6 +15,7 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
@@ -520,6 +521,14 @@ class FlutterDriver {
   /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
+  }
+
+  Future<Map<String, Object>> getRenderObjectDiagnostics(SerializableFinder finder, { int subtreeDepth = 0, Duration timeout }) async {
+    return _sendCommand(GetDiagnosticsTree(finder, DiagnosticsType.renderObject, subtreeDepth: subtreeDepth));
+  }
+
+  Future<Map<String, Object>> getWidgetDiagnostics(SerializableFinder finder, { int subtreeDepth = 0, Duration timeout }) async {
+    return _sendCommand(GetDiagnosticsTree(finder, DiagnosticsType.widget, subtreeDepth: subtreeDepth));
   }
 
   /// Tell the driver to perform a scrolling action.

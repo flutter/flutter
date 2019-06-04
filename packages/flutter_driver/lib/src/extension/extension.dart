@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
@@ -114,6 +116,7 @@ class FlutterDriverExtension {
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
+      'get_diagnostics_tree': _getDiagnosticsTree,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -133,6 +136,7 @@ class FlutterDriverExtension {
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
+      'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -406,6 +410,72 @@ class FlutterDriverExtension {
     }
     final Offset globalPoint = box.localToGlobal(localPoint);
     return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);
+  }
+
+  Future<DiagnosticsTreeResult> _getDiagnosticsTree(Command command) async {
+    final GetDiagnosticsTree getDiagnosticsTreeCommand = command;
+    final Finder finder = await _waitForElement(_createFinder(getDiagnosticsTreeCommand.finder));
+    final Element element = finder.evaluate().single;
+    DiagnosticsNode diagnsoticsNode;
+    switch (getDiagnosticsTreeCommand.diagnosticsType) {
+      case DiagnosticsType.renderObject:
+        diagnsoticsNode = element.renderObject.toDiagnosticsNode();
+        break;
+      case DiagnosticsType.widget:
+        diagnsoticsNode = element.toDiagnosticsNode();
+        break;
+    }
+    return DiagnosticsTreeResult(
+      _diagnosticsNodeToJson(
+        node: diagnsoticsNode,
+        subtreeDepth: getDiagnosticsTreeCommand.subtreeDepth,
+      ),
+    );
+  }
+
+  Map<String, Object> _diagnosticsNodeToJson({
+    @required DiagnosticsNode node,
+    @required int subtreeDepth,
+  }) {
+    print('$node -- $subtreeDepth');
+
+    List<Map<String, Object>> nodesToJson({
+      @required Iterable<DiagnosticsNode> nodes,
+      @required int subtreeDepth,
+    }) {
+      return nodes.map<Map<String, Object>>((DiagnosticsNode node) {
+        return _diagnosticsNodeToJson(
+          node: node,
+          subtreeDepth: math.max(0, subtreeDepth - 1),
+        );
+      }).toList();
+    }
+
+    final Map<String, Object> json = node.toJsonMap();
+
+    final Object value = node.value;
+
+    if (subtreeDepth > 0) {
+      List<DiagnosticsNode> rawChildren = node.getChildren();
+      if (rawChildren.isEmpty && node is DiagnosticsProperty && value is Diagnosticable) {
+        rawChildren = value.toDiagnosticsNode().getChildren();
+      }
+      json['children'] = nodesToJson(
+        nodes: rawChildren,
+        subtreeDepth: subtreeDepth,
+      );
+    }
+
+//    List<DiagnosticsNode> properties = node.getProperties();
+//    if (properties.isEmpty && node is DiagnosticsProperty && value is Diagnosticable) {
+//      properties = value.toDiagnosticsNode().getProperties();
+//    }
+//    json['properties'] = nodesToJson(
+//      nodes: properties,
+//      subtreeDepth: 0,
+//    );
+
+    return json;
   }
 
   Future<ScrollResult> _scroll(Command command) async {
