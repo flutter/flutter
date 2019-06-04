@@ -301,7 +301,7 @@ enum TargetPlatform {
   windows_x64,
   fuchsia,
   tester,
-  web,
+  web_javascript,
 }
 
 /// iOS target device architecture.
@@ -361,8 +361,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'fuchsia';
     case TargetPlatform.tester:
       return 'flutter-tester';
-    case TargetPlatform.web:
-      return 'web';
+    case TargetPlatform.web_javascript:
+      return 'web-javascript';
   }
   assert(false);
   return null;
@@ -386,8 +386,8 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_x64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
-    case 'web':
-      return TargetPlatform.web;
+    case 'web-javascript':
+      return TargetPlatform.web_javascript;
   }
   assert(platform != null);
   return null;
