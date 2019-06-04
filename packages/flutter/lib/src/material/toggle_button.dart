@@ -138,14 +138,82 @@ class _ToggleButton extends StatelessWidget {
   // TODO(WIP): include debugFillProperties method
 }
 
+class ToggleButtonBorder extends BoxBorder {
+  const ToggleButtonBorder({
+    this.borderSide,
+    @required this.borderRadius,
+  });
+
+  final BorderSide borderSide;
+
+  final BorderRadius borderRadius;
+
+  @override
+  BorderSide get top {
+    return borderSide;
+  }
+
+  @override
+  BorderSide get bottom {
+    return borderSide;
+  }
+
+  @override
+  bool get isUniform {
+    return false;
+  }
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
+    return Path()
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
+    return Path()
+      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
+  }
+
+  @override
+  void paint(
+    Canvas canvas,
+    Rect rect, {
+    TextDirection textDirection,
+    BoxShape shape = BoxShape.rectangle,
+    BorderRadius borderRadius,
+  }) {
+    final Paint paint = borderSide.toPaint();
+    final RRect outer = borderRadius.toRRect(rect);
+    final RRect center = outer.deflate(borderSide.width / 2.0);
+
+    canvas.drawRRect(center, paint);
+  }
+
+  @override
+  ToggleButtonBorder scale(double t) {
+    return ToggleButtonBorder(
+      borderSide: borderSide.scale(t),
+      borderRadius: borderRadius * t,
+    );
+  }
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
+}
+
 class ToggleButtons extends StatelessWidget {
   const ToggleButtons({
     this.children,
     this.isSelected,
     this.onPressed,
+    this.color,
+    this.activeColor,
+    this.disabledColor,
     this.border,
-    this.borderRadius,
-  });
+    this.borderSide = const BorderSide(),
+    this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
+  }); // borderRadius cannot be null
 
   final List<Widget> children;
 
@@ -153,7 +221,24 @@ class ToggleButtons extends StatelessWidget {
 
   final Function onPressed;
 
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
+  final Color color;
+
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
+  final Color activeColor;
+
+  /// The color for [Text] and [Icon] widgets if the button is disabled.
+  ///
+  /// If [onPressed] is null, this color will be used.
+  final Color disabledColor;
+
   final Border border;
+
+  final BorderSide borderSide;
 
   final BorderRadius borderRadius;
 
@@ -161,10 +246,14 @@ class ToggleButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        border: border ?? Border.all(),
-        borderRadius: borderRadius ?? const BorderRadius.all(
-          Radius.circular(5.0),
+        border: ToggleButtonBorder(
+          borderSide: borderSide,
+          borderRadius: borderRadius,
+          // pass in children to figure out width
+          // pass in selected to figre out color
+          // figure out: custom colors?
         ),
+        borderRadius: borderRadius,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
