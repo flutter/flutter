@@ -1,4 +1,4 @@
-Signature: ff2892180ebe58fee95669eb6cb7ddac
+Signature: bcb95cc054ec992c9670590b1faa189f
 
 UNUSED LICENSES:
 
@@ -5371,6 +5371,8 @@ FILE: ../../../third_party/skia/include/private/GrContext_Base.h
 FILE: ../../../third_party/skia/include/private/GrImageContext.h
 FILE: ../../../third_party/skia/include/private/GrRecordingContext.h
 FILE: ../../../third_party/skia/include/private/SkVx.h
+FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.h
 FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.h
 FILE: ../../../third_party/skia/modules/skottie/src/text/TextAdapter.cpp
