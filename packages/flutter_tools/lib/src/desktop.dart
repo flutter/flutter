@@ -4,17 +4,31 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
+import 'commands/daemon.dart';
 import 'convert.dart';
 import 'device.dart';
 import 'version.dart';
 
-// Only launch or display desktop embedding devices if
-// `ENABLE_FLUTTER_DESKTOP` environment variable is set to true.
+@visibleForTesting
+bool debugDisableDesktop = false;
+
+/// Only launch or display desktop embedding devices if
+/// `ENABLE_FLUTTER_DESKTOP` environment variable is set to true.
+/// when launched from flutter run instead of the daemon this becomes opt out.
 bool get flutterDesktopEnabled {
-  _flutterDesktopEnabled ??= platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
+  if (debugDisableDesktop) {
+    return false;
+  }
+  if (isRunningFromDaemon) {
+    _flutterDesktopEnabled ??= platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
+  } else {
+    _flutterDesktopEnabled ??= platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() != 'false';
+  }
   return _flutterDesktopEnabled && !FlutterVersion.instance.isStable;
 }
 bool _flutterDesktopEnabled;

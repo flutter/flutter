@@ -20,6 +20,7 @@ void main() {
   group('devices', () {
     setUpAll(() {
       Cache.disableLocking();
+      debugDisableWebAndDesktop = true;
     });
 
     testUsingContext('returns 0 when called', () async {

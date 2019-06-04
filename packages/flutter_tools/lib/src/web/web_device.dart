@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../application_package.dart';
 import '../asset.dart';
 import '../base/common.dart';
@@ -13,6 +15,7 @@ import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../commands/daemon.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
@@ -21,10 +24,21 @@ import '../web/compile.dart';
 
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
+@visibleForTesting
+bool debugDisableWeb = false;
+
 /// Only launch or display web devices if `FLUTTER_WEB`
-/// environment variable is set to true.
+/// environment variable is set to true. When launched from the command line
+/// instead of the daemon this becomes opt out.
 bool get flutterWebEnabled {
-  _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
+  if (debugDisableWeb) {
+    return false;
+  }
+  if (isRunningFromDaemon) {
+    _flutterWebEnabled ??= platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
+  } else {
+    _flutterWebEnabled ??= platform.environment['FLUTTER_WEB']?.toLowerCase() != 'false';
+  }
   return _flutterWebEnabled && !FlutterVersion.instance.isStable;
 }
 bool _flutterWebEnabled;

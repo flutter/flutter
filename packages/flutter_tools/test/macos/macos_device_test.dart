@@ -29,7 +29,9 @@ void main() {
     final MacOSDevice device = MacOSDevice();
     final MockProcessManager mockProcessManager = MockProcessManager();
     when(notMac.isMacOS).thenReturn(false);
-    when(notMac.environment).thenReturn(const <String, String>{});
+    when(notMac.environment).thenReturn(const <String, String>{
+      'ENABLE_FLUTTER_DESKTOP': 'false',
+    });
     when(mockProcessManager.run(any)).thenAnswer((Invocation invocation) async {
       return ProcessResult(0, 1, '', '');
     });
