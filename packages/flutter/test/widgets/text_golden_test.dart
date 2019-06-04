@@ -609,7 +609,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidget.1.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidget.1.1.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -654,7 +654,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidget.2.1.png'),
+      matchesGoldenFile('text_golden.TextInlineWidget.2.2.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -783,7 +783,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.1.png'),
+      matchesGoldenFile('text_golden.TextInlineWidgetNest.1.2.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -890,7 +890,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetBaseline.1.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidgetBaseline.1.1.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -997,7 +997,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetAboveBaseline.1.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidgetAboveBaseline.1.1.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -1104,7 +1104,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetBelowBaseline.1.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidgetBelowBaseline.1.1.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -1211,7 +1211,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetTop.1.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidgetTop.1.1.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -1318,7 +1318,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.0.png'),
+      matchesGoldenFile('text_golden.TextInlineWidgetMiddle.1.1.png'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 }
