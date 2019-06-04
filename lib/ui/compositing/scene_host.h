@@ -10,8 +10,8 @@
 #include <third_party/tonic/dart_library_natives.h>
 #include <third_party/tonic/dart_persistent_value.h>
 #include <zircon/types.h>
-#include "dart-pkg/zircon/sdk_ext/handle.h"
 
+#include "dart-pkg/zircon/sdk_ext/handle.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/task_runner.h"
 #include "flutter/lib/ui/dart_wrapper.h"
@@ -37,7 +37,7 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
   static void OnViewDisconnected(scenic::ResourceId id);
   static void OnViewStateChanged(scenic::ResourceId id, bool state);
 
-  zx_koid_t id() const { return id_; }
+  zx_koid_t id() const { return koid_; }
   bool use_view_holder() const { return use_view_holder_; }
 
   void setProperties(double width,
@@ -57,10 +57,10 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
             Dart_Handle viewStateChangedCallback);
 
   fml::RefPtr<fml::TaskRunner> gpu_task_runner_;
-  std::unique_ptr<tonic::DartPersistentValue> view_connected_callback_;
-  std::unique_ptr<tonic::DartPersistentValue> view_disconnected_callback_;
-  std::unique_ptr<tonic::DartPersistentValue> view_state_changed_callback_;
-  zx_koid_t id_ = ZX_KOID_INVALID;
+  tonic::DartPersistentValue view_connected_callback_;
+  tonic::DartPersistentValue view_disconnected_callback_;
+  tonic::DartPersistentValue view_state_changed_callback_;
+  zx_koid_t koid_ = ZX_KOID_INVALID;
   bool use_view_holder_ = false;
 };
 
