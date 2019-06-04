@@ -7,7 +7,6 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
@@ -30,6 +29,7 @@ import 'package:test_core/src/runner/suite.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
 import '../convert.dart';
