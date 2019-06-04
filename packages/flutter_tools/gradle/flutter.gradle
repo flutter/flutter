@@ -118,6 +118,13 @@ class FlutterPlugin implements Plugin<Project> {
         return result
     }
 
+    private String getBasePlatformJar(Project project) {
+        if ('android-arm64' in getTargetPlatforms(project)) {
+            return 'android-arm64';
+        }
+        return 'android-arm';
+    }
+
     @Override
     void apply(Project project) {
         project.extensions.create("flutter", FlutterExtension)
@@ -176,7 +183,7 @@ class FlutterPlugin implements Plugin<Project> {
             baseEnginePath = Paths.get(engineOut.absolutePath)
             flutterJar = baseEnginePath.resolve("flutter.jar").toFile()
             if (!flutterJar.isFile()) {
-                throw new GradleException('File not found: ' + flutterJar)
+                throw new GradleException('Local engine jar not found: ' + flutterJar)
             }
 
             localEngine = engineOut.name
@@ -189,14 +196,14 @@ class FlutterPlugin implements Plugin<Project> {
             dynamicProfileFlutterJar = flutterJar
             dynamicReleaseFlutterJar = flutterJar
         } else {
-            String targetArch = 'android-arm64' in getTargetPlatforms(project) ? 'arm64' : 'arm'
-            // This just includes the compiled classes since we include libflutter.so below.
+            String basePlatformJar = getBasePlatformJar(project)
+            // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
             baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
-            profileFlutterJar = baseEnginePath.resolve("android-${targetArch}-profile").resolve("flutter.jar").toFile()
-            releaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-release").resolve("flutter.jar").toFile()
-            dynamicProfileFlutterJar = baseEnginePath.resolve("android-${targetArch}-dynamic-profile").resolve("flutter.jar").toFile()
-            dynamicReleaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-dynamic-release").resolve("flutter.jar").toFile()
+            debugFlutterJar = baseEnginePath.resolve("${basePlatformJar}").resolve("flutter.jar").toFile()
+            profileFlutterJar = baseEnginePath.resolve("${basePlatformJar}-profile").resolve("flutter.jar").toFile()
+            releaseFlutterJar = baseEnginePath.resolve("${basePlatformJar}-release").resolve("flutter.jar").toFile()
+            dynamicProfileFlutterJar = baseEnginePath.resolve("${basePlatformJar}-dynamic-profile").resolve("flutter.jar").toFile()
+            dynamicReleaseFlutterJar = baseEnginePath.resolve("${basePlatformJar}-dynamic-release").resolve("flutter.jar").toFile()
         }
 
         if (!debugFlutterJar.isFile()) {
@@ -460,11 +467,16 @@ class FlutterPlugin implements Plugin<Project> {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
                 targetPlatforms.each { targetArch ->
-                    // Include `libflutter.so` for each abi.
-                    // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
-                    def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
-                    from(project.zipTree("${flutterRoot}/bin/cache/artifacts/engine/${engineArtifactSubdir}/flutter.jar")) {
-                        include 'lib/**'
+                    // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
+                    // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
+                    // is included as an implementation dependency, which causes duplicated `libflutter.so`.
+                    if (getBasePlatformJar(project) != targetArch) {
+                        def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
+                        // Include `libflutter.so`.
+                        // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
+                        from(project.zipTree("${flutterRoot}/bin/cache/artifacts/engine/${engineArtifactSubdir}/flutter.jar")) {
+                            include 'lib/**'
+                        }
                     }
                 }
                 dependsOn flutterTasks
