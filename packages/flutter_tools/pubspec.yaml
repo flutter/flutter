@@ -105,7 +105,6 @@ dev_dependencies:
   mockito: 4.1.0
   file_testing: 2.1.0
   vm_service_lib: 3.17.0+1
-  test: 1.6.3
   build_runner: 1.4.0
   build_vm_compilers: 1.0.0
   build_test: 0.10.8

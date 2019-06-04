@@ -73,7 +73,10 @@ class ChromeLauncher {
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
   /// Launch the chrome browser to a particular `host` page.
-  Future<Chrome> launch(String url) async {
+  ///
+  /// `headless` defaults to false, and controls whether we open a headless or
+  /// a `headfull` browser.
+  Future<Chrome> launch(String url, { bool headless = false }) async {
     final String chromeExecutable = findChromeExecutable();
     final Directory dataDir = fs.systemTempDirectory.createTempSync();
     final int port = await os.findFreePort();
@@ -94,6 +97,8 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      if (headless)
+        ...<String>['--headless', '--disable-gpu'],
       url,
     ];
     final Process process = await processManager.start(args);
