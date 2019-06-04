@@ -11,7 +11,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // Once we provide an option for images to be resized to
-// fit the container, we should see a  significant drop in
+// fit the container, we should see a significant drop in
 // the amount of memory consumed by this benchmark.
 Future<void> main() async {
   const int numItems = 10;
@@ -41,6 +41,10 @@ Future<void> main() async {
   ));
 
   await SchedulerBinding.instance.endOfFrame;
+
+  // We are waiting for the GPU to rasterize a frame here. This makes this flaky,
+  // we can rely on a more deterministic such as `Window.onReportTimings` once
+  // https://github.com/flutter/flutter/issues/26154 is addressed.
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
 
