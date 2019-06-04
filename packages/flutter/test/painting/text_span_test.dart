@@ -155,14 +155,12 @@ void main() {
       ],
     );
 
-    expect(textSpan1.compareTo(textSpan2), RenderComparison.identical);
     expect(textSpan1.compareTo(textSpan3), RenderComparison.layout);
     expect(textSpan1.compareTo(textSpan4), RenderComparison.layout);
     expect(textSpan1.compareTo(textSpan1), RenderComparison.identical);
     expect(textSpan2.compareTo(textSpan2), RenderComparison.identical);
     expect(textSpan3.compareTo(textSpan3), RenderComparison.identical);
     expect(textSpan2.compareTo(textSpan3), RenderComparison.layout);
-    expect(textSpan2.compareTo(textSpan1), RenderComparison.identical);
     expect(textSpan4.compareTo(textSpan5), RenderComparison.layout);
     expect(textSpan3.compareTo(textSpan5), RenderComparison.layout);
     expect(textSpan2.compareTo(textSpan5), RenderComparison.layout);
