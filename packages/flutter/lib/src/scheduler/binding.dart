@@ -743,10 +743,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   final Completer<void> _warmUpFrameCompleter = Completer<void>();
 
-  void afterWarmUpFrame(void Function() callback) {
-    _warmUpFrameCompleter.future.then<void>((_) { callback(); });
-  }
-
   /// Schedule a frame to run as soon as possible, rather than waiting for
   /// the engine to request a frame in response to a system "Vsync" signal.
   ///
@@ -778,26 +774,27 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     });
 
     // We use timers here to ensure that microtasks flush in between.
-    Timer.run(() {
+    scheduleMicrotask(() {
       assert(_warmUpFrame);
       handleBeginFrame(null);
-    });
-    Timer.run(() {
-      assert(_warmUpFrame);
-      handleDrawFrame();
-      // We call resetEpoch after this frame so that, in the hot reload case,
-      // the very next frame pretends to have occurred immediately after this
-      // warm-up frame. The warm-up frame's timestamp will typically be far in
-      // the past (the time of the last real frame), so if we didn't reset the
-      // epoch we would see a sudden jump from the old time in the warm-up frame
-      // to the new time in the "real" frame. The biggest problem with this is
-      // that implicit animations end up being triggered at the old time and
-      // then skipping every frame and finishing in the new time.
-      resetEpoch();
-      _warmUpFrame = false;
-      _warmUpFrameCompleter.complete();
-      if (hadScheduledFrame)
-        scheduleFrame();
+
+      scheduleMicrotask(() {
+        assert(_warmUpFrame);
+        handleDrawFrame();
+        // We call resetEpoch after this frame so that, in the hot reload case,
+        // the very next frame pretends to have occurred immediately after this
+        // warm-up frame. The warm-up frame's timestamp will typically be far in
+        // the past (the time of the last real frame), so if we didn't reset the
+        // epoch we would see a sudden jump from the old time in the warm-up frame
+        // to the new time in the "real" frame. The biggest problem with this is
+        // that implicit animations end up being triggered at the old time and
+        // then skipping every frame and finishing in the new time.
+        resetEpoch();
+        _warmUpFrame = false;
+        _warmUpFrameCompleter.complete();
+        if (hadScheduledFrame)
+          scheduleFrame();
+      });
     });
   }
 
@@ -954,7 +951,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     assert(_schedulerPhase == SchedulerPhase.midFrameMicrotasks);
     Timeline.finishSync(); // end the "Animate" phase
     try {
-      // PERSISTENT FRAME CALLBACKS
+      // PERSISTENT FRAME 
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
       for (FrameCallback callback in _persistentCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
