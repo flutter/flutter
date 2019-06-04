@@ -253,7 +253,7 @@ Future<void> main() async {
 
         _checkItDoesNotContain<String>(<String>[
           'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so', 
+          'base/lib/arm64-v8a/libflutter.so',
         ], bundleFiles);
       });
 
