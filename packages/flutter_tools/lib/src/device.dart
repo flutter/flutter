@@ -307,7 +307,7 @@ abstract class Device {
 
   /// Whether flutter applications running on this device can be terminated
   /// from the vmservice.
-  bool get supportsStopApp => true;
+  bool get supportsFlutterExit => true;
 
   /// Whether the device supports taking screenshots of a running flutter
   /// application.

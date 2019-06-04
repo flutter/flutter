@@ -11,7 +11,7 @@ import 'artifacts.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/io.dart';
+import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
@@ -166,8 +166,9 @@ class FlutterDevice {
       await service.getVM();
   }
 
-  Future<void> stopApps() async {
-    if (!device.supportsStopApp) {
+  Future<void> exitApps() async {
+    if (!device.supportsFlutterExit) {
+      await device.stopApp(package);
       return;
     }
     final List<FlutterView> flutterViews = views;
@@ -530,7 +531,7 @@ abstract class ResidentRunner {
   final bool stayResident;
   final bool ipv6;
   final Completer<int> _finished = Completer<int>();
-  bool _stopped = false;
+  bool _exited = false;
   String _packagesFilePath;
   String get packagesFilePath => _packagesFilePath;
   String _projectRootPath;
@@ -582,18 +583,18 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
-  Future<void> stop() async {
-    _stopped = true;
+  Future<void> exit() async {
+    _exited = true;
     if (saveCompilationTrace)
       await _debugSaveCompilationTrace();
     await stopEchoingDeviceLog();
-    await preStop();
-    await stopApp();
+    await preExit();
+    await exitApp();
   }
 
   Future<void> detach() async {
     await stopEchoingDeviceLog();
-    await preStop();
+    await preExit();
     appFinished();
   }
 
@@ -743,29 +744,29 @@ abstract class ResidentRunner {
 
   void registerSignalHandlers() {
     assert(stayResident);
-    ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
-    ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
+    io.ProcessSignal.SIGINT.watch().listen(_cleanUpAndExit);
+    io.ProcessSignal.SIGTERM.watch().listen(_cleanUpAndExit);
     if (!supportsServiceProtocol || !supportsRestart)
       return;
-    ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
-    ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
+    io.ProcessSignal.SIGUSR1.watch().listen(_handleSignal);
+    io.ProcessSignal.SIGUSR2.watch().listen(_handleSignal);
   }
 
-  Future<void> _cleanUpAndExit(ProcessSignal signal) async {
+  Future<void> _cleanUpAndExit(io.ProcessSignal signal) async {
     _resetTerminal();
     await cleanupAfterSignal();
-    exit(0);
+    io.exit(0);
   }
 
   bool _processingUserRequest = false;
-  Future<void> _handleSignal(ProcessSignal signal) async {
+  Future<void> _handleSignal(io.ProcessSignal signal) async {
     if (_processingUserRequest) {
       printTrace('Ignoring signal: "$signal" because we are busy.');
       return;
     }
     _processingUserRequest = true;
 
-    final bool fullRestart = signal == ProcessSignal.SIGUSR2;
+    final bool fullRestart = signal == io.ProcessSignal.SIGUSR2;
 
     try {
       await restart(fullRestart: fullRestart);
@@ -903,7 +904,7 @@ abstract class ResidentRunner {
       }
     } else if (lower == 'q') {
       // exit
-      await stop();
+      await exit();
       return true;
     } else if (lower == 'd') {
       await detach();
@@ -937,7 +938,7 @@ abstract class ResidentRunner {
   }
 
   void _serviceDisconnected() {
-    if (_stopped) {
+    if (_exited) {
       // User requested the application exit.
       return;
     }
@@ -980,12 +981,12 @@ abstract class ResidentRunner {
     return exitCode;
   }
 
-  Future<void> preStop() async { }
+  Future<void> preExit() async { }
 
-  Future<void> stopApp() async {
+  Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[];
     for (FlutterDevice device in flutterDevices)
-      futures.add(device.stopApps());
+      futures.add(device.exitApps());
     await Future.wait(futures);
     appFinished();
   }
