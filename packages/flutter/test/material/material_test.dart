@@ -616,7 +616,7 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_above.png'),
+        matchesGoldenFile('material.border_paint_above.png', version: null),
         skip: !isLinux,
       );
     });
@@ -657,7 +657,7 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_below.png'),
+        matchesGoldenFile('material.border_paint_below.png', version: null),
         skip: !isLinux,
       );
     });

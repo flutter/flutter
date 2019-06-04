@@ -29,7 +29,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Centered.png'),
+      matchesGoldenFile('text_golden.Centered.png', version: null),
     );
 
     await tester.pumpWidget(
@@ -53,7 +53,7 @@ void main() {
 
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Centered.wrap.png'),
+      matchesGoldenFile('text_golden.Centered.wrap.png', version: null),
     );
   }, skip: !isLinux);
 
@@ -84,7 +84,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.gradient.png'),
+      matchesGoldenFile('text_golden.Foreground.gradient.png', version: null),
     );
 
     await tester.pumpWidget(
@@ -106,7 +106,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.stroke.png'),
+      matchesGoldenFile('text_golden.Foreground.stroke.png', version: null),
     );
 
     await tester.pumpWidget(
@@ -129,7 +129,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png'),
+      matchesGoldenFile('text_golden.Foreground.stroke_and_gradient.png', version: null),
     );
   }, skip: !isLinux);
 
@@ -179,7 +179,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary),
-      matchesGoldenFile('text_golden.Background.png'),
+      matchesGoldenFile('text_golden.Background.png', version: null),
     );
   }, skip: !isLinux);
 
@@ -215,7 +215,7 @@ void main() {
 
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('text_golden.Fade.1.png'),
+      matchesGoldenFile('text_golden.Fade.png', version: '1'),
     );
   }, skip: !isLinux);
 
@@ -240,7 +240,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutDefault.png'),
+      matchesGoldenFile('text_golden.StrutDefault.png', version: null),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -268,7 +268,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.1.1.png'),
+      matchesGoldenFile('text_golden.Strut.1.png', version: '1'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -297,7 +297,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.2.1.png'),
+      matchesGoldenFile('text_golden.Strut.2.png', version: '1'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -349,7 +349,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.3.1.png'),
+      matchesGoldenFile('text_golden.Strut.3.png', version: '1'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -385,7 +385,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Strut.4.1.png'),
+      matchesGoldenFile('text_golden.Strut.4.png', version: '1'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -437,7 +437,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.StrutForce.1.1.png'),
+      matchesGoldenFile('text_golden.StrutForce.1.png', version: '1'),
     );
   }, skip: true); // Should only be on linux (skip: !Platform.isLinux).
                   // Disabled for now until font inconsistency is resolved.
@@ -476,7 +476,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.Decoration.1.0.png'),
+      matchesGoldenFile('text_golden.Decoration.1.png', version: '0'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 
@@ -515,7 +515,7 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('text_golden.DecorationThickness.1.0.png'),
+      matchesGoldenFile('text_golden.DecorationThickness.1.png', version: '0'),
     );
   }, skip: !isLinux); // Coretext uses different thicknesses for decoration
 }

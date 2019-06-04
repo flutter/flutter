@@ -407,7 +407,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.material.0.0.png'),
+      matchesGoldenFile('text_field_cursor_test.material.0.png', version: '0'),
     );
   }, skip: !isLinux);
 
@@ -436,7 +436,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.material.1.0.png'),
+      matchesGoldenFile('text_field_cursor_test.material.1.png', version: '0'),
     );
   }, skip: !isLinux);
 
@@ -487,7 +487,7 @@ void main() {
     await expectLater(
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
-      matchesGoldenFile('text_field_opacity_test.0.2.png'),
+      matchesGoldenFile('text_field_opacity_test.0.png', version: '2'),
       skip: !isLinux,
     );
   });

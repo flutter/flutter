@@ -1895,7 +1895,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(expectedChildLayerCount, equals(2));
       await expectLater(
         layer.toImage(renderObject.semanticBounds.inflate(50.0)),
-        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
+        matchesGoldenFile('inspector.repaint_boundary_margin.png', version: null),
         skip: !isLinux,
       );
 
@@ -1906,7 +1906,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 0.5,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin_small.png'),
+        matchesGoldenFile('inspector.repaint_boundary_margin_small.png', version: null),
         skip: !isLinux,
       );
 
@@ -1915,7 +1915,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 2.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin_large.png'),
+        matchesGoldenFile('inspector.repaint_boundary_margin_large.png', version: null),
         skip: !isLinux,
       );
 
@@ -1931,7 +1931,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 300.0,
           height: 300.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary.png'),
+        matchesGoldenFile('inspector.repaint_boundary.png', version: null),
         skip: !isLinux,
       );
 
@@ -1949,7 +1949,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
           margin: 50.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
+        matchesGoldenFile('inspector.repaint_boundary_margin.png', version: null),
         skip: !isLinux,
       );
 
@@ -1970,7 +1970,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
+        matchesGoldenFile('inspector.repaint_boundary_debugPaint.png', version: null),
         skip: !isLinux,
       );
       // Verify that taking a screenshot with debug paint on did not change
@@ -1981,7 +1981,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // hasn't changed the regular render of the widget.
       await expectLater(
         find.byType(RepaintBoundaryWithDebugPaint),
-        matchesGoldenFile('inspector.repaint_boundary.png'),
+        matchesGoldenFile('inspector.repaint_boundary.png', version: null),
         skip: !isLinux,
       );
 
@@ -1995,7 +1995,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 100.0,
           height: 100.0,
         ),
-        matchesGoldenFile('inspector.container.png'),
+        matchesGoldenFile('inspector.container.png', version: null),
         skip: !isLinux,
       );
 
@@ -2006,7 +2006,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.container_debugPaint.png'),
+        matchesGoldenFile('inspector.container_debugPaint.png', version: null),
         skip: !isLinux,
       );
 
@@ -2027,7 +2027,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             height: 100.0,
             debugPaint: true,
           ),
-          matchesGoldenFile('inspector.container_debugPaint.png'),
+          matchesGoldenFile('inspector.container_debugPaint.png', version: null),
           skip: !isLinux,
         );
         expect(container.debugNeedsLayout, isFalse);
@@ -2040,7 +2040,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 50.0,
           height: 100.0,
         ),
-        matchesGoldenFile('inspector.container_small.png'),
+        matchesGoldenFile('inspector.container_small.png', version: null),
         skip: !isLinux,
       );
 
@@ -2051,7 +2051,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 400.0,
           maxPixelRatio: 3.0,
         ),
-        matchesGoldenFile('inspector.container_large.png'),
+        matchesGoldenFile('inspector.container_large.png', version: null),
         skip: !isLinux,
       );
 
@@ -2064,7 +2064,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.clipRect_debugPaint.png'),
+        matchesGoldenFile('inspector.clipRect_debugPaint.png', version: null),
         skip: !isLinux,
       );
 
@@ -2081,7 +2081,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This golden image is platform dependent due to the clip icon.
       await expectLater(
         clipRectScreenshot,
-        matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
+        matchesGoldenFile('inspector.clipRect_debugPaint_margin.png', version: null),
         skip: !isLinux,
       );
 
@@ -2121,7 +2121,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.padding_debugPaint.png'),
+        matchesGoldenFile('inspector.padding_debugPaint.png', version: null),
         skip: !isLinux,
       );
 
@@ -2133,7 +2133,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint.1.png'),
+        matchesGoldenFile('inspector.sizedBox_debugPaint.png', version: '1'),
         skip: !isLinux,
       );
 
@@ -2146,7 +2146,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           margin: 50.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
+        matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png', version: null),
         skip: !isLinux,
       );
     });
@@ -2218,7 +2218,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile('inspector.composited_transform.only_offsets.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets.png', version: null),
         skip: !isLinux,
       );
 
@@ -2228,13 +2228,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 5000.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png', version: null),
         skip: !isLinux,
       );
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_small.1.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_small.png', version: '1'),
         skip: !isLinux,
       );
 
@@ -2244,7 +2244,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_target.png', version: null),
         skip: !isLinux,
       );
     });
@@ -2317,7 +2317,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // screenshots of specific subtrees are reasonable.
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile('inspector.composited_transform.with_rotations.png'),
+        matchesGoldenFile('inspector.composited_transform.with_rotations.png', version: null),
         skip: !isLinux,
       );
 
@@ -2327,7 +2327,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_small.png'),
+        matchesGoldenFile('inspector.composited_transform.with_rotations_small.png', version: null),
         skip: !isLinux,
       );
 
@@ -2337,7 +2337,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_target.png'),
+        matchesGoldenFile('inspector.composited_transform.with_rotations_target.png', version: null),
         skip: !isLinux,
       );
 
@@ -2347,7 +2347,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png'),
+        matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png', version: null),
         skip: !isLinux,
       );
 

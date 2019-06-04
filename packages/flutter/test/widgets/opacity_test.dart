@@ -177,7 +177,7 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('opacity_test.offset.1.png'),
+      matchesGoldenFile('opacity_test.offset.png', version: '1'),
       skip: !isLinux,
     );
   });
