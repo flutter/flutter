@@ -14,11 +14,17 @@ void main() {
   group(consolidateHttpClientResponseBytes, () {
     final List<int> chunkOne = <int>[0, 1, 2, 3, 4, 5];
     final List<int> chunkTwo = <int>[6, 7, 8, 9, 10];
+    MockHttpClient client;
     MockHttpClientResponse response;
+    MockHttpHeaders headers;
 
     setUp(() {
+      client = MockHttpClient();
       response = MockHttpClientResponse();
-      when(response.compressionState).thenReturn(HttpClientResponseCompressionState.notCompressed);
+      headers = MockHttpHeaders();
+      when(client.autoUncompress).thenReturn(true);
+      when(response.headers).thenReturn(headers);
+      when(headers.value(HttpHeaders.contentEncodingHeader)).thenReturn(null);
       when(response.listen(
          any,
          onDone: anyNamed('onDone'),
@@ -44,7 +50,7 @@ void main() {
       when(response.contentLength)
           .thenReturn(chunkOne.length + chunkTwo.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response);
+          await consolidateHttpClientResponseBytes(response, client: client);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -52,7 +58,7 @@ void main() {
     test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength).thenReturn(chunkOne.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response);
+          await consolidateHttpClientResponseBytes(response, client: client);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -60,7 +66,7 @@ void main() {
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
       when(response.contentLength).thenReturn(-1);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response);
+          await consolidateHttpClientResponseBytes(response, client: client);
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -71,6 +77,7 @@ void main() {
       final List<int> records = <int>[];
       await consolidateHttpClientResponseBytes(
         response,
+        client: client,
         onBytesReceived: (int cumulative, int total) {
           records.addAll(<int>[cumulative, total]);
         },
@@ -107,7 +114,7 @@ void main() {
       });
       when(response.contentLength).thenReturn(-1);
 
-      expect(consolidateHttpClientResponseBytes(response),
+      expect(consolidateHttpClientResponseBytes(response, client: client),
           throwsA(isInstanceOf<Exception>()));
     });
 
@@ -115,6 +122,7 @@ void main() {
       when(response.contentLength).thenReturn(-1);
       final Future<List<int>> result = consolidateHttpClientResponseBytes(
         response,
+        client: client,
         onBytesReceived: (int cumulative, int total) {
           throw 'misbehaving callback';
         },
@@ -129,7 +137,7 @@ void main() {
       final List<int> gzippedChunkTwo = gzipped.sublist(gzipped.length ~/ 2);
 
       setUp(() {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
+        when(headers.value(HttpHeaders.contentEncodingHeader)).thenReturn('gzip');
         when(response.listen(
           any,
           onDone: anyNamed('onDone'),
@@ -151,26 +159,27 @@ void main() {
         });
       });
 
-      test('Uncompresses GZIP bytes if autoUncompress is true and response.compressionState is compressed', () async {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
+      test('Uncompresses GZIP bytes if autoUncompress is true and response.autoUncompress is false', () async {
+        when(client.autoUncompress).thenReturn(false);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> bytes = await consolidateHttpClientResponseBytes(response);
+        final List<int> bytes = await consolidateHttpClientResponseBytes(response, client: client);
         expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       });
 
-      test('returns gzipped bytes if autoUncompress is false and response.compressionState is compressed', () async {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
+      test('returns gzipped bytes if autoUncompress is false and response.autoUncompress is false', () async {
+        when(client.autoUncompress).thenReturn(false);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> bytes = await consolidateHttpClientResponseBytes(response, autoUncompress: false);
+        final List<int> bytes = await consolidateHttpClientResponseBytes(response, client: client, autoUncompress: false);
         expect(bytes, gzipped);
       });
 
       test('Notifies onBytesReceived with gzipped numbers', () async {
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
+        when(client.autoUncompress).thenReturn(false);
         when(response.contentLength).thenReturn(gzipped.length);
         final List<int> records = <int>[];
         await consolidateHttpClientResponseBytes(
           response,
+          client: client,
           onBytesReceived: (int cumulative, int total) {
             records.addAll(<int>[cumulative, total]);
           },
@@ -184,13 +193,13 @@ void main() {
         ]);
       });
 
-      test('Notifies onBytesReceived with expectedContentLength of -1 if response.compressionState is decompressed', () async {
+      test('Notifies onBytesReceived with expectedContentLength of -1 if response.autoUncompress is true', () async {
         final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
-        when(response.compressionState).thenReturn(HttpClientResponseCompressionState.decompressed);
         when(response.contentLength).thenReturn(syntheticTotal);
         final List<int> records = <int>[];
         await consolidateHttpClientResponseBytes(
           response,
+          client: client,
           onBytesReceived: (int cumulative, int total) {
             records.addAll(<int>[cumulative, total]);
           },
@@ -207,4 +216,6 @@ void main() {
   });
 }
 
+class MockHttpClient extends Mock implements HttpClient {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockHttpHeaders extends Mock implements HttpHeaders {}
