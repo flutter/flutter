@@ -1086,17 +1086,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
     return await super.willPop();
   }
 
-  @override
-  void didPopNext(Route<dynamic> nextRoute) {
-    super.didPopNext(nextRoute);
-    // When the route on top of this route is popped, resume focus onto the
-    // widget that received the last focus.
-    final _ModalScopeState<T> modalScopeState = _scopeKey.currentState;
-    if (modalScopeState != null) {
-      modalScopeState.focusScopeNode.requestFocus();
-    }
-  }
-
   /// Enables this route to veto attempts by the user to dismiss it.
   ///
   /// This callback is typically added using a [WillPopScope] widget. That
