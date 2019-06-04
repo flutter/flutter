@@ -6581,4 +6581,34 @@ void main() {
     await tester.tapAt(handlePos, pointer: 7);
     expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
   });
+
+  testWidgets('when TextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Scaffold(
+        body: Center(
+          child: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              Container(height: 579), // Push field almost off screen.
+              TextField(controller: controller),
+              Container(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Tap the TextField to put the cursor into it and bring it into view.
+    expect(scrollController.offset, 0.0);
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // The ListView has scrolled to keep the TextField and cursor handle
+    // visible.
+    expect(scrollController.offset, 44.0);
+  });
 }
