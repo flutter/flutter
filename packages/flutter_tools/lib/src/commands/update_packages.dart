@@ -21,7 +21,7 @@ import '../runner/flutter_command.dart';
 /// package version in cases when upgrading to the latest breaks Flutter.
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
-  'flutter_gallery_assets': '0.1.8', // See //examples/flutter_gallery/pubspec.yaml
+  'flutter_gallery_assets': '0.1.9+2', // See //examples/flutter_gallery/pubspec.yaml
   'build_daemon': '0.6.1', // Crashes at 1.0
   'test': '1.6.3',     //  | Tests are timing out at 1.6.4 https://github.com/flutter/flutter/issues/33823
   'test_api': '0.2.5', //  |
