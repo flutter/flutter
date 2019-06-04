@@ -170,7 +170,6 @@ class WebAssetServer {
 
   Future<void> _completeRequest(HttpRequest request, File file,
       [String contentType = 'text']) async {
-    printTrace('looking for ${request.uri} at ${file.path}');
     if (!file.existsSync()) {
       request.response.statusCode = HttpStatus.notFound;
       await request.response.close();

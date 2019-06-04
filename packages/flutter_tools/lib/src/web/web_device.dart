@@ -5,30 +5,18 @@
 import '../application_package.dart';
 import '../asset.dart';
 import '../base/common.dart';
-import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../version.dart';
 import '../web/compile.dart';
-
-ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
-
-/// Only launch or display web devices if `FLUTTER_WEB`
-/// environment variable is set to true.
-bool get flutterWebEnabled {
-  _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  return _flutterWebEnabled && !FlutterVersion.instance.isStable;
-}
-bool _flutterWebEnabled;
-
+import '../web/workflow.dart';
+import 'chrome.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
   WebApplicationPackage(this._flutterProject) : super(id: _flutterProject.manifest.appName);
@@ -41,7 +29,6 @@ class WebApplicationPackage extends ApplicationPackage {
   /// The location of the web source assets.
   Directory get webSourcePath => _flutterProject.directory.childDirectory('web');
 }
-
 
 class WebDevice extends Device {
   WebDevice() : super('web');
@@ -94,7 +81,17 @@ class WebDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => 'web';
+  Future<String> get sdkNameAndVersion async {
+    final String chrome = findChromeExecutable();
+    final ProcessResult result = await processManager.run(<String>[
+      chrome,
+      '--version',
+    ]);
+    if (result.exitCode == 0) {
+      return result.stdout;
+    }
+    return 'unknown';
+  }
 
   @override
   Future<LaunchResult> startApp(
@@ -140,7 +137,7 @@ class WebDevice extends Device {
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
@@ -201,46 +198,4 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform => flutterWebEnabled;
-}
-
-const String _klinuxExecutable = 'google-chrome';
-const String _kMacOSExecutable = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const String _kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
-final List<String> _kWindowsPrefixes = <String>[
-  platform.environment['LOCALAPPDATA'],
-  platform.environment['PROGRAMFILES'],
-  platform.environment['PROGRAMFILES(X86)'],
-];
-
-// Responsible for launching chrome with devtools configured.
-class ChromeLauncher {
-  const ChromeLauncher();
-
-  /// Launch the chrome browser to a particular `host` page.
-  Future<Process> launch(String host) async {
-    String executable;
-    if (platform.isMacOS) {
-      executable = _kMacOSExecutable;
-    } else if (platform.isLinux) {
-      executable = _klinuxExecutable;
-    } else if (platform.isWindows) {
-      final String filePath = _kWindowsPrefixes.firstWhere((String prefix) {
-        if (prefix == null) {
-          return false;
-        }
-        final String path = fs.path.join(prefix, _kWindowsExecutable);
-        return fs.file(path).existsSync();
-      }, orElse: () => '.');
-      executable = filePath;
-    } else {
-      throwToolExit('Platform ${platform.operatingSystem} is not supported.');
-    }
-    if (!fs.file(executable).existsSync()) {
-      throwToolExit('Chrome executable not found at $executable');
-    }
-    return processManager.start(<String>[
-      executable,
-      host,
-    ], mode: ProcessStartMode.detached);
-  }
 }
