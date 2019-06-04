@@ -188,11 +188,7 @@ public class FlutterMain {
             return;
         }
         try {
-            // There are resources to extract. For example, the AOT blobs from the `assets` directory.
-            // `sResourceExtractor` is `null` if there isn't any AOT blob to extract.
-            if (sResourceExtractor != null) {
-                sResourceExtractor.waitForCompletion();
-            }
+            sResourceExtractor.waitForCompletion();
 
             List<String> shellArgs = new ArrayList<>();
             shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
@@ -313,13 +309,6 @@ public class FlutterMain {
      * This is required by the Dart runtime, so it can read the blobs.
      */
     private static void initResources(@NonNull Context applicationContext) {
-        // When the AOT blobs are contained in the native library directory,
-        // we don't need to extract them manually because they are
-        // extracted by the Android Package Manager automatically.
-        if (!sSnapshotPath.equals(PathUtils.getDataDirectory(applicationContext))) {
-            return;
-        }
-
         new ResourceCleaner(applicationContext).start();
 
         final String dataDirPath = PathUtils.getDataDirectory(applicationContext);
