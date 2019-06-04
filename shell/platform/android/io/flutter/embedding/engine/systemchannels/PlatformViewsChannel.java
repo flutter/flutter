@@ -51,8 +51,9 @@ public class PlatformViewsChannel {
         case "setDirection":
           setDirection(call, result);
           break;
+        default:
+          result.notImplemented();
       }
-      result.notImplemented();
     }
 
     private void create(MethodCall call, MethodChannel.Result result) {
@@ -429,9 +430,4 @@ public class PlatformViewsChannel {
       this.flags = flags;
     }
   }
-
-  /**
-   * The provided platform view ID does not correspond to any existing platform view.
-   */
-  public static class NoSuchPlatformViewException extends IllegalStateException {}
 }
