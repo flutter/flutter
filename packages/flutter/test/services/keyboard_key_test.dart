@@ -51,14 +51,14 @@ void main() {
       expect(key1, equals(key2));
     });
     test('Basic synonyms can be looked up.', () async {
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.shiftLeft], equals(LogicalKeyboardKey.shift));
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.controlLeft], equals(LogicalKeyboardKey.control));
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.altLeft], equals(LogicalKeyboardKey.alt));
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.metaLeft], equals(LogicalKeyboardKey.meta));
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.shiftRight], equals(LogicalKeyboardKey.shift));
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.controlRight], equals(LogicalKeyboardKey.control));
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.altRight], equals(LogicalKeyboardKey.alt));
-      expect(LogicalKeyboardKey.synonyms[LogicalKeyboardKey.metaRight], equals(LogicalKeyboardKey.meta));
+      expect(LogicalKeyboardKey.shiftLeft.synonyms.first, equals(LogicalKeyboardKey.shift));
+      expect(LogicalKeyboardKey.controlLeft.synonyms.first, equals(LogicalKeyboardKey.control));
+      expect(LogicalKeyboardKey.altLeft.synonyms.first, equals(LogicalKeyboardKey.alt));
+      expect(LogicalKeyboardKey.metaLeft.synonyms.first, equals(LogicalKeyboardKey.meta));
+      expect(LogicalKeyboardKey.shiftRight.synonyms.first, equals(LogicalKeyboardKey.shift));
+      expect(LogicalKeyboardKey.controlRight.synonyms.first, equals(LogicalKeyboardKey.control));
+      expect(LogicalKeyboardKey.altRight.synonyms.first, equals(LogicalKeyboardKey.alt));
+      expect(LogicalKeyboardKey.metaRight.synonyms.first, equals(LogicalKeyboardKey.meta));
     });
   });
 }
