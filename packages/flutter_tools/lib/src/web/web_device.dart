@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/platform.dart';
+
 import '../application_package.dart';
 import '../asset.dart';
 import '../base/common.dart';
@@ -82,11 +84,19 @@ class WebDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final String chrome = findChromeExecutable();
-    final ProcessResult result = await processManager.run(<String>[
-      chrome,
-      '--version',
-    ]);
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
+    ProcessResult result;
+    if (platform.isWindows) {
+      result = await processManager.run(<String>[
+        'reg', 'query', '"HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon"', '/v', 'version'
+      ]);
+    } else {
+      final String chrome = findChromeExecutable();
+      result = await processManager.run(<String>[
+        chrome,
+        '--version',
+      ]);
+    }
     if (result.exitCode == 0) {
       return result.stdout;
     }
