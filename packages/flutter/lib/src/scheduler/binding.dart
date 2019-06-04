@@ -772,7 +772,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
       Timeline.finishSync();
     });
 
-    // We use timers here to ensure that microtasks flush in between.
+    // We use scheduleMicrotask here to ensure that microtasks flush in between.
     scheduleMicrotask(() {
       assert(_warmUpFrame);
       handleBeginFrame(null);
