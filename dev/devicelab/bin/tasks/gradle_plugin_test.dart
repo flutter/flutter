@@ -55,7 +55,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
 
-        Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
+        final Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
 
         _checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -86,7 +86,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
 
-        Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
+        final Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
 
         _checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -114,7 +114,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
 
-        Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
 
         _checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -141,7 +141,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
 
-        Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
 
         _checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -168,7 +168,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
 
-        Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
 
         _checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -195,7 +195,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a release apk at: ${pluginProject.releaseApkPath}');
 
-        Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
 
         _checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -221,7 +221,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a release aab file at: ${pluginProject.releaseBundlePath}');
 
-        Set<String> bundleFiles = await pluginProject.getFilesInAppBundle(pluginProject.releaseBundlePath);
+        final Set<String> bundleFiles = await pluginProject.getFilesInAppBundle(pluginProject.releaseBundlePath);
 
         _checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
@@ -242,7 +242,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a release aab file at: ${pluginProject.releaseBundlePath}');
 
-        Set<String> bundleFiles = await pluginProject.getFilesInAppBundle(pluginProject.releaseBundlePath);
+        final Set<String> bundleFiles = await pluginProject.getFilesInAppBundle(pluginProject.releaseBundlePath);
 
         _checkItContains<String>(<String>[
           'base/manifest/AndroidManifest.xml',
@@ -253,7 +253,7 @@ Future<void> main() async {
 
         _checkItDoesNotContain<String>(<String>[
           'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
+          'base/lib/arm64-v8a/libflutter.so', 
         ], bundleFiles);
       });
 
