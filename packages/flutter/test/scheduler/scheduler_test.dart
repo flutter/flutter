@@ -92,7 +92,7 @@ void main() {
   });
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
-    final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
+    final List<VoidCallback> microtaskQueue = <VoidCallback>[];
     bool taskExecuted = false;
     runZoned<void>(
       () {
@@ -102,17 +102,17 @@ void main() {
         scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
       },
       zoneSpecification: ZoneSpecification(
-        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+        scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
           // Don't actually run the tasks, just record that it was scheduled.
-          timerQueueTasks.add(f);
+          microtaskQueue.add(f);
           return null;
         },
       ),
     );
 
-    // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0 because
+    // scheduleWarmUpFrame scheduled 1 microtask, scheduleTask scheduled 0 because
     // events are locked.
-    expect(timerQueueTasks.length, 2);
+    expect(microtaskQueue.length, 1);
     expect(taskExecuted, false);
   });
 }

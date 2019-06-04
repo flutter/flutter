@@ -741,8 +741,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
 
   bool _warmUpFrame = false;
 
-  final Completer<void> _warmUpFrameCompleter = Completer<void>();
-
   /// Schedule a frame to run as soon as possible, rather than waiting for
   /// the engine to request a frame in response to a system "Vsync" signal.
   ///
@@ -765,6 +763,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     _warmUpFrame = true;
     Timeline.startSync('Warm-up frame');
     final bool hadScheduledFrame = _hasScheduledFrame;
+    final Completer<void> _warmUpFrameCompleter = Completer<void>();
 
     // Lock events so touch events etc don't insert themselves until the
     // scheduled frame has finished.
