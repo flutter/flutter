@@ -2626,6 +2626,34 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  testWidgets('when CupertinoTextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(CupertinoApp(
+      theme: const CupertinoThemeData(),
+      home: Center(
+        child: ListView(
+          controller: scrollController,
+          children: <Widget>[
+            Container(height: 585), // Push field almost off screen.
+            CupertinoTextField(controller: controller),
+            Container(height: 1000),
+          ],
+        ),
+      ),
+    ));
+
+    // Tap the TextField to put the cursor into it and bring it into view.
+    expect(scrollController.offset, 0.0);
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pumpAndSettle();
+
+    // The ListView has scrolled to keep the TextField and cursor handle
+    // visible.
+    expect(scrollController.offset, 26.0);
+  });
+
   testWidgets('disabled state golden', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
