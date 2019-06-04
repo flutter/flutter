@@ -950,7 +950,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     assert(_schedulerPhase == SchedulerPhase.midFrameMicrotasks);
     Timeline.finishSync(); // end the "Animate" phase
     try {
-      // PERSISTENT FRAME CALLBACKS	
+      // PERSISTENT FRAME CALLBACKS
       _schedulerPhase = SchedulerPhase.persistentCallbacks;
       for (FrameCallback callback in _persistentCallbacks)
         _invokeFrameCallback(callback, _currentFrameTimeStamp);
