@@ -33,7 +33,7 @@ void main() {
       when(visualStudio.isInstalled).thenReturn(true);
       when(visualStudio.hasNecessaryComponents).thenReturn(false);
       when(visualStudio.workloadDescription).thenReturn('Desktop development');
-      when(visualStudio.necessaryComponentDescriptions).thenReturn(<String>['A', 'B']);
+      when(visualStudio.necessaryComponentDescriptions(any)).thenReturn(<String>['A', 'B']);
       const VisualStudioValidator validator = VisualStudioValidator();
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);

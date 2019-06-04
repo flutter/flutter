@@ -47,7 +47,13 @@ class VisualStudio {
   String get workloadDescription => 'Desktop development with C++';
 
   /// The names of the components within the workload that must be installed.
-  List<String> get necessaryComponentDescriptions => _requiredComponents.values;
+  ///
+  /// If there is an existing Visual Studio installation, the major version
+  /// should be provided here, as the descriptions of some componets differ
+  /// from version to version.
+  List<String> necessaryComponentDescriptions([int visualStudioMajorVersion]) {
+    return _requiredComponents(visualStudioMajorVersion).values.toList();
+  }
 
   /// The path to vcvars64.bat, or null if no Visual Studio installation has
   /// the components necessary to build.
@@ -82,18 +88,26 @@ class VisualStudio {
   ///
   /// Maps from component IDs to description in the installer UI.
   /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
-  static const Map<String, String> _requiredComponents = <String, String>{
-    // The MSBuild tool and related command-line toolchain.
-    'Microsoft.Component.MSBuild': 'MSBuild',
-    // The C++ toolchain required by the template.
-    // This is the VS 2017 version, which is opavailable for 2019 as an optional
-    // install.
-    'Microsoft.VisualStudio.Component.VC.v141.x86.x64':
-        'MSVC v141 - VS 2017 C++ x64/x86 build tools (v14.16)',
-    // The Windows SDK version used by the template.
-    'Microsoft.VisualStudio.Component.Windows10SDK.17763':
-        'Windows 10 SDK (10.0.17763.0)',
-  };
+  Map<String, String> _requiredComponents([int visualStudioMajorVersion]) {
+    // The description of the C++ toolchain required by the template. The
+    // component name is significantly different in different versions.
+    // Default to the latest known description, but use a specific string
+    // if a known older version is requested.
+    String cppToolchainDescription = 'MSVC v142 - VS 2019 C++ x64/x86 build tools (v14.21)';
+    if (visualStudioMajorVersion == 15) {
+      cppToolchainDescription = 'VC++ 2017 version 15.9 v14.16 latest v141 tools';
+    }
+
+    return <String, String>{
+      // The MSBuild tool and related command-line toolchain.
+      'Microsoft.Component.MSBuild': 'MSBuild',
+      // The C++ toolchain required by the template.
+      'Microsoft.VisualStudio.Coponent.VC.Tools.x86.x64': cppToolchainDescription,
+      // The Windows SDK version used by the template.
+      'Microsoft.VisualStudio.Component.Windows10SDK.17763':
+          'Windows 10 SDK (10.0.17763.0)',
+    };
+  }
 
   // Keys in a VS details dictionary returned from vswhere.
 
@@ -146,7 +160,7 @@ class VisualStudio {
   Map<String, dynamic> _cachedUsableVisualStudioDetails;
   Map<String, dynamic> get _usableVisualStudioDetails {
     _cachedUsableVisualStudioDetails ??=
-        _visualStudioDetails(requiredComponents: _requiredComponents.keys);
+        _visualStudioDetails(requiredComponents: _requiredComponents().keys);
     return _cachedUsableVisualStudioDetails;
   }
 

@@ -31,10 +31,11 @@ class VisualStudioValidator extends DoctorValidator {
 
       if (!visualStudio.hasNecessaryComponents) {
         status = ValidationType.partial;
+        final int majorVersion = int.tryParse(visualStudio.fullVersion.split('.')[0]);
         messages.add(ValidationMessage.error(
             userMessages.visualStudioMissingComponents(
                 visualStudio.workloadDescription,
-                visualStudio.necessaryComponentDescriptions
+                visualStudio.necessaryComponentDescriptions(majorVersion)
             )
         ));
       }
