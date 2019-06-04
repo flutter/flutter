@@ -722,7 +722,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cause: SelectionChangedCause.forcePress,
       );
       if (_shouldShowSelectionToolbar) {
-        _editableTextKey.currentState.showToolbar();
+        _editableTextKey.currentState.toggleToolbar();
       }
     }
   }
@@ -790,8 +790,10 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    if (_shouldShowSelectionToolbar)
-      _editableTextKey.currentState.showToolbar();
+    if (widget.selectionEnabled) {
+      if (_shouldShowSelectionToolbar)
+        _editableTextKey.currentState.toggleToolbar();
+    }
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
