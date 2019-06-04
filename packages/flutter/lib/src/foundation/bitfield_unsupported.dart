@@ -2,34 +2,32 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'bitfield.dart' as bitfield;
-
-/// The dart:html implementation of [bitfield.kMaxUnsignedSMI].
+/// Unsupported.
 const int kMaxUnsignedSMI = 0;
 
-/// The dart:html implementation of [bitfield.Bitfield].
-class BitField<T extends dynamic> implements bitfield.BitField<T> {
-  /// The dart:html implementation of [bitfield.Bitfield].
-  // Can remove when we have metaclasses.
+/// Unsupported.
+class BitField<T extends dynamic> {
+  /// Unsupported.
+  // Ignored so that both bitfield implementations have the same API.
   // ignore: avoid_unused_constructor_parameters
   BitField(int length);
 
-  /// The dart:html implementation of [bitfield.Bitfield.filled].
-  // Can remove when we have metaclasses.
+  /// Unsupported.
+  // Ignored so that both bitfield implementations have the same API.
   // ignore: avoid_unused_constructor_parameters
   BitField.filled(int length, bool value);
 
-  @override
+  /// Unsupported.
   bool operator [](T index) {
     throw UnsupportedError('Not supported when compiling to JavaScript');
   }
 
-  @override
+  /// Unsupported.
   void operator []=(T index, bool value) {
     throw UnsupportedError('Not supported when compiling to JavaScript');
   }
 
-  @override
+  /// Unsupported.
   void reset([ bool value = false ]) {
     throw UnsupportedError('Not supported when compiling to JavaScript');
   }
