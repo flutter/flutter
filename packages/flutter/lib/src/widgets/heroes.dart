@@ -22,10 +22,10 @@ import 'transitions.dart';
 /// [MaterialRectArcTween].
 typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 
-/// A builder that builds a placeholder widget given a child and a [Size]
+/// A function that builds a [Hero] placeholder widget given a child and a [Size]
 ///
 /// The child can optionally be part of the returned widget tree. The returned
-/// widget should typically be sized to [heroSize], if it doesn't do so
+/// widget should typically be constrained to [heroSize], if it doesn't do so
 /// implicitly.
 ///
 /// See also:
@@ -210,8 +210,10 @@ class Hero extends StatefulWidget {
   ///
   /// If a widget built by [flightShuttleBuilder] takes part in a [Navigator]
   /// push transition, that widget or its descendants must not have any
-  /// [GlobalKey] that is used in the source Hero's descendant widgets, as both
-  /// subtrees will be included in the tree during the Hero flight animation.
+  /// [GlobalKey] that is used in the source Hero's descendant widgets. That is
+  /// because both subtrees will be included in the widget tree during the Hero
+  /// flight animation, and [GlobalKey]s must be unique across the entire widget
+  /// tree.
   ///
   /// If the said [GlobalKey] is essential to your application, consider providing
   /// a custom [placeholderBuilder] for the source Hero, to avoid the [GlobalKey]
@@ -222,11 +224,10 @@ class Hero extends StatefulWidget {
   /// Placeholder widget left in place as the Hero's [child] once the flight takes
   /// off.
   ///
-  /// By default the placeholder widget left in place is an empty [SizedBox]
-  /// keeping the Hero child's original size, unless this Hero is a source Hero
-  /// of a [Navigator] push transition, in which case the placeholder will be a
-  /// widget that includes [child] as a descendant, and also preserves its
-  /// original size, keeps it offstage and pauses its animation.
+  /// By default the placeholder widget is an empty [SizedBox] keeping the Hero
+  /// child's original size, unless this Hero is a source Hero of a [Navigator]
+  /// push transition, in which case [child] will be a descendant of the placeholder
+  /// and will be kept [Offstage] during the Hero's flight.
   final HeroPlaceholderBuilder placeholderBuilder;
 
   /// Whether to perform the hero transition if the [PageRoute] transition was
