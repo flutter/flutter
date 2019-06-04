@@ -7,7 +7,6 @@ import 'dart:ui' show Path, lerpDouble;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/material/range_slider.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
@@ -2828,3 +2827,105 @@ class _PaddleSliderTrackShapePathPainter {
     canvas.restore();
   }
 }
+
+/// A callback that formats the numeric values from a [RangeSlider] widget.
+///
+/// See also:
+///
+///  * [RangeSlider.semanticFormatterCallback], which shows an example use case.
+typedef RangeSemanticFormatterCallback = String Function(RangeValues values);
+
+/// Decides which thumbs (if any) should be selected.
+///
+/// The default finds the closest thumb, but if the thumbs are close to each
+/// other, it waits for movement defined by [dx] to determine the selected
+/// thumb.
+///
+/// Override [RangeSlider.thumbSelector] for custom thumb selection.
+typedef RangeThumbSelector = Thumb Function(
+    TextDirection textDirection,
+    RangeValues values,
+    double tapValue,
+    Size thumbSize,
+    Size trackSize,
+    double dx
+    );
+
+/// Object for representing range slider thumb values.
+///
+/// This object is passed into [RangeSlider.values] to set its values, and it
+/// is emitted in [RangeSlider.onChange], [RangeSlider.onChangeStart], and
+/// [RangeSlider.onChangeEnd] when the values change.
+class RangeValues {
+  /// Creates pair of start and end values.
+  const RangeValues(this.start, this.end);
+
+  /// The value of the start thumb.
+  ///
+  /// For LTR text direction, the start is the left thumb, and for RTL text
+  /// direction, the start is the right thumb.
+  final double start;
+
+  /// The value of the end thumb.
+  ///
+  /// For LTR text direction, the end is the right thumb, and for RTL text
+  /// direction, the end is the left thumb.
+  final double end;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final RangeValues typedOther = other;
+    return typedOther.start == start
+        && typedOther.end == end;
+  }
+
+  @override
+  int get hashCode => hashValues(start, end);
+
+  @override
+  String toString() {
+    return '$runtimeType($start, $end)';
+  }
+}
+
+/// Object for setting range slider label values that appear in the value
+/// indicator for each thumb.
+///
+/// Used in combination with [RangeSlider.showValueIndicator] to display
+/// labels above the thumbs.
+class RangeLabels {
+  /// Creates pair of start and end labels.
+  const RangeLabels(this.start, this.end);
+
+  /// The label of the start thumb.
+  ///
+  /// For LTR text direction, the start is the left thumb, and for RTL text
+  /// direction, the start is the right thumb.
+  final String start;
+
+  /// The label of the end thumb.
+  ///
+  /// For LTR text direction, the end is the right thumb, and for RTL text
+  /// direction, the end is the left thumb.
+  final String end;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    final RangeLabels typedOther = other;
+    return typedOther.start == start
+        && typedOther.end == end;
+  }
+
+  @override
+  int get hashCode => hashValues(start, end);
+
+  @override
+  String toString() {
+    return '$runtimeType($start, $end)';
+  }
+}
+
