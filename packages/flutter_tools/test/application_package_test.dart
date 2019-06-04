@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/fuchsia/application_package.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 
@@ -303,6 +304,52 @@ void main() {
       final BuildableIOSApp iosApp = IOSApp.fromIosProject(FlutterProject.fromDirectory(fs.currentDirectory).ios);
 
       expect(iosApp, null);
+    }, overrides: overrides);
+  });
+
+  group('FuchsiaApp', () {
+    final Map<Type, Generator> overrides = <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      Platform: _kNoColorTerminalPlatform,
+      OperatingSystemUtils: () => MockOperatingSystemUtils(),
+    };
+    testUsingContext('Error on non-existing file', () {
+      final PrebuiltFuchsiaApp fuchsiaApp =
+          FuchsiaApp.fromPrebuiltApp(fs.file('not_existing.far'));
+      expect(fuchsiaApp, isNull);
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.errorText,
+        'File "not_existing.far" does not exist or is not a .far file. Use far archive.\n',
+      );
+    }, overrides: overrides);
+
+    testUsingContext('Error on non-far file', () {
+      fs.directory('regular_folder').createSync();
+      final PrebuiltFuchsiaApp fuchsiaApp =
+          FuchsiaApp.fromPrebuiltApp(fs.file('regular_folder'));
+      expect(fuchsiaApp, isNull);
+      final BufferLogger logger = context.get<Logger>();
+      expect(
+        logger.errorText,
+        'File "regular_folder" does not exist or is not a .far file. Use far archive.\n',
+      );
+    }, overrides: overrides);
+
+    testUsingContext('Success with far file', () {
+      fs.file('bundle.far').createSync();
+      final PrebuiltFuchsiaApp fuchsiaApp = FuchsiaApp.fromPrebuiltApp(fs.file('bundle.far'));
+      final BufferLogger logger = context.get<Logger>();
+      expect(logger.errorText, isEmpty);
+      expect(fuchsiaApp.id, 'bundle.far');
+    }, overrides: overrides);
+
+    testUsingContext('returns null when there is no fuchsia', () async {
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+      final BuildableFuchsiaApp fuchsiaApp = FuchsiaApp.fromFuchsiaProject(FlutterProject.fromDirectory(fs.currentDirectory).fuchsia);
+
+      expect(fuchsiaApp, null);
     }, overrides: overrides);
   });
 }

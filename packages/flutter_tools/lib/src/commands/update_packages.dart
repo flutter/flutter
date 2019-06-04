@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:flutter_goldens_client/client.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -23,7 +22,10 @@ import '../runner/flutter_command.dart';
 const Map<String, String> _kManuallyPinnedDependencies = <String, String>{
   // Add pinned packages here.
   'flutter_gallery_assets': '0.1.8', // See //examples/flutter_gallery/pubspec.yaml
-  'build_daemon': '0.6.1',
+  'build_daemon': '0.6.1', // Crashes at 1.0
+  'test': '1.6.3',     //  | Tests are timing out at 1.6.4 https://github.com/flutter/flutter/issues/33823
+  'test_api': '0.2.5', //  |
+  'test_core': '0.2.5' //  |
 };
 
 class UpdatePackagesCommand extends FlutterCommand {
@@ -135,17 +137,6 @@ class UpdatePackagesCommand extends FlutterCommand {
           return directory.path.endsWith('packages${fs.path.separator}$package');
         });
       });
-    }
-
-    // The dev/integration_tests/android_views integration test depends on an assets
-    // package that is in the goldens repository. We need to make sure that the goldens
-    // repository is cloned locally before we verify or update pubspecs.
-    printStatus('Cloning goldens repository...');
-    try {
-      final GoldensClient goldensClient = GoldensClient();
-      await goldensClient.prepare();
-    } on NonZeroExitCode catch (e) {
-      throwToolExit(e.stderr, exitCode: e.exitCode);
     }
 
     if (isVerifyOnly) {
@@ -1118,7 +1109,16 @@ String _generateFakePubspec(Iterable<PubspecDependency> dependencies) {
   overrides.writeln('dependency_overrides:');
   if (_kManuallyPinnedDependencies.isNotEmpty) {
     printStatus('WARNING: the following packages use hard-coded version constraints:');
+    final Set<String> allTransitive = <String>{
+      for (PubspecDependency dependency in dependencies)
+        dependency.name
+    };
     for (String package in _kManuallyPinnedDependencies.keys) {
+      // Don't add pinned dependency if it is not in the set of all transitive dependencies.
+      if (!allTransitive.contains(package)) {
+        printStatus('Skipping $package because it was not transitive');
+        continue;
+      }
       final String version = _kManuallyPinnedDependencies[package];
       result.writeln('  $package: $version');
       printStatus('  - $package: $version');

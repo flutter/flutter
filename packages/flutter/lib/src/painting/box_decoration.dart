@@ -97,6 +97,30 @@ class BoxDecoration extends Decoration {
          'gradient, but no color or gradient was provided.'
        );
 
+  /// Creates a copy of this object but with the given fields replaced with the
+  /// new values.
+  BoxDecoration copyWith({
+    Color color,
+    DecorationImage image,
+    BoxBorder border,
+    BorderRadiusGeometry borderRadius,
+    List<BoxShadow> boxShadow,
+    Gradient gradient,
+    BlendMode backgroundBlendMode,
+    BoxShape shape,
+  }) {
+    return BoxDecoration(
+      color: color ?? this.color,
+      image: image ?? this.image,
+      border: border ?? this.border,
+      borderRadius: borderRadius ?? this.borderRadius,
+      boxShadow: boxShadow ?? this.boxShadow,
+      gradient: gradient ?? this.gradient,
+      backgroundBlendMode: backgroundBlendMode ?? this.backgroundBlendMode,
+      shape: shape ?? this.shape,
+    );
+  }
+
   @override
   bool debugAssertIsValid() {
     assert(shape != BoxShape.circle ||

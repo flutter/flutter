@@ -8,6 +8,7 @@ import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, PathMetric,
                             Picture, PictureRecorder, Scene, SceneBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1237,7 +1238,9 @@ class TransformLayer extends OffsetLayer {
 
   Offset _transformOffset(Offset regionOffset) {
     if (_inverseDirty) {
-      _invertedTransform = Matrix4.tryInvert(transform);
+      _invertedTransform = Matrix4.tryInvert(
+        PointerEvent.removePerspectiveTransform(transform)
+      );
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
