@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -376,7 +375,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.0.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -406,7 +405,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('text_field_cursor_test.1.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets(
     'can control text content via controller',
@@ -1152,6 +1151,43 @@ void main() {
     expect(text.style.fontWeight, FontWeight.w300);
   });
 
+  testWidgets('Read only text field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              readOnly: true,
+            ),
+          ],
+        ),
+      ),
+    );
+    // Read only text field cannot open keyboard.
+    await tester.showKeyboard(find.byType(CupertinoTextField));
+    expect(tester.testTextInput.hasAnyClients, false);
+
+    await tester.longPressAt(
+        tester.getTopRight(find.text('readonly'))
+    );
+
+    await tester.pump();
+
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsOneWidget);
+
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
+
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+  });
+
   testWidgets('copy paste', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -1266,6 +1302,49 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'double tap selects word and first tap of double tap moves cursor',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      final TestGesture gesture =
+        await tester.startGesture(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 3 toolbar buttons.
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
 
@@ -1973,7 +2052,7 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
     await tester.tapAt(ePos, pointer: 7);
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 7);
 
@@ -1993,7 +2072,6 @@ void main() {
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
-
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 5);
 
@@ -2546,5 +2624,31 @@ void main() {
     expect(right.opacity.value, equals(1.0));
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('disabled state golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: DecoratedBox(
+          decoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: CupertinoTextField(
+                controller: TextEditingController(text: 'lorem'),
+                enabled: false,
+              ),
+            )
+          )
+        )
+      )
+    );
+
+    await expectLater(
+      find.byType(CupertinoTextField),
+      matchesGoldenFile('text_field_test.disabled.0.png'),
+      skip: !isLinux,
+    );
   });
 }

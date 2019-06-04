@@ -378,6 +378,91 @@ void main() {
     ]);
   }, timeout: allowForRemotePubInvocation);
 
+
+  testUsingContext('androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -1172,6 +1257,14 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   @override
   String get reasonPhrase => '<reason phrase>';
 
+  // TODO(tvolkert): Update (flutter/flutter#33791)
+  /*
+  @override
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
+  */
+
   @override
   StreamSubscription<List<int>> listen(
     void onData(List<int> event), {
@@ -1185,6 +1278,10 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
+    // TODO(tvolkert): Update (flutter/flutter#33791)
+    if (invocation.memberName == #compressionState) {
+      return null;
+    }
     throw 'io.HttpClientResponse - $invocation';
   }
 }

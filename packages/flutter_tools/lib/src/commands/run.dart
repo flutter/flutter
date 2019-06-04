@@ -403,7 +403,7 @@ class RunCommand extends RunCommandBase {
     // in a "hot mode".
     final bool webMode = !FlutterVersion.instance.isStable
       && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web
+      && await devices.single.targetPlatform == TargetPlatform.web_javascript
       && hotMode;
 
     ResidentRunner runner;
