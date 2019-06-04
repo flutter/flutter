@@ -29,6 +29,7 @@ void main() {
 
     setUpAll(() {
       unstable = MockFlutterVersion(false);
+      stable = MockFlutterVersion(true);
       noEnvironment = MockPlatform(environment: const <String, String>{});
       notSupported = MockPlatform(linux: false, windows: false, macos: false);
       windows = MockPlatform(windows: true);
