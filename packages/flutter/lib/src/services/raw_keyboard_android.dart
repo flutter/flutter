@@ -113,30 +113,41 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   /// replicated as static constants in this class.
   final int eventSource;
 
-  static const int _gamepadSource = 0x401;
-  static const int _dpadSource = 0x201;
-  static const int _joystickSource = 0x01000010;
-
-  @override
-  KeyEventSource get source {
-    if (eventSource & _gamepadSource == _gamepadSource) {
-      return KeyEventSource.gameController;
-    }
-    if (eventSource & _dpadSource == _dpadSource) {
-      return KeyEventSource.gameController;
-    }
-    if (eventSource & _joystickSource == _joystickSource) {
-      return KeyEventSource.gameController;
-    }
-    return KeyEventSource.keyboard;
-  }
+  // The source code that indicates that an event came from a joystick.
+  // from https://developer.android.com/reference/android/view/InputDevice.html#SOURCE_JOYSTICK
+  static const int _sourceJoystick = 0x01000010;
 
   // Android only reports a single code point for the key label.
   @override
   String get keyLabel => plainCodePoint == 0 ? null : String.fromCharCode(plainCodePoint & _kCombiningCharacterMask);
 
   @override
-  PhysicalKeyboardKey get physicalKey => kAndroidToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
+  PhysicalKeyboardKey get physicalKey {
+    if (kAndroidToPhysicalKey.containsKey(scanCode)) {
+      return kAndroidToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
+    }
+
+    // Android sends DPAD_UP, etc. as the keyCode for joystick DPAD events, but
+    // it doesn't set the scanCode for those, so we have to detect this, and set
+    // our own DPAD physical keys. The logical key will still match "arrowUp",
+    // etc.
+    if (eventSource & _sourceJoystick == _sourceJoystick) {
+      final LogicalKeyboardKey foundKey = kAndroidToLogicalKey[keyCode];
+      if (foundKey == LogicalKeyboardKey.arrowUp) {
+        return PhysicalKeyboardKey.dpadUp;
+      }
+      if (foundKey == LogicalKeyboardKey.arrowDown) {
+        return PhysicalKeyboardKey.dpadDown;
+      }
+      if (foundKey == LogicalKeyboardKey.arrowLeft) {
+        return PhysicalKeyboardKey.dpadLeft;
+      }
+      if (foundKey == LogicalKeyboardKey.arrowRight) {
+        return PhysicalKeyboardKey.dpadRight;
+      }
+    }
+    return PhysicalKeyboardKey.none;
+  }
 
   @override
   LogicalKeyboardKey get logicalKey {

@@ -6891,13 +6891,13 @@
       "glfw": null
     }
   },
-  "gameButtonL1": {
+  "gameButtonLeft1": {
     "names": {
-      "domkey": "GameButtonL1",
+      "domkey": "GameButtonLeft1",
       "android": [
         "BUTTON_L1"
       ],
-      "english": "Game Button L1",
+      "english": "Game Button Left 1",
       "chromium": "buttonL1",
       "glfw": null
     },
@@ -6918,13 +6918,13 @@
       "glfw": null
     }
   },
-  "gameButtonL2": {
+  "gameButtonLeft2": {
     "names": {
-      "domkey": "GameButtonL2",
+      "domkey": "GameButtonLeft2",
       "android": [
         "BUTTON_L2"
       ],
-      "english": "Game Button L2",
+      "english": "Game Button Left 2",
       "chromium": "buttonL2",
       "glfw": null
     },
@@ -6972,13 +6972,13 @@
       "glfw": null
     }
   },
-  "gameButtonR1": {
+  "gameButtonRight1": {
     "names": {
-      "domkey": "GameButtonR1",
+      "domkey": "GameButtonRight1",
       "android": [
         "BUTTON_R1"
       ],
-      "english": "Game Button R1",
+      "english": "Game Button Right 1",
       "chromium": "buttonR1",
       "glfw": null
     },
@@ -6999,13 +6999,13 @@
       "glfw": null
     }
   },
-  "gameButtonR2": {
+  "gameButtonRight2": {
     "names": {
-      "domkey": "GameButtonR2",
+      "domkey": "GameButtonRight2",
       "android": [
         "BUTTON_R2"
       ],
-      "english": "Game Button R2",
+      "english": "Game Button Right 2",
       "chromium": "buttonR2",
       "glfw": null
     },
@@ -7212,6 +7212,90 @@
       "android": [
         101
       ],
+      "glfw": null
+    }
+  },
+  "dpadUp": {
+    "names": {
+      "domkey": "DpadUp",
+      "android": null,
+      "english": "Dpad Up",
+      "chromium": "dpadUp",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 65680,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
+      "glfw": null
+    }
+  },
+  "dpadDown": {
+    "names": {
+      "domkey": "DpadDown",
+      "android": null,
+      "english": "Dpad Down",
+      "chromium": "dpadDown",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 65681,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
+      "glfw": null
+    }
+  },
+  "dpadRight": {
+    "names": {
+      "domkey": "DpadRight",
+      "android": null,
+      "english": "Dpad Right",
+      "chromium": "dpadRight",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 65682,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
+      "glfw": null
+    }
+  },
+  "dpadLeft": {
+    "names": {
+      "domkey": "DpadLeft",
+      "android": null,
+      "english": "Dpad Left",
+      "chromium": "dpadLeft",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 65683,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
       "glfw": null
     }
   }

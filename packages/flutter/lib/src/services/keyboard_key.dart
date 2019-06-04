@@ -1550,30 +1550,30 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey gameButtonC = LogicalKeyboardKey(0x00100053713, debugName: kReleaseMode ? null : 'Game Button C');
 
-  /// Represents the logical "Game Button L1" key on the keyboard.
+  /// Represents the logical "Game Button Left 1" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonL1 = LogicalKeyboardKey(0x00100053714, debugName: kReleaseMode ? null : 'Game Button L1');
+  static const LogicalKeyboardKey gameButtonLeft1 = LogicalKeyboardKey(0x00100053714, debugName: kReleaseMode ? null : 'Game Button Left 1');
 
-  /// Represents the logical "Game Button L2" key on the keyboard.
+  /// Represents the logical "Game Button Left 2" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonL2 = LogicalKeyboardKey(0x00100053715, debugName: kReleaseMode ? null : 'Game Button L2');
+  static const LogicalKeyboardKey gameButtonLeft2 = LogicalKeyboardKey(0x00100053715, debugName: kReleaseMode ? null : 'Game Button Left 2');
 
   /// Represents the logical "Game Button Mode" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey gameButtonMode = LogicalKeyboardKey(0x00100053716, debugName: kReleaseMode ? null : 'Game Button Mode');
 
-  /// Represents the logical "Game Button R1" key on the keyboard.
+  /// Represents the logical "Game Button Right 1" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonR1 = LogicalKeyboardKey(0x00100053717, debugName: kReleaseMode ? null : 'Game Button R1');
+  static const LogicalKeyboardKey gameButtonRight1 = LogicalKeyboardKey(0x00100053717, debugName: kReleaseMode ? null : 'Game Button Right 1');
 
-  /// Represents the logical "Game Button R2" key on the keyboard.
+  /// Represents the logical "Game Button Right 2" key on the keyboard.
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey gameButtonR2 = LogicalKeyboardKey(0x00100053718, debugName: kReleaseMode ? null : 'Game Button R2');
+  static const LogicalKeyboardKey gameButtonRight2 = LogicalKeyboardKey(0x00100053718, debugName: kReleaseMode ? null : 'Game Button Right 2');
 
   /// Represents the logical "Game Button Select" key on the keyboard.
   ///
@@ -1609,6 +1609,26 @@ class LogicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey gameButtonZ = LogicalKeyboardKey(0x0010005371f, debugName: kReleaseMode ? null : 'Game Button Z');
+
+  /// Represents the logical "Dpad Up" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey dpadUp = LogicalKeyboardKey(0x00100010090, debugName: kReleaseMode ? null : 'Dpad Up');
+
+  /// Represents the logical "Dpad Down" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey dpadDown = LogicalKeyboardKey(0x00100010091, debugName: kReleaseMode ? null : 'Dpad Down');
+
+  /// Represents the logical "Dpad Right" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey dpadRight = LogicalKeyboardKey(0x00100010092, debugName: kReleaseMode ? null : 'Dpad Right');
+
+  /// Represents the logical "Dpad Left" key on the keyboard.
+  ///
+  /// See the function [RawKeyEvent.logicalKey] for more information.
+  static const LogicalKeyboardKey dpadLeft = LogicalKeyboardKey(0x00100010093, debugName: kReleaseMode ? null : 'Dpad Left');
 
   /// Represents the logical "Shift" key on the keyboard.
   ///
@@ -1894,11 +1914,11 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x0100053711: gameButtonA,
     0x0100053712: gameButtonB,
     0x0100053713: gameButtonC,
-    0x0100053714: gameButtonL1,
-    0x0100053715: gameButtonL2,
+    0x0100053714: gameButtonLeft1,
+    0x0100053715: gameButtonLeft2,
     0x0100053716: gameButtonMode,
-    0x0100053717: gameButtonR1,
-    0x0100053718: gameButtonR2,
+    0x0100053717: gameButtonRight1,
+    0x0100053718: gameButtonRight2,
     0x0100053719: gameButtonSelect,
     0x010005371a: gameButtonStart,
     0x010005371b: gameButtonThumbLeft,
@@ -1906,6 +1926,10 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x010005371d: gameButtonX,
     0x010005371e: gameButtonY,
     0x010005371f: gameButtonZ,
+    0x0100010090: dpadUp,
+    0x0100010091: dpadDown,
+    0x0100010092: dpadRight,
+    0x0100010093: dpadLeft,
     0x201000700e1: shift,
     0x201000700e3: meta,
     0x201000700e2: alt,
@@ -3439,17 +3463,17 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey gameButtonC = PhysicalKeyboardKey(0x00053713, debugName: kReleaseMode ? null : 'Game Button C');
 
-  /// Represents the location of the "Game Button L1" key on a generalized
+  /// Represents the location of the "Game Button Left 1" key on a generalized
   /// keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonL1 = PhysicalKeyboardKey(0x00053714, debugName: kReleaseMode ? null : 'Game Button L1');
+  static const PhysicalKeyboardKey gameButtonLeft1 = PhysicalKeyboardKey(0x00053714, debugName: kReleaseMode ? null : 'Game Button Left 1');
 
-  /// Represents the location of the "Game Button L2" key on a generalized
+  /// Represents the location of the "Game Button Left 2" key on a generalized
   /// keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonL2 = PhysicalKeyboardKey(0x00053715, debugName: kReleaseMode ? null : 'Game Button L2');
+  static const PhysicalKeyboardKey gameButtonLeft2 = PhysicalKeyboardKey(0x00053715, debugName: kReleaseMode ? null : 'Game Button Left 2');
 
   /// Represents the location of the "Game Button Mode" key on a generalized
   /// keyboard.
@@ -3457,17 +3481,17 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey gameButtonMode = PhysicalKeyboardKey(0x00053716, debugName: kReleaseMode ? null : 'Game Button Mode');
 
-  /// Represents the location of the "Game Button R1" key on a generalized
+  /// Represents the location of the "Game Button Right 1" key on a generalized
   /// keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonR1 = PhysicalKeyboardKey(0x00053717, debugName: kReleaseMode ? null : 'Game Button R1');
+  static const PhysicalKeyboardKey gameButtonRight1 = PhysicalKeyboardKey(0x00053717, debugName: kReleaseMode ? null : 'Game Button Right 1');
 
-  /// Represents the location of the "Game Button R2" key on a generalized
+  /// Represents the location of the "Game Button Right 2" key on a generalized
   /// keyboard.
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey gameButtonR2 = PhysicalKeyboardKey(0x00053718, debugName: kReleaseMode ? null : 'Game Button R2');
+  static const PhysicalKeyboardKey gameButtonRight2 = PhysicalKeyboardKey(0x00053718, debugName: kReleaseMode ? null : 'Game Button Right 2');
 
   /// Represents the location of the "Game Button Select" key on a generalized
   /// keyboard.
@@ -3510,6 +3534,26 @@ class PhysicalKeyboardKey extends KeyboardKey {
   ///
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey gameButtonZ = PhysicalKeyboardKey(0x0005371f, debugName: kReleaseMode ? null : 'Game Button Z');
+
+  /// Represents the location of the "Dpad Up" key on a generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey dpadUp = PhysicalKeyboardKey(0x00010090, debugName: kReleaseMode ? null : 'Dpad Up');
+
+  /// Represents the location of the "Dpad Down" key on a generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey dpadDown = PhysicalKeyboardKey(0x00010091, debugName: kReleaseMode ? null : 'Dpad Down');
+
+  /// Represents the location of the "Dpad Right" key on a generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey dpadRight = PhysicalKeyboardKey(0x00010092, debugName: kReleaseMode ? null : 'Dpad Right');
+
+  /// Represents the location of the "Dpad Left" key on a generalized keyboard.
+  ///
+  /// See the function [RawKeyEvent.physicalKey] for more information.
+  static const PhysicalKeyboardKey dpadLeft = PhysicalKeyboardKey(0x00010093, debugName: kReleaseMode ? null : 'Dpad Left');
 
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
@@ -3767,11 +3811,11 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x00053711: gameButtonA,
     0x00053712: gameButtonB,
     0x00053713: gameButtonC,
-    0x00053714: gameButtonL1,
-    0x00053715: gameButtonL2,
+    0x00053714: gameButtonLeft1,
+    0x00053715: gameButtonLeft2,
     0x00053716: gameButtonMode,
-    0x00053717: gameButtonR1,
-    0x00053718: gameButtonR2,
+    0x00053717: gameButtonRight1,
+    0x00053718: gameButtonRight2,
     0x00053719: gameButtonSelect,
     0x0005371a: gameButtonStart,
     0x0005371b: gameButtonThumbLeft,
@@ -3779,5 +3823,9 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x0005371d: gameButtonX,
     0x0005371e: gameButtonY,
     0x0005371f: gameButtonZ,
+    0x00010090: dpadUp,
+    0x00010091: dpadDown,
+    0x00010092: dpadRight,
+    0x00010093: dpadLeft,
   };
 }

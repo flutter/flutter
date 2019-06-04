@@ -87,10 +87,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('keyCode: ${data.keyCode} (${_asHex(data.keyCode)})'));
             dataText.add(Text('scanCode: ${data.scanCode} (${_asHex(data.scanCode)})'));
             dataText.add(Text('metaState: ${data.metaState} (${_asHex(data.metaState)})'));
+            dataText.add(Text('source: ${data.eventSource} (${_asHex(data.eventSource)})'));
             dataText.add(Text('flags: ${data.flags} (${_asHex(data.flags)})'));
-            dataText.add(Text('isGamepad: ${data.source & 0x401 == 0x401}'));
-            dataText.add(Text('isDpad: ${data.source & 0x201 == 0x201}'));
-            dataText.add(Text('isJoystick: ${data.source & 0x01000010 == 0x01000010}'));
           } else if (data is RawKeyEventDataFuchsia) {
             dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
             dataText.add(Text('hidUsage: ${data.hidUsage} (${_asHex(data.hidUsage)})'));

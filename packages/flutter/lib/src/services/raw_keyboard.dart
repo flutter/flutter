@@ -35,35 +35,6 @@ enum KeyboardSide {
   all,
 }
 
-/// An enum describing the original source of the key event.
-///
-/// Most key events will come from a keyboard, but sometimes it is useful to
-/// know if a key event came from a game controller or whether the event was
-/// simulated.
-///
-/// The information for determining the value of this enum comes from the
-/// underlying platform, so the information is only as reliable as the
-/// underlying platform is at producing it.
-///
-/// This enum is used by [RawKeyEvent.source].
-enum KeyEventSource {
-  /// The source of the key event is unidentified, but is not one of the other
-  /// types of key event sources.
-  unidentified,
-
-  /// The source of the key event is a hardware keyboard.
-  keyboard,
-
-  /// The source of the key event is a game controller or joystick.
-  gameController,
-
-  /// The source of the key event is a numeric keypad.
-  numericKeypad,
-
-  /// The source of the key event is a simulated event or pseudo-key.
-  simulated,
-}
-
 /// An enum describing the type of modifier key that is being pressed.
 ///
 /// See also:
@@ -144,12 +115,6 @@ abstract class RawKeyEventData {
   /// This constructor enables subclasses to provide const constructors so that
   /// they can be used in const expressions.
   const RawKeyEventData();
-
-  /// Returns the type of device that produced this key event.
-  ///
-  /// Default implementation returns [KeyEventSource.keyboard], but subclasses
-  /// may override if they have more information about the source of the event.
-  KeyEventSource get source => KeyEventSource.keyboard;
 
   /// Returns true if the given [ModifierKey] was pressed at the time of this
   /// event.
@@ -334,9 +299,6 @@ abstract class RawKeyEvent extends Diagnosticable {
         throw FlutterError('Unknown key event type: $type');
     }
   }
-
-  /// Returns the type of device that produced this key event.
-  KeyEventSource get source => data.source;
 
   /// Returns true if the given [KeyboardKey] is pressed.
   bool isKeyPressed(LogicalKeyboardKey key) => RawKeyboard.instance.keysPressed.contains(key);
