@@ -13,10 +13,6 @@
 FROM debian:stretch
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
-# Add third party repo for chrome stable
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-RUN echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | sudo tee /etc/apt/sources.list.d/google-chrome.list
-
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
@@ -29,6 +25,10 @@ RUN apt-get install -y --no-install-recommends \
   unzip \
   ca-certificates \
   gnupg
+
+# Add repo for chrome stable
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
 
 # Add nodejs repository to apt sources and install it.
 ENV NODEJS_INSTALL="/opt/nodejs_install"

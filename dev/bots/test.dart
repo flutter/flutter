@@ -348,7 +348,7 @@ Future<void> _runWebTests() async {
       testfiles.add(entity.path);
     }
   }
-  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: true, tests: <String>[
     path.join('test', 'foundation'),
   ]);
 }
