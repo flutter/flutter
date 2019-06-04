@@ -389,6 +389,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
 
   @override
   void didUpdateWidget(RangeSlider oldWidget) {
+    super.didUpdateWidget(oldWidget);
     if (oldWidget.onChanged == widget.onChanged)
       return;
     final bool wasEnabled = oldWidget.onChanged != null;
