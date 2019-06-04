@@ -65,7 +65,7 @@ enum MaterialState {
 /// Signature for the function that returns a color based on a given set of states.
 typedef MaterialStateColorResolver = Color Function(Set<MaterialState> states);
 
-/// Defines a [Color] whose value depends a set of [MaterialState]s which
+/// Defines a [Color] whose value depends on a set of [MaterialState]s which
 /// represent the interactive state of a component.
 ///
 /// This is useful for improving the accessibility of text in different states
