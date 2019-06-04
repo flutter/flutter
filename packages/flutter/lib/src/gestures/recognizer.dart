@@ -15,7 +15,6 @@ import 'constants.dart';
 import 'debug.dart';
 import 'events.dart';
 import 'pointer_router.dart';
-import 'semantics.dart';
 import 'team.dart';
 
 export 'pointer_router.dart' show PointerRouter;
@@ -141,21 +140,6 @@ abstract class GestureRecognizer extends GestureArenaMember with DiagnosticableT
   PointerDeviceKind getKindForPointer(int pointer) {
     assert(_pointerToKind.containsKey(pointer));
     return _pointerToKind[pointer];
-  }
-
-  /// Returns the semantics configuration of this gesture recognizer, for example
-  /// for accessibility purposes. It is queried by the recognizer's
-  /// [RawGestureDetector] to build a collective semantics annotation.
-  ///
-  /// This method should be overridden by subclasses that are interested in
-  /// semantic gestures.
-  ///
-  /// The returned [SemanticsGestureConfiguration] object should be annotated in
-  /// a manner that describes the current state, and should remain consistant
-  /// behaviors across different calls. It is recommended to cache the returned
-  /// object.
-  SemanticsGestureConfiguration get semanticsConfiguration {
-    return null;
   }
 
   /// Releases any resources used by the object.
