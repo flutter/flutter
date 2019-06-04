@@ -20,7 +20,7 @@ import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
-import 'web/web_device.dart';
+import 'web/workflow.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 ///
@@ -188,7 +188,7 @@ class FlutterProject {
     if (flutterDesktopEnabled && macos.existsSync()) {
       await macos.ensureReadyForPlatformSpecificTooling();
     }
-    if (flutterWebEnabled) {
+    if (flutterWebEnabled && web.existsSync()) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(this, checkProjects: checkProjects);
