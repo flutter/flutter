@@ -33,8 +33,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.keyCode = 0,
     this.scanCode = 0,
     this.metaState = 0,
-    this.source = 0,
-    this.isGamepad = false,
+    this.eventSource = 0,
   }) : assert(flags != null),
        assert(codePoint != null),
        assert(keyCode != null),
@@ -106,8 +105,31 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   ///  * [isAltPressed], to see if an ALT key is pressed.
   ///  * [isMetaPressed], to see if a META key is pressed.
   final int metaState;
-  final int source;
-  final bool isGamepad;
+
+  /// The source of the event.
+  ///
+  /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getSource()>
+  /// for the numerical values of the `source`. Many of these constants are also
+  /// replicated as static constants in this class.
+  final int eventSource;
+
+  static const int _gamepadSource = 0x401;
+  static const int _dpadSource = 0x201;
+  static const int _joystickSource = 0x01000010;
+
+  @override
+  KeyEventSource get source {
+    if (eventSource & _gamepadSource == _gamepadSource) {
+      return KeyEventSource.gameController;
+    }
+    if (eventSource & _dpadSource == _dpadSource) {
+      return KeyEventSource.gameController;
+    }
+    if (eventSource & _joystickSource == _joystickSource) {
+      return KeyEventSource.gameController;
+    }
+    return KeyEventSource.keyboard;
+  }
 
   // Android only reports a single code point for the key label.
   @override
