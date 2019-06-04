@@ -81,31 +81,10 @@ Future<void> main() async {
               targetPlatform);
 
           final String isolateSnapshotData =
-              path.join(androidArmSnapshotPath, 'isolate_snapshot_data');
+              path.join(androidArmSnapshotPath, 'app.so');
           if (!File(isolateSnapshotData).existsSync()) {
             throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $isolateSnapshotData');
-          }
-
-          final String isolateSnapshotInstr =
-              path.join(androidArmSnapshotPath, 'isolate_snapshot_instr');
-          if (!File(isolateSnapshotInstr).existsSync()) {
-            throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $isolateSnapshotInstr');
-          }
-
-          final String vmSnapshotData =
-              path.join(androidArmSnapshotPath, 'vm_snapshot_data');
-          if (!File(isolateSnapshotData).existsSync()) {
-            throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $vmSnapshotData');
-          }
-
-          final String vmSnapshotInstr =
-              path.join(androidArmSnapshotPath, 'vm_snapshot_instr');
-          if (!File(isolateSnapshotData).existsSync()) {
-            throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $vmSnapshotInstr');
+                'Shared library doesn\'t exist');
           }
         }
       });
