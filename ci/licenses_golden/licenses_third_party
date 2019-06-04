@@ -1,4 +1,4 @@
-Signature: 1e7a40b0fa731f1458b12527c0a6a82a
+Signature: 98a1a04379cd73b19f98225a23943199
 
 UNUSED LICENSES:
 
@@ -5167,10 +5167,13 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_ia32.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/graph_intrinsifier_x64.cc
+FILE: ../../../third_party/dart/runtime/vm/compiler/offsets_extractor.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/recognized_methods_list.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/relocation.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_api.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_offsets_extracted.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/runtime_offsets_list.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/stub_code_compiler_arm64.cc
