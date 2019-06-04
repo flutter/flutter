@@ -145,7 +145,7 @@ void main() {
 
     scheduler.scheduleFrameCallback(frameCallback);
     tick(const Duration(seconds: 8));
-    expect(lastTimeStamp, Duration(seconds: 3)); // 2s + (8 - 6)s / 2
+    expect(lastTimeStamp, const Duration(seconds: 3)); // 2s + (8 - 6)s / 2
     expect(lastSystemTimeStamp, const Duration(seconds: 8));
   });
 }
