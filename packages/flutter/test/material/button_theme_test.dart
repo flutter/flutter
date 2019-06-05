@@ -349,12 +349,14 @@ void main() {
       return defaultColor;
     }
 
+    const ColorScheme colorScheme = ColorScheme.light();
+
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Center(
             child: ButtonTheme(
-              colorScheme: ColorScheme.light().copyWith(
+              colorScheme: colorScheme.copyWith(
                 primary: MaterialStateColor.resolveWith(getTextColor),
               ),
               textTheme: ButtonTextTheme.primary,
