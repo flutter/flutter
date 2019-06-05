@@ -58,6 +58,7 @@ class WebCompiler {
       target,
       '-o',
       '$outputPath',
+      '-O4',
       '--libraries-spec=$librariesPath',
     ];
     if (minify) {

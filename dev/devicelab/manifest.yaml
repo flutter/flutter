@@ -338,6 +338,14 @@ tasks:
     required_agent_capabilities: ["linux/android"]
     flaky: true
 
+  web_size__compile_test:
+    description: >
+      Measures the size of a dart2js bundle.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+
   # iOS on-device tests
 
   flavors_test_ios:
