@@ -1507,7 +1507,7 @@ class RenderEditable extends RenderBox {
   // should rework this properly to once again match the platform. The constant
   // _kCaretHeightOffset scales poorly for small font sizes.
   //
-  /// On iOS, the cursor is taller than the the cursor on Android. The height
+  /// On iOS, the cursor is taller than the cursor on Android. The height
   /// of the cursor for iOS is approximate and obtained through an eyeball
   /// comparison.
   Rect get _getCaretPrototype {
