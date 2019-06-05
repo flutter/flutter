@@ -220,7 +220,7 @@ class Actions extends InheritedWidget {
     return inherited?.dispatcher;
   }
 
-  /// Invokes the action associated with the given [Intent] using the the
+  /// Invokes the action associated with the given [Intent] using the
   /// [Actions] widget that most tightly encloses the given [BuildContext].
   ///
   /// The `context`, `intent` and `nullOk` arguments must not be null.
@@ -230,7 +230,7 @@ class Actions extends InheritedWidget {
   /// reaches the root.
   ///
   /// Will throw if no ambient [Actions] widget is found, or if the given
-  /// `intent` doesn't map to an action in any of the the [Actions.actions] maps
+  /// `intent` doesn't map to an action in any of the [Actions.actions] maps
   /// that are found.
   ///
   /// Setting `nullOk` to true means that if no ambient [Actions] widget is
