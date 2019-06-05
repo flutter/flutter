@@ -6060,9 +6060,9 @@ class Semantics extends SingleChildRenderObjectWidget {
 ///
 /// {@tool snippet --template=stateful_widget_scaffold}
 ///
-/// To see the end result, make sure to set MaterialApp's showSemanticsDebugger
-/// property to `true`. The property is available for WidgetApp and
-/// CupertinoApp as well.
+/// To see the end result, make sure to set [MaterialApp.showSemanticsDebugger]
+/// property to `true`. The property is available for [WidgetApp] and
+/// [CupertinoApp] as well.
 ///
 /// ```dart
 /// bool _isChecked = true;
