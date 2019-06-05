@@ -74,6 +74,10 @@ TaskFunction createHelloWorldCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
+TaskFunction createWebCompileTest() {
+  return const WebCompileTest().run;
+}
+
 TaskFunction createComplexLayoutCompileTest() {
   return CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
 }
@@ -195,6 +199,65 @@ class PerfTest {
         '99th_percentile_frame_rasterizer_time_millis',
       ]);
     });
+  }
+}
+
+/// Measures how long it takes to compile a Flutter app to JavaScript and how
+/// big the compiled code is.
+class WebCompileTest {
+  const WebCompileTest();
+
+  Future<TaskResult> run() async {
+    final Map<String, Object> metrics = <String, Object>{};
+    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/hello_world', () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ]);
+      final ProcessResult result = await Process.run('du',
+        <String>['-k', '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js'],
+      );
+      metrics['hello_world_dart2js_size'] = int.parse(result.stdout.split(RegExp(r'\s+')).first.trim());
+      return null;
+    });
+    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/flutter_gallery', () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ]);
+      final ProcessResult result = await Process.run('du',
+        <String>['-k', '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js']);
+      print(result.stdout);
+      metrics['flutter_gallery_dart2js_size'] = int.parse(result.stdout.split(RegExp(r'\s+')).first.trim());
+      return null;
+    });
+    const String sampleAppName = 'sample_flutter_app';
+    final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
+
+    rmTree(sampleDir);
+
+    await inDirectory<void>(Directory.systemTemp, () async {
+      await flutter('create', options: <String>['--template=app', sampleAppName]);
+      await inDirectory(sampleDir, () async {
+        await flutter('packages', options: <String>['get']);
+        await evalFlutter('build', options: <String>[
+          'web',
+          '-v',
+          '--release',
+          '--no-pub',
+        ]);
+        final ProcessResult result = await Process.run('du',
+          <String>['-k', path.join(sampleDir.path, 'build/web/main.dart.js')]);
+        metrics['basic_material_app_dart2js_size'] = int.parse(result.stdout.split(RegExp(r'\s+')).first.trim());
+      });
+    });
+    return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
   }
 }
 
