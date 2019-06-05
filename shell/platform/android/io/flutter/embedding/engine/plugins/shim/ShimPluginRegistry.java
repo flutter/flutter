@@ -75,7 +75,7 @@ public class ShimPluginRegistry implements PluginRegistry {
 
   //----- From FlutterPluginRegistry that aren't in the PluginRegistry interface ----//
   public void attach(FlutterView flutterView, Activity activity) {
-    platformViewsController.attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
+    platformViewsController.attach(activity.getApplicationContext(), flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
   }
 
   public void detach() {
