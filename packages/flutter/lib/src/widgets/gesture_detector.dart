@@ -1026,9 +1026,11 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 /// Each method of [GestureSemanticsMapping] corresponds to a kind of semantics
 /// gesture, and can return either a callback or null. If it returns a callback,
 /// the semantics information will be added to the semantics tree, and the
-/// callback will be called during the gesture. The callback can look for
-/// recognizers owned by the detector with `getRecognizer`, but it must not
-/// modify them.
+/// callback will be called during the gesture.
+///
+/// Each method has a parameter `getRecognizer`, which returns the recognizer
+/// of the given type that is owned by the detector, or null if not found. The
+/// callback can depend on the state of recognizers, but it must not modify them.
 ///
 /// See also:
 ///
