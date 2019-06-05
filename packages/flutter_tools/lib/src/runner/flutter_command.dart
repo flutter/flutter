@@ -363,6 +363,9 @@ abstract class FlutterCommand extends Command<void> {
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
+      splitPerAbi: argParser.options.containsKey('split-per-abi')
+        ? argResults['split-per-abi']
+        : false,
       targetPlatforms: targetPlatforms,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? argResults[FlutterOptions.kFileSystemRoot] : null,

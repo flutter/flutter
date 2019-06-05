@@ -14,6 +14,7 @@ import '../base/logger.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process.dart';
+import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -431,11 +432,12 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   if (buildInfo.fileSystemScheme != null)
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
+  if (buildInfo.splitPerAbi)
+    command.add('-Psplit-per-abi=true');
   if (buildInfo.targetPlatforms != null) {
     final String targetPlatforms = buildInfo.targetPlatforms.map(getNameForTargetPlatform).join(',');
     command.add('-Ptarget-platform=$targetPlatforms');
   }
-
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
   final int exitCode = await runCommandAndStreamOutput(
@@ -479,24 +481,26 @@ Future<void> _buildGradleProjectV2(
   }
 
   if (!isBuildingBundle) {
-    final File apkFile = _findApkFile(project, buildInfo);
-    if (apkFile == null)
+    final Iterable<File> apkFiles = _findApkFiles(project, buildInfo);
+    if (apkFiles.isEmpty)
       throwToolExit('Gradle build failed to produce an Android package.');
-    // Copy the APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
-    apkFile.copySync(project.apkDirectory.childFile('app.apk').path);
+    // Copy the first APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
+    apkFiles.first.copySync(project.apkDirectory.childFile('app.apk').path);
 
     printTrace('calculateSha: ${project.apkDirectory}/app.apk');
     final File apkShaFile = project.apkDirectory.childFile('app.apk.sha1');
-    apkShaFile.writeAsStringSync(calculateSha(apkFile));
+    apkShaFile.writeAsStringSync(calculateSha(apkFiles.first));
 
-    String appSize;
-    if (buildInfo.mode == BuildMode.debug) {
-      appSize = '';
-    } else {
-      appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
+    for (File apkFile in apkFiles) {
+      String appSize;
+      if (buildInfo.mode == BuildMode.debug) {
+        appSize = '';
+      } else {
+        appSize = ' (${getSizeAsMB(apkFile.lengthSync())})';
+      }
+      printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.',
+          color: TerminalColor.green);
     }
-    printStatus('Built ${fs.path.relative(apkFile.path)}$appSize.');
-
   } else {
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)
@@ -508,28 +512,32 @@ Future<void> _buildGradleProjectV2(
     } else {
       appSize = ' (${getSizeAsMB(bundleFile.lengthSync())})';
     }
-    printStatus('Built ${fs.path.relative(bundleFile.path)}$appSize.');
+    printStatus('Built ${fs.path.relative(bundleFile.path)}$appSize.',
+        color: TerminalColor.green);
   }
 }
 
-File _findApkFile(GradleProject project, BuildInfo buildInfo) {
-  final String apkFileName = project.apkFileFor(buildInfo);
-  if (apkFileName == null)
-    return null;
-  File apkFile = fs.file(fs.path.join(project.apkDirectory.path, apkFileName));
-  if (apkFile.existsSync())
-    return apkFile;
-  final String modeName = camelCase(buildInfo.modeName);
-  apkFile = fs.file(fs.path.join(project.apkDirectory.path, modeName, apkFileName));
-  if (apkFile.existsSync())
-    return apkFile;
-  if (buildInfo.flavor != null) {
-    // Android Studio Gradle plugin v3 adds flavor to path.
-    apkFile = fs.file(fs.path.join(project.apkDirectory.path, buildInfo.flavor, modeName, apkFileName));
+Iterable<File> _findApkFiles(GradleProject project, BuildInfo buildInfo) {
+  final Iterable<String> apkFileNames = project.apkFilesFor(buildInfo);
+  if (apkFileNames.isEmpty)
+    return <File>[];
+
+  return apkFileNames.map<File>((String apkFileName) {
+    File apkFile = fs.file(fs.path.join(project.apkDirectory.path, apkFileName));
     if (apkFile.existsSync())
       return apkFile;
-  }
-  return null;
+    final String modeName = camelCase(buildInfo.modeName);
+    apkFile = fs.file(fs.path.join(project.apkDirectory.path, modeName, apkFileName));
+    if (apkFile.existsSync())
+      return apkFile;
+    if (buildInfo.flavor != null) {
+      // Android Studio Gradle plugin v3 adds flavor to path.
+      apkFile = fs.file(fs.path.join(project.apkDirectory.path, buildInfo.flavor, modeName, apkFileName));
+      if (apkFile.existsSync())
+        return apkFile;
+    }
+    return null;
+  });
 }
 
 File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
@@ -632,13 +640,20 @@ class GradleProject {
     return 'assemble${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 
-  String apkFileFor(BuildInfo buildInfo) {
+  Iterable<String> apkFilesFor(BuildInfo buildInfo) {
     final String buildType = _buildTypeFor(buildInfo);
     final String productFlavor = _productFlavorFor(buildInfo);
     if (buildType == null || productFlavor == null)
-      return null;
+      return <String>[];
+
     final String flavorString = productFlavor.isEmpty ? '' : '-' + productFlavor;
-    return 'app$flavorString-$buildType.apk';
+    if (buildInfo.splitPerAbi) {
+      return buildInfo.targetPlatforms.map<String>((TargetPlatform targetPlatform) {
+        final String abi = getAbiForPlatform(targetPlatform);
+        return 'app$flavorString-$abi-$buildType.apk';
+      });
+    }
+    return <String>['app$flavorString-$buildType.apk'];
   }
 
   String bundleTaskFor(BuildInfo buildInfo) {

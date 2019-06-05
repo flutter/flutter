@@ -24,6 +24,11 @@ class BuildApkCommand extends BuildSubCommand {
 
     argParser
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
+      ..addFlag('split-per-abi',
+        negatable: false,
+        help: 'Whether to split the APKs per ABIs.'
+              'To learn more, see: https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',
+      )
       ..addMultiOption('target-platform',
         splitCommas: true,
         defaultsTo: <String>['android-arm', 'android-arm64'],
@@ -51,19 +56,24 @@ class BuildApkCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = getBuildInfo();
 
-    if (buildInfo.isRelease && buildInfo.targetPlatforms.length > 1) {
+    if (buildInfo.isRelease && !buildInfo.splitPerAbi && buildInfo.targetPlatforms.length > 1) {
       final String targetPlatforms = buildInfo.targetPlatforms
           .map(getNameForTargetPlatform)
           .join(', ');
 
-      printStatus('The APK will support the following platforms: '
+      printStatus('You are building a fat APK that includes binaries for '
                   '$targetPlatforms.', emphasis: true, color: TerminalColor.green);
       printStatus('If you are deploying the app to the Play Store, '
-                  'it\'s recommended to use app bundles to reduce the APK size.', emphasis: true);
-      printStatus('To generate an app bundle, run:', emphasis: true);
+                  'it\'s recommended to use app bundles or split the APK to reduce the APK size.', emphasis: true);
+      printStatus('To generate an app bundle, run:', emphasis: true, indent: 4);
       printStatus('flutter build appbundle '
-                  '--target-platform ${targetPlatforms.replaceAll(' ', '')}', emphasis: true, indent: 4);
-      printStatus('To learn more visit: https://developer.android.com/guide/app-bundle', emphasis: true);
+                  '--target-platform ${targetPlatforms.replaceAll(' ', '')}',indent: 8);
+      printStatus('Learn more on: https://developer.android.com/guide/app-bundle',indent: 8);
+      printStatus('To split the APKs per ABI, run:', emphasis: true, indent: 4);
+      printStatus('flutter build apk '
+                  '--target-platform ${targetPlatforms.replaceAll(' ', '')} '
+                  '--split-per-abi', indent: 8);
+      printStatus('Learn more on:  https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
     }
     await buildApk(
       project: FlutterProject.current(),

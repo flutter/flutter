@@ -17,6 +17,7 @@ class BuildInfo {
     this.compilationTraceFilePath,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
+    this.splitPerAbi,
     this.targetPlatforms,
     this.fileSystemRoots,
     this.fileSystemScheme,
@@ -48,6 +49,9 @@ class BuildInfo {
 
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
+
+  // Whether to split the shared library per ABI.
+  final bool splitPerAbi;
 
   /// The target platforms for the build (e.g. android_arm or android_arm64).
   final Iterable<TargetPlatform> targetPlatforms;
@@ -328,6 +332,21 @@ TargetPlatform getTargetPlatformForName(String platform) {
   }
   assert(platform != null);
   return null;
+}
+
+String getAbiForPlatform(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.android_arm:
+      return 'armeabi-v7a';
+    case TargetPlatform.android_arm64:
+      return 'arm64-v8a';
+    case TargetPlatform.android_x64:
+      return 'x86_64';
+    case TargetPlatform.android_x86:
+      return 'x86';
+    default:
+      throw Exception('Platform $platform doesn\'t have ABI');
+  }
 }
 
 HostPlatform getCurrentHostPlatform() {

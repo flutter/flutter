@@ -214,6 +214,51 @@ Future<void> main() async {
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
+        section('APK content for task assembleRelease with '
+                'target platform = android-arm, android-arm64 and split per ABI');
+        await pluginProject.runGradleTask('assembleRelease',
+            options: <String>['-Ptarget-platform=android-arm,android-arm64', '-Psplit-per-abi=true']);
+
+        if (!pluginProject.hasReleaseArmApk)
+          throw TaskResult.failure(
+              'Gradle did not produce a release apk at: ${pluginProject.releaseArmApkPath}');
+
+        final Set<String> armApkFiles = await pluginProject.getFilesInApk(pluginProject.releaseArmApkPath);
+
+        _checkItContains<String>(<String>[
+          'AndroidManifest.xml',
+          'classes.dex',
+          'lib/armeabi-v7a/libflutter.so',
+          'lib/armeabi-v7a/libapp.so',
+        ], armApkFiles);
+
+        _checkItDoesNotContain<String>(<String>[
+          'assets/flutter_assets/isolate_snapshot_data',
+          'assets/flutter_assets/kernel_blob.bin',
+          'assets/flutter_assets/vm_snapshot_data',
+        ], armApkFiles);
+
+        if (!pluginProject.hasReleaseArm64Apk)
+          throw TaskResult.failure(
+              'Gradle did not produce a release apk at: ${pluginProject.releaseArm64ApkPath}');
+
+        final Set<String> arm64ApkFiles = await pluginProject.getFilesInApk(pluginProject.releaseArm64ApkPath);
+
+        _checkItContains<String>(<String>[
+          'AndroidManifest.xml',
+          'classes.dex',
+          'lib/arm64-v8a/libflutter.so',
+          'lib/arm64-v8a/libapp.so',
+        ], arm64ApkFiles);
+
+        _checkItDoesNotContain<String>(<String>[
+          'assets/flutter_assets/isolate_snapshot_data',
+          'assets/flutter_assets/kernel_blob.bin',
+          'assets/flutter_assets/vm_snapshot_data',
+        ], arm64ApkFiles);
+      });
+
+      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('App bundle content for task bundleRelease without explicit target platform');
         await pluginProject.runGradleTask('bundleRelease');
 
@@ -494,7 +539,15 @@ class FlutterPluginProject {
   String get exampleAndroidPath => path.join(examplePath, 'android');
   String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
   String get releaseApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-release.apk');
+  String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-armeabi-v7a-release.apk');
+  String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-arm64-v8a-release.apk');
   String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
+
+  bool get hasDebugApk => File(debugApkPath).existsSync();
+  bool get hasReleaseApk => File(releaseApkPath).existsSync();
+  bool get hasReleaseArmApk => File(releaseArmApkPath).existsSync();
+  bool get hasReleaseArm64Apk => File(releaseArm64ApkPath).existsSync();
+  bool get hasReleaseBundle => File(releaseBundlePath).existsSync();
 
   Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
@@ -522,12 +575,6 @@ class FlutterPluginProject {
   Future<Set<String>> getFilesInAppBundle(String bundle) async {
     return getFilesInApk(bundle);
   }
-
-  bool get hasDebugApk => File(debugApkPath).existsSync();
-
-  bool get hasReleaseApk => File(releaseApkPath).existsSync();
-
-  bool get hasReleaseBundle => File(releaseBundlePath).existsSync();
 }
 
 Future<void> _runGradleTask({String workingDirectory, String task, List<String> options}) async {

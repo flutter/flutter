@@ -157,16 +157,16 @@ someOtherTask
     });
     test('should provide apk file name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.apkFileFor(BuildInfo.debug), 'app-debug.apk');
-      expect(project.apkFileFor(BuildInfo.profile), 'app-profile.apk');
-      expect(project.apkFileFor(BuildInfo.release), 'app-release.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      expect(project.apkFilesFor(BuildInfo.debug).first, 'app-debug.apk');
+      expect(project.apkFilesFor(BuildInfo.profile).first, 'app-profile.apk');
+      expect(project.apkFilesFor(BuildInfo.release).first, 'app-release.apk');
+      expect(project.apkFilesFor(const BuildInfo(BuildMode.release, 'unknown')).isEmpty, isTrue);
     });
     test('should provide apk file name for flavored build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>['free', 'paid'], fs.directory('/some/dir'),fs.directory('/some/dir'));
-      expect(project.apkFileFor(const BuildInfo(BuildMode.debug, 'free')), 'app-free-debug.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'paid')), 'app-paid-release.apk');
-      expect(project.apkFileFor(const BuildInfo(BuildMode.release, 'unknown')), isNull);
+      expect(project.apkFilesFor(const BuildInfo(BuildMode.debug, 'free')).first, 'app-free-debug.apk');
+      expect(project.apkFilesFor(const BuildInfo(BuildMode.release, 'paid')).first, 'app-paid-release.apk');
+      expect(project.apkFilesFor(const BuildInfo(BuildMode.release, 'unknown')).isEmpty, isTrue);
     });
     test('should provide bundle file name for default build types', () {
       final GradleProject project = GradleProject(<String>['debug', 'profile', 'release'], <String>[], fs.directory('/some/dir'),fs.directory('/some/dir'));
