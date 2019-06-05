@@ -34,10 +34,10 @@ import subprocess
 import sys
 
 DART_REVISION_ENTRY = 'dart_revision'
-FLUTTER = '{}/bin/flutter'.format(FLUTTER_HOME)
+FLUTTER = '{}/bin/flutter'.format(flutter_home())
 FLUTTER_DOCTOR = [FLUTTER, 'doctor']
 FLUTTER_RUN    = [FLUTTER, 'run']
-FLUTTER_TEST   = [FLUTTER, 'test', '--coverage']
+FLUTTER_TEST   = [FLUTTER, 'test']
 
 MAX_GCLIENT_RETRIES = 3
 
@@ -59,7 +59,7 @@ def update_dart_revision(dart_revision):
       original_revision = line.strip().split(' ')[1][1:-2]
       if not is_ancestor_commit(original_revision,
                                 dart_revision,
-                                DART_SDK_HOME):
+                                dart_sdk_home()):
         print_error('Dart revision {} is older than existing revision, {}.' +
                     ' Aborting roll.'.format(dart_revision, original_revision))
         sys.exit(ERROR_OLD_COMMIT_PROVIDED)
@@ -85,7 +85,7 @@ def gclient_sync():
     print_status('Running gclient sync (Attempt {}/{})'
                  .format(num_retries + 1, MAX_GCLIENT_RETRIES))
     exit_code = run_process(['gclient', 'sync', '--delete_unversioned_trees'],
-                            cwd=ENGINE_HOME)
+                            cwd=engine_home())
     if exit_code != 0:
       num_retries += 1
   if num_retries == MAX_GCLIENT_RETRIES:
@@ -101,7 +101,7 @@ def get_deps():
 
 def update_deps():
   print_status('Updating Dart dependencies')
-  run_process([update_dart_deps_path()], cwd=ENGINE_HOME)
+  run_process([update_dart_deps_path()], cwd=engine_home())
 
 
 def write_deps(newdeps):
@@ -111,7 +111,7 @@ def write_deps(newdeps):
 
 def run_gn():
   print_status('Generating build files')
-  common = [os.path.join('flutter', 'tools', 'gn'), '--goma']
+  common = [os.path.join('flutter', 'tools', 'gn'), '--goma', '--full-dart-sdk']
   debug = ['--runtime-mode=debug']
   profile = ['--runtime-mode=profile']
   release = ['--runtime-mode=release']
@@ -121,12 +121,12 @@ def run_gn():
 
   for mode in runtime_modes:
     if set(mode) != set(release):
-      run_process(common + android + unopt + mode, cwd=ENGINE_HOME)
-    run_process(common + android + mode, cwd=ENGINE_HOME)
+      run_process(common + android + unopt + mode, cwd=engine_home())
+    run_process(common + android + mode, cwd=engine_home())
     host = common[:]
     if set(mode) == set(debug):
       host += unopt
-    run_process(host + mode, cwd=ENGINE_HOME)
+    run_process(host + mode, cwd=engine_home())
 
 
 def build():
@@ -147,7 +147,7 @@ def build():
 
   for config in configs:
     error_code = run_process(command + ['-C', os.path.join(build_dir, config)],
-                             cwd=ENGINE_HOME)
+                             cwd=engine_home())
     if error_code != 0:
       print_error('Build failure for configuration "' +
                   config +
@@ -157,7 +157,7 @@ def build():
 
 def run_flutter_doctor():
   print_status('Running flutter doctor')
-  engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
+  engine_src_path = '--local-engine-src-path={}'.format(engine_home())
   result = run_process(FLUTTER_DOCTOR + ['--local-engine=host_debug_unopt',
                                     engine_src_path],
                                     cwd=package_flutter_path())
@@ -168,7 +168,7 @@ def run_flutter_doctor():
 
 def run_tests():
   print_status('Running tests in packages/flutter')
-  engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
+  engine_src_path = '--local-engine-src-path={}'.format(engine_home())
   result = run_process(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
                                        engine_src_path],
                                        cwd=package_flutter_path())
@@ -178,7 +178,8 @@ def run_tests():
 
   print_status('Running tests in examples/flutter_gallery')
   result = run_process(FLUTTER_TEST + ['--local-engine=host_debug_unopt',
-                                       engine_src_path],
+                                       engine_src_path,
+                                       '--disable-service-auth-codes'],
                                        cwd=flutter_gallery_path());
   if result != 0:
     print_error('flutter_gallery tests failed. Aborting roll.')
@@ -187,7 +188,7 @@ def run_tests():
 
 def run_hot_reload_configurations():
   print_status('Running flutter gallery release')
-  engine_src_path = '--local-engine-src-path={}'.format(ENGINE_HOME)
+  engine_src_path = '--local-engine-src-path={}'.format(engine_home())
   run_process(FLUTTER_RUN + ['--release',
                              '--local-engine=android_release',
                              engine_src_path],
@@ -200,8 +201,7 @@ def run_hot_reload_configurations():
 
 def update_licenses():
   print_status('Updating Flutter licenses')
-  result = run_process([engine_license_script_path()], cwd=ENGINE_HOME)
-  result = p.wait()
+  result = run_process([engine_license_script_path()], cwd=engine_home())
   if result == LICENSE_SCRIPT_EXIT_ERROR:
     print_error('License script failed to run. Is the Dart SDK (specifically' +
                 ' dart and pub) in your path? Aborting roll.')
@@ -223,7 +223,7 @@ def update_licenses():
   # Update the LICENSE file.
   with open(sky_license_file_path(), 'w') as sky_license:
     run_process(['dart', os.path.join('lib', 'main.dart'),
-                 '--release', '--src', ENGINE_HOME,
+                 '--release', '--src', engine_home(),
                  '--out', engine_license_script_output_path()],
                  cwd=engine_license_script_package_path(),
                  stdout=sky_license)
@@ -233,8 +233,9 @@ def get_commit_range(start, finish):
   range_str = '{}..{}'.format(start, finish)
   command = ['git', 'log', '--oneline', range_str]
   orig_dir = os.getcwd()
-  os.chdir(DART_SDK_HOME)
+  os.chdir(dart_sdk_home())
   result = subprocess.check_output(command)
+  result = '\n'.join(['dart-lang/sdk@' + l for l in result.splitlines()])
   os.chdir(orig_dir)
   return result
 
@@ -242,10 +243,10 @@ def get_commit_range(start, finish):
 def get_short_rev(rev):
   command = ['git', 'rev-parse', '--short', rev]
   orig_dir = os.getcwd()
-  os.chdir(DART_SDK_HOME)
-  result = subprocess.check_output(command)
+  os.chdir(dart_sdk_home())
+  result = subprocess.check_output(command).rstrip()
   os.chdir(orig_dir)
-  return result.rstrip()
+  return result
 
 
 def git_commit(original_revision, updated_revision):
@@ -262,31 +263,26 @@ def git_commit(original_revision, updated_revision):
 
 
 def update_roots(args):
-  # These globals are set from environment variables in dart_roll_utils.py
-  global FLUTTER_HOME
-  global ENGINE_HOME
-  global DART_SDK_HOME
-
   if args.flutter_home:
-    FLUTTER_HOME = args.flutter_home
+    set_flutter_home(args.flutter_home)
 
   if args.engine_home:
-    ENGINE_HOME = args.engine_home
+    set_engine_home(args.engine_home)
 
   if args.dart_sdk_home:
-    DART_SDK_HOME = args.dart_sdk_home
+    set_dart_sdk_home(args.dart_sdk_home)
 
-  if FLUTTER_HOME == '':
+  if flutter_home() == '':
     print_error('Either "--flutter-home" must be provided or FLUTTER_HOME must' +
                 ' be set. Aborting roll.')
     sys.exit(ERROR_MISSING_ROOTS)
 
-  if ENGINE_HOME == '':
+  if engine_home() == '':
     print_error('Either "--engine-home" must be provided or ENGINE_HOME must' +
                 ' be set. Aborting roll.')
     sys.exit(ERROR_MISSING_ROOTS)
 
-  if DART_SDK_HOME == '':
+  if dart_sdk_home() == '':
     print_error('Either "--dart-sdk-home" must be provided or DART_SDK_HOME ' +
                 'must be set. Aborting roll.')
     sys.exit(ERROR_MISSING_ROOTS)

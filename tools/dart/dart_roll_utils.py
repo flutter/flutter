@@ -59,6 +59,26 @@ STATUS_LABEL  = c_green()  + '[STATUS, {}]  ' + c_end()
 WARNING_LABEL = c_yellow() + '[WARNING, {}] ' + c_end()
 ERROR_LABEL   = c_red()    + '[ERROR, {}]   ' + c_end()
 
+def engine_home():
+  return ENGINE_HOME
+
+def set_engine_home(engine_home):
+  global ENGINE_HOME
+  ENGINE_HOME = engine_home
+
+def flutter_home():
+  return FLUTTER_HOME
+
+def set_flutter_home(flutter_home):
+  global FLUTTER_HOME
+  FLUTTER_HOME = flutter_home
+
+def dart_sdk_home():
+  return DART_SDK_HOME
+
+def set_dart_sdk_home(dart_sdk_home):
+  global DART_SDK_HOME
+  DART_SDK_HOME = dart_sdk_home
 
 def get_timestamp():
   return datetime.datetime.today().strftime('%Y-%m-%d %H:%M:%S')

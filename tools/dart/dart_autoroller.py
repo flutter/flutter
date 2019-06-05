@@ -62,6 +62,8 @@ PULL_REQUEST_DESCRIPTION = (
 FLAG_skip_wait_for_artifacts = False
 
 CURRENT_SUBPROCESS = None
+CURRENT_PR = None
+GITHUB_ENGINE_REPO = None
 
 def run_dart_roll_helper(most_recent_commit, extra_args):
   global CURRENT_SUBPROCESS
@@ -225,6 +227,14 @@ def create_pull_request(github_repo, local_repo, title, branch):
     local_repo.git.reset('--hard','origin/master')
 
 
+def cleanup_pr(github_repo, pull_request, reason):
+  msg = '{}, abandoning roll.'.format(reason)
+  pull_request.create_issue_comment(msg)
+  pull_request.edit(state='closed')
+  print_error(msg)
+  delete_remote_branch(github_repo, pull_request.head.ref)
+
+
 def merge_on_success(github_repo, local_repo, pull_request):
   sha = pull_request.head.sha
   commit = github_repo.get_commit(sha=sha)
@@ -240,9 +250,8 @@ def merge_on_success(github_repo, local_repo, pull_request):
       sys.exit(1)
     print_status('Merge was successful!')
   else:
-    pull_request.create_issue_comment('Checks failed, abandoning roll.')
-    pull_request.edit(state='closed')
-    print_error('Checks failed. Abandoning roll.')
+    cleanup_pr(github_repo, pull_request, 'Checks failed')
+    sys.exit(1)
   delete_remote_branch(github_repo, pull_request.head.ref)
 
 
@@ -308,15 +317,23 @@ def wait_for_status(commit):
   # print_status('Flutter build passing!')
   return True
 
+
 def sys_exit(signal, frame):
   sys.exit()
 
+
 def cleanup_children():
+  print_error('Roll canceled! Shutting down dart_autoroller.py.')
   if CURRENT_SUBPROCESS != None:
     CURRENT_SUBPROCESS.terminate()
+  if CURRENT_PR != None:
+    cleanup_pr(GITHUB_ENGINE_REPO, CURRENT_PR, 'Canceled by roller')
+
 
 def main():
+  global CURRENT_PR
   global FLAG_skip_wait_for_artifacts
+  global GITHUB_ENGINE_REPO
 
   parser = argparse.ArgumentParser(description='Dart SDK autoroller for Flutter.')
   parser.add_argument('--dart-sdk-revision',
@@ -362,7 +379,7 @@ def main():
   assert(not local_engine_flutter_repo.bare)
 
   github = Github(github_api_key)
-  github_engine_repo  = github.get_repo('flutter/engine')
+  GITHUB_ENGINE_REPO  = github.get_repo('flutter/engine')
   github_flutter_repo = github.get_repo('flutter/flutter')
 
   atexit.register(cleanup_children)
@@ -412,18 +429,19 @@ def main():
     current_date = datetime.datetime.today().strftime('%Y-%m-%d')
 
     try:
-      pr = create_pull_request(github_engine_repo,
-                          local_engine_flutter_repo,
-                          get_pr_title(local_engine_flutter_repo),
-                          'dart-sdk-roll-{}'.format(current_date))
+      CURRENT_PR = create_pull_request(GITHUB_ENGINE_REPO,
+                                       local_engine_flutter_repo,
+                                       get_pr_title(local_engine_flutter_repo),
+                                       'dart-sdk-roll-{}'.format(current_date))
     except DartAutorollerException as e:
       print_error(('Error while creating flutter/engine pull request: {}.'
                    ' Aborting roll.').format(e))
       sys.exit(1)
 
     print_status('Waiting for PR checks to complete...')
-    merge_on_success(github_engine_repo, local_engine_flutter_repo, pr)
+    merge_on_success(GITHUB_ENGINE_REPO, local_engine_flutter_repo, CURRENT_PR)
     print_status('PR checks complete!')
+    CURRENT_PR = None
   else:
     print_warning('Not creating flutter/engine PR!')
 
