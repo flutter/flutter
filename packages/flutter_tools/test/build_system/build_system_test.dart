@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:crypto/crypto.dart' show md5;
-
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -92,7 +90,11 @@ void main() {
     }));
 
     test('Throws exception if asked to build with unsupported environment', () => testbed.run(() {
-      final Environment environment = Environment(projectDir: fs.currentDirectory, buildMode: BuildMode.release);
+      final Environment environment = Environment(
+        projectDir: fs.currentDirectory,
+        buildMode: BuildMode.release,
+        targetPlatform: TargetPlatform.android_arm,
+      );
 
       expect(buildSystem.build('foo', environment), throwsA(isInstanceOf<InvalidBuildException>()));
     }));
@@ -145,7 +147,7 @@ void main() {
         ],
         'dependencies': <Object>[],
         'name':  'foo',
-        'stamp': fs.path.join('build', 'foo.debug.android-arm.none'),
+        'stamp': fs.path.absolute(fs.path.join('build', 'foo.debug.android-arm.none')),
       });
     }));
 
@@ -175,7 +177,11 @@ void main() {
     setUp(() {
       testbed = Testbed(setup: () {
         fs.directory('build').createSync();
-        environment = Environment(projectDir: fs.currentDirectory);
+        environment = Environment(
+          projectDir: fs.currentDirectory,
+          buildMode: BuildMode.release,
+          targetPlatform: TargetPlatform.android_arm,
+        );
       });
     });
 
@@ -199,9 +205,7 @@ void main() {
       fileCache.hashFiles(<File>[file]);
       fileCache.persist();
 
-      final List<int> bytes = file.readAsBytesSync();
-      final String currentHash = md5.convert(bytes).toString();
-
+      final String currentHash =  fileCache.currentHashes[file.absolute.path];
       expect(fs.file('build/.filecache').readAsStringSync(), '/foo.dart : $currentHash');
       expect(fs.file('build/.filecache_version').readAsStringSync(), '1');
 
@@ -217,7 +221,7 @@ void main() {
     }));
   });
 
-  group(Target, () {
+  group('Target', () {
     Testbed testbed;
     MockPlatform mockPlatform;
     Environment environment;

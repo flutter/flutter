@@ -40,7 +40,7 @@ abstract class DevFSContent {
 
   int get size;
 
-  List<int> contentsAsBytes();
+  Future<List<int>> contentsAsBytes();
 
   Stream<List<int>> contentsAsStream();
 
@@ -135,7 +135,7 @@ class DevFSFileContent extends DevFSContent {
   }
 
   @override
-  List<int> contentsAsBytes() => _getFile().readAsBytesSync();
+  Future<List<int>> contentsAsBytes() => _getFile().readAsBytes();
 
   @override
   Stream<List<int>> contentsAsStream() => _getFile().openRead();
@@ -175,7 +175,7 @@ class DevFSByteContent extends DevFSContent {
   int get size => _bytes.length;
 
   @override
-  List<int> contentsAsBytes() => _bytes;
+  Future<List<int>> contentsAsBytes() async => _bytes;
 
   @override
   Stream<List<int>> contentsAsStream() =>
@@ -232,7 +232,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   Future<dynamic> writeFile(String fsName, Uri deviceUri, DevFSContent content) async {
     List<int> bytes;
     try {
-      bytes = content.contentsAsBytes();
+      bytes = await content.contentsAsBytes();
     } catch (e) {
       return e;
     }

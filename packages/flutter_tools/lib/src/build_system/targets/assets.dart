@@ -70,7 +70,7 @@ Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment e
         case ChangeType.Modified:
         case ChangeType.Added:
           file.parent.createSync(recursive: true);
-          file.writeAsBytesSync(entry.value.contentsAsBytes());
+          file.writeAsBytesSync(await entry.value.contentsAsBytes());
           break;
         case ChangeType.Removed:
           // This clause won't currently be hit because the manifest logic
@@ -79,7 +79,7 @@ Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment e
       }
     } else {
       file.parent.createSync(recursive: true);
-      file.writeAsBytesSync(entry.value.contentsAsBytes());
+      file.writeAsBytesSync(await entry.value.contentsAsBytes());
     }
   }
 }

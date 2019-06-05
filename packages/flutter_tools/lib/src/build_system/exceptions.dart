@@ -76,3 +76,18 @@ class InvalidBuildException implements Exception {
       '${environment.targetPlatform}.';
   }
 }
+
+/// An exception thrown when in output is placed outside of
+/// [Environment.buildDir].
+class MisplacedOutputException implements Exception {
+  MisplacedOutputException(this.entity, this.target);
+
+  final FileSystemEntity entity;
+  final Target target;
+
+  @override
+  String toString() {
+    return 'Target ${target.name} produced an output at ${entity.resolveSymbolicLinksSync()}'
+        ' Which is outside of the current build or project directory';
+  }
+}

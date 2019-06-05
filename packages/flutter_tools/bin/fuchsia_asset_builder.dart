@@ -38,7 +38,7 @@ Future<void> main(List<String> args) {
 
 Future<void> writeFile(libfs.File outputFile, DevFSContent content) async {
   outputFile.createSync(recursive: true);
-  final List<int> data = content.contentsAsBytes();
+  final List<int> data = await content.contentsAsBytes();
   outputFile.writeAsBytesSync(data);
 }
 

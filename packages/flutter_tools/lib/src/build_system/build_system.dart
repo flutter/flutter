@@ -60,12 +60,6 @@ enum ChangeType {
 ///      "absolute/path/fizz"
 ///    ]
 /// }
-///
-/// We don't re-run if the target or mode change because we expect that these
-/// invocations will produce different outputs. For example, if I separately run
-/// a target which produces the gen_snapshot output for `android_arm` and
-/// `android_arm64`, this should not produce files which overwrite each other.
-/// This is not currently the case and will need to be adjusted.
 class Target {
   const Target({
     @required this.name,
@@ -77,9 +71,20 @@ class Target {
     this.modes = const <BuildMode>[],
   });
 
+  /// The user-readable name of the target.
+  ///
+  /// This information is surfaced in the assemble commands and used as an
+  /// argument to build a particular target.
   final String name;
+
+  /// The dependencies of this target.
   final List<Target> dependencies;
+
+  /// The input [Source]s which are diffed to determine if a target should run.
   final List<Source> inputs;
+
+  /// The output [Source]s which we attempt to verify are correctly produced.
+  // TODO(jonahwilliams): track outputs to allow more surgical flutter clean.
   final List<Source> outputs;
   final BuildInvocation invocation;
 
@@ -127,12 +132,12 @@ class Target {
         throw MissingInputException(entity, name);
       }
 
-      final String absolutePath = entity.absolute.path;
+      final String absolutePath = entity.resolveSymbolicLinksSync();
       final String previousHash = fileCache.previousHashes[absolutePath];
       if (fileCache.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileCache.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          updates[entity.absolute.path] = previousInputs.contains(entity.absolute.path)
+          updates[absolutePath] = previousInputs.contains(absolutePath)
               ? ChangeType.Modified
               : ChangeType.Added;
         }
@@ -145,13 +150,14 @@ class Target {
             .modified
             .toIso8601String();
         if (currentHash != previousHash) {
-          updates[entity.absolute.path] = previousInputs.contains(entity.absolute.path)
+          updates[absolutePath] = previousInputs.contains(absolutePath)
               ? ChangeType.Modified
               : ChangeType.Added;
         }
         fileCache.currentHashes[absolutePath] = currentHash;
       } else {
         assert(false);
+        // Skip in production mode.
       }
     }
 
@@ -160,17 +166,17 @@ class Target {
     if (filesToHash.isNotEmpty) {
       final List<File> dirty = await fileCache.hashFiles(filesToHash);
       for (File file in dirty) {
-        updates[file.absolute.path] = previousInputs.contains(file.absolute.path)
+        final String absolutePath = file.resolveSymbolicLinksSync();
+        updates[absolutePath] = previousInputs.contains(absolutePath)
             ? ChangeType.Modified
             : ChangeType.Added;
       }
     }
 
     // Find which, if any, inputs have been deleted.
-    final Set<String> currentInputPaths = <String>{
-      for (FileSystemEntity entity in inputs)
-        entity.absolute.path
-    };
+    final Set<String> currentInputPaths = Set<String>.from(
+      inputs.map<String>((FileSystemEntity entity) => entity.resolveSymbolicLinksSync())
+    );
     for (String previousInput in previousInputs) {
       if (!currentInputPaths.contains(previousInput)) {
         updates[previousInput] = ChangeType.Removed;
@@ -218,7 +224,9 @@ class Target {
   List<FileSystemEntity> resolveOutputs(
     Environment environment,
   ) {
-    return _resolveConfiguration(outputs, environment);
+    final List<FileSystemEntity> outputEntities = _resolveConfiguration(outputs, environment);
+    verifyOutputDirectories(outputEntities, environment, this);
+    return outputEntities;
   }
 
   /// Performs a fold across this target and its dependencies.
@@ -301,13 +309,15 @@ class Environment {
   /// defaults based on it.
   factory Environment({
     @required Directory projectDir,
+    @required TargetPlatform targetPlatform,
+    @required BuildMode buildMode,
     Directory buildDir,
     Directory cacheDir,
-    TargetPlatform targetPlatform,
-    BuildMode buildMode,
     String flavor,
   }) {
     assert(projectDir != null);
+    assert(targetPlatform != null);
+    assert(buildMode != null);
     return Environment._(
       projectDir: projectDir,
       buildDir: buildDir ?? projectDir.childDirectory('build'),
@@ -327,6 +337,24 @@ class Environment {
     @required this.buildMode,
     @required this.flavor,
   });
+
+  /// The [Source] value which is substituted with the path to [projectDir].
+  static const String kProjectDirectory = '{PROJECT_DIR}';
+
+  /// The [Source] value which is substituted with the path to [buildDir].
+  static const String kBuildDirectory = '{BUILD_DIR}';
+
+  /// The [Source] value which is substituted with the path to [cacheDir].
+  static const String kCacheDirectory = '{CACHE_DIR}';
+
+  /// The [Source] value which is substituted with [targetPlatform].
+  static const String kPlatform = '{platform}';
+
+  /// The [Source] value which is substituted with [buildMode].
+  static const String kMode = '{mode}';
+
+  /// The [Source] value which is substituted with [flavor].
+  static const String kFlavor = '{flavor}';
 
   /// The `PROJECT_DIR` environment variable.
   ///
@@ -349,7 +377,7 @@ class Environment {
   /// The currently selected build mode.
   final BuildMode buildMode;
 
-  /// The current target platform, or `null` if none.
+  /// The current target platform.
   ///
   /// Certain targets do not require a [TargetPlatform], while others will fail
   /// if paired with an incorrect [TargetPlatform].
@@ -371,63 +399,28 @@ class BuildSystem {
     Environment environment,
   ) async {
     final Target target = _getNamedTarget(name);
-    final FileCache fileCache = FileCache(environment);
-
-    if (!environment.buildDir.existsSync()) {
-      environment.buildDir.createSync();
-    }
+    environment.buildDir.createSync(recursive: true);
 
     // Load file cache from previous builds.
-    fileCache.initialize();
+    final FileCache fileCache = FileCache(environment)
+      ..initialize();
 
     // Perform sanity checks on build.
     checkCycles(target);
     final bool isBuildValid = target.fold(true, (bool isValid, Target target) {
-      if (target.modes.isNotEmpty && !target.modes.contains(environment.buildMode)) {
-        return false;
-      }
-      if (target.platforms.isNotEmpty && !target.platforms.contains(environment.targetPlatform)) {
-        return false;
-      }
-      return isValid;
+      return isValid
+        && (target.modes.isEmpty || target.modes.contains(environment.buildMode))
+        && (target.platforms.isEmpty || target.platforms.contains(environment.targetPlatform));
     });
     if (!isBuildValid) {
       throw InvalidBuildException(environment, target);
     }
 
-    final Pool resourcePool = Pool(platform?.numberOfProcessors ?? 1);
-    final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
-
-    Future<void> invokeTarget(Target target) async {
-      await Future.wait(target.dependencies.map(invokeTarget));
-
-      final AsyncMemoizer<void> memoizer = pending[target.name] ??= AsyncMemoizer<void>();
-      await memoizer.runOnce(() async {
-        final PoolResource resource = await resourcePool.request();
-        try {
-          final List<FileSystemEntity> inputs = target.resolveInputs(
-              environment);
-          final Map<String, ChangeType> updates = await target.computeChanges(
-              inputs, environment, fileCache);
-          if (updates.isEmpty) {
-            printTrace('Skipping target: ${target.name}');
-          } else {
-            printTrace('${target.name}: Starting');
-            await target.invocation(updates, environment);
-            printTrace('${target.name}: Complete');
-
-            final List<FileSystemEntity> outputs = target.resolveOutputs(
-                environment);
-            target._writeStamp(inputs, outputs, environment);
-          }
-        } finally {
-          resource.release();
-        }
-      });
-    }
-
+    // TODO(jonahwilliams): create a separate configuration for the settings and
+    // constants which effect build running.
+    final _BuildInstance buildInstance = _BuildInstance(environment, fileCache);
     try {
-      await invokeTarget(target);
+      await buildInstance.invokeTarget(target);
     } finally {
       // Always persist the file cache to disk.
       fileCache.persist();
@@ -464,6 +457,43 @@ class BuildSystem {
   }
 }
 
+/// An active instance of a build.
+class _BuildInstance {
+  _BuildInstance(this.environment, this.fileCache);
+
+  final Pool resourcePool = Pool(platform?.numberOfProcessors ?? 1);
+  final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
+  final Environment environment;
+  final FileCache fileCache;
+
+  Future<void> invokeTarget(Target target) async {
+    await Future.wait(target.dependencies.map(invokeTarget));
+    final AsyncMemoizer<void> memoizer = pending[target.name] ??= AsyncMemoizer<void>();
+    await memoizer.runOnce(() => _invokeInternal(target));
+  }
+
+  Future<void> _invokeInternal(Target target) async {
+    final PoolResource resource = await resourcePool.request();
+    try {
+      final List<FileSystemEntity> inputs = target.resolveInputs(environment);
+      final Map<String, ChangeType> updates = await target.computeChanges(
+          inputs, environment, fileCache);
+      if (updates.isEmpty) {
+        printTrace('Skipping target: ${target.name}');
+      } else {
+        printTrace('${target.name}: Starting');
+        await target.invocation(updates, environment);
+        printTrace('${target.name}: Complete');
+
+        final List<FileSystemEntity> outputs = target.resolveOutputs(environment);
+        target._writeStamp(inputs, outputs, environment);
+      }
+    } finally {
+      resource.release();
+    }
+  }
+}
+
 /// Check if there are any dependency cycles in the target.
 ///
 /// Throws a [CycleException] if one is encountered.
@@ -483,4 +513,16 @@ void checkCycles(Target initial) {
     stack.remove(target);
   }
   checkInternal(initial, <Target>{}, <Target>{});
+}
+
+/// Verifies that all  files are in a subdirectory of [Environment.buildDir].
+void verifyOutputDirectories(List<FileSystemEntity> outputs, Environment environment, Target target) {
+  final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
+  final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
+  for (FileSystemEntity entity in outputs) {
+    if (!entity.resolveSymbolicLinksSync().startsWith(buildDirectory)
+        && !entity.resolveSymbolicLinksSync().startsWith(projectDirectory)) {
+      throw MisplacedOutputException(entity, target);
+    }
+  }
 }

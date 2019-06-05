@@ -229,6 +229,6 @@ Future<void> writeBundle(
   for (MapEntry<String, DevFSContent> entry in assetEntries.entries) {
     final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
     file.parent.createSync(recursive: true);
-    file.writeAsBytesSync(entry.value.contentsAsBytes());
+    file.writeAsBytesSync(await entry.value.contentsAsBytes());
   }
 }

@@ -118,21 +118,17 @@ enum BuildMode {
   dynamicRelease
 }
 
+const List<String> _kBuildModes = <String>[
+  'debug',
+  'profile',
+  'release',
+  'dynamic-profile',
+  'dynamic-release',
+];
+
 /// Return the name for the build mode, or "any" if null.
 String getNameForBuildMode(BuildMode buildMode) {
-  switch (buildMode) {
-    case BuildMode.debug:
-      return 'debug';
-    case BuildMode.profile:
-      return 'profile';
-    case BuildMode.release:
-      return 'relese';
-    case BuildMode.dynamicProfile:
-      return 'dynamic-profile';
-    case BuildMode.dynamicRelease:
-      return 'dynamic-release';
-  }
-  return 'any';
+  return _kBuildModes[buildMode.index];
 }
 
 /// Returns the [BuildMode] for a particular `name`.
@@ -281,14 +277,13 @@ String getHostFolderForTargetPlaltform(TargetPlatform targetPlatform) {
       return 'windows';
     case TargetPlatform.fuchsia:
       return 'fuchsia';
-    case TargetPlatform.web:
-      return 'web';
+    case TargetPlatform.web_javascript:
+      return 'web_javascript';
     case TargetPlatform.tester:
       throw UnsupportedError('tester is not a support platform for building.');
   }
   return 'any';
 }
-
 
 enum TargetPlatform {
   android_arm,

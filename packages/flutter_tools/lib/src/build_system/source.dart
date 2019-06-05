@@ -17,13 +17,6 @@ class SourceVisitor {
   /// Create a new [SourceVisitor] from an [Environment].
   SourceVisitor(this.environment, [this.inputs = true]);
 
-  static const String _kProjectDirectory = '{PROJECT_DIR}';
-  static const String _kBuildDirectory = '{BUILD_DIR}';
-  static const String _kCacheDirectory = '{CACHE_DIR}';
-  static const String _kPlatform = '{platform}';
-  static const String _kMode = '{mode}';
-  static const String _kFlavor = '{flavor}';
-
   /// The current environment.
   final Environment environment;
 
@@ -51,21 +44,24 @@ class SourceVisitor {
     final List<String> segments = <String>[];
     final List<String> rawParts = pattern.split('/');
     final bool hasWildcard = rawParts.last.contains('*');
+    final bool isDirectory = pattern.endsWith('/');
+    if (hasWildcard && isDirectory) {
+      throw Exception('wildcard patterns are not supported with directories.');
+    }
     String wildcardFile;
     if (hasWildcard) {
       wildcardFile = rawParts.removeLast();
     }
-    final bool isDirectory = pattern.endsWith('/');
     // If the pattern does not start with an env variable, then we have nothing
     // to resolve it to, error out.
     switch (rawParts.first) {
-      case _kProjectDirectory:
+      case Environment.kProjectDirectory:
         segments.addAll(fs.path.split(environment.projectDir.absolute.path));
         break;
-      case _kBuildDirectory:
+      case Environment.kBuildDirectory:
         segments.addAll(fs.path.split(environment.buildDir.absolute.path));
         break;
-      case _kCacheDirectory:
+      case Environment.kCacheDirectory:
         segments.addAll(fs.path.split(environment.cacheDir.absolute.path));
         break;
       default:
@@ -73,9 +69,9 @@ class SourceVisitor {
     }
     for (String rawPart in rawParts.skip(1)) {
       final String value = rawPart
-          .replaceAll(_kMode, getNameForBuildMode(environment.buildMode))
-          .replaceAll(_kPlatform, getNameForTargetPlatform(environment.targetPlatform))
-          .replaceAll(_kFlavor, environment.flavor);
+          .replaceAll(Environment.kMode, getNameForBuildMode(environment.buildMode))
+          .replaceAll(Environment.kPlatform, getNameForTargetPlatform(environment.targetPlatform))
+          .replaceAll(Environment.kFlavor, environment.flavor);
       segments.add(value);
     }
     final String filePath = fs.path.joinAll(segments);

@@ -38,21 +38,20 @@ class FileCache {
   // The current version of the file cache storage format.
   static const String _kVersion = '1';
 
-
   /// Read file hashes from disk.
   void initialize() {
     printTrace('Initializing file cache');
-    final File file = _cacheFile;
     if (!_versionFile.existsSync()) {
       return;
     }
     if (_versionFile.readAsStringSync() != _kVersion) {
-      file.deleteSync();
-    } else if (!file.existsSync()) {
+      _cacheFile.deleteSync();
+      _versionFile.deleteSync();
+    } else if (!_cacheFile.existsSync()) {
       return;
     }
 
-    for (String line in file.readAsLinesSync()) {
+    for (String line in _cacheFile.readAsLinesSync()) {
       final List<String> parts = line.split(' : ');
       if (parts.length != 2) {
         continue;
@@ -64,9 +63,6 @@ class FileCache {
   /// Persist file hashes to disk.
   void persist() {
     final File version = _versionFile;
-    if (!version.existsSync()) {
-      version.createSync();
-    }
     version.writeAsStringSync(_kVersion);
     final File file = _cacheFile;
     if (!file.existsSync()) {
@@ -76,16 +72,27 @@ class FileCache {
     for (MapEntry<String, String> entry in currentHashes.entries) {
       previousHashes[entry.key] = entry.value;
     }
-    file.writeAsStringSync('');
+
+    // Write 100 entries at a time to disk.
     String fencepost = '';
+    final StringBuffer buffer = StringBuffer();
+    int count = 0;
     for (MapEntry<String, String> entry in previousHashes.entries) {
-      file.writeAsStringSync('$fencepost${entry.key} : ${entry.value}',
-          mode: FileMode.append);
+      buffer.write('$fencepost${entry.key} : ${entry.value}');
       fencepost = '\n';
+      count += 1;
+      if (count >= 100) {
+        file.writeAsStringSync(buffer.toString(), mode: FileMode.write);
+        count = 0;
+        buffer.clear();
+      }
+    }
+    if (count != 0) {
+      file.writeAsStringSync(buffer.toString(), mode: FileMode.write);
     }
   }
 
-  /// Computes an md5 hash of the provided files and returns a list of entities
+  /// Computes a hash of the provided files and returns a list of entities
   /// that were dirty.
   // TODO(jonahwilliams): compare hash performance with md5 tool on macOS and
   // linux and certutil on Windows, as well as dividing up computation across
@@ -94,7 +101,7 @@ class FileCache {
   Future<List<File>> hashFiles(List<File> files) async {
     final List<File> dirty = <File>[];
     for (File file in files) {
-      final String absolutePath = file.absolute.path;
+      final String absolutePath = file.resolveSymbolicLinksSync();
       final String previousHash = previousHashes[absolutePath];
       final List<int> bytes = file.readAsBytesSync();
       final String currentHash = md5.convert(bytes).toString();
