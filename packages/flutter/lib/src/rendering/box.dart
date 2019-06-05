@@ -1728,10 +1728,7 @@ abstract class RenderBox extends RenderObject {
       return true;
     }());
     _size = value;
-    assert(() {
-      debugAssertDoesMeetConstraints();
-      return true;
-    }());
+    assert(() { debugAssertDoesMeetConstraints(); return true; }());
   }
 
   /// Claims ownership of the given [Size].
