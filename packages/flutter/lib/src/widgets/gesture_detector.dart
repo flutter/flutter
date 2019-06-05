@@ -1042,20 +1042,28 @@ abstract class GestureSemanticsMapping {
 
   /// Returns a callback that is called when the user taps on the render object.
   /// Returns null if the mapping isn't interested in tap.
-  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer);
+  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
+    return null;
+  }
 
   /// Returns a callback that is called when the user presses on the render
   /// object for a long period of time. Returns null if the mapping isn't
   /// interested in long press.
-  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer);
+  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer) {
+    return null;
+  }
 
   /// Returns a callback that is called when the user scrolls to the left or to
   /// the right. Returns null if the mapping isn't interested in horizontal drag.
-  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer);
+  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
+    return null;
+  }
 
   /// Returns a callback that is called when the user scrolls up or down.
   /// Returns null if the mapping isn't interested in horizontal drag.
-  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer);
+  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
+    return null;
+  }
 }
 
 /// The default mapping used by [RawGestureDetector]. It calls the following
