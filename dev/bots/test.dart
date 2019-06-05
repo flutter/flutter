@@ -637,17 +637,17 @@ Future<void> _runFlutterTest(String workingDirectory, {
   }
 
   if (useFlutterTestFormatter) {
-  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  final Stream<String> testOutput = runAndGetStdout(
-    flutter,
-    args,
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
-    timeout: timeout,
-    beforeExit: formatter.finish,
-    environment: environment,
-  );
-  await _processTestOutput(formatter, testOutput, tableData);
+    final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+    final Stream<String> testOutput = runAndGetStdout(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      timeout: timeout,
+      beforeExit: formatter.finish,
+      environment: environment,
+    );
+    await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
       flutter,

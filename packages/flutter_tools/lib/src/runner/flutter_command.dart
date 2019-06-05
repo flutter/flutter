@@ -670,7 +670,7 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
     case TargetPlatform.android_x64:
     case TargetPlatform.android_x86:
       return DevelopmentArtifact.android;
-    case TargetPlatform.web:
+    case TargetPlatform.web_javascript:
       return DevelopmentArtifact.web;
     case TargetPlatform.ios:
       return DevelopmentArtifact.iOS;
