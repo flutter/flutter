@@ -165,7 +165,7 @@ class FakeAndroidPlatformViewsController {
     if (!_views.containsKey(id))
       throw PlatformException(
         code: 'error',
-        message: 'Trying to dispose a platform view with unknown id: $id',
+        message: 'Trying to clear the focus on a platform view with unknown id: $id',
       );
 
     lastClearedFocusViewId = id;
