@@ -52,10 +52,3 @@ void main() {
     });
   });
 }
-
-/*
-    Missing if not installed
-    includes installLocation as a message, and displayName+fullVersion
-    partial if missing required components.
-    statusInfo
-  */

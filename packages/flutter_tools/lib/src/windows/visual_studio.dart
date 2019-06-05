@@ -102,7 +102,7 @@ class VisualStudio {
       // The MSBuild tool and related command-line toolchain.
       'Microsoft.Component.MSBuild': 'MSBuild',
       // The C++ toolchain required by the template.
-      'Microsoft.VisualStudio.Coponent.VC.Tools.x86.x64': cppToolchainDescription,
+      'Microsoft.VisualStudio.Component.VC.Tools.x86.x64': cppToolchainDescription,
       // The Windows SDK version used by the template.
       'Microsoft.VisualStudio.Component.Windows10SDK.17763':
           'Windows 10 SDK (10.0.17763.0)',
