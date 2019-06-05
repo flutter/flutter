@@ -664,7 +664,7 @@ void main() {
       });
 
       testWidgets('reorderable_list_demo $themeName', (WidgetTester tester) async {
-        tester.binding.addTime(const Duration(seconds: 3));
+        tester.binding.addTime(const Duration(seconds: 6);
         final SemanticsHandle handle = tester.ensureSemantics();
         await tester.pumpWidget(MaterialApp(theme: theme, home: const ReorderableListDemo()));
         await expectLater(tester, meetsGuideline(textContrastGuideline));
