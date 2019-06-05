@@ -80,19 +80,36 @@ class _ToolbarClipper extends CustomClipper<Path> {
 }
 
 class _Toolbar extends SingleChildRenderObjectWidget {
+  const _Toolbar(
+    Key key,
+    Widget child,
+  ) : super(key: key, child: child);
 
+  @override
+  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox();
+
+  @override
+  SingleChildRenderObjectElement createElement() => SingleChildRenderObjectElement(this);
+
+  @override
+  void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
+
+  }
+}
+
+class _ToolbarRenderBox extends RenderShiftedBox {
+  _ToolbarRenderBox({
+    RenderBox child
+  }) : super(child);
+
+  @override
+  void performLayout() {
+
+  }
 
   @override
   void paint(PaintingContext context, Offset offset) {
   }
-
-  @override
-  RenderClipRect createRenderObject(BuildContext context) => RenderClipRect(clipper: clipper, clipBehavior: clipBehavior);
-}
-
-class _ToolbarRenderObjectElement extends SingleChildRenderObjectElement { }
-class _ToolbarRenderObject extends SingleChildRenderObjectWidget {
-
 }
 
 
