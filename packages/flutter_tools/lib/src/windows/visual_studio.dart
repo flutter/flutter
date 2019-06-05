@@ -149,6 +149,8 @@ class VisualStudio {
           return installations[0];
         }
       }
+    } on ArgumentError {
+      // Thrown if vswhere doesnt' exist; ignore and return null below.
     } on ProcessException {
       // Ignored, return null below.
     }
