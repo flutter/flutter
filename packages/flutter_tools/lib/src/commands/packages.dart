@@ -9,6 +9,7 @@ import '../base/os.dart';
 import '../dart/pub.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
+import '../usage.dart';
 
 class PackagesCommand extends FlutterCommand {
   PackagesCommand() {
@@ -27,10 +28,10 @@ class PackagesCommand extends FlutterCommand {
   }
 
   @override
-  final String name = 'packages';
+  final String name = 'pub';
 
   @override
-  List<String> get aliases => const <String>['pub'];
+  List<String> get aliases => const <String>['packages'];
 
   @override
   final String description = 'Commands for managing Flutter packages.';
@@ -65,16 +66,47 @@ class PackagesGetCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages $name [<target directory>]';
+    return '${runner.executableName} pub $name [<target directory>]';
   }
 
-  Future<void> _runPubGet (String directory) async {
-    await pubGet(context: PubContext.pubGet,
-      directory: directory,
-      upgrade: upgrade ,
-      offline: argResults['offline'],
-      checkLastModified: false,
-    );
+  @override
+  Future<Map<String, String>> get usageValues async {
+    final Map<String, String> usageValues = <String, String>{};
+    final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
+    final String target = findProjectRoot(workingDirectory);
+    if (target == null) {
+      return usageValues;
+    }
+    final FlutterProject rootProject = FlutterProject.fromPath(target);
+    final bool hasPlugins = await rootProject.flutterPluginsFile.exists();
+    if (hasPlugins) {
+      final int numberOfPlugins = (await rootProject.flutterPluginsFile.readAsLines()).length;
+      usageValues[kCommandPackagesNumberPlugins] = '$numberOfPlugins';
+    } else {
+      usageValues[kCommandPackagesNumberPlugins] = '0';
+    }
+    usageValues[kCommandPackagesProjectModule] = '${rootProject.isModule}';
+    return usageValues;
+  }
+
+  Future<void> _runPubGet(String directory) async {
+    final Stopwatch pubGetTimer = Stopwatch()..start();
+    try {
+      await pubGet(context: PubContext.pubGet,
+        directory: directory,
+        upgrade: upgrade ,
+        offline: argResults['offline'],
+        checkLastModified: false,
+      );
+      pubGetTimer.stop();
+      flutterUsage.sendEvent('packages-pub-get', 'success');
+      flutterUsage.sendTiming('packages-pub-get', 'success', pubGetTimer.elapsed);
+    } catch (_) {
+      pubGetTimer.stop();
+      flutterUsage.sendEvent('packages-pub-get', 'failure');
+      flutterUsage.sendTiming('packages-pub-get', 'failure', pubGetTimer.elapsed);
+      rethrow;
+    }
   }
 
   @override
@@ -82,13 +114,12 @@ class PackagesGetCommand extends FlutterCommand {
     if (argResults.rest.length > 1)
       throwToolExit('Too many arguments.\n$usage');
 
-    final String target = findProjectRoot(
-      argResults.rest.length == 1 ? argResults.rest[0] : null
-    );
+    final String workingDirectory = argResults.rest.length == 1 ? argResults.rest[0] : null;
+    final String target = findProjectRoot(workingDirectory);
     if (target == null) {
       throwToolExit(
        'Expected to find project root in '
-       '${ argResults.rest.length == 1 ? argResults.rest[0] : "current working directory" }.'
+       '${ workingDirectory ?? "current working directory" }.'
       );
     }
 
@@ -127,7 +158,7 @@ class PackagesTestCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages test [<tests...>]';
+    return '${runner.executableName} pub test [<tests...>]';
   }
 
   @override
@@ -157,7 +188,7 @@ class PackagesForwardCommand extends FlutterCommand {
 
   @override
   String get invocation {
-    return '${runner.executableName} packages $_commandName [<arguments...>]';
+    return '${runner.executableName} pub $_commandName [<arguments...>]';
   }
 
   @override

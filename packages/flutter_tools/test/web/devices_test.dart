@@ -5,6 +5,7 @@
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/compile.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
@@ -21,12 +22,14 @@ void main() {
 
     setUp(() async {
       flutterProject = FlutterProject.fromPath(fs.path.join(getFlutterRoot(), 'dev', 'integration_tests', 'web'));
-      when(mockWebCompiler.compile(
+      when(mockWebCompiler.compileDart2js(
         target: anyNamed('target'),
         minify: anyNamed('minify'),
         enabledAssertions: anyNamed('enabledAssertions'),
       )).thenAnswer((Invocation invocation) async => 0);
-      when(mockChromeLauncher.launch(any)).thenAnswer((Invocation invocation) async { });
+      when(mockChromeLauncher.launch(any)).thenAnswer((Invocation invocation) async {
+        return null;
+      });
     });
 
     testUsingContext('can build and connect to chrome', () async {

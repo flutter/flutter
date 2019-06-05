@@ -233,7 +233,7 @@ abstract class RawKeyEventData {
 ///  * [RawKeyboard], which uses this interface to expose key data.
 ///  * [RawKeyboardListener], a widget that listens for raw key events.
 @immutable
-abstract class RawKeyEvent {
+abstract class RawKeyEvent extends Diagnosticable {
   /// Initializes fields for subclasses, and provides a const constructor for
   /// const subclasses.
   const RawKeyEvent({
@@ -406,6 +406,13 @@ abstract class RawKeyEvent {
 
   /// Platform-specific information about the key event.
   final RawKeyEventData data;
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<LogicalKeyboardKey>('logicalKey', logicalKey));
+    properties.add(DiagnosticsProperty<PhysicalKeyboardKey>('physicalKey', physicalKey));
+  }
 }
 
 /// The user has pressed a key on the keyboard.

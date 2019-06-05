@@ -105,7 +105,7 @@ class BottomSheetThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
   }
 }

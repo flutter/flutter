@@ -753,7 +753,7 @@ abstract class SliderTickMarkShape {
   /// See also:
   ///
   /// * [SliderThemeData.tickMarkShape], which is the shape that the [Slider]
-  /// uses when painting tick marks.
+  ///   uses when painting tick marks.
   static final SliderTickMarkShape noTickMark = _EmptySliderTickMarkShape();
 }
 
@@ -803,9 +803,9 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 ///
 /// See also:
 ///
-///  * [RoundSliderThumbShape], which is the the default thumb shape.
-///  * [RoundSliderOverlayShape], which is the the default overlay shape.
-///  * [PaddleSliderValueIndicatorShape], which is the the default value
+///  * [RoundSliderThumbShape], which is the default thumb shape.
+///  * [RoundSliderOverlayShape], which is the default overlay shape.
+///  * [PaddleSliderValueIndicatorShape], which is the default value
 ///    indicator shape.
 abstract class SliderComponentShape {
   /// Abstract const constructor. This constructor enables subclasses to provide
@@ -860,7 +860,7 @@ abstract class SliderComponentShape {
   /// See also:
   ///
   /// * [SliderThemeData.thumbShape], which is the shape that the [Slider]
-  /// uses when painting the thumb.
+  ///   uses when painting the thumb.
   static final SliderComponentShape noThumb = _EmptySliderComponentShape();
 
   /// Special instance of [SliderComponentShape] to skip the overlay drawing.
@@ -868,7 +868,7 @@ abstract class SliderComponentShape {
   /// See also:
   ///
   /// * [SliderThemeData.overlayShape], which is the shape that the [Slider]
-  /// uses when painting the overlay.
+  ///   uses when painting the overlay.
   static final SliderComponentShape noOverlay = _EmptySliderComponentShape();
 }
 
@@ -908,9 +908,9 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 /// See also:
 ///
 /// * [RectangularSliderTrackShape], which is a track shape with sharp
-/// rectangular edges
+///   rectangular edges
 /// * [RoundedRectSliderTrackShape], which is a track shape with round
-/// stadium-like edges.
+///   stadium-like edges.
 ///
 /// The height is set from [SliderThemeData.trackHeight] and the width of the
 /// parent box less the larger of the widths of [SliderThemeData.thumbShape] and

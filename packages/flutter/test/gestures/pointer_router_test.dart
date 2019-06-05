@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 void main() {
   test('Should route pointers', () {
@@ -148,5 +149,54 @@ void main() {
     ]));
 
     FlutterError.onError = previousErrorHandler;
+  });
+
+  test('Should transform events', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    final List<PointerEvent> globalEvents = <PointerEvent>[];
+    final PointerRouter router = PointerRouter();
+    final Matrix4 transform = (Matrix4.identity()..scale(1 / 2.0, 1 / 2.0, 1.0)) * Matrix4.translationValues(-10, -30, 0);
+
+    router.addRoute(1, (PointerEvent event) {
+      events.add(event);
+    }, transform);
+
+    router.addGlobalRoute((PointerEvent event) {
+      globalEvents.add(event);
+    }, transform);
+
+    final TestPointer pointer1 = TestPointer(1);
+    const Offset firstPosition = Offset(16, 36);
+    router.route(pointer1.down(firstPosition));
+
+    expect(events.single.transform, transform);
+    expect(events.single.position, firstPosition);
+    expect(events.single.delta, Offset.zero);
+    expect(events.single.localPosition, const Offset(3, 3));
+    expect(events.single.localDelta, Offset.zero);
+
+    expect(globalEvents.single.transform, transform);
+    expect(globalEvents.single.position, firstPosition);
+    expect(globalEvents.single.delta, Offset.zero);
+    expect(globalEvents.single.localPosition, const Offset(3, 3));
+    expect(globalEvents.single.localDelta, Offset.zero);
+
+    events.clear();
+    globalEvents.clear();
+
+    const Offset newPosition = Offset(20, 40);
+    router.route(pointer1.move(newPosition));
+
+    expect(events.single.transform, transform);
+    expect(events.single.position, newPosition);
+    expect(events.single.delta, newPosition - firstPosition);
+    expect(events.single.localPosition, const Offset(5, 5));
+    expect(events.single.localDelta, const Offset(2, 2));
+
+    expect(globalEvents.single.transform, transform);
+    expect(globalEvents.single.position, newPosition);
+    expect(globalEvents.single.delta, newPosition - firstPosition);
+    expect(globalEvents.single.localPosition, const Offset(5, 5));
+    expect(globalEvents.single.localDelta, const Offset(2, 2));
   });
 }

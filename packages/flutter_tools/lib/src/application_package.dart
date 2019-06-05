@@ -17,6 +17,7 @@ import 'base/os.dart' show os;
 import 'base/process.dart';
 import 'base/user_messages.dart';
 import 'build_info.dart';
+import 'fuchsia/application_package.dart';
 import 'globals.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart' as plist;
@@ -55,7 +56,7 @@ class ApplicationPackageFactory {
         return applicationBinary == null
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
         return applicationBinary == null
@@ -66,7 +67,9 @@ class ApplicationPackageFactory {
             ? WindowsApp.fromWindowsProject(FlutterProject.current().windows)
             : WindowsApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.fuchsia:
-        return null;
+        return applicationBinary == null
+            ? FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia)
+            : FuchsiaApp.fromPrebuiltApp(applicationBinary);
     }
     assert(platform != null);
     return null;
@@ -384,10 +387,11 @@ class PrebuiltIOSApp extends IOSApp {
 }
 
 class ApplicationPackageStore {
-  ApplicationPackageStore({ this.android, this.iOS });
+  ApplicationPackageStore({ this.android, this.iOS, this.fuchsia });
 
   AndroidApk android;
   IOSApp iOS;
+  FuchsiaApp fuchsia;
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -400,12 +404,14 @@ class ApplicationPackageStore {
       case TargetPlatform.ios:
         iOS ??= IOSApp.fromIosProject(FlutterProject.current().ios);
         return iOS;
+      case TargetPlatform.fuchsia:
+        fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
+        return fuchsia;
       case TargetPlatform.darwin_x64:
       case TargetPlatform.linux_x64:
       case TargetPlatform.windows_x64:
-      case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         return null;
     }
     return null;

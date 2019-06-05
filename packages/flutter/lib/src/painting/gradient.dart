@@ -4,10 +4,10 @@
 
 import 'dart:collection';
 import 'dart:math' as math;
-import 'dart:typed_data';
 import 'dart:ui' as ui show Gradient, lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math_64.dart';
 
 import 'alignment.dart';
 import 'basic_types.dart';
@@ -65,7 +65,7 @@ _ColorsAndStops _interpolateColorsAndStops(
 ///
 /// See also:
 ///
-///  * [Gradient](https://api.flutter.dev/flutter/dart-ui/Gradient-class.html), the class in the [dart:ui] library.
+///  * [Gradient](dart-ui/Gradient-class.html), the class in the [dart:ui] library.
 ///
 @immutable
 abstract class Gradient {
@@ -127,9 +127,25 @@ abstract class Gradient {
   /// objects, then the `textDirection` argument must not be null.
   ///
   /// The `transform` property will be applied as a local transform to the
-  /// gradient, for example if you wish to rotate only the gradient with respect
-  /// to the drawing.
-  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform });
+  /// gradient, allowing the shader to be transformed without transforming the
+  /// entire canvas.
+  ///
+  /// {@tool sample}
+  /// This example shows how to rotate a [SweepGradient] without rotating the
+  /// [Canvas] or the [Rect] that the gradient is shading.
+  ///
+  /// ```dart
+  /// void paint(Canvas canvas, Rect rect) {
+  ///   final Matrix4 transform = Matrix4.identity()..rotateZ(0.785398); // 45 degrees.
+  ///   final SweepGradient gradient = SweepGradient(colors: [Colors.white, Colors.blue]);
+  ///   final Paint paint = Paint()
+  ///     ..shader = gradient.createShader(rect, transform: transform)
+  ///     ..color = Colors.blue;
+  ///   canvas.drawRect(rect, paint);
+  /// }
+  /// ```
+  /// {@end-tool}
+  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform });
 
   /// Returns a new gradient with its properties scaled by the given factor.
   ///
@@ -335,11 +351,11 @@ class LinearGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform }) {
+  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform }) {
     return ui.Gradient.linear(
       begin.resolve(textDirection).withinRect(rect),
       end.resolve(textDirection).withinRect(rect),
-      colors, _impliedStops(), tileMode, transform,
+      colors, _impliedStops(), tileMode, transform?.storage,
     );
   }
 
@@ -605,12 +621,12 @@ class RadialGradient extends Gradient {
   final double focalRadius;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform }) {
+  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform }) {
     return ui.Gradient.radial(
       center.resolve(textDirection).withinRect(rect),
       radius * rect.shortestSide,
       colors, _impliedStops(), tileMode,
-      transform,
+      transform?.storage,
       focal == null  ? null : focal.resolve(textDirection).withinRect(rect),
       focalRadius * rect.shortestSide,
     );
@@ -845,13 +861,16 @@ class SweepGradient extends Gradient {
   final TileMode tileMode;
 
   @override
-  Shader createShader(Rect rect, { TextDirection textDirection, Float64List transform }) {
+  Shader createShader(Rect rect, { TextDirection textDirection, Matrix4 transform }) {
+    final Offset resolvedCenter = center.resolve(textDirection).withinRect(rect);
+
+    print(resolvedCenter);
     return ui.Gradient.sweep(
-      center.resolve(textDirection).withinRect(rect),
+      resolvedCenter,
       colors, _impliedStops(), tileMode,
       startAngle,
       endAngle,
-      transform,
+      transform == null ? null : (transform..translate(-resolvedCenter.dx, -resolvedCenter.dy)).storage,
     );
   }
 

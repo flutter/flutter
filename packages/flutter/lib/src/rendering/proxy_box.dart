@@ -2654,7 +2654,7 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   bool get _hasActiveAnnotation => _hoverAnnotation != null && _mouseIsConnected;
 
   @override
-  bool get needsCompositing => _hasActiveAnnotation;
+  bool get needsCompositing => super.needsCompositing || _hasActiveAnnotation;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -2965,7 +2965,7 @@ class RenderIgnorePointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? ignoring : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? ignoring;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
@@ -3171,7 +3171,7 @@ class RenderAbsorbPointer extends RenderProxyBox {
       markNeedsSemanticsUpdate();
   }
 
-  bool get _effectiveIgnoringSemantics => ignoringSemantics == null ? absorbing : ignoringSemantics;
+  bool get _effectiveIgnoringSemantics => ignoringSemantics ?? absorbing;
 
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
