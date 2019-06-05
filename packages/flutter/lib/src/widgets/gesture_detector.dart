@@ -925,57 +925,36 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
-  GestureRecognizer _recognizerGetter(Type type) => _recognizers[type];
-
   void _assignSemantics(RenderSemanticsGestureHandler renderObject) {
-    final GestureSemanticsMapping mapping = widget._semanticsMapping;
-    if (mapping == null)
+    if (_semanticsMapping == null)
       return;
     renderObject
-      ..onTap =
-        mapping.getTapHandler(_recognizerGetter) == null ? null : _handleSemanticTap
-      ..onLongPress =
-        mapping.getLongPressHandler(_recognizerGetter) == null ? null : _handleSemanticLongPress
-      ..onHorizontalDragUpdate =
-        mapping.getHorizontalDragUpdateHandler(_recognizerGetter) == null ? null : _handleSemanticHorizontal
-      ..onVerticalDragUpdate =
-        mapping.getVerticalDragUpdateHandler(_recognizerGetter) == null ? null : _handleSemanticVertical;
+      ..onTap = _semanticsMapping.getTapHandler(_findRecognizer) == null
+          ? null : _handleSemanticTap
+      ..onLongPress = _semanticsMapping.getLongPressHandler(_findRecognizer) == null
+          ? null : _handleSemanticLongPress
+      ..onHorizontalDragUpdate = _semanticsMapping.getHorizontalDragUpdateHandler(_findRecognizer) == null
+          ? null : _handleSemanticHorizontal
+      ..onVerticalDragUpdate = _semanticsMapping.getVerticalDragUpdateHandler(_findRecognizer) == null
+          ? null : _handleSemanticVertical;
   }
-
+  GestureRecognizer _findRecognizer(Type type) => _recognizers[type];
+  GestureSemanticsMapping get _semanticsMapping => widget._semanticsMapping;
+  // These methods are assigned only when semanticsMapping and the corresponding
+  // handler are not null.
+  // They have to be defined in RawGestureDetector so that they are properly
+  // cached (same hash code) across different `build`s.
   void _handleSemanticTap() {
-    // The method is assigned only when the mapping and handler are not null
-    final GestureSemanticsMapping mapping = widget._semanticsMapping;
-    assert(mapping != null);
-    final GestureTapCallback handler = mapping.getTapHandler(_recognizerGetter);
-    assert(handler != null);
-    handler();
+    _semanticsMapping.getTapHandler(_findRecognizer)();
   }
-
   void _handleSemanticLongPress() {
-    // The method is assigned only when the mapping and handler are not null
-    final GestureSemanticsMapping mapping = widget._semanticsMapping;
-    assert(mapping != null);
-    final GestureLongPressCallback handler = mapping.getLongPressHandler(_recognizerGetter);
-    assert(handler != null);
-    handler();
+    _semanticsMapping.getLongPressHandler(_findRecognizer)();
   }
-
   void _handleSemanticHorizontal(DragUpdateDetails details) {
-    // The method is assigned only when the mapping and handler are not null
-    final GestureSemanticsMapping mapping = widget._semanticsMapping;
-    assert(mapping != null);
-    final GestureDragUpdateCallback handler = mapping.getHorizontalDragUpdateHandler(_recognizerGetter);
-    assert(handler != null);
-    handler(details);
+    _semanticsMapping.getHorizontalDragUpdateHandler(_findRecognizer)(details);
   }
-
   void _handleSemanticVertical(DragUpdateDetails details) {
-    // The method is assigned only when the mapping and handler are not null
-    final GestureSemanticsMapping mapping = widget._semanticsMapping;
-    assert(mapping != null);
-    final GestureDragUpdateCallback handler = mapping.getVerticalDragUpdateHandler(_recognizerGetter);
-    assert(handler != null);
-    handler(details);
+    _semanticsMapping.getVerticalDragUpdateHandler(_findRecognizer)(details);
   }
 
   @override
@@ -1034,7 +1013,7 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   }
 }
 
-typedef RecognizerGetter = GestureRecognizer Function(Type);
+typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 
 /// TODO
 abstract class GestureSemanticsMapping {
@@ -1042,16 +1021,16 @@ abstract class GestureSemanticsMapping {
   const GestureSemanticsMapping();
 
   /// TODO
-  GestureTapCallback getTapHandler(RecognizerGetter getter);
+  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer);
 
   /// TODO
-  GestureLongPressCallback getLongPressHandler(RecognizerGetter getter);
+  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer);
 
   /// TODO
-  GestureDragUpdateCallback getHorizontalDragUpdateHandler(RecognizerGetter getter);
+  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer);
 
   /// TODO
-  GestureDragUpdateCallback getVerticalDragUpdateHandler(RecognizerGetter getter);
+  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer);
 }
 
 /// TODO
@@ -1060,8 +1039,8 @@ class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
   const DefaultGestureSemanticsMapping();
 
   @override
-  GestureTapCallback getTapHandler(RecognizerGetter getter) {
-    final TapGestureRecognizer tap = getter(TapGestureRecognizer);
+  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
+    final TapGestureRecognizer tap = getRecognizer(TapGestureRecognizer);
     if (tap == null)
       return null;
     assert(tap is TapGestureRecognizer);
@@ -1078,8 +1057,8 @@ class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
   }
 
   @override
-  GestureLongPressCallback getLongPressHandler(RecognizerGetter getter) {
-    final LongPressGestureRecognizer longPress = getter(LongPressGestureRecognizer);
+  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer) {
+    final LongPressGestureRecognizer longPress = getRecognizer(LongPressGestureRecognizer);
     if (longPress == null)
       return null;
 
@@ -1097,9 +1076,9 @@ class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
   }
 
   @override
-  GestureDragUpdateCallback getHorizontalDragUpdateHandler(RecognizerGetter getter) {
-    final HorizontalDragGestureRecognizer horizontal = getter(HorizontalDragGestureRecognizer);
-    final PanGestureRecognizer pan = getter(PanGestureRecognizer);
+  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
+    final HorizontalDragGestureRecognizer horizontal = getRecognizer(HorizontalDragGestureRecognizer);
+    final PanGestureRecognizer pan = getRecognizer(PanGestureRecognizer);
 
     final GestureDragUpdateCallback horizontalHandler = horizontal == null ?
       null :
@@ -1140,9 +1119,9 @@ class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
   }
 
   @override
-  GestureDragUpdateCallback getVerticalDragUpdateHandler(RecognizerGetter getter) {
-    final VerticalDragGestureRecognizer vertical = getter(VerticalDragGestureRecognizer);
-    final PanGestureRecognizer pan = getter(PanGestureRecognizer);
+  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
+    final VerticalDragGestureRecognizer vertical = getRecognizer(VerticalDragGestureRecognizer);
+    final PanGestureRecognizer pan = getRecognizer(PanGestureRecognizer);
 
     final GestureDragUpdateCallback verticalHandler = vertical == null ?
       null :
