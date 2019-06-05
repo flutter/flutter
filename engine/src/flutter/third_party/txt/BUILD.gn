@@ -142,6 +142,8 @@ source_set("txt") {
     sources += [ "src/txt/platform_android.cc" ]
   } else if (is_linux) {
     sources += [ "src/txt/platform_linux.cc" ]
+  } else if (is_fuchsia) {
+    sources += [ "src/txt/platform_fuchsia.cc" ]
   } else {
     sources += [ "src/txt/platform.cc" ]
   }
