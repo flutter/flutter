@@ -551,17 +551,39 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       thumbSelector: sliderTheme.thumbSelector ?? _defaultRangeThumbSelector,
     );
 
-    return _RangeSliderRenderObjectWidget(
-      values: _unlerpRangeValues(widget.values),
-      divisions: widget.divisions,
-      labels: widget.labels,
-      sliderTheme: sliderTheme,
-      textScaleFactor: MediaQuery.of(context).textScaleFactor,
-      onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
-      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
-      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
-      state: this,
-      semanticFormatterCallback: widget.semanticFormatterCallback,
+//    return _RangeSliderRenderObjectWidget(
+//      values: _unlerpRangeValues(widget.values),
+//      divisions: widget.divisions,
+//      labels: widget.labels,
+//      sliderTheme: sliderTheme,
+//      textScaleFactor: MediaQuery.of(context).textScaleFactor,
+//      onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+//      onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+//      onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+//      state: this,
+//      semanticFormatterCallback: widget.semanticFormatterCallback,
+//    );
+
+    return AnimatedBuilder(
+      builder: (BuildContext context, Widget child) => _RangeSliderRenderObjectWidget(
+        values: _unlerpRangeValues(widget.values),
+        divisions: widget.divisions,
+        labels: widget.labels,
+        sliderTheme: sliderTheme,
+        textScaleFactor: MediaQuery.of(context).textScaleFactor,
+        onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
+        onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
+        onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+        state: this,
+        semanticFormatterCallback: widget.semanticFormatterCallback,
+      ),
+      animation: Listenable.merge(<Listenable>[
+        overlayController,
+        valueIndicatorController,
+        enableController,
+        startPositionController,
+        endPositionController,
+      ]),
     );
   }
 }
@@ -928,25 +950,25 @@ class _RenderRangeSlider extends RenderBox {
     markNeedsLayout();
   }
 
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _overlayAnimation.addListener(markNeedsPaint);
-    _valueIndicatorAnimation.addListener(markNeedsPaint);
-    _enableAnimation.addListener(markNeedsPaint);
-    _state.startPositionController.addListener(markNeedsPaint);
-    _state.endPositionController.addListener(markNeedsPaint);
-  }
-
-  @override
-  void detach() {
-    _overlayAnimation.removeListener(markNeedsPaint);
-    _valueIndicatorAnimation.removeListener(markNeedsPaint);
-    _enableAnimation.removeListener(markNeedsPaint);
-    _state.startPositionController.removeListener(markNeedsPaint);
-    _state.endPositionController.removeListener(markNeedsPaint);
-    super.detach();
-  }
+//  @override
+//  void attach(PipelineOwner owner) {
+//    super.attach(owner);
+//    _overlayAnimation.addListener(markNeedsPaint);
+//    _valueIndicatorAnimation.addListener(markNeedsPaint);
+//    _enableAnimation.addListener(markNeedsPaint);
+//    _state.startPositionController.addListener(markNeedsPaint);
+//    _state.endPositionController.addListener(markNeedsPaint);
+//  }
+//
+//  @override
+//  void detach() {
+//    _overlayAnimation.removeListener(markNeedsPaint);
+//    _valueIndicatorAnimation.removeListener(markNeedsPaint);
+//    _enableAnimation.removeListener(markNeedsPaint);
+//    _state.startPositionController.removeListener(markNeedsPaint);
+//    _state.endPositionController.removeListener(markNeedsPaint);
+//    super.detach();
+//  }
 
   double _getValueFromVisualPosition(double visualPosition) {
     switch (textDirection) {
