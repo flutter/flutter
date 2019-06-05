@@ -83,7 +83,7 @@ void main() {
       'Microsoft.VisualStudio.Component.Windows10SDK.17763',
     ], exists ? null : '[]');
   }
-  
+
   group('Visual Studio', () {
     VisualStudio visualStudio;
 
