@@ -69,11 +69,11 @@ void main() {
       when(mockProcessManager.run(<String>[
         'reg',
         'query',
-        r'"HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon"',
+        'HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon',
         '/v',
         'version',
       ])).thenAnswer((Invocation invocation) async {
-        return MockProcessResult(0, r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0');
+        return MockProcessResult(0, r'HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon\ version REG_SZ 74.0.0 A');
       });
       final WebDevice webDevice = WebDevice();
 
