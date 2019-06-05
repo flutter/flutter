@@ -89,10 +89,13 @@ class WebDevice extends Device {
     String version = 'unknown';
     if (platform.isWindows) {
       final ProcessResult result = await processManager.run(<String>[
-        'reg', 'query', r'"HKEY_CURRENT_USER\Software\Google\Chrome\BLBeacon"', '/v', 'version'
+        r'reg', 'query', 'HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon', '/v', 'version'
       ]);
       if (result.exitCode == 0) {
-        version = 'Google Chrome ' + result.stdout.split(RegExp(r'\s+')).last;
+        final List<String> parts = result.stdout.split(RegExp(r'\s+'));
+        if (parts.length > 2) {
+          version = 'Google Chrome ' + parts[parts.length - 2];
+        }
       }
     } else {
       final String chrome = findChromeExecutable();
