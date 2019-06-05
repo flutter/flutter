@@ -803,9 +803,9 @@ class _EmptySliderTickMarkShape extends SliderTickMarkShape {
 ///
 /// See also:
 ///
-///  * [RoundSliderThumbShape], which is the the default thumb shape.
-///  * [RoundSliderOverlayShape], which is the the default overlay shape.
-///  * [PaddleSliderValueIndicatorShape], which is the the default value
+///  * [RoundSliderThumbShape], which is the default thumb shape.
+///  * [RoundSliderOverlayShape], which is the default overlay shape.
+///  * [PaddleSliderValueIndicatorShape], which is the default value
 ///    indicator shape.
 abstract class SliderComponentShape {
   /// Abstract const constructor. This constructor enables subclasses to provide
