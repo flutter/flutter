@@ -17,6 +17,7 @@ developers and organizations around the world, and is free and open source.
 For announcements about new releases and breaking changes, follow the
 [flutter-announce@googlegroups.com](https://groups.google.com/forum/#!forum/flutter-announce)
 mailing list.
+[Click here](./docs/) to see this README in other language.
 
 ## About Flutter
 
