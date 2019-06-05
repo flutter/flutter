@@ -940,10 +940,11 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   }
   GestureRecognizer _findRecognizer(Type type) => _recognizers[type];
   GestureSemanticsMapping get _semanticsMapping => widget._semanticsMapping;
-  // These methods are assigned only when semanticsMapping and the corresponding
-  // handler are not null.
-  // They have to be defined in RawGestureDetector so that they are properly
-  // cached (same hash code) across different `build`s.
+  // The following methods handles semantic gestures, and are assigned to the
+  // render object [RenderSemanticsGestureHandler].
+  // They are assigned only when both semanticsMapping and the corresponding
+  // handler are non-null, therefore no null check of them is needed in the
+  // bodies. They are defined in a widget state because they need to be cached.
   void _handleSemanticTap() {
     _semanticsMapping.getTapHandler(_findRecognizer)();
   }
@@ -995,7 +996,9 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     Widget child,
     @required this.owner,
     @required this.assignSemantics,
-  }) : super(key: key, child: child);
+  }) : assert(owner != null),
+       assert(assignSemantics != null),
+       super(key: key, child: child);
 
   final RawGestureDetectorState owner;
   final _AssignSemantics assignSemantics;
@@ -1015,27 +1018,60 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
 typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 
-/// TODO
+/// A base class that tells [RawGestureDetector]s how to handle specific
+/// gestures from the semantics server (e.g. an accessibility tool) based on the
+/// recognizers.
+///
+/// Each method of [GestureSemanticsMapping] can return a callback that will be
+/// called when the corresponding kind of gesture is reported by the semantic
+/// sever. The callback can depend on the recognizers owned by the
+/// detector by using `getRecognizer`, but it must not modify the recognizers.
+/// Each can also return null if it's not interested.
+///
+/// See also:
+///
+///  * [DefaultGestureSemanticsMapping], the default mapping used by
+///    [RawGestureDetector].
+///  * [RenderSemanticsGestureHandler] defines the 4 kinds of semantic gestures
+///    used in this class.
 abstract class GestureSemanticsMapping {
-  /// TODO
+  /// Create a mapping of gesture semantics.
   const GestureSemanticsMapping();
 
-  /// TODO
+  /// Returns a callback that is called when the user taps on the render object.
+  /// Returns null if the mapping isn't interested in tap.
   GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer);
 
-  /// TODO
+  /// Returns a callback that is called when the user presses on the render
+  /// object for a long period of time. Returns null if the mapping isn't
+  /// interested in long press.
   GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer);
 
-  /// TODO
+  /// Returns a callback that is called when the user scrolls to the left or to
+  /// the right. Returns null if the mapping isn't interested in horizontal drag.
   GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer);
 
-  /// TODO
+  /// Returns a callback that is called when the user scrolls up or down.
+  /// Returns null if the mapping isn't interested in horizontal drag.
   GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer);
 }
 
-/// TODO
+/// The default mapping used by [RawGestureDetector]. It calls the following
+/// callbacks on each kind of semantic gesture if they exist:
+///
+///  * On a semantic tap, it looks for [TapGestureRecognizer] and calls its
+///    `onTapDown`, `onTapUp`, and `onTap`.
+///  * On a semantic long press, it looks for [LongPressGestureRecognizer] and
+///    calls its `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
+///    `onLongPressUp`.
+///  * On a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
+///    and calls its `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
+///    for [PanGestureRecognizer] and calls the same methods again.
+///  * On a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
+///    and calls its `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
+///    for [PanGestureRecognizer] and calls the same methods again.
 class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
-  /// TODO
+  /// Create a [DefaultGestureSemanticsMapping].
   const DefaultGestureSemanticsMapping();
 
   @override
