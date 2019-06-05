@@ -147,7 +147,7 @@ static std::shared_ptr<const fml::Mapping> ResolveIsolateInstructions(
 
 fml::RefPtr<DartSnapshot> DartSnapshot::VMSnapshotFromSettings(
     const Settings& settings) {
-  TRACE_EVENT0("flutter", "DartSnapshot::VMSnapshotFromSettings");
+  FML_TRACE_EVENT0("flutter", "DartSnapshot::VMSnapshotFromSettings");
   auto snapshot =
       fml::MakeRefCounted<DartSnapshot>(ResolveVMData(settings),         //
                                         ResolveVMInstructions(settings)  //
@@ -160,7 +160,7 @@ fml::RefPtr<DartSnapshot> DartSnapshot::VMSnapshotFromSettings(
 
 fml::RefPtr<DartSnapshot> DartSnapshot::IsolateSnapshotFromSettings(
     const Settings& settings) {
-  TRACE_EVENT0("flutter", "DartSnapshot::IsolateSnapshotFromSettings");
+  FML_TRACE_EVENT0("flutter", "DartSnapshot::IsolateSnapshotFromSettings");
   auto snapshot =
       fml::MakeRefCounted<DartSnapshot>(ResolveIsolateData(settings),         //
                                         ResolveIsolateInstructions(settings)  //

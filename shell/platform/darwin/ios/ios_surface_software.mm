@@ -53,7 +53,7 @@ std::unique_ptr<Surface> IOSSurfaceSoftware::CreateGPUSurface() {
 }
 
 sk_sp<SkSurface> IOSSurfaceSoftware::AcquireBackingStore(const SkISize& size) {
-  TRACE_EVENT0("flutter", "IOSSurfaceSoftware::AcquireBackingStore");
+  FML_TRACE_EVENT0("flutter", "IOSSurfaceSoftware::AcquireBackingStore");
   if (!IsValid()) {
     return nullptr;
   }
@@ -71,7 +71,7 @@ sk_sp<SkSurface> IOSSurfaceSoftware::AcquireBackingStore(const SkISize& size) {
 }
 
 bool IOSSurfaceSoftware::PresentBackingStore(sk_sp<SkSurface> backing_store) {
-  TRACE_EVENT0("flutter", "IOSSurfaceSoftware::PresentBackingStore");
+  FML_TRACE_EVENT0("flutter", "IOSSurfaceSoftware::PresentBackingStore");
   if (!IsValid() || backing_store == nullptr) {
     return false;
   }

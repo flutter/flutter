@@ -72,7 +72,7 @@ void Rasterizer::DrawLastLayerTree() {
 }
 
 void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
-  TRACE_EVENT0("flutter", "GPURasterizer::Draw");
+  FML_TRACE_EVENT0("flutter", "GPURasterizer::Draw");
 
   Pipeline<flutter::LayerTree>::Consumer consumer =
       std::bind(&Rasterizer::DoDraw, this, std::placeholders::_1);
@@ -96,7 +96,7 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
 
 sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
                                               SkISize picture_size) {
-  TRACE_EVENT0("flutter", __FUNCTION__);
+  FML_TRACE_EVENT0("flutter", __FUNCTION__);
 
   sk_sp<SkSurface> surface;
   SkImageInfo image_info = SkImageInfo::MakeN32Premul(
@@ -128,7 +128,7 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
 
   sk_sp<SkImage> device_snapshot;
   {
-    TRACE_EVENT0("flutter", "MakeDeviceSnpashot");
+    FML_TRACE_EVENT0("flutter", "MakeDeviceSnpashot");
     device_snapshot = surface->makeImageSnapshot();
   }
 
@@ -137,7 +137,7 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
   }
 
   {
-    TRACE_EVENT0("flutter", "DeviceHostTransfer");
+    FML_TRACE_EVENT0("flutter", "DeviceHostTransfer");
     if (auto raster_image = device_snapshot->makeRasterImage()) {
       return raster_image;
     }

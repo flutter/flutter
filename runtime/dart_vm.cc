@@ -259,7 +259,7 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
       vm_data_(vm_data),
       isolate_name_server_(std::move(isolate_name_server)),
       service_protocol_(std::make_shared<ServiceProtocol>()) {
-  TRACE_EVENT0("flutter", "DartVMInitializer");
+  FML_TRACE_EVENT0("flutter", "DartVMInitializer");
 
   gVMLaunchCount++;
 
@@ -271,7 +271,7 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
                  << (IsRunningPrecompiledCode() ? "AOT" : "Interpreter");
 
   {
-    TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
+    FML_TRACE_EVENT0("flutter", "dart::bin::BootstrapDartIo");
     dart::bin::BootstrapDartIo();
 
     if (!settings_.temp_directory_path.empty()) {
@@ -342,6 +342,9 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   }
 
   if (settings_.trace_systrace) {
+#if defined(OS_FUCHSIA)
+    PushBackAll(&args, kDartFuchsiaTraceArgs, fml::size(kDartFuchsiaTraceArgs));
+#endif  // OS_FUCHSIA
     PushBackAll(&args, kDartSystraceTraceBufferArgs,
                 fml::size(kDartSystraceTraceBufferArgs));
     PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));
@@ -350,11 +353,6 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   if (settings_.trace_startup) {
     PushBackAll(&args, kDartTraceStartupArgs, fml::size(kDartTraceStartupArgs));
   }
-
-#if defined(OS_FUCHSIA)
-  PushBackAll(&args, kDartFuchsiaTraceArgs, fml::size(kDartFuchsiaTraceArgs));
-  PushBackAll(&args, kDartTraceStreamsArgs, fml::size(kDartTraceStreamsArgs));
-#endif
 
   for (size_t i = 0; i < settings_.dart_flags.size(); i++)
     args.push_back(settings_.dart_flags[i].c_str());
@@ -368,7 +366,7 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
   DartUI::InitForGlobal();
 
   {
-    TRACE_EVENT0("flutter", "Dart_Initialize");
+    FML_TRACE_EVENT0("flutter", "Dart_Initialize");
     Dart_InitializeParams params = {};
     params.version = DART_INITIALIZE_PARAMS_CURRENT_VERSION;
     params.vm_snapshot_data = vm_data_->GetVMSnapshot().GetDataMapping();

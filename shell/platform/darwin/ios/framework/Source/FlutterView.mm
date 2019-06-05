@@ -120,7 +120,7 @@ id<FlutterViewEngineDelegate> _delegate;
 }
 
 - (void)drawLayer:(CALayer*)layer inContext:(CGContextRef)context {
-  TRACE_EVENT0("flutter", "SnapshotFlutterView");
+  FML_TRACE_EVENT0("flutter", "SnapshotFlutterView");
 
   if (layer != self.layer || context == nullptr) {
     return;

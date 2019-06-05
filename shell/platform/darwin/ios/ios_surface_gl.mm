@@ -70,7 +70,7 @@ bool IOSSurfaceGL::GLContextClearCurrent() {
 }
 
 bool IOSSurfaceGL::GLContextPresent() {
-  TRACE_EVENT0("flutter", "IOSSurfaceGL::GLContextPresent");
+  FML_TRACE_EVENT0("flutter", "IOSSurfaceGL::GLContextPresent");
   return IsValid() && render_target_->PresentRenderBuffer();
 }
 

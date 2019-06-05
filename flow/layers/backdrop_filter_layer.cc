@@ -11,7 +11,7 @@ BackdropFilterLayer::BackdropFilterLayer() = default;
 BackdropFilterLayer::~BackdropFilterLayer() = default;
 
 void BackdropFilterLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
+  FML_TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
   FML_DCHECK(needs_painting());
 
   Layer::AutoSaveLayer save = Layer::AutoSaveLayer::Create(
