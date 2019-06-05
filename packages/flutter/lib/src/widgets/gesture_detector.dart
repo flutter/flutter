@@ -1023,7 +1023,7 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 /// gestures from the semantics server (e.g. an accessibility tool) based on the
 /// recognizers.
 ///
-/// Each method of [GestureSemanticsMapping] corresponds to a kind of semantics
+/// Each method of [GestureSemanticsMapping] is responsible for a kind of semantics
 /// gesture, and can return either a callback or null. If it returns a callback,
 /// the semantics information will be added to the semantics tree, and the
 /// callback will be called during the gesture.
@@ -1068,20 +1068,19 @@ abstract class GestureSemanticsMapping {
   }
 }
 
-/// The default mapping used by [RawGestureDetector]. It calls the following
-/// callbacks on each kind of semantic gesture if they exist:
+/// The default mapping used by [RawGestureDetector]. Its behavior is as follows:
 ///
-///  * On a semantic tap, it looks for [TapGestureRecognizer] and calls its
+///  * On a semantic tap, it looks for [TapGestureRecognizer] and calls
 ///    `onTapDown`, `onTapUp`, and `onTap`.
 ///  * On a semantic long press, it looks for [LongPressGestureRecognizer] and
-///    calls its `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
+///    calls `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
 ///    `onLongPressUp`.
 ///  * On a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
-///    and calls its `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-///    for [PanGestureRecognizer] and calls the same methods again.
+///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
+///    for [PanGestureRecognizer] and calls the same methods.
 ///  * On a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
-///    and calls its `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-///    for [PanGestureRecognizer] and calls the same methods again.
+///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
+///    for [PanGestureRecognizer] and calls the same methods.
 class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
   /// Create a [DefaultGestureSemanticsMapping].
   const DefaultGestureSemanticsMapping();
