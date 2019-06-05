@@ -5,6 +5,9 @@
 import 'dart:async';
 
 import '../android/apk.dart';
+import '../base/terminal.dart';
+import '../build_info.dart';
+import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
 import 'build.dart';
@@ -46,10 +49,26 @@ class BuildApkCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final BuildInfo buildInfo = getBuildInfo();
+
+    if (buildInfo.isRelease && buildInfo.targetPlatforms.length > 1) {
+      final String targetPlatforms = buildInfo.targetPlatforms
+          .map(getNameForTargetPlatform)
+          .join(', ');
+
+      printStatus('The APK will support the following platforms: '
+                  '$targetPlatforms.', emphasis: true, color: TerminalColor.green);
+      printStatus('If you are deploying the app to the Play Store, '
+                  'it\'s recommended to use app bundles to reduce the APK size.', emphasis: true);
+      printStatus('To generate an app bundle, run:', emphasis: true);
+      printStatus('flutter build appbundle '
+                  '--target-platform ${targetPlatforms.replaceAll(' ', '')}', emphasis: true, indent: 4);
+      printStatus('To learn more visit: https://developer.android.com/guide/app-bundle', emphasis: true);
+    }
     await buildApk(
       project: FlutterProject.current(),
       target: targetFile,
-      buildInfo: getBuildInfo(),
+      buildInfo: buildInfo,
     );
     return null;
   }
