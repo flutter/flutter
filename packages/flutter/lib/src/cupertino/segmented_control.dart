@@ -13,7 +13,7 @@ import 'theme.dart';
 
 // Minimum padding from horizontal edges of segmented control to edges of
 // encompassing widget.
-const EdgeInsets _kHorizontalItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
+const EdgeInsetsGeometry _kHorizontalItemPadding = EdgeInsets.symmetric(horizontal: 16.0);
 
 // Minimum height of the segmented control.
 const double _kMinSegmentedControlHeight = 28.0;
@@ -180,10 +180,10 @@ class CupertinoSegmentedControl<T> extends StatefulWidget {
   /// Defaults to the selectedColor at 20% opacity if null.
   final Color pressedColor;
 
-  /// The [children], if any, are placed inside this padding.
+  /// The CupertinoSegmentedControl will be placed inside this padding
   ///
   /// Defaults to EdgeInsets.symmetric(horizontal: 16.0)
-  final EdgeInsets padding;
+  final EdgeInsetsGeometry padding;
 
   @override
   _SegmentedControlState<T> createState() => _SegmentedControlState<T>();
@@ -413,7 +413,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
     );
 
     return Padding(
-      padding: widget.padding ?? _kHorizontalItemPadding.resolve(Directionality.of(context)),
+      padding: widget.padding ?? _kHorizontalItemPadding,
       child: UnconstrainedBox(
         constrainedAxis: Axis.horizontal,
         child: box,

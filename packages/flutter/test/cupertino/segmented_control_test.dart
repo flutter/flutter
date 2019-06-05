@@ -119,54 +119,91 @@ void main() {
     }
   });
 
-  testWidgets('Default padding is set', (WidgetTester tester) async {
+  testWidgets('Padding works', (WidgetTester tester) async {
+    const Key key = Key('Container');
+
     final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    children[0] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 1'),
+    ) ;
+    children[1] = const SizedBox(
+      height: double.infinity,
+      child: Text('Child 2'),
+    ) ;
+
+    Future<void> verifyPadding({ EdgeInsets padding }) async {
+      final EdgeInsets effectivePadding = padding ?? const EdgeInsets.symmetric(horizontal: 16);
+      final Rect segmentedControlRect = tester.getRect(find.byKey(key));
+      expect(
+          tester.getTopLeft(find.byWidget(children[0])),
+          segmentedControlRect.topLeft.translate(
+            effectivePadding.topLeft.dx,
+            effectivePadding.topLeft.dy,
+          )
+      );
+      expect(
+        tester.getBottomLeft(find.byWidget(children[0])),
+        segmentedControlRect.bottomLeft.translate(
+          effectivePadding.bottomLeft.dx,
+          effectivePadding.bottomLeft.dy,
+        ),
+      );
+
+      expect(
+        tester.getTopRight(find.byWidget(children[1])),
+        segmentedControlRect.topRight.translate(
+          effectivePadding.topRight.dx,
+          effectivePadding.topRight.dy,
+        ),
+      );
+      expect(
+        tester.getBottomRight(find.byWidget(children[1])),
+        segmentedControlRect.bottomRight.translate(
+          effectivePadding.bottomRight.dx,
+          effectivePadding.bottomRight.dy,
+        ),
+      );
+    }
 
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSegmentedControl<int>(
-              key: const ValueKey<String>('Segmented Control'),
-              children: children,
-              onValueChanged: (int newValue) {},
-              groupValue: 1,
-            ),
-          );
-        },
-      ),
+        boilerplate(
+          child: CupertinoSegmentedControl<int>(
+            key: key,
+            children: children,
+            onValueChanged: (int newValue) { },
+          ),
+        )
     );
 
-    expect(find.byType(Padding), findsOneWidget);
-    final Padding paddingWidget = find.byType(Padding).evaluate().single.widget;
-    expect(paddingWidget.padding, const EdgeInsets.symmetric(horizontal: 16.0));
-  });
+    // Default padding works.
+    await verifyPadding();
 
-  testWidgets('Custom padding is set', (WidgetTester tester) async {
-    final Map<int, Widget> children = <int, Widget>{};
-    children[0] = const Text('Child 1');
-    children[1] = const Text('Child 2');
+    // Switch to Child 2 padding should remain the same.
+    await tester.tap(find.text('Child 2'));
+    await tester.pumpAndSettle();
+
+    await verifyPadding();
 
     await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setState) {
-          return boilerplate(
-            child: CupertinoSegmentedControl<int>(
-              padding: const EdgeInsets.all(4.0),
-              children: children,
-              onValueChanged: (int newValue) {},
-              groupValue: 1,
-            ),
-          );
-        },
-      ),
+        boilerplate(
+          child: CupertinoSegmentedControl<int>(
+            key: key,
+            padding: const EdgeInsets.fromLTRB(1, 3, 5, 7),
+            children: children,
+            onValueChanged: (int newValue) { },
+          ),
+        )
     );
 
-    expect(find.byType(Padding), findsOneWidget);
-    final Padding paddingWidget = find.byType(Padding).evaluate().single.widget;
-    expect(paddingWidget.padding, const EdgeInsets.all(4.0));
+    // Custom padding works.
+    await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
+
+    // Switch back to Child 1 padding should remain the same.
+    await tester.tap(find.text('Child 1'));
+    await tester.pumpAndSettle();
+
+    await verifyPadding(padding: const EdgeInsets.fromLTRB(1, 3, 5, 7));
   });
 
   testWidgets('Value attribute must be the key of one of the children widgets', (WidgetTester tester) async {
