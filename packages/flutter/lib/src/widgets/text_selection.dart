@@ -114,6 +114,7 @@ abstract class TextSelectionControls {
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
+    double textLineHeight,
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
@@ -509,17 +510,27 @@ class TextSelectionOverlay {
       return Container();
 
     // Find the horizontal midpoint, just above the selected text.
-    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-    final Offset midpoint = Offset(
-      (endpoints.length == 1) ?
-        endpoints[0].point.dx :
-        (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
-      endpoints[0].point.dy - renderObject.preferredLineHeight,
-    );
+    final List<TextSelectionPoint> endpoints =
+        renderObject.getEndpointsForSelection(_selection);
 
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
+    );
+
+    final bool isMultiline =
+      endpoints.last.point.dy - endpoints.first.point.dy >
+          renderObject.preferredLineHeight / 2;
+
+    // If the selected text spans more than 1 line, vertically center the toolbar.
+    final double midX = isMultiline
+      ? editingRegion.center.dx
+      : (endpoints.first.point.dx + endpoints.last.point.dx) / 2;
+
+    final Offset midpoint = Offset(
+      midX,
+      // The Y calculation is a bit random ... we don't need it anyway.
+      endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
     return FadeTransition(

@@ -11,28 +11,36 @@ import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
 
+
+const Color _kHandlesColor = Color(0xFF136FE0);
+const double _kSelectionHandleOverlap = 1.5;
+// Read off from the output on iOS 12. This color does not vary with the
+// application's theme color.
+const double _kSelectionHandleRadius = 5.5;
+
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
-const double _kToolbarHeight = 36.0;
 
-const Color _kToolbarBackgroundColor = Color(0xFF2E2E2E);
-const Color _kToolbarDividerColor = Color(0xFFB9B9B9);
-// Read off from the output on iOS 12. This color does not vary with the
-// application's theme color.
-const Color _kHandlesColor = Color(0xFF136FE0);
+// Vertical distance between the tip of the arrow and the line the arrow is pointing
+// to. The value used here is eyeballed.
+const double _kToolbarContentDistance = 8.0;
+// Values derived from https://developer.apple.com/design/resources/.
+// 92% Opacity ~= 0xEB
 
-const double _kSelectionHandleOverlap = 1.5;
-const double _kSelectionHandleRadius = 5.5;
-const Size _kToolbarArrowSize = Size(18.0, 9.0);
+// The height of the toolbar, including the arrow.
+const double _kToolbarHeight = 43.0;
+const Color _kToolbarBackgroundColor = Color(0xEB202020);
+const Color _kToolbarDividerColor = Color(0xFF808080);
+const Size _kToolbarArrowSize = Size(14.0, 7.0);
 const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, horizontal: 18.0);
-const Radius _kToolbarBorderRadius = Radius.circular(7.5);
+const Radius _kToolbarBorderRadius = Radius.circular(8);
 
 const TextStyle _kToolbarButtonFontStyle = TextStyle(
   inherit: false,
   fontSize: 14.0,
-  letterSpacing: -0.11,
-  fontWeight: FontWeight.w300,
+  letterSpacing: -0.15,
+  fontWeight: FontWeight.w400,
   color: CupertinoColors.white,
 );
 
@@ -75,43 +83,10 @@ class _ToolbarClipper extends CustomClipper<Path> {
 
     return Path.combine(PathOperation.union, rrect, arrow);
   }
+
   @override
   bool shouldReclip(_ToolbarClipper oldClipper) => false;
 }
-
-class _Toolbar extends SingleChildRenderObjectWidget {
-  const _Toolbar(
-    Key key,
-    Widget child,
-  ) : super(key: key, child: child);
-
-  @override
-  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox();
-
-  @override
-  SingleChildRenderObjectElement createElement() => SingleChildRenderObjectElement(this);
-
-  @override
-  void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
-
-  }
-}
-
-class _ToolbarRenderBox extends RenderShiftedBox {
-  _ToolbarRenderBox({
-    RenderBox child
-  }) : super(child);
-
-  @override
-  void performLayout() {
-
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-  }
-}
-
 
 /// Manages a copy/paste text selection toolbar.
 class _TextSelectionToolbar extends StatelessWidget {
@@ -283,6 +258,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
+    double textLineHeight,
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
@@ -291,21 +267,20 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     // The toolbar should appear below the TextField
     // when there is not enough space above the TextField to show it.
-    final double availableHeight
-        = globalEditableRegion.top - MediaQuery.of(context).padding.top - _kToolbarScreenPadding;
-    final bool isArrowPointingDown = availableHeight > _kToolbarHeight;
+    final bool isArrowPointingDown =
+      MediaQuery.of(context).padding.top
+      + _kToolbarScreenPadding
+      + _kToolbarHeight
+      + _kToolbarContentDistance <= globalEditableRegion.top;
 
-    final TextSelectionPoint startTextSelectionPoint = endpoints[0];
-    final TextSelectionPoint endTextSelectionPoint = (endpoints.length > 1)
-      ? endpoints[1]
-      : null;
-    final double x = (endTextSelectionPoint == null)
-      ? startTextSelectionPoint.point.dx
-      : (startTextSelectionPoint.point.dx + endTextSelectionPoint.point.dx) / 2.0;
-    final double y = isArrowPointingDown
-      ? startTextSelectionPoint.point.dy - globalEditableRegion.height
-      : startTextSelectionPoint.point.dy + globalEditableRegion.height + _kToolbarHeight;
-    final Offset preciseMidpoint = Offset(x, y);
+    // We cannot trust postion.dy.
+    final double midX = position.dx;
+
+    final double midY = isArrowPointingDown
+      ? endpoints.first.point.dy - textLineHeight
+      : endpoints.last.point.dy;
+
+    final Offset preciseMidpoint = Offset(midX, midY);
 
     return ConstrainedBox(
       constraints: BoxConstraints.tight(globalEditableRegion.size),
