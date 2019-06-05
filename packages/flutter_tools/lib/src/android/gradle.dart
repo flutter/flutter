@@ -431,11 +431,10 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   if (buildInfo.fileSystemScheme != null)
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  if (buildInfo.buildSharedLibrary) {
-    command.add('-Pbuild-shared-library=true');
+  if (buildInfo.targetPlatforms != null) {
+    final String targetPlatforms = buildInfo.targetPlatforms.map(getNameForTargetPlatform).join(',');
+    command.add('-Ptarget-platform=$targetPlatforms');
   }
-  if (buildInfo.targetPlatform != null)
-    command.add('-Ptarget-platform=${getNameForTargetPlatform(buildInfo.targetPlatform)}');
 
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;

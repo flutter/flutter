@@ -17,8 +17,7 @@ class BuildInfo {
     this.compilationTraceFilePath,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
-    this.buildSharedLibrary,
-    this.targetPlatform,
+    this.targetPlatforms,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.buildNumber,
@@ -50,11 +49,8 @@ class BuildInfo {
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
 
-  /// Whether to prefer AOT compiling to a *so file.
-  final bool buildSharedLibrary;
-
-  /// Target platform for the build (e.g. android_arm versus android_arm64).
-  final TargetPlatform targetPlatform;
+  /// The target platforms for the build (e.g. android_arm or android_arm64).
+  final Iterable<TargetPlatform> targetPlatforms;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.
@@ -105,8 +101,7 @@ class BuildInfo {
           compilationTraceFilePath: compilationTraceFilePath,
           extraFrontEndOptions: extraFrontEndOptions,
           extraGenSnapshotOptions: extraGenSnapshotOptions,
-          buildSharedLibrary: buildSharedLibrary,
-          targetPlatform: targetPlatform);
+          targetPlatforms: <TargetPlatform>[targetPlatform]);
 }
 
 /// The type of build.

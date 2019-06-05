@@ -21,12 +21,9 @@ class BuildApkCommand extends BuildSubCommand {
 
     argParser
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addFlag('build-shared-library',
-        negatable: false,
-        help: 'Whether to prefer compiling to a *.so file (android only).',
-      )
-      ..addOption('target-platform',
-        defaultsTo: 'android-arm',
+      ..addMultiOption('target-platform',
+        splitCommas: true,
+        defaultsTo: <String>['android-arm', 'android-arm64'],
         allowed: <String>['android-arm', 'android-arm64', 'android-x86', 'android-x64'],
         help: 'The target platform for which the app is compiled.',
       );
