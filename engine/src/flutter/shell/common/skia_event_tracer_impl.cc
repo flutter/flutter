@@ -4,7 +4,7 @@
 
 #include "flutter/shell/common/skia_event_tracer_impl.h"
 
-#define TRACE_EVENT_HIDE_MACROS
+#define FML_TRACE_EVENT_HIDE_MACROS
 #include <vector>
 
 #include "flutter/fml/logging.h"

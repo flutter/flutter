@@ -52,7 +52,7 @@ void ClipRRectLayer::UpdateScene(SceneUpdateContext& context) {
 #endif  // defined(OS_FUCHSIA)
 
 void ClipRRectLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "ClipRRectLayer::Paint");
+  FML_TRACE_EVENT0("flutter", "ClipRRectLayer::Paint");
   FML_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);

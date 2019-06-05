@@ -47,7 +47,7 @@ static void InvokeCodecCallback(fml::RefPtr<Codec> codec,
                                 size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
-    TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
+    FML_TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
     return;
   }
   tonic::DartState::Scope scope(dart_state);
@@ -56,14 +56,14 @@ static void InvokeCodecCallback(fml::RefPtr<Codec> codec,
   } else {
     DartInvoke(callback->value(), {ToDart(codec)});
   }
-  TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
+  FML_TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
 }
 
 static sk_sp<SkImage> DecodeImage(fml::WeakPtr<GrContext> context,
                                   sk_sp<SkData> buffer,
                                   size_t trace_id) {
-  TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
-  TRACE_EVENT0("flutter", "DecodeImage");
+  FML_TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
+  FML_TRACE_EVENT0("flutter", "DecodeImage");
 
   if (buffer == nullptr || buffer->isEmpty()) {
     return nullptr;
@@ -159,8 +159,8 @@ static sk_sp<SkImage> DecodeAndResizeImageToExactSize(
     SkImageInfo scaledImageInfo,
     sk_sp<SkData> buffer,
     size_t trace_id) {
-  TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
-  TRACE_EVENT0("flutter", "DecodeAndResizeImageToExactSize");
+  FML_TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
+  FML_TRACE_EVENT0("flutter", "DecodeAndResizeImageToExactSize");
 
   // Do not create a cross context image here, since it can not be resized.
   sk_sp<SkImage> image = SkImage::MakeFromEncoded(std::move(buffer));
@@ -194,8 +194,8 @@ fml::RefPtr<Codec> InitCodec(fml::WeakPtr<GrContext> context,
                              const int targetWidth,
                              const int targetHeight,
                              size_t trace_id) {
-  TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
-  TRACE_EVENT0("blink", "InitCodec");
+  FML_TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
+  FML_TRACE_EVENT0("blink", "InitCodec");
 
   if (buffer == nullptr || buffer->isEmpty()) {
     FML_LOG(ERROR) << "InitCodec failed - buffer was empty ";
@@ -233,8 +233,8 @@ fml::RefPtr<Codec> InitCodecUncompressed(
     int targetWidth,
     int targetHeight,
     size_t trace_id) {
-  TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
-  TRACE_EVENT0("blink", "InitCodecUncompressed");
+  FML_TRACE_FLOW_STEP("flutter", kInitCodecTraceTag, trace_id);
+  FML_TRACE_EVENT0("blink", "InitCodecUncompressed");
 
   if (buffer == nullptr || buffer->isEmpty()) {
     FML_LOG(ERROR) << "InitCodecUncompressed failed - buffer was empty";
@@ -360,11 +360,11 @@ bool ConvertImageInfo(Dart_Handle image_info_handle,
 void InstantiateImageCodec(Dart_NativeArguments args) {
   static size_t trace_counter = 1;
   const size_t trace_id = trace_counter++;
-  TRACE_FLOW_BEGIN("flutter", kInitCodecTraceTag, trace_id);
+  FML_TRACE_FLOW_BEGIN("flutter", kInitCodecTraceTag, trace_id);
 
   Dart_Handle callback_handle = Dart_GetNativeArgument(args, 1);
   if (!Dart_IsClosure(callback_handle)) {
-    TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
+    FML_TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
     Dart_SetReturnValue(args, ToDart("Callback must be a function"));
     return;
   }
@@ -374,7 +374,7 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
   if (!Dart_IsNull(image_info_handle)) {
     image_info = std::make_unique<ImageInfo>();
     if (!ConvertImageInfo(image_info_handle, args, image_info.get())) {
-      TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
+      FML_TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
       return;
     }
   }
@@ -383,7 +383,7 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
   tonic::Uint8List list =
       tonic::DartConverter<tonic::Uint8List>::FromArguments(args, 0, exception);
   if (exception) {
-    TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
+    FML_TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
     Dart_SetReturnValue(args, exception);
     return;
   }
@@ -391,7 +391,7 @@ void InstantiateImageCodec(Dart_NativeArguments args) {
   if (image_info) {
     int expected_size = image_info->row_bytes * image_info->sk_info.height();
     if (list.num_elements() < expected_size) {
-      TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
+      FML_TRACE_FLOW_END("flutter", kInitCodecTraceTag, trace_id);
       list.Release();
       Dart_SetReturnValue(
           args, ToDart("Pixel buffer size does not match image size"));
@@ -458,7 +458,7 @@ void InvokeNextFrameCallback(fml::RefPtr<FrameInfo> frameInfo,
                              size_t trace_id) {
   std::shared_ptr<tonic::DartState> dart_state = callback->dart_state().lock();
   if (!dart_state) {
-    TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
+    FML_TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
     return;
   }
   tonic::DartState::Scope scope(dart_state);
@@ -467,7 +467,7 @@ void InvokeNextFrameCallback(fml::RefPtr<FrameInfo> frameInfo,
   } else {
     DartInvoke(callback->value(), {ToDart(frameInfo)});
   }
-  TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
+  FML_TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
 }
 
 }  // namespace
@@ -585,16 +585,16 @@ void MultiFrameCodec::GetNextFrameAndInvokeCallback(
         InvokeNextFrameCallback(frameInfo, std::move(callback), trace_id);
       }));
 
-  TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
+  FML_TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
 }
 
 Dart_Handle MultiFrameCodec::getNextFrame(Dart_Handle callback_handle) {
   static size_t trace_counter = 1;
   const size_t trace_id = trace_counter++;
-  TRACE_FLOW_BEGIN("flutter", kCodecNextFrameTraceTag, trace_id);
+  FML_TRACE_FLOW_BEGIN("flutter", kCodecNextFrameTraceTag, trace_id);
 
   if (!Dart_IsClosure(callback_handle)) {
-    TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
+    FML_TRACE_FLOW_END("flutter", kCodecNextFrameTraceTag, trace_id);
     return ToDart("Callback must be a function");
   }
 

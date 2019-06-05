@@ -98,7 +98,7 @@ bool IOSGLRenderTarget::UpdateStorageSizeIfNecessary() {
     // Nothing to since the stoage size is already consistent with the layer.
     return true;
   }
-  TRACE_EVENT_INSTANT0("flutter", "IOSGLRenderTarget::UpdateStorageSizeIfNecessary");
+  FML_TRACE_EVENT_INSTANT0("flutter", "IOSGLRenderTarget::UpdateStorageSizeIfNecessary");
   FML_DLOG(INFO) << "Updating render buffer storage size.";
 
   FML_DCHECK(glGetError() == GL_NO_ERROR);

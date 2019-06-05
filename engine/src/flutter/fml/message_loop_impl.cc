@@ -137,7 +137,7 @@ void MessageLoopImpl::RegisterTask(fml::closure task,
 }
 
 void MessageLoopImpl::FlushTasks(FlushType type) {
-  TRACE_EVENT0("fml", "MessageLoop::FlushTasks");
+  FML_TRACE_EVENT0("fml", "MessageLoop::FlushTasks");
   std::vector<fml::closure> invocations;
 
   // We are grabbing this lock here as a proxy to indicate

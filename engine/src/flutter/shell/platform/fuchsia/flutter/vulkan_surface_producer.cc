@@ -129,11 +129,11 @@ void VulkanSurfaceProducer::OnSurfacesPresented(
     std::vector<
         std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>>
         surfaces) {
-  TRACE_EVENT0("flutter", "VulkanSurfaceProducer::OnSurfacesPresented");
+  FML_TRACE_EVENT0("flutter", "VulkanSurfaceProducer::OnSurfacesPresented");
 
   // Do a single flush for all canvases derived from the context.
   {
-    TRACE_EVENT0("flutter", "GrContext::flushAndSignalSemaphores");
+    FML_TRACE_EVENT0("flutter", "GrContext::flushAndSignalSemaphores");
     context_->flush();
   }
 

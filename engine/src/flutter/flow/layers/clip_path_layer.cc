@@ -54,7 +54,7 @@ void ClipPathLayer::UpdateScene(SceneUpdateContext& context) {
 #endif  // defined(OS_FUCHSIA)
 
 void ClipPathLayer::Paint(PaintContext& context) const {
-  TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
+  FML_TRACE_EVENT0("flutter", "ClipPathLayer::Paint");
   FML_DCHECK(needs_painting());
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);

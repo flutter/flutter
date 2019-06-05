@@ -148,7 +148,7 @@ Engine::Engine(Delegate& delegate,
   // rasterizer.
   std::unique_ptr<flutter::CompositorContext> compositor_context;
   {
-    TRACE_EVENT0("flutter", "CreateCompositorContext");
+    FML_TRACE_EVENT0("flutter", "CreateCompositorContext");
     compositor_context = std::make_unique<flutter_runner::CompositorContext>(
         thread_label_,          // debug label
         std::move(view_token),  // scenic view we attach our tree to
@@ -210,7 +210,7 @@ Engine::Engine(Delegate& delegate,
   }
 
   {
-    TRACE_EVENT0("flutter", "CreateShell");
+    FML_TRACE_EVENT0("flutter", "CreateShell");
     shell_ = flutter::Shell::Create(
         task_runners,                 // host task runners
         settings_,                    // shell launch settings

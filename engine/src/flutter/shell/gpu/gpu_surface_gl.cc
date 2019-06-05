@@ -176,7 +176,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
   }
 
   // We need to do some updates.
-  TRACE_EVENT0("flutter", "UpdateSurfacesSize");
+  FML_TRACE_EVENT0("flutter", "UpdateSurfacesSize");
 
   // Either way, we need to get rid of previous surface.
   onscreen_surface_ = nullptr;
@@ -259,7 +259,7 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
   }
 
   if (offscreen_surface_ != nullptr) {
-    TRACE_EVENT0("flutter", "CopyTextureOnscreen");
+    FML_TRACE_EVENT0("flutter", "CopyTextureOnscreen");
     SkPaint paint;
     SkCanvas* onscreen_canvas = onscreen_surface_->getCanvas();
     onscreen_canvas->clear(SK_ColorTRANSPARENT);
@@ -268,7 +268,7 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
   }
 
   {
-    TRACE_EVENT0("flutter", "SkCanvas::Flush");
+    FML_TRACE_EVENT0("flutter", "SkCanvas::Flush");
     onscreen_surface_->getCanvas()->flush();
   }
 

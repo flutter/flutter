@@ -34,21 +34,21 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
     {
       // Preroll the Flutter layer tree. This allows Flutter to perform
       // pre-paint optimizations.
-      TRACE_EVENT0("flutter", "Preroll");
+      FML_TRACE_EVENT0("flutter", "Preroll");
       layer_tree.Preroll(*this, true /* ignore raster cache */);
     }
 
     {
       // Traverse the Flutter layer tree so that the necessary session ops to
       // represent the frame are enqueued in the underlying session.
-      TRACE_EVENT0("flutter", "UpdateScene");
+      FML_TRACE_EVENT0("flutter", "UpdateScene");
       layer_tree.UpdateScene(session_connection_.scene_update_context(),
                              session_connection_.root_node());
     }
 
     {
       // Flush all pending session ops.
-      TRACE_EVENT0("flutter", "SessionPresent");
+      FML_TRACE_EVENT0("flutter", "SessionPresent");
       session_connection_.Present(*this);
     }
 
