@@ -1,4 +1,4 @@
-Signature: f0735ccfd6671abb07c2e5bbaa1cc880
+Signature: 606d9d49a229455f32f9309cd2b43aec
 
 UNUSED LICENSES:
 
@@ -5500,6 +5500,8 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrColorMatrixFragmentProcessor.f
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrColorMatrixFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadList.h
+FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadUtils.cpp
+FILE: ../../../third_party/skia/src/gpu/geometry/GrQuadUtils.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLESInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleGLInterfaceAutogen.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLAssembleHelpers.cpp
