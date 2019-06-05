@@ -437,8 +437,6 @@ class FlutterDriverExtension {
     @required DiagnosticsNode node,
     @required int subtreeDepth,
   }) {
-    print('$node -- $subtreeDepth');
-
     List<Map<String, Object>> nodesToJson({
       @required Iterable<DiagnosticsNode> nodes,
       @required int subtreeDepth,
@@ -446,16 +444,33 @@ class FlutterDriverExtension {
       return nodes.map<Map<String, Object>>((DiagnosticsNode node) {
         return _diagnosticsNodeToJson(
           node: node,
-          subtreeDepth: math.max(0, subtreeDepth - 1),
+          subtreeDepth: subtreeDepth == null ? null : math.max(0, subtreeDepth - 1),
         );
       }).toList();
     }
 
     final Map<String, Object> json = node.toJsonMap();
-
     final Object value = node.value;
 
-    if (subtreeDepth > 0) {
+    if (value is Element) {
+      if (value is StatefulElement) {
+        json['stateful'] = true;
+      }
+      json['widgetRuntimeType'] = value.widget?.runtimeType.toString();
+    } else if (value is RenderObject) {
+      json['renderObjectRuntimeType'] = value.runtimeType.toString();
+    }
+
+    List<DiagnosticsNode> properties = node.getProperties();
+    if (properties.isEmpty && node is DiagnosticsProperty && value is Diagnosticable) {
+      properties = value.toDiagnosticsNode().getProperties();
+    }
+    json['properties'] = nodesToJson(
+      nodes: properties.where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info)),
+      subtreeDepth: 0,
+    );
+
+    if (subtreeDepth == null || subtreeDepth > 0) {
       List<DiagnosticsNode> rawChildren = node.getChildren();
       if (rawChildren.isEmpty && node is DiagnosticsProperty && value is Diagnosticable) {
         rawChildren = value.toDiagnosticsNode().getChildren();
@@ -465,15 +480,6 @@ class FlutterDriverExtension {
         subtreeDepth: subtreeDepth,
       );
     }
-
-//    List<DiagnosticsNode> properties = node.getProperties();
-//    if (properties.isEmpty && node is DiagnosticsProperty && value is Diagnosticable) {
-//      properties = value.toDiagnosticsNode().getProperties();
-//    }
-//    json['properties'] = nodesToJson(
-//      nodes: properties,
-//      subtreeDepth: 0,
-//    );
 
     return json;
   }

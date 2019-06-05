@@ -523,10 +523,26 @@ class FlutterDriver {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
   }
 
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [RenderObject] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [RenderObject] identified by `finder` will be part of the result.
+  /// Setting `subtreeDepth` to null will return the entire subtree with the
+  /// [RenderObject] identified by `finder` as the root.
   Future<Map<String, Object>> getRenderObjectDiagnostics(SerializableFinder finder, { int subtreeDepth = 0, Duration timeout }) async {
     return _sendCommand(GetDiagnosticsTree(finder, DiagnosticsType.renderObject, subtreeDepth: subtreeDepth));
   }
 
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [Widget] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [Widget] identified by `finder` will be part of the result.
+  /// Setting `subtreeDepth` to null will return the entire subtree with the
+  /// [Widget] identified by `finder` as the root.
   Future<Map<String, Object>> getWidgetDiagnostics(SerializableFinder finder, { int subtreeDepth = 0, Duration timeout }) async {
     return _sendCommand(GetDiagnosticsTree(finder, DiagnosticsType.widget, subtreeDepth: subtreeDepth));
   }
