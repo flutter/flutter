@@ -5,6 +5,7 @@
 #include "flutter/flow/flow_test_utils.h"
 #include "flutter/flow/layers/performance_overlay_layer.h"
 #include "flutter/flow/raster_cache.h"
+#include "flutter/fml/build_config.h"
 
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/utils/SkBase64.h"
@@ -73,6 +74,9 @@ TEST(PerformanceOverlayLayer, Gold) {
       << "Please either set --golden-dir, or make sure that the unit test is "
       << "run from the right directory (e.g., flutter/engine/src).";
 
+#if !OS_LINUX
+  GTEST_SKIP() << "Skipping golden tests on non-Linux OSes";
+#endif  // OS_LINUX
   const bool golden_data_matches = golden_data->equals(snapshot_data.get());
   if (!golden_data_matches) {
     SkFILEWStream wstream(new_golden_file_path.c_str());
