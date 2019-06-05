@@ -36,10 +36,11 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
     super.dispose();
   }
 
-  void _handleKeyEvent(RawKeyEvent event) {
+  bool _handleKeyEvent(FocusNode node, RawKeyEvent event) {
     setState(() {
       _event = event;
     });
+    return false;
   }
 
   String _asHex(int value) => value != null ? '0x${value.toRadixString(16)}' : 'null';
@@ -53,9 +54,10 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    return RawKeyboardListener(
+    return Focus(
       focusNode: _focusNode,
       onKey: _handleKeyEvent,
+      autofocus: true,
       child: AnimatedBuilder(
         animation: _focusNode,
         builder: (BuildContext context, Widget child) {

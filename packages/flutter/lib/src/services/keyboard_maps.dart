@@ -719,10 +719,6 @@ const Map<int, LogicalKeyboardKey> kFuchsiaToLogicalKey = <int, LogicalKeyboardK
   0x10005371d: LogicalKeyboardKey.gameButtonX,
   0x10005371e: LogicalKeyboardKey.gameButtonY,
   0x10005371f: LogicalKeyboardKey.gameButtonZ,
-  0x100010090: LogicalKeyboardKey.dpadUp,
-  0x100010091: LogicalKeyboardKey.dpadDown,
-  0x100010092: LogicalKeyboardKey.dpadRight,
-  0x100010093: LogicalKeyboardKey.dpadLeft,
 };
 
 /// Maps Fuchsia-specific USB HID Usage IDs to the matching
@@ -993,10 +989,6 @@ const Map<int, PhysicalKeyboardKey> kFuchsiaToPhysicalKey = <int, PhysicalKeyboa
   0x0005371d: PhysicalKeyboardKey.gameButtonX,
   0x0005371e: PhysicalKeyboardKey.gameButtonY,
   0x0005371f: PhysicalKeyboardKey.gameButtonZ,
-  0x00010090: PhysicalKeyboardKey.dpadUp,
-  0x00010091: PhysicalKeyboardKey.dpadDown,
-  0x00010092: PhysicalKeyboardKey.dpadRight,
-  0x00010093: PhysicalKeyboardKey.dpadLeft,
 };
 
 /// Maps macOS-specific key code values representing [PhysicalKeyboardKey].

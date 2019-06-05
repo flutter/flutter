@@ -148,16 +148,16 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     if (eventSource & _sourceJoystick == _sourceJoystick) {
       final LogicalKeyboardKey foundKey = kAndroidToLogicalKey[keyCode];
       if (foundKey == LogicalKeyboardKey.arrowUp) {
-        return PhysicalKeyboardKey.dpadUp;
+        return PhysicalKeyboardKey.arrowUp;
       }
       if (foundKey == LogicalKeyboardKey.arrowDown) {
-        return PhysicalKeyboardKey.dpadDown;
+        return PhysicalKeyboardKey.arrowDown;
       }
       if (foundKey == LogicalKeyboardKey.arrowLeft) {
-        return PhysicalKeyboardKey.dpadLeft;
+        return PhysicalKeyboardKey.arrowLeft;
       }
       if (foundKey == LogicalKeyboardKey.arrowRight) {
-        return PhysicalKeyboardKey.dpadRight;
+        return PhysicalKeyboardKey.arrowRight;
       }
     }
     return PhysicalKeyboardKey.none;

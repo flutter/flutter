@@ -1610,26 +1610,6 @@ class LogicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.logicalKey] for more information.
   static const LogicalKeyboardKey gameButtonZ = LogicalKeyboardKey(0x0010005371f, debugName: kReleaseMode ? null : 'Game Button Z');
 
-  /// Represents the logical "Dpad Up" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey dpadUp = LogicalKeyboardKey(0x00100010090, debugName: kReleaseMode ? null : 'Dpad Up');
-
-  /// Represents the logical "Dpad Down" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey dpadDown = LogicalKeyboardKey(0x00100010091, debugName: kReleaseMode ? null : 'Dpad Down');
-
-  /// Represents the logical "Dpad Right" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey dpadRight = LogicalKeyboardKey(0x00100010092, debugName: kReleaseMode ? null : 'Dpad Right');
-
-  /// Represents the logical "Dpad Left" key on the keyboard.
-  ///
-  /// See the function [RawKeyEvent.logicalKey] for more information.
-  static const LogicalKeyboardKey dpadLeft = LogicalKeyboardKey(0x00100010093, debugName: kReleaseMode ? null : 'Dpad Left');
-
   /// Represents the logical "Shift" key on the keyboard.
   ///
   /// This key represents the union of the keys {shiftLeft, shiftRight} when
@@ -1926,10 +1906,6 @@ class LogicalKeyboardKey extends KeyboardKey {
     0x010005371d: gameButtonX,
     0x010005371e: gameButtonY,
     0x010005371f: gameButtonZ,
-    0x0100010090: dpadUp,
-    0x0100010091: dpadDown,
-    0x0100010092: dpadRight,
-    0x0100010093: dpadLeft,
     0x201000700e1: shift,
     0x201000700e3: meta,
     0x201000700e2: alt,
@@ -3535,26 +3511,6 @@ class PhysicalKeyboardKey extends KeyboardKey {
   /// See the function [RawKeyEvent.physicalKey] for more information.
   static const PhysicalKeyboardKey gameButtonZ = PhysicalKeyboardKey(0x0005371f, debugName: kReleaseMode ? null : 'Game Button Z');
 
-  /// Represents the location of the "Dpad Up" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey dpadUp = PhysicalKeyboardKey(0x00010090, debugName: kReleaseMode ? null : 'Dpad Up');
-
-  /// Represents the location of the "Dpad Down" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey dpadDown = PhysicalKeyboardKey(0x00010091, debugName: kReleaseMode ? null : 'Dpad Down');
-
-  /// Represents the location of the "Dpad Right" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey dpadRight = PhysicalKeyboardKey(0x00010092, debugName: kReleaseMode ? null : 'Dpad Right');
-
-  /// Represents the location of the "Dpad Left" key on a generalized keyboard.
-  ///
-  /// See the function [RawKeyEvent.physicalKey] for more information.
-  static const PhysicalKeyboardKey dpadLeft = PhysicalKeyboardKey(0x00010093, debugName: kReleaseMode ? null : 'Dpad Left');
-
   // A list of all the predefined constant PhysicalKeyboardKeys so that they
   // can be searched.
   static const Map<int, PhysicalKeyboardKey> _knownPhysicalKeys = <int, PhysicalKeyboardKey>{
@@ -3823,9 +3779,5 @@ class PhysicalKeyboardKey extends KeyboardKey {
     0x0005371d: gameButtonX,
     0x0005371e: gameButtonY,
     0x0005371f: gameButtonZ,
-    0x00010090: dpadUp,
-    0x00010091: dpadDown,
-    0x00010092: dpadRight,
-    0x00010093: dpadLeft,
   };
 }

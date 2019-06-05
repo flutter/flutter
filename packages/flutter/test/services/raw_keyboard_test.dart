@@ -164,7 +164,7 @@ void main() {
         'source': 0x1000010, // Joystick source.
       });
       final RawKeyEventDataAndroid data = joystickDpadDown.data;
-      expect(data.physicalKey, equals(PhysicalKeyboardKey.dpadDown));
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isNull);
     });
