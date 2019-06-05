@@ -73,7 +73,10 @@ class ChromeLauncher {
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
   /// Launch the chrome browser to a particular `host` page.
-  Future<Chrome> launch(String url) async {
+  ///
+  /// `headless` defaults to false, and controls whether we open a headless or
+  /// a `headfull` browser.
+  Future<Chrome> launch(String url, { bool headless = false }) async {
     final String chromeExecutable = findChromeExecutable();
     final Directory dataDir = fs.systemTempDirectory.createTempSync();
     final int port = await os.findFreePort();
@@ -94,6 +97,8 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      if (headless)
+        ...<String>['--headless', '--disable-gpu'],
       url,
     ];
     final Process process = await processManager.start(args);
@@ -107,12 +112,14 @@ class ChromeLauncher {
           throwToolExit('Unable to connect to Chrome DevTools.');
           return null;
         });
+    final Uri remoteDebuggerUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
 
     return _connect(Chrome._(
       port,
       ChromeConnection('localhost', port),
       process: process,
       dataDir: dataDir,
+      remoteDebuggerUri: remoteDebuggerUri,
     ));
   }
 
@@ -138,15 +145,36 @@ class ChromeLauncher {
       _connect(Chrome._(port, ChromeConnection('localhost', port)));
 
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
+
+  /// Returns the full URL of the Chrome remote debugger for the main page.
+///
+/// This takes the [base] remote debugger URL (which points to a browser-wide
+/// page) and uses its JSON API to find the resolved URL for debugging the host
+/// page.
+Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
+  try {
+    final HttpClient client = HttpClient();
+    final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
+    final HttpClientResponse response = await request.close();
+    final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single;
+    return base.resolve(jsonObject.first['devtoolsFrontendUrl']);
+  } catch (_) {
+    // If we fail to talk to the remote debugger protocol, give up and return
+    // the raw URL rather than crashing.
+    return base;
+  }
+}
+
 }
 
 /// A class for managing an instance of Chrome.
 class Chrome {
-  const Chrome._(
+  Chrome._(
     this.debugPort,
     this.chromeConnection, {
     Process process,
     Directory dataDir,
+    this.remoteDebuggerUri,
   })  : _process = process,
         _dataDir = dataDir;
 
@@ -154,15 +182,18 @@ class Chrome {
   final Process _process;
   final Directory _dataDir;
   final ChromeConnection chromeConnection;
+  final Uri remoteDebuggerUri;
 
   static Completer<Chrome> _currentCompleter = Completer<Chrome>();
+
+  Future<void> get onExit => _currentCompleter.future;
 
   Future<void> close() async {
     if (_currentCompleter.isCompleted) {
       _currentCompleter = Completer<Chrome>();
     }
     chromeConnection.close();
-    _process?.kill(ProcessSignal.SIGKILL);
+    _process?.kill();
     await _process?.exitCode;
     try {
       // Chrome starts another process as soon as it dies that modifies the
