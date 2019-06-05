@@ -170,6 +170,230 @@ void main() {
 
     semantics.dispose();
   });
+
+  group('DefaultGestureSemanticsMapping', () {
+    group('getTapHandler', () {
+      test('should return null when there is no TapGR', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureTapCallback callback = mapping.getTapHandler((Type type) {
+          return null;
+        });
+        expect(callback, isNull);
+      });
+
+      test('should return non-null when there is TapGR with no callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureTapCallback callback = mapping.getTapHandler((Type type) {
+          switch(type) {
+            case TapGestureRecognizer :
+              return TapGestureRecognizer();
+            default:
+              return null;
+          }
+        });
+        expect(callback, isNotNull);
+      });
+
+      test('should return a callback that correctly calls callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final List<String> logs = <String>[];
+        final GestureTapCallback callback = mapping.getTapHandler((Type type) {
+          switch(type) {
+            case TapGestureRecognizer :
+              return TapGestureRecognizer()
+                ..onTap = () {logs.add('tap');}
+                ..onTapUp = (_) {logs.add('tapUp');}
+                ..onTapDown = (_) {logs.add('tapDown');}
+                ..onTapCancel = () {logs.add('WRONG');}
+                ..onSecondaryTapDown = (_) {logs.add('WRONG');};
+            default:
+              return null;
+          }
+        });
+        expect(callback, isNotNull);
+        callback();
+        expect(logs, <String>['tapDown', 'tapUp', 'tap']);
+      });
+    });
+
+    group('getLongPressHandler', () {
+      test('should return null when there is no LongPressGR', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureLongPressCallback callback = mapping.getLongPressHandler((Type type) {
+          return null;
+        });
+        expect(callback, isNull);
+      });
+
+      test('should return non-null when there is LongPressGR with no callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureLongPressCallback callback = mapping.getLongPressHandler((Type type) {
+          switch(type) {
+            case LongPressGestureRecognizer:
+              return LongPressGestureRecognizer();
+            default:
+              return null;
+          }
+        });
+        expect(callback, isNotNull);
+      });
+
+      test('should return a callback that correctly calls callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final List<String> logs = <String>[];
+        final GestureLongPressCallback callback = mapping.getLongPressHandler((Type type) {
+          switch(type) {
+            case LongPressGestureRecognizer:
+              return LongPressGestureRecognizer()
+                ..onLongPress = () {logs.add('LP');}
+                ..onLongPressStart = (_) {logs.add('LPStart');}
+                ..onLongPressUp = () {logs.add('LPUp');}
+                ..onLongPressEnd = (_) {logs.add('LPEnd');}
+                ..onLongPressMoveUpdate = (_) {logs.add('WRONG');};
+            default:
+              return null;
+          }
+        });
+        expect(callback, isNotNull);
+        callback();
+        expect(logs, <String>['LPStart', 'LP', 'LPEnd', 'LPUp']);
+      });
+    });
+
+    group('getHorizontalDragUpdateHandler', () {
+      test('should return null when there is no matching recognizers', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureDragUpdateCallback callback = mapping.getHorizontalDragUpdateHandler(
+          (Type type) { return null; }
+        );
+        expect(callback, isNull);
+      });
+
+      test('should return non-null when there is either matching recognizer with no callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureDragUpdateCallback callback1 = mapping.getHorizontalDragUpdateHandler((Type type) {
+          switch(type) {
+            case HorizontalDragGestureRecognizer:
+              return HorizontalDragGestureRecognizer();
+            default:
+              return null;
+          }
+        });
+        expect(callback1, isNotNull);
+
+        final GestureDragUpdateCallback callback2 = mapping.getHorizontalDragUpdateHandler(
+          (Type type) {
+            switch(type) {
+              case PanGestureRecognizer:
+                return PanGestureRecognizer();
+              default:
+                return null;
+            }
+          }
+        );
+        expect(callback2, isNotNull);
+      });
+
+      test('should return a callback that correctly calls callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final List<String> logs = <String>[];
+        final GestureDragUpdateCallback callback = mapping.getHorizontalDragUpdateHandler((Type type) {
+          switch(type) {
+            case PanGestureRecognizer:
+              return PanGestureRecognizer()
+                ..onStart = (_) {logs.add('PStart');}
+                ..onDown = (_) {logs.add('PDown');}
+                ..onEnd = (_) {logs.add('PEnd');}
+                ..onUpdate = (_) {logs.add('PUpdate');}
+                ..onCancel = () {logs.add('WRONG');};
+            case HorizontalDragGestureRecognizer:
+              return HorizontalDragGestureRecognizer()
+                ..onStart = (_) {logs.add('HStart');}
+                ..onDown = (_) {logs.add('HDown');}
+                ..onEnd = (_) {logs.add('HEnd');}
+                ..onUpdate = (_) {logs.add('HUpdate');}
+                ..onCancel = () {logs.add('WRONG');};
+            default:
+              return null;
+          }
+        });
+        expect(callback, isNotNull);
+        callback(DragUpdateDetails(
+          delta: const Offset(0, 0),
+          globalPosition: const Offset(0, 0),
+        ));
+        expect(logs, <String>['HDown', 'HStart', 'HUpdate', 'HEnd',
+          'PDown', 'PStart', 'PUpdate', 'PEnd',]);
+      });
+    });
+
+    group('getVerticalDragUpdateHandler', () {
+      test('should return null when there is no matching recognizers', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureDragUpdateCallback callback = mapping.getVerticalDragUpdateHandler(
+          (Type type) { return null; }
+        );
+        expect(callback, isNull);
+      });
+
+      test('should return non-null when there is either matching recognizer with no callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final GestureDragUpdateCallback callback1 = mapping.getVerticalDragUpdateHandler((Type type) {
+          switch(type) {
+            case VerticalDragGestureRecognizer:
+              return VerticalDragGestureRecognizer();
+            default:
+              return null;
+          }
+        });
+        expect(callback1, isNotNull);
+
+        final GestureDragUpdateCallback callback2 = mapping.getVerticalDragUpdateHandler(
+          (Type type) {
+            switch(type) {
+              case PanGestureRecognizer:
+                return PanGestureRecognizer();
+              default:
+                return null;
+            }
+          }
+        );
+        expect(callback2, isNotNull);
+      });
+
+      test('should return a callback that correctly calls callbacks', () {
+        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
+        final List<String> logs = <String>[];
+        final GestureDragUpdateCallback callback = mapping.getVerticalDragUpdateHandler((Type type) {
+          switch(type) {
+            case PanGestureRecognizer:
+              return PanGestureRecognizer()
+                ..onStart = (_) {logs.add('PStart');}
+                ..onDown = (_) {logs.add('PDown');}
+                ..onEnd = (_) {logs.add('PEnd');}
+                ..onUpdate = (_) {logs.add('PUpdate');}
+                ..onCancel = () {logs.add('WRONG');};
+            case VerticalDragGestureRecognizer:
+              return VerticalDragGestureRecognizer()
+                ..onStart = (_) {logs.add('VStart');}
+                ..onDown = (_) {logs.add('VDown');}
+                ..onEnd = (_) {logs.add('VEnd');}
+                ..onUpdate = (_) {logs.add('VUpdate');}
+                ..onCancel = () {logs.add('WRONG');};
+            default:
+              return null;
+          }
+        });
+        expect(callback, isNotNull);
+        callback(DragUpdateDetails(
+          delta: const Offset(0, 0),
+          globalPosition: const Offset(0, 0),
+        ));
+        expect(logs, <String>['VDown', 'VStart', 'VUpdate', 'VEnd',
+          'PDown', 'PStart', 'PUpdate', 'PEnd',]);
+      });
+    });
+  });
 }
 
 class TestLayoutPerformer extends SingleChildRenderObjectWidget {

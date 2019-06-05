@@ -1032,6 +1032,12 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 /// of the given type that is owned by the detector, or null if not found. The
 /// callback can depend on the state of recognizers, but it must not modify them.
 ///
+/// The callbacks are collected by [RawGestureDetector] during initialization,
+/// then updated when the underlying render object is updated, and during
+/// [RawGestureDetector.replaceGestureRecognizers]. Therefore, the methods
+/// should probably not decide whether to return null based on mutable
+/// properties, such as recognizers' handlers.
+///
 /// See also:
 ///
 ///  * [DefaultGestureSemanticsMapping], the default mapping used by
