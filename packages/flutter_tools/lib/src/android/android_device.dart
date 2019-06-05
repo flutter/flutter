@@ -14,6 +14,7 @@ import '../base/common.dart' show throwToolExit;
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
@@ -41,6 +42,35 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
   'samsungexynos8895': _HardwareType.physical,
   'samsungexynos9810': _HardwareType.physical,
 };
+
+bool allowHeapCorruptionOnWindows(int exitCode) {
+  // In platform tools 29.0.0 adb.exe seems to be ending with this heap
+  // corruption error code onseemingly successful termination.
+  // So we ignore this error on Windows.
+  return exitCode == -1073740940 && platform.isWindows;
+}
+
+String runMostlyCheckedSync(
+    List<String> cmd, {
+      String workingDirectory,
+      bool allowReentrantFlutter = false,
+      Map<String, String> environment}) {
+  return runCheckedSync(cmd, workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      environment: environment,
+      whiteListFailures: allowHeapCorruptionOnWindows
+  );
+}
+
+Future<RunResult> runMostlyCheckedAsync(
+    List<String> cmd, {
+      String workingDirectory,
+      bool allowReentrantFlutter = false,
+    }) async {
+  return runCheckedAsync(cmd, workingDirectory: workingDirectory,
+      allowReentrantFlutter: allowReentrantFlutter,
+      whiteListFailures: allowHeapCorruptionOnWindows);
+}
 
 class AndroidDevices extends PollingDeviceDiscovery {
   AndroidDevices() : super('Android devices');
@@ -89,10 +119,10 @@ class AndroidDevice extends Device {
           stdoutEncoding: latin1,
           stderrEncoding: latin1,
         );
-        if (result.exitCode == 0) {
+        if (result.exitCode == 0 || allowHeapCorruptionOnWindows(result.exitCode)) {
           _properties = parseAdbDeviceProperties(result.stdout);
         } else {
-          printError('Error retrieving device properties for $name:');
+          printError('Error ${result.exitCode} retrieving device properties for $name:');
           printError(result.stderr);
         }
       } on ProcessException catch (error) {
@@ -252,7 +282,7 @@ class AndroidDevice extends Device {
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     // This call takes 400ms - 600ms.
     try {
-      final RunResult listOut = await runCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
+      final RunResult listOut = await runMostlyCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } catch (error) {
       printTrace('$error');
@@ -294,7 +324,7 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    await runCheckedAsync(adbCommandForDevice(<String>[
+    await runMostlyCheckedAsync(adbCommandForDevice(<String>[
       'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
     ]));
     return true;
@@ -514,7 +544,7 @@ class AndroidDevice extends Device {
   /// Return the most recent timestamp in the Android log or null if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
-    final String output = runCheckedSync(adbCommandForDevice(<String>[
+    final String output = runMostlyCheckedSync(adbCommandForDevice(<String>[
       'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
     ]));
 
@@ -531,9 +561,9 @@ class AndroidDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     const String remotePath = '/data/local/tmp/flutter_screenshot.png';
-    await runCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
+    await runMostlyCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
-    await runCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
+    await runMostlyCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
   }
 
   @override
