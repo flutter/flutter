@@ -361,7 +361,7 @@ class TextPainter {
   /// placeholders will be ignored in the text layout and no valid
   /// [inlinePlaceholderBoxes] will be returned.
   void setPlaceholderDimensions(List<PlaceholderDimensions> value) {
-    if (value == null || value.length == 0 || listEquals(value, _placeholderDimensions)) {
+    if (value == null || value.isEmpty || listEquals(value, _placeholderDimensions)) {
       return;
     }
     assert(() {
