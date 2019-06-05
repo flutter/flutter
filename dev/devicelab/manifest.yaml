@@ -255,6 +255,7 @@ tasks:
       Measures the size of a dart2js bundle.
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
+    flaky: true
 
   hello_world__memory:
     description: >
