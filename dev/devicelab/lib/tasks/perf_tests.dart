@@ -217,10 +217,8 @@ class WebCompileTest {
         '--release',
         '--no-pub',
       ]);
-      final ProcessResult result = await Process.run('du',
-        <String>['-k', '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js'],
-      );
-      metrics['hello_world_dart2js_size'] = int.parse(result.stdout.split(RegExp(r'\s+')).first.trim());
+      final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
+      await _measureSize('hello_world', output, metrics);
       return null;
     });
     await inDirectory<TaskResult>('${flutterDirectory.path}/examples/flutter_gallery', () async {
@@ -231,10 +229,8 @@ class WebCompileTest {
         '--release',
         '--no-pub',
       ]);
-      final ProcessResult result = await Process.run('du',
-        <String>['-k', '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js']);
-      print(result.stdout);
-      metrics['flutter_gallery_dart2js_size'] = int.parse(result.stdout.split(RegExp(r'\s+')).first.trim());
+      final String output = '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js';
+      await _measureSize('flutter_gallery', output, metrics);
       return null;
     });
     const String sampleAppName = 'sample_flutter_app';
@@ -252,12 +248,22 @@ class WebCompileTest {
           '--release',
           '--no-pub',
         ]);
-        final ProcessResult result = await Process.run('du',
-          <String>['-k', path.join(sampleDir.path, 'build/web/main.dart.js')]);
-        metrics['basic_material_app_dart2js_size'] = int.parse(result.stdout.split(RegExp(r'\s+')).first.trim());
+        await _measureSize('basic_material_app', path.join(sampleDir.path, 'build/web/main.dart.js'), metrics);
       });
     });
     return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+  }
+
+  static Future<void> _measureSize(String metric, String output, Map<String, Object> metrics) async {
+    final ProcessResult result = await Process.run('du', <String>['-k', output]);
+    await Process.run('gzip',<String>['-k', '9', output]);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', output + '.gz']);
+    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout);
+    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout);
+  }
+
+  static int _parseDu(String source) {
+    return int.parse(source.split(RegExp(r'\s+')).first.trim());
   }
 }
 
