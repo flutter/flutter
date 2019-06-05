@@ -61,7 +61,14 @@ String hex(List<int> bytes) {
 }
 
 String calculateSha(File file) {
-  return hex(sha1.convert(file.readAsBytesSync()).bytes);
+  final Stopwatch stopwatch = Stopwatch()..start();
+  final List<int> bytes = file.readAsBytesSync();
+  printTrace('calculateSha: reading file took ${stopwatch.elapsedMicroseconds}us');
+  stopwatch.reset();
+  final String sha = hex(sha1.convert(bytes).bytes);
+  stopwatch.stop();
+  printTrace('calculateSha: computing sha took ${stopwatch.elapsedMicroseconds}us');
+  return sha;
 }
 
 /// Convert `foo_bar` to `fooBar`.
