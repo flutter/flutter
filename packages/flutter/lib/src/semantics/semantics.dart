@@ -2501,7 +2501,7 @@ class SemanticsOwner extends ChangeNotifier {
             !node.parent.isPartOfNodeMerging || node.isMergedIntoParent,
             '$node cannot be merged because an ancestor SemanticsNode needs '
             'to merge its descendants\' semantic information, but $node is '
-            'set to be explicit. See [SemanticsConfiguration.explicitChildNodes] '
+            'set to be explicit. See SemanticsConfiguration.explicitChildNodes '
             'for more information.'
           );
         }
