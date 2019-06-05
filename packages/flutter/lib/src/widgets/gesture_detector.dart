@@ -764,9 +764,10 @@ class GestureDetector extends StatelessWidget {
 class RawGestureDetector extends StatefulWidget {
   /// Creates a widget that detects gestures.
   ///
-  /// By default, gesture detectors contribute semantic information to the tree
-  /// that is used by assistive technology. This can be controlled using
-  /// [excludeFromSemantics].
+  /// Gesture detectors can contribute semantic information to the tree that is
+  /// used by assistive technology. The behavior can be configured by
+  /// `semanticsMapping`, which defaults to [DefaultGestureSemanticsMapping].
+  /// It can also be disabled with [excludeFromSemantics].
   const RawGestureDetector({
     Key key,
     this.child,
@@ -1022,18 +1023,19 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 /// gestures from the semantics server (e.g. an accessibility tool) based on the
 /// recognizers.
 ///
-/// Each method of [GestureSemanticsMapping] can return a callback that will be
-/// called when the corresponding kind of gesture is reported by the semantic
-/// sever. The callback can depend on the recognizers owned by the
-/// detector by using `getRecognizer`, but it must not modify the recognizers.
-/// Each can also return null if it's not interested.
+/// Each method of [GestureSemanticsMapping] corresponds to a kind of semantics
+/// gesture, and can return either a callback or null. If it returns a callback,
+/// the semantics information will be added to the semantics tree, and the
+/// callback will be called during the gesture. The callback can look for
+/// recognizers owned by the detector with `getRecognizer`, but it must not
+/// modify them.
 ///
 /// See also:
 ///
 ///  * [DefaultGestureSemanticsMapping], the default mapping used by
 ///    [RawGestureDetector].
-///  * [RenderSemanticsGestureHandler] defines the 4 kinds of semantic gestures
-///    used in this class.
+///  * [RenderSemanticsGestureHandler], which defines the kinds of semantics
+///    gestures.
 abstract class GestureSemanticsMapping {
   /// Create a mapping of gesture semantics.
   const GestureSemanticsMapping();
