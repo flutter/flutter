@@ -53,6 +53,12 @@ Future<void> main(List<String> rawArguments) async {
         'from the correct file in the Chromium repository.',
   );
   argParser.addOption(
+    'supplemental-hid-codes',
+    defaultsTo: path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'supplemental_hid_codes.inc'),
+    help: "The path to where the supplemental HID codes that don't appear in the "
+        'Chromium map should be read.',
+  );
+  argParser.addOption(
     'android-keycodes',
     defaultsTo: null,
     help: 'The path to where the Android keycodes header file should be read. '
@@ -139,6 +145,9 @@ Future<void> main(List<String> rawArguments) async {
     } else {
       hidCodes = File(parsedArguments['chromium-hid-codes']).readAsStringSync();
     }
+
+    final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes']).readAsStringSync();
+    hidCodes = '$hidCodes\n$supplementalHidCodes';
 
     String androidKeyCodes;
     if (parsedArguments['android-keycodes'] == null) {
