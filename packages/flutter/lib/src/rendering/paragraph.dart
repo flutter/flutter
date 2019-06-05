@@ -465,6 +465,9 @@ class RenderParagraph extends RenderBox
   // specified.
   void _layoutChildren(BoxConstraints constraints) {
     RenderBox child = firstChild;
+    if (childCount == 0) {
+      return;
+    }
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
