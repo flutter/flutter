@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 // ignore_for_file: implementation_imports
+import 'dart:async';
+
 import 'package:build/build.dart';
 import 'package:build_config/build_config.dart';
 import 'package:build_modules/build_modules.dart';
@@ -105,6 +107,20 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       isOptional: true,
       hideOutput: true,
       appliesBuilders: <String>['flutter_tools|ddc_modules']),
+  core.apply(
+    'flutter_tools|shell',
+    <BuilderFactory>[
+      (BuilderOptions options) => FlutterWebShellBuilder(),
+    ],
+    core.toRoot(),
+    hideOutput: true,
+    defaultGenerateFor: const InputSet(
+      include: <String>[
+        'lib/**',
+        'web/**',
+      ],
+    ),
+  ),
   core.apply(
     'flutter_tools|entrypoint',
     <BuilderFactory>[
@@ -211,7 +227,7 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
-        '.dart': <String>[
+        '_web_entrypoint.dart': <String>[
           ddcBootstrapExtension,
           jsEntrypointExtension,
           jsEntrypointSourceMapExtension,
@@ -228,4 +244,18 @@ class FlutterWebEntrypointBuilder implements Builder {
     log.info('building for target ${buildStep.inputId.path}');
     await bootstrapDdc(buildStep, platform: flutterWebPlatform);
   }
+}
+
+/// A builder which wraps the user provided main and initializes the web shell.
+class FlutterWebShellBuilder implements Builder {
+  @override
+  FutureOr<void> build(BuildStep buildStep) {
+    
+  }
+
+  @override
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+    '.dart': <String>['_web_entrypoint.dart'],
+  };
+
 }
