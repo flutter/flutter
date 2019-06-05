@@ -250,13 +250,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
-  web_size__compile_test:
-    description: >
-      Measures the size of a dart2js bundle.
-    stage: devicelab
-    required_agent_capabilities: ["mac/android"]
-    flaky: true
-
   hello_world__memory:
     description: >
       Measures starting memory usage of the simplest Flutter app.
@@ -344,6 +337,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true
+
+  web_size__compile_test:
+    description: >
+      Measures the size of a dart2js bundle.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
 
   # iOS on-device tests
 
