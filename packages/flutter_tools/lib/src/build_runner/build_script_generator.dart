@@ -138,11 +138,8 @@ class BuildScriptGenerator {
     if (definition.isOptional) {
       namedArgs['isOptional'] = literalTrue;
     }
-    if (definition.buildTo == BuildTo.cache) {
-      namedArgs['hideOutput'] = literalTrue;
-    } else {
-      namedArgs['hideOutput'] = literalFalse;
-    }
+    // We always build to source.
+    namedArgs['hideOutput'] = literalFalse;
     if (!identical(definition.defaults?.generateFor, InputSet.anything)) {
       final Map<String, Expression> inputSetArgs = <String, Expression>{};
       if (definition.defaults.generateFor.include != null) {

@@ -68,6 +68,10 @@ class FlutterDevice {
     if (flutterProject.hasBuilders) {
       generator = await CodeGeneratingResidentCompiler.create(
         flutterProject: flutterProject,
+        fileSystemRoots: fileSystemRoots,
+        fileSystemScheme: fileSystemScheme,
+        targetModel: targetModel,
+        packagesPath: PackageMap.globalPackagesPath,
       );
     } else {
       generator = ResidentCompiler(
