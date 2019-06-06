@@ -846,22 +846,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   }
   Duration _currentFrameTimeStamp;
 
-  /// The raw time stamp as provided by the engine to [Window.onBeginFrame]
-  /// for the frame currently being processed.
-  ///
-  /// Unlike [currentFrameTimeStamp], this time stamp is neither adjusted to
-  /// offset when the epoch started nor scaled to reflect the [timeDilation] in
-  /// the current epoch.
-  ///
-  /// On most platforms, this is a more or less arbitrary value, and should
-  /// generally be ignored. On Fuchsia, this corresponds to the system-provided
-  /// presentation time, and can be used to ensure that animations running in
-  /// different processes are synchronized.
-  Duration get currentSystemFrameTimeStamp {
-    assert(_lastRawTimeStamp != null);
-    return _lastRawTimeStamp;
-  }
-
   int _profileFrameNumber = 0;
   final Stopwatch _profileFrameStopwatch = Stopwatch();
   String _debugBanner;
