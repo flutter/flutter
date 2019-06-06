@@ -15,6 +15,9 @@ typedef VoidCallback = void Function();
 /// common time base.
 typedef FrameCallback = void Function(Duration duration);
 
+/// Signature for [Window.onReportTimings].
+typedef TimingsCallback = void Function(List<FrameTiming> timings);
+
 /// Signature for [Window.onPointerDataPacket].
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 
