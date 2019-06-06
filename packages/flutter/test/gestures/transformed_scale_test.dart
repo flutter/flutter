@@ -14,24 +14,24 @@ void main() {
 
     final Key redContainer = UniqueKey();
     await tester.pumpWidget(
-        Center(
-          child: GestureDetector(
-              onScaleStart: (ScaleStartDetails details) {
-                print(details);
-                startDetails.add(details);
-              },
-              onScaleUpdate: (ScaleUpdateDetails details) {
-                print(details);
-                updateDetails.add(details);
-              },
-              child: Container(
-                key: redContainer,
-                width: 100,
-                height: 100,
-                color: Colors.red,
-              )
+      Center(
+        child: GestureDetector(
+          onScaleStart: (ScaleStartDetails details) {
+            print(details);
+            startDetails.add(details);
+          },
+          onScaleUpdate: (ScaleUpdateDetails details) {
+            print(details);
+            updateDetails.add(details);
+          },
+          child: Container(
+            key: redContainer,
+            width: 100,
+            height: 100,
+            color: Colors.red,
           ),
-        )
+        ),
+      ),
     );
 
     await tester.startGesture(tester.getCenter(find.byKey(redContainer)) - const Offset(20, 20));
