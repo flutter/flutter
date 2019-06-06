@@ -542,6 +542,7 @@ class TextSelectionOverlay {
         child: selectionControls.buildToolbar(
           context,
           editingRegion,
+          renderObject.preferredLineHeight,
           midpoint,
           endpoints,
           selectionDelegate,

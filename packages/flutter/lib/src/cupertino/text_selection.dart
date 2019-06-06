@@ -21,6 +21,9 @@ const double _kSelectionHandleRadius = 5.5;
 // Minimal padding from all edges of the selection toolbar to all edges of the
 // viewport.
 const double _kToolbarScreenPadding = 8.0;
+// Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
+// viewport. Eyeballed value.
+const double _kArrowScreenPadding = 16.0;
 
 // Vertical distance between the tip of the arrow and the line the arrow is pointing
 // to. The value used here is eyeballed.
@@ -44,48 +47,134 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
-class _ToolbarClipper extends CustomClipper<Path> {
-  const _ToolbarClipper({
+class _Toolbar extends SingleChildRenderObjectWidget {
+  const _Toolbar({
+    Key key,
+    this.barTopY,
+    this.arrowTipX,
     this.isArrowPointingDown,
-    this.arrowXOffset,
-  });
+    Widget child,
+  }) : super(key: key, child: child);
 
+  final double barTopY;
+  final double arrowTipX;
   final bool isArrowPointingDown;
-  final double arrowXOffset;
 
   @override
-  Path getClip(Size size) {
-    final Path rrect = Path()
-    ..addRRect(
-      RRect.fromRectAndRadius(
-        Offset(
-          0,
-          isArrowPointingDown ? 0 : _kToolbarArrowSize.height,
-        )
-        & Size(size.width, size.height - _kToolbarArrowSize.height),
-        _kToolbarBorderRadius
-      )
-    );
+  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(barTopY, arrowTipX, isArrowPointingDown, null);
 
-    final double arrowBottomY = isArrowPointingDown
-      ? size.height - _kToolbarArrowSize.height
-      : _kToolbarArrowSize.height;
+  @override
+  void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
+    renderObject
+      ..barTopY = barTopY
+      ..arrowTipX = arrowTipX
+      ..isArrowPointingDown = isArrowPointingDown;
+  }
+}
 
-      final double arrowPointY = isArrowPointingDown
-      ? _kToolbarArrowSize.height
-      : 0;
+class _ToolbarParentData extends BoxParentData {
+  Path clipPath;
+  @override
+  String toString() => 'offset=$offset, clipPath=$clipPath';
+}
 
-    final Path arrow = Path()
-      ..moveTo(arrowXOffset, arrowPointY)
-      ..lineTo(arrowXOffset - _kToolbarArrowSize.width / 2, arrowBottomY)
-      ..lineTo(arrowXOffset + _kToolbarArrowSize.width / 2, arrowBottomY)
-      ..close();
+class _ToolbarRenderBox extends RenderShiftedBox {
+  _ToolbarRenderBox(
+      this._barTopY,
+      this._arrowTipX,
+      this._isArrowPointingDown,
+      RenderBox child,
+  ) : super(child);
 
-    return Path.combine(PathOperation.union, rrect, arrow);
+  double _barTopY;
+  set barTopY(double value) {
+    if (_barTopY == value) {
+      return;
+    }
+    _barTopY = value;
+    markNeedsLayout();
+  }
+
+  double _arrowTipX;
+  set arrowTipX(double value) {
+    if (_arrowTipX == value) {
+      return;
+    }
+    _arrowTipX = value;
+    markNeedsLayout();
+  }
+
+  bool _isArrowPointingDown;
+  set isArrowPointingDown(bool value) {
+    if (_isArrowPointingDown == value) {
+      return;
+    }
+    _isArrowPointingDown = value;
+    markNeedsLayout();
+  }
+
+  final BoxConstraints heightConstraint = const BoxConstraints.tightFor(height: _kToolbarHeight);
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! _ToolbarParentData) {
+      child.parentData = _ToolbarParentData();
+    }
   }
 
   @override
-  bool shouldReclip(_ToolbarClipper oldClipper) => false;
+  void performLayout() {
+    assert(child != null);
+    size = constraints.biggest;
+    child.layout(heightConstraint.enforce(constraints.loosen()), parentUsesSize: true);
+    final _ToolbarParentData childParentData = child.parentData;
+    final Offset localBarTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY), ancestor: parent);
+
+    final double adjustedCenterX = localBarTopCenter.dx
+      .clamp(
+        child.size.width/2 + _kArrowScreenPadding,
+        size.width - child.size.width/2 - _kArrowScreenPadding,
+      );
+
+    childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, localBarTopCenter.dy);
+
+    final Path rrect = Path()
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,) & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
+          _kToolbarBorderRadius,
+          )
+        );
+
+    final double arrowTipX = localBarTopCenter.dx - childParentData.offset.dx;
+
+    final double arrowBottomY = _isArrowPointingDown
+      ? child.size.height - _kToolbarArrowSize.height
+      : _kToolbarArrowSize.height;
+
+    final double arrowTipY = _isArrowPointingDown ? child.size.height : 0;
+
+    final Path arrow = Path()
+      ..moveTo(arrowTipX, arrowTipY)
+      ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBottomY)
+      ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBottomY)
+      ..close();
+
+    childParentData.clipPath = Path.combine(PathOperation.union, rrect, arrow);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final _ToolbarParentData childParentData = child.parentData;
+    final Offset totalOffset = offset + childParentData.offset;
+    context.pushClipPath(
+      needsCompositing,
+      totalOffset,
+      Offset.zero & child.size,
+      childParentData.clipPath,
+      (PaintingContext innerContext, Offset innerOffset) => context.paintChild(child, innerOffset),
+    );
+  }
 }
 
 /// Manages a copy/paste text selection toolbar.
@@ -133,21 +222,16 @@ class _TextSelectionToolbar extends StatelessWidget {
       items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
 
-    return Row(mainAxisSize: MainAxisSize.min, children: items);
-    /*
-    final Widget toolbar = ClipRRect(
-      borderRadius: _kToolbarBorderRadius,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: _kToolbarDividerColor,
-          borderRadius: _kToolbarBorderRadius,
-          // Add a hairline border with the button color to avoid
-          // antialiasing artifacts.
-          border: Border.all(color: _kToolbarBackgroundColor, width: 0),
-        ),
-        child:
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: _kToolbarDividerColor,
+        //borderRadius: _kToolbarBorderRadius,
+        // Add a hairline border with the button color to avoid
+        // antialiasing artifacts.
+        border: Border.all(color: _kToolbarBackgroundColor, width: 0),
       ),
-    );*/
+      child: Row(mainAxisSize: MainAxisSize.min, children: items),
+    );
   }
 
   /// Builds a themed [CupertinoButton] for the toolbar.
@@ -168,48 +252,6 @@ class _TextSelectionToolbar extends StatelessWidget {
   }
 }
 
-
-/// Centers the toolbar around the given position, ensuring that it remains on
-/// screen.
-class _TextSelectionToolbarLayout extends SingleChildLayoutDelegate {
-  _TextSelectionToolbarLayout(this.screenSize, this.globalEditableRegion, this.position);
-
-  /// The size of the screen at the time that the toolbar was last laid out.
-  final Size screenSize;
-
-  /// Size and position of the editing region at the time the toolbar was last
-  /// laid out, in global coordinates.
-  final Rect globalEditableRegion;
-
-  /// Anchor position of the toolbar, relative to the top left of the
-  /// [globalEditableRegion].
-  final Offset position;
-
-  @override
-  BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
-    return constraints.loosen();
-  }
-
-  @override
-  Offset getPositionForChild(Size size, Size childSize) {
-    final Offset globalPosition = globalEditableRegion.topLeft + position;
-
-    final double x = globalPosition.dx - childSize.width / 2.0;
-    final double y = globalPosition.dy - childSize.height;
-
-    return Offset(
-      x.clamp(_kToolbarScreenPadding, screenSize.width - childSize.width - _kToolbarScreenPadding),
-      y.clamp(_kToolbarScreenPadding, screenSize.height - childSize.height - _kToolbarScreenPadding),
-    );
-  }
-
-  @override
-  bool shouldRelayout(_TextSelectionToolbarLayout oldDelegate) {
-    return screenSize != oldDelegate.screenSize
-        || globalEditableRegion != oldDelegate.globalEditableRegion
-        || position != oldDelegate.position;
-  }
-}
 
 /// Draws a single text selection handle with a bar and a ball.
 class _TextSelectionHandlePainter extends CustomPainter {
@@ -264,39 +306,42 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     TextSelectionDelegate delegate,
   ) {
     assert(debugCheckHasMediaQuery(context));
+    final MediaQueryData mediaQuery = MediaQuery.of(context);
 
-    // The toolbar should appear below the TextField
-    // when there is not enough space above the TextField to show it.
+    // The toolbar should appear below the TextField when there is not enough
+    // space above the TextField to show it. Assuming there's always enough space
+    // at the bottom when this happens.
     final bool isArrowPointingDown =
-      MediaQuery.of(context).padding.top
+      mediaQuery.padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance <= globalEditableRegion.top;
 
-    // We cannot trust postion.dy.
-    final double midX = position.dx;
+    // We cannot trust postion.dy, since the caller (TextSelectionOverlay._buildToolbar)
+    // does not know whether the toolbar is going to be facing up or down.
+    final double localArrowTipX = position.dx.clamp(_kArrowScreenPadding, mediaQuery.size.width - _kArrowScreenPadding);
 
-    final double midY = isArrowPointingDown
-      ? endpoints.first.point.dy - textLineHeight
-      : endpoints.last.point.dy;
+    // The height of the toolbar is fixed hence we can decide its vertical
+    // position.
+    final double localBarTopY = isArrowPointingDown
+      ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight
+      : endpoints.last.point.dy + _kToolbarContentDistance;
 
-    final Offset preciseMidpoint = Offset(midX, midY);
+    final Widget toolbarContent = _TextSelectionToolbar(
+      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
+      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
+      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
+      isArrowPointingDown: isArrowPointingDown,
+    );
 
     return ConstrainedBox(
-      constraints: BoxConstraints.tight(globalEditableRegion.size),
-      child: CustomSingleChildLayout(
-        delegate: _TextSelectionToolbarLayout(
-          MediaQuery.of(context).size,
-          globalEditableRegion,
-          Offset(position.dx, position.dy + MediaQuery.of(context).padding.top),
-        ),
-        child: _TextSelectionToolbar(
-          handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-          handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-          handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-          handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-          isArrowPointingDown: isArrowPointingDown,
-        ),
+      constraints: BoxConstraints.tight(mediaQuery.size),
+      child: _Toolbar(
+        barTopY: localBarTopY + globalEditableRegion.top,
+        arrowTipX: localArrowTipX + globalEditableRegion.left,
+        isArrowPointingDown: isArrowPointingDown,
+        child: toolbarContent,
       ),
     );
   }
