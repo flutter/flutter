@@ -276,7 +276,7 @@ bool exitsHappy(List<String> cli) {
 Future<bool> exitsHappyAsync(List<String> cli) async {
   _traceCommand(cli);
   try {
-    return (await processManager.run(cli)).exitCode == 0;
+    return (await processManager.run(cli)).exitCode == 0; // TODO: we can pass an environment map here
   } catch (error) {
     printTrace('$cli failed with $error');
     return false;
