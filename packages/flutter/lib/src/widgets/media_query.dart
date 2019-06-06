@@ -378,8 +378,8 @@ class MediaQueryData {
       textScaleFactor: textScaleFactor,
       platformBrightness: platformBrightness,
       padding: padding,
-      viewPadding: viewInsets,
-      viewInsets: viewPadding.copyWith(
+      viewInsets: viewInsets,
+      viewPadding: viewPadding.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
         right: removeRight ? 0.0 : null,
