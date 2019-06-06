@@ -16,6 +16,7 @@ class VisualStudioValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType status = ValidationType.missing;
+    String versionInfo;
 
     if (visualStudio.isInstalled) {
       status = ValidationType.installed;
@@ -39,12 +40,12 @@ class VisualStudioValidator extends DoctorValidator {
             )
         ));
       }
+      versionInfo = '${visualStudio.displayName} ${visualStudio.displayVersion}';
     } else {
       status = ValidationType.missing;
       messages.add(ValidationMessage.error(userMessages.visualStudioMissing));
     }
 
-    return ValidationResult(status, messages,
-        statusInfo: '${visualStudio.displayName} ${visualStudio.displayVersion}');
+    return ValidationResult(status, messages, statusInfo: versionInfo);
   }
 }
