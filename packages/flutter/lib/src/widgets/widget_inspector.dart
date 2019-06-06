@@ -1449,13 +1449,6 @@ mixin WidgetInspectorService {
       json['valueId'] = toId(value, config.groupName);
     }
 
-    if (value  is Element) {
-      if (value is StatefulElement) {
-        json['stateful'] = true;
-      }
-      json['widgetRuntimeType'] = value.widget?.runtimeType.toString();
-    }
-
     if (config.summaryTree) {
       json['summaryTree'] = true;
     }

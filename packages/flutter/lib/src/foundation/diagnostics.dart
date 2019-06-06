@@ -2735,8 +2735,9 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 }
 
 /// [DiagnosticsNode] for an instance of [DiagnosticableTree].
-class _DiagnosticableTreeNode extends DiagnosticableNode<DiagnosticableTree> {
-  _DiagnosticableTreeNode({
+class DiagnosticableTreeNode extends DiagnosticableNode<DiagnosticableTree> {
+  /// Creates a [DiagnosticableTreeNode].
+  DiagnosticableTreeNode({
     String name,
     @required DiagnosticableTree value,
     @required DiagnosticsTreeStyle style,
@@ -3201,7 +3202,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return _DiagnosticableTreeNode(
+    return DiagnosticableTreeNode(
       name: name,
       value: this,
       style: style,
@@ -3268,7 +3269,7 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return _DiagnosticableTreeNode(
+    return DiagnosticableTreeNode(
       name: name,
       value: this,
       style: style,
