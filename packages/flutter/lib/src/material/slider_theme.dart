@@ -842,7 +842,7 @@ class SliderThemeData extends Diagnosticable {
 }
 
 /// {@template flutter.material.slider.shape.center}
-/// [center] is the offset of the center where this shape should be painted.
+/// [center] is the offset for where this shape's center should be painted.
 /// This offset is relative to the origin of the [context] canvas.
 /// {@endtemplate}
 ///
@@ -1575,7 +1575,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
   }
 }
 
-/// This is the default shape of a [Slider]'s track.
+/// The default shape of a [Slider]'s track.
 ///
 /// It paints a solid colored rectangle with rounded edges, vertically centered
 /// in the [parentBox]. The track rectangle extends to the bounds of the
@@ -1803,7 +1803,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
   }
 }
 
-/// This is the default shape of a [RangeSlider]'s track.
+/// The default shape of a [RangeSlider]'s track.
 ///
 /// It paints a solid colored rectangle with rounded edges, vertically centered
 /// in the [parentBox]. The track rectangle extends to the bounds of the
@@ -1941,10 +1941,10 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   }
 }
 
-/// This is the default shape of each [Slider] tick mark.
+/// The default shape of each [Slider] tick mark.
 ///
 /// Tick marks are only displayed if the slider is discrete, which can be done
-/// by setting the [Slider.divisions] as non-null.
+/// by setting the [Slider.divisions] to an integer value.
 ///
 /// It paints a solid circle, centered in the on the track.
 /// The color is determined by the [Slider]'s enabled state and track's active
@@ -2033,10 +2033,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   }
 }
 
-/// This is the default shape of each [RangeSlider] tick mark.
+/// The default shape of each [RangeSlider] tick mark.
 ///
 /// Tick marks are only displayed if the slider is discrete, which can be done
-/// by setting the [RangeSlider.divisions] as non-null.
+/// by setting the [RangeSlider.divisions] to an integer value.
 ///
 /// It paints a solid circle, centered on the track.
 /// The color is determined by the [Slider]'s enabled state and track's active
@@ -2182,7 +2182,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
   }
 }
 
-/// This is the default shape of a [Slider]'s thumb.
+/// The default shape of a [Slider]'s thumb.
 ///
 /// See also:
 ///
@@ -2210,8 +2210,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    assert(isEnabled != null);
-    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -2251,7 +2250,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
   }
 }
 
-/// This is the default shape of a [RangeSlider]'s thumbs.
+/// The default shape of a [RangeSlider]'s thumbs.
 ///
 /// See also:
 ///
@@ -2279,8 +2278,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    assert(isEnabled != null);
-    return Size.fromRadius(isEnabled ? enabledThumbRadius : _disabledThumbRadius);
+    return Size.fromRadius(isEnabled == true ? enabledThumbRadius : _disabledThumbRadius);
   }
 
   @override
@@ -2299,6 +2297,8 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     assert(center != null);
     assert(activationAnimation != null);
     assert(sliderTheme != null);
+    assert(sliderTheme.showValueIndicator != null);
+    assert(sliderTheme.overlappingShapeStrokeColor != null);
     assert(enableAnimation != null);
     final Canvas canvas = context.canvas;
     final Tween<double> radiusTween = Tween<double>(
@@ -2313,7 +2313,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
 
     // Add a stroke of 1dp around the circle if this thumb would overlap
     // the other thumb.
-    if (isOnTop) {
+    if (isOnTop == true) {
       bool showValueIndicator;
       switch (sliderTheme.showValueIndicator) {
         case ShowValueIndicator.onlyForDiscrete:
@@ -2354,7 +2354,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
   }
 }
 
-/// This is the default shape of a [Slider]'s thumb overlay.
+/// The default shape of a [Slider]'s thumb overlay.
 ///
 /// The shape of the overlay is a circle with the same center as the thumb, but
 /// with a larger radius. It animates to full size when the thumb is pressed,
@@ -2420,7 +2420,7 @@ class RoundSliderOverlayShape extends SliderComponentShape {
   }
 }
 
-/// This is the default shape of a [Slider]'s value indicator.
+/// The default shape of a [Slider]'s value indicator.
 ///
 /// See also:
 ///
@@ -2475,7 +2475,7 @@ class PaddleSliderValueIndicatorShape extends SliderComponentShape {
   }
 }
 
-/// This is the default shape of a [RangeSlider]'s value indicators.
+/// The default shape of a [RangeSlider]'s value indicators.
 ///
 /// See also:
 ///
