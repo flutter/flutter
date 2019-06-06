@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 import 'dart:ui' show Brightness;
 
@@ -32,28 +33,47 @@ enum Orientation {
 /// exception, unless the `nullOk` argument is set to true, in which case it
 /// returns null.
 ///
+/// ## Insets and Padding
+///
+/// //TODO(Piinks): Diagram & further elaboration below
+///
+/// This diagram illustrates how [padding] is derived from [viewPadding] and
+/// [viewInsets].
+///
+/// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/window_padding.mp4}
+///
+/// In this diagram, the black areas represent system UI that the app cannot
+/// draw over. The red area represents view padding that the application may not
+/// be able to detect gestures in and may not want to draw in. The grey area
+/// represents the system keyboard, which can cover over the bottom view padding
+/// when visible.
+///
 /// MediaQueryData includes three [EdgeInsets] values:
 /// [padding], [viewPadding], and [viewInsets]. These values reflect the
-/// configuration of the device and are used by many top level widgets, like
-/// [SafeArea] and the Cupertino and Material [Scaffold] widgets. The padding
-/// value defines areas that might not be completely visible, like the display
-/// "notch" on the iPhone X. The viewInsets value defines areas that aren't
-/// visible at all, typically because they're obscured by the device's keyboard.
-/// Similar to viewInsets, viewPadding does not differentiate padding in areas
-/// that may be obscured. For example, by using the viewPadding property,
-/// padding would defer to the iPhone "safe area" regardless of whether a
-/// keyboard is showing.
+/// configuration of the device and are used by many top level widgets, listed
+/// below. The padding value defines areas that might not be completely visible,
+/// like the display "notch" on the iPhone X. The viewInsets value defines areas that
+/// aren't visible at all, typically because they're obscured by the device's
+/// keyboard. Similar to viewInsets, viewPadding does not differentiate padding
+/// in areas that may be obscured. For example, by using the viewPadding
+/// property, padding would defer to the iPhone "safe area" regardless of
+/// whether a keyboard is showing.
 ///
-/// The viewInsets, viewPadding, and padding values are independent, they're
-/// measured from the edges of the MediaQuery widget's bounds. The
-/// bounds of the top level MediaQuery created by [WidgetsApp] are the
-/// same as the window that contains the app.
+/// The viewInsets and viewPadding are independent values, they're
+/// measured from the edges of the MediaQuery widget's bounds. together they
+/// inform the [padding] property. The bounds of the top level MediaQuery
+/// created by [WidgetsApp] are the same as the window that contains the app.
 ///
 /// Widgets whose layouts consume space defined by [viewInsets], [viewPadding],
 /// or [padding] should enclose their children in secondary MediaQuery
 /// widgets that reduce those properties by the same amount.
 /// The [removePadding], [removeViewPadding], and [removeInsets] methods are
 /// useful for this.
+/// See also:
+///
+/// * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
+/// [CupertinoPageScaffold], all of which are informed by [padding],
+/// [viewPadding], and [viewInsets].
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -134,15 +154,16 @@ class MediaQueryData {
   /// When a mobile device's keyboard is visible `viewInsets.bottom`
   /// corresponds to the top of the keyboard.
   ///
-  /// This value is independent of the [padding] and [viewPadding]: their values
-  /// are measured from the edges of the [MediaQuery] widget's bounds. The
-  /// bounds of the top level MediaQuery created by [WidgetsApp] are the
-  /// same as the window (often the mobile device screen) that contains the app.
+  /// This value is independent of the [padding] and [viewPadding]. viewPadding
+  /// is measured from the edges of the [MediaQuery] widget's bounds. Padding is
+  /// calculated based on the viewPadding and viewInsets. The bounds of the top
+  /// level MediaQuery created by [WidgetsApp] are the same as the window
+  /// (often the mobile device screen) that contains the app.
   ///
   /// See also:
   ///
-  /// * [MediaQueryData], which provides some additional detail about this
-  ///   property and how it differs from [padding] and [viewPadding].
+  /// * [ui.window], which provides some additional detail about this property
+  /// and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -154,10 +175,12 @@ class MediaQueryData {
   /// for subsequent descendants in the widget tree by inserting a new
   /// [MediaQuery] widget using the [MediaQuery.removePadding] factory.
   ///
+  /// Padding is derived from the values of viewInsets and viewPadding.
+  ///
   /// See also:
   ///
-  ///  * [MediaQueryData], which provides some additional detail about this
-  ///    property and how it differs from [viewInsets] and [viewPadding].
+  ///  * [ui.window], which provides some additional detail about this
+  ///    property and how it relates to [viewInsets] and [viewPadding].
   ///  * [SafeArea], a widget that consumes this padding with a [Padding] widget
   ///    and automatically removes it from the [MediaQuery] for its child.
   final EdgeInsets padding;
@@ -175,8 +198,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [MediaQueryData], which provides some additional detail about this
-  ///   property and how it differs from [padding] and [viewInsets].
+  /// * [ui.window], which provides some additional detail about this
+  ///   property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
   /// Whether to use 24-hour format when formatting time.
@@ -299,7 +322,12 @@ class MediaQueryData {
         right: removeRight ? 0.0 : null,
         bottom: removeBottom ? 0.0 : null,
       ),
-      viewPadding: viewPadding,
+      viewPadding: viewPadding.copyWith(
+        left: math.max(0.0, viewPadding.left - padding.left),
+        top: math.max(0.0, viewPadding.top - padding.top),
+        right: math.max(0.0, viewPadding.right - padding.right),
+        bottom: math.max(0.0, viewPadding.bottom - padding.bottom),
+      ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
       disableAnimations: disableAnimations,
@@ -336,7 +364,12 @@ class MediaQueryData {
       textScaleFactor: textScaleFactor,
       platformBrightness: platformBrightness,
       padding: padding,
-      viewPadding: viewPadding,
+      viewPadding: viewPadding.copyWith(
+        left: math.max(0.0, viewPadding.left - viewInsets.left),
+        top: math.max(0.0, viewPadding.top - viewInsets.top),
+        right: math.max(0.0, viewPadding.right - viewInsets.right),
+        bottom: math.max(0.0, viewPadding.bottom - viewInsets.bottom),
+      ),
       viewInsets: viewInsets.copyWith(
         left: removeLeft ? 0.0 : null,
         top: removeTop ? 0.0 : null,
@@ -377,7 +410,12 @@ class MediaQueryData {
       devicePixelRatio: devicePixelRatio,
       textScaleFactor: textScaleFactor,
       platformBrightness: platformBrightness,
-      padding: padding,
+      padding: padding.copyWith(
+        left: removeLeft ? 0.0 : null,
+        top: removeTop ? 0.0 : null,
+        right: removeRight ? 0.0 : null,
+        bottom: removeBottom ? 0.0 : null,
+      ),
       viewInsets: viewInsets,
       viewPadding: viewPadding.copyWith(
         left: removeLeft ? 0.0 : null,

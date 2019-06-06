@@ -101,7 +101,7 @@ void main() {
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
     const EdgeInsets padding = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 2.0, right: 4.0, left: 5.0, bottom: 6.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
 
     MediaQueryData unpadded;
@@ -144,7 +144,7 @@ void main() {
     expect(unpadded.devicePixelRatio, devicePixelRatio);
     expect(unpadded.textScaleFactor, textScaleFactor);
     expect(unpadded.padding, EdgeInsets.zero);
-    expect(unpadded.viewPadding, viewPadding);
+    expect(unpadded.viewPadding, viewInsets);
     expect(unpadded.viewInsets, viewInsets);
     expect(unpadded.alwaysUse24HourFormat, true);
     expect(unpadded.accessibleNavigation, true);
@@ -158,7 +158,7 @@ void main() {
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 2.0, right: 4.0, left: 5.0, bottom: 6.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
     MediaQueryData unpadded;
@@ -201,7 +201,7 @@ void main() {
     expect(unpadded.devicePixelRatio, devicePixelRatio);
     expect(unpadded.textScaleFactor, textScaleFactor);
     expect(unpadded.padding, padding);
-    expect(unpadded.viewPadding, viewPadding);
+    expect(unpadded.viewPadding, padding);
     expect(unpadded.viewInsets, EdgeInsets.zero);
     expect(unpadded.alwaysUse24HourFormat, true);
     expect(unpadded.accessibleNavigation, true);
@@ -215,7 +215,7 @@ void main() {
     const double devicePixelRatio = 2.0;
     const double textScaleFactor = 1.2;
     const EdgeInsets padding = EdgeInsets.only(top: 5.0, right: 6.0, left: 7.0, bottom: 8.0);
-    const EdgeInsets viewPadding = EdgeInsets.only(top: 2.0, right: 4.0, left: 5.0, bottom: 6.0);
+    const EdgeInsets viewPadding = EdgeInsets.only(top: 6.0, right: 8.0, left: 10.0, bottom: 12.0);
     const EdgeInsets viewInsets = EdgeInsets.only(top: 1.0, right: 2.0, left: 3.0, bottom: 4.0);
 
     MediaQueryData unpadded;
@@ -257,7 +257,7 @@ void main() {
     expect(unpadded.size, size);
     expect(unpadded.devicePixelRatio, devicePixelRatio);
     expect(unpadded.textScaleFactor, textScaleFactor);
-    expect(unpadded.padding, padding);
+    expect(unpadded.padding, EdgeInsets.zero);
     expect(unpadded.viewPadding, EdgeInsets.zero);
     expect(unpadded.viewInsets, viewInsets);
     expect(unpadded.alwaysUse24HourFormat, true);
