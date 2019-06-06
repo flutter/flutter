@@ -9,32 +9,34 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
 import 'package:path/path.dart' as p; // ignore: package_path_import
+import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_packages_handler/shelf_packages_handler.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test/src/runner/browser/browser_manager.dart';
-import 'package:test/src/runner/browser/default_settings.dart';
-import 'package:test/src/runner/executable_settings.dart';
+import 'package:test_api/backend.dart';
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
 import 'package:test_api/src/util/stack_trace_mapper.dart';
 import 'package:test_core/src/runner/configuration.dart';
+import 'package:test_core/src/runner/environment.dart';
 import 'package:test_core/src/runner/platform.dart';
+import 'package:test_core/src/runner/plugin/platform_helpers.dart';
 import 'package:test_core/src/runner/runner_suite.dart';
 import 'package:test_core/src/runner/suite.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../artifacts.dart';
+import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../web/chrome.dart';
 
-// TODO(jonahwilliams): remove shelf and test dependencies.
 class FlutterWebPlatform extends PlatformPlugin {
   FlutterWebPlatform._(this._server, this._config, this._root) {
     // Look up the location of the testing resources.
@@ -42,6 +44,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       Cache.flutterRoot,
       'packages',
       'flutter_tools',
+      '.packages',
     )).map;
     testUri = packageMap['test'];
     final shelf.Cascade cascade = shelf.Cascade()
@@ -118,8 +121,16 @@ class FlutterWebPlatform extends PlatformPlugin {
   /// The precompiled test javascript.
   File get testDartJs => fs.file(fs.path.join(
         testUri.toFilePath(),
-        'lib',
         'dart.js',
+      ));
+
+  File get testHostDartJs => fs.file(fs.path.join(
+        testUri.toFilePath(),
+        'src',
+        'runner',
+        'browser',
+        'static',
+        'host.dart.js',
       ));
 
   Future<shelf.Response> _handleStaticArtifact(shelf.Request request) async {
@@ -146,6 +157,11 @@ class FlutterWebPlatform extends PlatformPlugin {
         testDartJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
+    } else if (request.requestedUri.path.contains('host.dart.js')) {
+      return shelf.Response.ok(
+        testHostDartJs.openRead(),
+        headers: <String, String>{'Content-Type': 'text/javascript'},
+      );
     } else {
       return shelf.Response.notFound('Not Found');
     }
@@ -155,8 +171,6 @@ class FlutterWebPlatform extends PlatformPlugin {
   final PathHandler _jsHandler = PathHandler();
   final AsyncMemoizer<void> _closeMemo = AsyncMemoizer<void>();
   final String _root;
-  final Map<Runtime, ExecutableSettings> _browserSettings =
-      Map<Runtime, ExecutableSettings>.from(defaultSettings);
 
   bool get _closed => _closeMemo.hasRun;
 
@@ -243,8 +257,6 @@ class FlutterWebPlatform extends PlatformPlugin {
       browser,
       hostUrl,
       completer.future,
-      _browserSettings[browser],
-      debug: _config.pauseAfterLoad,
     );
 
     // Store null values for browsers that error out so we know not to load them
@@ -380,4 +392,290 @@ class PathHandler {
 class _Node {
   shelf.Handler handler;
   final Map<String, _Node> children = <String, _Node>{};
+}
+
+class BrowserManager {
+  /// Creates a new BrowserManager that communicates with [browser] over
+  /// [webSocket].
+  BrowserManager._(this._browser, this._runtime, WebSocketChannel webSocket) {
+    // The duration should be short enough that the debugging console is open as
+    // soon as the user is done setting breakpoints, but long enough that a test
+    // doing a lot of synchronous work doesn't trigger a false positive.
+    //
+    // Start this canceled because we don't want it to start ticking until we
+    // get some response from the iframe.
+    _timer = RestartableTimer(const Duration(seconds: 3), () {
+      for (RunnerSuiteController controller in _controllers) {
+        controller.setDebugging(true);
+      }
+    })
+      ..cancel();
+
+    // Whenever we get a message, no matter which child channel it's for, we the
+    // know browser is still running code which means the user isn't debugging.
+    _channel = MultiChannel<dynamic>(
+        webSocket.cast<String>().transform(jsonDocument).changeStream((Stream<Object> stream) {
+      return stream.map((Object message) {
+        if (!_closed) {
+          _timer.reset();
+        }
+        for (RunnerSuiteController controller in _controllers) {
+          controller.setDebugging(false);
+        }
+
+        return message;
+      });
+    }));
+
+    _environment = _loadBrowserEnvironment();
+    _channel.stream.listen(_onMessage, onDone: close);
+  }
+
+  /// The browser instance that this is connected to via [_channel].
+  final Chrome _browser;
+
+  // TODO(nweiz): Consider removing the duplication between this and
+  // [_browser.name].
+  /// The [Runtime] for [_browser].
+  final Runtime _runtime;
+
+  /// The channel used to communicate with the browser.
+  ///
+  /// This is connected to a page running `static/host.dart`.
+  MultiChannel<dynamic> _channel;
+
+  /// A pool that ensures that limits the number of initial connections the
+  /// manager will wait for at once.
+  ///
+  /// This isn't the *total* number of connections; any number of iframes may be
+  /// loaded in the same browser. However, the browser can only load so many at
+  /// once, and we want a timeout in case they fail so we only wait for so many
+  /// at once.
+  final Pool _pool = Pool(8);
+
+  /// The ID of the next suite to be loaded.
+  ///
+  /// This is used to ensure that the suites can be referred to consistently
+  /// across the client and server.
+  int _suiteID = 0;
+
+  /// Whether the channel to the browser has closed.
+  bool _closed = false;
+
+  /// The completer for [_BrowserEnvironment.displayPause].
+  ///
+  /// This will be `null` as long as the browser isn't displaying a pause
+  /// screen.
+  CancelableCompleter<dynamic> _pauseCompleter;
+
+  /// The controller for [_BrowserEnvironment.onRestart].
+  final StreamController<dynamic> _onRestartController =
+      StreamController<dynamic>.broadcast();
+
+  /// The environment to attach to each suite.
+  Future<_BrowserEnvironment> _environment;
+
+  /// Controllers for every suite in this browser.
+  ///
+  /// These are used to mark suites as debugging or not based on the browser's
+  /// pings.
+  final Set<RunnerSuiteController> _controllers = <RunnerSuiteController>{};
+
+  // A timer that's reset whenever we receive a message from the browser.
+  //
+  // Because the browser stops running code when the user is actively debugging,
+  // this lets us detect whether they're debugging reasonably accurately.
+  RestartableTimer _timer;
+
+  final AsyncMemoizer<dynamic> _closeMemoizer = AsyncMemoizer<dynamic>();
+
+  /// Starts the browser identified by [runtime] and has it connect to [url].
+  ///
+  /// [url] should serve a page that establishes a WebSocket connection with
+  /// this process. That connection, once established, should be emitted via
+  /// [future]. If [debug] is true, starts the browser in debug mode, with its
+  /// debugger interfaces on and detected.
+  ///
+  /// The [settings] indicate how to invoke this browser's executable.
+  ///
+  /// Returns the browser manager, or throws an [ApplicationException] if a
+  /// connection fails to be established.
+  static Future<BrowserManager> start(
+      Runtime runtime, Uri url, Future<WebSocketChannel> future,
+      {bool debug = false}) async {
+    final Chrome chrome =
+        await chromeLauncher.launch(url.toString(), headless: true);
+
+    final Completer<BrowserManager> completer = Completer<BrowserManager>();
+
+    unawaited(chrome.onExit.then((void _) {
+      throwToolExit('${runtime.name} exited before connecting.');
+    }).catchError((dynamic error, StackTrace stackTrace) {
+      if (completer.isCompleted) {
+        return;
+      }
+      completer.completeError(error, stackTrace);
+    }));
+    unawaited(future.then((WebSocketChannel webSocket) {
+      if (completer.isCompleted) {
+        return;
+      }
+      completer.complete(BrowserManager._(chrome, runtime, webSocket));
+    }).catchError((dynamic error, StackTrace stackTrace) {
+      chrome.close();
+      if (completer.isCompleted) {
+        return;
+      }
+      completer.completeError(error, stackTrace);
+    }));
+
+    return completer.future.timeout(const Duration(seconds: 30), onTimeout: () {
+      chrome.close();
+      throwToolExit('Timed out waiting for ${runtime.name} to connect.');
+      return;
+    });
+  }
+
+  /// Loads [_BrowserEnvironment].
+  Future<_BrowserEnvironment> _loadBrowserEnvironment() async {
+    return _BrowserEnvironment(
+        this, null, _browser.remoteDebuggerUri, _onRestartController.stream);
+  }
+
+  /// Tells the browser the load a test suite from the URL [url].
+  ///
+  /// [url] should be an HTML page with a reference to the JS-compiled test
+  /// suite. [path] is the path of the original test suite file, which is used
+  /// for reporting. [suiteConfig] is the configuration for the test suite.
+  ///
+  /// If [mapper] is passed, it's used to map stack traces for errors coming
+  /// from this test suite.
+  Future<RunnerSuite> load(
+      String path, Uri url, SuiteConfiguration suiteConfig, Object message,
+      {StackTraceMapper mapper}) async {
+    url = url.replace(
+        fragment: Uri.encodeFull(jsonEncode(<String, Object>{
+      'metadata': suiteConfig.metadata.serialize(),
+      'browser': _runtime.identifier
+    })));
+
+    final int suiteID = _suiteID++;
+    RunnerSuiteController controller;
+    void closeIframe() {
+      if (_closed) {
+        return;
+      }
+      _controllers.remove(controller);
+      _channel.sink
+          .add(<String, Object>{'command': 'closeSuite', 'id': suiteID});
+    }
+
+    // The virtual channel will be closed when the suite is closed, in which
+    // case we should unload the iframe.
+    final VirtualChannel<dynamic> virtualChannel = _channel.virtualChannel();
+    final int suiteChannelID = virtualChannel.id;
+    final StreamChannel<dynamic> suiteChannel = virtualChannel.transformStream(
+        StreamTransformer<dynamic, dynamic>.fromHandlers(handleDone: (EventSink<dynamic> sink) {
+      closeIframe();
+      sink.close();
+    }));
+
+    return await _pool.withResource<RunnerSuite>(() async {
+      _channel.sink.add(<String, Object>{
+        'command': 'loadSuite',
+        'url': url.toString(),
+        'id': suiteID,
+        'channel': suiteChannelID
+      });
+
+      try {
+        controller = deserializeSuite(path, SuitePlatform(Runtime.chrome),
+            suiteConfig, await _environment, suiteChannel, message);
+        controller.channel('test.browser.mapper').sink.add(mapper?.serialize());
+
+        _controllers.add(controller);
+        return await controller.suite;
+      } catch (_) {
+        closeIframe();
+        rethrow;
+      }
+    });
+  }
+
+  /// An implementation of [Environment.displayPause].
+  CancelableOperation<dynamic> _displayPause() {
+    if (_pauseCompleter != null) {
+      return _pauseCompleter.operation;
+    }
+    _pauseCompleter = CancelableCompleter<dynamic>(onCancel: () {
+      _channel.sink.add(<String, String>{'command': 'resume'});
+      _pauseCompleter = null;
+    });
+    _pauseCompleter.operation.value.whenComplete(() {
+      _pauseCompleter = null;
+    });
+    _channel.sink.add(<String, String>{'command': 'displayPause'});
+
+    return _pauseCompleter.operation;
+  }
+
+  /// The callback for handling messages received from the host page.
+  void _onMessage(dynamic message) {
+    switch (message['command'] as String) {
+      case 'ping':
+        break;
+      case 'restart':
+        _onRestartController.add(null);
+        break;
+      case 'resume':
+        if (_pauseCompleter != null) {
+          _pauseCompleter.complete();
+        }
+        break;
+      default:
+        // Unreachable.
+        assert(false);
+        break;
+    }
+  }
+
+  /// Closes the manager and releases any resources it owns, including closing
+  /// the browser.
+  Future<dynamic> close() {
+    return _closeMemoizer.runOnce(() {
+      _closed = true;
+      _timer.cancel();
+      if (_pauseCompleter != null) {
+        _pauseCompleter.complete();
+      }
+      _pauseCompleter = null;
+      _controllers.clear();
+      return _browser.close();
+    });
+  }
+}
+
+/// An implementation of [Environment] for the browser.
+///
+/// All methods forward directly to [BrowserManager].
+class _BrowserEnvironment implements Environment {
+  _BrowserEnvironment(this._manager, this.observatoryUrl,
+      this.remoteDebuggerUrl, this.onRestart);
+
+  final BrowserManager _manager;
+
+  @override
+  final bool supportsDebugging = true;
+
+  @override
+  final Uri observatoryUrl;
+
+  @override
+  final Uri remoteDebuggerUrl;
+
+  @override
+  final Stream<dynamic> onRestart;
+
+  @override
+  CancelableOperation<dynamic> displayPause() => _manager._displayPause();
 }

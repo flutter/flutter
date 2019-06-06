@@ -306,7 +306,7 @@ Future<void> main() async {
   // The following parameters are hard-coded in Flutter's test embedder. Since
   // we don't have an embedder yet this is the lowest-most layer we can put
   // this stuff in.
-  await ui.webOnlyTestSetup();
+  await ui.webOnlyInitializeEngine();
   internalBootstrapBrowserTest(() => test.main);
 }
 
@@ -358,8 +358,7 @@ StreamChannel postMessageChannel() {
   return controller.foreign;
 }
 
-void setStackTraceMap
-per(StackTraceMapper mapper) {
+void setStackTraceMapper(StackTraceMapper mapper) {
   var formatter = StackTraceFormatter.current;
   if (formatter == null) {
     throw StateError(

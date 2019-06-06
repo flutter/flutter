@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -94,7 +92,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.0.3.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('cursor layout has correct radius', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -145,7 +143,7 @@ void main() {
       find.byKey(const ValueKey<int>(1)),
       matchesGoldenFile('editable_text_test.1.3.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
     final Widget widget = MaterialApp(
@@ -318,6 +316,34 @@ void main() {
     expect(renderEditable, paints..rect(color: const Color(0xff4285f4)));
 
     EditableText.debugDeterministicCursor = false;
+  });
+
+  testWidgets('Cursor does not show when showCursor set to false', (WidgetTester tester) async {
+    const Widget widget = MaterialApp(
+      home: Material(
+        child: TextField(
+          showCursor: false,
+          maxLines: 3,
+        ),
+      ),
+    );
+    await tester.pumpWidget(widget);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
+    final RenderEditable renderEditable = editableTextState.renderEditable;
+
+    // Make sure it does not paint for a period of time.
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
+
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(renderEditable, paintsExactlyCountTimes(#drawRect, 0));
   });
 
   testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
@@ -724,6 +750,6 @@ void main() {
       matchesGoldenFile('editable_text_test.2.0.png'),
     );
     debugDefaultTargetPlatformOverride = null;
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
 }

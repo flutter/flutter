@@ -676,17 +676,17 @@ Future<void> _runFlutterTest(String workingDirectory, {
   }
 
   if (useFlutterTestFormatter) {
-  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  final Stream<String> testOutput = runAndGetStdout(
-    flutter,
-    args,
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
-    timeout: timeout,
-    beforeExit: formatter.finish,
-    environment: environment,
-  );
-  await _processTestOutput(formatter, testOutput, tableData);
+    final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+    final Stream<String> testOutput = runAndGetStdout(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      timeout: timeout,
+      beforeExit: formatter.finish,
+      environment: environment,
+    );
+    await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
       flutter,
@@ -712,7 +712,7 @@ Future<void> _verifyVersion(String filename) async {
     print('$redLine');
     exit(1);
   }
-  final RegExp pattern = RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(?:|-pre\.\d+|\+hotfix\.\d+)$');
   if (!version.contains(pattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string.');

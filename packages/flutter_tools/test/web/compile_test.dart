@@ -38,6 +38,7 @@ void main() {
         'lib/main.dart',
         '-o',
         'build/web/main.dart.js',
+        '-O4',
         '--libraries-spec=bin/cache/flutter_web_sdk/libraries.json',
         '-m',
       ])).called(1);

@@ -535,11 +535,10 @@ class DropdownButtonHideUnderline extends InheritedWidget {
 /// This sample shows a `DropdownButton` whose value is one of
 /// "One", "Two", "Free", or "Four".
 ///
-/// ```dart preamble
-/// String dropdownValue = 'One';
-/// ```
-///
 /// ```dart
+/// String dropdownValue = 'One';
+///
+/// @override
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
 ///     body: Center(

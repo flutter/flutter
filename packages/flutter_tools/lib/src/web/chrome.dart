@@ -14,30 +14,70 @@ import '../base/os.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../convert.dart';
+import '../globals.dart';
 
 /// The [ChromeLauncher] instance.
 ChromeLauncher get chromeLauncher => context.get<ChromeLauncher>();
 
-const String _kChromeEnvironment = 'CHROME_EXECUTABLE';
-const String _kLinuxExecutable = 'google-chrome';
-const String _kMacOSExecutable =
+/// An environment variable used to override the location of chrome.
+const String kChromeEnvironment = 'CHROME_EXECUTABLE';
+
+/// The expected executable name on linux.
+const String kLinuxExecutable = 'google-chrome';
+
+/// The expected executable name on macOS.
+const String kMacOSExecutable =
     '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
-const String _kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
-final List<String> _kWindowsPrefixes = <String>[
+
+/// The expected executable name on Windows.
+const String kWindowsExecutable = r'Google\Chrome\Application\chrome.exe';
+
+/// The possible locations where the chrome executable can be located on windows.
+final List<String> kWindowsPrefixes = <String>[
   platform.environment['LOCALAPPDATA'],
   platform.environment['PROGRAMFILES'],
   platform.environment['PROGRAMFILES(X86)']
 ];
 
-// Responsible for launching chrome with devtools configured.
+/// Find the chrome executable on the current platform.
+///
+/// Does not verify whether the executable exists.
+String findChromeExecutable() {
+  if (platform.environment.containsKey(kChromeEnvironment)) {
+    return platform.environment[kChromeEnvironment];
+  }
+  if (platform.isLinux) {
+    return kLinuxExecutable;
+  }
+  if (platform.isMacOS) {
+    return kMacOSExecutable;
+  }
+  if (platform.isWindows) {
+    final String windowsPrefix = kWindowsPrefixes.firstWhere((String prefix) {
+      if (prefix == null) {
+        return false;
+      }
+      final String path = fs.path.join(prefix, kWindowsExecutable);
+      return fs.file(path).existsSync();
+    }, orElse: () => '.');
+    return fs.path.join(windowsPrefix, kWindowsExecutable);
+  }
+  throwToolExit('Platform ${platform.operatingSystem} is not supported.');
+  return null;
+}
+
+/// Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
   const ChromeLauncher();
 
   static final Completer<Chrome> _currentCompleter = Completer<Chrome>();
 
   /// Launch the chrome browser to a particular `host` page.
-  Future<Chrome> launch(String url) async {
-    final String chromeExecutable = _findExecutable();
+  ///
+  /// `headless` defaults to false, and controls whether we open a headless or
+  /// a `headfull` browser.
+  Future<Chrome> launch(String url, { bool headless = false }) async {
+    final String chromeExecutable = findChromeExecutable();
     final Directory dataDir = fs.systemTempDirectory.createTempSync();
     final int port = await os.findFreePort();
     final List<String> args = <String>[
@@ -57,6 +97,8 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      if (headless)
+        ...<String>['--headless', '--disable-gpu'],
       url,
     ];
     final Process process = await processManager.start(args);
@@ -70,12 +112,14 @@ class ChromeLauncher {
           throwToolExit('Unable to connect to Chrome DevTools.');
           return null;
         });
+    final Uri remoteDebuggerUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
 
     return _connect(Chrome._(
       port,
       ChromeConnection('localhost', port),
       process: process,
       dataDir: dataDir,
+      remoteDebuggerUri: remoteDebuggerUri,
     ));
   }
 
@@ -102,46 +146,35 @@ class ChromeLauncher {
 
   static Future<Chrome> get connectedInstance => _currentCompleter.future;
 
-  static String _findExecutable() {
-    if (platform.environment.containsKey(_kChromeEnvironment)) {
-      return platform.environment[_kChromeEnvironment];
-    }
-    if (platform.isLinux) {
-      // Don't check if this exists, it isn't a file.
-      return _kLinuxExecutable;
-    }
-    if (platform.isMacOS) {
-      if (!fs.file(_kMacOSExecutable).existsSync()) {
-        throwToolExit('Chrome executable not found at $_kMacOSExecutable');
-      }
-      return _kMacOSExecutable;
-    }
-    if (platform.isWindows) {
-      final String windowsPrefix = _kWindowsPrefixes.firstWhere((String prefix) {
-        if (prefix == null) {
-          return false;
-        }
-        final String path = fs.path.join(prefix, _kWindowsExecutable);
-        return fs.file(path).existsSync();
-      }, orElse: () => '.');
-      final String path = fs.path.join(windowsPrefix, _kWindowsExecutable);
-      if (!fs.file(path).existsSync()) {
-        throwToolExit('Chrome executable not found at $path');
-      }
-      return path;
-    }
-    throwToolExit('Platform ${platform.operatingSystem} is not supported.');
-    return null;
+  /// Returns the full URL of the Chrome remote debugger for the main page.
+///
+/// This takes the [base] remote debugger URL (which points to a browser-wide
+/// page) and uses its JSON API to find the resolved URL for debugging the host
+/// page.
+Future<Uri> _getRemoteDebuggerUrl(Uri base) async {
+  try {
+    final HttpClient client = HttpClient();
+    final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
+    final HttpClientResponse response = await request.close();
+    final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single;
+    return base.resolve(jsonObject.first['devtoolsFrontendUrl']);
+  } catch (_) {
+    // If we fail to talk to the remote debugger protocol, give up and return
+    // the raw URL rather than crashing.
+    return base;
   }
+}
+
 }
 
 /// A class for managing an instance of Chrome.
 class Chrome {
-  const Chrome._(
+  Chrome._(
     this.debugPort,
     this.chromeConnection, {
     Process process,
     Directory dataDir,
+    this.remoteDebuggerUri,
   })  : _process = process,
         _dataDir = dataDir;
 
@@ -149,25 +182,32 @@ class Chrome {
   final Process _process;
   final Directory _dataDir;
   final ChromeConnection chromeConnection;
+  final Uri remoteDebuggerUri;
 
   static Completer<Chrome> _currentCompleter = Completer<Chrome>();
+
+  Future<void> get onExit => _currentCompleter.future;
 
   Future<void> close() async {
     if (_currentCompleter.isCompleted) {
       _currentCompleter = Completer<Chrome>();
     }
     chromeConnection.close();
-    _process?.kill(ProcessSignal.SIGKILL);
+    _process?.kill();
     await _process?.exitCode;
     try {
       // Chrome starts another process as soon as it dies that modifies the
       // profile information. Give it some time before attempting to delete
       // the directory.
       await Future<void>.delayed(const Duration(milliseconds: 500));
-      await _dataDir?.delete(recursive: true);
     } catch (_) {
       // Silently fail if we can't clean up the profile information.
-      // It is a system tmp directory so it should get cleaned up eventually.
+    } finally {
+      try {
+        await _dataDir?.delete(recursive: true);
+      } on FileSystemException {
+        printError('failed to delete temporary profile at ${_dataDir.path}');
+      }
     }
   }
 }

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../application_package.dart';
 import '../asset.dart';
 import '../base/common.dart';
@@ -9,23 +11,15 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
+import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../device.dart';
 import '../globals.dart';
 import '../project.dart';
-import '../version.dart';
 import '../web/compile.dart';
+import '../web/workflow.dart';
 import 'chrome.dart';
-
-/// Only launch or display web devices if `FLUTTER_WEB`
-/// environment variable is set to true.
-bool get flutterWebEnabled {
-  _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  return _flutterWebEnabled && !FlutterVersion.instance.isStable;
-}
-bool _flutterWebEnabled;
-
 
 class WebApplicationPackage extends ApplicationPackage {
   WebApplicationPackage(this._flutterProject) : super(id: _flutterProject.manifest.appName);
@@ -38,7 +32,6 @@ class WebApplicationPackage extends ApplicationPackage {
   /// The location of the web source assets.
   Directory get webSourcePath => _flutterProject.directory.childDirectory('web');
 }
-
 
 class WebDevice extends Device {
   WebDevice() : super('web');
@@ -56,7 +49,7 @@ class WebDevice extends Device {
   bool get supportsStartPaused => true;
 
   @override
-  bool get supportsStopApp => true;
+  bool get supportsFlutterExit => true;
 
   @override
   bool get supportsScreenshot => false;
@@ -91,7 +84,31 @@ class WebDevice extends Device {
   DevicePortForwarder get portForwarder => const NoOpDevicePortForwarder();
 
   @override
-  Future<String> get sdkNameAndVersion async => 'web';
+  Future<String> get sdkNameAndVersion async {
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
+    String version = 'unknown';
+    if (platform.isWindows) {
+      final ProcessResult result = await processManager.run(<String>[
+        r'reg', 'query', 'HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon', '/v', 'version'
+      ]);
+      if (result.exitCode == 0) {
+        final List<String> parts = result.stdout.split(RegExp(r'\s+'));
+        if (parts.length > 2) {
+          version = 'Google Chrome ' + parts[parts.length - 2];
+        }
+      }
+    } else {
+      final String chrome = findChromeExecutable();
+      final ProcessResult result = await processManager.run(<String>[
+        chrome,
+        '--version',
+      ]);
+      if (result.exitCode == 0) {
+        version = result.stdout;
+      }
+    }
+    return version;
+  }
 
   @override
   Future<LaunchResult> startApp(
@@ -137,7 +154,7 @@ class WebDevice extends Device {
   }
 
   @override
-  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web;
+  Future<TargetPlatform> get targetPlatform async => TargetPlatform.web_javascript;
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
@@ -198,4 +215,9 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform => flutterWebEnabled;
+}
+
+@visibleForTesting
+String parseVersionForWindows(String input) {
+  return input.split(RegExp('\w')).last;
 }

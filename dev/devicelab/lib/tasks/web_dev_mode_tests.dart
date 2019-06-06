@@ -134,6 +134,9 @@ TaskFunction createWebDevModeTest() {
         }
       });
     });
+    if (hotRestartCount != 1) {
+      return TaskResult.failure(null);
+    }
     return TaskResult.success(null);
   };
 }
