@@ -583,23 +583,7 @@ class WebProject {
     return parent.directory.childDirectory('web').existsSync();
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    /// Generate index.html in build/web. Eventually we could support
-    /// a custom html under the web sub directory.
-    final Directory outputDir = fs.directory(getWebBuildDirectory());
-    if (!outputDir.existsSync()) {
-      outputDir.createSync(recursive: true);
-    }
-    final Template template = Template.fromName('web/index.html.tmpl');
-    template.render(
-      outputDir,
-      <String, dynamic>{
-        'appName': parent.manifest.appName,
-      },
-      printStatusWhenWriting: false,
-      overwriteExisting: true,
-    );
-  }
+  Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
 /// Deletes [directory] with all content.
