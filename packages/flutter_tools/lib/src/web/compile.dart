@@ -58,6 +58,7 @@ class WebCompiler {
       target,
       '-o',
       '$outputPath',
+      '-O4',
       '--libraries-spec=$librariesPath',
     ];
     if (minify) {
@@ -90,7 +91,8 @@ class WebCompilationProxy {
   /// `projectDirectory`.
   Future<void> initialize({
     @required Directory projectDirectory,
-    @required String target,
+    @required List<String> targets,
+    String testOutputDir,
   }) async {
     throw UnimplementedError();
   }
