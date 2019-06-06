@@ -66,6 +66,7 @@ abstract class PlaceholderSpan extends InlineSpan {
   @Deprecated('Use to visitChildren instead')
   bool visitTextSpan(bool visitor(TextSpan span)) {
     assert(false, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
+    return false;
   }
 
   /// Populates the `semanticsOffsets` and `semanticsElements` with the appropriate data
