@@ -30,7 +30,7 @@ void main() {
     });
 
     test('invokes dart2js with correct arguments', () => testBed.run(() async {
-      await webCompiler.compile(target: 'lib/main.dart');
+      await webCompiler.compileDart2js(target: 'lib/main.dart');
 
       verify(mockProcessManager.start(<String>[
         'bin/cache/dart-sdk/bin/dart',
@@ -38,6 +38,7 @@ void main() {
         'lib/main.dart',
         '-o',
         'build/web/main.dart.js',
+        '-O4',
         '--libraries-spec=bin/cache/flutter_web_sdk/libraries.json',
         '-m',
       ])).called(1);

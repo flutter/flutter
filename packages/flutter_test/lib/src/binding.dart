@@ -757,13 +757,14 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _ensureInitialized(assetFolderPath);
 
     if (_allowedAssetKeys.isNotEmpty) {
-      BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) {
+      defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) {
         final String key = utf8.decode(message.buffer.asUint8List());
         if (_allowedAssetKeys.contains(key)) {
           final File asset = File(path.join(assetFolderPath, key));
           final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
           return Future<ByteData>.value(encoded.buffer.asByteData());
         }
+        return null;
       });
     }
   }
@@ -1761,6 +1762,21 @@ class _MockHttpResponse extends Stream<List<int>> implements HttpClientResponse 
 
   @override
   int get contentLength => -1;
+
+  // TODO(tvolkert): Update (flutter/flutter#33791)
+  /*
+  @override
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
+  */
+  @override
+  dynamic noSuchMethod(Invocation invocation) {
+    if (invocation.memberName == #compressionState) {
+      return null;
+    }
+    return super.noSuchMethod(invocation);
+  }
 
   @override
   List<Cookie> get cookies => null;

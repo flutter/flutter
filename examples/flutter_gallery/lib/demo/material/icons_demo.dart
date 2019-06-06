@@ -58,13 +58,15 @@ class IconsDemoState extends State<IconsDemo> {
         child: SafeArea(
           top: false,
           bottom: false,
-          child: ListView(
-            padding: const EdgeInsets.all(24.0),
-            children: <Widget>[
-              _IconsDemoCard(handleIconButtonPress, Icons.face), // direction-agnostic icon
-              const SizedBox(height: 24.0),
-              _IconsDemoCard(handleIconButtonPress, Icons.battery_unknown), // direction-aware icon
-            ],
+          child: Scrollbar(
+            child: ListView(
+              padding: const EdgeInsets.all(24.0),
+              children: <Widget>[
+                _IconsDemoCard(handleIconButtonPress, Icons.face), // direction-agnostic icon
+                const SizedBox(height: 24.0),
+                _IconsDemoCard(handleIconButtonPress, Icons.battery_unknown), // direction-aware icon
+              ],
+            ),
           ),
         ),
       ),

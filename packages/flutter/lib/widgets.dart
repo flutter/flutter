@@ -14,6 +14,7 @@ library widgets;
 
 export 'package:vector_math/vector_math_64.dart' show Matrix4;
 
+export 'src/widgets/actions.dart';
 export 'src/widgets/animated_cross_fade.dart';
 export 'src/widgets/animated_list.dart';
 export 'src/widgets/animated_size.dart';
@@ -87,6 +88,7 @@ export 'src/widgets/scroll_view.dart';
 export 'src/widgets/scrollable.dart';
 export 'src/widgets/scrollbar.dart';
 export 'src/widgets/semantics_debugger.dart';
+export 'src/widgets/shortcuts.dart';
 export 'src/widgets/single_child_scroll_view.dart';
 export 'src/widgets/size_changed_layout_notifier.dart';
 export 'src/widgets/sliver.dart';
@@ -106,4 +108,5 @@ export 'src/widgets/value_listenable_builder.dart';
 export 'src/widgets/viewport.dart';
 export 'src/widgets/visibility.dart';
 export 'src/widgets/widget_inspector.dart';
+export 'src/widgets/widget_span.dart';
 export 'src/widgets/will_pop_scope.dart';

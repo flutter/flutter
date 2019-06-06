@@ -72,7 +72,7 @@ class UpgradeCommandRunner {
         );
       }
     }
-    // If there are uncomitted changes we might be on the right commit but
+    // If there are uncommitted changes we might be on the right commit but
     // we should still warn.
     if (!force && await hasUncomittedChanges()) {
       throwToolExit(

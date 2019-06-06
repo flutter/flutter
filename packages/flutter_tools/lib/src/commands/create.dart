@@ -24,6 +24,7 @@ import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../template.dart';
+import '../usage.dart';
 import '../version.dart';
 
 enum _ProjectType {
@@ -56,11 +57,11 @@ class CreateCommand extends FlutterCommand {
   CreateCommand() {
     argParser.addFlag('pub',
       defaultsTo: true,
-      help: 'Whether to run "flutter packages get" after the project has been created.',
+      help: 'Whether to run "flutter pub get" after the project has been created.',
     );
     argParser.addFlag('offline',
       defaultsTo: false,
-      help: 'When "flutter packages get" is run by the create command, this indicates '
+      help: 'When "flutter pub get" is run by the create command, this indicates '
         'whether to run it in offline mode or not. In offline mode, it will need to '
         'have all dependencies already available in the pub cache to succeed.',
     );
@@ -136,6 +137,12 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: 'java',
       allowed: <String>['java', 'kotlin'],
     );
+    argParser.addFlag(
+      'androidx',
+      negatable: true,
+      defaultsTo: false,
+      help: 'Generate a project using the AndroidX support libraries',
+    );
   }
 
   @override
@@ -147,6 +154,15 @@ class CreateCommand extends FlutterCommand {
 
   @override
   String get invocation => '${runner.executableName} $name <output directory>';
+
+  @override
+  Future<Map<String, String>> get usageValues async {
+    return <String, String>{
+      kCommandCreateProjectType: argResults['template'],
+      kCommandCreateAndroidLanguage: argResults['android-language'],
+      kCommandCreateIosLanguage: argResults['ios-language'],
+    };
+  }
 
   // If it has a .metadata file with the project_type in it, use that.
   // If it has an android dir and an android/app dir, it's a legacy app
@@ -203,7 +219,8 @@ class CreateCommand extends FlutterCommand {
 
   /// Fetches the samples index file from the Flutter docs website.
   Future<String> _fetchSamplesIndexFromServer() async {
-    return utf8.decode(await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json')));
+    return utf8.decode(
+      await fetchUrl(Uri.https(_snippetsHost, 'snippets/index.json'), maxAttempts: 2));
   }
 
   /// Fetches the samples index file from the server and writes it to
@@ -214,16 +231,55 @@ class CreateCommand extends FlutterCommand {
       if (outputFile.existsSync()) {
         throwToolExit('File "$outputFilePath" already exists', exitCode: 1);
       }
-      outputFile.writeAsStringSync(await _fetchSamplesIndexFromServer());
-      printStatus('Wrote samples JSON to "$outputFilePath"');
+      final String samplesJson = await _fetchSamplesIndexFromServer();
+      if (samplesJson == null) {
+        throwToolExit('Unable to download samples', exitCode: 2);
+      }
+      else {
+        outputFile.writeAsStringSync(samplesJson);
+        printStatus('Wrote samples JSON to "$outputFilePath"');
+      }
     } catch (e) {
       throwToolExit('Failed to write samples JSON to "$outputFilePath": $e', exitCode: 2);
     }
   }
 
+  _ProjectType _getProjectType(Directory projectDir) {
+    _ProjectType template;
+    _ProjectType detectedProjectType;
+    final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
+    if (argResults['template'] != null) {
+      template = _stringToProjectType(argResults['template']);
+    } else {
+      // If the project directory exists and isn't empty, then try to determine the template
+      // type from the project directory.
+      if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
+        detectedProjectType = _determineTemplateType(projectDir);
+        if (detectedProjectType == null && metadataExists) {
+          // We can only be definitive that this is the wrong type if the .metadata file
+          // exists and contains a type that we don't understand, or doesn't contain a type.
+          throwToolExit('Sorry, unable to detect the type of project to recreate. '
+              'Try creating a fresh project and migrating your existing code to '
+              'the new project manually.');
+        }
+      }
+    }
+    template ??= detectedProjectType ?? _ProjectType.app;
+    if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
+      // We can only be definitive that this is the wrong type if the .metadata file
+      // exists and contains a type that doesn't match.
+      throwToolExit("The requested template type '${getEnumName(template)}' doesn't match the "
+          "existing template type of '${getEnumName(detectedProjectType)}'.");
+    }
+    return template;
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults['list-samples'] != null) {
+      // _writeSamplesJson can potentially be long-lived.
+      Cache.releaseLockEarly();
+
       await _writeSamplesJson(argResults['list-samples']);
       return null;
     }
@@ -273,31 +329,7 @@ class CreateCommand extends FlutterCommand {
       sampleCode = await _fetchSampleFromServer(argResults['sample']);
     }
 
-    _ProjectType template;
-    _ProjectType detectedProjectType;
-    final bool metadataExists = projectDir.absolute.childFile('.metadata').existsSync();
-    if (argResults['template'] != null) {
-      template = _stringToProjectType(argResults['template']);
-    } else {
-      if (projectDir.existsSync() && projectDir.listSync().isNotEmpty) {
-        detectedProjectType = _determineTemplateType(projectDir);
-        if (detectedProjectType == null && metadataExists) {
-          // We can only be definitive that this is the wrong type if the .metadata file
-          // exists and contains a type that we don't understand, or doesn't contain a type.
-          throwToolExit('Sorry, unable to detect the type of project to recreate. '
-              'Try creating a fresh project and migrating your existing code to '
-              'the new project manually.');
-        }
-      }
-    }
-    template ??= detectedProjectType ?? _ProjectType.app;
-    if (detectedProjectType != null && template != detectedProjectType && metadataExists) {
-      // We can only be definitive that this is the wrong type if the .metadata file
-      // exists and contains a type that doesn't match.
-      throwToolExit("The requested template type '${getEnumName(template)}' doesn't match the "
-          "existing template type of '${getEnumName(detectedProjectType)}'.");
-    }
-
+    final _ProjectType template = _getProjectType(projectDir);
     final bool generateModule = template == _ProjectType.module;
     final bool generatePlugin = template == _ProjectType.plugin;
     final bool generatePackage = template == _ProjectType.package;
@@ -332,6 +364,7 @@ class CreateCommand extends FlutterCommand {
       flutterRoot: flutterRoot,
       renderDriverTest: argResults['with-driver-test'],
       withPluginHook: generatePlugin,
+      androidX: argResults['androidx'],
       androidLanguage: argResults['android-language'],
       iosLanguage: argResults['ios-language'],
     );
@@ -538,6 +571,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     String projectName,
     String projectDescription,
     String androidLanguage,
+    bool androidX,
     String iosLanguage,
     String flutterRoot,
     bool renderDriverTest = false,
@@ -557,6 +591,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'iosIdentifier': _createUTIIdentifier(organization, projectName),
       'description': projectDescription,
       'dartSdk': '$flutterRoot/bin/cache/dart-sdk',
+      'androidX': androidX,
       'androidMinApiLevel': android.minApiLevel,
       'androidSdkVersion': android_sdk.minimumAndroidSdkVersion,
       'androidFlutterJar': '$flutterRoot/bin/cache/artifacts/engine/android-arm/flutter.jar',

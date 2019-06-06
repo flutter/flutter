@@ -115,9 +115,11 @@ class PaletteTabView extends StatelessWidget {
       }).toList());
     }
 
-    return ListView(
-      itemExtent: kColorItemHeight,
-      children: colorItems,
+    return Scrollbar(
+      child: ListView(
+        itemExtent: kColorItemHeight,
+        children: colorItems,
+      )
     );
   }
 }

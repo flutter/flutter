@@ -61,7 +61,14 @@ String hex(List<int> bytes) {
 }
 
 String calculateSha(File file) {
-  return hex(sha1.convert(file.readAsBytesSync()).bytes);
+  final Stopwatch stopwatch = Stopwatch()..start();
+  final List<int> bytes = file.readAsBytesSync();
+  printTrace('calculateSha: reading file took ${stopwatch.elapsedMicroseconds}us');
+  stopwatch.reset();
+  final String sha = hex(sha1.convert(bytes).bytes);
+  stopwatch.stop();
+  printTrace('calculateSha: computing sha took ${stopwatch.elapsedMicroseconds}us');
+  return sha;
 }
 
 /// Convert `foo_bar` to `fooBar`.
@@ -265,11 +272,11 @@ class Poller {
   final Duration initialDelay;
   final Duration pollingInterval;
 
-  bool _cancelled = false;
+  bool _canceled = false;
   Timer _timer;
 
   Future<void> _handleCallback() async {
-    if (_cancelled)
+    if (_canceled)
       return;
 
     try {
@@ -278,13 +285,13 @@ class Poller {
       printTrace('Error from poller: $error');
     }
 
-    if (!_cancelled)
+    if (!_canceled)
       _timer = Timer(pollingInterval, _handleCallback);
   }
 
   /// Cancels the poller.
   void cancel() {
-    _cancelled = true;
+    _canceled = true;
     _timer?.cancel();
     _timer = null;
   }
