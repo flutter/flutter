@@ -28,6 +28,8 @@ class FakeAndroidPlatformViewsController {
 
   Completer<void> createCompleter;
 
+  int lastClearedFocusViewId;
+
   void registerViewType(String viewType) {
     _registeredViewTypes.add(viewType);
   }
@@ -50,6 +52,8 @@ class FakeAndroidPlatformViewsController {
         return _touch(call);
       case 'setDirection':
         return _setDirection(call);
+      case 'clearFocus':
+        return _clearFocus(call);
     }
     return Future<dynamic>.sync(() => null);
   }
@@ -152,6 +156,19 @@ class FakeAndroidPlatformViewsController {
 
     _views[id].layoutDirection = layoutDirection;
 
+    return Future<dynamic>.sync(() => null);
+  }
+
+  Future<dynamic> _clearFocus(MethodCall call) {
+    final int id = call.arguments;
+
+    if (!_views.containsKey(id))
+      throw PlatformException(
+        code: 'error',
+        message: 'Trying to clear the focus on a platform view with unknown id: $id',
+      );
+
+    lastClearedFocusViewId = id;
     return Future<dynamic>.sync(() => null);
   }
 }
