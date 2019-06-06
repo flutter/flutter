@@ -14,6 +14,8 @@ import 'package:build_modules/src/module_builder.dart';
 import 'package:build_modules/src/platform.dart';
 import 'package:build_modules/src/workers.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
+import 'package:build_runner_core/src/asset_graph/graph.dart';
+import 'package:build_runner_core/src/asset_graph/node.dart';
 import 'package:build_runner_core/src/generate/build_impl.dart';
 import 'package:build_runner_core/src/generate/options.dart';
 import 'package:build_test/builder.dart';
@@ -235,9 +237,17 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       );
       return result.status == core.BuildStatus.success;
     } on core.BuildConfigChangedException {
-      projectDirectory
-        .childDirectory('.dart_tool')
-        .deleteSync(recursive: true);
+      await _cleanAssets(projectDirectory);
+      result = await _runBuilder(
+        buildEnvironment,
+        buildOptions,
+        targets,
+        release,
+        buildDirs,
+      );
+      return result.status == core.BuildStatus.success;
+    } on core.BuildScriptChangedException {
+      await _cleanAssets(projectDirectory);
       result = await _runBuilder(
         buildEnvironment,
         buildOptions,
@@ -291,6 +301,50 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       buildDirs: buildDirs,
     );
   }
+
+  Future<void> _cleanAssets(Directory projectDirectory) async {
+    final File assetGraphFile = fs.file(core.assetGraphPath);
+    if (assetGraphFile.existsSync()) {
+      assetGraphFile.deleteSync();
+    }
+    AssetGraph assetGraph;
+    try {
+      assetGraph = AssetGraph.deserialize(await assetGraphFile.readAsBytes());
+    } catch (_) {
+      printTrace('Failed to clean up asset graph.');
+    }
+    final core.PackageGraph packageGraph = core.PackageGraph.forThisPackage();
+    await _cleanUpSourceOutputs(assetGraph, packageGraph);
+    final Directory cacheDirectory = fs.directory(fs.path.join(
+      projectDirectory.path,
+      '.dart_tool',
+      'build',
+      'flutter_web',
+    ));
+    if (cacheDirectory.existsSync()) {
+      cacheDirectory.deleteSync(recursive: true);
+    }
+  }
+
+  Future<void> _cleanUpSourceOutputs(AssetGraph assetGraph, core.PackageGraph packageGraph) async {
+    final core.FileBasedAssetWriter writer = core.FileBasedAssetWriter(packageGraph);
+    if (assetGraph?.outputs == null) {
+      return;
+    }
+    for (AssetId id in assetGraph.outputs) {
+      if (id.package != packageGraph.root.name) {
+        continue;
+      }
+      final GeneratedAssetNode node = assetGraph.get(id);
+      if (node.wasOutput) {
+        // Note that this does a file.exists check in the root package and
+        // only tries to delete the file if it exists. This way we only
+        // actually delete to_source outputs, without reading in the build
+        // actions.
+        await writer.delete(id);
+      }
+    }
+  }
 }
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
@@ -332,6 +386,7 @@ class FlutterWebEntrypointBuilder implements Builder {
   }
 }
 
+/// Bootstraps the test entrypoint.
 class FlutterWebTestBootstrapBuilder implements Builder {
   const FlutterWebTestBootstrapBuilder();
 
