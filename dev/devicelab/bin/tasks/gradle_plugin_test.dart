@@ -55,7 +55,7 @@ Future<void> main() async {
           throw TaskResult.failure(
               'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
 
-        final Set<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
+        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
 
         _checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -65,6 +65,7 @@ Future<void> main() async {
           'assets/flutter_assets/vm_snapshot_data',
           'lib/arm64-v8a/libflutter.so',
           'lib/armeabi-v7a/libflutter.so',
+          // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
         ], apkFiles);
@@ -95,6 +96,7 @@ Future<void> main() async {
           'assets/flutter_assets/kernel_blob.bin',
           'assets/flutter_assets/vm_snapshot_data',
           'lib/armeabi-v7a/libflutter.so',
+          // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
         ], apkFiles);
@@ -553,26 +555,20 @@ class FlutterPluginProject {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
-  Future<Set<String>> getFilesInApk(String apk) async {
+  Future<Iterable<String>> getFilesInApk(String apk) async {
     final Process unzip = await startProcess(
       'unzip',
       <String>['-v', apk],
       isBot: false, // we just want to test the output, not have any debugging info
     );
-
-    final Stream<String> lines = unzip.stdout
+    return unzip.stdout
         .transform(utf8.decoder)
-        .transform(const LineSplitter());
-
-    final Set<String> apkFiles = <String>{};
-
-    await for (String line in lines) {
-      apkFiles.add(line.split(' ').last);
-    }
-    return apkFiles;
+        .transform(const LineSplitter())
+        .map((String line) => line.split(' ').last)
+        .toList();
   }
 
-  Future<Set<String>> getFilesInAppBundle(String bundle) async {
+  Future<Set<String>> getFilesInAppBundle(String bundle) {
     return getFilesInApk(bundle);
   }
 }
