@@ -232,7 +232,7 @@ void main() {
         final MockDevice mockDevice = MockDevice();
         when(mockDevice.supportsHotReload).thenReturn(true);
         when(mockDevice.supportsHotRestart).thenReturn(true);
-        when(mockDevice.supportsStopApp).thenReturn(false);
+        when(mockDevice.supportsFlutterExit).thenReturn(false);
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug),
         ];
@@ -247,11 +247,11 @@ void main() {
         final MockDevice mockDevice = MockDevice();
         when(mockDevice.supportsHotReload).thenReturn(true);
         when(mockDevice.supportsHotRestart).thenReturn(true);
-        when(mockDevice.supportsStopApp).thenReturn(false);
+        when(mockDevice.supportsFlutterExit).thenReturn(false);
         final List<FlutterDevice> devices = <FlutterDevice>[
           FlutterDevice(mockDevice, generator: residentCompiler, trackWidgetCreation: false, buildMode: BuildMode.debug),
         ];
-        await HotRunner(devices).preStop();
+        await HotRunner(devices).preExit();
         expect(shutdownTestingConfig.shutdownHookCalled, true);
       }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,

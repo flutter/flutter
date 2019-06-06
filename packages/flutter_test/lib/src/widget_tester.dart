@@ -133,8 +133,10 @@ void testWidgets(
 /// If the callback is asynchronous, make sure you `await` the call
 /// to [benchmarkWidgets], otherwise it won't run!
 ///
-/// Benchmarks must not be run in checked mode. To avoid this, this
-/// function will print a big message if it is run in checked mode.
+/// Benchmarks must not be run in checked mode, because the performance is not
+/// representative. To avoid this, this function will print a big message if it
+/// is run in checked mode. Unit tests of this method pass `mayRunWithAsserts`,
+/// but it should not be used for actual benchmarking.
 ///
 /// Example:
 ///
@@ -152,8 +154,11 @@ void testWidgets(
 ///       });
 ///       exit(0);
 ///     }
-Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
+Future<void> benchmarkWidgets(WidgetTesterCallback callback, {bool mayRunWithAsserts = false}) {
   assert(() {
+    if (mayRunWithAsserts)
+      return true;
+
     print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
     print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
     print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');

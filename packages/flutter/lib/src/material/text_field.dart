@@ -65,6 +65,9 @@ typedef InputCounterWidgetBuilder = Widget Function(
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
+///
 /// {@tool sample}
 /// This example shows how to create a [TextField] that will obscure input. The
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
@@ -91,6 +94,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
 ///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
