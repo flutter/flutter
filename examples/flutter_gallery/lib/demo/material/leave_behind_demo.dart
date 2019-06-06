@@ -130,16 +130,18 @@ class LeaveBehindDemoState extends State<LeaveBehindDemo> {
         ),
       );
     } else {
-      body = ListView(
-        children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
-          return _LeaveBehindListItem(
-            confirmDismiss: _confirmDismiss,
-            item: item,
-            onArchive: _handleArchive,
-            onDelete: _handleDelete,
-            dismissDirection: _dismissDirection,
-          );
-        }).toList(),
+      body = Scrollbar(
+        child: ListView(
+          children: leaveBehindItems.map<Widget>((LeaveBehindItem item) {
+            return _LeaveBehindListItem(
+              confirmDismiss: _confirmDismiss,
+              item: item,
+              onArchive: _handleArchive,
+              onDelete: _handleDelete,
+              dismissDirection: _dismissDirection,
+            );
+          }).toList(),
+          ),
       );
     }
 
