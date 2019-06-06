@@ -499,10 +499,9 @@ Future<void> bootstrapDart2Js(BuildStep buildStep) async {
   final List<String> args = <String>[
     '--libraries-spec=$librariesPath',
     '--packages=$packageFile',
-    '-o',
-    jsOutputPath,
     '-m',
     '-O4',
+    '-o=$jsOutputPath',
     dartPath,
   ];
   final Dart2JsBatchWorkerPool dart2js = await buildStep.fetchResource(dart2JsWorkerResource);
