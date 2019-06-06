@@ -108,6 +108,9 @@ abstract class TextSelectionControls {
   /// [globalEditableRegion] is the TextField size of the global coordinate system
   /// in logical pixels.
   ///
+  /// [textLineHeight] is the `preferredLineHeight` of the [RenderEditable] we
+  /// are building a toolbar for.
+  ///
   /// The [position] is a general calculation midpoint parameter of the toolbar.
   /// If you want more detailed position information, can use [endpoints]
   /// to calculate it.
@@ -518,18 +521,18 @@ class TextSelectionOverlay {
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
     );
 
-    final bool isMultiline =
-      endpoints.last.point.dy - endpoints.first.point.dy >
+    final bool isMultiline = endpoints.last.point.dy - endpoints.first.point.dy >
           renderObject.preferredLineHeight / 2;
 
-    // If the selected text spans more than 1 line, vertically center the toolbar.
+    // If the selected text spans more than 1 line, horizontally center the toolbar.
+    // Seems consistent on both iOS and Android.
     final double midX = isMultiline
-      ? editingRegion.center.dx
+      ? editingRegion.width / 2
       : (endpoints.first.point.dx + endpoints.last.point.dx) / 2;
 
     final Offset midpoint = Offset(
       midX,
-      // The Y calculation is a bit random ... we don't need it anyway.
+      // The Y value here is a bit random ... we don't need it anyway.
       endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 

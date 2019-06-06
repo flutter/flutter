@@ -19,14 +19,14 @@ const double _kSelectionHandleOverlap = 1.5;
 const double _kSelectionHandleRadius = 5.5;
 
 // Minimal padding from all edges of the selection toolbar to all edges of the
-// viewport.
+// screen.
 const double _kToolbarScreenPadding = 8.0;
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
-// viewport. Eyeballed value.
+// screen. Eyeballed value.
 const double _kArrowScreenPadding = 16.0;
 
-// Vertical distance between the tip of the arrow and the line the arrow is pointing
-// to. The value used here is eyeballed.
+// Vertical distance between the tip of the arrow and the line of text the arrow
+// is pointing to. The value used here is eyeballed.
 const double _kToolbarContentDistance = 8.0;
 // Values derived from https://developer.apple.com/design/resources/.
 // 92% Opacity ~= 0xEB
@@ -56,8 +56,14 @@ class _Toolbar extends SingleChildRenderObjectWidget {
     Widget child,
   }) : super(key: key, child: child);
 
+  /// The y-coordinate of toolbar's top edge, in global coordinate system.
   final double barTopY;
+
+  /// The y-coordinate of the tip of the arrow, in global coordinate system.
   final double arrowTipX;
+
+  /// Whether the arrow should point down and be attached to the bottom
+  /// of the toolbar, or point up and be attached to the top of the toolbar.
   final bool isArrowPointingDown;
 
   @override
@@ -73,9 +79,10 @@ class _Toolbar extends SingleChildRenderObjectWidget {
 }
 
 class _ToolbarParentData extends BoxParentData {
-  Path clipPath;
+  // The x offset from the center of the toolbar to the tip of the arrow.
+  double arrowXOffsetFromCenter;
   @override
-  String toString() => 'offset=$offset, clipPath=$clipPath';
+  String toString() => 'offset=$offset, arrowXOffsetFromCenter=$arrowXOffsetFromCenter';
 }
 
 class _ToolbarRenderBox extends RenderShiftedBox {
@@ -130,23 +137,31 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     final _ToolbarParentData childParentData = child.parentData;
     final Offset localBarTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY), ancestor: parent);
 
+    // The local x-coordinate of the center of the toolbar.
     final double adjustedCenterX = localBarTopCenter.dx
       .clamp(
-        child.size.width/2 + _kArrowScreenPadding,
-        size.width - child.size.width/2 - _kArrowScreenPadding,
+        child.size.width/2 + _kToolbarScreenPadding,
+        size.width - child.size.width/2 - _kToolbarScreenPadding,
       );
 
     childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, localBarTopCenter.dy);
+    childParentData.arrowXOffsetFromCenter = localBarTopCenter.dx - adjustedCenterX;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final _ToolbarParentData childParentData = child.parentData;
 
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
-          Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,) & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
+          Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,)
+          & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
           _kToolbarBorderRadius,
-          )
-        );
+        ),
+      );
 
-    final double arrowTipX = localBarTopCenter.dx - childParentData.offset.dx;
+    final double arrowTipX = child.size.width / 2 + childParentData.arrowXOffsetFromCenter;
 
     final double arrowBottomY = _isArrowPointingDown
       ? child.size.height - _kToolbarArrowSize.height
@@ -160,18 +175,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBottomY)
       ..close();
 
-    childParentData.clipPath = Path.combine(PathOperation.union, rrect, arrow);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    final _ToolbarParentData childParentData = child.parentData;
-    final Offset totalOffset = offset + childParentData.offset;
     context.pushClipPath(
       needsCompositing,
-      totalOffset,
+      offset + childParentData.offset,
       Offset.zero & child.size,
-      childParentData.clipPath,
+      Path.combine(PathOperation.union, rrect, arrow),
       (PaintingContext innerContext, Offset innerOffset) => context.paintChild(child, innerOffset),
     );
   }
@@ -223,13 +231,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     }
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: _kToolbarDividerColor,
-        //borderRadius: _kToolbarBorderRadius,
-        // Add a hairline border with the button color to avoid
-        // antialiasing artifacts.
-        border: Border.all(color: _kToolbarBackgroundColor, width: 0),
-      ),
+      decoration: BoxDecoration(color: _kToolbarDividerColor),
       child: Row(mainAxisSize: MainAxisSize.min, children: items),
     );
   }
