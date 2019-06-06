@@ -559,7 +559,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
     final StreamController<ImageChunkEvent> chunkEvents = StreamController<ImageChunkEvent>();
 
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, chunkEvents),
+      codec: _loadAsync(key, chunkEvents, targetHeight: targetHeight, targetWidth: targetWidth),
       chunkEvents: chunkEvents.stream,
       scale: key.scale,
       informationCollector: () sync* {
@@ -588,6 +588,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   Future<ui.Codec> _loadAsync(
     NetworkImage key,
     StreamController<ImageChunkEvent> chunkEvents,
+    {int targetHeight, int targetWidth}
   ) async {
     try {
       assert(key == this);
@@ -614,7 +615,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
 
-      return PaintingBinding.instance.instantiateImageCodec(bytes);
+      return PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
     } finally {
       chunkEvents.close();
     }
@@ -664,7 +665,7 @@ class FileImage extends ImageProvider<FileImage> {
   @override
   ImageStreamCompleter load(FileImage key, {int targetHeight, int targetWidth}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
       informationCollector: () sync* {
         yield ErrorDescription('Path: ${file?.path}');
@@ -672,14 +673,14 @@ class FileImage extends ImageProvider<FileImage> {
     );
   }
 
-  Future<ui.Codec> _loadAsync(FileImage key) async {
+  Future<ui.Codec> _loadAsync(FileImage key, {int targetHeight, int targetWidth}) async {
     assert(key == this);
 
     final Uint8List bytes = await file.readAsBytes();
     if (bytes.lengthInBytes == 0)
       return null;
 
-    return await PaintingBinding.instance.instantiateImageCodec(bytes);
+    return await PaintingBinding.instance.instantiateImageCodec(bytes, targetWidth: targetWidth, targetHeight: targetHeight);
   }
 
   @override
@@ -732,15 +733,15 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   @override
   ImageStreamCompleter load(MemoryImage key, {int targetHeight, int targetWidth}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec: _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
     );
   }
 
-  Future<ui.Codec> _loadAsync(MemoryImage key) {
+  Future<ui.Codec> _loadAsync(MemoryImage key, {int targetHeight, int targetWidth}) {
     assert(key == this);
 
-    return PaintingBinding.instance.instantiateImageCodec(bytes);
+    return PaintingBinding.instance.instantiateImageCodec(bytes, targetHeight: targetHeight, targetWidth: targetWidth);
   }
 
   @override
