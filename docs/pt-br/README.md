@@ -40,7 +40,7 @@ Flutter oferece hot reload com estado completo, permitindo que você faça mudan
 
 ## Extensível e modelo aberto
 
-Flutter funciona em qualquer ferramenta de desenvolvimento, mas inclui plug-ins para ambos os editores [Visual Studio Code] e [IntelliJ / Android Studio]. Flutter provê [centenas de pacotes] para agilizar seu desenvolvimento, independentemente da plataforma alvo. E acessar os recursos da plataforma é fácil, aqui está pequeno trecho como exemplo da nossa [interop example](https://github.com/flutter/flutter/tree/master/examples/platform_channel):
+Flutter funciona em qualquer ferramenta de desenvolvimento, mas inclui plug-ins para ambos os editores [Visual Studio Code] e [IntelliJ / Android Studio]. Flutter provê [milhares de pacotes][Flutter packages] para agilizar seu desenvolvimento, independentemente da plataforma alvo. E acessar os recursos da plataforma é fácil, aqui está pequeno trecho como exemplo da nossa [interop example](https://github.com/flutter/flutter/tree/master/examples/platform_channel):
 
 ```dart
 Future<void> getBatteryLevel() async {
