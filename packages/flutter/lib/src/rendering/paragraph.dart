@@ -464,10 +464,10 @@ class RenderParagraph extends RenderBox
   // into the LibTxt layout. This does not do anything if no inline widgets were
   // specified.
   void _layoutChildren(BoxConstraints constraints) {
-    RenderBox child = firstChild;
     if (childCount == 0) {
       return;
     }
+    RenderBox child = firstChild;
     final List<PlaceholderDimensions> placeholderDimensions = List<PlaceholderDimensions>(childCount);
     int childIndex = 0;
     while (child != null) {
