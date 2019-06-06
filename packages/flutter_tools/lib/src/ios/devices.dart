@@ -114,7 +114,7 @@ class IOSDevices extends PollingDeviceDiscovery {
 class IOSDevice extends Device {
   IOSDevice(String id, { this.name, String sdkVersion })
       : _sdkVersion = sdkVersion,
-        super(id) {
+        super(id, category: Category.mobile) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
   }

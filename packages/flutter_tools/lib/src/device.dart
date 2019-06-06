@@ -28,6 +28,23 @@ import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
 
+/// A broad category the describes the kind of workflow the device supports.
+class Category {
+  const Category._(this.value);
+
+  static const Category web = Category._('web');
+  static const Category fuchsia = Category._('fuchsia');
+  static const Category desktop = Category._('desktop');
+  static const Category mobile = Category._('mobile');
+  static const Category simulator = Category._('simulator');
+  static const Category unknown = Category._('unknown');
+
+  final String value;
+
+  @override
+  String toString() => value;
+}
+
 /// A class to get all available devices.
 class DeviceManager {
 
@@ -208,9 +225,12 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
 abstract class Device {
 
-  Device(this.id);
+  Device(this.id, {this.category = Category.unknown});
 
   final String id;
+
+  /// The [Category] for this device type.
+  final Category category;
 
   String get name;
 

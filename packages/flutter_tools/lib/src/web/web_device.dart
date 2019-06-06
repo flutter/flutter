@@ -34,7 +34,7 @@ class WebApplicationPackage extends ApplicationPackage {
 }
 
 class WebDevice extends Device {
-  WebDevice() : super('web');
+  WebDevice() : super('web', category: Category.web);
 
   HttpServer _server;
   WebApplicationPackage _package;

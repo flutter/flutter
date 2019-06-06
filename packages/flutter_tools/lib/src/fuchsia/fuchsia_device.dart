@@ -175,7 +175,7 @@ List<FuchsiaDevice> parseListDevices(String text) {
 }
 
 class FuchsiaDevice extends Device {
-  FuchsiaDevice(String id, {this.name}) : super(id);
+  FuchsiaDevice(String id, {this.name}) : super(id, category: Category.fuchsia);
 
   @override
   bool get supportsHotReload => true;

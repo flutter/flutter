@@ -19,7 +19,7 @@ import 'linux_workflow.dart';
 
 /// A device that represents a desktop Linux target.
 class LinuxDevice extends Device {
-  LinuxDevice() : super('Linux');
+  LinuxDevice() : super('Linux', category: Category.desktop);
 
   @override
   void clearLogs() { }

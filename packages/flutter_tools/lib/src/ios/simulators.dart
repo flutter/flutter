@@ -50,7 +50,7 @@ class IOSSimulatorUtils {
       return <IOSSimulator>[];
 
     return SimControl.instance.getConnectedDevices().map<IOSSimulator>((SimDevice device) {
-      return IOSSimulator(device.udid, name: device.name, category: device.category);
+      return IOSSimulator(device.udid, name: device.name, simulatorCategory: device.category);
     }).toList();
   }
 }
@@ -215,12 +215,12 @@ class SimDevice {
 }
 
 class IOSSimulator extends Device {
-  IOSSimulator(String id, { this.name, this.category }) : super(id);
+  IOSSimulator(String id, { this.name, this.simulatorCategory }) : super(id, category: Category.simulator);
 
   @override
   final String name;
 
-  final String category;
+  final String simulatorCategory;
 
   @override
   Future<bool> get isLocalEmulator async => true;
@@ -436,7 +436,7 @@ class IOSSimulator extends Device {
   Future<TargetPlatform> get targetPlatform async => TargetPlatform.ios;
 
   @override
-  Future<String> get sdkNameAndVersion async => category;
+  Future<String> get sdkNameAndVersion async => simulatorCategory;
 
   final RegExp _iosSdkRegExp = RegExp(r'iOS( |-)(\d+)');
 
