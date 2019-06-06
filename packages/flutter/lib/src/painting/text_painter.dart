@@ -164,8 +164,13 @@ class TextPainter {
   /// The (potentially styled) text to paint.
   ///
   /// After this is set, you must call [layout] before the next call to [paint].
-  ///
   /// This and [textDirection] must be non-null before you call [layout].
+  ///
+  /// The [InlineSpan] this provides is in the form of a tree that may contain
+  /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plaintext
+  /// representation of the contents of this [TextPainter], use [InlineSpan.toPlainText]
+  /// to get the full contents of all nodes in the tree. [TextSpan.text] will
+  /// only provide the contents of the first node in the tree.
   InlineSpan get text => _text;
   InlineSpan _text;
   set text(InlineSpan value) {
