@@ -185,6 +185,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     String testOutputDir,
     bool release = false,
   }) async {
+    // Create the .dart_tool directory if it doesn't exist.
+    projectDirectory.childDirectory('.dart_tool').createSync();
+
     // Override the generated output directory so this does not conflict with
     // other build_runner output.
     core.overrideGeneratedOutputDirectory('flutter_web');
@@ -223,25 +226,26 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     };
     final Status status =
         logger.startProgress('Compiling ${targets.first} for the Web...', timeout: null);
+    core.BuildResult result;
     try {
-      _builder = await BuildImpl.create(
-        buildOptions,
+      result = await _runBuilder(
         buildEnvironment,
-        builders,
-        <String, Map<String, dynamic>>{
-          'flutter_tools|entrypoint': <String, dynamic>{
-            'targets': targets,
-            'release': release,
-          },
-          'flutter_tools|shell': <String, dynamic>{
-            'targets': targets,
-          }
-        },
-        isReleaseBuild: false,
+        buildOptions,
+        targets,
+        release,
+        buildDirs,
       );
-      final core.BuildResult result = await _builder.run(
-        const <AssetId, ChangeType>{},
-        buildDirs: buildDirs,
+      return result.status == core.BuildStatus.success;
+    } on core.BuildConfigChangedException {
+      projectDirectory
+        .childDirectory('.dart_tool')
+        .deleteSync(recursive: true);
+      result = await _runBuilder(
+        buildEnvironment,
+        buildOptions,
+        targets,
+        release,
+        buildDirs,
       );
       return result.status == core.BuildStatus.success;
     } finally {
@@ -265,6 +269,29 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       status.cancel();
     }
     return result.status == core.BuildStatus.success;
+  }
+
+
+  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, List<String> targets, bool release, Set<core.BuildDirectory> buildDirs) async {
+    _builder = await BuildImpl.create(
+      buildOptions,
+      buildEnvironment,
+      builders,
+      <String, Map<String, dynamic>>{
+        'flutter_tools|entrypoint': <String, dynamic>{
+          'targets': targets,
+          'release': release,
+        },
+        'flutter_tools|shell': <String, dynamic>{
+          'targets': targets,
+        }
+      },
+      isReleaseBuild: false,
+    );
+    return _builder.run(
+      const <AssetId, ChangeType>{},
+      buildDirs: buildDirs,
+    );
   }
 }
 

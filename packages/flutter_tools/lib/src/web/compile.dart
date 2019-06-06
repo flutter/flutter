@@ -14,7 +14,7 @@ import '../bundle.dart';
 import '../globals.dart';
 import '../project.dart';
 
-/// The [WebCompilationProxuy] instance.
+/// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
 Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo) async {
