@@ -551,17 +551,17 @@ Future<void> bootstrapDart2Js(BuildStep buildStep) async {
   final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
   final List<String> args = <String>[
     '--libraries-spec="$librariesPath"',
-    '-o="$jsOutputPath"',
-    '--packages="$packageFile"',
     '-m',
     '-o4',
+    '-o',
+    '$jsOutputPath',
+    '--packages="$packageFile"',
     dartPath,
   ];
   final Dart2JsBatchWorkerPool dart2js = await buildStep.fetchResource(dart2JsWorkerResource);
   final Dart2JsResult result = await dart2js.compile(args);
   final AssetId jsOutputId = dartEntrypointId.changeExtension(jsEntrypointExtension);
   final io.File jsOutputFile = scratchSpace.fileFor(jsOutputId);
-
   if (result.succeeded && jsOutputFile.existsSync()) {
     log.info(result.output);
     // Explicitly write out the original js file and sourcemap.
