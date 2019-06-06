@@ -240,8 +240,8 @@ class TextSpan extends InlineSpan {
     }
     if (children != null) {
       for (InlineSpan child in children) {
-        assert(child is TextSpan, '`visitTextSpan` is deprecated. Use `visitChildren` to support InlineSpans');
-        TextSpan textSpanChild = child;
+        assert(child is TextSpan, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
+        final TextSpan textSpanChild = child;
         if (!textSpanChild.visitTextSpan(visitor))
           return false;
       }
