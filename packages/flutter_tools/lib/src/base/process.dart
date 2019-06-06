@@ -255,7 +255,7 @@ Future<RunResult> runCheckedAsync(
     environment: environment,
   );
   if (result.exitCode != 0) {
-    if (whiteListFailures != null && !whiteListFailures(result.exitCode)) {
+    if (whiteListFailures == null || !whiteListFailures(result.exitCode)) {
       throw ProcessException(cmd[0], cmd.sublist(1),
           'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
     }
