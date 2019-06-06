@@ -35,10 +35,15 @@ enum Orientation {
 ///
 /// ## Insets and Padding
 ///
-/// //TODO(Piinks): Diagram & further elaboration below
+/// ![A diagram of padding, viewInsets, and viewPadding in correlation with each
+/// other](https://flutter.github.io/assets-for-api-docs/assets/widgets/media_query.mp4)
 ///
-/// This diagram illustrates how [padding] is derived from [viewPadding] and
-/// [viewInsets].
+/// This diagram illustrates how [padding] relates to [viewPadding] and
+/// [viewInsets], shown here in its simplest configuration, as the difference
+/// between the two. In cases when the viewInsets exceed the viewPadding, like
+/// when a keyboard is shown below, padding goes to zero rather than a negative
+/// value. Therefore, padding is calculated by taking
+/// `max(0.0, viewPadding - viewInsets)`.
 ///
 /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/window_padding.mp4}
 ///
