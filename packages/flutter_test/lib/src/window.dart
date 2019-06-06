@@ -347,11 +347,6 @@ class TestWindow implements Window {
     _window.onPlatformMessage = callback;
   }
 
-  @override
-  dynamic noSuchMethod(Invocation invocation) {
-    return super.noSuchMethod(invocation);
-  }
-
   /// Delete any test value properties that have been set on this [TestWindow]
   /// and return to reporting the real [Window] values for all [Window] properties.
   ///
