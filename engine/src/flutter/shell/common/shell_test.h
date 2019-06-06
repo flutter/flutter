@@ -26,10 +26,30 @@ class ShellTest : public ThreadTest {
   ~ShellTest();
 
   Settings CreateSettingsForFixture();
-
+  std::unique_ptr<Shell> CreateShell(Settings settings);
+  std::unique_ptr<Shell> CreateShell(Settings settings,
+                                     TaskRunners task_runners);
   TaskRunners GetTaskRunnersForFixture();
 
   void AddNativeCallback(std::string name, Dart_NativeFunction callback);
+
+  static void PlatformViewNotifyCreated(
+      Shell* shell);  // This creates the surface
+  static void RunEngine(Shell* shell, RunConfiguration configuration);
+
+  static void PumpOneFrame(Shell* shell);
+
+  // Declare |UnreportedTimingsCount|, |GetNeedsReportTimings| and
+  // |SetNeedsReportTimings| inside |ShellTest| mainly for easier friend class
+  // declarations as shell unit tests and Shell are in different name spaces.
+
+  static bool GetNeedsReportTimings(Shell* shell);
+  static void SetNeedsReportTimings(Shell* shell, bool value);
+
+  // Do not assert |UnreportedTimingsCount| to be positive in any tests.
+  // Otherwise those tests will be flaky as the clearing of unreported timings
+  // is unpredictive.
+  static int UnreportedTimingsCount(Shell* shell);
 
  protected:
   // |testing::ThreadTest|

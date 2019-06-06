@@ -106,7 +106,7 @@ int RunTester(const flutter::Settings& settings, bool run_forever) {
       };
 
   Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
-    return std::make_unique<Rasterizer>(shell.GetTaskRunners());
+    return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
   };
 
   auto shell = Shell::Create(task_runners,             //

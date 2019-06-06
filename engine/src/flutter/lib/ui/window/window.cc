@@ -60,6 +60,12 @@ void SetIsolateDebugName(Dart_NativeArguments args) {
   UIDartState::Current()->SetDebugName(name);
 }
 
+void SetNeedsReportTimings(Dart_NativeArguments args) {
+  Dart_Handle exception = nullptr;
+  bool value = tonic::DartConverter<bool>::FromArguments(args, 1, exception);
+  UIDartState::Current()->window()->client()->SetNeedsReportTimings(value);
+}
+
 void ReportUnhandledException(Dart_NativeArguments args) {
   Dart_Handle exception = nullptr;
 
@@ -320,6 +326,31 @@ void Window::BeginFrame(fml::TimePoint frameTime) {
   tonic::LogIfError(tonic::DartInvokeField(library_.value(), "_drawFrame", {}));
 }
 
+void Window::ReportTimings(std::vector<int64_t> timings) {
+  std::shared_ptr<tonic::DartState> dart_state = library_.dart_state().lock();
+  if (!dart_state)
+    return;
+  tonic::DartState::Scope scope(dart_state);
+
+  Dart_Handle data_handle =
+      Dart_NewTypedData(Dart_TypedData_kInt64, timings.size());
+
+  Dart_TypedData_Type type;
+  void* data = nullptr;
+  intptr_t num_acquired = 0;
+  FML_CHECK(!Dart_IsError(
+      Dart_TypedDataAcquireData(data_handle, &type, &data, &num_acquired)));
+  FML_DCHECK(num_acquired == static_cast<int>(timings.size()));
+
+  memcpy(data, timings.data(), sizeof(int64_t) * timings.size());
+  FML_CHECK(Dart_TypedDataReleaseData(data_handle));
+
+  tonic::LogIfError(tonic::DartInvokeField(library_.value(), "_reportTimings",
+                                           {
+                                               data_handle,
+                                           }));
+}
+
 void Window::CompletePlatformMessageEmptyResponse(int response_id) {
   if (!response_id)
     return;
@@ -353,6 +384,7 @@ void Window::RegisterNatives(tonic::DartLibraryNatives* natives) {
       {"Window_updateSemantics", UpdateSemantics, 2, true},
       {"Window_setIsolateDebugName", SetIsolateDebugName, 2, true},
       {"Window_reportUnhandledException", ReportUnhandledException, 2, true},
+      {"Window_setNeedsReportTimings", SetNeedsReportTimings, 2, true},
   });
 }
 
