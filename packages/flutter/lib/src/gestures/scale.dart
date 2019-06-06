@@ -45,7 +45,7 @@ class ScaleStartDetails {
   ///
   /// See also:
   ///
-  ///  * [localFocalPoint], which is the same value reported in global
+  ///  * [localFocalPoint], which is the same value reported in local
   ///    coordinates.
   final Offset focalPoint;
 
