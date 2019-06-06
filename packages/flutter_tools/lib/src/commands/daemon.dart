@@ -863,7 +863,7 @@ class AppInstance {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
   }
 
-  Future<void> stop() => runner.stop();
+  Future<void> stop() => runner.exit();
   Future<void> detach() => runner.detach();
 
   void closeLogger() {

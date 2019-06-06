@@ -49,7 +49,7 @@ class WebDevice extends Device {
   bool get supportsStartPaused => true;
 
   @override
-  bool get supportsStopApp => true;
+  bool get supportsFlutterExit => true;
 
   @override
   bool get supportsScreenshot => false;
