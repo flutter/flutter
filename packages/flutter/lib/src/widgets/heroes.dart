@@ -22,7 +22,8 @@ import 'transitions.dart';
 /// [MaterialRectArcTween].
 typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 
-/// A function that builds a [Hero] placeholder widget given a child and a [Size]
+/// Signature for a function that builds a [Hero] placeholder widget given a
+/// child and a [Size].
 ///
 /// The child can optionally be part of the returned widget tree. The returned
 /// widget should typically be constrained to [heroSize], if it doesn't do so
