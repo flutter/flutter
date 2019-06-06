@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:meta/meta.dart';
+
 import '../application_package.dart';
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart';
@@ -82,15 +85,29 @@ class WebDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
-    final String chrome = findChromeExecutable();
-    final ProcessResult result = await processManager.run(<String>[
-      chrome,
-      '--version',
-    ]);
-    if (result.exitCode == 0) {
-      return result.stdout;
+    // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
+    String version = 'unknown';
+    if (platform.isWindows) {
+      final ProcessResult result = await processManager.run(<String>[
+        r'reg', 'query', 'HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon', '/v', 'version'
+      ]);
+      if (result.exitCode == 0) {
+        final List<String> parts = result.stdout.split(RegExp(r'\s+'));
+        if (parts.length > 2) {
+          version = 'Google Chrome ' + parts[parts.length - 2];
+        }
+      }
+    } else {
+      final String chrome = findChromeExecutable();
+      final ProcessResult result = await processManager.run(<String>[
+        chrome,
+        '--version',
+      ]);
+      if (result.exitCode == 0) {
+        version = result.stdout;
+      }
     }
-    return 'unknown';
+    return version;
   }
 
   @override
@@ -198,4 +215,9 @@ class WebDevices extends PollingDeviceDiscovery {
 
   @override
   bool get supportsPlatform => flutterWebEnabled;
+}
+
+@visibleForTesting
+String parseVersionForWindows(String input) {
+  return input.split(RegExp('\w')).last;
 }

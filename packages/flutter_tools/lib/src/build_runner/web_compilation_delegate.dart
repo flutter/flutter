@@ -14,17 +14,21 @@ import 'package:build_modules/src/platform.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
 import 'package:build_runner_core/src/generate/build_impl.dart';
 import 'package:build_runner_core/src/generate/options.dart';
+import 'package:build_test/builder.dart';
+import 'package:build_test/src/debug_test_builder.dart';
 import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:test_core/backend.dart';
 import 'package:watcher/watcher.dart';
 
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -68,6 +72,36 @@ final DartPlatform flutterWebPlatform =
 /// The build application to compile a flutter application to the web.
 final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
+    'flutter_tools|test_bootstrap',
+    <BuilderFactory>[
+      (BuilderOptions options) => const DebugTestBuilder(),
+      (BuilderOptions options) => const FlutterWebTestBootstrapBuilder(),
+    ],
+    core.toRoot(),
+    hideOutput: true,
+    defaultGenerateFor: const InputSet(
+      include: <String>[
+        'test/**',
+      ],
+    ),
+  ),
+  core.apply(
+    'flutter_tools|shell',
+    <BuilderFactory>[
+      (BuilderOptions options) => FlutterWebShellBuilder(
+        options.config['targets'] ?? <String>['lib/main.dart']
+      ),
+    ],
+    core.toRoot(),
+    hideOutput: true,
+    defaultGenerateFor: const InputSet(
+      include: <String>[
+        'lib/**',
+        'web/**',
+      ],
+    ),
+  ),
+  core.apply(
       'flutter_tools|module_library',
       <Builder Function(BuilderOptions)>[moduleLibraryBuilder],
       core.toAllPackages(),
@@ -108,24 +142,10 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       hideOutput: true,
       appliesBuilders: <String>['flutter_tools|ddc_modules']),
   core.apply(
-    'flutter_tools|shell',
-    <BuilderFactory>[
-      (BuilderOptions options) => FlutterWebShellBuilder(),
-    ],
-    core.toRoot(),
-    hideOutput: true,
-    defaultGenerateFor: const InputSet(
-      include: <String>[
-        'lib/**',
-        'web/**',
-      ],
-    ),
-  ),
-  core.apply(
     'flutter_tools|entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config['target'] ?? 'lib/main.dart'),
+          options.config['targets'] ?? <String>['lib/main.dart']),
     ],
     core.toRoot(),
     hideOutput: true,
@@ -133,6 +153,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       include: <String>[
         'lib/**',
         'web/**',
+        'test/**_test.dart.browser_test.dart',
       ],
     ),
   ),
@@ -151,13 +172,14 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   @override
   Future<void> initialize({
     @required Directory projectDirectory,
-    @required String target,
+    @required List<String> targets,
+    String testOutputDir,
   }) async {
     // Override the generated output directory so this does not conflict with
     // other build_runner output.
     core.overrideGeneratedOutputDirectory('flutter_web');
     _packageUriMapper = PackageUriMapper(
-        path.absolute(target), PackageMap.globalPackagesPath, null, null);
+        path.absolute('lib/main.dart'), PackageMap.globalPackagesPath, null, null);
     _packageGraph = core.PackageGraph.forPath(projectDirectory.path);
     final core.BuildEnvironment buildEnvironment = core.OverrideableEnvironment(
         core.IOEnvironment(_packageGraph), onLog: (LogRecord record) {
@@ -179,8 +201,18 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       trackPerformance: false,
       deleteFilesByDefault: true,
     );
+    final Set<core.BuildDirectory> buildDirs = <core.BuildDirectory>{
+      if (testOutputDir != null)
+        core.BuildDirectory(
+          'test',
+          outputLocation: core.OutputLocation(
+            testOutputDir,
+            useSymlinks: !platform.isWindows,
+          ),
+      ),
+    };
     final Status status =
-        logger.startProgress('Compiling $target for the Web...', timeout: null);
+        logger.startProgress('Compiling ${targets.first} for the Web...', timeout: null);
     try {
       _builder = await BuildImpl.create(
         buildOptions,
@@ -188,12 +220,15 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         builders,
         <String, Map<String, dynamic>>{
           'flutter_tools|entrypoint': <String, dynamic>{
-            'target': target,
+            'targets': targets,
+          },
+          'flutter_tools|shell': <String, dynamic>{
+            'targets': targets,
           }
         },
         isReleaseBuild: false,
       );
-      await _builder.run(const <AssetId, ChangeType>{});
+      await _builder.run(const <AssetId, ChangeType>{}, buildDirs: buildDirs);
     } finally {
       status.stop();
     }
@@ -205,9 +240,8 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         logger.startProgress('Recompiling sources...', timeout: null);
     final Map<AssetId, ChangeType> updates = <AssetId, ChangeType>{};
     for (Uri input in inputs) {
-      updates[AssetId.resolve(
-              _packageUriMapper.map(input.toFilePath()).toString())] =
-          ChangeType.MODIFY;
+      final AssetId assetId = AssetId.resolve( _packageUriMapper.map(input.toFilePath()).toString());
+      updates[assetId] = ChangeType.MODIFY;
     }
     core.BuildResult result;
     try {
@@ -221,13 +255,13 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
-  const FlutterWebEntrypointBuilder(this.target);
+  const FlutterWebEntrypointBuilder(this.targets);
 
-  final String target;
+  final List<String> targets;
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
-        '_web_entrypoint.dart': <String>[
+        '.dart': <String>[
           ddcBootstrapExtension,
           jsEntrypointExtension,
           jsEntrypointSourceMapExtension,
@@ -238,7 +272,14 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    if (!buildStep.inputId.path.contains(target)) {
+    bool matches = false;
+    for (String target in targets) {
+      if (buildStep.inputId.path.contains(fs.path.setExtension(target, '_web_entrypoint.dart'))) {
+        matches = true;
+        break;
+      }
+    }
+    if (!matches) {
       return;
     }
     log.info('building for target ${buildStep.inputId.path}');
@@ -246,11 +287,140 @@ class FlutterWebEntrypointBuilder implements Builder {
   }
 }
 
-/// A builder which wraps the user provided main and initializes the web shell.
-class FlutterWebShellBuilder implements Builder {
+class FlutterWebTestBootstrapBuilder implements Builder {
+  const FlutterWebTestBootstrapBuilder();
+
   @override
-  FutureOr<void> build(BuildStep buildStep) {
-    
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+    '_test.dart': <String>[
+      '_test.dart.browser_test.dart',
+    ]
+  };
+
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    final AssetId id = buildStep.inputId;
+    final String contents = await buildStep.readAsString(id);
+    final String assetPath = id.pathSegments.first == 'lib'
+        ? path.url.join('packages', id.package, id.path)
+        : id.path;
+    final Metadata metadata = parseMetadata(
+        assetPath, contents, Runtime.builtIn.map((Runtime runtime) => runtime.name).toSet());
+
+    if (metadata.testOn.evaluate(SuitePlatform(Runtime.chrome))) {
+    await buildStep.writeAsString(id.addExtension('.browser_test.dart'), '''
+import 'dart:ui' as ui;
+import 'dart:html';
+import 'dart:js';
+
+import 'package:stream_channel/stream_channel.dart';
+import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
+import 'package:test_api/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
+import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
+import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
+
+import "${path.url.basename(id.path)}" as test;
+
+Future<void> main() async {
+  // Extra initialization for flutter_web.
+  // The following parameters are hard-coded in Flutter's test embedder. Since
+  // we don't have an embedder yet this is the lowest-most layer we can put
+  // this stuff in.
+  await ui.webOnlyInitializeEngine();
+  internalBootstrapBrowserTest(() => test.main);
+}
+
+void internalBootstrapBrowserTest(Function getMain()) {
+  var channel =
+      serializeSuite(getMain, hidePrints: false, beforeLoad: () async {
+    var serialized =
+        await suiteChannel("test.browser.mapper").stream.first as Map;
+    if (serialized == null) return;
+  });
+  postMessageChannel().pipe(channel);
+}
+StreamChannel serializeSuite(Function getMain(),
+        {bool hidePrints = true, Future beforeLoad()}) =>
+    RemoteListener.start(getMain,
+        hidePrints: hidePrints, beforeLoad: beforeLoad);
+
+StreamChannel suiteChannel(String name) {
+  var manager = SuiteChannelManager.current;
+  if (manager == null) {
+    throw StateError('suiteChannel() may only be called within a test worker.');
+  }
+
+  return manager.connectOut(name);
+}
+
+StreamChannel postMessageChannel() {
+  var controller = StreamChannelController(sync: true);
+  window.onMessage.firstWhere((message) {
+    return message.origin == window.location.origin && message.data == "port";
+  }).then((message) {
+    var port = message.ports.first;
+    var portSubscription = port.onMessage.listen((message) {
+      controller.local.sink.add(message.data);
+    });
+
+    controller.local.stream.listen((data) {
+      port.postMessage({"data": data});
+    }, onDone: () {
+      port.postMessage({"event": "done"});
+      portSubscription.cancel();
+    });
+  });
+
+  context['parent'].callMethod('postMessage', [
+    JsObject.jsify({"href": window.location.href, "ready": true}),
+    window.location.origin,
+  ]);
+  return controller.foreign;
+}
+
+void setStackTraceMapper(StackTraceMapper mapper) {
+  var formatter = StackTraceFormatter.current;
+  if (formatter == null) {
+    throw StateError(
+        'setStackTraceMapper() may only be called within a test worker.');
+  }
+
+  formatter.configure(mapper: mapper);
+}
+''');
+    }
+  }
+}
+
+/// A shell builder which generates the web specific entrypoint.
+class FlutterWebShellBuilder implements Builder {
+  const FlutterWebShellBuilder(this.targets);
+
+  final List<String> targets;
+
+  @override
+  FutureOr<void> build(BuildStep buildStep) async {
+    bool matches = false;
+    for (String target in targets) {
+      if (buildStep.inputId.path.contains(target)) {
+        matches = true;
+        break;
+      }
+    }
+    if (!matches) {
+      return;
+    }
+    final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
+    await buildStep.writeAsString(outputId, '''
+import 'dart:ui' as ui;
+import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
+
+Future<void> main() async {
+  await ui.webOnlyInitializePlatform();
+  entrypoint.main();
+}
+
+''');
   }
 
   @override
