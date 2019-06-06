@@ -11,7 +11,6 @@ import '../base/file_system.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../bundle.dart';
-import '../codegen.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
@@ -90,17 +89,6 @@ class TestCompiler {
   /// Create the resident compiler used to compile the test.
   @visibleForTesting
   Future<ResidentCompiler> createCompiler() async {
-    if (flutterProject.hasBuilders) {
-      return CodeGeneratingResidentCompiler.create(
-        flutterProject: flutterProject,
-        trackWidgetCreation: trackWidgetCreation,
-        compilerMessageConsumer: _reportCompilerMessage,
-        initializeFromDill: testFilePath,
-        // We already ran codegen once at the start, we only need to
-        // configure builders.
-        runCold: true,
-      );
-    }
     return ResidentCompiler(
       artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath),
       packagesPath: PackageMap.globalPackagesPath,
