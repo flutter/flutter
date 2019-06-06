@@ -304,9 +304,6 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
 
   Future<void> _cleanAssets(Directory projectDirectory) async {
     final File assetGraphFile = fs.file(core.assetGraphPath);
-    if (assetGraphFile.existsSync()) {
-      assetGraphFile.deleteSync();
-    }
     AssetGraph assetGraph;
     try {
       assetGraph = AssetGraph.deserialize(await assetGraphFile.readAsBytes());
@@ -321,6 +318,9 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       'build',
       'flutter_web',
     ));
+    if (assetGraphFile.existsSync()) {
+      assetGraphFile.deleteSync();
+    }
     if (cacheDirectory.existsSync()) {
       cacheDirectory.deleteSync(recursive: true);
     }
@@ -550,9 +550,9 @@ Future<void> bootstrapDart2Js(BuildStep buildStep) async {
   final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
   final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
   final List<String> args = <String>[
-    '--libraries-spec=$librariesPath',
-    '-o=$jsOutputPath',
-    '--packages=$packageFile',
+    '--libraries-spec="$librariesPath"',
+    '-o="$jsOutputPath"',
+    '--packages="$packageFile"',
     '-m',
     '-o4',
     dartPath,
