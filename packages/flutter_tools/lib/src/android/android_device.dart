@@ -167,7 +167,7 @@ class AndroidDevice extends Device {
     return <String>[getAdbPath(androidSdk), '-s', id]..addAll(args);
   }
 
-  String runAdbMostlyCheckedSync(
+  String runAdbCheckedSync(
       List<String> params, {
         String workingDirectory,
         bool allowReentrantFlutter = false,
@@ -179,7 +179,7 @@ class AndroidDevice extends Device {
     );
   }
 
-  Future<RunResult> runAdbMostlyCheckedAsync(
+  Future<RunResult> runAdbCheckedAsync(
       List<String> params, {
         String workingDirectory,
         bool allowReentrantFlutter = false,
@@ -282,7 +282,7 @@ class AndroidDevice extends Device {
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     // This call takes 400ms - 600ms.
     try {
-      final RunResult listOut = await runAdbMostlyCheckedAsync(<String>['shell', 'pm', 'list', 'packages', app.id]);
+      final RunResult listOut = await runAdbCheckedAsync(<String>['shell', 'pm', 'list', 'packages', app.id]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } catch (error) {
       printTrace('$error');
@@ -324,7 +324,7 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    await runAdbMostlyCheckedAsync(<String>[
+    await runAdbCheckedAsync(<String>[
       'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
     ]);
     return true;
@@ -481,7 +481,7 @@ class AndroidDevice extends Device {
       }
     }
     cmd.add(apk.launchActivity);
-    final String result = (await runAdbMostlyCheckedAsync(cmd)).stdout;
+    final String result = (await runAdbCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
       printError(result.trim(), wrap: false);
@@ -545,7 +545,7 @@ class AndroidDevice extends Device {
   /// Return the most recent timestamp in the Android log or null if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
-    final String output = runAdbMostlyCheckedSync(<String>[
+    final String output = runAdbCheckedSync(<String>[
       'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
     ]);
 
@@ -562,9 +562,9 @@ class AndroidDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     const String remotePath = '/data/local/tmp/flutter_screenshot.png';
-    await runAdbMostlyCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
+    await runAdbCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
-    await runAdbMostlyCheckedAsync(<String>['shell', 'rm', remotePath]);
+    await runAdbCheckedAsync(<String>['shell', 'rm', remotePath]);
   }
 
   @override
