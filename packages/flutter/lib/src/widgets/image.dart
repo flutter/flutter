@@ -55,6 +55,14 @@ ImageConfiguration createLocalImageConfiguration(BuildContext context, { Size si
   );
 }
 
+ImageProvider<dynamic> _resizeIfNeeded(bool resizeToFit, ImageProvider<dynamic> provider) {
+  if (resizeToFit) {
+    return ResizedImage(provider);
+  } else {
+    return provider;
+  }
+}
+
 /// Prefetches an image into the image cache.
 ///
 /// Returns a [Future] that will complete when the first image yielded by the
@@ -262,7 +270,7 @@ class Image extends StatefulWidget {
 
   /// Creates a widget that displays an [ImageStream] obtained from the network.
   ///
-  /// The [src], [scale], and [repeat] arguments must not be null.
+  /// The [src], [scale], [resizeToFit], and [repeat] arguments must not be null.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -280,6 +288,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [resizeToFit] is true, it indicates to the engine that this image must
+  /// be resized. The image will be resized to the container's rendered dimensions.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of this parameter. This parameter is primarily
+  /// intended to reduce the memory usage of [ImageCache].
   Image.network(
     String src, {
     Key key,
@@ -300,7 +314,8 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers),
+    bool resizeToFit = false,
+  }) : image = _resizeIfNeeded(resizeToFit, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
@@ -324,6 +339,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [resizeToFit] is true, it indicates to the engine that this image must
+  /// be resized. The image will be resized to the container's rendered dimensions.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of this parameter. This parameter is primarily
+  /// intended to reduce the memory usage of [ImageCache].
   Image.file(
     File file, {
     Key key,
@@ -342,7 +363,8 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = FileImage(file, scale: scale),
+    bool resizeToFit = false,
+  }) : image = _resizeIfNeeded(resizeToFit, FileImage(file, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -475,6 +497,12 @@ class Image extends StatefulWidget {
   ///    scale is present.
   ///  * <https://flutter.dev/assets-and-images/>, an introduction to assets in
   ///    Flutter.
+  ///
+  /// If [resizeToFit] is true, it indicates to the engine that this image must
+  /// be resized. The image will be resized to the container's rendered dimensions.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of this parameter. This parameter is primarily
+  /// intended to reduce the memory usage of [ImageCache].
   Image.asset(
     String name, {
     Key key,
@@ -495,9 +523,10 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     String package,
     this.filterQuality = FilterQuality.low,
-  }) : image = scale != null
+    bool resizeToFit = false,
+  }) : image = _resizeIfNeeded(resizeToFit, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package),
+         : AssetImage(name, bundle: bundle, package: package)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
@@ -519,6 +548,12 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [resizeToFit] is true, it indicates to the engine that this image must
+  /// be resized. The image will be resized to the container's rendered dimensions.
+  /// The image will be rendered to the constraints of the layout or [width]
+  /// and [height] regardless of this parameter. This parameter is primarily
+  /// intended to reduce the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
     Key key,
@@ -537,7 +572,8 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = MemoryImage(bytes, scale: scale),
+    bool resizeToFit = false,
+  }) : image = _resizeIfNeeded(resizeToFit, MemoryImage(bytes, scale: scale)),
        loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),

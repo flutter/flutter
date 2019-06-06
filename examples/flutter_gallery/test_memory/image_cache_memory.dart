@@ -33,6 +33,7 @@ Future<void> main() async {
               height: 100,
               fit: BoxFit.contain,
               key: Key('image_$position'),
+              resizeToFit: true,
             ),
           ),
         );

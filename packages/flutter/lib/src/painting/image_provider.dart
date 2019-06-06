@@ -379,8 +379,23 @@ abstract class ImageProvider<T> {
 
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image.
+  ///
+  /// If [targetHeight] or [targetWidth] are specified, the image returned
+  /// through the [ImageStreamCompleter] will be resized. It is discouraged
+  /// to use these parameters directly as it could result in the following
+  /// scenario:
+  ///
+  ///   1. call [load] with [h1, w1].
+  ///   2. [ImageCache] will cache image with [h1, w1] dimensions.
+  ///   3. call [load] with [h2, w2], [ImageCache] could return the previously
+  ///      cached image if [obtainKey] does not account for target dimensions.
+  ///
+  /// See also:
+  ///   * [Image.network]'s [resizeToFit] parameter for how this is intended to
+  ///      be consumed.
+  ///   * [ResizedImage] for modifying the key to account for target dimensions.
   @protected
-  ImageStreamCompleter load(T key);
+  ImageStreamCompleter load(T key, {int targetHeight, int targetWidth});
 
   @override
   String toString() => '$runtimeType()';
@@ -444,9 +459,9 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   /// Converts a key into an [ImageStreamCompleter], and begins fetching the
   /// image using [loadAsync].
   @override
-  ImageStreamCompleter load(AssetBundleImageKey key) {
+  ImageStreamCompleter load(AssetBundleImageKey key, {int targetHeight, int targetWidth}) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key),
+      codec:  _loadAsync(key, targetWidth: targetWidth, targetHeight: targetHeight),
       scale: key.scale,
       informationCollector: () sync* {
         yield DiagnosticsProperty<ImageProvider>('Image provider', this);
@@ -460,11 +475,47 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   ///
   /// This function is used by [load].
   @protected
-  Future<ui.Codec> _loadAsync(AssetBundleImageKey key) async {
+  Future<ui.Codec> _loadAsync(AssetBundleImageKey key, {int targetWidth, int targetHeight}) async {
     final ByteData data = await key.bundle.load(key.name);
     if (data == null)
       throw 'Unable to read data';
-    return await PaintingBinding.instance.instantiateImageCodec(data.buffer.asUint8List());
+    return await PaintingBinding.instance.instantiateImageCodec(data.buffer.asUint8List(), targetWidth: targetWidth, targetHeight: targetHeight);
+  }
+}
+
+class _SizeAwareCacheKey {
+  const _SizeAwareCacheKey(this._providerCacheKey, this._imageSize);
+
+  final dynamic _providerCacheKey;
+  final Size _imageSize;
+}
+
+/// Re-sizes the image provided to the rendered size.
+///
+/// See also:
+/// * [Image.network] for example usage when `resizeToFit` parameter is set.
+class ResizedImage extends ImageProvider<_SizeAwareCacheKey> {
+  /// Creates an object that re-sizes the image to rendered size.
+  const ResizedImage(this._imageProvider);
+
+  final ImageProvider _imageProvider;
+
+  @override
+  ImageStreamCompleter load(_SizeAwareCacheKey key, {int targetWidth, int targetHeight}) {
+    if (key._imageSize == null) {
+      return _imageProvider.load(key._providerCacheKey);
+    } else {
+      final int targetWidth = key._imageSize.width.round();
+      final int targetHeight = key._imageSize.height.round();
+      return _imageProvider.load(key._providerCacheKey, targetHeight:  targetHeight, targetWidth: targetWidth);
+    }
+  }
+
+  @override
+  Future<_SizeAwareCacheKey> obtainKey(ImageConfiguration configuration) async {
+    final Size imageSize = configuration.size;
+    final dynamic providerCacheKey = await _imageProvider.obtainKey(configuration);
+    return _SizeAwareCacheKey(providerCacheKey, imageSize);
   }
 }
 
@@ -501,7 +552,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
   }
 
   @override
-  ImageStreamCompleter load(NetworkImage key) {
+  ImageStreamCompleter load(NetworkImage key, {int targetHeight, int targetWidth}) {
     // Ownership of this controller is handed off to [_loadAsync]; it is that
     // method's responsibility to close the controller's stream when the image
     // has been loaded or an error is thrown.
@@ -611,7 +662,7 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  ImageStreamCompleter load(FileImage key) {
+  ImageStreamCompleter load(FileImage key, {int targetHeight, int targetWidth}) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
@@ -679,7 +730,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  ImageStreamCompleter load(MemoryImage key) {
+  ImageStreamCompleter load(MemoryImage key, {int targetHeight, int targetWidth}) {
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key),
       scale: key.scale,
