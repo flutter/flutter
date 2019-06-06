@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('BackdropFilter\'s cull rect does not shrink', (WidgetTester tester) async {
+    tester.binding.addTime(const Duration(seconds: 15));
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
