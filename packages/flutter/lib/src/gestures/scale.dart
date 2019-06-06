@@ -52,7 +52,7 @@ class ScaleStartDetails {
   /// The initial focal point of the pointers in contact with the screen.
   ///
   /// Reported in local coordinates. Defaults to [focalPoint] if not set in the
-  //  /// constructor.
+  /// constructor.
   ///
   /// See also:
   ///
