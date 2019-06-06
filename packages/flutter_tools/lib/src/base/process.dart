@@ -239,11 +239,14 @@ Future<RunResult> runAsync(
   return runResults;
 }
 
+typedef RunResultChecker = bool Function(int);
+
 Future<RunResult> runCheckedAsync(
   List<String> cmd, {
   String workingDirectory,
   bool allowReentrantFlutter = false,
   Map<String, String> environment,
+  RunResultChecker whiteListFailures,
 }) async {
   final RunResult result = await runAsync(
     cmd,
@@ -252,8 +255,10 @@ Future<RunResult> runCheckedAsync(
     environment: environment,
   );
   if (result.exitCode != 0) {
-    throw ProcessException(cmd[0], cmd.sublist(1),
-      'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+    if (whiteListFailures == null || !whiteListFailures(result.exitCode)) {
+      throw ProcessException(cmd[0], cmd.sublist(1),
+          'Process "${cmd[0]}" exited abnormally:\n$result', result.exitCode);
+    }
   }
   return result;
 }
@@ -287,6 +292,7 @@ String runCheckedSync(
   bool allowReentrantFlutter = false,
   bool hideStdout = false,
   Map<String, String> environment,
+  RunResultChecker whiteListFailures,
 }) {
   return _runWithLoggingSync(
     cmd,
@@ -296,6 +302,7 @@ String runCheckedSync(
     checked: true,
     noisyErrors: true,
     environment: environment,
+    whiteListFailures: whiteListFailures
   );
 }
 
@@ -330,6 +337,7 @@ String _runWithLoggingSync(
   bool allowReentrantFlutter = false,
   bool hideStdout = false,
   Map<String, String> environment,
+  RunResultChecker whiteListFailures,
 }) {
   _traceCommand(cmd, workingDirectory: workingDirectory);
   final ProcessResult results = processManager.runSync(
@@ -340,14 +348,19 @@ String _runWithLoggingSync(
 
   printTrace('Exit code ${results.exitCode} from: ${cmd.join(' ')}');
 
+  bool failedExitCode = results.exitCode != 0;
+  if (whiteListFailures != null && failedExitCode) {
+    failedExitCode = !whiteListFailures(results.exitCode);
+  }
+
   if (results.stdout.isNotEmpty && !hideStdout) {
-    if (results.exitCode != 0 && noisyErrors)
+    if (failedExitCode && noisyErrors)
       printStatus(results.stdout.trim());
     else
       printTrace(results.stdout.trim());
   }
 
-  if (results.exitCode != 0) {
+  if (failedExitCode) {
     if (results.stderr.isNotEmpty) {
       if (noisyErrors)
         printError(results.stderr.trim());
