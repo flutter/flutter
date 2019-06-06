@@ -45,31 +45,9 @@ const Map<String, _HardwareType> _knownHardware = <String, _HardwareType>{
 
 bool allowHeapCorruptionOnWindows(int exitCode) {
   // In platform tools 29.0.0 adb.exe seems to be ending with this heap
-  // corruption error code onseemingly successful termination.
+  // corruption error code on seemingly successful termination.
   // So we ignore this error on Windows.
   return exitCode == -1073740940 && platform.isWindows;
-}
-
-String runMostlyCheckedSync(
-    List<String> cmd, {
-      String workingDirectory,
-      bool allowReentrantFlutter = false,
-      Map<String, String> environment}) {
-  return runCheckedSync(cmd, workingDirectory: workingDirectory,
-      allowReentrantFlutter: allowReentrantFlutter,
-      environment: environment,
-      whiteListFailures: allowHeapCorruptionOnWindows
-  );
-}
-
-Future<RunResult> runMostlyCheckedAsync(
-    List<String> cmd, {
-      String workingDirectory,
-      bool allowReentrantFlutter = false,
-    }) async {
-  return runCheckedAsync(cmd, workingDirectory: workingDirectory,
-      allowReentrantFlutter: allowReentrantFlutter,
-      whiteListFailures: allowHeapCorruptionOnWindows);
 }
 
 class AndroidDevices extends PollingDeviceDiscovery {
@@ -189,6 +167,28 @@ class AndroidDevice extends Device {
     return <String>[getAdbPath(androidSdk), '-s', id]..addAll(args);
   }
 
+  String runAdbMostlyCheckedSync(
+      List<String> params, {
+        String workingDirectory,
+        bool allowReentrantFlutter = false,
+        Map<String, String> environment}) {
+    return runCheckedSync(adbCommandForDevice(params), workingDirectory: workingDirectory,
+        allowReentrantFlutter: allowReentrantFlutter,
+        environment: environment,
+        whiteListFailures: allowHeapCorruptionOnWindows
+    );
+  }
+
+  Future<RunResult> runAdbMostlyCheckedAsync(
+      List<String> params, {
+        String workingDirectory,
+        bool allowReentrantFlutter = false,
+      }) async {
+    return runCheckedAsync(adbCommandForDevice(params), workingDirectory: workingDirectory,
+        allowReentrantFlutter: allowReentrantFlutter,
+        whiteListFailures: allowHeapCorruptionOnWindows);
+  }
+
   bool _isValidAdbVersion(String adbVersion) {
     // Sample output: 'Android Debug Bridge version 1.0.31'
     final Match versionFields = RegExp(r'(\d+)\.(\d+)\.(\d+)').firstMatch(adbVersion);
@@ -282,7 +282,7 @@ class AndroidDevice extends Device {
   Future<bool> isAppInstalled(ApplicationPackage app) async {
     // This call takes 400ms - 600ms.
     try {
-      final RunResult listOut = await runMostlyCheckedAsync(adbCommandForDevice(<String>['shell', 'pm', 'list', 'packages', app.id]));
+      final RunResult listOut = await runAdbMostlyCheckedAsync(<String>['shell', 'pm', 'list', 'packages', app.id]);
       return LineSplitter.split(listOut.stdout).contains('package:${app.id}');
     } catch (error) {
       printTrace('$error');
@@ -324,9 +324,9 @@ class AndroidDevice extends Device {
       return false;
     }
 
-    await runMostlyCheckedAsync(adbCommandForDevice(<String>[
+    await runAdbMostlyCheckedAsync(<String>[
       'shell', 'echo', '-n', _getSourceSha1(app), '>', _getDeviceSha1Path(app),
-    ]));
+    ]);
     return true;
   }
 
@@ -443,13 +443,13 @@ class AndroidDevice extends Device {
 
     List<String> cmd;
 
-    cmd = adbCommandForDevice(<String>[
+    cmd = <String>[
       'shell', 'am', 'start',
       '-a', 'android.intent.action.RUN',
       '-f', '0x20000000', // FLAG_ACTIVITY_SINGLE_TOP
       '--ez', 'enable-background-compilation', 'true',
       '--ez', 'enable-dart-profiling', 'true',
-    ]);
+    ];
 
     if (traceStartup)
       cmd.addAll(<String>['--ez', 'trace-startup', 'true']);
@@ -481,7 +481,7 @@ class AndroidDevice extends Device {
       }
     }
     cmd.add(apk.launchActivity);
-    final String result = (await runMostlyCheckedAsync(cmd)).stdout;
+    final String result = (await runAdbMostlyCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
       printError(result.trim(), wrap: false);
@@ -545,9 +545,9 @@ class AndroidDevice extends Device {
   /// Return the most recent timestamp in the Android log or null if there is
   /// no available timestamp. The format can be passed to logcat's -T option.
   String get lastLogcatTimestamp {
-    final String output = runMostlyCheckedSync(adbCommandForDevice(<String>[
+    final String output = runAdbMostlyCheckedSync(<String>[
       'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
-    ]));
+    ]);
 
     final Match timeMatch = _timeRegExp.firstMatch(output);
     return timeMatch?.group(0);
@@ -562,9 +562,9 @@ class AndroidDevice extends Device {
   @override
   Future<void> takeScreenshot(File outputFile) async {
     const String remotePath = '/data/local/tmp/flutter_screenshot.png';
-    await runMostlyCheckedAsync(adbCommandForDevice(<String>['shell', 'screencap', '-p', remotePath]));
+    await runAdbMostlyCheckedAsync(<String>['shell', 'screencap', '-p', remotePath]);
     await runCheckedAsync(adbCommandForDevice(<String>['pull', remotePath, outputFile.path]));
-    await runMostlyCheckedAsync(adbCommandForDevice(<String>['shell', 'rm', remotePath]));
+    await runAdbMostlyCheckedAsync(<String>['shell', 'rm', remotePath]);
   }
 
   @override
