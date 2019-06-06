@@ -481,7 +481,7 @@ class AndroidDevice extends Device {
       }
     }
     cmd.add(apk.launchActivity);
-    final String result = (await runCheckedAsync(cmd)).stdout;
+    final String result = (await runMostlyCheckedAsync(cmd)).stdout;
     // This invocation returns 0 even when it fails.
     if (result.contains('Error: ')) {
       printError(result.trim(), wrap: false);
