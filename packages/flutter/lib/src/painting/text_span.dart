@@ -205,11 +205,8 @@ class TextSpan extends InlineSpan {
       builder.pop();
   }
 
-  /// Walks this [TextSpan] and its descendants in pre-order and calls [visitor]
+  /// Walks this text span and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor` returns
-  /// false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
@@ -219,30 +216,6 @@ class TextSpan extends InlineSpan {
     if (children != null) {
       for (InlineSpan child in children) {
         if (!child.visitChildren(visitor))
-          return false;
-      }
-    }
-    return true;
-  }
-
-  // TODO(garyq): Remove this after next stable release.
-  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
-  /// for each span that has content.
-  ///
-  /// When `visitor` returns true, the walk will continue. When `visitor` returns
-  /// false, then the walk will end.
-  @override
-  @Deprecated('Use to visitChildren instead')
-  bool visitTextSpan(bool visitor(TextSpan span)) {
-    if (text != null) {
-      if (!visitor(this))
-        return false;
-    }
-    if (children != null) {
-      for (InlineSpan child in children) {
-        assert(child is TextSpan, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
-        final TextSpan textSpanChild = child;
-        if (!textSpanChild.visitTextSpan(visitor))
           return false;
       }
     }
