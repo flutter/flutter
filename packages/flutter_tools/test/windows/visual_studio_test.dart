@@ -79,7 +79,7 @@ void main() {
   void setMockCompatibleVisualStudioExists(bool exists) {
     setMockVswhereResponse(<String>[
       'Microsoft.Component.MSBuild',
-      'Microsoft.VisualStudio.Component.VC.v141.x86.x64',
+      'Microsoft.VisualStudio.Component.VC.Tools.x86.x64',
       'Microsoft.VisualStudio.Component.Windows10SDK.17763',
     ], exists ? null : '[]');
   }

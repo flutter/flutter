@@ -13,7 +13,7 @@ import '../src/context.dart';
 class MockVisualStudio extends Mock implements VisualStudio {}
 
 void main() {
-  group('Xcode validation', () {
+  group('Visual Studio validation', () {
     MockVisualStudio mockVisualStudio;
 
     setUp(() {
@@ -34,6 +34,7 @@ void main() {
       when(visualStudio.hasNecessaryComponents).thenReturn(false);
       when(visualStudio.workloadDescription).thenReturn('Desktop development');
       when(visualStudio.necessaryComponentDescriptions(any)).thenReturn(<String>['A', 'B']);
+      when(visualStudio.fullVersion).thenReturn('15.1');
       const VisualStudioValidator validator = VisualStudioValidator();
       final ValidationResult result = await validator.validate();
       expect(result.type, ValidationType.partial);
