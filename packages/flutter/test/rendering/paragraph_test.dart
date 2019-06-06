@@ -5,6 +5,7 @@
 import 'dart:ui' as ui show TextBox;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -324,4 +325,93 @@ void main() {
     expect(paragraph.locale, const Locale('ja', 'JP'));
   });
 
+  test('inline widgets test', () {
+    const TextSpan text = TextSpan(
+      text: 'a',
+      style: TextStyle(fontSize: 10.0),
+      children: <InlineSpan>[
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        TextSpan(text: 'a'),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+      ],
+    );
+    // Fake the render boxes that correspond to the WidgetSpans. We use
+    // RenderParagraph to reduce dependencies this test has.
+    final List<RenderBox> renderBoxes = <RenderBox>[];
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+
+    final RenderParagraph paragraph = RenderParagraph(
+      text,
+      textDirection: TextDirection.ltr,
+      children: renderBoxes,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 100.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 0, extentOffset: 8)
+    );
+
+    expect(boxes.length, equals(5));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    expect(boxes[4], const TextBox.fromLTRBD(48.0, 0.0, 62.0, 14.0, TextDirection.ltr));
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  }, skip: isWindows || isMacOS);
+
+  test('inline widgets multiline test', () {
+    const TextSpan text = TextSpan(
+      text: 'a',
+      style: TextStyle(fontSize: 10.0),
+      children: <InlineSpan>[
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        TextSpan(text: 'a'),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+        WidgetSpan(child: SizedBox(width: 21, height: 21)),
+      ],
+    );
+    // Fake the render boxes that correspond to the WidgetSpans. We use
+    // RenderParagraph to reduce dependencies this test has.
+    final List<RenderBox> renderBoxes = <RenderBox>[];
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+    renderBoxes.add(RenderParagraph(const TextSpan(text: 'b'), textDirection: TextDirection.ltr));
+
+    final RenderParagraph paragraph = RenderParagraph(
+      text,
+      textDirection: TextDirection.ltr,
+      children: renderBoxes,
+    );
+    layout(paragraph, constraints: const BoxConstraints(maxWidth: 50.0));
+
+    final List<ui.TextBox> boxes = paragraph.getBoxesForSelection(
+        const TextSelection(baseOffset: 0, extentOffset: 12)
+    );
+
+    expect(boxes.length, equals(9));
+    expect(boxes[0], const TextBox.fromLTRBD(0.0, 4.0, 10.0, 14.0, TextDirection.ltr));
+    expect(boxes[1], const TextBox.fromLTRBD(10.0, 0.0, 24.0, 14.0, TextDirection.ltr));
+    expect(boxes[2], const TextBox.fromLTRBD(24.0, 0.0, 38.0, 14.0, TextDirection.ltr));
+    expect(boxes[3], const TextBox.fromLTRBD(38.0, 4.0, 48.0, 14.0, TextDirection.ltr));
+    // Wraps
+    expect(boxes[4], const TextBox.fromLTRBD(0.0, 14.0, 14.0, 28.0 , TextDirection.ltr));
+    expect(boxes[5], const TextBox.fromLTRBD(14.0, 14.0, 28.0, 28.0, TextDirection.ltr));
+    expect(boxes[6], const TextBox.fromLTRBD(28.0, 14.0, 42.0, 28.0, TextDirection.ltr));
+    // Wraps
+    expect(boxes[7], const TextBox.fromLTRBD(0.0, 28.0, 14.0, 42.0, TextDirection.ltr));
+    expect(boxes[8], const TextBox.fromLTRBD(14.0, 28.0, 28.0, 42.0 , TextDirection.ltr));
+  // Ahem-based tests don't yet quite work on Windows or some MacOS environments
+  }, skip: isWindows || isMacOS);
 }
