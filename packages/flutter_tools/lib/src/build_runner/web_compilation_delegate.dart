@@ -4,9 +4,8 @@
 
 // ignore_for_file: implementation_imports
 import 'dart:async';
-import 'dart:io' as io;
+import 'dart:io' as io; // ignore: dart_io_import
 
-import 'package:archive/archive.dart';
 import 'package:build/build.dart';
 import 'package:build_config/build_config.dart';
 import 'package:build_modules/build_modules.dart';
@@ -23,7 +22,6 @@ import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:crypto/crypto.dart';
-import 'package:glob/glob.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -259,7 +257,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         logger.startProgress('Recompiling sources...', timeout: null);
     final Map<AssetId, ChangeType> updates = <AssetId, ChangeType>{};
     for (Uri input in inputs) {
-      final AssetId assetId = AssetId.resolve( _packageUriMapper.map(input.toFilePath()).toString());
+      final AssetId assetId = AssetId.resolve(_packageUriMapper.map(input.toFilePath()).toString());
       updates[assetId] = ChangeType.MODIFY;
     }
     core.BuildResult result;
@@ -498,10 +496,10 @@ Future<void> bootstrapDart2Js(BuildStep buildStep) async {
   final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
   final List<String> args = <String>[
     '--libraries-spec=$librariesPath',
+    '-o=$jsOutputPath',
     '--packages=$packageFile',
     '-m',
-    '-O4',
-    '-o=$jsOutputPath',
+    '-o4',
     dartPath,
   ];
   final Dart2JsBatchWorkerPool dart2js = await buildStep.fetchResource(dart2JsWorkerResource);
@@ -511,33 +509,7 @@ Future<void> bootstrapDart2Js(BuildStep buildStep) async {
 
   if (result.succeeded && jsOutputFile.existsSync()) {
     log.info(result.output);
-    final String rootDir = fs.path.dirname(jsOutputFile.path);
-    final String dartFile = fs.path.basename(dartEntrypointId.path);
-    final Glob fileGlob = Glob('$dartFile.js*');
-    final Archive archive = Archive();
-    await for (io.FileSystemEntity jsFile in fileGlob.list(root: rootDir)) {
-      if (jsFile.path.endsWith(jsEntrypointExtension) ||
-          jsFile.path.endsWith(jsEntrypointSourceMapExtension)) {
-        // These are explicitly output, and are not part of the archive.
-        continue;
-      }
-      if (jsFile is io.File) {
-        final String fileName = fs.path.relative(jsFile.path, from: rootDir);
-        final io.FileStat fileStats = jsFile.statSync();
-        archive.addFile(
-            ArchiveFile(fileName, fileStats.size, await jsFile.readAsBytes())
-              ..mode = fileStats.mode
-              ..lastModTime = fileStats.modified.millisecondsSinceEpoch);
-      }
-    }
-    if (archive.isNotEmpty) {
-      final AssetId archiveId =
-          dartEntrypointId.changeExtension(jsEntrypointArchiveExtension);
-      await buildStep.writeAsBytes(archiveId, TarEncoder().encode(archive));
-    }
-
-    // Explicitly write out the original js file and sourcemap - we can't output
-    // these as part of the archive because they already have asset nodes.
+    // Explicitly write out the original js file and sourcemap.
     await scratchSpace.copyOutput(jsOutputId, buildStep);
     final AssetId jsSourceMapId =
         dartEntrypointId.changeExtension(jsEntrypointSourceMapExtension);
