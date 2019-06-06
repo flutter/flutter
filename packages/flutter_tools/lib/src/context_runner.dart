@@ -44,7 +44,6 @@ import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
 import 'web/chrome.dart';
-import 'web/compile.dart';
 import 'web/workflow.dart';
 import 'windows/windows_workflow.dart';
 
@@ -100,7 +99,6 @@ Future<T> runInContext<T>(
       TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
-      WebCompiler: () => const WebCompiler(),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),
