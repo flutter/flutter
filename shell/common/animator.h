@@ -18,6 +18,10 @@
 
 namespace flutter {
 
+namespace testing {
+class ShellTest;
+}
+
 class Animator final {
  public:
   class Delegate {
@@ -86,6 +90,8 @@ class Animator final {
   std::deque<uint64_t> trace_flow_ids_;
 
   fml::WeakPtrFactory<Animator> weak_factory_;
+
+  friend class testing::ShellTest;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Animator);
 };

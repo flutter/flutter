@@ -22,14 +22,17 @@ namespace flutter {
 // used within this interval.
 static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
-Rasterizer::Rasterizer(TaskRunners task_runners)
-    : Rasterizer(std::move(task_runners),
+Rasterizer::Rasterizer(Delegate& delegate, TaskRunners task_runners)
+    : Rasterizer(delegate,
+                 std::move(task_runners),
                  std::make_unique<flutter::CompositorContext>()) {}
 
 Rasterizer::Rasterizer(
+    Delegate& delegate,
     TaskRunners task_runners,
     std::unique_ptr<flutter::CompositorContext> compositor_context)
-    : task_runners_(std::move(task_runners)),
+    : delegate_(delegate),
+      task_runners_(std::move(task_runners)),
       compositor_context_(std::move(compositor_context)),
       weak_factory_(this) {
   FML_DCHECK(compositor_context_);
@@ -151,6 +154,11 @@ void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
     return;
   }
 
+  FrameTiming timing;
+  timing.Set(FrameTiming::kBuildStart, layer_tree->build_start());
+  timing.Set(FrameTiming::kBuildFinish, layer_tree->build_finish());
+  timing.Set(FrameTiming::kRasterStart, fml::TimePoint::Now());
+
   PersistentCache* persistent_cache = PersistentCache::GetCacheForProcess();
   persistent_cache->ResetStoredNewShaders();
 
@@ -164,6 +172,12 @@ void Rasterizer::DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree) {
         ScreenshotLastLayerTree(ScreenshotType::SkiaPicture, false);
     persistent_cache->DumpSkp(*screenshot.data);
   }
+
+  // TODO(liyuqian): in Fuchsia, the rasterization doesn't finish when
+  // Rasterizer::DoDraw finishes. Future work is needed to adapt the timestamp
+  // for Fuchsia to capture SceneUpdateContext::ExecutePaintTasks.
+  timing.Set(FrameTiming::kRasterFinish, fml::TimePoint::Now());
+  delegate_.OnFrameRasterized(timing);
 }
 
 bool Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
@@ -178,7 +192,7 @@ bool Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   // There is no way for the compositor to know how long the layer tree
   // construction took. Fortunately, the layer tree does. Grab that time
   // for instrumentation.
-  compositor_context_->ui_time().SetLapTime(layer_tree.construction_time());
+  compositor_context_->ui_time().SetLapTime(layer_tree.build_time());
 
   auto* canvas = frame->SkiaCanvas();
 

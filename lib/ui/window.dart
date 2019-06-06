@@ -10,6 +10,18 @@ typedef VoidCallback = void Function();
 /// Signature for [Window.onBeginFrame].
 typedef FrameCallback = void Function(Duration duration);
 
+/// Signature for [Window.onReportTimings].
+///
+/// {@template dart.ui.TimingsCallback.list}
+/// The callback takes a list of [FrameTiming] because it may not be immediately
+/// triggered after each frame. Instead, Flutter tries to batch frames together
+/// and send all their timings at once to decrease the overhead (as this is
+/// available in the release mode). The list is sorted in ascending order of
+/// time (earliest frame first). The timing of any frame will be sent within
+/// about 1 second even if there are no later frames to batch.
+/// {@endtemplate}
+typedef TimingsCallback = void Function(List<FrameTiming> timings);
+
 /// Signature for [Window.onPointerDataPacket].
 typedef PointerDataPacketCallback = void Function(PointerDataPacket packet);
 
@@ -24,6 +36,98 @@ typedef PlatformMessageResponseCallback = void Function(ByteData data);
 
 /// Signature for [Window.onPlatformMessage].
 typedef PlatformMessageCallback = void Function(String name, ByteData data, PlatformMessageResponseCallback callback);
+
+/// Various important time points in the lifetime of a frame.
+///
+/// [FrameTiming] records a timestamp of each phase for performance analysis.
+enum FramePhase {
+  /// When the UI thread starts building a frame.
+  ///
+  /// See also [FrameTiming.buildDuration].
+  buildStart,
+
+  /// When the UI thread finishes building a frame.
+  ///
+  /// See also [FrameTiming.buildDuration].
+  buildFinish,
+
+  /// When the GPU thread starts rasterizing a frame.
+  ///
+  /// See also [FrameTiming.rasterDuration].
+  rasterStart,
+
+  /// When the GPU thread finishes rasterizing a frame.
+  ///
+  /// See also [FrameTiming.rasterDuration].
+  rasterFinish,
+}
+
+/// Time-related performance metrics of a frame.
+///
+/// See [Window.onReportTimings] for how to get this.
+///
+/// The metrics in debug mode (`flutter run` without any flags) may be very
+/// different from those in profile and release modes due to the debug overhead.
+/// Therefore it's recommended to only monitor and analyze performance metrics
+/// in profile and release modes.
+class FrameTiming {
+  /// Construct [FrameTiming] with raw timestamps in microseconds.
+  ///
+  /// List [timestamps] must have the same number of elements as
+  /// [FramePhase.values].
+  ///
+  /// This constructor is usually only called by the Flutter engine, or a test.
+  /// To get the [FrameTiming] of your app, see [Window.onReportTimings].
+  FrameTiming(List<int> timestamps)
+      : assert(timestamps.length == FramePhase.values.length), _timestamps = timestamps;
+
+  /// This is a raw timestamp in microseconds from some epoch. The epoch in all
+  /// [FrameTiming] is the same, but it may not match [DateTime]'s epoch.
+  int timestampInMicroseconds(FramePhase phase) => _timestamps[phase.index];
+
+  Duration _rawDuration(FramePhase phase) => Duration(microseconds: _timestamps[phase.index]);
+
+  /// The duration to build the frame on the UI thread.
+  ///
+  /// The build starts approximately when [Window.onBeginFrame] is called. The
+  /// [Duration] in the [Window.onBeginFrame] callback is exactly the
+  /// `Duration(microseconds: timestampInMicroseconds(FramePhase.buildStart))`.
+  ///
+  /// The build finishes when [Window.render] is called.
+  ///
+  /// {@template dart.ui.FrameTiming.fps_smoothness_milliseconds}
+  /// To ensure smooth animations of X fps, this should not exceed 1000/X
+  /// milliseconds.
+  /// {@endtemplate}
+  /// {@template dart.ui.FrameTiming.fps_milliseconds}
+  /// That's about 16ms for 60fps, and 8ms for 120fps.
+  /// {@endtemplate}
+  Duration get buildDuration => _rawDuration(FramePhase.buildFinish) - _rawDuration(FramePhase.buildStart);
+
+  /// The duration to rasterize the frame on the GPU thread.
+  ///
+  /// {@macro dart.ui.FrameTiming.fps_smoothness_milliseconds}
+  /// {@macro dart.ui.FrameTiming.fps_milliseconds}
+  Duration get rasterDuration => _rawDuration(FramePhase.rasterFinish) - _rawDuration(FramePhase.rasterStart);
+
+  /// The timespan between build start and raster finish.
+  ///
+  /// To achieve the lowest latency on an X fps display, this should not exceed
+  /// 1000/X milliseconds.
+  /// {@macro dart.ui.FrameTiming.fps_milliseconds}
+  ///
+  /// See also [buildDuration] and [rasterDuration].
+  Duration get totalSpan => _rawDuration(FramePhase.rasterFinish) - _rawDuration(FramePhase.buildStart);
+
+  final List<int> _timestamps;  // in microseconds
+
+  String _formatMS(Duration duration) => '${duration.inMicroseconds * 0.001}ms';
+
+  @override
+  String toString() {
+    return '$runtimeType(buildDuration: ${_formatMS(buildDuration)}, rasterDuration: ${_formatMS(rasterDuration)}, totalSpan: ${_formatMS(totalSpan)})';
+  }
+}
 
 /// States that an application can be in.
 ///
@@ -780,6 +884,36 @@ class Window {
     _onDrawFrame = callback;
     _onDrawFrameZone = Zone.current;
   }
+
+  /// A callback that is invoked to report the [FrameTiming] of recently
+  /// rasterized frames.
+  ///
+  /// This can be used to see if the application has missed frames (through
+  /// [FrameTiming.buildDuration] and [FrameTiming.rasterDuration]), or high
+  /// latencies (through [FrameTiming.totalSpan]).
+  ///
+  /// Unlike [Timeline], the timing information here is available in the release
+  /// mode (additional to the profile and the debug mode). Hence this can be
+  /// used to monitor the application's performance in the wild.
+  ///
+  /// {@macro dart.ui.TimingsCallback.list}
+  ///
+  /// If this is null, no additional work will be done. If this is not null,
+  /// Flutter spends less than 0.1ms every 1 second to report the timings
+  /// (measured on iPhone6S). The 0.1ms is about 0.6% of 16ms (frame budget for
+  /// 60fps), or 0.01% CPU usage per second.
+  TimingsCallback get onReportTimings => _onReportTimings;
+  TimingsCallback _onReportTimings;
+  Zone _onReportTimingsZone;
+  set onReportTimings(TimingsCallback callback) {
+    if ((callback == null) != (_onReportTimings == null)) {
+      _setNeedsReportTimings(callback != null);
+    }
+    _onReportTimings = callback;
+    _onReportTimingsZone = Zone.current;
+  }
+
+  void _setNeedsReportTimings(bool value) native 'Window_setNeedsReportTimings';
 
   /// A callback that is invoked when pointer data is available.
   ///

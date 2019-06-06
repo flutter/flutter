@@ -19,6 +19,11 @@ LayerTree::LayerTree()
 
 LayerTree::~LayerTree() = default;
 
+void LayerTree::RecordBuildTime(fml::TimePoint start) {
+  build_start_ = start;
+  build_finish_ = fml::TimePoint::Now();
+}
+
 void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
                         bool ignore_raster_cache) {
   FML_TRACE_EVENT0("flutter", "LayerTree::Preroll");

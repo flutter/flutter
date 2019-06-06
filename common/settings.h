@@ -14,9 +14,26 @@
 
 #include "flutter/fml/closure.h"
 #include "flutter/fml/mapping.h"
+#include "flutter/fml/time/time_point.h"
 #include "flutter/fml/unique_fd.h"
 
 namespace flutter {
+
+class FrameTiming {
+ public:
+  enum Phase { kBuildStart, kBuildFinish, kRasterStart, kRasterFinish, kCount };
+
+  static constexpr Phase kPhases[kCount] = {kBuildStart, kBuildFinish,
+                                            kRasterStart, kRasterFinish};
+
+  fml::TimePoint Get(Phase phase) const { return data_[phase]; }
+  fml::TimePoint Set(Phase phase, fml::TimePoint value) {
+    return data_[phase] = value;
+  }
+
+ private:
+  fml::TimePoint data_[kCount];
+};
 
 using TaskObserverAdd =
     std::function<void(intptr_t /* key */, fml::closure /* callback */)>;
@@ -31,6 +48,8 @@ using UnhandledExceptionCallback =
 using MappingCallback = std::function<std::unique_ptr<fml::Mapping>(void)>;
 using MappingsCallback =
     std::function<std::vector<std::unique_ptr<const fml::Mapping>>(void)>;
+
+using FrameRasterizedCallback = std::function<void(const FrameTiming&)>;
 
 struct Settings {
   Settings();
@@ -148,6 +167,10 @@ struct Settings {
   fml::UniqueFD::element_type assets_dir =
       fml::UniqueFD::traits_type::InvalidValue();
   std::string assets_path;
+
+  // Callback to handle the timings of a rasterized frame. This is called as
+  // soon as a frame is rasterized.
+  FrameRasterizedCallback frame_rasterized_callback;
 
   std::string ToString() const;
 };

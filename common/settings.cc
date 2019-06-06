@@ -8,6 +8,8 @@
 
 namespace flutter {
 
+constexpr FrameTiming::Phase FrameTiming::kPhases[FrameTiming::kCount];
+
 Settings::Settings() = default;
 
 Settings::Settings(const Settings& other) = default;
@@ -51,6 +53,8 @@ std::string Settings::ToString() const {
   stream << "icu_data_path: " << icu_data_path << std::endl;
   stream << "assets_dir: " << assets_dir << std::endl;
   stream << "assets_path: " << assets_path << std::endl;
+  stream << "frame_rasterized_callback set: " << !!frame_rasterized_callback
+         << std::endl;
   return stream.str();
 }
 

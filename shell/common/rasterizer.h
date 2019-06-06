@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "flutter/common/settings.h"
 #include "flutter/common/task_runners.h"
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/layers/layer_tree.h"
@@ -21,9 +22,14 @@ namespace flutter {
 
 class Rasterizer final : public SnapshotDelegate {
  public:
-  Rasterizer(TaskRunners task_runners);
+  class Delegate {
+   public:
+    virtual void OnFrameRasterized(const FrameTiming&) = 0;
+  };
+  Rasterizer(Delegate& delegate, TaskRunners task_runners);
 
-  Rasterizer(TaskRunners task_runners,
+  Rasterizer(Delegate& delegate,
+             TaskRunners task_runners,
              std::unique_ptr<flutter::CompositorContext> compositor_context);
 
   ~Rasterizer();
@@ -76,6 +82,7 @@ class Rasterizer final : public SnapshotDelegate {
   void SetResourceCacheMaxBytes(int max_bytes);
 
  private:
+  Delegate& delegate_;
   TaskRunners task_runners_;
   std::unique_ptr<Surface> surface_;
   std::unique_ptr<flutter::CompositorContext> compositor_context_;

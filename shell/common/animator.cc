@@ -174,8 +174,7 @@ void Animator::Render(std::unique_ptr<flutter::LayerTree> layer_tree) {
 
   if (layer_tree) {
     // Note the frame time for instrumentation.
-    layer_tree->set_construction_time(fml::TimePoint::Now() -
-                                      last_begin_frame_time_);
+    layer_tree->RecordBuildTime(last_begin_frame_time_);
   }
 
   // Commit the pending continuation.

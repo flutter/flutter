@@ -36,6 +36,7 @@ void main() {
     VoidCallback originalOnLocaleChanged;
     FrameCallback originalOnBeginFrame;
     VoidCallback originalOnDrawFrame;
+    TimingsCallback originalOnReportTimings;
     PointerDataPacketCallback originalOnPointerDataPacket;
     VoidCallback originalOnSemanticsEnabledChanged;
     SemanticsActionCallback originalOnSemanticsAction;
@@ -47,6 +48,7 @@ void main() {
       originalOnLocaleChanged = window.onLocaleChanged;
       originalOnBeginFrame = window.onBeginFrame;
       originalOnDrawFrame = window.onDrawFrame;
+      originalOnReportTimings = window.onReportTimings;
       originalOnPointerDataPacket = window.onPointerDataPacket;
       originalOnSemanticsEnabledChanged = window.onSemanticsEnabledChanged;
       originalOnSemanticsAction = window.onSemanticsAction;
@@ -59,6 +61,7 @@ void main() {
       window.onLocaleChanged = originalOnLocaleChanged;
       window.onBeginFrame = originalOnBeginFrame;
       window.onDrawFrame = originalOnDrawFrame;
+      window.onReportTimings = originalOnReportTimings;
       window.onPointerDataPacket = originalOnPointerDataPacket;
       window.onSemanticsEnabledChanged = originalOnSemanticsEnabledChanged;
       window.onSemanticsAction = originalOnSemanticsAction;
@@ -142,6 +145,22 @@ void main() {
       });
 
       _drawFrame();
+      expect(runZone, isNotNull);
+      expect(runZone, same(innerZone));
+    });
+
+    test('onReportTimings preserves callback zone', () {
+      Zone innerZone;
+      Zone runZone;
+
+      runZoned(() {
+        innerZone = Zone.current;
+        window.onReportTimings = (List<FrameTiming> timings) {
+          runZone = Zone.current;
+        };
+      });
+
+      _reportTimings(<int>[]);
       expect(runZone, isNotNull);
       expect(runZone, same(innerZone));
     });

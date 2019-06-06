@@ -201,6 +201,11 @@ void Engine::BeginFrame(fml::TimePoint frame_time) {
   runtime_controller_->BeginFrame(frame_time);
 }
 
+void Engine::ReportTimings(std::vector<int64_t> timings) {
+  TRACE_EVENT0("flutter", "Engine::ReportTimings");
+  runtime_controller_->ReportTimings(std::move(timings));
+}
+
 void Engine::NotifyIdle(int64_t deadline) {
   FML_TRACE_EVENT1("flutter", "Engine::NotifyIdle", "deadline_now_delta",
                    std::to_string(deadline - Dart_TimelineGetMicros()).c_str());
@@ -430,6 +435,10 @@ void Engine::HandlePlatformMessage(fml::RefPtr<PlatformMessage> message) {
 void Engine::UpdateIsolateDescription(const std::string isolate_name,
                                       int64_t isolate_port) {
   delegate_.UpdateIsolateDescription(isolate_name, isolate_port);
+}
+
+void Engine::SetNeedsReportTimings(bool value) {
+  delegate_.SetNeedsReportTimings(value);
 }
 
 FontCollection& Engine::GetFontCollection() {

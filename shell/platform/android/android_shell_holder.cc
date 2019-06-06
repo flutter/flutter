@@ -73,7 +73,7 @@ AndroidShellHolder::AndroidShellHolder(
       };
 
   Shell::CreateCallback<Rasterizer> on_create_rasterizer = [](Shell& shell) {
-    return std::make_unique<Rasterizer>(shell.GetTaskRunners());
+    return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
   };
 
   // The current thread will be used as the platform thread. Ensure that the

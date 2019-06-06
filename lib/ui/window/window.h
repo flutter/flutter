@@ -19,6 +19,16 @@
 
 namespace tonic {
 class DartLibraryNatives;
+
+// So tonice::ToDart<std::vector<int64_t>> returns List<int> instead of
+// List<dynamic>.
+template <>
+struct DartListFactory<int64_t> {
+  static Dart_Handle NewList(intptr_t length) {
+    return Dart_NewListOf(Dart_CoreType_Int, length);
+  }
+};
+
 }  // namespace tonic
 
 namespace flutter {
@@ -46,6 +56,7 @@ class WindowClient {
   virtual FontCollection& GetFontCollection() = 0;
   virtual void UpdateIsolateDescription(const std::string isolate_name,
                                         int64_t isolate_port) = 0;
+  virtual void SetNeedsReportTimings(bool value) = 0;
 
  protected:
   virtual ~WindowClient();
@@ -74,6 +85,7 @@ class Window final {
                                SemanticsAction action,
                                std::vector<uint8_t> args);
   void BeginFrame(fml::TimePoint frameTime);
+  void ReportTimings(std::vector<int64_t> timings);
 
   void CompletePlatformMessageResponse(int response_id,
                                        std::vector<uint8_t> data);

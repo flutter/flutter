@@ -59,6 +59,8 @@ class RuntimeController final : public WindowClient {
 
   bool BeginFrame(fml::TimePoint frame_time);
 
+  bool ReportTimings(std::vector<int64_t> timings);
+
   bool NotifyIdle(int64_t deadline);
 
   bool IsRootIsolateRunning() const;
@@ -176,6 +178,9 @@ class RuntimeController final : public WindowClient {
   // |WindowClient|
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
+
+  // |WindowClient|
+  void SetNeedsReportTimings(bool value) override;
 
   FML_DISALLOW_COPY_AND_ASSIGN(RuntimeController);
 };

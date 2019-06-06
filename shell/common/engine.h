@@ -52,6 +52,8 @@ class Engine final : public RuntimeDelegate {
 
     virtual void UpdateIsolateDescription(const std::string isolate_name,
                                           int64_t isolate_port) = 0;
+
+    virtual void SetNeedsReportTimings(bool value) = 0;
   };
 
   Engine(Delegate& delegate,
@@ -83,6 +85,8 @@ class Engine final : public RuntimeDelegate {
   bool UpdateAssetManager(std::shared_ptr<AssetManager> asset_manager);
 
   void BeginFrame(fml::TimePoint frame_time);
+
+  void ReportTimings(std::vector<int64_t> timings);
 
   void NotifyIdle(int64_t deadline);
 
@@ -150,6 +154,8 @@ class Engine final : public RuntimeDelegate {
   void UpdateIsolateDescription(const std::string isolate_name,
                                 int64_t isolate_port) override;
 
+  void SetNeedsReportTimings(bool value) override;
+
   void StopAnimator();
 
   void StartAnimatorIfPossible();
@@ -167,6 +173,8 @@ class Engine final : public RuntimeDelegate {
   bool GetAssetAsBuffer(const std::string& name, std::vector<uint8_t>* data);
 
   RunStatus PrepareAndLaunchIsolate(RunConfiguration configuration);
+
+  friend class testing::ShellTest;
 
   FML_DISALLOW_COPY_AND_ASSIGN(Engine);
 };
