@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
 import 'text_painter.dart';
+import 'text_span.dart';
 import 'text_style.dart';
 
 /// Mutable wrapper of an integer that can be passed by reference to track a
@@ -102,6 +103,15 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// [Paragraph] objects can be drawn on [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
+
+  // TODO(garyq): Remove this after next stable release.
+  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
+  /// for each span that has content.
+  ///
+  /// When `visitor` returns true, the walk will continue. When `visitor` returns
+  /// false, then the walk will end.
+  @Deprecated('Use to visitChildren instead')
+  bool visitTextSpan(bool visitor(TextSpan span));
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
