@@ -202,7 +202,7 @@ void Engine::BeginFrame(fml::TimePoint frame_time) {
 }
 
 void Engine::ReportTimings(std::vector<int64_t> timings) {
-  TRACE_EVENT0("flutter", "Engine::ReportTimings");
+  FML_TRACE_EVENT0("flutter", "Engine::ReportTimings");
   runtime_controller_->ReportTimings(std::move(timings));
 }
 
