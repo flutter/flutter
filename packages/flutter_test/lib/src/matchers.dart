@@ -1702,15 +1702,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
-    final Uri testNameUri = version == null ? key : Uri.parse(
-      key
-        .toString()
-        .splitMapJoin(
-          RegExp(r'.png'),
-          onMatch: (Match m) => '${'.' + version + m.group(0)}',
-          onNonMatch: (String n) => '$n'
-        )
-    );
+    final Uri testNameUri = _getTestNameUri(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1734,7 +1726,19 @@ class _MatchesGoldenFile extends AsyncMatcher {
 
   @override
   Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "$key"');
+      description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
+
+  Uri _getTestNameUri(Uri key, String version) {
+    return version == null ? key : Uri.parse(
+      key
+        .toString()
+        .splitMapJoin(
+        RegExp(r'.png'),
+        onMatch: (Match m) => '${'.' + version + m.group(0)}',
+        onNonMatch: (String n) => '$n'
+      )
+    );
+  }
 }
 
 class _MatchesSemanticsData extends Matcher {
