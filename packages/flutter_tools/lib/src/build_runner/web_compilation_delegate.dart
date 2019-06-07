@@ -3,13 +3,19 @@
 // found in the LICENSE file.
 
 // ignore_for_file: implementation_imports
+import 'dart:async';
+import 'dart:io' as io; // ignore: dart_io_import
+
 import 'package:build/build.dart';
 import 'package:build_config/build_config.dart';
 import 'package:build_modules/build_modules.dart';
 import 'package:build_modules/builders.dart';
 import 'package:build_modules/src/module_builder.dart';
 import 'package:build_modules/src/platform.dart';
+import 'package:build_modules/src/workers.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
+import 'package:build_runner_core/src/asset_graph/graph.dart';
+import 'package:build_runner_core/src/asset_graph/node.dart';
 import 'package:build_runner_core/src/generate/build_impl.dart';
 import 'package:build_runner_core/src/generate/options.dart';
 import 'package:build_test/builder.dart';
@@ -17,9 +23,11 @@ import 'package:build_test/src/debug_test_builder.dart';
 import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
+import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:scratch_space/scratch_space.dart';
 import 'package:test_core/backend.dart';
 import 'package:watcher/watcher.dart';
 
@@ -28,6 +36,7 @@ import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/platform.dart';
 import '../compile.dart';
+import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../web/compile.dart';
@@ -84,6 +93,22 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     ),
   ),
   core.apply(
+    'flutter_tools|shell',
+    <BuilderFactory>[
+      (BuilderOptions options) => FlutterWebShellBuilder(
+        options.config['targets'] ?? <String>['lib/main.dart']
+      ),
+    ],
+    core.toRoot(),
+    hideOutput: true,
+    defaultGenerateFor: const InputSet(
+      include: <String>[
+        'lib/**',
+        'web/**',
+      ],
+    ),
+  ),
+  core.apply(
       'flutter_tools|module_library',
       <Builder Function(BuilderOptions)>[moduleLibraryBuilder],
       core.toAllPackages(),
@@ -127,7 +152,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools|entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config['targets'] ?? <String>['lib/main.dart']),
+          options.config['targets'] ?? <String>['lib/main.dart'],
+          options.config['release'],
+      ),
     ],
     core.toRoot(),
     hideOutput: true,
@@ -152,11 +179,15 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   PackageUriMapper _packageUriMapper;
 
   @override
-  Future<void> initialize({
+  Future<bool> initialize({
     @required Directory projectDirectory,
     @required List<String> targets,
     String testOutputDir,
+    bool release = false,
   }) async {
+    // Create the .dart_tool directory if it doesn't exist.
+    projectDirectory.childDirectory('.dart_tool').createSync();
+
     // Override the generated output directory so this does not conflict with
     // other build_runner output.
     core.overrideGeneratedOutputDirectory('flutter_web');
@@ -195,19 +226,36 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     };
     final Status status =
         logger.startProgress('Compiling ${targets.first} for the Web...', timeout: null);
+    core.BuildResult result;
     try {
-      _builder = await BuildImpl.create(
-        buildOptions,
+      result = await _runBuilder(
         buildEnvironment,
-        builders,
-        <String, Map<String, dynamic>>{
-          'flutter_tools|entrypoint': <String, dynamic>{
-            'targets': targets,
-          }
-        },
-        isReleaseBuild: false,
+        buildOptions,
+        targets,
+        release,
+        buildDirs,
       );
-      await _builder.run(const <AssetId, ChangeType>{}, buildDirs: buildDirs);
+      return result.status == core.BuildStatus.success;
+    } on core.BuildConfigChangedException {
+      await _cleanAssets(projectDirectory);
+      result = await _runBuilder(
+        buildEnvironment,
+        buildOptions,
+        targets,
+        release,
+        buildDirs,
+      );
+      return result.status == core.BuildStatus.success;
+    } on core.BuildScriptChangedException {
+      await _cleanAssets(projectDirectory);
+      result = await _runBuilder(
+        buildEnvironment,
+        buildOptions,
+        targets,
+        release,
+        buildDirs,
+      );
+      return result.status == core.BuildStatus.success;
     } finally {
       status.stop();
     }
@@ -219,9 +267,8 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         logger.startProgress('Recompiling sources...', timeout: null);
     final Map<AssetId, ChangeType> updates = <AssetId, ChangeType>{};
     for (Uri input in inputs) {
-      updates[AssetId.resolve(
-              _packageUriMapper.map(input.toFilePath()).toString())] =
-          ChangeType.MODIFY;
+      final AssetId assetId = AssetId.resolve(_packageUriMapper.map(input.toFilePath()).toString());
+      updates[assetId] = ChangeType.MODIFY;
     }
     core.BuildResult result;
     try {
@@ -231,13 +278,81 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     }
     return result.status == core.BuildStatus.success;
   }
+
+
+  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, List<String> targets, bool release, Set<core.BuildDirectory> buildDirs) async {
+    _builder = await BuildImpl.create(
+      buildOptions,
+      buildEnvironment,
+      builders,
+      <String, Map<String, dynamic>>{
+        'flutter_tools|entrypoint': <String, dynamic>{
+          'targets': targets,
+          'release': release,
+        },
+        'flutter_tools|shell': <String, dynamic>{
+          'targets': targets,
+        }
+      },
+      isReleaseBuild: false,
+    );
+    return _builder.run(
+      const <AssetId, ChangeType>{},
+      buildDirs: buildDirs,
+    );
+  }
+
+  Future<void> _cleanAssets(Directory projectDirectory) async {
+    final File assetGraphFile = fs.file(core.assetGraphPath);
+    AssetGraph assetGraph;
+    try {
+      assetGraph = AssetGraph.deserialize(await assetGraphFile.readAsBytes());
+    } catch (_) {
+      printTrace('Failed to clean up asset graph.');
+    }
+    final core.PackageGraph packageGraph = core.PackageGraph.forThisPackage();
+    await _cleanUpSourceOutputs(assetGraph, packageGraph);
+    final Directory cacheDirectory = fs.directory(fs.path.join(
+      projectDirectory.path,
+      '.dart_tool',
+      'build',
+      'flutter_web',
+    ));
+    if (assetGraphFile.existsSync()) {
+      assetGraphFile.deleteSync();
+    }
+    if (cacheDirectory.existsSync()) {
+      cacheDirectory.deleteSync(recursive: true);
+    }
+  }
+
+  Future<void> _cleanUpSourceOutputs(AssetGraph assetGraph, core.PackageGraph packageGraph) async {
+    final core.FileBasedAssetWriter writer = core.FileBasedAssetWriter(packageGraph);
+    if (assetGraph?.outputs == null) {
+      return;
+    }
+    for (AssetId id in assetGraph.outputs) {
+      if (id.package != packageGraph.root.name) {
+        continue;
+      }
+      final GeneratedAssetNode node = assetGraph.get(id);
+      if (node.wasOutput) {
+        // Note that this does a file.exists check in the root package and
+        // only tries to delete the file if it exists. This way we only
+        // actually delete to_source outputs, without reading in the build
+        // actions.
+        await writer.delete(id);
+      }
+    }
+  }
 }
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
-  const FlutterWebEntrypointBuilder(this.targets);
+  const FlutterWebEntrypointBuilder(this.targets, this.release);
 
   final List<String> targets;
+  final bool release;
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
@@ -254,7 +369,7 @@ class FlutterWebEntrypointBuilder implements Builder {
   Future<void> build(BuildStep buildStep) async {
     bool matches = false;
     for (String target in targets) {
-      if (buildStep.inputId.path.contains(target)) {
+      if (buildStep.inputId.path.contains(fs.path.setExtension(target, '_web_entrypoint.dart'))) {
         matches = true;
         break;
       }
@@ -263,10 +378,15 @@ class FlutterWebEntrypointBuilder implements Builder {
       return;
     }
     log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+    if (release) {
+      await bootstrapDart2Js(buildStep);
+    } else {
+      await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+    }
   }
 }
 
+/// Bootstraps the test entrypoint.
 class FlutterWebTestBootstrapBuilder implements Builder {
   const FlutterWebTestBootstrapBuilder();
 
@@ -372,3 +492,117 @@ void setStackTraceMapper(StackTraceMapper mapper) {
   }
 }
 
+/// A shell builder which generates the web specific entrypoint.
+class FlutterWebShellBuilder implements Builder {
+  const FlutterWebShellBuilder(this.targets);
+
+  final List<String> targets;
+
+  @override
+  FutureOr<void> build(BuildStep buildStep) async {
+    bool matches = false;
+    for (String target in targets) {
+      if (buildStep.inputId.path.contains(target)) {
+        matches = true;
+        break;
+      }
+    }
+    if (!matches) {
+      return;
+    }
+    final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
+    await buildStep.writeAsString(outputId, '''
+import 'dart:ui' as ui;
+import "${path.url.basename(buildStep.inputId.path)}" as entrypoint;
+
+Future<void> main() async {
+  await ui.webOnlyInitializePlatform();
+  entrypoint.main();
+}
+
+''');
+  }
+
+  @override
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+    '.dart': <String>['_web_entrypoint.dart'],
+  };
+}
+
+Future<void> bootstrapDart2Js(BuildStep buildStep) async {
+  final AssetId dartEntrypointId = buildStep.inputId;
+  final AssetId moduleId = dartEntrypointId.changeExtension(moduleExtension(flutterWebPlatform));
+  final Module module = Module.fromJson(json.decode(await buildStep.readAsString(moduleId)));
+
+  final List<Module> allDeps = await module.computeTransitiveDependencies(buildStep, throwIfUnsupported: false)..add(module);
+  final ScratchSpace scratchSpace = await buildStep.fetchResource(scratchSpaceResource);
+  final Iterable<AssetId> allSrcs = allDeps.expand((Module module) => module.sources);
+  await scratchSpace.ensureAssets(allSrcs, buildStep);
+
+  final String packageFile = await _createPackageFile(allSrcs, buildStep, scratchSpace);
+  final String dartPath = dartEntrypointId.path.startsWith('lib/')
+      ? 'package:${dartEntrypointId.package}/'
+          '${dartEntrypointId.path.substring('lib/'.length)}'
+      : dartEntrypointId.path;
+  final String jsOutputPath =
+      '${fs.path.withoutExtension(dartPath.replaceFirst('package:', 'packages/'))}'
+      '$jsEntrypointExtension';
+  final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+  final String librariesPath = fs.path.join(flutterWebSdkPath, 'libraries.json');
+  final List<String> args = <String>[
+    '--libraries-spec="$librariesPath"',
+    '-m',
+    '-o4',
+    '-o',
+    '$jsOutputPath',
+    '--packages="$packageFile"',
+    dartPath,
+  ];
+  final Dart2JsBatchWorkerPool dart2js = await buildStep.fetchResource(dart2JsWorkerResource);
+  final Dart2JsResult result = await dart2js.compile(args);
+  final AssetId jsOutputId = dartEntrypointId.changeExtension(jsEntrypointExtension);
+  final io.File jsOutputFile = scratchSpace.fileFor(jsOutputId);
+  if (result.succeeded && jsOutputFile.existsSync()) {
+    log.info(result.output);
+    // Explicitly write out the original js file and sourcemap.
+    await scratchSpace.copyOutput(jsOutputId, buildStep);
+    final AssetId jsSourceMapId =
+        dartEntrypointId.changeExtension(jsEntrypointSourceMapExtension);
+    await _copyIfExists(jsSourceMapId, scratchSpace, buildStep);
+  } else {
+    log.severe(result.output);
+  }
+}
+
+Future<void> _copyIfExists(
+    AssetId id, ScratchSpace scratchSpace, AssetWriter writer) async {
+  final io.File file = scratchSpace.fileFor(id);
+  if (file.existsSync()) {
+    await scratchSpace.copyOutput(id, writer);
+  }
+}
+
+/// Creates a `.packages` file unique to this entrypoint at the root of the
+/// scratch space and returns it's filename.
+///
+/// Since mulitple invocations of Dart2Js will share a scratch space and we only
+/// know the set of packages involved the current entrypoint we can't construct
+/// a `.packages` file that will work for all invocations of Dart2Js so a unique
+/// file is created for every entrypoint that is run.
+///
+/// The filename is based off the MD5 hash of the asset path so that files are
+/// unique regarless of situations like `web/foo/bar.dart` vs
+/// `web/foo-bar.dart`.
+Future<String> _createPackageFile(Iterable<AssetId> inputSources, BuildStep buildStep, ScratchSpace scratchSpace) async {
+  final Uri inputUri = buildStep.inputId.uri;
+  final String packageFileName =
+      '.package-${md5.convert(inputUri.toString().codeUnits)}';
+  final io.File packagesFile =
+      scratchSpace.fileFor(AssetId(buildStep.inputId.package, packageFileName));
+  final Set<String> packageNames = inputSources.map((AssetId s) => s.package).toSet();
+  final String packagesFileContent =
+      packageNames.map((String name) => '$name:packages/$name/').join('\n');
+  await packagesFile
+      .writeAsString('# Generated for $inputUri\n$packagesFileContent');
+  return packageFileName;
+}
