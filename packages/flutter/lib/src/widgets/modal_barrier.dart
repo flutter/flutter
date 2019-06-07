@@ -73,7 +73,6 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
     Key key,
     @required this.child,
     @required this.onAnyTapDown,
-    this.excludeFromSemantics = false,
   }) : assert(child != null),
        assert(onAnyTapDown != null),
        super(key: key);
@@ -85,10 +84,6 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   /// Immediately called when a pointer causes a tap down.
   /// See [_AnyTapGestureRecognizer.onAnyTapDown].
   final VoidCallback onAnyTapDown;
-
-  /// Whether to exclude these gestures from the semantics tree.
-  /// See [RawGestureDetector.excludeFromSemantics].
-  final bool excludeFromSemantics;
 
   @override
   Widget build(BuildContext context) {
