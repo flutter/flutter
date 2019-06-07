@@ -30,13 +30,16 @@ task:
     - name: build_and_test_host
       compile_host_script: |
         cd $ENGINE_PATH/src
-        ./flutter/tools/gn --unoptimized
+        ./flutter/tools/gn --unoptimized --full-dart-sdk
         ninja -C out/host_debug_unopt
       test_host_script: cd $ENGINE_PATH/src && ./flutter/testing/run_tests.sh host_debug_unopt
       fetch_framework_script: |
         mkdir -p $FRAMEWORK_PATH
         cd $FRAMEWORK_PATH
         git clone https://github.com/flutter/flutter.git
+      web_test_script: |
+        cd $FRAMEWORK_PATH/flutter/dev/integration_tests/web
+        ../../../bin/flutter --local-engine=host_debug_unopt build web -v
       framework_test_script: |
         cd $FRAMEWORK_PATH/flutter/packages/flutter
         ../../bin/flutter test --local-engine=host_debug_unopt
