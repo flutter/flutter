@@ -18,17 +18,18 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  final MockApplicationPackageFactory mockPackageApplicationFactory =
-      MockApplicationPackageFactory();
-  final MockDeviceManager mockDeviceManager = MockDeviceManager();
-  final MockFlutterVersion mockStableFlutterVersion =
-      MockFlutterVersion(isStable: true);
-  final MockFlutterVersion mockUnstableFlutterVersion =
-      MockFlutterVersion(isStable: false);
-
   group('run', () {
+    MockApplicationPackageFactory mockApplicationPackageFactory;
+    MockDeviceManager mockDeviceManager;
+    MockFlutterVersion mockStableFlutterVersion;
+    MockFlutterVersion mockUnstableFlutterVersion;
+
     setUpAll(() {
       Cache.disableLocking();
+      mockApplicationPackageFactory = MockApplicationPackageFactory();
+      mockDeviceManager = MockDeviceManager();
+      mockStableFlutterVersion = MockFlutterVersion(isStable: true);
+      mockUnstableFlutterVersion = MockFlutterVersion(isStable: false);
     });
 
     testUsingContext('fails when target not found', () async {
@@ -42,7 +43,7 @@ void main() {
       }
     });
 
-    testUsingContext('dart-flags option is not available in stable framework', () async {
+    testUsingContext('dart-flags option is not available on stable channel', () async {
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.fromIterable(<Device>[
           FakeDevice(),
@@ -106,7 +107,7 @@ void main() {
         expect(e.exitCode ?? 1, 1);
       }
     }, overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => mockPackageApplicationFactory,
+      ApplicationPackageFactory: () => mockApplicationPackageFactory,
       DeviceManager: () => mockDeviceManager,
       FlutterVersion: () => mockUnstableFlutterVersion,
     });

@@ -139,9 +139,9 @@ class RunCommand extends RunCommandBase {
               'present on the whitelist defined within the Flutter engine. If '
               'a non-whitelisted flag is encountered, the process will be '
               'terminated immediately.\n\n'
-              'This option is only valid while working on a non-stable Flutter release '
-              'and is only applied in debug and profile modes. This option should '
-              'only be used for experiments and should not be used by typical users.')
+              'This flag is not available on the stable channel and is only '
+              'applied in debug and profile modes. This option should only '
+              'be used for experiments and should not be used by typical users.')
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
@@ -356,8 +356,8 @@ class RunCommand extends RunCommandBase {
     }
 
     if (argResults['dart-flags'] != null && FlutterVersion.instance.isStable) {
-      throw UsageException('--dart-flags is for experiments only and cannot be'
-                           ' used on the stable branch.', null);
+      throw UsageException('--dart-flags is not available on the stable '
+                           'channel.', null);
     }
 
     for (Device device in devices) {
