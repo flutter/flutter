@@ -1183,11 +1183,13 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
     /**
      * Updates the Android cache of Flutter's currently registered custom accessibility actions.
+     *
+     * The buffer received here is encoded by PlatformViewAndroid::UpdateSemantics, and the
+     * decode logic here must be kept in sync with that method's encoding logic.
      */
     // TODO(mattcarroll): Consider introducing ability to delete custom actions because they can
     //                    probably come and go in Flutter, so we may want to reflect that here in
     //                    the Android cache as well.
-    // TODO(mattcarroll): where is the encoding code for reference?
     void updateCustomAccessibilityActions(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
         while (buffer.hasRemaining()) {
             int id = buffer.getInt();
@@ -1203,9 +1205,10 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
     /**
      * Updates {@link #flutterSemanticsTree} to reflect the latest state of Flutter's semantics tree.
      *
-     * The latest state of Flutter's semantics tree is encoded in the given {@code buffer}.
+     * The latest state of Flutter's semantics tree is encoded in the given {@code buffer}. The buffer
+     * is encoded by PlatformViewAndroid::UpdateSemantics, and the decode logic must be kept in sync
+     * with that method's encoding logic.
      */
-    // TODO(mattcarroll): where is the encoding code for reference?
     void updateSemantics(@NonNull ByteBuffer buffer, @NonNull String[] strings) {
         ArrayList<SemanticsNode> updated = new ArrayList<>();
         while (buffer.hasRemaining()) {
