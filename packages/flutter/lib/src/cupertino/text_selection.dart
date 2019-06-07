@@ -79,7 +79,9 @@ class _Toolbar extends SingleChildRenderObjectWidget {
 }
 
 class _ToolbarParentData extends BoxParentData {
-  // The x offset from the center of the toolbar to the tip of the arrow.
+  // The x offset from the tip of the arrow to the center of the toolbar.
+  // Positive if the tip of the arrow has a larger x-coordinate than the
+  // center of the toolbar.
   double arrowXOffsetFromCenter;
   @override
   String toString() => 'offset=$offset, arrowXOffsetFromCenter=$arrowXOffsetFromCenter';
@@ -100,6 +102,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     }
     _barTopY = value;
     markNeedsLayout();
+    markNeedsSemanticsUpdate();
   }
 
   double _arrowTipX;
@@ -109,6 +112,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     }
     _arrowTipX = value;
     markNeedsLayout();
+    markNeedsSemanticsUpdate();
   }
 
   bool _isArrowPointingDown;
@@ -118,6 +122,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
     }
     _isArrowPointingDown = value;
     markNeedsLayout();
+    markNeedsSemanticsUpdate();
   }
 
   final BoxConstraints heightConstraint = const BoxConstraints.tightFor(height: _kToolbarHeight);
@@ -138,24 +143,23 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       parentUsesSize: true,
     );
     final _ToolbarParentData childParentData = child.parentData;
-    final Offset localBarTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY));
+    final Offset localTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY));
 
-    final double lower = child.size.width/2 + _kToolbarScreenPadding;
-    final double upper = size.width - child.size.width/2 - _kToolbarScreenPadding;
+    final double lowerBound = child.size.width/2 + _kToolbarScreenPadding;
+    final double upperBound = size.width - child.size.width/2 - _kToolbarScreenPadding;
 
-    assert(upper >= lower, '$lower > $upper with child width of ${child.size.width} and area width of ${size.width}');
     // The local x-coordinate of the center of the toolbar.
-    final double adjustedCenterX = localBarTopCenter.dx
-      .clamp(lower, upper);
+    final double adjustedCenterX = localTopCenter.dx.clamp(lowerBound, upperBound);
 
-    childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, localBarTopCenter.dy);
-    childParentData.arrowXOffsetFromCenter = localBarTopCenter.dx - adjustedCenterX;
+    childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, localTopCenter.dy);
+    childParentData.arrowXOffsetFromCenter = localTopCenter.dx - adjustedCenterX;
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     final _ToolbarParentData childParentData = child.parentData;
 
+    // The path is described in the toolbar's coordinate system.
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
@@ -315,20 +319,22 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     final MediaQueryData mediaQuery = MediaQuery.of(context);
 
     // The toolbar should appear below the TextField when there is not enough
-    // space above the TextField to show it. Assuming there's always enough space
-    // at the bottom when this happens.
+    // space above the TextField to show it, assuming there's always enough space
+    // at the bottom in this case.
     final bool isArrowPointingDown =
       mediaQuery.padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
       + _kToolbarContentDistance <= globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
 
-    // We cannot trust postion.dy, since the caller (TextSelectionOverlay._buildToolbar)
-    // does not know whether the toolbar is going to be facing up or down.
-    final double localArrowTipX = position.dx.clamp(_kArrowScreenPadding, globalEditableRegion.size.width - _kArrowScreenPadding);
+    final double localArrowTipX = position.dx.clamp(
+      _kArrowScreenPadding,
+      globalEditableRegion.size.width - _kArrowScreenPadding
+    );
 
-    // The height of the toolbar is fixed hence we can decide its vertical
-    // position.
+    // The y-coordinate has to be calculated instead of directly quoting postion.dy,
+    // since the caller (TextSelectionOverlay._buildToolbar) does not know whether
+    // the toolbar is going to be facing up or down.
     final double localBarTopY = isArrowPointingDown
       ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight
       : endpoints.last.point.dy + _kToolbarContentDistance;

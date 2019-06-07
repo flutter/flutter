@@ -525,14 +525,14 @@ class TextSelectionOverlay {
           renderObject.preferredLineHeight / 2;
 
     // If the selected text spans more than 1 line, horizontally center the toolbar.
-    // Seems consistent on both iOS and Android.
+    // Derived from both iOS and Android.
     final double midX = isMultiline
       ? editingRegion.width / 2
       : (endpoints.first.point.dx + endpoints.last.point.dx) / 2;
 
     final Offset midpoint = Offset(
       midX,
-      // The Y value here is a bit random ... we don't need it anyway.
+      // The y-coordinate won't be made use of most likely.
       endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
