@@ -160,10 +160,8 @@ class ColdRunner extends ResidentRunner {
     await stopEchoingDeviceLog();
     if (_didAttach) {
       appFinished();
-    } else {
-      await stopApp();
     }
-    await stopApp();
+    await exitApp();
   }
 
   @override
@@ -207,7 +205,7 @@ class ColdRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> preStop() async {
+  Future<void> preExit() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmServices == null || device.vmServices.isEmpty)

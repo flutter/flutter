@@ -583,6 +583,14 @@ class AndroidViewController {
     });
   }
 
+  /// Clears the focus from the Android View if it is focused.
+  Future<void> clearFocus() {
+    if (_state != _AndroidViewState.created) {
+      return null;
+    }
+    return SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
+  }
+
   static int _getAndroidDirection(TextDirection direction) {
     assert(direction != null);
     switch (direction) {
