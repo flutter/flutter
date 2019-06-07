@@ -102,13 +102,11 @@ class Usage {
   String get clientId => _analytics.clientId;
 
   void sendCommand(String command, { Map<String, String> parameters }) {
-    print('YOLO DAWG!!!! -> $suppressAnalytics');
     if (suppressAnalytics)
       return;
 
     parameters ??= const <String, String>{};
 
-    parameters.forEach((k, v) => print('$k: $v')); // TODO remove
     _analytics.sendScreenView(command, parameters: parameters);
   }
 
