@@ -16,6 +16,10 @@ import 'globals.dart';
 import 'version.dart';
 
 const String _kFlutterUA = 'UA-67589403-6';
+
+const String kSessionHostOsDetails = 'cd1';
+const String kSessionChannelName = 'cd2';
+
 const String kEventReloadReasonParameterName = 'cd5';
 const String kEventReloadFinalLibraryCount = 'cd6';
 const String kEventReloadSyncedLibraryCount = 'cd7';
@@ -31,6 +35,8 @@ const String kCommandRunTargetName = 'cd4';
 const String kCommandRunProjectType = 'cd14';
 const String kCommandRunProjectHostLanguage = 'cd15';
 const String kCommandRunProjectModule = 'cd18';
+const String kCommandRunTargetOsVersion = 'cd22';
+const String kCommandRunModeName = 'cd23';
 
 const String kCommandCreateAndroidLanguage = 'cd16';
 const String kCommandCreateIosLanguage = 'cd17';
@@ -51,9 +57,9 @@ class Usage {
         documentDirectory: configDirOverride != null ? fs.directory(configDirOverride) : null);
 
     // Report a more detailed OS version string than package:usage does by default.
-    _analytics.setSessionValue('cd1', os.name);
+    _analytics.setSessionValue(kSessionHostOsDetails, os.name);
     // Send the branch name as the "channel".
-    _analytics.setSessionValue('cd2', flutterVersion.getBranchName(redactUnknownBranches: true));
+    _analytics.setSessionValue(kSessionChannelName, flutterVersion.getBranchName(redactUnknownBranches: true));
     // Record the host as the application installer ID - the context that flutter_tools is running in.
     if (platform.environment.containsKey('FLUTTER_HOST')) {
       _analytics.setSessionValue('aiid', platform.environment['FLUTTER_HOST']);
@@ -96,11 +102,13 @@ class Usage {
   String get clientId => _analytics.clientId;
 
   void sendCommand(String command, { Map<String, String> parameters }) {
+    print('YOLO DAWG!!!! -> $suppressAnalytics');
     if (suppressAnalytics)
       return;
 
     parameters ??= const <String, String>{};
 
+    parameters.forEach((k, v) => print('$k: $v')); // TODO remove
     _analytics.sendScreenView(command, parameters: parameters);
   }
 
