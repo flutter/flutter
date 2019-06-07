@@ -26,7 +26,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.4.2';
+const String protocolVersion = '0.5.0';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
