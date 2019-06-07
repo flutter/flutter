@@ -8,6 +8,7 @@ import 'package:flutter/painting.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+
   testWidgets('Divider control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -23,6 +24,7 @@ void main() {
   });
 
   testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
+    const double customIndent = 10.0;
     Rect dividerRect;
     Rect lineRect;
 
@@ -31,7 +33,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Divider(
-            indent: 10.0,
+            indent: customIndent,
           ),
         ),
       ),
@@ -40,7 +42,7 @@ void main() {
     // The divider line is drawn with a DecoratedBox with a border
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
-    expect(lineRect.left, dividerRect.left + 10.0);
+    expect(lineRect.left, dividerRect.left + customIndent);
     expect(lineRect.right, dividerRect.right);
 
     await tester.pumpWidget(
@@ -48,7 +50,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: Divider(
-            endIndent: 10.0,
+            endIndent: customIndent,
           ),
         ),
       ),
@@ -57,15 +59,15 @@ void main() {
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.left, dividerRect.left);
-    expect(lineRect.right, dividerRect.right - 10.0);
+    expect(lineRect.right, dividerRect.right - customIndent);
 
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: Divider(
-            indent: 10.0,
-            endIndent: 10.0,
+            indent: customIndent,
+            endIndent: customIndent,
           ),
         ),
       ),
@@ -73,8 +75,8 @@ void main() {
 
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
-    expect(lineRect.left, dividerRect.left + 10.0);
-    expect(lineRect.right, dividerRect.right - 10.0);
+    expect(lineRect.left, dividerRect.left + customIndent);
+    expect(lineRect.right, dividerRect.right - customIndent);
   });
 
   testWidgets('Vertical Divider Test', (WidgetTester tester) async {
@@ -116,6 +118,7 @@ void main() {
   });
 
   testWidgets('Vertical divider custom indentation', (WidgetTester tester) async {
+    const double customIndent = 10.0;
     Rect dividerRect;
     Rect lineRect;
 
@@ -124,7 +127,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: VerticalDivider(
-            indent: 10.0,
+            indent: customIndent,
           ),
         ),
       ),
@@ -133,7 +136,7 @@ void main() {
     // The divider line is drawn with a DecoratedBox with a border
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
-    expect(lineRect.top, dividerRect.top + 10.0);
+    expect(lineRect.top, dividerRect.top + customIndent);
     expect(lineRect.bottom, dividerRect.bottom);
 
     await tester.pumpWidget(
@@ -141,7 +144,7 @@ void main() {
         textDirection: TextDirection.ltr,
         child: Center(
           child: VerticalDivider(
-            endIndent: 10.0,
+            endIndent: customIndent,
           ),
         ),
       ),
@@ -150,15 +153,15 @@ void main() {
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.top, dividerRect.top);
-    expect(lineRect.bottom, dividerRect.bottom - 10.0);
+    expect(lineRect.bottom, dividerRect.bottom - customIndent);
 
     await tester.pumpWidget(
       const Directionality(
         textDirection: TextDirection.ltr,
         child: Center(
           child: VerticalDivider(
-            indent: 10.0,
-            endIndent: 10.0,
+            indent: customIndent,
+            endIndent: customIndent,
           ),
         ),
       ),
@@ -166,7 +169,7 @@ void main() {
 
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
-    expect(lineRect.top, dividerRect.top + 10.0);
-    expect(lineRect.bottom, dividerRect.bottom - 10.0);
+    expect(lineRect.top, dividerRect.top + customIndent);
+    expect(lineRect.bottom, dividerRect.bottom - customIndent);
   });
 }
