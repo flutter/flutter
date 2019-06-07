@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -10,24 +11,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
-
-import '../rendering/mock_canvas.dart';
-
-class PathMatcher extends Matcher {
-  const PathMatcher({
-      this.includes = const <Offset>[],
-      this.excludes = const <Offset>[],
-  }) : super();
-
-  final Iterable<Offset> includes;
-  final Iterable<Offset> excludes;
-
-  @override
-  bool matches(dynamic item, Map<dynamic, dynamic> matchState) => includes.every(item.contains) && !excludes.any(item.contains);
-
-  @override
-  Description describe(Description description) => description.add('must include these points $includes and must not include $excludes');
-}
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -2504,9 +2487,9 @@ void main() {
   );
 
   testWidgets('Collapsed selection works', (WidgetTester tester) async {
-    final String text = List<String>.filled(100, 'a').join(' ');
+    final String text = List<String>.filled(10, 'a').join('\n');
 
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < 10; i++) {
       final TextEditingController controller = TextEditingController(text: text);
 
       await tester.pumpWidget(
@@ -2517,34 +2500,15 @@ void main() {
         ),
       );
       final Offset tapLocation = textOffsetToPosition(tester, i * 2);
-      final RenderEditable renderEditable = findRenderEditable(tester);
       await tester.longPressAt(tapLocation);
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 200));
 
-      final Finder toolbar = find.byType(CupertinoTextSelectionToolbar);
-
-      final TextSelection selection = TextSelection(baseOffset: i * 2, extentOffset: i * 2 + 1);
-      final List<TextSelectionPoint> globalSelections = globalize(
-        renderEditable.getEndpointsForSelection(selection),
-        renderEditable
+      await expectLater(
+        find.byType(CupertinoApp),
+        matchesGoldenFile('text_field.collapsed_selection.toolbar.$i.png'),
+        skip: !Platform.isLinux,
       );
-
-      final bool flipToolbar = globalSelections[0].point.dy - renderEditable.preferredLineHeight
-        < 8  // Top padding
-        + 43 // Toolbar height
-        + 8; // To content padding
-
-      final double arrowCenterX = (globalSelections.first.point.dx + globalSelections.last.point.dx) / 2;
-      final double arrowCenterY = flipToolbar
-        ? globalSelections[0].point.dy + 8 + 7
-        : globalSelections[0].point.dy - 8 - 7 - renderEditable.preferredLineHeight;
-
-      expect(
-        toolbar,
-        paints
-          ..clipPath(pathMatcher: PathMatcher(includes: <Offset> [Offset(arrowCenterX, arrowCenterY)]))
-     );
     }
 
   });
