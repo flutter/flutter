@@ -5,8 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show
   PrimaryPointerGestureRecognizer,
-  GestureDisposition,
-  SemanticsGestureConfiguration;
+  GestureDisposition;
 
 import 'basic.dart';
 import 'container.dart';
@@ -22,19 +21,15 @@ import 'transitions.dart';
 //
 // It is used by ModalBarrier to detect any taps on the overlay.
 class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  _AnyTapGestureRecognizer({ Object debugOwner }) : super(debugOwner: debugOwner);
+  _AnyTapGestureRecognizer({
+    Object debugOwner,
+    @required this.onAnyTapDown,
+  }) : assert(onAnyTapDown != null),
+       super(debugOwner: debugOwner);
 
-  VoidCallback onAnyTapDown;
+  final VoidCallback onAnyTapDown;
 
   bool _sentTapDown = false;
-
-  @override
-  SemanticsGestureConfiguration get semanticsConfiguration {
-    return _semanticsConfiguration ??= SemanticsGestureConfiguration(
-      onTap: onAnyTapDown,
-    );
-  }
-  SemanticsGestureConfiguration _semanticsConfiguration;
 
   @override
   void addAllowedPointer(PointerDownEvent event) {
@@ -61,16 +56,26 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   String get debugDescription => 'anyTap';
 }
 
+class _AnyTapSemanticsMapping extends GestureSemanticsMapping {
+  @override
+  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
+    final _AnyTapGestureRecognizer tap = getRecognizer(_AnyTapGestureRecognizer);
+    // We can directly return the method here because AnyTap ensures non-null
+    // `onAnyTapDown`.
+    return tap.onAnyTapDown;
+  }
+}
+
 // A GestureDetector used by ModalBarrier. It only has one callback,
 // `onAnyTapDown`, which recognizes tap down unconditionally.
 class _ModalBarrierGestureDetector extends StatelessWidget {
   const _ModalBarrierGestureDetector({
     Key key,
-    this.child,
-    this.onAnyTapDown,
-    this.behavior,
+    @required this.child,
+    @required this.onAnyTapDown,
     this.excludeFromSemantics = false,
-  }) : assert(excludeFromSemantics != null),
+  }) : assert(child != null),
+       assert(onAnyTapDown != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -81,32 +86,23 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   /// See [_AnyTapGestureRecognizer.onAnyTapDown].
   final VoidCallback onAnyTapDown;
 
-  /// How this gesture detector should behave during hit testing.
-  /// See [RawGestureDetector.behavior].
-  final HitTestBehavior behavior;
-
   /// Whether to exclude these gestures from the semantics tree.
   /// See [RawGestureDetector.excludeFromSemantics].
   final bool excludeFromSemantics;
 
   @override
   Widget build(BuildContext context) {
-    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{};
-
-    if (onAnyTapDown != null) {
-      gestures[_AnyTapGestureRecognizer] = GestureRecognizerFactoryWithHandlers<_AnyTapGestureRecognizer>(
-        () => _AnyTapGestureRecognizer(debugOwner: this),
-        (_AnyTapGestureRecognizer instance) {
-          instance
-            ..onAnyTapDown = onAnyTapDown;
-        },
-      );
-    }
+    final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
+      _AnyTapGestureRecognizer: GestureRecognizerFactoryWithHandlers<_AnyTapGestureRecognizer>(
+        () => _AnyTapGestureRecognizer(debugOwner: this, onAnyTapDown: onAnyTapDown),
+        (_AnyTapGestureRecognizer instance) => instance,
+      ),
+    };
 
     return RawGestureDetector(
       gestures: gestures,
-      behavior: behavior,
-      excludeFromSemantics: excludeFromSemantics,
+      behavior: HitTestBehavior.opaque,
+      semanticsMapping: _AnyTapSemanticsMapping(),
       child: child,
     );
   }
@@ -186,7 +182,6 @@ class ModalBarrier extends StatelessWidget {
             if (dismissible)
               Navigator.maybePop(context);
           },
-          behavior: HitTestBehavior.opaque,
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
