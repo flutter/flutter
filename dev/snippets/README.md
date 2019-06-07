@@ -80,7 +80,10 @@ This uses the skeleton for [application](config/skeletons/application.html)
 snippets.
 
 Code snippets also allow for quick Flutter app generation using the following command:
-`flutter create --sample=[directory.File.sampleNumber] [name_of_project_directory]`
+
+```
+flutter create --sample=[directory.File.sampleNumber] [name_of_project_directory]
+```
 
 #### Templates
 
