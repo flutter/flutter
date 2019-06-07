@@ -451,6 +451,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.pageDidChanged,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
   }) : controller = controller ?? _defaultPageController,
@@ -477,6 +478,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.pageDidChanged,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -494,6 +496,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
+    this.pageDidChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(childrenDelegate != null),
@@ -539,7 +542,8 @@ class PageView extends StatefulWidget {
 
   /// Called whenever the page in the center of the viewport changes.
   final ValueChanged<int> onPageChanged;
-
+  /// Called whenever the page has changed and the scroll animation has stopped.
+  final ValueChanged<int> pageDidChanged;
   /// A delegate that provides the children for the [PageView].
   ///
   /// The [PageView.custom] constructor lets you specify this delegate
@@ -556,12 +560,16 @@ class PageView extends StatefulWidget {
 }
 
 class _PageViewState extends State<PageView> {
-  int _lastReportedPage = 0;
+  int _onPageChangedIndex = 0;
+  int _pageDidChangedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _lastReportedPage = widget.controller.initialPage;
+    /// a flag to decide whether to call [PageView.onPageChanged];
+    _onPageChangedIndex = widget.controller.initialPage;
+    /// a flag to decide whether to call [PageView.pageDidChanged];
+    _pageDidChangedIndex = widget.controller.initialPage;
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -589,9 +597,16 @@ class _PageViewState extends State<PageView> {
         if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
           final PageMetrics metrics = notification.metrics;
           final int currentPage = metrics.page.round();
-          if (currentPage != _lastReportedPage) {
-            _lastReportedPage = currentPage;
+          if (currentPage != _onPageChangedIndex) {
+            _onPageChangedIndex = currentPage;
             widget.onPageChanged(currentPage);
+          }
+        } else if (notification.depth == 0 && widget.pageDidChanged != null && notification is ScrollEndNotification) {
+          final PageMetrics metrics = notification.metrics;
+          final int currentPage = metrics.page.round();
+          if (currentPage != _pageDidChangedIndex) {
+            _pageDidChangedIndex = currentPage;
+            widget.pageDidChanged(currentPage);
           }
         }
         return false;

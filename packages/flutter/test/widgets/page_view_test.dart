@@ -327,6 +327,33 @@ void main() {
     expect(find.text('Alaska'), findsOneWidget);
   });
 
+  testWidgets('Page changes and scroll animation ends', (WidgetTester tester) async {
+    final List<int> log = <int>[];
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        pageDidChanged: log.add,
+        children: kStates.map<Widget>((String state) => Text(state)).toList(),
+      ),
+    ));
+
+    expect(log, isEmpty);
+
+    final TestGesture gesture =
+    await tester.startGesture(const Offset(100.0, 100.0));
+    // The page view is 800.0 wide, so this move is beyond halfway.
+    await gesture.moveBy(const Offset(-420.0, 0.0));
+
+    expect(log, isEmpty);
+
+    await gesture.up();
+    await tester.pumpAndSettle();
+
+    expect(log, equals(const <int>[1]));
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+  });
+
   testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
     final List<int> log = <int>[];
     final PageController controller = PageController(viewportFraction: 0.9);
@@ -337,6 +364,7 @@ void main() {
         child: PageView(
           controller: controller,
           onPageChanged: log.add,
+          pageDidChanged: log.add,
           physics: const BouncingScrollPhysics(),
           children: kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
@@ -433,6 +461,7 @@ void main() {
         child: PageView(
           pageSnapping: pageSnapping,
           onPageChanged: log.add,
+          pageDidChanged: log.add,
           children:
               kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
@@ -454,6 +483,10 @@ void main() {
     await gesture.up();
     await tester.pumpAndSettle();
 
+    // Check if [PageView.pageDidChange] is triggered.
+    expect(log, equals(const <int>[1]));
+    log.clear();
+
     expect(find.text('Alabama'), findsNothing);
     expect(find.text('Alaska'), findsOneWidget);
 
@@ -463,7 +496,7 @@ void main() {
     // Move just beyond halfway, again.
     await gesture.moveBy(const Offset(-420.0, 0.0));
 
-    // Page notifications still get sent.
+    // [PageView.onPageChanged] still get sent.
     expect(log, equals(const <int>[2]));
     log.clear();
 
@@ -480,7 +513,8 @@ void main() {
     await tester.pumpWidget(build(pageSnapping: true));
     await tester.pumpAndSettle();
 
-    expect(log, isEmpty);
+    // [PageView.pageDidChange] should be triggered.
+    expect(log, equals(const <int>[2]));
 
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
@@ -580,13 +614,16 @@ void main() {
           onPageChanged: (int page) {
             changeIndex = page;
           },
+          pageDidChanged: (int page) {
+            changeIndex = page;
+          },
         ),
       );
     }
 
     await tester.pumpWidget(build());
     controller.jumpToPage(kStates.length * 2); // try to move beyond max range
-    // change index should be zero, shouldn't fire onPageChanged
+    // change index should be zero, shouldn't fire onPageChanged or pageDidChanged
     expect(changeIndex, 0);
     await tester.pump();
     expect(changeIndex, 0);
