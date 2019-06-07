@@ -67,18 +67,25 @@ class TextSpan extends InlineSpan {
   /// For the object to be useful, at least one of [text] or
   /// [children] should be set.
   const TextSpan({
-    this.text,
-    this.children,
+    String text,
+    List<InlineSpan> children,
     TextStyle style,
     this.recognizer,
     this.semanticsLabel,
-  }) : super(style: style,);
+  }) : _text = text,
+       _children = children,
+       super(style: style,);
 
-  /// The text contained in the span.
+  /// The text contained in this span.
   ///
   /// If both [text] and [children] are non-null, the text will precede the
   /// children.
-  final String text;
+  ///
+  /// This getter does not include the contents of its children.
+  @override
+  String get text => _text;
+  final String _text;
+
 
   /// Additional spans to include as children.
   ///
@@ -89,7 +96,9 @@ class TextSpan extends InlineSpan {
   /// supported and may have unexpected results.
   ///
   /// The list must not contain any nulls.
-  final List<InlineSpan> children;
+  @override
+  List<InlineSpan> get children => _children;
+  final List<InlineSpan> _children;
 
   /// A gesture recognizer that will receive events that hit this span.
   ///

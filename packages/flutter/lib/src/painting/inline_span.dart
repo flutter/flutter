@@ -90,6 +90,18 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// of [TextSpan].
   final TextStyle style;
 
+  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
+  /// Returns the text associated with this span if this is an instance of [TextSpan],
+  /// otherwise returns null.
+  @Deprecated('InlineSpan does not innately have text. Use TextSpan.text instead.')
+  String get text => null;
+
+  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
+  /// Returns the [InlineSpan] children list associated with this span if this is an
+  /// instance of [TextSpan], otherwise returns null.
+  @Deprecated('InlineSpan does not innately have children. Use TextSpan.children instead.')
+  List<InlineSpan> get children => null;
+
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
   ///
@@ -104,7 +116,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// [Paragraph] objects can be drawn on [Canvas] objects.
   void build(ui.ParagraphBuilder builder, { double textScaleFactor = 1.0, List<PlaceholderDimensions> dimensions });
 
-  // TODO(garyq): Remove this after next stable release.
+  // TODO(garyq): Remove the deprecated visitTextSpan, text, and children.
   /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
   /// for each span that has content.
   ///
