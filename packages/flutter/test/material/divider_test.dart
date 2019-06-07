@@ -8,7 +8,6 @@ import 'package:flutter/painting.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
-
   testWidgets('Divider control test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
@@ -38,7 +37,6 @@ void main() {
         ),
       ),
     );
-
     // The divider line is drawn with a DecoratedBox with a border
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -55,7 +53,6 @@ void main() {
         ),
       ),
     );
-
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.left, dividerRect.left);
@@ -72,7 +69,6 @@ void main() {
         ),
       ),
     );
-
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.left, dividerRect.left + customIndent);
@@ -132,7 +128,6 @@ void main() {
         ),
       ),
     );
-
     // The divider line is drawn with a DecoratedBox with a border
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
@@ -149,7 +144,6 @@ void main() {
         ),
       ),
     );
-
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.top, dividerRect.top);
@@ -166,7 +160,6 @@ void main() {
         ),
       ),
     );
-
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.top, dividerRect.top + customIndent);
