@@ -43,8 +43,10 @@ import 'macos/xcode_validator.dart';
 import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
-import 'web/compile.dart';
-import 'web/web_device.dart';
+import 'web/chrome.dart';
+import 'web/workflow.dart';
+import 'windows/visual_studio.dart';
+import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
@@ -99,7 +101,9 @@ Future<T> runInContext<T>(
       TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
-      WebCompiler: () => const WebCompiler(),
+      VisualStudio: () => VisualStudio(),
+      VisualStudioValidator: () => const VisualStudioValidator(),
+      WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),
       XcodeValidator: () => const XcodeValidator(),

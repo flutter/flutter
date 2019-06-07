@@ -3794,13 +3794,17 @@
   "select": {
     "names": {
       "domkey": "Select",
-      "android": null,
+      "android": [
+        "DPAD_CENTER"
+      ],
       "english": "Select",
       "chromium": "select",
       "glfw": null
     },
     "scanCodes": {
-      "android": null,
+      "android": [
+        353
+      ],
       "usb": 458871,
       "linux": 132,
       "xkb": 140,
@@ -3808,7 +3812,9 @@
       "macos": null
     },
     "keyCodes": {
-      "android": null,
+      "android": [
+        23
+      ],
       "glfw": null
     }
   },
@@ -6314,6 +6320,27 @@
       "glfw": null
     }
   },
+  "keyboardLayoutSelect": {
+    "names": {
+      "domkey": "KeyboardLayoutSelect",
+      "android": null,
+      "english": "Keyboard Layout Select",
+      "chromium": "keyboardLayoutSelect",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": null,
+      "usb": 787101,
+      "linux": 584,
+      "xkb": 592,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": null,
+      "glfw": null
+    }
+  },
   "showAllWindows": {
     "names": {
       "domkey": "ShowAllWindows",
@@ -6332,6 +6359,859 @@
     },
     "keyCodes": {
       "android": null,
+      "glfw": null
+    }
+  },
+  "gameButton1": {
+    "names": {
+      "domkey": "GameButton1",
+      "android": [
+        "BUTTON_1"
+      ],
+      "english": "Game Button 1",
+      "chromium": "button1",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        256,
+        288
+      ],
+      "usb": 341761,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        188
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton2": {
+    "names": {
+      "domkey": "GameButton2",
+      "android": [
+        "BUTTON_2"
+      ],
+      "english": "Game Button 2",
+      "chromium": "button2",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        257,
+        289
+      ],
+      "usb": 341762,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        189
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton3": {
+    "names": {
+      "domkey": "GameButton3",
+      "android": [
+        "BUTTON_3"
+      ],
+      "english": "Game Button 3",
+      "chromium": "button3",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        258,
+        290
+      ],
+      "usb": 341763,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        190
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton4": {
+    "names": {
+      "domkey": "GameButton4",
+      "android": [
+        "BUTTON_4"
+      ],
+      "english": "Game Button 4",
+      "chromium": "button4",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        259,
+        291
+      ],
+      "usb": 341764,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        191
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton5": {
+    "names": {
+      "domkey": "GameButton5",
+      "android": [
+        "BUTTON_5"
+      ],
+      "english": "Game Button 5",
+      "chromium": "button5",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        260,
+        292
+      ],
+      "usb": 341765,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        192
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton6": {
+    "names": {
+      "domkey": "GameButton6",
+      "android": [
+        "BUTTON_6"
+      ],
+      "english": "Game Button 6",
+      "chromium": "button6",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        261,
+        293
+      ],
+      "usb": 341766,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        193
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton7": {
+    "names": {
+      "domkey": "GameButton7",
+      "android": [
+        "BUTTON_7"
+      ],
+      "english": "Game Button 7",
+      "chromium": "button7",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        262,
+        294
+      ],
+      "usb": 341767,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        194
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton8": {
+    "names": {
+      "domkey": "GameButton8",
+      "android": [
+        "BUTTON_8"
+      ],
+      "english": "Game Button 8",
+      "chromium": "button8",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        263,
+        295
+      ],
+      "usb": 341768,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        195
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton9": {
+    "names": {
+      "domkey": "GameButton9",
+      "android": [
+        "BUTTON_9"
+      ],
+      "english": "Game Button 9",
+      "chromium": "button9",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        264,
+        296
+      ],
+      "usb": 341769,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        196
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton10": {
+    "names": {
+      "domkey": "GameButton10",
+      "android": [
+        "BUTTON_10"
+      ],
+      "english": "Game Button 10",
+      "chromium": "button10",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        265,
+        297
+      ],
+      "usb": 341770,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        197
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton11": {
+    "names": {
+      "domkey": "GameButton11",
+      "android": [
+        "BUTTON_11"
+      ],
+      "english": "Game Button 11",
+      "chromium": "button11",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        266,
+        298
+      ],
+      "usb": 341771,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        198
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton12": {
+    "names": {
+      "domkey": "GameButton12",
+      "android": [
+        "BUTTON_12"
+      ],
+      "english": "Game Button 12",
+      "chromium": "button12",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        267,
+        299
+      ],
+      "usb": 341772,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        199
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton13": {
+    "names": {
+      "domkey": "GameButton13",
+      "android": [
+        "BUTTON_13"
+      ],
+      "english": "Game Button 13",
+      "chromium": "button13",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        268,
+        300
+      ],
+      "usb": 341773,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        200
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton14": {
+    "names": {
+      "domkey": "GameButton14",
+      "android": [
+        "BUTTON_14"
+      ],
+      "english": "Game Button 14",
+      "chromium": "button14",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        269,
+        301
+      ],
+      "usb": 341774,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        201
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton15": {
+    "names": {
+      "domkey": "GameButton15",
+      "android": [
+        "BUTTON_15"
+      ],
+      "english": "Game Button 15",
+      "chromium": "button15",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        270,
+        302
+      ],
+      "usb": 341775,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        202
+      ],
+      "glfw": null
+    }
+  },
+  "gameButton16": {
+    "names": {
+      "domkey": "GameButton16",
+      "android": [
+        "BUTTON_16"
+      ],
+      "english": "Game Button 16",
+      "chromium": "button16",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        271,
+        303
+      ],
+      "usb": 341776,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        203
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonA": {
+    "names": {
+      "domkey": "GameButtonA",
+      "android": [
+        "BUTTON_A"
+      ],
+      "english": "Game Button A",
+      "chromium": "buttonA",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        304
+      ],
+      "usb": 341777,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        96
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonB": {
+    "names": {
+      "domkey": "GameButtonB",
+      "android": [
+        "BUTTON_B"
+      ],
+      "english": "Game Button B",
+      "chromium": "buttonB",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        305
+      ],
+      "usb": 341778,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        97
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonC": {
+    "names": {
+      "domkey": "GameButtonC",
+      "android": [
+        "BUTTON_C"
+      ],
+      "english": "Game Button C",
+      "chromium": "buttonC",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        306
+      ],
+      "usb": 341779,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        98
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonLeft1": {
+    "names": {
+      "domkey": "GameButtonLeft1",
+      "android": [
+        "BUTTON_L1"
+      ],
+      "english": "Game Button Left 1",
+      "chromium": "buttonL1",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        310
+      ],
+      "usb": 341780,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        102
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonLeft2": {
+    "names": {
+      "domkey": "GameButtonLeft2",
+      "android": [
+        "BUTTON_L2"
+      ],
+      "english": "Game Button Left 2",
+      "chromium": "buttonL2",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        312
+      ],
+      "usb": 341781,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        104
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonMode": {
+    "names": {
+      "domkey": "GameButtonMode",
+      "android": [
+        "BUTTON_MODE"
+      ],
+      "english": "Game Button Mode",
+      "chromium": "buttonMode",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        316
+      ],
+      "usb": 341782,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        110
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonRight1": {
+    "names": {
+      "domkey": "GameButtonRight1",
+      "android": [
+        "BUTTON_R1"
+      ],
+      "english": "Game Button Right 1",
+      "chromium": "buttonR1",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        311
+      ],
+      "usb": 341783,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        103
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonRight2": {
+    "names": {
+      "domkey": "GameButtonRight2",
+      "android": [
+        "BUTTON_R2"
+      ],
+      "english": "Game Button Right 2",
+      "chromium": "buttonR2",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        313
+      ],
+      "usb": 341784,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        105
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonSelect": {
+    "names": {
+      "domkey": "GameButtonSelect",
+      "android": [
+        "BUTTON_SELECT"
+      ],
+      "english": "Game Button Select",
+      "chromium": "buttonSelect",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        314
+      ],
+      "usb": 341785,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        109
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonStart": {
+    "names": {
+      "domkey": "GameButtonStart",
+      "android": [
+        "BUTTON_START"
+      ],
+      "english": "Game Button Start",
+      "chromium": "buttonStart",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        315
+      ],
+      "usb": 341786,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        108
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonThumbLeft": {
+    "names": {
+      "domkey": "GameButtonThumbLeft",
+      "android": [
+        "BUTTON_THUMBL"
+      ],
+      "english": "Game Button Thumb Left",
+      "chromium": "buttonThumbl",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        317
+      ],
+      "usb": 341787,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        106
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonThumbRight": {
+    "names": {
+      "domkey": "GameButtonThumbRight",
+      "android": [
+        "BUTTON_THUMBR"
+      ],
+      "english": "Game Button Thumb Right",
+      "chromium": "buttonThumbr",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        318
+      ],
+      "usb": 341788,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        107
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonX": {
+    "names": {
+      "domkey": "GameButtonX",
+      "android": [
+        "BUTTON_X"
+      ],
+      "english": "Game Button X",
+      "chromium": "buttonX",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        307
+      ],
+      "usb": 341789,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        99
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonY": {
+    "names": {
+      "domkey": "GameButtonY",
+      "android": [
+        "BUTTON_Y"
+      ],
+      "english": "Game Button Y",
+      "chromium": "buttonY",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        308
+      ],
+      "usb": 341790,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        100
+      ],
+      "glfw": null
+    }
+  },
+  "gameButtonZ": {
+    "names": {
+      "domkey": "GameButtonZ",
+      "android": [
+        "BUTTON_Z"
+      ],
+      "english": "Game Button Z",
+      "chromium": "buttonZ",
+      "glfw": null
+    },
+    "scanCodes": {
+      "android": [
+        309
+      ],
+      "usb": 341791,
+      "linux": null,
+      "xkb": null,
+      "windows": null,
+      "macos": null
+    },
+    "keyCodes": {
+      "android": [
+        101
+      ],
       "glfw": null
     }
   }
