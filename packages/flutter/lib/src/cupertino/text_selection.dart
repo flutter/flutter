@@ -47,8 +47,12 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
-class _Toolbar extends SingleChildRenderObjectWidget {
-  const _Toolbar({
+/// The toolbar that appears and provides text manipulation operations to the user
+/// on iOS when there is selected text in a `EditableText`.
+@visibleForTesting
+class CupertinoTextSelectionToolbar extends SingleChildRenderObjectWidget {
+  /// Create a [CupertinoTextSelectionToolbar].
+  const CupertinoTextSelectionToolbar({
     Key key,
     this.barTopY,
     this.arrowTipX,
@@ -339,7 +343,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     return ConstrainedBox(
       constraints: BoxConstraints.tight(mediaQuery.size),
-      child: _Toolbar(
+      child: CupertinoTextSelectionToolbar(
         barTopY: localBarTopY + globalEditableRegion.top,
         arrowTipX: localArrowTipX + globalEditableRegion.left,
         isArrowPointingDown: isArrowPointingDown,

@@ -11,6 +11,24 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../rendering/mock_canvas.dart';
+
+class PathMatcher extends Matcher {
+  const PathMatcher({
+      this.includes = const <Offset>[],
+      this.excludes = const <Offset>[],
+  }) : super();
+
+  final Iterable<Offset> includes;
+  final Iterable<Offset> excludes;
+
+  @override
+  bool matches(dynamic item, Map<dynamic, dynamic> matchState) => includes.every(item.contains) && !excludes.any(item.contains);
+
+  @override
+  Description describe(Description description) => description.add('must include these points $includes and must not include $excludes');
+}
+
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
     'text': null,
@@ -1115,8 +1133,8 @@ void main() {
     Text text = tester.widget<Text>(find.text('Paste'));
     expect(text.style.color, CupertinoColors.white);
     expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.11);
-    expect(text.style.fontWeight, FontWeight.w300);
+    expect(text.style.letterSpacing, -0.15);
+    expect(text.style.fontWeight, FontWeight.w400);
 
     // Change the theme.
     await tester.pumpWidget(
@@ -1147,8 +1165,8 @@ void main() {
     // The toolbar buttons' text are still the same style.
     expect(text.style.color, CupertinoColors.white);
     expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.11);
-    expect(text.style.fontWeight, FontWeight.w300);
+    expect(text.style.letterSpacing, -0.15);
+    expect(text.style.fontWeight, FontWeight.w400);
   });
 
   testWidgets('Read only text field', (WidgetTester tester) async {
@@ -2484,6 +2502,60 @@ void main() {
       expect(toolbarTopLeft.dy, lessThan(textFieldTopLeft.dy));
     }
   );
+
+  testWidgets('Collapsed selection works', (WidgetTester tester) async {
+    final String text = List<String>.filled(100, 'a').join(' ');
+
+    for(int i = 0; i < 100; i++) {
+      final TextEditingController controller = TextEditingController(text: text);
+
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(controller: controller),
+          ),
+        ),
+      );
+      final Offset tapLocation = textOffsetToPosition(tester, i * 2);
+      final RenderEditable renderEditable = findRenderEditable(tester);
+      await tester.longPressAt(tapLocation);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 200));
+
+      final Finder toolbar = find.byType(CupertinoTextSelectionToolbar);
+
+      final TextSelection selection = TextSelection(baseOffset: i * 2, extentOffset: i * 2 + 1);
+      final List<TextSelectionPoint> globalSelections = globalize(
+        renderEditable.getEndpointsForSelection(selection),
+        renderEditable
+      );
+
+      final bool flipToolbar = globalSelections[0].point.dy - renderEditable.preferredLineHeight
+        < 8  // Top padding
+        + 43 // Toolbar height
+        + 8; // To content padding
+
+      final double arrowCenterX = (globalSelections.first.point.dx + globalSelections.last.point.dx) / 2;
+      final double arrowCenterY = flipToolbar
+        ? globalSelections[0].point.dy + 8 + 7
+        : globalSelections[0].point.dy - 8 - 7 - renderEditable.preferredLineHeight;
+
+      expect(
+        toolbar,
+        paints
+          ..clipPath(pathMatcher: PathMatcher(includes: <Offset> [Offset(arrowCenterX, arrowCenterY)]))
+     );
+    }
+
+  });
+
+  testWidgets('selecting multiple words works', (WidgetTester tester) async {
+
+  });
+
+  testWidgets('selecting multiline works', (WidgetTester tester) async {
+
+  });
 
   testWidgets('text field respects keyboardAppearance from theme', (WidgetTester tester) async {
     final List<MethodCall> log = <MethodCall>[];
