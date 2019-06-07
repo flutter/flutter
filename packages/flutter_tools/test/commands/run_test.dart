@@ -60,6 +60,7 @@ void main() {
       try {
         await createTestCommandRunner(command).run(args);
         fail('Expect exception');
+      // ignore: unused_catch_clause
       } on UsageException catch(e) {
         // Not available while on stable branch.
       }
@@ -174,6 +175,7 @@ class MockDevice extends Mock implements Device {
 
 class TestRunCommand extends RunCommand {
   @override
+  // ignore: must_call_super
   Future<void> validateCommand() async {
     devices = await deviceManager.getDevices().toList();
   }
@@ -190,7 +192,7 @@ class FakeDevice extends Fake implements Device {
   void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
 
   @override
-  Future<bool> get isLocalEmulator => Future.value(false);
+  Future<bool> get isLocalEmulator => Future<bool>.value(false);
 
   @override
   bool get supportsHotReload => false;
