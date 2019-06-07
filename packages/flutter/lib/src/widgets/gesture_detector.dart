@@ -807,6 +807,12 @@ class RawGestureDetector extends StatefulWidget {
   /// duplication of information.
   bool get excludeFromSemantics => _semanticsMapping == null;
 
+  /// Describes how gestures from the semantics server are mapped into callbacks
+  /// of recognizers. For example, during a semantic tap, a detector might want
+  /// to call the callbacks of its TapGestureRecognizer if there is one.
+  ///
+  /// It is null if [excludeFromSemantics] is true.
+  GestureSemanticsMapping get semanticsMapping => _semanticsMapping;
   final GestureSemanticsMapping _semanticsMapping;
 
   @override
