@@ -28,7 +28,7 @@ final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER
 
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
-  'webtests': _runWebTests,
+  'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
@@ -341,13 +341,6 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
-  final List<String> testfiles = <String>[];
-  final Directory foundation = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test', 'foundation'));
-  for (FileSystemEntity entity in foundation.listSync(recursive: true)) {
-    if (entity is File) {
-      testfiles.add(entity.path);
-    }
-  }
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
     'test/foundation/',
   ]);
