@@ -23,7 +23,12 @@ const Duration taskTimeoutWithGracePeriod = Duration(minutes: 26);
 ///
 /// Running the task in [silent] mode will suppress standard output from task
 /// processes and only print standard errors.
-Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) async {
+Future<Map<String, dynamic>> runTask(
+  String taskName, {
+  bool silent = false,
+  String localEngine,
+  String localEngineSrcPath,
+}) async {
   final String taskExecutable = 'bin/tasks/$taskName.dart';
 
   if (!file(taskExecutable).existsSync())
@@ -32,6 +37,8 @@ Future<Map<String, dynamic>> runTask(String taskName, { bool silent = false }) a
   final Process runner = await startProcess(dartBin, <String>[
     '--enable-vm-service=0', // zero causes the system to choose a free port
     '--no-pause-isolates-on-exit',
+    if (localEngine != null) '-DlocalEngine=$localEngine',
+    if (localEngineSrcPath != null) '-DlocalEngineSrcPath=$localEngineSrcPath',
     taskExecutable,
   ]);
 
