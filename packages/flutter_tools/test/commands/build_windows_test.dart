@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
+import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:xml/xml.dart' as xml;
@@ -25,6 +26,7 @@ void main() {
   final MockPlatform windowsPlatform = MockPlatform()
       ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
   final MockPlatform notWindowsPlatform = MockPlatform();
+  final MockVisualStudio mockVisualStudio = MockVisualStudio();
   const String solutionPath = r'C:\windows\Runner.sln';
   const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
   const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
@@ -41,25 +43,6 @@ void main() {
   when(windowsPlatform.isWindows).thenReturn(true);
   when(notWindowsPlatform.isWindows).thenReturn(false);
 
-  // Sets up the mock environment so that lookup of vcvars64.bat will succeed.
-  void enableVcvarsMocking() {
-    const String vswherePath = r'C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe';
-    fs.file(vswherePath).createSync(recursive: true);
-    fs.file(vcvarsPath).createSync(recursive: true);
-
-    final MockProcessResult result = MockProcessResult();
-    when(result.exitCode).thenReturn(0);
-    when<String>(result.stdout).thenReturn(visualStudioPath);
-    when(mockProcessManager.run(<String>[
-      vswherePath,
-      '-latest',
-      '-requires', 'Microsoft.VisualStudio.Workload.NativeDesktop',
-      '-property', 'installationPath',
-    ])).thenAnswer((Invocation invocation) async {
-      return result;
-    });
-  }
-
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
@@ -70,25 +53,27 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => memoryFilesystem,
+    VisualStudio: () => mockVisualStudio,
   });
 
   testUsingContext('Windows build fails when there is no windows project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    enableVcvarsMocking();
+    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
     ), throwsA(isInstanceOf<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => memoryFilesystem,
+    VisualStudio: () => mockVisualStudio,
   });
 
   testUsingContext('Windows build fails on non windows platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file(solutionPath).createSync(recursive: true);
-    enableVcvarsMocking();
+    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
@@ -98,13 +83,14 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => memoryFilesystem,
+    VisualStudio: () => mockVisualStudio,
   });
 
   testUsingContext('Windows build invokes msbuild and writes generated files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     fs.file(solutionPath).createSync(recursive: true);
-    enableVcvarsMocking();
+    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
 
@@ -132,15 +118,16 @@ void main() {
     FileSystem: () => memoryFilesystem,
     ProcessManager: () => mockProcessManager,
     Platform: () => windowsPlatform,
+    VisualStudio: () => mockVisualStudio,
   });
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockProcess extends Mock implements Process {}
-class MockProcessResult extends Mock implements ProcessResult {}
 class MockPlatform extends Mock implements Platform {
   @override
   Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': r'C:\',
   };
 }
+class MockVisualStudio extends Mock implements VisualStudio {}
