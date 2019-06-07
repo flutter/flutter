@@ -147,6 +147,7 @@ class CreateCommand extends FlutterCommand {
       'web',
       negatable: true,
       defaultsTo: false,
+      hide: true,
       help: '(Experimental) Generate the web specific tooling. Only supported '
         'on non-stable branches',
     );
