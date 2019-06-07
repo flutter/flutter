@@ -36,7 +36,7 @@ class Divider extends StatelessWidget {
     Key key,
     this.height = 16.0,
     this.indent = 0.0,
-    this.rightIndent = 0.0,
+    this.endIndent = 0.0,
     this.color,
   }) : assert(height >= 0.0),
        super(key: key);
