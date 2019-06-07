@@ -14,6 +14,7 @@ import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 import 'msbuild_utils.dart';
+import 'visual_studio.dart';
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
@@ -31,9 +32,10 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   }
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
-  final String vcvarsScript = await findVcvars();
+  final String vcvarsScript = visualStudio.vcvarsPath;
   if (vcvarsScript == null) {
-    throwToolExit('Unable to build: could not find suitable toolchain.');
+    throwToolExit('Unable to find suitable Visual Studio toolchain. '
+        'Please run `flutter doctor` for more details.');
   }
 
   final String buildScript = fs.path.join(
