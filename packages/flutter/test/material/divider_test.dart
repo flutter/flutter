@@ -22,7 +22,7 @@ void main() {
     expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
   });
 
-  testWidgets('Divider custom indentation', (WidgetTester tester) async {
+  testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
     RenderBox divider;
     RenderBox decoratedBox;
 
@@ -58,9 +58,6 @@ void main() {
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 10.0);
     divider = tester.firstRenderObject(find.byType(Divider));
-    // Container widgets wrap its child in an DecoratedBox widget, which in turn
-    // is wrapped by a Padding widget. The Padding widget provides these
-    // indentations.
     decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
     expect(divider.size.width, decoratedBox.size.width + 10.0);
 
@@ -78,9 +75,6 @@ void main() {
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 20.0);
     divider = tester.firstRenderObject(find.byType(Divider));
-    // Container widgets wrap its child in an DecoratedBox widget, which in turn
-    // is wrapped by a Padding widget. The Padding widget provides these
-    // indentations.
     decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
     expect(divider.size.width, 10.0 + decoratedBox.size.width + 10.0);
   });
@@ -121,5 +115,62 @@ void main() {
     expect(box.size.width, 16.0);
     expect(containerBox.size.height, 600.0);
     expect(find.byType(VerticalDivider), paints..path(strokeWidth: 0.0));
+  });
+
+  testWidgets('Vertical divider custom indentation', (WidgetTester tester) async {
+    RenderBox divider;
+    RenderBox decoratedBox;
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: VerticalDivider(
+            indent: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 10.0);
+    divider = tester.firstRenderObject(find.byType(VerticalDivider));
+    // Container widgets wrap its child in an DecoratedBox widget, which in turn
+    // is wrapped by a Padding widget. The Padding widget provides these
+    // indentations.
+    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
+    expect(divider.size.height, 10.0 + decoratedBox.size.height);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: VerticalDivider(
+            endIndent: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 10.0);
+    divider = tester.firstRenderObject(find.byType(VerticalDivider));
+    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
+    expect(divider.size.height, decoratedBox.size.height + 10.0);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: VerticalDivider(
+            indent: 10.0,
+            endIndent: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 20.0);
+    divider = tester.firstRenderObject(find.byType(VerticalDivider));
+    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
+    expect(divider.size.height, 10.0 + decoratedBox.size.height + 10.0);
   });
 }

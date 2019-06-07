@@ -10,18 +10,17 @@ import 'theme.dart';
 // Examples can assume:
 // BuildContext context;
 
-/// A one device pixel thick horizontal line, with padding on either
+/// A one physical pixel thick horizontal line, with padding on either
 /// side.
 ///
-/// In the material design language, this represents a divider.
+/// In the material design language, this represents a divider. Dividers can be
+/// used in lists, [Drawer]s, and elsewhere to separate content.
 ///
-/// Dividers can be used in lists, [Drawer]s, and elsewhere to separate content
-/// vertically or horizontally depending on the value of the [axis] enum.
-/// To create a one-pixel divider between items in a list, consider using
+/// To create a one-pixel divider between [ListTile] items, consider using
 /// [ListTile.divideTiles], which is optimized for this case.
 ///
 /// The box's total height is controlled by [height]. The appropriate
-/// padding is automatically computed from the width or height.
+/// padding is automatically computed from the height.
 ///
 /// See also:
 ///
@@ -44,11 +43,11 @@ class Divider extends StatelessWidget {
 
   /// The divider's height extent.
   ///
-  /// The divider itself is always drawn as one device pixel thick horizontal
+  /// The divider itself is always drawn as one physical pixel thick horizontal
   /// line that is centered within the height specified by this value.
   ///
   /// A divider with a [height] of 0.0 is always drawn as a line with a height
-  /// of exactly one device pixel, without any padding around it.
+  /// of exactly one physical pixel, without any padding around it.
   final double height;
 
   /// The amount of empty space to the left of the divider.
@@ -124,22 +123,19 @@ class Divider extends StatelessWidget {
   }
 }
 
-/// A one device pixel thick vertical line, with padding on either
+/// A one physical pixel thick horizontal line, with padding on either
 /// side.
 ///
-/// In the material design language, this represents a divider.
-///
-/// Dividers can be used in lists, [Drawer]s, and elsewhere to separate content
-/// horizontally. To create a one-pixel divider between items in a list,
-/// consider using [ListTile.divideTiles], which is optimized for this case.
+/// In the material design language, this represents a divider. Vertical
+/// dividers can be used in horizontally scrolling lists, such as a
+/// [ListView] with [ListView.scrollDirection] set to [Axis.horizontal].
 ///
 /// The box's total width is controlled by [width]. The appropriate
 /// padding is automatically computed from the width.
 ///
 /// See also:
 ///
-///  * [PopupMenuDivider], which is the equivalent but for popup menus.
-///  * [ListTile.divideTiles], another approach to dividing widgets in a list.
+///  * [ListView.separated], which can be used to generate vertical dividers.
 ///  * <https://material.io/design/components/dividers.html>
 class VerticalDivider extends StatelessWidget {
   /// Creates a material design divider.
@@ -156,17 +152,17 @@ class VerticalDivider extends StatelessWidget {
 
   /// The divider's width.
   ///
-  /// The divider itself is always drawn as one device pixel thick
+  /// The divider itself is always drawn as one physical pixel thick
   /// line that is centered within the width specified by this value.
   ///
   /// A divider with a [width] of 0.0 is always drawn as a line with a width
-  /// of exactly one device pixel, without any padding around it.
+  /// of exactly one physical pixel, without any padding around it.
   final double width;
 
-  /// The amount of empty space to the left of the divider.
+  /// The amount of empty space on top of the divider.
   final double indent;
 
-  /// The amount of empty space to the right of the divider.
+  /// The amount of empty space under the divider.
   final double endIndent;
 
   /// The color to use when painting the line.
@@ -191,7 +187,7 @@ class VerticalDivider extends StatelessWidget {
       child: Center(
         child: Container(
           width: 0.0,
-          margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
+          margin: EdgeInsetsDirectional.only(top: indent, bottom: endIndent),
           decoration: BoxDecoration(
             border: Border(
               left: Divider.createBorderSide(context, color: color),
