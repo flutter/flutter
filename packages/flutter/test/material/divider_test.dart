@@ -37,10 +37,7 @@ void main() {
       ),
     );
 
-    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 10.0);
-    // Container widgets wrap its child in an DecoratedBox widget, which in turn
-    // is wrapped by a Padding widget. The Padding widget provides these
-    // indentations.
+    // The divider line is drawn with a DecoratedBox with a border
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.left, dividerRect.left + 10.0);
@@ -57,7 +54,6 @@ void main() {
       ),
     );
 
-    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 10.0);
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.left, dividerRect.left);
@@ -75,7 +71,6 @@ void main() {
       ),
     );
 
-    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 20.0);
     dividerRect = tester.getRect(find.byType(Divider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.left, dividerRect.left + 10.0);
@@ -135,10 +130,7 @@ void main() {
       ),
     );
 
-    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 10.0);
-    // Container widgets wrap its child in an DecoratedBox widget, which in turn
-    // is wrapped by a Padding widget. The Padding widget provides these
-    // indentations.
+    // The divider line is drawn with a DecoratedBox with a border
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.top, dividerRect.top + 10.0);
@@ -155,7 +147,6 @@ void main() {
       ),
     );
 
-    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 10.0);
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.top, dividerRect.top);
@@ -173,7 +164,6 @@ void main() {
       ),
     );
 
-    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 20.0);
     dividerRect = tester.getRect(find.byType(VerticalDivider));
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.top, dividerRect.top + 10.0);
