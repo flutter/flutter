@@ -143,6 +143,14 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: false,
       help: 'Generate a project using the AndroidX support libraries',
     );
+    argParser.addFlag(
+      'web',
+      negatable: true,
+      defaultsTo: false,
+      hide: true,
+      help: '(Experimental) Generate the web specific tooling. Only supported '
+        'on non-stable branches',
+    );
   }
 
   @override
@@ -367,6 +375,7 @@ class CreateCommand extends FlutterCommand {
       androidX: argResults['androidx'],
       androidLanguage: argResults['android-language'],
       iosLanguage: argResults['ios-language'],
+      web: argResults['web'],
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
@@ -576,6 +585,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
     String flutterRoot,
     bool renderDriverTest = false,
     bool withPluginHook = false,
+    bool web = false,
   }) {
     flutterRoot = fs.path.normalize(flutterRoot);
 
@@ -603,6 +613,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       'iosLanguage': iosLanguage,
       'flutterRevision': FlutterVersion.instance.frameworkRevision,
       'flutterChannel': FlutterVersion.instance.channel,
+      'web': web && !FlutterVersion.instance.isStable,
     };
   }
 
