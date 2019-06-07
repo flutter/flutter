@@ -23,8 +23,8 @@ void main() {
   });
 
   testWidgets('Horizontal divider custom indentation', (WidgetTester tester) async {
-    RenderBox divider;
-    RenderBox decoratedBox;
+    Rect dividerRect;
+    Rect lineRect;
 
     await tester.pumpWidget(
       const Directionality(
@@ -38,12 +38,13 @@ void main() {
     );
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 10.0);
-    divider = tester.firstRenderObject(find.byType(Divider));
     // Container widgets wrap its child in an DecoratedBox widget, which in turn
     // is wrapped by a Padding widget. The Padding widget provides these
     // indentations.
-    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
-    expect(divider.size.width, 10.0 + decoratedBox.size.width);
+    dividerRect = tester.getRect(find.byType(Divider));
+    lineRect = tester.getRect(find.byType(DecoratedBox));
+    expect(lineRect.left, dividerRect.left + 10.0);
+    expect(lineRect.right, dividerRect.right);
 
     await tester.pumpWidget(
       const Directionality(
@@ -57,9 +58,10 @@ void main() {
     );
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 10.0);
-    divider = tester.firstRenderObject(find.byType(Divider));
-    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
-    expect(divider.size.width, decoratedBox.size.width + 10.0);
+    dividerRect = tester.getRect(find.byType(Divider));
+    lineRect = tester.getRect(find.byType(DecoratedBox));
+    expect(lineRect.left, dividerRect.left);
+    expect(lineRect.right, dividerRect.right - 10.0);
 
     await tester.pumpWidget(
       const Directionality(
@@ -74,9 +76,10 @@ void main() {
     );
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 20.0);
-    divider = tester.firstRenderObject(find.byType(Divider));
-    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
-    expect(divider.size.width, 10.0 + decoratedBox.size.width + 10.0);
+    dividerRect = tester.getRect(find.byType(Divider));
+    lineRect = tester.getRect(find.byType(DecoratedBox));
+    expect(lineRect.left, dividerRect.left + 10.0);
+    expect(lineRect.right, dividerRect.right - 10.0);
   });
 
   testWidgets('Vertical Divider Test', (WidgetTester tester) async {
@@ -118,8 +121,8 @@ void main() {
   });
 
   testWidgets('Vertical divider custom indentation', (WidgetTester tester) async {
-    RenderBox divider;
-    RenderBox decoratedBox;
+    Rect dividerRect;
+    Rect lineRect;
 
     await tester.pumpWidget(
       const Directionality(
@@ -133,12 +136,13 @@ void main() {
     );
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 10.0);
-    divider = tester.firstRenderObject(find.byType(VerticalDivider));
     // Container widgets wrap its child in an DecoratedBox widget, which in turn
     // is wrapped by a Padding widget. The Padding widget provides these
     // indentations.
-    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
-    expect(divider.size.height, 10.0 + decoratedBox.size.height);
+    dividerRect = tester.getRect(find.byType(VerticalDivider));
+    lineRect = tester.getRect(find.byType(DecoratedBox));
+    expect(lineRect.top, dividerRect.top + 10.0);
+    expect(lineRect.bottom, dividerRect.bottom);
 
     await tester.pumpWidget(
       const Directionality(
@@ -152,9 +156,10 @@ void main() {
     );
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 10.0);
-    divider = tester.firstRenderObject(find.byType(VerticalDivider));
-    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
-    expect(divider.size.height, decoratedBox.size.height + 10.0);
+    dividerRect = tester.getRect(find.byType(VerticalDivider));
+    lineRect = tester.getRect(find.byType(DecoratedBox));
+    expect(lineRect.top, dividerRect.top);
+    expect(lineRect.bottom, dividerRect.bottom - 10.0);
 
     await tester.pumpWidget(
       const Directionality(
@@ -169,8 +174,9 @@ void main() {
     );
 
     expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.vertical, 20.0);
-    divider = tester.firstRenderObject(find.byType(VerticalDivider));
-    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
-    expect(divider.size.height, 10.0 + decoratedBox.size.height + 10.0);
+    dividerRect = tester.getRect(find.byType(VerticalDivider));
+    lineRect = tester.getRect(find.byType(DecoratedBox));
+    expect(lineRect.top, dividerRect.top + 10.0);
+    expect(lineRect.bottom, dividerRect.bottom - 10.0);
   });
 }
