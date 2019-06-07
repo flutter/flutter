@@ -24,6 +24,7 @@ import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../services.dart';
+import '../usage.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
@@ -374,7 +375,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
-  final Stopwatch buildStopwatch = Stopwatch()..start();
+  final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
@@ -387,11 +388,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildSubStatus = null;
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
-  buildStopwatch.stop();
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
   );
+  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(

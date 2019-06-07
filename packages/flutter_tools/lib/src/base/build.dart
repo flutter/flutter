@@ -15,6 +15,7 @@ import '../dart/package_map.dart';
 import '../globals.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
+import '../usage.dart';
 import 'context.dart';
 import 'file_system.dart';
 import 'fingerprint.dart';
@@ -194,7 +195,9 @@ class AOTSnapshotter {
     // }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
-    final int genSnapshotExitCode = await _timedStep('snapshot(CompileTime)', () => genSnapshot.run(
+    final int genSnapshotExitCode =
+      await _timedStep('snapshot(CompileTime)', 'aot-snapshot',
+        () => genSnapshot.run(
       snapshotType: snapshotType,
       additionalArgs: genSnapshotArgs,
       iosArch: iosArch,
@@ -281,7 +284,9 @@ class AOTSnapshotter {
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
-    final CompilerOutput compilerOutput = await _timedStep('frontend(CompileTime)', () => kernelCompiler.compile(
+    final CompilerOutput compilerOutput =
+      await _timedStep('frontend(CompileTime)', 'aot-kernel',
+        () => kernelCompiler.compile(
       sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       mainPath: mainPath,
       packagesPath: packagesPath,
@@ -323,12 +328,13 @@ class AOTSnapshotter {
   /// to find.
   /// Important: external performance tracking tools expect format of this
   /// output to be stable.
-  Future<T> _timedStep<T>(String marker, FutureOr<T> Function() action) async {
+  Future<T> _timedStep<T>(String marker, String analyticsVar, FutureOr<T> Function() action) async {
     final Stopwatch sw = Stopwatch()..start();
     final T value = await action();
     if (reportTimings) {
       printStatus('$marker: ${sw.elapsedMilliseconds} ms.');
     }
+    flutterUsage.sendTiming('build', analyticsVar, Duration(milliseconds: sw.elapsedMilliseconds));
     return value;
   }
 }
