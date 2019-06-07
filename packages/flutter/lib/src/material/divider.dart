@@ -191,7 +191,7 @@ class VerticalDivider extends StatelessWidget {
       child: Center(
         child: Container(
           width: 0.0,
-          margin: EdgeInsetsDirectional.only(start: indent),
+          margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
             border: Border(
               left: Divider.createBorderSide(context, color: color),
