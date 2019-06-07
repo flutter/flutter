@@ -39,5 +39,9 @@ class WebWorkflow extends Workflow {
 /// Whether we can locate the chrome executable.
 bool canFindChrome() {
   final String chrome = findChromeExecutable();
-  return processManager.canRun(chrome);
+  try {
+    return processManager.canRun(chrome);
+  } on ArgumentError {
+    return false;
+  }
 }
