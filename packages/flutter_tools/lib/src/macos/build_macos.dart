@@ -12,6 +12,7 @@ import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
+import '../usage.dart';
 import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcode build.
@@ -37,6 +38,7 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     config = 'Release';
   }
   // Run build script provided by application.
+  final Stopwatch sw = Stopwatch()..start();
   final Process process = await processManager.start(<String>[
     '/usr/bin/env',
     'xcrun',
@@ -69,4 +71,5 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
   if (result != 0) {
     throwToolExit('Build process failed');
   }
+  flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }

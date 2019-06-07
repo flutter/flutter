@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
 
 import '../asset.dart';
@@ -12,10 +14,19 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../devfs.dart';
+import '../globals.dart';
 import '../project.dart';
+import '../usage.dart';
 
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
+
+Future<void> _timedBuildStep(String name, Future<void> Function() action) async {
+  final Stopwatch sw = Stopwatch()..start();
+  await action();
+  printTrace('$name: ${sw.elapsedMilliseconds} ms.');
+  flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
+}
 
 // Building a Fuchsia package has a few steps:
 // 1. Do the custom kernel compile using the kernel compiler from the Fuchsia
@@ -32,10 +43,13 @@ Future<void> buildFuchsia(
     outDir.createSync(recursive: true);
   }
 
-  await fuchsiaSdk.fuchsiaKernelCompiler.build(
-      fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo);
-  await _buildAssets(fuchsiaProject, target, buildInfo);
-  await _buildPackage(fuchsiaProject, target, buildInfo);
+  await _timedBuildStep('fuchsia-kernel-compile',
+    () => fuchsiaSdk.fuchsiaKernelCompiler.build(
+      fuchsiaProject: fuchsiaProject, target: target, buildInfo: buildInfo));
+  await _timedBuildStep('fuchsia-build-assets',
+    () => _buildAssets(fuchsiaProject, target, buildInfo));
+  await _timedBuildStep('fuchsia-build-package',
+    () => _buildPackage(fuchsiaProject, target, buildInfo));
 }
 
 Future<void> _buildAssets(

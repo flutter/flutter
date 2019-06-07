@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' show Random, max;
 
-import 'package:crypto/crypto.dart';
 import 'package:intl/intl.dart';
 
 import '../convert.dart';
@@ -51,24 +50,6 @@ class BotDetector {
 bool get isRunningOnBot {
   final BotDetector botDetector = context.get<BotDetector>() ?? _kBotDetector;
   return botDetector.isRunningOnBot;
-}
-
-String hex(List<int> bytes) {
-  final StringBuffer result = StringBuffer();
-  for (int part in bytes)
-    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
-  return result.toString();
-}
-
-String calculateSha(File file) {
-  final Stopwatch stopwatch = Stopwatch()..start();
-  final List<int> bytes = file.readAsBytesSync();
-  printTrace('calculateSha: reading file took ${stopwatch.elapsedMicroseconds}us');
-  stopwatch.reset();
-  final String sha = hex(sha1.convert(bytes).bytes);
-  stopwatch.stop();
-  printTrace('calculateSha: computing sha took ${stopwatch.elapsedMicroseconds}us');
-  return sha;
 }
 
 /// Convert `foo_bar` to `fooBar`.
