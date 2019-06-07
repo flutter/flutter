@@ -1,4 +1,4 @@
-Signature: 4541d8f8b529d6b1e61e305c8202d978
+Signature: 35c0d3554bc63bc09e6f9e4b1db648dd
 
 UNUSED LICENSES:
 
@@ -5170,6 +5170,7 @@ FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.c
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/flow_graph_checker.h
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_test_helper.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/il_test_helper.h
+FILE: ../../../third_party/dart/runtime/vm/compiler/backend/inliner_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/slot_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/type_propagator_test.cc
 FILE: ../../../third_party/dart/runtime/vm/compiler/backend/typed_data_aot_test.cc
@@ -5239,6 +5240,7 @@ FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/database.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/arena.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/cstring.dart
 FILE: ../../../third_party/dart/samples/ffi/sqlite/lib/src/ffi/dylib_utils.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/rti.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/annotations.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
