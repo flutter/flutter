@@ -133,16 +133,20 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   void performLayout() {
     assert(child != null);
     size = constraints.biggest;
-    child.layout(heightConstraint.enforce(constraints.loosen()), parentUsesSize: true);
+    child.layout(
+      heightConstraint.enforce(constraints.deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding)).loosen()),
+      parentUsesSize: true,
+    );
     final _ToolbarParentData childParentData = child.parentData;
     final Offset localBarTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY));
 
+    final double lower = child.size.width/2 + _kToolbarScreenPadding;
+    final double upper = size.width - child.size.width/2 - _kToolbarScreenPadding;
+
+    assert(upper >= lower, '$lower > $upper with child width of ${child.size.width} and area width of ${size.width}');
     // The local x-coordinate of the center of the toolbar.
     final double adjustedCenterX = localBarTopCenter.dx
-      .clamp(
-        child.size.width/2 + _kToolbarScreenPadding,
-        size.width - child.size.width/2 - _kToolbarScreenPadding,
-      );
+      .clamp(lower, upper);
 
     childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, localBarTopCenter.dy);
     childParentData.arrowXOffsetFromCenter = localBarTopCenter.dx - adjustedCenterX;
@@ -231,7 +235,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     }
 
     return DecoratedBox(
-      decoration: BoxDecoration(color: _kToolbarDividerColor),
+      decoration: const BoxDecoration(color: _kToolbarDividerColor),
       child: Row(mainAxisSize: MainAxisSize.min, children: items),
     );
   }
@@ -321,7 +325,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     // We cannot trust postion.dy, since the caller (TextSelectionOverlay._buildToolbar)
     // does not know whether the toolbar is going to be facing up or down.
-    final double localArrowTipX = position.dx.clamp(_kArrowScreenPadding, mediaQuery.size.width - _kArrowScreenPadding);
+    final double localArrowTipX = position.dx.clamp(_kArrowScreenPadding, globalEditableRegion.size.width - _kArrowScreenPadding);
 
     // The height of the toolbar is fixed hence we can decide its vertical
     // position.
