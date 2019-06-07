@@ -102,6 +102,11 @@ abstract class InlineSpan extends DiagnosticableTree {
   @Deprecated('InlineSpan does not innately have children. Use TextSpan.children instead.')
   List<InlineSpan> get children => null;
 
+  /// Returns the [GestureRecognizer] associated with this span if this is an
+  /// instance of [TextSpan], otherwise returns null.
+  @Deprecated('InlineSpan does not innately have a recognizer. Use TextSpan.recognizer instead.')
+  GestureRecognizer get recognizer; => null;
+
   /// Apply the properties of this object to the given [ParagraphBuilder], from
   /// which a [Paragraph] can be obtained.
   ///
