@@ -113,8 +113,8 @@ directory) is an HTML template into which the Dart code blocks and descriptions
 are interpolated, in order to display it nicely.
 
 There is currently one skeleton for
-`[application](config/skeletons/application.html) snippets` and one for
-`[sample](config/skeletons/sample.html) snippets`, but there could be more.
+[application](config/skeletons/application.html) `snippets` and one for
+[sample](config/skeletons/sample.html) `snippets`, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
 be interpolated into the template. It doesn't actually use the mustache
