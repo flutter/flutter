@@ -286,8 +286,7 @@ Information about project "Runner":
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null,
-          targetPlatforms: <TargetPlatform>[TargetPlatform.ios]);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -305,8 +304,7 @@ Information about project "Runner":
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true,
-          targetPlatforms: <TargetPlatform>[TargetPlatform.ios]);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -324,8 +322,7 @@ Information about project "Runner":
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null,
-          targetPlatforms: <TargetPlatform>[TargetPlatform.ios]);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
         project: project,
@@ -343,8 +340,7 @@ Information about project "Runner":
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
       when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
-      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null,
-          targetPlatforms: <TargetPlatform>[TargetPlatform.ios]);
+      const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null);
 
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(

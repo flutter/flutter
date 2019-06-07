@@ -37,6 +37,49 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
+    // The platforms that can be passed to the `--Ptarget-platform` flag.
+    private static final String PLATFORM_ARM32  = "android-arm";
+    private static final String PLATFORM_ARM64  = "android-arm64";
+    private static final String PLATFORM_X86    = "android-x86";
+    private static final String PLATFORM_X86_64 = "android-x64";
+
+    // The ABI architectures.
+    private static final String ARCH_ARM32      = "armeabi-v7a";
+    private static final String ARCH_ARM64      = "arm64-v8a";
+    private static final String ARCH_X86        = "x86";
+    private static final String ARCH_X86_64     = "x86_64";
+
+    // Maps platforms to ABI architectures.
+    private static final Map PLATFORM_ARCH_MAP = [
+        (PLATFORM_ARM32)    : ARCH_ARM32,
+        (PLATFORM_ARM64)    : ARCH_ARM64,
+        (PLATFORM_X86)      : ARCH_X86,
+        (PLATFORM_X86_64)   : ARCH_X86_64,
+    ]
+
+    // The version code that gives each ABI a value.
+    // For each APK variant, use the following versions to override the version of the Universal APK.
+    // Otherwise, the Play Store will complain that the APK variants have the same version.
+    private static final Map ABI_VERSION = [
+        (ARCH_ARM32)        : 1,
+        (ARCH_ARM64)        : 2,
+        (ARCH_X86)          : 3,
+        (ARCH_X86_64)       : 4,
+    ]
+
+    // When split is enabled, multiple APKs are generated per each ABI.
+    private static final Set DEFAULT_PLATFORMS = [
+        PLATFORM_ARM32,
+        PLATFORM_ARM64,
+    ]
+
+    // The name prefix for flutter builds.  This is used to identify gradle tasks
+    // where we expect the flutter tool to provide any error output, and skip the
+    // standard Gradle error output in the FlutterEventLogger. If you change this,
+    // be sure to change any instances of this string in symbols in the code below
+    // to match.
+    static final String FLUTTER_BUILD_PREFIX = "flutterBuild"
+
     private Path baseEnginePath
     private File flutterRoot
     private File flutterExecutable
@@ -50,37 +93,6 @@ class FlutterPlugin implements Plugin<Project> {
     private File dynamicProfileFlutterJar
     private File dynamicReleaseFlutterJar
 
-    // The name prefix for flutter builds.  This is used to identify gradle tasks
-    // where we expect the flutter tool to provide any error output, and skip the
-    // standard Gradle error output in the FlutterEventLogger. If you change this,
-    // be sure to change any instances of this string in symbols in the code below
-    // to match.
-    static final String flutterBuildPrefix = "flutterBuild"
-
-    // The platforms (or CPU architectures) for which native code is generated.
-    static final Map allTargetPlatforms = [
-        'android-arm': 'armeabi-v7a',
-        'android-arm64': 'arm64-v8a',
-        'android-x64': 'x86_64',
-        'android-x86': 'x86',
-    ]
-
-    // The version code that gives each ABI a value.
-    static final Map abiVersion = [
-        'armeabi-v7a': 1,
-        'arm64-v8a': 2,
-        'x86_64': 3,
-        'x86': 4,
-    ]
-
-    // Supports ARM 32 and 64 bits.
-    // When splits are enabled, multiple APKs are generated per each CPU architecture,
-    // which helps decrease the size of each APK.
-    static final Set allArmPlatforms = [
-        'android-arm',
-        'android-arm64',
-    ]
-
     private Properties readPropertiesIfExist(File propertiesFile) {
         Properties result = new Properties()
         if (propertiesFile.exists()) {
@@ -93,14 +105,14 @@ class FlutterPlugin implements Plugin<Project> {
         if (project.hasProperty('target-platform')) {
             Set<String> platforms =  []
             project.property('target-platform').split(',').each {
-                if (!allTargetPlatforms[it]) {
+                if (!PLATFORM_ARCH_MAP[it]) {
                     throw new GradleException("Invalid platform: $it.")
                 }
                 platforms.add(it)
             }
             return platforms
         }
-        return allArmPlatforms
+        return DEFAULT_PLATFORMS
     }
 
     private Boolean getBuildShareLibrary(Project project) {
@@ -134,11 +146,17 @@ class FlutterPlugin implements Plugin<Project> {
         return result
     }
 
-    private String getBasePlatformArch(Project project) {
-        if ('android-arm64' in getTargetPlatforms(project)) {
-            return 'android-arm64';
+    /**
+     * Returns the platform that is used to extract the `libflutter.so` and the .class files.
+     *
+     * Note: This is only needed to add the .class files.
+     * Unfortunately, the engine artifacts include the .class and libflutter.so files.
+     */
+    private String getBasePlatform(Project project) {
+        if (PLATFORM_ARM64 in getTargetPlatforms(project)) {
+            return PLATFORM_ARM64;
         }
-        return 'android-arm';
+        return PLATFORM_ARM32;
     }
 
     @Override
@@ -146,18 +164,26 @@ class FlutterPlugin implements Plugin<Project> {
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
 
+        // By default, assembling APKs generates fat APKs if multiple platforms are passed.
+        // Configuring split per ABI allows to generate separate APKs for each abi.
+        // This is a noop when building a bundle.
         if (this.splitPerAbi(project)) {
             project.android {
                 splits {
                     abi {
+                        // Enables building multiple APKs per ABI.
                         enable true
+                        // By default all ABIs are included, so use reset() and include to specify that we only
+                        // want APKs for x86 and x86_64.
+                        // Resets the list of ABIs that Gradle should create APKs for to none.
                         reset()
+                        // Specifies that we do not want to also generate a universal APK that includes all ABIs.
                         universalApk false
                     }
                 }
             }
             this.getTargetPlatforms(project).each { targetArch ->
-                String abiValue = allTargetPlatforms[targetArch]
+                String abiValue = PLATFORM_ARCH_MAP[targetArch]
                 project.android {
                     packagingOptions {
                         pickFirst "lib/${abiValue}/libflutter.so"
@@ -229,7 +255,7 @@ class FlutterPlugin implements Plugin<Project> {
             dynamicProfileFlutterJar = flutterJar
             dynamicReleaseFlutterJar = flutterJar
         } else {
-            String basePlatformArch = getBasePlatformArch(project)
+            String basePlatformArch = getBasePlatform(project)
             // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
             baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
             debugFlutterJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
@@ -252,7 +278,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Add x86/x86_64 native library. Debug mode only, for now.
         File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-        Task debugX86JarTask = project.tasks.create("${flutterBuildPrefix}X86Jar", Jar) {
+        Task debugX86JarTask = project.tasks.create("${FLUTTER_BUILD_PREFIX}X86Jar", Jar) {
             destinationDir flutterX86Jar.parentFile
             archiveName flutterX86Jar.name
             from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
@@ -455,8 +481,11 @@ class FlutterPlugin implements Plugin<Project> {
         def addFlutterDeps = { variant ->
             if (this.splitPerAbi(project)) {
                 variant.outputs.each { output ->
-                    // See https://developer.android.com/studio/build/configure-apk-splits
-                    def abiVersionCode = abiVersion.get(output.getFilter(OutputFile.ABI))
+                    // Assigns the new version code to versionCodeOverride, which changes the version code
+                    // for only the output APK, not for the variant itself. Skipping this step simply
+                    // causes Gradle to use the value of variant.versionCode for the APK.
+                    // For more, see https://developer.android.com/studio/build/configure-apk-splits
+                    def abiVersionCode = ABI_VERSION.get(output.getFilter(OutputFile.ABI))
                     if (abiVersionCode != null) {
                         output.versionCodeOverride =
                             abiVersionCode * 1000 + variant.versionCode
@@ -465,7 +494,7 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             String flutterBuildMode = buildModeFor(variant.buildType)
-            if (flutterBuildMode == 'debug' && project.tasks.findByName('${flutterBuildPrefix}X86Jar')) {
+            if (flutterBuildMode == 'debug' && project.tasks.findByName("${FLUTTER_BUILD_PREFIX}X86Jar")) {
                 Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
                 if (task) {
                     task.dependsOn project.flutterBuildX86Jar
@@ -478,8 +507,8 @@ class FlutterPlugin implements Plugin<Project> {
 
             def flutterTasks = []
             targetPlatforms.each { targetArch ->
-                String abiValue = allTargetPlatforms[targetArch]
-                String taskName = "compile${flutterBuildPrefix}${variant.name.capitalize()}${targetArch.replace('android-', '').capitalize()}"
+                String abiValue = PLATFORM_ARCH_MAP[targetArch]
+                String taskName = "compile${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}${targetArch.replace('android-', '').capitalize()}"
                 FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
@@ -505,14 +534,14 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.add(compileTask)
             }
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
-            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${flutterBuildPrefix}${variant.name.capitalize()}", type: Jar) {
+            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
                 targetPlatforms.each { targetArch ->
                     // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
                     // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
                     // is included as an implementation dependency, which causes duplicated `libflutter.so`.
-                    if (getBasePlatformArch(project) != targetArch) {
+                    if (getBasePlatform(project) != targetArch) {
                         def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
                         // Include `libflutter.so`.
                         // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
@@ -678,7 +707,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                     args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
                 }
                 if (targetPlatform == null) {
-                    args "--target-platform", "android-arm"
+                    args "--target-platform", PLATFORM_ARM32
                 } else {
                     args "--target-platform", "${targetPlatform}"
                 }
@@ -839,7 +868,7 @@ class FlutterEventLogger extends BuildAdapter implements TaskExecutionListener {
 
     void buildFinished(BuildResult result) {
         if (result.failure != null) {
-            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.flutterBuildPrefix)) {
+            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.FLUTTER_BUILD_PREFIX)) {
                 result.rethrowFailure()
             }
         }

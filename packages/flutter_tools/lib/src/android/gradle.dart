@@ -318,7 +318,7 @@ void _exitIfNoAndroidSdk() {
 
 Future<void> buildGradleProject({
   @required FlutterProject project,
-  @required BuildInfo buildInfo,
+  @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required bool isBuildingBundle,
 }) async {
@@ -330,7 +330,7 @@ Future<void> buildGradleProject({
   // and can be overwritten with flutter build command.
   // The default Gradle script reads the version name and number
   // from the local.properties file.
-  updateLocalProperties(project: project, buildInfo: buildInfo);
+  updateLocalProperties(project: project, buildInfo: androidBuildInfo.buildInfo);
 
   final String gradle = await _ensureGradle(project);
 
@@ -342,7 +342,7 @@ Future<void> buildGradleProject({
     case FlutterPluginVersion.managed:
       // Fall through. Managed plugin builds the same way as plugin v2.
     case FlutterPluginVersion.v2:
-      return _buildGradleProjectV2(project, gradle, buildInfo, target, isBuildingBundle);
+      return _buildGradleProjectV2(project, gradle, androidBuildInfo, target, isBuildingBundle);
   }
 }
 
@@ -370,11 +370,12 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
 Future<void> _buildGradleProjectV2(
   FlutterProject flutterProject,
   String gradle,
-  BuildInfo buildInfo,
+  AndroidBuildInfo androidBuildInfo,
   String target,
   bool isBuildingBundle,
 ) async {
   final GradleProject project = await _gradleProject();
+  final BuildInfo buildInfo = androidBuildInfo.buildInfo;
 
   String assembleTask;
 
@@ -432,10 +433,11 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   if (buildInfo.fileSystemScheme != null)
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  if (buildInfo.splitPerAbi)
+  if (androidBuildInfo.splitPerAbi)
     command.add('-Psplit-per-abi=true');
-  if (buildInfo.targetPlatforms != null) {
-    final String targetPlatforms = buildInfo.targetPlatforms.map(getNameForTargetPlatform).join(',');
+  if (androidBuildInfo.targetArchs.isNotEmpty) {
+    final String targetPlatforms = androidBuildInfo.targetArchs
+        .map(getPlatformNameForAndroidArch).join(',');
     command.add('-Ptarget-platform=$targetPlatforms');
   }
   command.add(assembleTask);
@@ -481,7 +483,7 @@ Future<void> _buildGradleProjectV2(
   }
 
   if (!isBuildingBundle) {
-    final Iterable<File> apkFiles = _findApkFiles(project, buildInfo);
+    final Iterable<File> apkFiles = _findApkFiles(project, androidBuildInfo);
     if (apkFiles.isEmpty)
       throwToolExit('Gradle build failed to produce an Android package.');
     // Copy the first APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
@@ -517,22 +519,28 @@ Future<void> _buildGradleProjectV2(
   }
 }
 
-Iterable<File> _findApkFiles(GradleProject project, BuildInfo buildInfo) {
-  final Iterable<String> apkFileNames = project.apkFilesFor(buildInfo);
+Iterable<File> _findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
+  final Iterable<String> apkFileNames = project.apkFilesFor(androidBuildInfo);
   if (apkFileNames.isEmpty)
     return <File>[];
 
   return apkFileNames.map<File>((String apkFileName) {
-    File apkFile = fs.file(fs.path.join(project.apkDirectory.path, apkFileName));
+    File apkFile = project.apkDirectory.childFile(apkFileName);
     if (apkFile.existsSync())
       return apkFile;
+    final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String modeName = camelCase(buildInfo.modeName);
-    apkFile = fs.file(fs.path.join(project.apkDirectory.path, modeName, apkFileName));
+    apkFile = project.apkDirectory
+        .childDirectory(modeName)
+        .childFile(apkFileName);
     if (apkFile.existsSync())
       return apkFile;
     if (buildInfo.flavor != null) {
       // Android Studio Gradle plugin v3 adds flavor to path.
-      apkFile = fs.file(fs.path.join(project.apkDirectory.path, buildInfo.flavor, modeName, apkFileName));
+      apkFile = project.apkDirectory
+          .childDirectory(buildInfo.flavor)
+          .childDirectory(modeName)
+          .childFile(apkFileName);
       if (apkFile.existsSync())
         return apkFile;
     }
@@ -546,12 +554,12 @@ File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
   if (bundleFileName == null)
     return null;
   final String modeName = camelCase(buildInfo.modeName);
-  File bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, modeName, bundleFileName));
+  File bundleFile = project.bundleDirectory.childDirectory(modeName).childFile(bundleFileName);
   if (bundleFile.existsSync())
     return bundleFile;
   if (buildInfo.flavor != null) {
     // Android Studio Gradle plugin v3 adds the flavor to the path. For the bundle the folder name is the flavor plus the mode name.
-    bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, buildInfo.flavor + modeName, bundleFileName));
+    bundleFile = project.bundleDirectory.childDirectory(buildInfo.flavor + modeName).childFile(bundleFileName);
     if (bundleFile.existsSync())
       return bundleFile;
   }
@@ -640,16 +648,16 @@ class GradleProject {
     return 'assemble${toTitleCase(productFlavor)}${toTitleCase(buildType)}';
   }
 
-  Iterable<String> apkFilesFor(BuildInfo buildInfo) {
-    final String buildType = _buildTypeFor(buildInfo);
-    final String productFlavor = _productFlavorFor(buildInfo);
+  Iterable<String> apkFilesFor(AndroidBuildInfo androidBuildInfo) {
+    final String buildType = _buildTypeFor(androidBuildInfo.buildInfo);
+    final String productFlavor = _productFlavorFor(androidBuildInfo.buildInfo);
     if (buildType == null || productFlavor == null)
-      return <String>[];
+      return const <String>[];
 
     final String flavorString = productFlavor.isEmpty ? '' : '-' + productFlavor;
-    if (buildInfo.splitPerAbi) {
-      return buildInfo.targetPlatforms.map<String>((TargetPlatform targetPlatform) {
-        final String abi = getAbiForPlatform(targetPlatform);
+    if (androidBuildInfo.splitPerAbi) {
+      return androidBuildInfo.targetArchs.map<String>((AndroidArch arch) {
+        final String abi = getNameForAndroidArch(arch);
         return 'app$flavorString-$abi-$buildType.apk';
       });
     }

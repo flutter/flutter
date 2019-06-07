@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../android/app_bundle.dart';
+import '../build_info.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
@@ -40,10 +41,13 @@ class BuildAppBundleCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
+    );
     await buildAppBundle(
       project: FlutterProject.current(),
       target: targetFile,
-      buildInfo: getBuildInfo(),
+      androidBuildInfo: androidBuildInfo,
     );
     return null;
   }

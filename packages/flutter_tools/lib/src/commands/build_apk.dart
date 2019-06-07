@@ -55,11 +55,13 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final BuildInfo buildInfo = getBuildInfo();
+    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(buildInfo,
+      splitPerAbi: argResults['split-per-abi'],
+      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName)
+    );
 
-    if (buildInfo.isRelease && !buildInfo.splitPerAbi && buildInfo.targetPlatforms.length > 1) {
-      final String targetPlatforms = buildInfo.targetPlatforms
-          .map(getNameForTargetPlatform)
-          .join(', ');
+    if (buildInfo.isRelease && !androidBuildInfo.splitPerAbi && androidBuildInfo.targetArchs.length > 1) {
+      final String targetPlatforms = argResults['target-platform'].join(', ');
 
       printStatus('You are building a fat APK that includes binaries for '
                   '$targetPlatforms.', emphasis: true, color: TerminalColor.green);
@@ -78,7 +80,7 @@ class BuildApkCommand extends BuildSubCommand {
     await buildApk(
       project: FlutterProject.current(),
       target: targetFile,
-      buildInfo: buildInfo,
+      androidBuildInfo: androidBuildInfo,
     );
     return null;
   }

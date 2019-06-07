@@ -564,8 +564,7 @@ class FlutterPluginProject {
     return unzip.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .map((String line) => line.split(' ').last)
-        .toList();
+        .map((String line) => line.split(' ').last);
   }
 
   Future<Iterable<String>> getFilesInAppBundle(String bundle) {
