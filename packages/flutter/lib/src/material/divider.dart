@@ -10,7 +10,7 @@ import 'theme.dart';
 // Examples can assume:
 // BuildContext context;
 
-/// A one physical pixel thick horizontal line, with padding on either
+/// A one device pixel thick horizontal line, with padding on either
 /// side.
 ///
 /// In the material design language, this represents a divider. Dividers can be
@@ -43,11 +43,11 @@ class Divider extends StatelessWidget {
 
   /// The divider's height extent.
   ///
-  /// The divider itself is always drawn as one physical pixel thick horizontal
+  /// The divider itself is always drawn as one device pixel thick horizontal
   /// line that is centered within the height specified by this value.
   ///
   /// A divider with a [height] of 0.0 is always drawn as a line with a height
-  /// of exactly one physical pixel, without any padding around it.
+  /// of exactly one device pixel, without any padding around it.
   final double height;
 
   /// The amount of empty space to the left of the divider.
@@ -123,7 +123,7 @@ class Divider extends StatelessWidget {
   }
 }
 
-/// A one physical pixel thick horizontal line, with padding on either
+/// A one device pixel thick horizontal line, with padding on either
 /// side.
 ///
 /// In the material design language, this represents a divider. Vertical
@@ -152,11 +152,11 @@ class VerticalDivider extends StatelessWidget {
 
   /// The divider's width.
   ///
-  /// The divider itself is always drawn as one physical pixel thick
+  /// The divider itself is always drawn as one device pixel thick
   /// line that is centered within the width specified by this value.
   ///
   /// A divider with a [width] of 0.0 is always drawn as a line with a width
-  /// of exactly one physical pixel, without any padding around it.
+  /// of exactly one device pixel, without any padding around it.
   final double width;
 
   /// The amount of empty space on top of the divider.
