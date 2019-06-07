@@ -120,7 +120,7 @@ void webOnlyInitializeEngine() {
   domRenderer;
 
   bool waitingForAnimation = false;
-  ui.window.webOnlyScheduleFrameCallback = () {
+  ui.webOnlyScheduleFrameCallback = () {
     // We're asked to schedule a frame and call `frameHandler` when the frame
     // fires.
     if (!waitingForAnimation) {

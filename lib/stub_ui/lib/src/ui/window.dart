@@ -804,8 +804,6 @@ abstract class Window {
     _onLocaleChanged = callback;
   }
 
-  VoidCallback webOnlyScheduleFrameCallback;
-
   /// Requests that, at the next appropriate opportunity, the [onBeginFrame]
   /// and [onDrawFrame] callbacks be invoked.
   ///
@@ -1223,6 +1221,8 @@ class IsolateNameServer {
     throw UnimplementedError();
   }
 }
+
+VoidCallback webOnlyScheduleFrameCallback;
 
 /// The [Window] singleton. This object exposes the size of the display, the
 /// core scheduler API, the input event callback, the graphics drawing API, and
