@@ -244,6 +244,13 @@ class TestWindow implements Window {
   }
 
   @override
+  TimingsCallback get onReportTimings => _window.onReportTimings;
+  @override
+  set onReportTimings(TimingsCallback callback) {
+    _window.onReportTimings = callback;
+  }
+
+  @override
   PointerDataPacketCallback get onPointerDataPacket => _window.onPointerDataPacket;
   @override
   set onPointerDataPacket(PointerDataPacketCallback callback) {

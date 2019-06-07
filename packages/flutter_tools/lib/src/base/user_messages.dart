@@ -215,6 +215,17 @@ class UserMessages {
   String vsCodeLocation(String location) => 'VS Code at $location';
   String vsCodeFlutterExtensionMissing(String url) => 'Flutter extension not installed; install from\n$url';
 
+  // Messages used in VisualStudioValidator
+  String visualStudioVersion(String name, String version) => '$name version $version';
+  String visualStudioLocation(String location) => 'Visual Studio at $location';
+  String visualStudioMissingComponents(String workload, List<String> components) =>
+      'Visual Studio is missing necessary components. Please re-run the '
+      'Visual Studio installer for the "$workload" workload, and include these components:\n'
+      '  ${components.join('\n  ')}';
+  String get visualStudioMissing =>
+      'Visual Studio not installed; this is necessary for Windows development.\n'
+      'Download at https://visualstudio.microsoft.com/downloads/.';
+
   // Messages used in FlutterCommand
   String flutterElapsedTime(String name, String elapsedTime) => '"flutter $name" took $elapsedTime.';
   String get flutterNoDevelopmentDevice =>
