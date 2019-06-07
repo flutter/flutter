@@ -36,6 +36,7 @@ class Divider extends StatelessWidget {
     Key key,
     this.height = 16.0,
     this.indent = 0.0,
+    this.rightIndent = 0.0,
     this.color,
   }) : assert(height >= 0.0),
        super(key: key);
@@ -52,6 +53,9 @@ class Divider extends StatelessWidget {
 
   /// The amount of empty space to the left of the divider.
   final double indent;
+
+  /// The amount of empty space to the right of the divider.
+  final double endIndent;
 
   /// The color to use when painting the line.
   ///
@@ -108,7 +112,7 @@ class Divider extends StatelessWidget {
       child: Center(
         child: Container(
           height: 0.0,
-          margin: EdgeInsetsDirectional.only(start: indent),
+          margin: EdgeInsetsDirectional.only(start: indent, end: endIndent),
           decoration: BoxDecoration(
             border: Border(
               bottom: createBorderSide(context, color: color),
@@ -145,6 +149,7 @@ class VerticalDivider extends StatelessWidget {
     Key key,
     this.width = 16.0,
     this.indent = 0.0,
+    this.endIndent = 0.0,
     this.color,
   }) : assert(width >= 0.0),
        super(key: key);
@@ -160,6 +165,9 @@ class VerticalDivider extends StatelessWidget {
 
   /// The amount of empty space to the left of the divider.
   final double indent;
+
+  /// The amount of empty space to the right of the divider.
+  final double endIndent;
 
   /// The color to use when painting the line.
   ///
