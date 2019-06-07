@@ -66,6 +66,7 @@ class WebAssetServer {
 
   /// An HTTP server which provides JavaScript and web assets to the browser.
   Future<void> _onRequest(HttpRequest request) async {
+    final String targetName = '${fs.path.basenameWithoutExtension(target)}_web_entrypoint';
     if (request.method != 'GET') {
       request.response.statusCode = HttpStatus.forbidden;
       await request.response.close();
@@ -103,17 +104,17 @@ class WebAssetServer {
         'flutter_web',
         flutterProject.manifest.appName,
         'lib',
-        '${fs.path.basename(target)}.js',
+        '$targetName.dart.js',
       ));
       await _completeRequest(request, file, 'text/javascript');
-    } else if (uri.path.endsWith('${fs.path.basename(target)}.bootstrap.js')) {
+    } else if (uri.path.endsWith('$targetName.dart.bootstrap.js')) {
       final File file = fs.file(fs.path.join(
         flutterProject.dartTool.path,
         'build',
         'flutter_web',
         flutterProject.manifest.appName,
         'lib',
-        '${fs.path.basename(target)}.bootstrap.js',
+        '$targetName.dart.bootstrap.js',
       ));
       await _completeRequest(request, file, 'text/javascript');
     } else if (uri.path.contains('dart_sdk')) {
