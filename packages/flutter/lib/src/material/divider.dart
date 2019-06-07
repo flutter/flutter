@@ -123,7 +123,7 @@ class Divider extends StatelessWidget {
   }
 }
 
-/// A one device pixel thick horizontal line, with padding on either
+/// A one device pixel thick vertical line, with padding on either
 /// side.
 ///
 /// In the material design language, this represents a divider. Vertical
