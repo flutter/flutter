@@ -19,26 +19,6 @@ class TestStrategy {
   }
 }
 
-List<VoidCallback> runWithMicrotaskQueueSpy(VoidCallback callback) {
-  final List<VoidCallback> microtaskQueue = <VoidCallback>[];
-  runZoned<void>(
-    () {
-      callback();
-    },
-    zoneSpecification: ZoneSpecification(
-      scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
-        // Don't actually run the tasks, just record that it was scheduled.
-        microtaskQueue.add(f);
-        self.parent.scheduleMicrotask(() {
-          f();
-          microtaskQueue.remove(f);
-        });
-      },
-    ),
-  );
-  return microtaskQueue;
-}
-
 void main() {
   SchedulerBinding scheduler;
   setUpAll(() {
@@ -112,27 +92,27 @@ void main() {
   });
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
-    final List<VoidCallback> microtaskQueue = runWithMicrotaskQueueSpy(() {
-      scheduler.scheduleWarmUpFrame();
-      scheduler.scheduleWarmUpFrame();
-    });
-
-    // scheduleWarmUpFrame scheduled 1 microtask
-    expect(microtaskQueue.length, 1);
-  });
-
-  test('Tasks are not executed before scheduleWarmUpFrame finishes', () async {
+    final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
     bool taskExecuted = false;
-    final List<VoidCallback> microtaskQueue = runWithMicrotaskQueueSpy(() {
-        scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
-        Timer.run(() { taskExecuted = true; });
+    runZoned<void>(
+      () {
+        // Run it twice without processing the queued tasks.
         scheduler.scheduleWarmUpFrame();
-    });
+        scheduler.scheduleWarmUpFrame();
+        scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
+      },
+      zoneSpecification: ZoneSpecification(
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+          // Don't actually run the tasks, just record that it was scheduled.
+          timerQueueTasks.add(f);
+          return null;
+        },
+      ),
+    );
 
-    expect(microtaskQueue.isNotEmpty, true);
-    await scheduler.endOfFrame;
-
-    expect(scheduler.schedulerPhase, SchedulerPhase.idle);
+    // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0 because
+    // events are locked.
+    expect(timerQueueTasks.length, 2);
     expect(taskExecuted, false);
   });
 }
