@@ -36,13 +36,13 @@ enum Orientation {
 /// ## Insets and Padding
 ///
 /// ![A diagram of padding, viewInsets, and viewPadding in correlation with each
-/// other](https://flutter.github.io/assets-for-api-docs/assets/widgets/media_query.mp4)
+/// other](https://flutter.github.io/assets-for-api-docs/assets/widgets/media_query.png)
 ///
 /// This diagram illustrates how [padding] relates to [viewPadding] and
 /// [viewInsets], shown here in its simplest configuration, as the difference
 /// between the two. In cases when the viewInsets exceed the viewPadding, like
-/// when a keyboard is shown below, padding goes to zero rather than a negative
-/// value. Therefore, padding is calculated by taking
+/// when a software keyboard is shown below, padding goes to zero rather than a
+/// negative value. Therefore, padding is calculated by taking
 /// `max(0.0, viewPadding - viewInsets)`.
 ///
 /// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/window_padding.mp4}
@@ -55,17 +55,17 @@ enum Orientation {
 ///
 /// MediaQueryData includes three [EdgeInsets] values:
 /// [padding], [viewPadding], and [viewInsets]. These values reflect the
-/// configuration of the device and are used by many top level widgets, listed
-/// below. The padding value defines areas that might not be completely visible,
-/// like the display "notch" on the iPhone X. The viewInsets value defines areas that
-/// aren't visible at all, typically because they're obscured by the device's
-/// keyboard. Similar to viewInsets, viewPadding does not differentiate padding
-/// in areas that may be obscured. For example, by using the viewPadding
-/// property, padding would defer to the iPhone "safe area" regardless of
-/// whether a keyboard is showing.
+/// configuration of the device and are used and optionally consumed by widgets
+/// that position content within these insets. The padding value defines areas
+/// that might not be completely visible, like the display "notch" on the iPhone
+/// X. The viewInsets value defines areas that aren't visible at all, typically
+/// because they're obscured by the device's keyboard. Similar to viewInsets,
+/// viewPadding does not differentiate padding in areas that may be obscured.
+/// For example, by using the viewPadding property, padding would defer to the
+/// iPhone "safe area" regardless of whether a keyboard is showing.
 ///
 /// The viewInsets and viewPadding are independent values, they're
-/// measured from the edges of the MediaQuery widget's bounds. together they
+/// measured from the edges of the MediaQuery widget's bounds. Together they
 /// inform the [padding] property. The bounds of the top level MediaQuery
 /// created by [WidgetsApp] are the same as the window that contains the app.
 ///
@@ -168,7 +168,7 @@ class MediaQueryData {
   /// See also:
   ///
   /// * [ui.window], which provides some additional detail about this property
-  /// and how it relates to [padding] and [viewPadding].
+  ///   and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -190,16 +190,19 @@ class MediaQueryData {
   ///    and automatically removes it from the [MediaQuery] for its child.
   final EdgeInsets padding;
 
-  /// The parts of the display that may be obscured by the system UI, but
-  /// respect the padding established below the obstruction.
+  /// The parts of the display that are partially obscured by system UI,
+  /// typically by the hardware display "notches" or the system status bar.
   ///
-  /// When a mobile device's keyboard is visible, `viewPadding.bottom`
-  /// corresponds to the bottom of the view beneath it.
+  /// This value remains the same regardless of whether the system is reporting
+  /// other obstructions in the same physical area of the screen. For example, a
+  /// software keyboard on the bottom of the screen that may cover and consume
+  /// the same area that requires bottom padding will not affect this value.
   ///
   /// This value is independent of the [padding] and [viewInsets]: their values
   /// are measured from the edges of the [MediaQuery] widget's bounds. The
   /// bounds of the top level MediaQuery created by [WidgetsApp] are the
-  /// same as the window (often the mobile device screen) that contains the app.
+  /// same as the window that contains the app. On mobile devices, this will
+  /// typically be the full screen.
   ///
   /// See also:
   ///
