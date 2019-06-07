@@ -17,7 +17,7 @@ in the source code into API documentation, as seen on https://api.flutter.dev/.
 
 ### Sample Tool
 
-[Code sample image](/assets/code_sample.png)
+![Code sample image](/assets/code_sample.png)
 
 The code sample tool generates a block containing a description and example
 code. Here is an example of a code sample with a description:
@@ -43,7 +43,7 @@ This uses the skeleton for [sample](config/skeletons/sample.html) snippets.
 
 ### Snippet Tool
 
-[Code snippet image](/assets/code_snippet.png)
+![Code snippet image](/assets/code_snippet.png)
 
 The code snippet tool can expand examples into full Flutter applications.
 These snippets can be directly copied and used to demonstrate how
