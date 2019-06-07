@@ -349,7 +349,7 @@ Future<void> _runWebTests() async {
     }
   }
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
-    path.join('test', 'foundation'),
+    'test/foundation/',
   ]);
 }
 
