@@ -19,8 +19,11 @@ class WebValidator extends DoctorValidator {
     if (platform.environment.containsKey(kChromeEnvironment)) {
       messages.add(ValidationMessage('$kChromeEnvironment = $chrome'));
     } else {
-      messages.add(ValidationMessage('Chrome at $chrome'));
-      messages.add(ValidationMessage.hint('$kChromeEnvironment not set'));
+      if (!canRunChrome) {
+        messages.add(ValidationMessage.hint('$kChromeEnvironment not set'));
+      } else {
+        messages.add(ValidationMessage('Chrome at $chrome'));
+      }
     }
     if (!canRunChrome) {
       return ValidationResult(

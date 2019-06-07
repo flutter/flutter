@@ -43,6 +43,15 @@ void main() {
       final ValidationResult result = await webValidator.validate();
       expect(result.type, ValidationType.missing);
     }));
+
+    test('Doesn\'t warn about CHROME_EXECUTABLE unless it cant find chrome ', () => testbed.run(() async {
+      fs.file(kMacOSExecutable).deleteSync();
+      final ValidationResult result = await webValidator.validate();
+      expect(result.messages, <ValidationMessage>[
+        ValidationMessage.hint('CHROME_EXECUTABLE not set')
+      ]);
+      expect(result.type, ValidationType.missing);
+    }));
   });
 }
 
