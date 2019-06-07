@@ -22,6 +22,69 @@ void main() {
     expect(find.byType(Divider), paints..path(strokeWidth: 0.0));
   });
 
+  testWidgets('Divider custom indentation', (WidgetTester tester) async {
+    RenderBox divider;
+    RenderBox decoratedBox;
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Divider(
+            indent: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 10.0);
+    divider = tester.firstRenderObject(find.byType(Divider));
+    // Container widgets wrap its child in an DecoratedBox widget, which in turn
+    // is wrapped by a Padding widget. The Padding widget provides these
+    // indentations.
+    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
+    expect(divider.size.width, 10.0 + decoratedBox.size.width);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Divider(
+            endIndent: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 10.0);
+    divider = tester.firstRenderObject(find.byType(Divider));
+    // Container widgets wrap its child in an DecoratedBox widget, which in turn
+    // is wrapped by a Padding widget. The Padding widget provides these
+    // indentations.
+    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
+    expect(divider.size.width, decoratedBox.size.width + 10.0);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: Divider(
+            indent: 10.0,
+            endIndent: 10.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(tester.firstWidget<Padding>(find.byType(Padding)).padding.horizontal, 20.0);
+    divider = tester.firstRenderObject(find.byType(Divider));
+    // Container widgets wrap its child in an DecoratedBox widget, which in turn
+    // is wrapped by a Padding widget. The Padding widget provides these
+    // indentations.
+    decoratedBox = tester.firstRenderObject(find.byType(DecoratedBox));
+    expect(divider.size.width, 10.0 + decoratedBox.size.width + 10.0);
+  });
+
   testWidgets('Vertical Divider Test', (WidgetTester tester) async {
     await tester.pumpWidget(
       const Directionality(
