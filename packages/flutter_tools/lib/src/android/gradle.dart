@@ -487,6 +487,7 @@ Future<void> _buildGradleProjectV2(
     if (apkFiles.isEmpty)
       throwToolExit('Gradle build failed to produce an Android package.');
     // Copy the first APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
+    // TODO(blasten): Handle multiple APKs.
     apkFiles.first.copySync(project.apkDirectory.childFile('app.apk').path);
 
     printTrace('calculateSha: ${project.apkDirectory}/app.apk');
