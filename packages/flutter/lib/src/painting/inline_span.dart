@@ -122,7 +122,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   ///
   /// When `visitor` returns true, the walk will continue. When `visitor` returns
   /// false, then the walk will end.
-  @Deprecated('Use to visitChildren instead')
+  @Deprecated('Use visitChildren instead')
   bool visitTextSpan(bool visitor(TextSpan span));
 
   /// Walks this [InlineSpan] and any descendants in pre-order and calls `visitor`
@@ -132,7 +132,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// false, then the walk will end.
   bool visitChildren(InlineSpanVisitor visitor);
 
-  /// Returns the text span that contains the given position in the text.
+  /// Returns the [InlineSpan] that contains the given position in the text.
   InlineSpan getSpanForPosition(TextPosition position) {
     assert(debugAssertIsValid());
     final Accumulator offset = Accumulator();
