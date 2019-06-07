@@ -854,6 +854,55 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
+  testWidgets('text field build empty tool bar when no options available ios', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: const Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
+  });
+
+  testWidgets('text field build empty tool bar when no options available android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
+  });
+
   testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
     TextEditingController controller = TextEditingController(text: 'readonly');
     final OverlayEntry entry = OverlayEntry(
