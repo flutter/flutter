@@ -1,9 +1,9 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
 import 'package:flutter/src/material/debug.dart';
 import 'package:flutter/src/material/theme_data.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
@@ -50,6 +50,9 @@ class _ToggleButton extends StatelessWidget {
     this.splashColor,
     this.onPressed,
     this.shape,
+    this.leadingBorderSide,
+    this.horizontalBorderSide,
+    this.trailingBorderSide,
     this.child,
   }) : super(key: key);
 
@@ -97,6 +100,12 @@ class _ToggleButton extends StatelessWidget {
   /// button has an elevation, then its drop shadow is defined by this shape.
   final ShapeBorder shape;
 
+  final BorderSide leadingBorderSide;
+
+  final BorderSide horizontalBorderSide;
+
+  final BorderSide trailingBorderSide;
+
   /// The button's label, which is usually an [Icon] or a [Text] widget.
   final Widget child;
 
@@ -104,16 +113,19 @@ class _ToggleButton extends StatelessWidget {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
     Color currentColor;
+    BorderSide currentBorderSide;
+    final ThemeData themeData = Theme.of(context);
 
     if (onPressed != null && selected) {
-      currentColor = activeColor ?? Theme.of(context).colorScheme.primary;
+      final Color primary = themeData.colorScheme.primary;
+      currentColor = activeColor ?? primary;
     } else if (onPressed != null && !selected) {
-      currentColor = color ?? Theme.of(context).colorScheme.onSurface;
+      currentColor = color ?? themeData.colorScheme.onSurface;
     } else {
-      currentColor = disabledColor ?? Theme.of(context).disabledColor;
+      currentColor = disabledColor ?? themeData.disabledColor;
     }
 
-    return IconTheme.merge(
+    final Widget result = IconTheme.merge(
       data: IconThemeData(
         color: currentColor,
       ),
@@ -133,73 +145,110 @@ class _ToggleButton extends StatelessWidget {
         child: child,
       ),
     );
+
+    return _SelectToggleButton(
+      key: key,
+      child: result,
+      leadingBorderSide: leadingBorderSide,
+      horizontalBorderSide: horizontalBorderSide,
+      trailingBorderSide: trailingBorderSide,
+    );
   }
 
   // TODO(WIP): include debugFillProperties method
 }
 
-class ToggleButtonBorder extends BoxBorder {
-  const ToggleButtonBorder({
-    this.borderSide,
-    @required this.borderRadius,
+class _SelectToggleButton extends SingleChildRenderObjectWidget {
+  const _SelectToggleButton({
+    Key key,
+    Widget child,
+    this.color,
+    this.leadingBorderSide,
+    this.horizontalBorderSide,
+    this.trailingBorderSide,
+  }) : super(
+    key: key,
+    child: child,
+  );
+
+  final Color color;
+
+  final BorderSide leadingBorderSide;
+
+  final BorderSide horizontalBorderSide;
+
+  final BorderSide trailingBorderSide;
+
+  @override
+  _SelectToggleButtonRenderObject createRenderObject(BuildContext context) => _SelectToggleButtonRenderObject(
+      leadingBorderSide: leadingBorderSide,
+      horizontalBorderSide: horizontalBorderSide,
+      trailingBorderSide: trailingBorderSide,
+  );
+
+  @override
+  void updateRenderObject(BuildContext context, _SelectToggleButtonRenderObject renderObject) {
+    renderObject
+      ..leadingBorderSide = leadingBorderSide
+      ..horizontalBorderSide = horizontalBorderSide
+      ..trailingBorderSide = trailingBorderSide;
+  }
+}
+
+class _SelectToggleButtonRenderObject extends RenderProxyBox {
+  _SelectToggleButtonRenderObject({
+    this.leadingBorderSide,
+    this.horizontalBorderSide,
+    this.trailingBorderSide,
   });
 
-  final BorderSide borderSide;
+  BorderSide leadingBorderSide;
 
-  final BorderRadius borderRadius;
+  BorderSide horizontalBorderSide;
+
+  BorderSide trailingBorderSide;
 
   @override
-  BorderSide get top {
-    return borderSide;
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    final Offset bottomRight = size.bottomRight(offset);
+    final Rect inner = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
+    final Rect center = inner.inflate(horizontalBorderSide.width / 2.0);
+
+    final double bottom = center.bottom;
+    final double left = center.left;
+    final double top = center.top;
+    final double right = center.right;
+
+      final Paint leadingPaint = leadingBorderSide.toPaint();
+      final Path leftPath = Path()
+        ..moveTo(left, top)
+        ..lineTo(left, bottom);
+
+      context.canvas.drawPath(leftPath, leadingPaint);
+
+    if (trailingBorderSide != null) {
+      final Paint trailingPaint = trailingBorderSide.toPaint();
+      final Path rightPath = Path()
+        ..moveTo(right, top)
+        ..lineTo(right, bottom);
+
+      context.canvas.drawPath(rightPath, trailingPaint);
+    }
+
+    final Paint horizontalPaint = horizontalBorderSide.toPaint();
+
+    final Path bottomPath = Path()
+      ..moveTo(right, bottom)
+      ..lineTo(left, bottom);
+
+    final Path topPath = Path()
+      ..moveTo(right, top)
+      ..lineTo(left, top);
+
+    context.canvas.drawPath(bottomPath, horizontalPaint);
+    context.canvas.drawPath(topPath, horizontalPaint);
   }
-
-  @override
-  BorderSide get bottom {
-    return borderSide;
-  }
-
-  @override
-  bool get isUniform {
-    return false;
-  }
-
-  @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
-    return Path()
-      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect).deflate(borderSide.width));
-  }
-
-  @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
-    return Path()
-      ..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
-  }
-
-  @override
-  void paint(
-    Canvas canvas,
-    Rect rect, {
-    TextDirection textDirection,
-    BoxShape shape = BoxShape.rectangle,
-    BorderRadius borderRadius,
-  }) {
-    final Paint paint = borderSide.toPaint();
-    final RRect outer = borderRadius.toRRect(rect);
-    final RRect center = outer.deflate(borderSide.width / 2.0);
-
-    canvas.drawRRect(center, paint);
-  }
-
-  @override
-  ToggleButtonBorder scale(double t) {
-    return ToggleButtonBorder(
-      borderSide: borderSide.scale(t),
-      borderRadius: borderRadius * t,
-    );
-  }
-
-  @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 }
 
 class ToggleButtons extends StatelessWidget {
@@ -210,8 +259,9 @@ class ToggleButtons extends StatelessWidget {
     this.color,
     this.activeColor,
     this.disabledColor,
-    this.border,
-    this.borderSide = const BorderSide(),
+    this.borderSide,
+    this.activeBorderSide,
+    this.disabledBorderSide,
     this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
   }); // borderRadius cannot be null
 
@@ -236,37 +286,66 @@ class ToggleButtons extends StatelessWidget {
   /// If [onPressed] is null, this color will be used.
   final Color disabledColor;
 
-  final Border border;
-
   final BorderSide borderSide;
+
+  final BorderSide activeBorderSide;
+
+  final BorderSide disabledBorderSide;
 
   final BorderRadius borderRadius;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        border: ToggleButtonBorder(
-          borderSide: borderSide,
-          borderRadius: borderRadius,
-          // pass in children to figure out width
-          // pass in selected to figre out color
-          // figure out: custom colors?
-        ),
-        borderRadius: borderRadius,
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: List<Widget>.generate(children.length, (int index) {
-          return _ToggleButton(
-            onPressed: () {
+    final ThemeData themeData = Theme.of(context);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List<Widget>.generate(children.length, (int index) {
+        BorderSide horizontalBorderSide;
+        BorderSide leadingBorderSide;
+        BorderSide trailingBorderSide;
+
+        if (onPressed != null && isSelected[index]) {
+          horizontalBorderSide = activeBorderSide ?? BorderSide(color: themeData.colorScheme.primary);
+        } else if (onPressed != null && !isSelected[index]) {
+          horizontalBorderSide = borderSide ?? BorderSide(color: themeData.colorScheme.onSurface);
+        } else {
+          horizontalBorderSide = disabledBorderSide ?? BorderSide(color: themeData.disabledColor);
+        }
+
+        if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
+          leadingBorderSide = activeBorderSide ?? BorderSide(color: themeData.colorScheme.primary);
+        } else if (onPressed != null && !isSelected[index]) {
+          leadingBorderSide = borderSide ?? BorderSide(color: themeData.colorScheme.onSurface);
+        } else {
+          leadingBorderSide = disabledBorderSide ?? BorderSide(color: themeData.disabledColor);
+        }
+
+        if (index != children.length - 1) {
+          trailingBorderSide = null;
+        } else {
+          if (onPressed != null && (isSelected[index])) {
+            trailingBorderSide = activeBorderSide ?? BorderSide(color: themeData.colorScheme.primary);
+          } else if (onPressed != null && !isSelected[index]) {
+            trailingBorderSide = borderSide ?? BorderSide(color: themeData.colorScheme.onSurface);
+          } else {
+            trailingBorderSide = disabledBorderSide ?? BorderSide(color: themeData.disabledColor);
+          }
+        }
+
+        return _ToggleButton(
+          onPressed: onPressed != null
+            ? () {
               onPressed(index);
-            },
-            selected: isSelected[index],
-            child: children[index],
-          );
-        }),
-      ),
+            }
+            : null,
+          selected: isSelected[index],
+          leadingBorderSide: leadingBorderSide,
+          horizontalBorderSide: horizontalBorderSide,
+          trailingBorderSide: trailingBorderSide,
+          child: children[index],
+        );
+      }),
     );
   }
 
