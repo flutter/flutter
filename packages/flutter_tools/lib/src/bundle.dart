@@ -12,7 +12,6 @@ import 'asset.dart';
 import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
-import 'base/platform.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
