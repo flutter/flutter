@@ -342,7 +342,7 @@ void main() {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         try {
-          await expectLater(finder, matchesGoldenFile('foo.png'));
+          await expectLater(finder, matchesGoldenFile('bar.png'));
           fail('TestFailure expected but not thrown');
         } on TestFailure catch (error) {
           expect(comparator.invocation, _ComparatorInvocation.compare);
@@ -355,7 +355,7 @@ void main() {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         try {
-          await expectLater(finder, matchesGoldenFile('foo.png'));
+          await expectLater(finder, matchesGoldenFile('baz.png'));
           fail('TestFailure expected but not thrown');
         } on TestFailure catch (error) {
           expect(comparator.invocation, _ComparatorInvocation.compare);
@@ -367,7 +367,7 @@ void main() {
         await tester.pumpWidget(boilerplate(Container()));
         final Finder finder = find.byType(Text);
         try {
-          await expectLater(finder, matchesGoldenFile('foo.png'));
+          await expectLater(finder, matchesGoldenFile('flop.png'));
           fail('TestFailure expected but not thrown');
         } on TestFailure catch (error) {
           expect(comparator.invocation, isNull);
@@ -381,7 +381,7 @@ void main() {
         )));
         final Finder finder = find.byType(Text);
         try {
-          await expectLater(finder, matchesGoldenFile('foo.png'));
+          await expectLater(finder, matchesGoldenFile('top.png'));
           fail('TestFailure expected but not thrown');
         } on TestFailure catch (error) {
           expect(comparator.invocation, isNull);
@@ -394,11 +394,32 @@ void main() {
       autoUpdateGoldenFiles = true;
       await tester.pumpWidget(boilerplate(const Text('hello')));
       final Finder finder = find.byType(Text);
-      await expectLater(finder, matchesGoldenFile('foo.png'));
+      await expectLater(finder, matchesGoldenFile('pop.png'));
       expect(comparator.invocation, _ComparatorInvocation.update);
       expect(comparator.imageBytes, hasLength(greaterThan(0)));
-      expect(comparator.golden, Uri.parse('foo.png'));
+      expect(comparator.golden, Uri.parse('pop.png'));
       autoUpdateGoldenFiles = false;
+    });
+
+    testWidgets('updates goldenTestNames', (WidgetTester tester) async {
+      expect(goldenTestNames, containsAll(<String>[
+        'foo.png',
+        'bar.png',
+        'baz.png',
+        'pop.png',
+      ]));
+    });
+
+    testWidgets('notifies for duplicate test name', (WidgetTester tester) async {
+      await tester.pumpWidget(boilerplate(const Text('hello')));
+      final Finder finder = find.byType(Text);
+      try {
+        await expectLater(finder, matchesGoldenFile('foo.png'));
+        fail('TestFailure expected but not thrown');
+      } on TestFailure catch (error) {
+        expect(comparator.invocation, isNull);
+        expect(error.message, contains('Duplicate file name detected'));
+      }
     });
   });
 
