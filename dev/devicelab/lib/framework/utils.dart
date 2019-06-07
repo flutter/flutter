@@ -346,14 +346,12 @@ Future<int> flutter(String command, {
   bool canFail = false, // as in, whether failures are ok. False means that they are fatal.
   Map<String, String> environment,
 }) {
-  final List<String> args = <String>[command];
-  if (localEngine != null) {
-    args.addAll(<String>['--local-engine', localEngine]);
-    if (localEngineSrcPath != null) {
-      args.addAll(<String>['--local-engine-src-path', localEngineSrcPath]);
-    }
-  }
-  args.addAll(options);
+  final List<String> args = <String>[
+    command,
+    if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    ...options,
+  ];
   return exec(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment);
 }
@@ -365,14 +363,12 @@ Future<String> evalFlutter(String command, {
   Map<String, String> environment,
   StringBuffer stderr, // if not null, the stderr will be written here.
 }) {
-  final List<String> args = <String>[command];
-  if (localEngine != null) {
-    args.addAll(<String>['--local-engine', localEngine]);
-    if (localEngineSrcPath != null) {
-      args.addAll(<String>['--local-engine-src-path', localEngineSrcPath]);
-    }
-  }
-  args.addAll(options);
+  final List<String> args = <String>[
+    command,
+    if (localEngine != null) ...<String>['--local-engine', localEngine],
+    if (localEngineSrcPath != null) ...<String>['--local-engine-src-path', localEngineSrcPath],
+    ...options,
+  ];
   return eval(path.join(flutterDirectory.path, 'bin', 'flutter'), args,
       canFail: canFail, environment: environment, stderr: stderr);
 }
