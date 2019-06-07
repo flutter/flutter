@@ -19,8 +19,8 @@ in the source code into API documentation, as seen on https://api.flutter.dev/.
 
 ![Code sample image](assets/code_sample.png)
 
-The code sample tool generates a block containing a description and example
-code. Here is an example of a code sample with a description:
+The code `sample` tool generates a block containing a description and example
+code. Here is an example of the code `sample` tool in use:
 
 ```dart
 /// {@tool sample}
@@ -36,7 +36,7 @@ code. Here is an example of a code sample with a description:
 /// {@end-tool}
 ```
 
-This will generate example code that can be copied to the clipboard and added
+This will generate sample code that can be copied to the clipboard and added
 to existing applications.
 
 This uses the skeleton for [sample](config/skeletons/sample.html) snippets.
@@ -45,9 +45,9 @@ This uses the skeleton for [sample](config/skeletons/sample.html) snippets.
 
 ![Code snippet image](assets/code_snippet.png)
 
-The code snippet tool can expand examples into full Flutter applications.
-These snippets can be directly copied and used to demonstrate how
-the API's functionality in a sample application:
+The code `snippet` tool can expand sample code into full Flutter applications.
+These sample applications can be directly copied and used to demonstrate the
+API's functionality in a sample application:
 
 ```dart
 /// {@tool snippet --template=stateless_widget_material}
@@ -113,20 +113,21 @@ directory) is an HTML template into which the Dart code blocks and descriptions
 are interpolated, in order to display it nicely.
 
 There is currently one skeleton for
-[application](config/skeletons/application.html) snippets and one for
-[sample](config/skeletons/sample.html)
-snippets, but there could be more. It uses mustache notation (e.g. `{{code}}`)
-to mark where the components to be interpolated into the template should go.
-It doesn't actually use the mustache package, since the only things that need
-substituting are simple strings, but it uses the same syntax.
+[application](config/skeletons/application.html) `snippets` and one for
+[sample](config/skeletons/sample.html) `snippets`, but there could be more.
+
+Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
+be interpolated into the template. It doesn't actually use the mustache
+package, since these are simple string substitutions, but it uses the same
+syntax.
 
 ## Test Doc Generation Workflow
 
-If you are making changes to an existing code sample or are creating a new code
-sample, follow these steps to generate a local copy of the API docs and verify
-that your code samples are showing up correctly:
+If you are making changes to an existing code block or are creating a new code
+block, follow these steps to generate a local copy of the API docs and verify
+that your code blocks are showing up correctly:
 
-1. Make an update to a code sample or create a new code sample.
+1. Make an update to a code block or create a new code block.
 2. From the root directory, run `./dev/bots/docs.sh`. This should start
 generating a local copy of the API documentation.
 3. Once complete, check `./dev/docs/doc` to check your API documentation. The
