@@ -68,7 +68,7 @@ class FlutterPlugin implements Plugin<Project> {
     ]
 
     // When split is enabled, multiple APKs are generated per each ABI.
-    private static final Set DEFAULT_PLATFORMS = [
+    private static final List DEFAULT_PLATFORMS = [
         PLATFORM_ARM32,
         PLATFORM_ARM64,
     ]
@@ -101,18 +101,16 @@ class FlutterPlugin implements Plugin<Project> {
         return result
     }
 
-    private Set<String> getTargetPlatforms(Project project) {
-        if (project.hasProperty('target-platform')) {
-            Set<String> platforms =  []
-            project.property('target-platform').split(',').each {
-                if (!PLATFORM_ARCH_MAP[it]) {
-                    throw new GradleException("Invalid platform: $it.")
-                }
-                platforms.add(it)
-            }
-            return platforms
+    private List<String> getTargetPlatforms(Project project) {
+        if (!project.hasProperty('target-platform')) {
+            return DEFAULT_PLATFORMS
         }
-        return DEFAULT_PLATFORMS
+        return project.property('target-platform').split(',').collect {
+            if (!PLATFORM_ARCH_MAP[it]) {
+                throw new GradleException("Invalid platform: $it.")
+            }
+            return it
+        }
     }
 
     private Boolean getBuildShareLibrary(Project project) {
@@ -173,8 +171,6 @@ class FlutterPlugin implements Plugin<Project> {
                     abi {
                         // Enables building multiple APKs per ABI.
                         enable true
-                        // By default all ABIs are included, so use reset() and include to specify that we only
-                        // want APKs for x86 and x86_64.
                         // Resets the list of ABIs that Gradle should create APKs for to none.
                         reset()
                         // Specifies that we do not want to also generate a universal APK that includes all ABIs.

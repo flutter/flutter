@@ -361,7 +361,7 @@ class AndroidDevice extends Device {
 
     if (!debuggingOptions.buildInfo.isDebug &&
           !debuggingOptions.buildInfo.isDynamic) {
-      printError('Profile and release builds are only supported on ARM targets.');
+      printError('Profile and release builds are only supported.');
       return LaunchResult.failed();
     }
 
@@ -371,12 +371,12 @@ class AndroidDevice extends Device {
     switch (devicePlatform) {
       case TargetPlatform.android_arm:
         androidArch = AndroidArch.armeabi_v7a;
-      break;
+        break;
       case TargetPlatform.android_arm64:
         androidArch = AndroidArch.arm64_v8a;
-      break;
+        break;
       default:
-        printError('Profile and release builds are only supported on ARM targets.');
+        printError('ARM targets are only supported.');
         return LaunchResult.failed();
     }
 
