@@ -97,6 +97,21 @@ set goldenFileComparator(GoldenFileComparator value) {
 ///   * [goldenFileComparator]
 bool autoUpdateGoldenFiles = false;
 
+/// A set for keeping track of golden file test names to prevent duplication.
+///
+/// As calls to [matchesGoldenFile] are executed, it is updated with file names
+/// to prevent conflicts.
+///
+/// The Flutter tool will automatically initialize this to an empty set, so
+/// callers should generally never have to explicitly modify this value. If you
+/// are intentionally testing a golden file multiple times, call [remove] before
+/// executing [matchesGoldenFile] again.
+///
+/// See also:
+///
+///   * [goldenFileComparator]
+Set<String> goldenTestNames = <String>{};
+
 /// Placeholder comparator that is set as the value of [goldenFileComparator]
 /// when the initialization that happens in the test bootstrap either has not
 /// yet happened or has been bypassed.

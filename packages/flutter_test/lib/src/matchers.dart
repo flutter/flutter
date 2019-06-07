@@ -1701,6 +1701,12 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
+    if(goldenTestNames.contains(key.toString()) ){
+      return 'Duplicate file name detected for golden file test: "$key"';
+    } else {
+      goldenTestNames.add(key.toString());
+    }
+
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;

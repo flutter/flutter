@@ -1941,7 +1941,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // Verify that taking a screenshot did not change the number of children
       // of the layer.
       expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
-
+      // Remove test name to avoid duplicate test exception.
+      // Check if it is present first in cases of skipped test.
+      if (goldenTestNames.contains('inspector.repaint_boundary_margin.png'))
+        goldenTestNames.remove('inspector.repaint_boundary_margin.png');
       await expectLater(
         service.screenshot(
           repaintBoundary,
@@ -1976,7 +1979,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // Verify that taking a screenshot with debug paint on did not change
       // the number of children the layer has.
       expect(getChildLayerCount(layer), equals(expectedChildLayerCount));
-
+      // Remove test name to avoid duplicate test exception.
+      // Check if it is present first in cases of skipped test.
+      if (goldenTestNames.contains('inspector.repaint_boundary.png'))
+        goldenTestNames.remove('inspector.repaint_boundary.png');
       // Ensure that creating screenshots including ones with debug paint
       // hasn't changed the regular render of the widget.
       await expectLater(
@@ -2019,7 +2025,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           ..markNeedsLayout()
           ..markNeedsPaint();
         expect(container.debugNeedsLayout, isTrue);
-
+        // Remove test name to avoid duplicate test exception.
+        // Check if it is present first in cases of skipped test.
+        if (goldenTestNames.contains('inspector.container_debugPaint.png'))
+          goldenTestNames.remove('inspector.container_debugPaint.png');
         await expectLater(
           service.screenshot(
             find.byKey(outerContainerKey).evaluate().single,
