@@ -1777,14 +1777,17 @@ class Codec {
 /// Instantiates an image codec [Codec] object.
 ///
 /// [list] is the binary image data (e.g a PNG or GIF binary data).
-/// The data can be for either static or animated images.
+/// The data can be for either static or animated images. The following image
+/// formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
+/// The [targetWidth] and [targetHeight] arguments are ignored.
 ///
 /// The returned future can complete with an error if the image decoding has
 /// failed.
-Future<Codec> instantiateImageCodec(Uint8List list,
-    {double decodedCacheRatioCap = double.infinity}) {
+Future<Codec> instantiateImageCodec(Uint8List list, {
+  int targetWidth,
+  int targetHeight,
+}) {
   return engine.futurize((engine.Callback<Codec> callback) =>
       _instantiateImageCodec(list, callback, null));
 }
