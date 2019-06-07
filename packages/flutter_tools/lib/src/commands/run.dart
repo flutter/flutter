@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/time.dart';
@@ -130,6 +132,16 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'If necessary, build the app before running.',
       )
+      ..addOption('dart-flags',
+        hide: !verboseHelp,
+        help: 'Pass a list of comma separated flags to the Dart instance at '
+              'application startup. Flags passed through this option must be '
+              'present on the whitelist defined within the Flutter engine. If '
+              'a non-whitelisted flag is encountered, the process will be '
+              'terminated immediately.\n\n'
+              'This option is only valid while working on a non-stable Flutter release '
+              'and is only applied in debug and profile modes. This option should '
+              'only be used for experiments and should not be used by typical users.')
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
@@ -183,19 +195,6 @@ class RunCommand extends RunCommandBase {
         splitCommas: true,
         hide: true,
       );
-
-    if (!FlutterVersion.instance.isStable) {
-      argParser.addOption('dart-flags',
-          hide: !verboseHelp,
-          help: 'Pass a list of comma separated flags to the Dart instance at '
-                'application startup. Flags passed through this option must be '
-                'present on the whitelist defined within the Flutter engine. If '
-                'a non-whitelisted flag is encountered, the process will be '
-                'terminated immediately.\n\n'
-                'This flag is only applied in debug and profile modes and is not '
-                'recommended for use by users who are not working on the framework '
-                'or related tooling.');
-    }
   }
 
   @override
@@ -354,6 +353,11 @@ class RunCommand extends RunCommandBase {
         timingLabelParts: <String>['daemon'],
         endTimeOverride: appStartedTime,
       );
+    }
+
+    if (argResults['dart-flags'] != null && FlutterVersion.instance.isStable) {
+      throw UsageException('--dart-flags is for experiments only and cannot be'
+                           ' used on the stable branch.', null);
     }
 
     for (Device device in devices) {

@@ -18,9 +18,13 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  final MockDeviceManager mockDeviceManager = MockDeviceManager();
   final MockApplicationPackageFactory mockPackageApplicationFactory =
       MockApplicationPackageFactory();
+  final MockDeviceManager mockDeviceManager = MockDeviceManager();
+  final MockFlutterVersion mockStableFlutterVersion =
+      MockFlutterVersion(isStable: true);
+  final MockFlutterVersion mockUnstableFlutterVersion =
+      MockFlutterVersion(isStable: false);
 
   group('run', () {
     setUpAll(() {
@@ -36,6 +40,32 @@ void main() {
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
       }
+    });
+
+    testUsingContext('dart-flags option is not available in stable framework', () async {
+      when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+        return Stream<Device>.fromIterable(<Device>[
+          FakeDevice(),
+        ]);
+      });
+
+      final RunCommand command = TestRunCommand();
+      final List<String> args = <String> [
+                                  'run',
+                                  '--dart-flags', '"--observe"',
+                                  '--no-hot',
+                                ];
+
+      // Stable branch.
+      try {
+        await createTestCommandRunner(command).run(args);
+        fail('Expect exception');
+      } on UsageException catch(e) {
+        // Not available while on stable branch.
+      }
+    }, overrides: <Type, Generator>{
+      DeviceManager: () => mockDeviceManager,
+      FlutterVersion: () => mockStableFlutterVersion,
     });
 
     testUsingContext('dart-flags option is only populated for debug and profile modes', () async {
@@ -57,9 +87,6 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
-      } on UsageException catch(e) {
-        // Not available while on stable branch.
-        expect(FlutterVersion.instance.isStable, true);
       }
 
       // Profile mode
@@ -68,9 +95,6 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
-      } on UsageException catch(e) {
-        // Not available while on stable branch.
-        expect(FlutterVersion.instance.isStable, true);
       }
 
       // Release mode
@@ -79,13 +103,11 @@ void main() {
         fail('Expect exception');
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
-      } on UsageException catch(e) {
-        // Not available while on stable branch.
-        expect(FlutterVersion.instance.isStable, true);
       }
     }, overrides: <Type, Generator>{
       ApplicationPackageFactory: () => mockPackageApplicationFactory,
       DeviceManager: () => mockDeviceManager,
+      FlutterVersion: () => mockUnstableFlutterVersion,
     });
 
     testUsingContext('should only request artifacts corresponding to connected devices', () async {
@@ -155,6 +177,11 @@ class TestRunCommand extends RunCommand {
   Future<void> validateCommand() async {
     devices = await deviceManager.getDevices().toList();
   }
+}
+
+class MockStableFlutterVersion extends MockFlutterVersion {
+  @override
+  bool get isStable => true;
 }
 
 class FakeDevice extends Fake implements Device {
