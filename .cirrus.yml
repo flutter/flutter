@@ -76,6 +76,9 @@ task:
       container:
         cpu: 4
         memory: 12G
+    - name: web_tests-linux
+      env:
+        SHARD: web_tests
     - name: build_tests-linux
       env:
         SHARD: build_tests

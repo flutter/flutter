@@ -44,7 +44,6 @@ import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
 import 'web/chrome.dart';
-import 'web/compile.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio.dart';
 import 'windows/visual_studio_validator.dart';
@@ -104,7 +103,6 @@ Future<T> runInContext<T>(
       UserMessages: () => UserMessages(),
       VisualStudio: () => VisualStudio(),
       VisualStudioValidator: () => const VisualStudioValidator(),
-      WebCompiler: () => const WebCompiler(),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),

@@ -17,11 +17,9 @@ void main() {
       Center(
         child: GestureDetector(
           onScaleStart: (ScaleStartDetails details) {
-            print(details);
             startDetails.add(details);
           },
           onScaleUpdate: (ScaleUpdateDetails details) {
-            print(details);
             updateDetails.add(details);
           },
           child: Container(

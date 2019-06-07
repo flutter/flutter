@@ -583,6 +583,9 @@ class WebProject {
     return parent.directory.childDirectory('web').existsSync();
   }
 
+  /// The html file used to host the flutter web application.
+  File get indexFile => parent.directory.childDirectory('web').childFile('index.html');
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
