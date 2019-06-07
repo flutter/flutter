@@ -12,7 +12,7 @@ in the source code into API documentation, as seen on https://api.flutter.dev/.
   - [Sample tool](#sample-tool)
   - [Snippet tool](#snippet-tool)
 - [Skeletons](#skeletons)
-
+- [Test Doc Generation Workflow](#test-doc-generation-workflow)
 ## Types of code blocks
 
 ### Sample Tool
@@ -116,3 +116,17 @@ snippets, but there could be more. It uses mustache notation (e.g. `{{code}}`)
 to mark where the components to be interpolated into the template should go.
 It doesn't actually use the mustache package, since the only things that need
 substituting are simple strings, but it uses the same syntax.
+
+## Test Doc Generation Workflow
+
+If you are making changes to an existing code sample or are creating a new code
+sample, follow these steps to generate a local copy of the API docs and verify
+that your code samples are showing up correctly:
+
+1. Make an update to a code sample or create a new code sample.
+2. From the root directory, run `./dev/bots/docs.sh`. This should start
+generating a local copy of the API documentation.
+3. Once complete, check `./dev/docs/doc` to check your API documentation. The
+search bar will not work locally, so open `./dev/docs/doc/index.html` to
+navigate through the documentation, or search `./dev/docs/doc/flutter` for your
+page of interest.
