@@ -79,21 +79,21 @@ API's functionality in a sample application:
 This uses the skeleton for [application](config/skeletons/application.html)
 snippets.
 
-Code snippets also allow for quick Flutter app generation using the following command:
+Code `snippets` also allow for quick Flutter app generation using the following command:
 
-```
+```bash
 flutter create --sample=[directory.File.sampleNumber] [name_of_project_directory]
 ```
 
 #### Templates
 
 In order to support showing an entire app when you click on the right tab of
-the code snippet UI, we have to be able to insert the snippet into the template
+the code snippet UI, we have to be able to insert the `snippet` into the template
 and instantiate the right parts.
 
 To do this, there is a [config/templates](config/templates) directory that
 contains a list of templates. These templates represent an entire app that the
-snippet can be placed into, basically a replacement for `lib/main.dart` in a
+`snippet` can be placed into, basically a replacement for `lib/main.dart` in a
 flutter app package.
 
 For more information about how to create, use, or update templates, see
@@ -105,7 +105,7 @@ The code block generation tools process the source input and emit HTML for outpu
 which dartdoc places back into the documentation. Any options given to the
  `{@tool ...}` directive are passed on verbatim to the tool.
 
-To render the these examples, the snippets tool needs to render the code in a
+To render the these examples, the `snippets` tool needs to render the code in a
 combination of markdown and HTML, using the `{@inject-html}` dartdoc directive.
 
 A skeleton (in relation to this tool, in the [config/skeletons](config/skeletons)
@@ -113,8 +113,8 @@ directory) is an HTML template into which the Dart code blocks and descriptions
 are interpolated, in order to display it nicely.
 
 There is currently one skeleton for
-[application](config/skeletons/application.html) `snippets` and one for
-[sample](config/skeletons/sample.html) `snippets`, but there could be more.
+`[application](config/skeletons/application.html) snippets` and one for
+`[sample](config/skeletons/sample.html) snippets`, but there could be more.
 
 Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
 be interpolated into the template. It doesn't actually use the mustache
