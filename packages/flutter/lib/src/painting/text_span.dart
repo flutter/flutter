@@ -80,6 +80,7 @@ class TextSpan extends InlineSpan {
   /// children.
   ///
   /// This getter does not include the contents of its children.
+  @override
   final String text;
 
 
@@ -92,6 +93,7 @@ class TextSpan extends InlineSpan {
   /// supported and may have unexpected results.
   ///
   /// The list must not contain any nulls.
+  @override
   final List<InlineSpan> children;
 
   /// A gesture recognizer that will receive events that hit this span.
