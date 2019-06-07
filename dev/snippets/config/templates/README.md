@@ -37,7 +37,7 @@ syntax inside of the dartdoc comment for a Flutter class/variable/enum/etc.:
 /// {@end-tool}
 ```
 
-This will result in the template having the section that's inside ````dart`
+This will result in the template having the section that's inside "```dart"
 interpolated into the template's stateful widget's state object body.
 
 For other sections of the template, the interpolation occurs by appending the string
