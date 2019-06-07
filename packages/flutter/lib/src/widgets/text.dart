@@ -256,16 +256,9 @@ class Text extends StatelessWidget {
        textSpan = null,
        super(key: key);
 
-  /// Creates a text widget with a [InlineSpan].
-  ///
-  /// The following subclasses of [InlineSpan] may be used to build rich text:
-  ///
-  /// * [TextSpan]s define text and children [InlineSpan]s.
-  /// * [WidgetSpan]s define embedded inline widgets.
+  /// Creates a text widget with a [TextSpan].
   ///
   /// The [textSpan] parameter must not be null.
-  ///
-  /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
     this.textSpan, {
     Key key,
@@ -292,10 +285,10 @@ class Text extends StatelessWidget {
   /// This will be null if a [textSpan] is provided instead.
   final String data;
 
-  /// The text to display as a [InlineSpan].
+  /// The text to display as a [TextSpan].
   ///
   /// This will be null if [data] is provided instead.
-  final InlineSpan textSpan;
+  final TextSpan textSpan;
 
   /// If non-null, the style to use for this text.
   ///

@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'flat_button.dart';
 import 'material_button.dart';
+import 'material_state.dart';
 import 'outline_button.dart';
 import 'raised_button.dart';
 import 'theme.dart';
@@ -479,7 +480,13 @@ class ButtonThemeData extends Diagnosticable {
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.30 if [getBrightness] is dark, 0.38 otherwise.
+  ///
+  /// If [MaterialButton.textColor] is a [MaterialStateColor], it will be used
+  /// as the `disabledTextColor`. It will be resolved in the
+  /// [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
+    if (button.textColor is MaterialStateColor)
+      return button.textColor;
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
     return _getDisabledColor(button);
