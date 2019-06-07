@@ -22,13 +22,13 @@ final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Pla
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final List<String> flutterTestArgs = <String>[];
 
-
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
 final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] == 'true';
 
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
+  'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
@@ -340,6 +340,19 @@ Future<void> _runTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
+Future<void> _runWebTests() async {
+  final List<String> testfiles = <String>[];
+  final Directory foundation = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test', 'foundation'));
+  for (FileSystemEntity entity in foundation.listSync(recursive: true)) {
+    if (entity is File) {
+      testfiles.add(entity.path);
+    }
+  }
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: true, tests: <String>[
+    path.join('test', 'foundation'),
+  ]);
+}
+
 Future<void> _runCoverage() async {
   final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
@@ -590,6 +603,32 @@ class EvalResult {
   final String stdout;
   final String stderr;
   final int exitCode;
+}
+
+Future<void> _runFlutterWebTest(String workingDirectory, {
+  bool expectFailure = false,
+  bool printOutput = true,
+  bool skip = false,
+  Duration timeout = _kLongTimeout,
+  List<String> tests,
+}) async {
+  final List<String> args = <String>['test', '--platform=chrome'];
+  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
+    args.addAll(flutterTestArgs);
+
+  args.add('--machine');
+  args.addAll(tests);
+
+  await runCommand(
+    flutter,
+    args,
+    workingDirectory: workingDirectory,
+    expectNonZeroExit: expectFailure,
+    timeout: timeout,
+    environment: <String, String>{
+      'FLUTTER_WEB': 'true',
+    },
+  );
 }
 
 Future<void> _runFlutterTest(String workingDirectory, {
