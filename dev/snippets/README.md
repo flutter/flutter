@@ -1,38 +1,88 @@
-## Snippet Tool
+# Dartdoc Generation
 
-This is a dartdoc extension tool that takes code snippets and expands how they
-are presented so that Flutter can have more interactive and useful code
-snippets.
+The Flutter API documentation contains code blocks that help provide
+context or a good starting point when learning to use any of Flutter's APIs.
 
-This takes code in dartdocs, like this:
+To generate these code blocks, Flutter uses dartdoc tools to turn documentation
+in the source code into API documentation, as seen on https://api.flutter.dev/.
+
+## Table of Contents
+
+- [Types of code blocks](#types-of-code-blocks)
+  - [Sample tool](#sample-tool)
+  - [Snippet tool](#snippet-tool)
+- [Skeletons](#skeletons)
+
+## Types of code blocks
+
+### Sample Tool
+
+[Code sample image](/assets/code_sample.png)
+
+The code sample tool generates a block containing a description and example
+code. Here is an example of a code sample with a description:
 
 ```dart
-/// {@tool snippet --template="stateless_widget"}
-/// The following is a skeleton of a stateless widget subclass called `GreenFrog`.
-/// ```dart
-/// class GreenFrog extends StatelessWidget {
-///   const GreenFrog({ Key key }) : super(key: key);
+/// {@tool sample}
 ///
-///   @override
-///   Widget build(BuildContext context) {
-///     return Container(color: const Color(0xFF2DBD3A));
-///   }
+/// If the avatar is to have an image, the image should be specified in the
+/// [backgroundImage] property:
+///
+/// ```dart
+/// CircleAvatar(
+///   backgroundImage: NetworkImage(userAvatarUrl),
+/// )
+/// ```
+/// {@end-tool}
+```
+
+This will generate example code that can be copied to the clipboard and added
+to existing applications.
+
+This uses the skeleton for [sample](config/skeletons/sample.html) snippets.
+
+### Snippet Tool
+
+[Code snippet image](/assets/code_snippet.png)
+
+The code snippet tool can expand examples into full Flutter applications.
+These snippets can be directly copied and used to demonstrate how
+the API's functionality in a sample application:
+
+```dart
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to make a simple [FloatingActionButton] in a
+/// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('Floating Action Button Sample'),
+///     ),
+///     body: Center(
+///       child: Text('Press the button below!')
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       onPressed: () {
+///         // Add your onPressed code here!
+///       },
+///       child: Icon(Icons.thumb_up),
+///       backgroundColor: Colors.pink,
+///     ),
+///   );
 /// }
 /// ```
 /// {@end-tool}
 ```
 
-And converts it into something which has a nice visual presentation, and 
-a button to automatically copy the sample to the clipboard.
+This uses the skeleton for [application](config/skeletons/application.html)
+snippets.
 
-It does this by processing the source input and emitting HTML for output,
-which dartdoc places back into the documentation. Any options given to the
- `{@tool ...}` directive are passed on verbatim to the tool.
+Code snippets also allow for quick Flutter app generation using the following command:
+`flutter create --sample=[directory.File.sampleNumber] [name_of_project_directory]`
 
-To render the above, the snippets tool needs to render the code in a combination
-of markdown and HTML, using the `{@inject-html}` dartdoc directive.
-
-## Templates
+#### Templates
 
 In order to support showing an entire app when you click on the right tab of
 the code snippet UI, we have to be able to insert the snippet into the template
@@ -43,10 +93,20 @@ contains a list of templates. These templates represent an entire app that the
 snippet can be placed into, basically a replacement for `lib/main.dart` in a
 flutter app package.
 
+For more information about how to create, use, or update templates, see
+[config/templates/README.md](config/templates/README.md).
+
 ## Skeletons
 
+The code block generation tools process the source input and emit HTML for output,
+which dartdoc places back into the documentation. Any options given to the
+ `{@tool ...}` directive are passed on verbatim to the tool.
+
+To render the these examples, the snippets tool needs to render the code in a
+combination of markdown and HTML, using the `{@inject-html}` dartdoc directive.
+
 A skeleton (in relation to this tool, in the [config/skeletons](config/skeletons)
-directory) is an HTML template into which the snippet Dart code and description
+directory) is an HTML template into which the Dart code blocks and descriptions
 are interpolated, in order to display it nicely.
 
 There is currently one skeleton for
@@ -54,6 +114,5 @@ There is currently one skeleton for
 [sample](config/skeletons/sample.html)
 snippets, but there could be more. It uses mustache notation (e.g. `{{code}}`)
 to mark where the components to be interpolated into the template should go.
-
-(It doesn't actually use the mustache package, since the only things that need
-substituting are simple strings, but it uses the same syntax).
+It doesn't actually use the mustache package, since the only things that need
+substituting are simple strings, but it uses the same syntax.
