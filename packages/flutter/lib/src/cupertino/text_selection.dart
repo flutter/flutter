@@ -317,7 +317,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       mediaQuery.padding.top
       + _kToolbarScreenPadding
       + _kToolbarHeight
-      + _kToolbarContentDistance <= globalEditableRegion.top;
+      + _kToolbarContentDistance <= globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
 
     // We cannot trust postion.dy, since the caller (TextSelectionOverlay._buildToolbar)
     // does not know whether the toolbar is going to be facing up or down.
