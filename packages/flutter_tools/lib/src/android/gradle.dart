@@ -523,7 +523,7 @@ Future<void> _buildGradleProjectV2(
 Iterable<File> _findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
   final Iterable<String> apkFileNames = project.apkFilesFor(androidBuildInfo);
   if (apkFileNames.isEmpty)
-    return <File>[];
+    return const <File>[];
 
   return apkFileNames.map<File>((String apkFileName) {
     File apkFile = project.apkDirectory.childFile(apkFileName);
