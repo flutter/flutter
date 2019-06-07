@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
 import 'artifacts.dart';
 import 'asset.dart';
 import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/platform.dart';
 import 'build_info.dart';
 import 'compile.dart';
 import 'dart/package_map.dart';
@@ -226,10 +228,18 @@ Future<void> writeBundle(
     bundleDir.deleteSync(recursive: true);
   bundleDir.createSync(recursive: true);
 
+  // On systems with a limited number of file descriptors, limit number of
+  // open files.
+  final Pool pool = Pool(platform.isMacOS ? 30 : 1000);
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-      final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
-      file.parent.createSync(recursive: true);
-      await file.writeAsBytes(await entry.value.contentsAsBytes());
+      final PoolResource resource = await pool.request();
+      try {
+        final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+        file.parent.createSync(recursive: true);
+        await file.writeAsBytes(await entry.value.contentsAsBytes());
+      } finally {
+        resource.release();
+      }
     }));
 }
