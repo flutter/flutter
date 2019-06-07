@@ -1,4 +1,4 @@
-Signature: 66e8a438ea76492e4dc45914f910be22
+Signature: 404addd058be0bf35c7651656154c10d
 
 UNUSED LICENSES:
 
@@ -1213,6 +1213,10 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.h
 FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobVertexRegenerator.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyManager.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyManager.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyPipeline.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkCopyPipeline.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorPool.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorPool.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorSet.cpp
@@ -1644,6 +1648,10 @@ FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGrad
 FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyManager.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCopyPipelineState.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCppUtil.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlDepthStencil.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlGpuCommandBuffer.h
@@ -2414,6 +2422,7 @@ FILE: ../../../third_party/skia/gm/pathreverse.cpp
 FILE: ../../../third_party/skia/gm/points.cpp
 FILE: ../../../third_party/skia/gm/poly2poly.cpp
 FILE: ../../../third_party/skia/gm/quadpaths.cpp
+FILE: ../../../third_party/skia/gm/rasterhandleallocator.cpp
 FILE: ../../../third_party/skia/gm/shadertext3.cpp
 FILE: ../../../third_party/skia/gm/shadows.cpp
 FILE: ../../../third_party/skia/gm/strokefill.cpp
@@ -2447,15 +2456,12 @@ FILE: ../../../third_party/skia/samplecode/SampleAAClip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAARectModes.cpp
 FILE: ../../../third_party/skia/samplecode/SampleAARects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleArc.cpp
-FILE: ../../../third_party/skia/samplecode/SampleBigBlur.cpp
-FILE: ../../../third_party/skia/samplecode/SampleBigGradient.cpp
 FILE: ../../../third_party/skia/samplecode/SampleBitmapRect.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCamera.cpp
 FILE: ../../../third_party/skia/samplecode/SampleCircle.cpp
 FILE: ../../../third_party/skia/samplecode/SampleClip.cpp
 FILE: ../../../third_party/skia/samplecode/SampleColorFilter.cpp
 FILE: ../../../third_party/skia/samplecode/SampleComplexClip.cpp
-FILE: ../../../third_party/skia/samplecode/SampleConcavePaths.cpp
 FILE: ../../../third_party/skia/samplecode/SampleDegenerateTwoPtRadials.cpp
 FILE: ../../../third_party/skia/samplecode/SampleEffects.cpp
 FILE: ../../../third_party/skia/samplecode/SampleEmboss.cpp
@@ -2474,7 +2480,6 @@ FILE: ../../../third_party/skia/samplecode/SamplePatch.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePath.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathClip.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePathEffects.cpp
-FILE: ../../../third_party/skia/samplecode/SamplePoints.cpp
 FILE: ../../../third_party/skia/samplecode/SamplePolyToPoly.cpp
 FILE: ../../../third_party/skia/samplecode/SampleRegion.cpp
 FILE: ../../../third_party/skia/samplecode/SampleRepeatTile.cpp
