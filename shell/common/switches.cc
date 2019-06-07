@@ -41,11 +41,13 @@ struct SwitchDesc {
     FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
 
 // List of common and safe VM flags to allow to be passed directly to the VM.
+// clang-format off
 static const std::string gDartFlagsWhitelist[] = {
-    "--max_profile_depth",     "--profile_period",         "--random_seed",
-    "--trace_profiler",        "--trace_profiler_verbose", "--trace_service",
-    "--trace_service_verbose",
+    "--max_profile_depth",
+    "--profile_period",
+    "--random_seed",
 };
+// clang-format on
 
 #endif
 
