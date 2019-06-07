@@ -156,34 +156,36 @@ class _BottomAppBarDemoState extends State<BottomAppBarDemo> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 88.0),
-        children: <Widget>[
-          const _Heading('FAB Shape'),
+      body: Scrollbar(
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 88.0),
+          children: <Widget>[
+            const _Heading('FAB Shape'),
 
-          _RadioItem<Widget>(kCircularFab, _fabShape, _onFabShapeChanged),
-          _RadioItem<Widget>(kDiamondFab, _fabShape, _onFabShapeChanged),
-          _RadioItem<Widget>(kNoFab, _fabShape, _onFabShapeChanged),
+            _RadioItem<Widget>(kCircularFab, _fabShape, _onFabShapeChanged),
+            _RadioItem<Widget>(kDiamondFab, _fabShape, _onFabShapeChanged),
+            _RadioItem<Widget>(kNoFab, _fabShape, _onFabShapeChanged),
 
-          const Divider(),
-          const _Heading('Notch'),
+            const Divider(),
+            const _Heading('Notch'),
 
-          _RadioItem<bool>(kShowNotchTrue, _showNotch, _onShowNotchChanged),
-          _RadioItem<bool>(kShowNotchFalse, _showNotch, _onShowNotchChanged),
+            _RadioItem<bool>(kShowNotchTrue, _showNotch, _onShowNotchChanged),
+            _RadioItem<bool>(kShowNotchFalse, _showNotch, _onShowNotchChanged),
 
-          const Divider(),
-          const _Heading('FAB Position'),
+            const Divider(),
+            const _Heading('FAB Position'),
 
-          _RadioItem<FloatingActionButtonLocation>(kFabEndDocked, _fabLocation, _onFabLocationChanged),
-          _RadioItem<FloatingActionButtonLocation>(kFabCenterDocked, _fabLocation, _onFabLocationChanged),
-          _RadioItem<FloatingActionButtonLocation>(kFabEndFloat, _fabLocation, _onFabLocationChanged),
-          _RadioItem<FloatingActionButtonLocation>(kFabCenterFloat, _fabLocation, _onFabLocationChanged),
+            _RadioItem<FloatingActionButtonLocation>(kFabEndDocked, _fabLocation, _onFabLocationChanged),
+            _RadioItem<FloatingActionButtonLocation>(kFabCenterDocked, _fabLocation, _onFabLocationChanged),
+            _RadioItem<FloatingActionButtonLocation>(kFabEndFloat, _fabLocation, _onFabLocationChanged),
+            _RadioItem<FloatingActionButtonLocation>(kFabCenterFloat, _fabLocation, _onFabLocationChanged),
 
-          const Divider(),
-          const _Heading('App bar color'),
+            const Divider(),
+            const _Heading('App bar color'),
 
-          _ColorsItem(kBabColors, _babColor, _onBabColorChanged),
-        ],
+            _ColorsItem(kBabColors, _babColor, _onBabColorChanged),
+          ],
+        ),
       ),
       floatingActionButton: _fabShape.value,
       floatingActionButtonLocation: _fabLocation.value,

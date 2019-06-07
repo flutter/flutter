@@ -940,7 +940,7 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => r'VORM.';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
   String get copyButtonLabel => r'Kopieren';
@@ -991,10 +991,10 @@ class CupertinoLocalizationDe extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => r'Einfügen';
+  String get pasteButtonLabel => r'Einsetzen';
 
   @override
-  String get postMeridiemAbbreviation => r'NACHM.';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get selectAllButtonLabel => r'Alles auswählen';
@@ -3578,7 +3578,7 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => r'VORM.';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
   String get copyButtonLabel => r'Kopieren';
@@ -3629,10 +3629,10 @@ class CupertinoLocalizationGsw extends GlobalCupertinoLocalizations {
   String get datePickerMinuteSemanticsLabelZero => null;
 
   @override
-  String get pasteButtonLabel => r'Einfügen';
+  String get pasteButtonLabel => r'Einsetzen';
 
   @override
-  String get postMeridiemAbbreviation => r'NACHM.';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get selectAllButtonLabel => r'Alles auswählen';
@@ -6690,6 +6690,9 @@ class CupertinoLocalizationPtPt extends CupertinoLocalizationPt {
 
   @override
   String get timerPickerSecondLabelOther => r'seg';
+
+  @override
+  String get selectAllButtonLabel => r'Selecionar tudo';
 }
 
 /// The translations for Romanian Moldavian Moldovan (`ro`).
@@ -6886,16 +6889,16 @@ class CupertinoLocalizationRu extends GlobalCupertinoLocalizations {
   String get datePickerDateTimeOrderString => r'date_time_dayPeriod';
 
   @override
-  String get datePickerHourSemanticsLabelFew => r'$hour часа ровно';
+  String get datePickerHourSemanticsLabelFew => r'$hour часа';
 
   @override
-  String get datePickerHourSemanticsLabelMany => r'$hour часов ровно';
+  String get datePickerHourSemanticsLabelMany => r'$hour часов';
 
   @override
-  String get datePickerHourSemanticsLabelOne => r'$hour час ровно';
+  String get datePickerHourSemanticsLabelOne => r'$hour час';
 
   @override
-  String get datePickerHourSemanticsLabelOther => r'$hour часа ровно';
+  String get datePickerHourSemanticsLabelOther => r'$hour часа';
 
   @override
   String get datePickerHourSemanticsLabelTwo => null;

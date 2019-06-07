@@ -182,7 +182,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
   _renderTemplateToFile(_androidPluginRegistryTemplate, context, registryPath);
 }
 
-const String _cocoaPluginRegistryHeaderTemplate = '''//
+const String _objcPluginRegistryHeaderTemplate = '''//
 //  Generated file. Do not edit.
 //
 
@@ -198,7 +198,7 @@ const String _cocoaPluginRegistryHeaderTemplate = '''//
 #endif /* GeneratedPluginRegistrant_h */
 ''';
 
-const String _cocoaPluginRegistryImplementationTemplate = '''//
+const String _objcPluginRegistryImplementationTemplate = '''//
 //  Generated file. Do not edit.
 //
 
@@ -216,6 +216,23 @@ const String _cocoaPluginRegistryImplementationTemplate = '''//
 }
 
 @end
+''';
+
+const String _swiftPluginRegistryTemplate = '''//
+//  Generated file. Do not edit.
+//
+import Foundation
+import {{framework}}
+
+{{#plugins}}
+import {{name}}
+{{/plugins}}
+
+func RegisterGeneratedPlugins(registry: FlutterPluginRegistry) {
+  {{#plugins}}
+  {{class}}.register(with: registry.registrar(forPlugin: "{{class}}"))
+{{/plugins}}
+}
 ''';
 
 const String _pluginRegistrantPodspecTemplate = '''
@@ -259,7 +276,35 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
     'plugins': iosPlugins,
   };
   final String registryDirectory = project.ios.pluginRegistrantHost.path;
-  return await _writeCocoaPluginRegistrant(project, context, registryDirectory);
+  if (project.isModule) {
+    final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
+    _renderTemplateToFile(
+      _pluginRegistrantPodspecTemplate,
+      context,
+      fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
+    );
+    _renderTemplateToFile(
+      _objcPluginRegistryHeaderTemplate,
+      context,
+      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
+    );
+    _renderTemplateToFile(
+      _objcPluginRegistryImplementationTemplate,
+      context,
+      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
+    );
+  } else {
+    _renderTemplateToFile(
+      _objcPluginRegistryHeaderTemplate,
+      context,
+      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
+    );
+    _renderTemplateToFile(
+      _objcPluginRegistryImplementationTemplate,
+      context,
+      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
+    );
+  }
 }
 
 Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> plugins) async {
@@ -269,51 +314,19 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
       .where((Plugin p) => p.pluginClass != null && p.macosPrefix != null)
       .map<Map<String, dynamic>>((Plugin p) => <String, dynamic>{
     'name': p.name,
-    'prefix': p.macosPrefix,
     'class': p.pluginClass,
   }).toList();
   final Map<String, dynamic> context = <String, dynamic>{
     'os': 'macos',
-    'deploymentTarget': '10.13',
     'framework': 'FlutterMacOS',
     'plugins': macosPlugins,
   };
   final String registryDirectory = project.macos.managedDirectory.path;
-  return await _writeCocoaPluginRegistrant(project, context, registryDirectory);
-}
-
-Future<void> _writeCocoaPluginRegistrant(FlutterProject project,
-    Map<String, dynamic> templateContext, String registryDirectory) async {
-
-  if (project.isModule) {
-    final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
-    _renderTemplateToFile(
-      _pluginRegistrantPodspecTemplate,
-      templateContext,
-      fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
-    );
-    _renderTemplateToFile(
-      _cocoaPluginRegistryHeaderTemplate,
-      templateContext,
-      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
-    );
-    _renderTemplateToFile(
-      _cocoaPluginRegistryImplementationTemplate,
-      templateContext,
-      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
-    );
-  } else {
-    _renderTemplateToFile(
-      _cocoaPluginRegistryHeaderTemplate,
-      templateContext,
-      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
-    );
-    _renderTemplateToFile(
-      _cocoaPluginRegistryImplementationTemplate,
-      templateContext,
-      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
-    );
-  }
+  _renderTemplateToFile(
+    _swiftPluginRegistryTemplate,
+    context,
+    fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.swift'),
+  );
 }
 
 /// Rewrites the `.flutter-plugins` file of [project] based on the plugin

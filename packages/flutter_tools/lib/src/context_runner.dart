@@ -44,8 +44,9 @@ import 'run_hot.dart';
 import 'usage.dart';
 import 'version.dart';
 import 'web/chrome.dart';
-import 'web/compile.dart';
 import 'web/workflow.dart';
+import 'windows/visual_studio.dart';
+import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Future<T> runInContext<T>(
@@ -93,13 +94,15 @@ Future<T> runInContext<T>(
       Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
       MacOSWorkflow: () => const MacOSWorkflow(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
+      PlistBuddy: () => const PlistBuddy(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
       SystemClock: () => const SystemClock(),
       TimeoutConfiguration: () => const TimeoutConfiguration(),
       Usage: () => Usage(),
       UserMessages: () => UserMessages(),
-      WebCompiler: () => const WebCompiler(),
+      VisualStudio: () => VisualStudio(),
+      VisualStudioValidator: () => const VisualStudioValidator(),
       WebWorkflow: () => const WebWorkflow(),
       WindowsWorkflow: () => const WindowsWorkflow(),
       Xcode: () => Xcode(),
