@@ -28,7 +28,7 @@ final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER
 
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
-  'web_tests': _runWebTests,
+  'webtests': _runWebTests,
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
@@ -348,7 +348,7 @@ Future<void> _runWebTests() async {
       testfiles.add(entity.path);
     }
   }
-  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: true, tests: <String>[
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
     path.join('test', 'foundation'),
   ]);
 }
