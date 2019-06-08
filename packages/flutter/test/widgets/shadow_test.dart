@@ -126,5 +126,5 @@ void main() {
       );
     }
     debugDisableShadows = true;
-  }, skip: !isLinux); // shadows render differently on different platforms
+  }); // shadows render differently on different platforms
 }

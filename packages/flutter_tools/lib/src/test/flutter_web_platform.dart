@@ -27,6 +27,7 @@ import 'package:test_core/src/runner/plugin/platform_helpers.dart';
 import 'package:test_core/src/runner/runner_suite.dart';
 import 'package:test_core/src/runner/suite.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -58,6 +59,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
             serveFilesOutsidePath: true))
         .add(_handleStaticArtifact)
+        .add(_goldenFileHandler)
         .add(_wrapperHandler);
     _server.mount(cascade.handler);
   }
@@ -162,6 +164,38 @@ class FlutterWebPlatform extends PlatformPlugin {
         testHostDartJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
+    } else {
+      return shelf.Response.notFound('Not Found');
+    }
+  }
+
+  Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
+    if (request.url.path.contains('flutter_goldens')) {
+      final Map<String, Object> body = json.decode(await request.readAsString());
+      final String goldenKey = body['key'];
+      final double left = body['left'];
+      final double right = body['right'];
+      final double top = body['top'];
+      final double bottom = body['bottom'];
+      final Runtime browser = Runtime.chrome;
+      final BrowserManager browserManager = await _browserManagerFor(browser);
+      final ChromeTab chromeTab = await browserManager._browser.chromeConnection.getTab((ChromeTab tab) {
+        return tab.url.contains(browserManager._browser.url);
+      });
+      final WipConnection connection = await chromeTab.connect();
+      final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
+        'clip': <String, Object>{
+          'x': left,
+          'y': top,
+          'width': right - left,
+          'height': bottom - top,
+        }
+      });
+      final String output = response.result['data'];
+      fs.file(goldenKey)
+        ..createSync()
+        ..writeAsBytesSync(base64.decode(output));
+      return shelf.Response.ok('true');
     } else {
       return shelf.Response.notFound('Not Found');
     }
@@ -422,7 +456,6 @@ class BrowserManager {
         for (RunnerSuiteController controller in _controllers) {
           controller.setDebugging(false);
         }
-
         return message;
       });
     }));
@@ -469,8 +502,7 @@ class BrowserManager {
   CancelableCompleter<dynamic> _pauseCompleter;
 
   /// The controller for [_BrowserEnvironment.onRestart].
-  final StreamController<dynamic> _onRestartController =
-      StreamController<dynamic>.broadcast();
+  final StreamController<dynamic> _onRestartController = StreamController<dynamic>.broadcast();
 
   /// The environment to attach to each suite.
   Future<_BrowserEnvironment> _environment;
@@ -503,9 +535,7 @@ class BrowserManager {
   static Future<BrowserManager> start(
       Runtime runtime, Uri url, Future<WebSocketChannel> future,
       {bool debug = false}) async {
-    final Chrome chrome =
-        await chromeLauncher.launch(url.toString(), headless: true);
-
+    final Chrome chrome = await chromeLauncher.launch(url.toString(), headless: true);
     final Completer<BrowserManager> completer = Completer<BrowserManager>();
 
     unawaited(chrome.onExit.then((void _) {

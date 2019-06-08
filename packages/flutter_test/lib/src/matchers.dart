@@ -21,7 +21,6 @@ import 'package:flutter/services.dart';
 import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
-import 'goldens.dart';
 import 'widget_tester.dart' show WidgetTester;
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
@@ -291,46 +290,6 @@ Matcher isMethodCall(String name, { @required dynamic arguments }) {
 /// the path draws outside the expected area.
 Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int sampleSize = 20 })
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
-
-/// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
-/// golden image file identified by [key].
-///
-/// For the case of a [Finder], the [Finder] must match exactly one widget and
-/// the rendered image of the first [RepaintBoundary] ancestor of the widget is
-/// treated as the image for the widget.
-///
-/// [key] may be either a [Uri] or a [String] representation of a URI.
-///
-/// This is an asynchronous matcher, meaning that callers should use
-/// [expectLater] when using this matcher and await the future returned by
-/// [expectLater].
-///
-/// ## Sample code
-///
-/// ```dart
-/// await expectLater(find.text('Save'), matchesGoldenFile('save.png'));
-/// await expectLater(image, matchesGoldenFile('save.png'));
-/// await expectLater(imageFuture, matchesGoldenFile('save.png'));
-/// ```
-///
-/// Golden image files can be created or updated by running `flutter test
-/// --update-goldens` on the test.
-///
-/// See also:
-///
-///  * [goldenFileComparator], which acts as the backend for this matcher.
-///  * [matchesReferenceImage], which should be used instead if you want to
-///    verify that two different code paths create identical images.
-///  * [flutter_test] for a discussion of test configurations, whereby callers
-///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(dynamic key) {
-  if (key is Uri) {
-    return _MatchesGoldenFile(key);
-  } else if (key is String) {
-    return _MatchesGoldenFile.forStringPath(key);
-  }
-  throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
-}
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches a
 /// reference image identified by [image].
@@ -1674,56 +1633,6 @@ class _MatchesReferenceImage extends AsyncMatcher {
   Description describe(Description description) {
     return description.add('rasterized image matches that of a $referenceImage reference image');
   }
-}
-
-class _MatchesGoldenFile extends AsyncMatcher {
-  const _MatchesGoldenFile(this.key);
-
-  _MatchesGoldenFile.forStringPath(String path) : key = Uri.parse(path);
-
-  final Uri key;
-
-  @override
-  Future<String> matchAsync(dynamic item) async {
-    Future<ui.Image> imageFuture;
-    if (item is Future<ui.Image>) {
-      imageFuture = item;
-    } else if (item is ui.Image) {
-      imageFuture = Future<ui.Image>.value(item);
-    } else {
-      final Finder finder = item;
-      final Iterable<Element> elements = finder.evaluate();
-      if (elements.isEmpty) {
-        return 'could not be rendered because no widget was found';
-      } else if (elements.length > 1) {
-        return 'matched too many widgets';
-      }
-      imageFuture = _captureImage(elements.single);
-    }
-
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
-    return binding.runAsync<String>(() async {
-      final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
-      if (bytes == null)
-        return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
-      if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(key, bytes.buffer.asUint8List());
-        return null;
-      }
-      try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
-        return success ? null : 'does not match';
-      } on TestFailure catch (ex) {
-        return ex.message;
-      }
-    }, additionalTime: const Duration(seconds: 11));
-  }
-
-  @override
-  Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "$key"');
 }
 
 class _MatchesSemanticsData extends Matcher {

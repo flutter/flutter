@@ -117,6 +117,7 @@ class ChromeLauncher {
     return _connect(Chrome._(
       port,
       ChromeConnection('localhost', port),
+      url: url,
       process: process,
       dataDir: dataDir,
       remoteDebuggerUri: remoteDebuggerUri,
@@ -172,12 +173,14 @@ class Chrome {
   Chrome._(
     this.debugPort,
     this.chromeConnection, {
+    this.url,
     Process process,
     Directory dataDir,
     this.remoteDebuggerUri,
   })  : _process = process,
         _dataDir = dataDir;
 
+  final String url;
   final int debugPort;
   final Process _process;
   final Directory _dataDir;
