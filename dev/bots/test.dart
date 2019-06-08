@@ -605,7 +605,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
-  final List<String> args = <String>['test', '--platform=chrome'];
+  final List<String> args = <String>['test', '--platform=chrome', '--low-resources-mode'];
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
