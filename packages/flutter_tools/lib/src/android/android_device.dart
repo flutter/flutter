@@ -474,6 +474,8 @@ class AndroidDevice extends Device {
         cmd.addAll(<String>['--ez', 'start-paused', 'true']);
       if (debuggingOptions.disableServiceAuthCodes)
         cmd.addAll(<String>['--ez', 'disable-service-auth-codes', 'true']);
+      if (debuggingOptions.dartFlags.isNotEmpty)
+        cmd.addAll(<String>['--es', 'dart-flags', debuggingOptions.dartFlags]);
       if (debuggingOptions.useTestFonts)
         cmd.addAll(<String>['--ez', 'use-test-fonts', 'true']);
       if (debuggingOptions.verboseSystemLogs) {
