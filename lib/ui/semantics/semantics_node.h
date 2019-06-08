@@ -78,8 +78,8 @@ struct SemanticsNode {
 
   ~SemanticsNode();
 
-  bool HasAction(SemanticsAction action);
-  bool HasFlag(SemanticsFlags flag);
+  bool HasAction(SemanticsAction action) const;
+  bool HasFlag(SemanticsFlags flag) const;
 
   // Whether this node is for embedded platform views.
   bool IsPlatformViewNode() const;
