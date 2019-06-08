@@ -613,13 +613,13 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
 
   await runCommand(
     flutter,
-    ['doctor'],
+    <String>['doctor'],
     workingDirectory: workingDirectory,
     expectNonZeroExit: true,
     environment: <String, String>{
       'FLUTTER_WEB': 'true',
     },
-  )
+  );
   await runCommand(
     flutter,
     args,
