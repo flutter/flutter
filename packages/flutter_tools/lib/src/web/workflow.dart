@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../doctor.dart';
@@ -40,12 +39,9 @@ class WebWorkflow extends Workflow {
 /// Whether we can locate the chrome executable.
 bool canFindChrome() {
   final String chrome = findChromeExecutable();
-  if (platform.isLinux) {
+  try {
     return processManager.canRun(chrome);
-  } else if (platform.isMacOS) {
-    return fs.file(chrome).existsSync();
-  } else if (platform.isWindows) {
-    return fs.file(chrome).existsSync();
+  } on ArgumentError {
+    return false;
   }
-  return false;
 }

@@ -71,7 +71,7 @@ class WebDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  bool isSupported() => flutterWebEnabled;
+  bool isSupported() => flutterWebEnabled && canFindChrome();
 
   @override
   String get name => 'web';
@@ -81,6 +81,9 @@ class WebDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
+    if (!isSupported()) {
+      return 'unknown';
+    }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     String version = 'unknown';
     if (platform.isWindows) {
