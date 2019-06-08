@@ -342,7 +342,7 @@ Future<void> _runTests() async {
 
 Future<void> _runWebTests() async {
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
-    'test/foundation/',
+    'test/foundation/binary_search_test.dart',
   ]);
 }
 
@@ -610,16 +610,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
     args.addAll(flutterTestArgs);
 
   args.addAll(tests);
-
-  await runCommand(
-    flutter,
-    <String>['doctor'],
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: true,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
-  );
   await runCommand(
     flutter,
     args,
