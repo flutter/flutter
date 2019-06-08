@@ -283,11 +283,6 @@ class IOSDevice extends Device {
     if (debuggingOptions.disableServiceAuthCodes)
       launchArguments.add('--disable-service-auth-codes');
 
-    if (debuggingOptions.dartFlags.isNotEmpty) {
-      final String dartFlags = debuggingOptions.dartFlags;
-      launchArguments.add('--dart-flags="$dartFlags"');
-    }
-
     if (debuggingOptions.useTestFonts)
       launchArguments.add('--use-test-fonts');
 
