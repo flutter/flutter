@@ -689,16 +689,6 @@ class _SerializeConfig {
     this.maxDescendentsTruncatableNode = -1,
   });
 
-  _SerializeConfig.merge(
-    _SerializeConfig base, {
-    int subtreeDepth,
-  }) : groupName = base.groupName,
-       summaryTree = base.summaryTree,
-       subtreeDepth = subtreeDepth ?? base.subtreeDepth,
-       includeProperties = base.includeProperties,
-       expandPropertyValues = base.expandPropertyValues,
-       maxDescendentsTruncatableNode = base.maxDescendentsTruncatableNode;
-
   /// Optional object group name used to manage manage lifetimes of object
   /// references in the returned JSON.
   ///
@@ -1435,68 +1425,77 @@ mixin WidgetInspectorService {
     return _followDiagnosticableChain(chain.reversed.toList());
   }
 
+  DiagnosticsSerialisationDelegate _configToDelegate(_SerializeConfig config) {
+    final Set<DiagnosticsNode> createdByLocalProject = <DiagnosticsNode>{};
+    return DiagnosticsSerialisationDelegate(
+      subtreeDepth: config.subtreeDepth,
+      includeProperties: config.includeProperties,
+      expandPropertyValues: config.expandPropertyValues,
+      additionalNodeProperties: (DiagnosticsNode node, DiagnosticsSerialisationDelegate _) {
+        final Map<String, Object> result = <String, Object>{};
+        final Object value = node.value;
+        if (config.interactive) {
+          result['objectId'] = toId(node, config.groupName);
+          result['valueId'] = toId(value, config.groupName);
+        }
+        if (config.summaryTree) {
+          result['summaryTree'] = true;
+        }
+        final _Location creationLocation = _getCreationLocation(value);
+        if (creationLocation != null) {
+          result['locationId'] = _toLocationId(creationLocation);
+          result['creationLocation'] = creationLocation.toJsonMap();
+          if (_isLocalCreationLocation(creationLocation)) {
+            createdByLocalProject.add(node);
+            result['createdByLocalProject'] = true;
+          }
+        }
+        return result;
+      },
+      filterChildren: (List<DiagnosticsNode> children, DiagnosticsNode parent, DiagnosticsSerialisationDelegate _) {
+        return _filterChildren(children, config);
+      },
+      filterProperties: (List<DiagnosticsNode> properties, DiagnosticsNode parent, DiagnosticsSerialisationDelegate _) {
+        return properties.where((DiagnosticsNode node) {
+          return !node.isFiltered(
+              createdByLocalProject.contains(node)
+                  ? DiagnosticLevel.fine
+                  : DiagnosticLevel.info
+          );
+        }).toList();
+      },
+      nodeTruncator: (List<DiagnosticsNode> nodes, DiagnosticsNode parent, DiagnosticsSerialisationDelegate _) {
+        if (config.maxDescendentsTruncatableNode >= 0 &&
+            parent?.allowTruncate == true &&
+            nodes.length > config.maxDescendentsTruncatableNode) {
+          nodes = _truncateNodes(nodes, config);
+        }
+        return nodes;
+      },
+      delegateForAddingNode: (DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate) {
+        // The tricky special case here is that when in the detailsTree,
+        // we keep subtreeDepth from going down to zero until we reach nodes
+        // that also exist in the summary tree. This ensures that every time
+        // you expand a node in the details tree, you expand the entire subtree
+        // up until you reach the next nodes shared with the summary tree.
+        if (config.summaryTree || delegate.subtreeDepth > 1 || _shouldShowInSummaryTree(node)) {
+          delegate = delegate.copyWith(subtreeDepth: config.subtreeDepth - 1);
+        }
+        return delegate;
+      },
+    );
+  }
+
   Map<String, Object> _nodeToJson(
     DiagnosticsNode node,
     _SerializeConfig config,
   ) {
     if (node == null)
       return null;
-    final Map<String, Object> json = node.toJsonMap();
+
+    final Map<String, Object> json = node.toJsonMap(_configToDelegate(config));
 
     final Object value = node.value;
-    if (config.interactive) {
-      json['objectId'] = toId(node, config.groupName);
-      json['valueId'] = toId(value, config.groupName);
-    }
-
-    if (config.summaryTree) {
-      json['summaryTree'] = true;
-    }
-
-    final _Location creationLocation = _getCreationLocation(value);
-    bool createdByLocalProject = false;
-    if (creationLocation != null) {
-      json['locationId'] = _toLocationId(creationLocation);
-      json['creationLocation'] = creationLocation.toJsonMap();
-      if (_isLocalCreationLocation(creationLocation)) {
-        createdByLocalProject = true;
-        json['createdByLocalProject'] = true;
-      }
-    }
-
-    if (config.subtreeDepth > 0) {
-      json['children'] = _nodesToJson(_getChildrenHelper(node, config), config, parent: node);
-    }
-
-    if (config.includeProperties) {
-      final List<DiagnosticsNode> properties = node.getProperties();
-      if (properties.isEmpty && node is DiagnosticsProperty
-          && config.expandPropertyValues && value is Diagnosticable) {
-        // Special case to expand property values.
-        json['properties'] = _nodesToJson(
-          value.toDiagnosticsNode().getProperties().where(
-            (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info),
-          ),
-          _SerializeConfig(groupName: config.groupName,
-            subtreeDepth: 0,
-            expandPropertyValues: false,
-          ),
-          parent: node,
-        );
-      } else {
-        json['properties'] = _nodesToJson(
-          properties.where(
-                (DiagnosticsNode node) => !node.isFiltered(
-                createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel
-                    .info),
-          ),
-          _SerializeConfig.merge(
-              config, subtreeDepth: math.max(0, config.subtreeDepth - 1)),
-          parent: node,
-        );
-      }
-    }
-
     if (node is DiagnosticsProperty) {
       // Add additional information about properties needed for graphical
       // display of properties.
@@ -1569,29 +1568,7 @@ mixin WidgetInspectorService {
     _SerializeConfig config, {
     @required DiagnosticsNode parent,
   }) {
-    bool truncated = false;
-    if (nodes == null)
-      return <Map<String, Object>>[];
-    if (config.maxDescendentsTruncatableNode >= 0 && parent?.allowTruncate == true && nodes.length > config.maxDescendentsTruncatableNode) {
-      nodes = _truncateNodes(nodes, config)..add(DiagnosticsNode.message('...'));
-      truncated = true;
-    }
-    final List<Map<String, Object>> json = nodes.map<Map<String, Object>>(
-      (DiagnosticsNode node) {
-        // The tricky special case here is that when in the detailsTree,
-        // we keep subtreeDepth from going down to zero until we reach nodes
-        // that also exist in the summary tree. This ensures that every time
-        // you expand a node in the details tree, you expand the entire subtree
-        // up until you reach the next nodes shared with the summary tree.
-        return _nodeToJson(
-          node,
-          config.summaryTree || config.subtreeDepth > 1 || _shouldShowInSummaryTree(node) ?
-              _SerializeConfig.merge(config, subtreeDepth: config.subtreeDepth - 1) : config,
-        );
-      }).toList();
-    if (truncated)
-      json.last['truncated'] = true;
-    return json;
+    return DiagnosticsNode.toJsonList(nodes, parent, _configToDelegate(config));
   }
 
   /// Returns a JSON representation of the properties of the [DiagnosticsNode]
@@ -1615,7 +1592,7 @@ mixin WidgetInspectorService {
   List<Object> _getChildren(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     final _SerializeConfig config = _SerializeConfig(groupName: groupName);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config, parent: node);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, config), config, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1637,7 +1614,7 @@ mixin WidgetInspectorService {
   List<Object> _getChildrenSummaryTree(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     final _SerializeConfig config = _SerializeConfig(groupName: groupName, summaryTree: true);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config, parent: node);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, config), config, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1654,11 +1631,7 @@ mixin WidgetInspectorService {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     // With this value of minDepth we only expand one extra level of important nodes.
     final _SerializeConfig config = _SerializeConfig(groupName: groupName, subtreeDepth: 1,  includeProperties: true);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config, parent: node);
-  }
-
-  List<DiagnosticsNode> _getChildrenHelper(DiagnosticsNode node, _SerializeConfig config) {
-    return _getChildrenFiltered(node, config).toList();
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, config), config, parent: node);
   }
 
   bool _shouldShowInSummaryTree(DiagnosticsNode node) {
@@ -1681,10 +1654,12 @@ mixin WidgetInspectorService {
     DiagnosticsNode node,
     _SerializeConfig config,
   ) {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    final List<DiagnosticsNode> rawChildren = node.getChildren();
+    return _filterChildren(node.getChildren(), config);
+  }
 
-    for (DiagnosticsNode child in rawChildren) {
+  List<DiagnosticsNode> _filterChildren(List<DiagnosticsNode> nodes, _SerializeConfig config) {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    for (DiagnosticsNode child in nodes) {
       if (!config.summaryTree || _shouldShowInSummaryTree(child)) {
         children.add(child);
       } else {

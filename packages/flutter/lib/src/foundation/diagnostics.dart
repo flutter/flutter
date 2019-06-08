@@ -1526,7 +1526,7 @@ abstract class DiagnosticsNode {
   ///    by this method and interactive tree views in the Flutter IntelliJ
   ///    plugin.
   @mustCallSuper
-  Map<String, Object> toJsonMap() {
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
     final Map<String, Object> data = <String, Object>{
       'description': toDescription(),
       'type': runtimeType.toString(),
@@ -1561,7 +1561,56 @@ abstract class DiagnosticsNode {
     if (allowNameWrap)
       data['allowNameWrap'] = allowNameWrap;
 
+    if (delegate.additionalNodeProperties != null) {
+      data.addAll(delegate.additionalNodeProperties(this, delegate));
+    }
+
+    if (delegate.includeProperties) {
+      data['properties'] = propertiesToJsonList(delegate);
+    }
+
+    if (delegate.subtreeDepth > 0) {
+      data['children'] = childrenToJsonList(delegate);
+    }
+
     return data;
+  }
+
+  ///
+  @protected
+  List<Map<String, Object>> propertiesToJsonList(DiagnosticsSerialisationDelegate delegate) {
+    List<DiagnosticsNode> properties = getProperties();
+    properties = delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties;
+    return toJsonList(properties, this, delegate);
+  }
+
+  ///
+  @protected
+  List<Map<String, Object>> childrenToJsonList(DiagnosticsSerialisationDelegate delegate) {
+    List<DiagnosticsNode> children = getChildren();
+    children = delegate.filterChildren != null ? delegate.filterChildren(children, this, delegate) : children;
+    return toJsonList(children, this, delegate);
+  }
+
+  ///
+  static List<Map<String, Object>> toJsonList(List<DiagnosticsNode> nodes, DiagnosticsNode parent, DiagnosticsSerialisationDelegate delegate) {
+    bool truncated = false;
+    if (nodes == null)
+      return <Map<String, Object>>[];
+    final int originalNodeCount = nodes.length;
+    if (delegate.nodeTruncator != null) {
+      nodes = delegate.nodeTruncator(nodes, parent, delegate);
+      if (nodes.length != originalNodeCount) {
+        nodes.add(DiagnosticsNode.message('...'));
+        truncated = true;
+      }
+    }
+    final List<Map<String, Object>> json = nodes.map<Map<String, Object>>((DiagnosticsNode node) {
+      return node.toJsonMap(delegate.delegateForAddingNode(node, delegate));
+    }).toList();
+    if (truncated)
+      json.last['truncated'] = true;
+    return json;
   }
 
   /// Returns a string representation of this diagnostic that is compatible with
@@ -1751,8 +1800,8 @@ class StringProperty extends DiagnosticsProperty<String> {
   final bool quoted;
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     json['quoted'] = quoted;
     return json;
   }
@@ -1824,8 +1873,8 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
   );
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (unit != null)
       json['unit'] = unit;
 
@@ -2060,8 +2109,8 @@ class FlagProperty extends DiagnosticsProperty<bool> {
        );
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (ifTrue != null)
       json['ifTrue'] = ifTrue;
     if (ifFalse != null)
@@ -2194,8 +2243,8 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   }
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (value != null) {
       json['values'] = value.map<String>((T value) => value.toString()).toList();
     }
@@ -2345,8 +2394,8 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   }
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (ifPresent != null)
       json['ifPresent'] = ifPresent;
     return json;
@@ -2471,9 +2520,17 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   final bool allowNameWrap;
 
+  bool _isExpandingPropertyValuesForJson(DiagnosticsSerialisationDelegate delegate) {
+    return getProperties().isEmpty && delegate.expandPropertyValues && value is Diagnosticable;
+  }
+
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    if (_isExpandingPropertyValuesForJson(delegate)) {
+      // Exclude children for expanded nodes to avoid cycles.
+      delegate = delegate.copyWith(subtreeDepth: 0);
+    }
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (defaultValue != kNoDefaultValue)
       json['defaultValue'] = defaultValue.toString();
     if (ifEmpty != null)
@@ -2490,6 +2547,21 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     return json;
+  }
+
+  @override
+  List<Map<String, Object>> propertiesToJsonList(DiagnosticsSerialisationDelegate delegate) {
+    if (_isExpandingPropertyValuesForJson(delegate)) {
+      // Ignore can be removed when https://github.com/dart-lang/sdk/issues/37200 is fixed.
+      final Diagnosticable diagnosticableValue = value as Diagnosticable; // ignore: avoid_as
+      List<DiagnosticsNode> properties = diagnosticableValue.toDiagnosticsNode().getProperties();
+      properties = delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties;
+      return DiagnosticsNode.toJsonList(properties, this, delegate.copyWith(
+        // Exclude properties for expanded nodes to avoid cycles.
+        includeProperties: false
+      ));
+    }
+    return super.propertiesToJsonList(delegate);
   }
 
   /// Returns a string representation of the property value.
@@ -3335,3 +3407,63 @@ class DiagnosticsBlock extends DiagnosticsNode {
   @override
   String toDescription({TextTreeConfiguration parentConfiguration}) => _description;
 }
+
+///
+class DiagnosticsSerialisationDelegate {
+  ///
+  DiagnosticsSerialisationDelegate({
+    this.subtreeDepth = 0,
+    this.includeProperties = false,
+    this.expandPropertyValues = false,
+    this.additionalNodeProperties,
+    this.filterChildren,
+    this.filterProperties,
+    this.nodeTruncator,
+    this.delegateForAddingNode,
+  });
+
+  ///
+  final NodeToMap additionalNodeProperties;
+
+  ///
+  final NodesFilter filterChildren;
+
+  ///
+  final NodesFilter filterProperties;
+
+  ///
+  final NodesFilter nodeTruncator;
+
+  ///
+  final NodeDelegateGetter delegateForAddingNode;
+
+  ///
+  final int subtreeDepth;
+
+  ///
+  final bool includeProperties;
+
+  ///
+  final bool expandPropertyValues;
+
+  ///
+  DiagnosticsSerialisationDelegate copyWith({
+    int subtreeDepth,
+    bool includeProperties,
+  }) {
+    return DiagnosticsSerialisationDelegate(
+      subtreeDepth: subtreeDepth ?? this.subtreeDepth,
+      includeProperties: includeProperties ?? this.includeProperties,
+      expandPropertyValues: expandPropertyValues,
+      additionalNodeProperties: additionalNodeProperties,
+      filterChildren: filterChildren,
+      filterProperties: filterProperties,
+      nodeTruncator: nodeTruncator,
+      delegateForAddingNode: delegateForAddingNode,
+    );
+  }
+}
+
+typedef NodeToMap = Map<String, Object> Function(DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate);
+typedef NodesFilter = List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner, DiagnosticsSerialisationDelegate delegate);
+typedef NodeDelegateGetter = DiagnosticsSerialisationDelegate Function(DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate);

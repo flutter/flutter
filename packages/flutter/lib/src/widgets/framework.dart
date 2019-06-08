@@ -3692,8 +3692,8 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
   final bool stateful;
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     final Element element = value;
     json['widgetRuntimeType'] = element.widget?.runtimeType?.toString();
     json['stateful'] = stateful;
