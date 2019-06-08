@@ -693,6 +693,7 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--build-shared-library"
                 args "--target", targetPath
                 args "--output-dir", "${intermediateDir}"
+                args "--target-platform", "${targetPlatform}"
                 if (trackWidgetCreation) {
                     args "--track-widget-creation"
                 }
@@ -701,11 +702,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 }
                 if (extraGenSnapshotOptions != null) {
                     args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
-                }
-                if (targetPlatform == null) {
-                    args "--target-platform", PLATFORM_ARM32
-                } else {
-                    args "--target-platform", "${targetPlatform}"
                 }
                 args "--${buildMode}"
             }
@@ -721,6 +717,7 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "bundle"
             args "--suppress-analytics"
             args "--target", targetPath
+            args "--target-platform", "${targetPlatform}"
             if (verbose) {
                 args "--verbose"
             }
@@ -753,9 +750,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (extraGenSnapshotOptions != null) {
                 args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
-            }
-            if (targetPlatform != null) {
-                args "--target-platform", "${targetPlatform}"
             }
             if (buildMode == "release" || buildMode == "profile") {
                 args "--precompiled"
