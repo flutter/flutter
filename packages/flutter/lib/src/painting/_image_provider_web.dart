@@ -6,7 +6,8 @@ import 'dart:async';
 import 'dart:ui' show hashValues;
 import 'dart:ui' as ui;
 
-import '../../foundation.dart';
+import 'package:flutter/foundation.dart';
+
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 

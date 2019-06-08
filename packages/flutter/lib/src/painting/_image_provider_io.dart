@@ -8,7 +8,8 @@ import 'dart:typed_data';
 import 'dart:ui'  show hashValues;
 import 'dart:ui' as ui;
 
-import '../../foundation.dart';
+import 'package:flutter/foundation.dart';
+
 import 'binding.dart';
 import 'debug.dart';
 import 'image_provider.dart' as image_provider;
