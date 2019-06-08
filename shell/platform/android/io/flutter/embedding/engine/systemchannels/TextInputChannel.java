@@ -70,10 +70,6 @@ public class TextInputChannel {
             result.error("error", exception.getMessage(), null);
           }
           break;
-        case "TextInput.setPlatformViewClient":
-          final int id = (int) args;
-          textInputMethodHandler.setPlatformViewClient(id);
-          break;
         case "TextInput.setEditingState":
           try {
             final JSONObject editingState = (JSONObject) args;
@@ -221,16 +217,6 @@ public class TextInputChannel {
 
     // TODO(mattcarroll): javadoc
     void setClient(int textInputClientId, @NonNull Configuration configuration);
-
-    /**
-     * Sets a platform view as the text input client.
-     *
-     * Subsequent calls to createInputConnection will be delegated to the platform view until a
-     * different client is set.
-     *
-     * @param id the ID of the platform view to be set as a text input client.
-     */
-    void setPlatformViewClient(int id);
 
     // TODO(mattcarroll): javadoc
     void setEditingState(@NonNull TextEditState editingState);

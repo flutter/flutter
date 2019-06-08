@@ -23,15 +23,12 @@ import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.StandardMethodCodec;
-import io.flutter.plugin.editing.TextInputPlugin;
 import io.flutter.view.AccessibilityBridge;
 import io.flutter.view.TextureRegistry;
 
-import java.lang.reflect.Method;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -54,8 +51,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     // The texture registry maintaining the textures into which the embedded views will be rendered.
     private TextureRegistry textureRegistry;
 
-    private TextInputPlugin textInputPlugin;
-
     // The system channel used to communicate with the framework about platform views.
     private PlatformViewsChannel platformViewsChannel;
 
@@ -63,11 +58,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     private final AccessibilityEventsDelegate accessibilityEventsDelegate;
 
     private final HashMap<Integer, VirtualDisplayController> vdControllers;
-
-    // The set of root views for all active virtual displays managed by this controller.
-    // This allows an O(1) check whether a view is managed by this controller(by checking if it's root view is in this
-    // set). This is used by isPlatformView.
-    private final HashSet<View> vdRootViews;
 
     private final PlatformViewsChannel.PlatformViewsHandler channelHandler = new PlatformViewsChannel.PlatformViewsHandler() {
         @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -102,19 +92,14 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
 
             TextureRegistry.SurfaceTextureEntry textureEntry = textureRegistry.createSurfaceTexture();
             VirtualDisplayController vdController = VirtualDisplayController.create(
-                    context,
-                    accessibilityEventsDelegate,
-                    viewFactory,
-                    textureEntry,
-                    physicalWidth,
-                    physicalHeight,
-                    request.viewId,
-                    createParams,
-                    (view, hasFocus) -> {
-                        if (hasFocus) {
-                            platformViewsChannel.invokeViewFocused(request.viewId);
-                        }
-                    }
+                context,
+                accessibilityEventsDelegate,
+                viewFactory,
+                textureEntry,
+                toPhysicalPixels(request.logicalWidth),
+                toPhysicalPixels(request.logicalHeight),
+                request.viewId,
+                createParams
             );
 
             if (vdController == null) {
@@ -123,9 +108,7 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             }
 
             vdControllers.put(request.viewId, vdController);
-            View platformView = vdController.getView();
-            platformView.setLayoutDirection(request.direction);
-            vdRootViews.add(platformView.getRootView());
+            vdController.getView().setLayoutDirection(request.direction);
 
             // TODO(amirh): copy accessibility nodes to the FlutterView's accessibility tree.
 
@@ -141,9 +124,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
                 throw new IllegalStateException("Trying to dispose a platform view with unknown id: "
                     + viewId);
             }
-
-            View rootView = vdController.getView().getRootView();
-            vdRootViews.remove(rootView);
 
             vdController.dispose();
             vdControllers.remove(viewId);
@@ -163,28 +143,11 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             int physicalHeight = toPhysicalPixels(request.newLogicalHeight);
             validateVirtualDisplayDimensions(physicalWidth, physicalHeight);
 
-            if (textInputPlugin != null) {
-                // Resizing involved moving the platform view to a new virtual display.
-                // Doing so potentially results in losing an active input connection.
-                // To make sure we preserve the input connection when resizing we lock it here
-                // and unlock after the resize is complete.
-                textInputPlugin.lockPlatformViewInputConnection();
-            }
-            vdRootViews.remove(vdController.getView().getRootView());
             vdController.resize(
-                    physicalWidth,
-                    physicalHeight,
-                    new Runnable() {
-                        @Override
-                        public void run() {
-                            if (textInputPlugin != null) {
-                                textInputPlugin.unlockPlatformViewInputConnection();
-                            }
-                            onComplete.run();
-                        }
-                    }
+                physicalWidth,
+                physicalHeight,
+                onComplete
             );
-            vdRootViews.add(vdController.getView().getRootView());
         }
 
         @Override
@@ -244,12 +207,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
             view.setLayoutDirection(direction);
         }
 
-        @Override
-        public void clearFocus(int viewId) {
-            View view = vdControllers.get(viewId).getView();
-            view.clearFocus();
-        }
-
         private void ensureValidAndroidVersion() {
             if (Build.VERSION.SDK_INT < MINIMAL_SDK) {
                 Log.e(TAG, "Trying to use platform views with API " + Build.VERSION.SDK_INT
@@ -264,7 +221,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
         registry = new PlatformViewRegistryImpl();
         vdControllers = new HashMap<>();
         accessibilityEventsDelegate = new AccessibilityEventsDelegate();
-        vdRootViews = new HashSet<>();
     }
 
     /**
@@ -312,33 +268,6 @@ public class PlatformViewsController implements PlatformViewsAccessibilityDelega
     @Override
     public void detachAccessibiltyBridge() {
         accessibilityEventsDelegate.setAccessibilityBridge(null);
-    }
-
-    /**
-     * Attaches this controller to a text input plugin.
-     *
-     * While a text input plugin is available, the platform views controller interacts with it to facilitate
-     * delegation of text input connections to platform views.
-     *
-     * A platform views controller should be attached to a text input plugin whenever it is possible for the Flutter
-     * framework to receive text input.
-     */
-    public void attachTextInputPlugin(TextInputPlugin textInputPlugin) {
-        this.textInputPlugin = textInputPlugin;
-    }
-
-    /**
-     * Detaches this controller from the currently attached text input plugin.
-     */
-    public void detachTextInputPlugin() {
-        textInputPlugin = null;
-    }
-
-    /**
-     * Returns true if the view is a platform view managed by this controller.
-     */
-    public boolean isPlatformView(View view) {
-        return vdRootViews.contains(view.getRootView());
     }
 
     public PlatformViewRegistry getRegistry() {

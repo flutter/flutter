@@ -191,11 +191,9 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
         PlatformPlugin platformPlugin = new PlatformPlugin(activity, platformChannel);
         addActivityLifecycleListener(platformPlugin);
         mImm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-        PlatformViewsController platformViewsController = mNativeView.getPluginRegistry().getPlatformViewsController();
-        mTextInputPlugin = new TextInputPlugin(this, dartExecutor, platformViewsController);
+        mTextInputPlugin = new TextInputPlugin(this, dartExecutor);
         androidKeyProcessor = new AndroidKeyProcessor(keyEventChannel, mTextInputPlugin);
         androidTouchProcessor = new AndroidTouchProcessor(flutterRenderer);
-        mNativeView.getPluginRegistry().getPlatformViewsController().attachTextInputPlugin(mTextInputPlugin);
 
         // Send initial platform information to Dart
         sendLocalesToDart(getResources().getConfiguration());
@@ -395,12 +393,6 @@ public class FlutterView extends SurfaceView implements BinaryMessenger, Texture
     @Override
     public InputConnection onCreateInputConnection(EditorInfo outAttrs) {
         return mTextInputPlugin.createInputConnection(this, outAttrs);
-    }
-
-    @Override
-    public boolean checkInputConnectionProxy(View view) {
-        PlatformViewsController platformViewsController = mNativeView.getPluginRegistry().getPlatformViewsController();
-        return platformViewsController.isPlatformView(view);
     }
 
     @Override

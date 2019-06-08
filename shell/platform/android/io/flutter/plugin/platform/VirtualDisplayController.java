@@ -9,13 +9,10 @@ import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.os.Build;
-import android.util.Log;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import io.flutter.view.TextureRegistry;
-
-import static android.view.View.OnFocusChangeListener;
 
 @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
 class VirtualDisplayController {
@@ -28,8 +25,7 @@ class VirtualDisplayController {
             int width,
             int height,
             int viewId,
-            Object createParams,
-            OnFocusChangeListener focusChangeListener
+            Object createParams
     ) {
         textureEntry.surfaceTexture().setDefaultBufferSize(width, height);
         Surface surface = new Surface(textureEntry.surfaceTexture());
@@ -50,14 +46,13 @@ class VirtualDisplayController {
         }
 
         return new VirtualDisplayController(
-                context, accessibilityEventsDelegate, virtualDisplay, viewFactory, surface, textureEntry, focusChangeListener, viewId, createParams);
+                context, accessibilityEventsDelegate, virtualDisplay, viewFactory, surface, textureEntry, viewId, createParams);
     }
 
     private final Context context;
     private final AccessibilityEventsDelegate accessibilityEventsDelegate;
     private final int densityDpi;
     private final TextureRegistry.SurfaceTextureEntry textureEntry;
-    private final OnFocusChangeListener focusChangeListener;
     private VirtualDisplay virtualDisplay;
     private SingleViewPresentation presentation;
     private Surface surface;
@@ -70,30 +65,21 @@ class VirtualDisplayController {
             PlatformViewFactory viewFactory,
             Surface surface,
             TextureRegistry.SurfaceTextureEntry textureEntry,
-            OnFocusChangeListener focusChangeListener,
             int viewId,
             Object createParams
     ) {
         this.context = context;
         this.accessibilityEventsDelegate = accessibilityEventsDelegate;
         this.textureEntry = textureEntry;
-        this.focusChangeListener = focusChangeListener;
         this.surface = surface;
         this.virtualDisplay = virtualDisplay;
         densityDpi = context.getResources().getDisplayMetrics().densityDpi;
         presentation = new SingleViewPresentation(
-                context,
-                this.virtualDisplay.getDisplay(),
-                viewFactory,
-                accessibilityEventsDelegate,
-                viewId,
-                createParams,
-                focusChangeListener);
+                context, this.virtualDisplay.getDisplay(), viewFactory, accessibilityEventsDelegate, viewId, createParams);
         presentation.show();
     }
 
     public void resize(final int width, final int height, final Runnable onNewSizeFrameAvailable) {
-        boolean isFocused = getView().isFocused();
         final SingleViewPresentation.PresentationState presentationState = presentation.detachState();
         // We detach the surface to prevent it being destroyed when releasing the vd.
         //
@@ -139,13 +125,7 @@ class VirtualDisplayController {
             public void onViewDetachedFromWindow(View v) {}
         });
 
-        presentation = new SingleViewPresentation(
-                context,
-                virtualDisplay.getDisplay(),
-                accessibilityEventsDelegate,
-                presentationState,
-                focusChangeListener,
-                isFocused);
+        presentation = new SingleViewPresentation(context, virtualDisplay.getDisplay(), accessibilityEventsDelegate, presentationState);
         presentation.show();
     }
 
