@@ -90,20 +90,18 @@ class _ToolbarParentData extends BoxParentData {
 
 class _ToolbarRenderBox extends RenderShiftedBox {
   _ToolbarRenderBox(
-      this._barTopY,
-      this._arrowTipX,
-      this._isArrowPointingDown,
-      RenderBox child,
+    this._barTopY,
+    this._arrowTipX,
+    this._isArrowPointingDown,
+    RenderBox child,
   ) : super(child);
 
 
-  /*
   @override
   bool get isRepaintBoundary => true;
 
   @override
   bool get needsCompositing => false;
-  */
 
   double _barTopY;
   set barTopY(double value) {
@@ -171,27 +169,27 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   Path _clipPath() {
     final _ToolbarParentData childParentData = child.parentData;
     final Path rrect = Path()
-    ..addRRect(
-      RRect.fromRectAndRadius(
-        Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,)
-        & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
-        _kToolbarBorderRadius,
-      ),
-    );
+      ..addRRect(
+        RRect.fromRectAndRadius(
+          Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,)
+          & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
+          _kToolbarBorderRadius,
+        ),
+      );
 
     final double arrowTipX = child.size.width / 2 + childParentData.arrowXOffsetFromCenter;
 
     final double arrowBottomY = _isArrowPointingDown
-    ? child.size.height - _kToolbarArrowSize.height
-    : _kToolbarArrowSize.height;
+      ? child.size.height - _kToolbarArrowSize.height
+      : _kToolbarArrowSize.height;
 
     final double arrowTipY = _isArrowPointingDown ? child.size.height : 0;
 
     final Path arrow = Path()
-    ..moveTo(arrowTipX, arrowTipY)
-    ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBottomY)
-    ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBottomY)
-    ..close();
+      ..moveTo(arrowTipX, arrowTipY)
+      ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBottomY)
+      ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBottomY)
+      ..close();
 
     return Path.combine(PathOperation.union, rrect, arrow);
   }
