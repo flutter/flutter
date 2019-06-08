@@ -230,76 +230,6 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   }
 }
 
-/// Manages a copy/paste text selection toolbar.
-class _TextSelectionToolbar extends StatelessWidget {
-  const _TextSelectionToolbar({
-    Key key,
-    this.handleCut,
-    this.handleCopy,
-    this.handlePaste,
-    this.handleSelectAll,
-    this.isArrowPointingDown,
-  }) : super(key: key);
-
-  final VoidCallback handleCut;
-  final VoidCallback handleCopy;
-  final VoidCallback handlePaste;
-  final VoidCallback handleSelectAll;
-  final bool isArrowPointingDown;
-
-  @override
-  Widget build(BuildContext context) {
-    final List<Widget> items = <Widget>[];
-    final Widget onePhysicalPixelVerticalDivider =
-    SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
-    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
-
-    if (handleCut != null)
-      items.add(_buildToolbarButton(localizations.cutButtonLabel, handleCut));
-
-    if (handleCopy != null) {
-      if (items.isNotEmpty)
-        items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton(localizations.copyButtonLabel, handleCopy));
-    }
-
-    if (handlePaste != null) {
-      if (items.isNotEmpty)
-        items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton(localizations.pasteButtonLabel, handlePaste));
-    }
-
-    if (handleSelectAll != null) {
-      if (items.isNotEmpty)
-        items.add(onePhysicalPixelVerticalDivider);
-      items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
-    }
-
-    return DecoratedBox(
-      decoration: const BoxDecoration(color: _kToolbarDividerColor),
-      child: Row(mainAxisSize: MainAxisSize.min, children: items),
-    );
-  }
-
-  /// Builds a themed [CupertinoButton] for the toolbar.
-  CupertinoButton _buildToolbarButton(String text, VoidCallback onPressed) {
-    final EdgeInsets arrowPadding = isArrowPointingDown
-      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
-      : EdgeInsets.only(top: _kToolbarArrowSize.height);
-
-    return CupertinoButton(
-      child: Text(text, style: _kToolbarButtonFontStyle),
-      color: _kToolbarBackgroundColor,
-      minSize: _kToolbarHeight,
-      padding: _kToolbarButtonPadding.add(arrowPadding),
-      borderRadius: null,
-      pressedOpacity: 0.7,
-      onPressed: onPressed,
-    );
-  }
-}
-
-
 /// Draws a single text selection handle with a bar and a ball.
 class _TextSelectionHandlePainter extends CustomPainter {
   const _TextSelectionHandlePainter();
@@ -376,20 +306,54 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       ? endpoints.first.point.dy - textLineHeight - _kToolbarContentDistance - _kToolbarHeight
       : endpoints.last.point.dy + _kToolbarContentDistance;
 
-    final Widget toolbarContent = _TextSelectionToolbar(
-      handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
-      handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
-      handleSelectAll: canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-      isArrowPointingDown: isArrowPointingDown,
-    );
+    final List<Widget> items = <Widget>[];
+    final Widget onePhysicalPixelVerticalDivider =
+    SizedBox(width: 1.0 / MediaQuery.of(context).devicePixelRatio);
+    final CupertinoLocalizations localizations = CupertinoLocalizations.of(context);
+    final EdgeInsets arrowPadding = isArrowPointingDown
+      ? EdgeInsets.only(bottom: _kToolbarArrowSize.height)
+      : EdgeInsets.only(top: _kToolbarArrowSize.height);
 
-    return _Toolbar(
-      barTopY: localBarTopY + globalEditableRegion.top,
-      arrowTipX: arrowTipX,
-      isArrowPointingDown: isArrowPointingDown,
-      child: toolbarContent,
-    );
+    void addToolbarButtonIfNeeded(
+      String text,
+      bool Function(TextSelectionDelegate) predicate,
+      void Function(TextSelectionDelegate) onPressed
+    ) {
+      if (!predicate(delegate)) {
+        return;
+      }
+
+      if (items.isNotEmpty) {
+        items.add(onePhysicalPixelVerticalDivider);
+      }
+
+      items.add(CupertinoButton(
+        child: Text(text, style: _kToolbarButtonFontStyle),
+        color: _kToolbarBackgroundColor,
+        minSize: _kToolbarHeight,
+        padding: _kToolbarButtonPadding.add(arrowPadding),
+        borderRadius: null,
+        pressedOpacity: 0.7,
+        onPressed: () => onPressed(delegate),
+      ));
+    }
+
+    addToolbarButtonIfNeeded(localizations.cutButtonLabel, canCut, handleCut);
+    addToolbarButtonIfNeeded(localizations.copyButtonLabel, canCopy, handleCopy);
+    addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
+    addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
+
+    return items.isEmpty
+      ? Container()
+      : _Toolbar(
+        barTopY: localBarTopY + globalEditableRegion.top,
+        arrowTipX: arrowTipX,
+        isArrowPointingDown: isArrowPointingDown,
+        child: DecoratedBox(
+          decoration: const BoxDecoration(color: _kToolbarDividerColor),
+          child: Row(mainAxisSize: MainAxisSize.min, children: items),
+        ),
+      );
   }
 
   /// Builder for iOS text selection edges.
