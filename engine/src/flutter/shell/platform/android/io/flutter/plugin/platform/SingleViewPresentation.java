@@ -19,7 +19,6 @@ import android.widget.FrameLayout;
 import java.lang.reflect.*;
 
 import static android.content.Context.WINDOW_SERVICE;
-import static android.view.View.OnFocusChangeListener;
 
 /*
  * A presentation used for hosting a single Android view in a virtual display.
@@ -62,8 +61,6 @@ class SingleViewPresentation extends Presentation {
     // A reference to the current accessibility bridge to which accessibility events will be delegated.
     private final AccessibilityEventsDelegate accessibilityEventsDelegate;
 
-    private final OnFocusChangeListener focusChangeListener;
-
     // This is the view id assigned by the Flutter framework to the embedded view, we keep it here
     // so when we create the platform view we can tell it its view id.
     private int viewId;
@@ -81,8 +78,6 @@ class SingleViewPresentation extends Presentation {
 
     private PresentationState state;
 
-    private boolean startFocused = false;
-
     /**
      * Creates a presentation that will use the view factory to create a new
      * platform view in the presentation's onCreate, and attach it.
@@ -93,15 +88,13 @@ class SingleViewPresentation extends Presentation {
             PlatformViewFactory viewFactory,
             AccessibilityEventsDelegate accessibilityEventsDelegate,
             int viewId,
-            Object createParams,
-            OnFocusChangeListener focusChangeListener
+            Object createParams
     ) {
         super(outerContext, display);
         this.viewFactory = viewFactory;
         this.accessibilityEventsDelegate = accessibilityEventsDelegate;
         this.viewId = viewId;
         this.createParams = createParams;
-        this.focusChangeListener = focusChangeListener;
         state = new PresentationState();
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
@@ -120,20 +113,16 @@ class SingleViewPresentation extends Presentation {
             Context outerContext,
             Display display,
             AccessibilityEventsDelegate accessibilityEventsDelegate,
-            PresentationState state,
-            OnFocusChangeListener focusChangeListener,
-            boolean startFocused
+            PresentationState state
     ) {
         super(outerContext, display);
         this.accessibilityEventsDelegate = accessibilityEventsDelegate;
         viewFactory = null;
         this.state = state;
-        this.focusChangeListener = focusChangeListener;
         getWindow().setFlags(
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
         );
-        this.startFocused = startFocused;
     }
 
     @Override
@@ -159,14 +148,6 @@ class SingleViewPresentation extends Presentation {
         rootView = new AccessibilityDelegatingFrameLayout(getContext(), accessibilityEventsDelegate, embeddedView);
         rootView.addView(container);
         rootView.addView(state.fakeWindowViewGroup);
-
-        embeddedView.setOnFocusChangeListener(focusChangeListener);
-        rootView.setFocusableInTouchMode(true);
-        if (startFocused) {
-            embeddedView.requestFocus();
-        } else {
-            rootView.requestFocus();
-        }
         setContentView(rootView);
     }
 

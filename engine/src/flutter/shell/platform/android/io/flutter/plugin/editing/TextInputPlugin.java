@@ -18,7 +18,7 @@ import android.view.inputmethod.InputMethodManager;
 
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
-import io.flutter.plugin.platform.PlatformViewsController;
+import io.flutter.view.FlutterView;
 
 /**
  * Android implementation of the text input plugin.
@@ -30,8 +30,7 @@ public class TextInputPlugin {
     private final InputMethodManager mImm;
     @NonNull
     private final TextInputChannel textInputChannel;
-    @NonNull
-    private InputTarget inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
+    private int mClient = 0;
     @Nullable
     private TextInputChannel.Configuration configuration;
     @Nullable
@@ -40,13 +39,7 @@ public class TextInputPlugin {
     @Nullable
     private InputConnection lastInputConnection;
 
-    private PlatformViewsController platformViewsController;
-
-    // When true following calls to createInputConnection will return the cached lastInputConnection if the input
-    // target is a platform view. See the comments on lockPlatformViewInputConnection for more details.
-    private boolean isInputConnectionLocked;
-
-    public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor, PlatformViewsController platformViewsController) {
+    public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor) {
         mView = view;
         mImm = (InputMethodManager) view.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
@@ -69,11 +62,6 @@ public class TextInputPlugin {
             }
 
             @Override
-            public void setPlatformViewClient(int platformViewId) {
-                setPlatformViewTextInputClient(platformViewId);
-            }
-
-            @Override
             public void setEditingState(TextInputChannel.TextEditState editingState) {
                 setTextInputEditingState(mView, editingState);
             }
@@ -83,47 +71,11 @@ public class TextInputPlugin {
                 clearTextInputClient();
             }
         });
-        this.platformViewsController = platformViewsController;
-        platformViewsController.attachTextInputPlugin(this);
     }
 
     @NonNull
     public InputMethodManager getInputMethodManager() {
         return mImm;
-    }
-
-    /***
-     * Use the current platform view input connection until unlockPlatformViewInputConnection is called.
-     *
-     * The current input connection instance is cached and any following call to @{link createInputConnection} returns
-     * the cached connection until unlockPlatformViewInputConnection is called.
-     *
-     * This is a no-op if the current input target isn't a platform view.
-     *
-     * This is used to preserve an input connection when moving a platform view from one virtual display to another.
-     */
-    public void lockPlatformViewInputConnection() {
-        if (inputTarget.type == InputTarget.Type.PLATFORM_VIEW) {
-            isInputConnectionLocked = true;
-        }
-    }
-
-    /**
-     * Unlocks the input connection.
-     *
-     * See also: @{link lockPlatformViewInputConnection}.
-     */
-    public void unlockPlatformViewInputConnection() {
-        isInputConnectionLocked = false;
-    }
-
-    /**
-     * Detaches the text input plugin from the platform views controller.
-     *
-     * The TextInputPlugin instance should not be used after calling this.
-     */
-    public void destroy() {
-        platformViewsController.detachTextInputPlugin();
     }
 
     private static int inputTypeFromTextInputType(
@@ -176,16 +128,8 @@ public class TextInputPlugin {
     }
 
     public InputConnection createInputConnection(View view, EditorInfo outAttrs) {
-        if (inputTarget.type == InputTarget.Type.NO_TARGET) {
+        if (mClient == 0) {
             lastInputConnection = null;
-            return null;
-        }
-
-        if (inputTarget.type == InputTarget.Type.PLATFORM_VIEW) {
-            if (isInputConnectionLocked) {
-                return lastInputConnection;
-            }
-            lastInputConnection = platformViewsController.getPlatformViewById(inputTarget.id).onCreateInputConnection(outAttrs);
             return lastInputConnection;
         }
 
@@ -214,7 +158,7 @@ public class TextInputPlugin {
 
         InputConnectionAdaptor connection = new InputConnectionAdaptor(
             view,
-            inputTarget.id,
+            mClient,
             textInputChannel,
             mEditable
         );
@@ -236,26 +180,17 @@ public class TextInputPlugin {
     }
 
     private void hideTextInput(View view) {
-        if (inputTarget.type == InputTarget.Type.FRAMEWORK_CLIENT) {
-            mImm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
-        }
+        mImm.hideSoftInputFromWindow(view.getApplicationWindowToken(), 0);
     }
 
     private void setTextInputClient(int client, TextInputChannel.Configuration configuration) {
-        inputTarget = new InputTarget(InputTarget.Type.FRAMEWORK_CLIENT, client);
+        mClient = client;
         this.configuration = configuration;
         mEditable = Editable.Factory.getInstance().newEditable("");
 
         // setTextInputClient will be followed by a call to setTextInputEditingState.
         // Do a restartInput at that time.
         mRestartInputPending = true;
-        unlockPlatformViewInputConnection();
-    }
-
-    private void setPlatformViewTextInputClient(int platformViewId) {
-        inputTarget = new InputTarget(InputTarget.Type.PLATFORM_VIEW, platformViewId);
-        mImm.restartInput(mView);
-        mRestartInputPending = false;
     }
 
     private void applyStateToSelection(TextInputChannel.TextEditState state) {
@@ -285,45 +220,6 @@ public class TextInputPlugin {
     }
 
     private void clearTextInputClient() {
-        if (inputTarget.type == InputTarget.Type.PLATFORM_VIEW) {
-            // Focus changes in the framework tree have no guarantees on the order focus nodes are notified. A node
-            // that lost focus may be notified before or after a node that gained focus.
-            // When moving the focus from a Flutter text field to an AndroidView, it is possible that the Flutter text
-            // field's focus node will be notified that it lost focus after the AndroidView was notified that it gained
-            // focus. When this happens the text field will send a clearTextInput command which we ignore.
-            // By doing this we prevent the framework from clearing a platform view input client(the only way to do so
-            // is to set a new framework text client). I don't see an obvious use case for "clearing" a platform views
-            // text input client, and it may be error prone as we don't know how the platform view manages the input
-            // connection and we probably shouldn't interfere.
-            // If we ever want to allow the framework to clear a platform view text client we should probably consider
-            // changing the focus manager such that focus nodes that lost focus are notified before focus nodes that
-            // gained focus as part of the same focus event.
-            return;
-        }
-        inputTarget = new InputTarget(InputTarget.Type.NO_TARGET, 0);
-        unlockPlatformViewInputConnection();
-    }
-
-    static private class InputTarget {
-        enum Type {
-            NO_TARGET,
-            // InputConnection is managed by the TextInputPlugin, and events are forwarded to the Flutter framework.
-            FRAMEWORK_CLIENT,
-            // InputConnection is managed by an embedded platform view.
-            PLATFORM_VIEW
-        }
-
-        public InputTarget(@NonNull Type type, int id) {
-            this.type = type;
-            this.id = id;
-        }
-
-        @NonNull
-        Type type;
-        // The ID of the input target.
-        //
-        // For framework clients this is the framework input connection client ID.
-        // For platform views this is the platform view's ID.
-        int id;
+        mClient = 0;
     }
 }
