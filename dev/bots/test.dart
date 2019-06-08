@@ -609,7 +609,6 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  args.add('--machine');
   args.addAll(tests);
 
   await runCommand(
