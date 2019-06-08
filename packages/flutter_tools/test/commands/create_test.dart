@@ -421,6 +421,40 @@ void main() {
     expect(actualContents.contains('useAndroidX'), false);
   }, timeout: allowForCreateFlutterProject);
 
+  testUsingContext('androidx app module', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--androidx', projectDir.path]);
+
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    expect(
+      project.usesAndroidX,
+      true,
+    );
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx app module', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--no-androidx', projectDir.path]);
+
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    expect(
+      project.usesAndroidX,
+      false,
+    );
+  }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('androidx plugin project', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
