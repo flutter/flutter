@@ -417,7 +417,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-elf',
-        '--assembly=build/foo/app.so',
+        '--elf=build/foo/app.so',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         'main.dill',
@@ -446,7 +446,7 @@ void main() {
       expect(genSnapshot.additionalArgs, <String>[
         '--deterministic',
         '--snapshot_kind=app-aot-elf',
-        '--assembly=build/foo/app.so',
+        '--elf=build/foo/app.so',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
