@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
@@ -23,7 +24,7 @@ const double _kSelectionHandleRadius = 5.5;
 const double _kToolbarScreenPadding = 8.0;
 // Minimal padding from tip of the selection toolbar arrow to horizontal edges of the
 // screen. Eyeballed value.
-const double _kArrowScreenPadding = 16.0;
+const double _kArrowScreenPadding = 26.0;
 
 // Vertical distance between the tip of the arrow and the line of text the arrow
 // is pointing to. The value used here is eyeballed.
@@ -95,6 +96,15 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       RenderBox child,
   ) : super(child);
 
+
+  /*
+  @override
+  bool get isRepaintBoundary => true;
+
+  @override
+  bool get needsCompositing => false;
+  */
+
   double _barTopY;
   set barTopY(double value) {
     if (_barTopY == value) {
@@ -137,59 +147,88 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   @override
   void performLayout() {
     assert(child != null);
+
     size = constraints.biggest;
-    child.layout(
-      heightConstraint.enforce(constraints.deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding)).loosen()),
-      parentUsesSize: true,
-    );
+    final BoxConstraints enforcedConstraint = constraints
+      .deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding))
+      .loosen();
+
+    child.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
     final _ToolbarParentData childParentData = child.parentData;
+
     final Offset localTopCenter = globalToLocal(Offset(_arrowTipX, _barTopY));
 
+    // The local x-coordinate of the center of the toolbar.
     final double lowerBound = child.size.width/2 + _kToolbarScreenPadding;
     final double upperBound = size.width - child.size.width/2 - _kToolbarScreenPadding;
-
-    // The local x-coordinate of the center of the toolbar.
     final double adjustedCenterX = localTopCenter.dx.clamp(lowerBound, upperBound);
 
     childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, localTopCenter.dy);
     childParentData.arrowXOffsetFromCenter = localTopCenter.dx - adjustedCenterX;
   }
 
-  @override
-  void paint(PaintingContext context, Offset offset) {
+  // The path is described in the toolbar's coordinate system.
+  Path _clipPath() {
     final _ToolbarParentData childParentData = child.parentData;
-
-    // The path is described in the toolbar's coordinate system.
     final Path rrect = Path()
-      ..addRRect(
-        RRect.fromRectAndRadius(
-          Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,)
-          & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
-          _kToolbarBorderRadius,
-        ),
-      );
+    ..addRRect(
+      RRect.fromRectAndRadius(
+        Offset(0, _isArrowPointingDown ? 0 : _kToolbarArrowSize.height,)
+        & Size(child.size.width, child.size.height - _kToolbarArrowSize.height),
+        _kToolbarBorderRadius,
+      ),
+    );
 
     final double arrowTipX = child.size.width / 2 + childParentData.arrowXOffsetFromCenter;
 
     final double arrowBottomY = _isArrowPointingDown
-      ? child.size.height - _kToolbarArrowSize.height
-      : _kToolbarArrowSize.height;
+    ? child.size.height - _kToolbarArrowSize.height
+    : _kToolbarArrowSize.height;
 
     final double arrowTipY = _isArrowPointingDown ? child.size.height : 0;
 
     final Path arrow = Path()
-      ..moveTo(arrowTipX, arrowTipY)
-      ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBottomY)
-      ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBottomY)
-      ..close();
+    ..moveTo(arrowTipX, arrowTipY)
+    ..lineTo(arrowTipX - _kToolbarArrowSize.width / 2, arrowBottomY)
+    ..lineTo(arrowTipX + _kToolbarArrowSize.width / 2, arrowBottomY)
+    ..close();
+
+    return Path.combine(PathOperation.union, rrect, arrow);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    final _ToolbarParentData childParentData = child.parentData;
 
     context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
       Offset.zero & child.size,
-      Path.combine(PathOperation.union, rrect, arrow),
+      _clipPath(),
       (PaintingContext innerContext, Offset innerOffset) => context.paintChild(child, innerOffset),
     );
+  }
+
+  Paint _debugPaint;
+
+  @override
+  void debugPaintSize(PaintingContext context, Offset offset) {
+    assert(() {
+      _debugPaint ??= Paint()
+      ..shader = ui.Gradient.linear(
+        const Offset(0.0, 0.0),
+        const Offset(10.0, 10.0),
+        <Color>[const Color(0x00000000), const Color(0xFFFF00FF), const Color(0xFFFF00FF), const Color(0x00000000)],
+        <double>[0.25, 0.25, 0.75, 0.75],
+        TileMode.repeated,
+      )
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke;
+
+      final _ToolbarParentData childParentData = child.parentData;
+      context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint);
+      return true;
+    }());
   }
 }
 
@@ -327,9 +366,9 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       + _kToolbarHeight
       + _kToolbarContentDistance <= globalEditableRegion.top + endpoints.first.point.dy - textLineHeight;
 
-    final double localArrowTipX = position.dx.clamp(
-      _kArrowScreenPadding,
-      globalEditableRegion.size.width - _kArrowScreenPadding
+    final double arrowTipX = (position.dx + globalEditableRegion.left).clamp(
+      _kArrowScreenPadding + mediaQuery.padding.left,
+      mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
     );
 
     // The y-coordinate has to be calculated instead of directly quoting postion.dy,
@@ -347,14 +386,11 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
       isArrowPointingDown: isArrowPointingDown,
     );
 
-    return ConstrainedBox(
-      constraints: BoxConstraints.tight(mediaQuery.size),
-      child: _Toolbar(
-        barTopY: localBarTopY + globalEditableRegion.top,
-        arrowTipX: localArrowTipX + globalEditableRegion.left,
-        isArrowPointingDown: isArrowPointingDown,
-        child: toolbarContent,
-      ),
+    return _Toolbar(
+      barTopY: localBarTopY + globalEditableRegion.top,
+      arrowTipX: arrowTipX,
+      isArrowPointingDown: isArrowPointingDown,
+      child: toolbarContent,
     );
   }
 
