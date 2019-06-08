@@ -11,6 +11,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/src/painting/_image_resolution_io.dart' as io;
 
 class TestImage implements ui.Image {
   TestImage(this.scale);
@@ -99,7 +100,7 @@ class FakeImageStreamCompleter extends ImageStreamCompleter {
   }
 }
 
-class TestAssetImage extends AssetImage {
+class TestAssetImage extends io.AssetImage {
   TestAssetImage(String name) : super(name);
 
   @override
