@@ -53,6 +53,7 @@ export 'src/controller.dart';
 export 'src/finders.dart';
 export 'src/goldens.dart';
 export 'src/matchers.dart';
+export 'src/matches_golden.dart';
 export 'src/nonconst.dart';
 export 'src/platform.dart';
 export 'src/stack_manipulation.dart';
