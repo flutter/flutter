@@ -178,14 +178,16 @@ class FlutterPlugin implements Plugin<Project> {
                     }
                 }
             }
-            this.getTargetPlatforms(project).each { targetArch ->
-                String abiValue = PLATFORM_ARCH_MAP[targetArch]
-                project.android {
-                    packagingOptions {
-                        pickFirst "lib/${abiValue}/libflutter.so"
-                        // Prevent the ELF library from getting corrupted.
-                        doNotStrip "*/${abiValue}/libapp.so"
-                    }
+        }
+        this.getTargetPlatforms(project).each { targetArch ->
+            String abiValue = PLATFORM_ARCH_MAP[targetArch]
+            project.android {
+                packagingOptions {
+                    pickFirst "lib/${abiValue}/libflutter.so"
+                    // Prevent the ELF library from getting corrupted.
+                    doNotStrip "*/${abiValue}/libapp.so"
+                }
+                if (this.splitPerAbi(project)) {
                     splits {
                         abi {
                             include abiValue
