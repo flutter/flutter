@@ -465,7 +465,7 @@ void main() {
     expect(selectedResults, <String>['Result Foo']);
   });
 
-  testWidgets('keyboard show search button', (WidgetTester tester) async {
+  testWidgets('keyboard shows search button by default', (WidgetTester tester) async {
     final _TestSearchDelegate delegate = _TestSearchDelegate();
 
     await tester.pumpWidget(TestHomePage(
@@ -477,6 +477,20 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
 
     expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.search.toString());
+  });
+
+  testWidgets('keyboard shows corresponding button when text input action is set', (WidgetTester tester) async {
+    final _TestSearchDelegate delegate = _TestSearchDelegate(textInputAction: TextInputAction.done);
+
+    await tester.pumpWidget(TestHomePage(
+      delegate: delegate,
+    ));
+    await tester.tap(find.byTooltip('Search'));
+    await tester.pumpAndSettle();
+
+    await tester.showKeyboard(find.byType(TextField));
+
+    expect(tester.testTextInput.setClientArgs['inputAction'], TextInputAction.done.toString());
   });
 
   group('contributes semantics', () {
@@ -639,7 +653,12 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     this.suggestions = 'Suggestions',
     this.result = 'Result',
     this.actions = const <Widget>[],
-  });
+    TextInputAction textInputAction,
+  }) {
+    if (textInputAction != null) {
+      this.textInputAction = textInputAction;
+    }
+  }
 
   final String suggestions;
   final String result;

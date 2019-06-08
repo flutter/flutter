@@ -89,6 +89,23 @@ Future<T> showSearch<T>({
 /// for another [showSearch] call.
 abstract class SearchDelegate<T> {
 
+  /// The type of action button to use for the keyboard.
+  ///
+  /// Defaults to the default value specified in [TextField].
+  TextInputType keyboardType;
+
+  /// The hint text to be displayed in the search bar, prompting the user to
+  /// enter an input.
+  ///
+  /// Defaults to null.
+  String hintText;
+
+  /// The text input action configuring the soft keyboard to a particular action
+  /// button.
+  ///
+  /// Defaults to [TextInputAction.search].
+  TextInputAction textInputAction = TextInputAction.search;
+
   /// Suggestions shown in the body of the search page while the user types a
   /// query into the search field.
   ///
@@ -417,7 +434,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = widget.delegate.appBarTheme(context);
-    final String searchFieldLabel = MaterialLocalizations.of(context).searchFieldLabel;
+    final String searchFieldLabel = widget.delegate.hintText ??
+      MaterialLocalizations.of(context).searchFieldLabel;
     Widget body;
     switch(widget.delegate._currentBody) {
       case _SearchBody.suggestions:
@@ -459,7 +477,8 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
             controller: widget.delegate._queryTextController,
             focusNode: focusNode,
             style: theme.textTheme.title,
-            textInputAction: TextInputAction.search,
+            textInputAction: widget.delegate.textInputAction,
+            keyboardType: widget.delegate.keyboardType,
             onSubmitted: (String _) {
               widget.delegate.showResults(context);
             },
