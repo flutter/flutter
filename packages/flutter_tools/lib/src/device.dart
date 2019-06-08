@@ -377,7 +377,6 @@ class DebuggingOptions {
     this.buildInfo, {
     this.startPaused = false,
     this.disableServiceAuthCodes = false,
-    this.dartFlags = '',
     this.enableSoftwareRendering = false,
     this.skiaDeterministicRendering = false,
     this.traceSkia = false,
@@ -392,7 +391,6 @@ class DebuggingOptions {
     : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
-      dartFlags = '',
       disableServiceAuthCodes = false,
       enableSoftwareRendering = false,
       skiaDeterministicRendering = false,
@@ -406,7 +404,6 @@ class DebuggingOptions {
 
   final BuildInfo buildInfo;
   final bool startPaused;
-  final String dartFlags;
   final bool disableServiceAuthCodes;
   final bool enableSoftwareRendering;
   final bool skiaDeterministicRendering;
