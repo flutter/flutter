@@ -170,6 +170,7 @@ class TextSpan extends InlineSpan {
   /// }
   /// ```
   /// {@end-tool}
+  @override
   final GestureRecognizer recognizer;
 
   /// An alternative semantics label for this [TextSpan].
