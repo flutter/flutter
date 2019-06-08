@@ -1593,7 +1593,7 @@ class Paragraph {
   /// where positive y values indicate down.
   List<TextBox> getBoxesForPlaceholders() {
     // TODO(garyq): Implement stub_ui version of this.
-    throw UnimplementedError();
+    return const <TextBox>[];
   }
 
   /// Returns the text position closest to the given offset.
