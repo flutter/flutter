@@ -57,7 +57,11 @@ if (current_cpu == "") {
   current_cpu = target_cpu
 }
 if (current_os == "") {
-  current_os = target_os
+  if (host_os == "win") {
+    current_os = "win"
+  } else {
+    current_os = target_os
+  }
 }
 
 # =============================================================================
@@ -476,6 +480,8 @@ if (custom_toolchain != "") {
     }
   } else if (host_os == "mac") {
     host_toolchain = "//build/toolchain/mac:clang_$host_cpu"
+  } else if (host_os == "win") {
+    host_toolchain = "//build/toolchain/win:$current_cpu"
   } else {
     assert(false, "Unknown host for android cross compile")
   }

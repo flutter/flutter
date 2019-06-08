@@ -61,6 +61,8 @@ if (is_android) {
     android_host_os = "linux"
   } else if (host_os == "mac") {
     android_host_os = "darwin"
+  } else if (host_os == "win") {
+    android_host_os = "win"
   } else {
     assert(false, "Need Android toolchain support for your build OS.")
   }
@@ -95,10 +97,8 @@ if (is_android) {
   } else {
     android_api_level = 16
   }
-  x86_android_sysroot_subdir =
-      "platforms/android-${android_api_level}/arch-x86"
-  arm_android_sysroot_subdir =
-      "platforms/android-${android_api_level}/arch-arm"
+  x86_android_sysroot_subdir = "platforms/android-${android_api_level}/arch-x86"
+  arm_android_sysroot_subdir = "platforms/android-${android_api_level}/arch-arm"
   mips_android_sysroot_subdir =
       "platforms/android-${android_api_level}/arch-mips"
   x86_64_android_sysroot_subdir =
