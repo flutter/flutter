@@ -4,8 +4,6 @@
 
 import 'dart:async';
 
-import 'package:args/command_runner.dart';
-
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/time.dart';
@@ -132,16 +130,6 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'If necessary, build the app before running.',
       )
-      ..addOption('dart-flags',
-        hide: !verboseHelp,
-        help: 'Pass a list of comma separated flags to the Dart instance at '
-              'application startup. Flags passed through this option must be '
-              'present on the whitelist defined within the Flutter engine. If '
-              'a non-whitelisted flag is encountered, the process will be '
-              'terminated immediately.\n\n'
-              'This flag is not available on the stable channel and is only '
-              'applied in debug and profile modes. This option should only '
-              'be used for experiments and should not be used by typical users.')
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
@@ -306,7 +294,6 @@ class RunCommand extends RunCommandBase {
         buildInfo,
         startPaused: argResults['start-paused'],
         disableServiceAuthCodes: argResults['disable-service-auth-codes'],
-        dartFlags: argResults['dart-flags'],
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
@@ -361,11 +348,6 @@ class RunCommand extends RunCommandBase {
         timingLabelParts: <String>['daemon'],
         endTimeOverride: appStartedTime,
       );
-    }
-
-    if (argResults['dart-flags'] != null && FlutterVersion.instance.isStable) {
-      throw UsageException('--dart-flags is not available on the stable '
-                           'channel.', null);
     }
 
     for (Device device in devices) {
