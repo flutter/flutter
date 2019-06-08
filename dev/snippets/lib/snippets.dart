@@ -82,7 +82,7 @@ class SnippetGenerator {
         return description.join('\n').trim();
       } else {
         // If the match isn't found in the injections, then just remove the
-        // moustache reference, since we want to allow the sections to be
+        // mustache reference, since we want to allow the sections to be
         // "optional" in the input: users shouldn't be forced to add an empty
         // "```dart preamble" section if that section would be empty.
         return injections
@@ -252,9 +252,7 @@ class SnippetGenerator {
         metadata.addAll(<String, Object>{
           'id': id,
           'file': path.basename(outputFile.path),
-          'description': description != null
-              ? description.mergedContent
-              : null,
+          'description': description?.mergedContent,
         });
         metadataFile.writeAsStringSync(jsonEncoder.convert(metadata));
         break;

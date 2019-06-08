@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -105,6 +106,84 @@ Use the 'android' tool to install them:
       expect(properties['ro.build.version.sdk'], '23');
     });
   });
+
+  group('adb.exe exiting with heap corruption on windows', () {
+    final ProcessManager mockProcessManager = MockProcessManager();
+    String hardware;
+    String buildCharacteristics;
+
+    setUp(() {
+      hardware = 'goldfish';
+      buildCharacteristics = 'unused';
+      exitCode = -1;
+      when(mockProcessManager.run(argThat(contains('getprop')),
+          stderrEncoding: anyNamed('stderrEncoding'),
+          stdoutEncoding: anyNamed('stdoutEncoding'))).thenAnswer((_) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('[ro.hardware]: [$hardware]')..writeln(
+              '[ro.build.characteristics]: [$buildCharacteristics]');
+        final ProcessResult result = ProcessResult(1, exitCode, buf.toString(), '');
+        return Future<ProcessResult>.value(result);
+      });
+    });
+
+    testUsingContext('nonHeapCorruptionErrorOnWindows', () async {
+      exitCode = -1073740941;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+
+    testUsingContext('heapCorruptionOnWindows', () async {
+      exitCode = -1073740940;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'windows',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+
+    testUsingContext('heapCorruptionExitCodeOnLinux', () async {
+      exitCode = -1073740940;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, false);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+
+    testUsingContext('noErrorOnLinux', () async {
+      exitCode = 0;
+      final AndroidDevice device = AndroidDevice('test');
+      expect(await device.isLocalEmulator, true);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Platform: () => FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{
+          'ANDROID_HOME': '/',
+        },
+      ),
+    });
+  });
+
 
   group('isLocalEmulator', () {
     final ProcessManager mockProcessManager = MockProcessManager();

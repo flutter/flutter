@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -106,10 +105,10 @@ void main() {
     final TextStyle unselectedIcon = _iconStyle(tester, Icons.access_alarm);
     expect(selectedFontStyle.color, equals(primaryColor));
     expect(selectedFontStyle.fontSize, selectedFontSize);
-    expect(selectedFontStyle.fontWeight, isNull);
+    expect(selectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(selectedFontStyle.height, isNull);
     expect(unselectedFontStyle.color, equals(captionColor));
-    expect(unselectedFontStyle.fontWeight, isNull);
+    expect(unselectedFontStyle.fontWeight, equals(FontWeight.w400));
     expect(unselectedFontStyle.height, isNull);
     // Unselected label has a font size of 14 but is scaled down to be font size 12.
     expect(
@@ -571,7 +570,7 @@ void main() {
     expect(_getMaterial(tester).color, equals(color));
   });
 
-  testWidgets('Shifting BottomNavigationBar background color is overriden by item color', (WidgetTester tester) async {
+  testWidgets('Shifting BottomNavigationBar background color is overridden by item color', (WidgetTester tester) async {
     const Color itemColor = Colors.yellow;
     const Color backgroundColor = Colors.blue;
 
@@ -1435,8 +1434,8 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile('bottom_navigation_bar.shifting_transition.2.$pump.png'),
-	      skip: !Platform.isLinux,
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.2.png'),
+        skip: !isLinux,
       );
     }
   });

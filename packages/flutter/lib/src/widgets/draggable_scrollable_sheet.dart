@@ -47,7 +47,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// [ScrollableWidgetBuilder] does not use provided [ScrollController], the
 /// sheet will remain at the initialChildSize.
 ///
-/// By default, the widget will expand its non-occupied area to fill availble
+/// By default, the widget will expand its non-occupied area to fill available
 /// space in the parent. If this is not desired, e.g. because the parent wants
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
@@ -157,7 +157,7 @@ class DraggableScrollableSheet extends StatefulWidget {
 /// [DraggableScrollableSheet] widgets notify their ancestors when the size of
 /// the sheet changes. When the extent of the sheet changes via a drag,
 /// this notification bubbles up through the tree, which means a given
-/// [NotificationListener] will recieve notifications for all descendant
+/// [NotificationListener] will receive notifications for all descendant
 /// [DraggableScrollableSheet] widgets. To focus on notifications from the
 /// nearest [DraggableScorllableSheet] descendant, check that the [depth]
 /// property of the notification is zero.

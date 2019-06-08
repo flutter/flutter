@@ -2,7 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../artifacts.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process_manager.dart';
@@ -11,23 +13,37 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../usage.dart';
 
 /// Builds the Linux project through the Makefile.
-Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo) async {
-  /// Cache flutter root in linux directory.
-  linuxProject.editableHostAppDirectory.childFile('.generated_flutter_root')
-    ..createSync(recursive: true)
-    ..writeAsStringSync(Cache.flutterRoot);
-
+Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo, {String target = 'lib/main.dart'}) async {
   final String buildFlag = buildInfo?.isDebug == true ? 'debug' : 'release';
-  final String bundleFlags = buildInfo?.trackWidgetCreation == true ? '--track-widget-creation' : '';
+  final StringBuffer buffer = StringBuffer('''
+# Generated code do not commit.
+export FLUTTER_ROOT=${Cache.flutterRoot}
+export BUILD=$buildFlag
+export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
+export FLUTTER_TARGET=$target
+export PROJECT_DIR=${linuxProject.project.directory.path}
+''');
+  if (artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final String engineOutPath = localEngineArtifacts.engineOutPath;
+    buffer.writeln('export FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
+    buffer.writeln('export LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
+  }
+
+  /// Cache flutter configuration files in the linux directory.
+  linuxProject.cacheDirectory.childFile('generated_config')
+    ..createSync(recursive: true)
+    ..writeAsStringSync(buffer.toString());
+
+  // Invoke make.
+  final Stopwatch sw = Stopwatch()..start();
   final Process process = await processManager.start(<String>[
     'make',
     '-C',
     linuxProject.editableHostAppDirectory.path,
-    'BUILD=$buildFlag',
-    'FLUTTER_ROOT=${Cache.flutterRoot}',
-    'FLUTTER_BUNDLE_FLAGS=$bundleFlags',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building Linux application...',
@@ -50,4 +66,5 @@ Future<void> buildLinux(LinuxProject linuxProject, BuildInfo buildInfo) async {
   if (result != 0) {
     throwToolExit('Build process failed');
   }
+  flutterUsage.sendTiming('build', 'make-linux', Duration(milliseconds: sw.elapsedMilliseconds));
 }

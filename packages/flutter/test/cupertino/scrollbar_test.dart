@@ -9,14 +9,17 @@ import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Scrollbar never goes away until finger lift', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoScrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 4000.0, height: 4000.0),
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: MediaQueryData(),
+          child: CupertinoScrollbar(
+            child: SingleChildScrollView(child: SizedBox(width: 4000.0, height: 4000.0)),
+          ),
         ),
       ),
-    ));
+    );
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
     await gesture.moveBy(const Offset(0.0, -10.0));
     await tester.pump();
@@ -40,27 +43,6 @@ void main() {
     // Opacity going down now.
     expect(find.byType(CupertinoScrollbar), paints..rrect(
       color: const Color(0x15777777),
-    ));
-  });
-
-  testWidgets('Scrollbar is not smaller than minLength with large scroll views', (WidgetTester tester) async {
-    await tester.pumpWidget(const Directionality(
-      textDirection: TextDirection.ltr,
-      child: CupertinoScrollbar(
-        child: SingleChildScrollView(
-          child: SizedBox(width: 800.0, height: 20000.0),
-        ),
-      ),
-    ));
-    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(SingleChildScrollView)));
-    await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-
-    // Height is 36.0.
-    const Rect scrollbarRect = Rect.fromLTWH(795.0, 4.28659793814433, 2.5, 36.0);
-    expect(find.byType(CupertinoScrollbar), paints..rrect(
-      rrect: RRect.fromRectAndRadius(scrollbarRect, const Radius.circular(1.25)),
     ));
   });
 }

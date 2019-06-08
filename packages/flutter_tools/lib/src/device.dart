@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'android/android_device.dart';
 import 'application_package.dart';
+import 'artifacts.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/utils.dart';
@@ -22,6 +23,7 @@ import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
+import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
@@ -274,6 +276,9 @@ abstract class Device {
   /// Clear the device's logs.
   void clearLogs();
 
+  /// Optional device-specific artifact overrides.
+  OverrideArtifacts get artifactOverrides => null;
+
   /// Start an app package on the current device.
   ///
   /// [platformArgs] allows callers to pass platform-specific arguments to the
@@ -302,7 +307,7 @@ abstract class Device {
 
   /// Whether flutter applications running on this device can be terminated
   /// from the vmservice.
-  bool get supportsStopApp => true;
+  bool get supportsFlutterExit => true;
 
   /// Whether the device supports taking screenshots of a running flutter
   /// application.

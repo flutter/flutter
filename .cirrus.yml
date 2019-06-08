@@ -76,6 +76,9 @@ task:
       container:
         cpu: 4
         memory: 12G
+    - name: web_tests-linux
+      env:
+        SHARD: web_tests
     - name: build_tests-linux
       env:
         SHARD: build_tests
@@ -104,8 +107,8 @@ task:
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   windows_container:
-    image: cirrusci/android-sdk:28-windowsservercore-ltsc2016
-    os_version: 2016
+    image: cirrusci/android-sdk:28-windowsservercore-2019
+    os_version: 2019
     cpu: 4
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"

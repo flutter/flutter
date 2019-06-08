@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 
 import '../android/android_sdk.dart';
@@ -20,6 +21,8 @@ import '../cache.dart';
 import '../flutter_manifest.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../runner/flutter_command.dart';
+import '../usage.dart';
 import 'android_sdk.dart';
 import 'android_studio.dart';
 
@@ -350,6 +353,7 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
     timeout: timeoutConfiguration.slowOperation,
     multilineOutput: true,
   );
+  final Stopwatch sw = Stopwatch()..start();
   final int exitCode = await runCommandAndStreamOutput(
     <String>[fs.file(gradle).absolute.path, 'build'],
     workingDirectory: project.android.hostAppGradleRoot.path,
@@ -357,11 +361,31 @@ Future<void> _buildGradleProjectV1(FlutterProject project, String gradle) async 
     environment: _gradleEnv,
   );
   status.stop();
+  flutterUsage.sendTiming('build', 'gradle-v1', Duration(milliseconds: sw.elapsedMilliseconds));
 
   if (exitCode != 0)
     throwToolExit('Gradle build failed: $exitCode', exitCode: exitCode);
 
   printStatus('Built ${fs.path.relative(project.android.gradleAppOutV1File.path)}.');
+}
+
+String _hex(List<int> bytes) {
+  final StringBuffer result = StringBuffer();
+  for (int part in bytes)
+    result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
+  return result.toString();
+}
+
+String _calculateSha(File file) {
+  final Stopwatch sw = Stopwatch()..start();
+  final List<int> bytes = file.readAsBytesSync();
+  printTrace('calculateSha: reading file took ${sw.elapsedMilliseconds}us');
+  flutterUsage.sendTiming('build', 'apk-sha-read', Duration(milliseconds: sw.elapsedMilliseconds));
+  sw.reset();
+  final String sha = _hex(sha1.convert(bytes).bytes);
+  printTrace('calculateSha: computing sha took ${sw.elapsedMilliseconds}us');
+  flutterUsage.sendTiming('build', 'apk-sha-calc', Duration(milliseconds: sw.elapsedMilliseconds));
+  return sha;
 }
 
 Future<void> _buildGradleProjectV2(
@@ -429,7 +453,7 @@ Future<void> _buildGradleProjectV2(
     command.add('-Pfilesystem-roots=${buildInfo.fileSystemRoots.join('|')}');
   if (buildInfo.fileSystemScheme != null)
     command.add('-Pfilesystem-scheme=${buildInfo.fileSystemScheme}');
-  if (buildInfo.buildSharedLibrary && androidSdk.ndk != null) {
+  if (buildInfo.buildSharedLibrary) {
     command.add('-Pbuild-shared-library=true');
   }
   if (buildInfo.targetPlatform != null)
@@ -437,30 +461,35 @@ Future<void> _buildGradleProjectV2(
 
   command.add(assembleTask);
   bool potentialAndroidXFailure = false;
-  final int exitCode = await runCommandAndStreamOutput(
-    command,
-    workingDirectory: flutterProject.android.hostAppGradleRoot.path,
-    allowReentrantFlutter: true,
-    environment: _gradleEnv,
-    // TODO(mklim): if AndroidX warnings are no longer required, this
-    // mapFunction and all its associated variabled can be replaced with just
-    // `filter: ndkMessagefilter`.
-    mapFunction: (String line) {
-      final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
-      if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
-        potentialAndroidXFailure = true;
-      }
-      // Always print the full line in verbose mode.
-      if (logger.isVerbose) {
-        return line;
-      } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
-        return null;
-      }
+  final Stopwatch sw = Stopwatch()..start();
+  int exitCode = 1;
+  try {
+    exitCode = await runCommandAndStreamOutput(
+      command,
+      workingDirectory: flutterProject.android.hostAppGradleRoot.path,
+      allowReentrantFlutter: true,
+      environment: _gradleEnv,
+      // TODO(mklim): if AndroidX warnings are no longer required, this
+      // mapFunction and all its associated variabled can be replaced with just
+      // `filter: ndkMessagefilter`.
+      mapFunction: (String line) {
+        final bool isAndroidXPluginWarning = androidXPluginWarningRegex.hasMatch(line);
+        if (!isAndroidXPluginWarning && androidXFailureRegex.hasMatch(line)) {
+          potentialAndroidXFailure = true;
+        }
+        // Always print the full line in verbose mode.
+        if (logger.isVerbose) {
+          return line;
+        } else if (isAndroidXPluginWarning || !ndkMessageFilter.hasMatch(line)) {
+          return null;
+        }
 
-      return line;
-    },
-  );
-  status.stop();
+        return line;
+      },
+    );
+  } finally {
+    status.stop();
+  }
 
   if (exitCode != 0) {
     if (potentialAndroidXFailure) {
@@ -468,9 +497,15 @@ Future<void> _buildGradleProjectV2(
       printError('The Gradle failure may have been because of AndroidX incompatibilities in this Flutter app.');
       printError('See https://goo.gl/CP92wY for more information on the problem and how to fix it.');
       printError('*******************************************************************************************');
+      String commandName = '';
+      if (FlutterCommand.current != null) {
+        commandName = '-${FlutterCommand.current.name}';
+      }
+      flutterUsage.sendEvent('build$commandName', 'android-x-failure');
     }
     throwToolExit('Gradle task $assembleTask failed with exit code $exitCode', exitCode: exitCode);
   }
+  flutterUsage.sendTiming('build', 'gradle-v2', Duration(milliseconds: sw.elapsedMilliseconds));
 
   if (!isBuildingBundle) {
     final File apkFile = _findApkFile(project, buildInfo);
@@ -481,7 +516,7 @@ Future<void> _buildGradleProjectV2(
 
     printTrace('calculateSha: ${project.apkDirectory}/app.apk');
     final File apkShaFile = project.apkDirectory.childFile('app.apk.sha1');
-    apkShaFile.writeAsStringSync(calculateSha(apkFile));
+    apkShaFile.writeAsStringSync(_calculateSha(apkFile));
 
     String appSize;
     if (buildInfo.mode == BuildMode.debug) {
@@ -495,14 +530,6 @@ Future<void> _buildGradleProjectV2(
     final File bundleFile = _findBundleFile(project, buildInfo);
     if (bundleFile == null)
       throwToolExit('Gradle build failed to produce an Android bundle package.');
-    // Copy the bundle to app.aab, so `flutter run`, `flutter install`, etc. can find it.
-    bundleFile.copySync(project.bundleDirectory
-        .childFile('app.aab')
-        .path);
-
-    printTrace('calculateSha: ${project.bundleDirectory}/app.aab');
-    final File bundleShaFile = project.bundleDirectory.childFile('app.aab.sha1');
-    bundleShaFile.writeAsStringSync(calculateSha(bundleFile));
 
     String appSize;
     if (buildInfo.mode == BuildMode.debug) {
@@ -539,12 +566,8 @@ File _findBundleFile(GradleProject project, BuildInfo buildInfo) {
 
   if (bundleFileName == null)
     return null;
-  File bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, bundleFileName));
-  if (bundleFile.existsSync()) {
-    return bundleFile;
-  }
   final String modeName = camelCase(buildInfo.modeName);
-  bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, modeName, bundleFileName));
+  File bundleFile = fs.file(fs.path.join(project.bundleDirectory.path, modeName, bundleFileName));
   if (bundleFile.existsSync())
     return bundleFile;
   if (buildInfo.flavor != null) {

@@ -195,7 +195,7 @@ void main() {
       await commands.close();
     });
 
-    testUsingContext('device.getDevices reports avaiable devices', () async {
+    testUsingContext('device.getDevices reports available devices', () async {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(

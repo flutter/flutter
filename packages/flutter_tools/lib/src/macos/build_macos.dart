@@ -12,13 +12,14 @@ import '../convert.dart';
 import '../globals.dart';
 import '../ios/xcodeproj.dart';
 import '../project.dart';
+import '../usage.dart';
+import 'cocoapod_utils.dart';
 
 /// Builds the macOS project through xcode build.
 // TODO(jonahwilliams): support target option.
 // TODO(jonahwilliams): refactor to share code with the existing iOS code.
 Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) async {
   final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
-  final String symrootOverride = fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products');
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
   }
@@ -27,24 +28,27 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
     project: flutterProject,
     buildInfo: buildInfo,
     useMacOSConfig: true,
-    symrootOverride: symrootOverride,
+    setSymroot: false,
   );
+  await processPodsIfNeeded(flutterProject.macos, getMacOSBuildDirectory(), buildInfo.mode);
+
   // Set debug or release mode.
   String config = 'Debug';
   if (buildInfo.isRelease) {
     config = 'Release';
   }
   // Run build script provided by application.
+  final Stopwatch sw = Stopwatch()..start();
   final Process process = await processManager.start(<String>[
     '/usr/bin/env',
     'xcrun',
     'xcodebuild',
-    '-project', flutterProject.macos.xcodeProjectFile.path,
+    '-workspace', flutterProject.macos.xcodeWorkspace.path,
     '-configuration', '$config',
     '-scheme', 'Runner',
     '-derivedDataPath', flutterBuildDir.absolute.path,
     'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-    'SYMROOT=$symrootOverride',
+    'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
   ], runInShell: true);
   final Status status = logger.startProgress(
     'Building macOS application...',
@@ -67,4 +71,5 @@ Future<void> buildMacOS(FlutterProject flutterProject, BuildInfo buildInfo) asyn
   if (result != 0) {
     throwToolExit('Build process failed');
   }
+  flutterUsage.sendTiming('build', 'xcode-macos', Duration(milliseconds: sw.elapsedMilliseconds));
 }
