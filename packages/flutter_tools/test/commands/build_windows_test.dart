@@ -19,17 +19,29 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  Cache.disableLocking();
-  final MockProcessManager mockProcessManager = MockProcessManager();
-  final MemoryFileSystem memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
-  final MockProcess mockProcess = MockProcess();
-  final MockPlatform windowsPlatform = MockPlatform()
-      ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
-  final MockPlatform notWindowsPlatform = MockPlatform();
-  final MockVisualStudio mockVisualStudio = MockVisualStudio();
+  MockProcessManager mockProcessManager;
+  MemoryFileSystem memoryFilesystem;
+  MockProcess mockProcess;
+  MockPlatform windowsPlatform;
+  MockPlatform notWindowsPlatform;
+  MockVisualStudio mockVisualStudio;
   const String solutionPath = r'C:\windows\Runner.sln';
   const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
   const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
+
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
+  setUp(() {
+    mockProcessManager = MockProcessManager();
+    memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
+    mockProcess = MockProcess();
+    windowsPlatform = MockPlatform()
+        ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
+    notWindowsPlatform = MockPlatform();
+    mockVisualStudio = MockVisualStudio();
+  });
 
   when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
     return 0;
