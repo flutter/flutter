@@ -205,7 +205,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       offset + childParentData.offset,
       Offset.zero & child.size,
       _clipPath(),
-      (PaintingContext innerContext, Offset innerOffset) => context.paintChild(child, innerOffset),
+      (PaintingContext innerContext, Offset innerOffset) => innerContext.paintChild(child, innerOffset),
     );
   }
 
@@ -292,7 +292,7 @@ class _TextSelectionToolbar extends StatelessWidget {
     return CupertinoButton(
       child: Text(text, style: _kToolbarButtonFontStyle),
       color: _kToolbarBackgroundColor,
-      minSize: _kToolbarHeight + _kToolbarArrowSize.height,
+      minSize: _kToolbarHeight,
       padding: _kToolbarButtonPadding.add(arrowPadding),
       borderRadius: null,
       pressedOpacity: 0.7,
