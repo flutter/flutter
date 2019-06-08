@@ -41,19 +41,18 @@ void main() {
         ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
     notWindowsPlatform = MockPlatform();
     mockVisualStudio = MockVisualStudio();
+    when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+    when(mockProcess.stderr).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(mockProcess.stdout).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(windowsPlatform.isWindows).thenReturn(true);
+    when(notWindowsPlatform.isWindows).thenReturn(false);
   });
-
-  when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-    return 0;
-  });
-  when(mockProcess.stderr).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
-  });
-  when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
-  });
-  when(windowsPlatform.isWindows).thenReturn(true);
-  when(notWindowsPlatform.isWindows).thenReturn(false);
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
