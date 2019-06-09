@@ -998,6 +998,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///    to the new one if the updated widget configuration requires
   ///    replacing the object.
   ///  * In [dispose], unsubscribe from the object.
+  ///
   /// {@endtemplate}
   ///
   /// You cannot use [BuildContext.inheritFromWidgetOfExactType] from this
@@ -2580,7 +2581,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   //
   // See also:
   //
-  //  * https://www.dartlang.org/articles/dart-vm/numeric-computation, which
+  //  * https://dart.dev/articles/dart-vm/numeric-computation, which
   //    explains how numbers are represented in Dart.
   @override
   int get hashCode => _cachedHash;
@@ -3249,7 +3250,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'If you need some sizing information during build to decide which '
           'widgets to build, consider using a LayoutBuilder widget, which can '
           'tell you the layout constraints at a given location in the tree. See '
-          '<https://docs.flutter.io/flutter/widgets/LayoutBuilder-class.html> '
+          '<https://api.flutter.dev/flutter/widgets/LayoutBuilder-class.html> '
           'for more details.\n'
           '\n'
           'The size getter was called for the following element:\n'

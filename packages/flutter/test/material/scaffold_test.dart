@@ -66,7 +66,7 @@ void main() {
     bodyBox = tester.renderObject(find.byKey(bodyKey));
     expect(bodyBox.size, equals(const Size(800.0, 544.0)));
 
-    // Backwards compatiblity: deprecated resizeToAvoidBottomPadding flag
+    // Backwards compatibility: deprecated resizeToAvoidBottomPadding flag
     await tester.pumpWidget(boilerplate(MediaQuery(
       data: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 100.0)),
       child: Scaffold(
