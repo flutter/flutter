@@ -388,14 +388,14 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return LaunchResult.failed();
 
-
-    if (!debuggingOptions.buildInfo.isDebug &&
-          !debuggingOptions.buildInfo.isDynamic) {
-      printError('Profile and release builds are only supported.');
+    final TargetPlatform devicePlatform = await targetPlatform;
+    if (!(devicePlatform == TargetPlatform.android_arm ||
+          devicePlatform == TargetPlatform.android_arm64) &&
+        !(debuggingOptions.buildInfo.isDebug ||
+          debuggingOptions.buildInfo.isDynamic)) {
+      printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }
-
-    final TargetPlatform devicePlatform = await targetPlatform;
 
     AndroidArch androidArch;
     switch (devicePlatform) {
@@ -405,9 +405,15 @@ class AndroidDevice extends Device {
       case TargetPlatform.android_arm64:
         androidArch = AndroidArch.arm64_v8a;
         break;
+      case TargetPlatform.android_x64:
+        androidArch = AndroidArch.x86_64;
+        break;
+      case TargetPlatform.android_x86:
+        androidArch = AndroidArch.x86;
+        break;
       default:
-        printError('ARM targets are only supported.');
-        return LaunchResult.failed();
+      printError('Android platforms are only supported.');
+      return LaunchResult.failed();
     }
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
