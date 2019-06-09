@@ -29,3 +29,8 @@ accept_android_licenses || (error "Accepting Android licenses failed." && false)
 # Run pub get in all the repo packages.
 echo "Updating packages for Flutter."
 ./bin/flutter update-packages
+
+# Download chrome stable.
+echo "Downloading Chrom stable"
+wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.de
+sudo dpkg -i google-chrome-stable_current_amd64.deb
