@@ -13,7 +13,7 @@ import 'dart/package_map.dart';
 import 'globals.dart';
 import 'project.dart';
 
-// Arbitrarily choosen multi-root file scheme. This is used to configure the
+// Arbitrarily chosen multi-root file scheme. This is used to configure the
 // frontend_server to resolve a package uri to multiple filesystem directories.
 // In this case, the source directory and a generated directory.
 const String kMultiRootScheme = 'org-dartlang-app';

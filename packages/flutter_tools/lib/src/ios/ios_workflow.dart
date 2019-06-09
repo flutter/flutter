@@ -11,13 +11,12 @@ import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
-import 'cocoapods.dart';
+import '../macos/xcode.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
 
 IOSWorkflow get iosWorkflow => context.get<IOSWorkflow>();
 IOSValidator get iosValidator => context.get<IOSValidator>();
-CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 class IOSWorkflow implements Workflow {
   const IOSWorkflow();
@@ -44,7 +43,7 @@ class IOSWorkflow implements Workflow {
 
 class IOSValidator extends DoctorValidator {
 
-  const IOSValidator() : super('iOS toolchain - develop for iOS devices');
+  const IOSValidator() : super('iOS tools - develop for iOS devices');
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
@@ -79,44 +78,7 @@ class IOSValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    ValidationType xcodeStatus = ValidationType.missing;
     ValidationType packageManagerStatus = ValidationType.installed;
-    String xcodeVersionInfo;
-
-    if (xcode.isInstalled) {
-      xcodeStatus = ValidationType.installed;
-
-      messages.add(ValidationMessage(userMessages.iOSXcodeLocation(xcode.xcodeSelectPath)));
-
-      xcodeVersionInfo = xcode.versionText;
-      if (xcodeVersionInfo.contains(','))
-        xcodeVersionInfo = xcodeVersionInfo.substring(0, xcodeVersionInfo.indexOf(','));
-      messages.add(ValidationMessage(xcode.versionText));
-
-      if (!xcode.isInstalledAndMeetsVersionCheck) {
-        xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(
-            userMessages.iOSXcodeOutdated(kXcodeRequiredVersionMajor, kXcodeRequiredVersionMinor)
-        ));
-      }
-
-      if (!xcode.eulaSigned) {
-        xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.iOSXcodeEula));
-      }
-      if (!xcode.isSimctlInstalled) {
-        xcodeStatus = ValidationType.partial;
-        messages.add(ValidationMessage.error(userMessages.iOSXcodeMissingSimct));
-      }
-
-    } else {
-      xcodeStatus = ValidationType.missing;
-      if (xcode.xcodeSelectPath == null || xcode.xcodeSelectPath.isEmpty) {
-        messages.add(ValidationMessage.error(userMessages.iOSXcodeMissing));
-      } else {
-        messages.add(ValidationMessage.error(userMessages.iOSXcodeIncomplete));
-      }
-    }
 
     int checksFailed = 0;
 
@@ -155,61 +117,9 @@ class IOSValidator extends DoctorValidator {
     if (checksFailed == totalChecks)
       packageManagerStatus = ValidationType.missing;
     if (checksFailed > 0 && !hasHomebrew) {
-      messages.add(ValidationMessage.error(userMessages.iOSBrewMissing));
+      messages.add(ValidationMessage.hint(userMessages.iOSBrewMissing));
     }
 
-    return ValidationResult(
-        <ValidationType>[xcodeStatus, packageManagerStatus].reduce(_mergeValidationTypes),
-        messages,
-        statusInfo: xcodeVersionInfo,
-    );
-  }
-
-  ValidationType _mergeValidationTypes(ValidationType t1, ValidationType t2) {
-    return t1 == t2 ? t1 : ValidationType.partial;
-  }
-}
-
-class CocoaPodsValidator extends DoctorValidator {
-  const CocoaPodsValidator() : super('CocoaPods subvalidator');
-
-  bool get hasHomebrew => os.which('brew') != null;
-
-  @override
-  Future<ValidationResult> validate() async {
-    final List<ValidationMessage> messages = <ValidationMessage>[];
-
-    ValidationType status = ValidationType.installed;
-    if (hasHomebrew) {
-      final CocoaPodsStatus cocoaPodsStatus = await cocoaPods
-          .evaluateCocoaPodsInstallation;
-
-      if (cocoaPodsStatus == CocoaPodsStatus.recommended) {
-        if (await cocoaPods.isCocoaPodsInitialized) {
-          messages.add(ValidationMessage(userMessages.cocoaPodsVersion(await cocoaPods.cocoaPodsVersionText)));
-        } else {
-          status = ValidationType.partial;
-          messages.add(ValidationMessage.error(userMessages.cocoaPodsUninitialized(noCocoaPodsConsequence)));
-        }
-      } else {
-        if (cocoaPodsStatus == CocoaPodsStatus.notInstalled) {
-          status = ValidationType.missing;
-          messages.add(ValidationMessage.error(
-              userMessages.cocoaPodsMissing(noCocoaPodsConsequence, cocoaPodsInstallInstructions)));
-        } else if (cocoaPodsStatus == CocoaPodsStatus.unknownVersion) {
-          status = ValidationType.partial;
-          messages.add(ValidationMessage.hint(
-              userMessages.cocoaPodsUnknownVersion(unknownCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
-        } else {
-          status = ValidationType.partial;
-          messages.add(ValidationMessage.hint(
-              userMessages.cocoaPodsOutdated(cocoaPods.cocoaPodsRecommendedVersion, noCocoaPodsConsequence, cocoaPodsUpgradeInstructions)));
-        }
-      }
-    } else {
-      // Only set status. The main validator handles messages for missing brew.
-      status = ValidationType.missing;
-    }
-    return ValidationResult(status, messages);
+    return ValidationResult(packageManagerStatus, messages);
   }
 }

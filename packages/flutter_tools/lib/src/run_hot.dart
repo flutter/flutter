@@ -218,7 +218,7 @@ class HotRunner extends ResidentRunner {
         printStatus('Benchmark completed. Exiting application.');
         await _cleanupDevFS();
         await stopEchoingDeviceLog();
-        await stopApp();
+        await exitApp();
       }
       final File benchmarkOutput = fs.file('hot_benchmark.json');
       benchmarkOutput.writeAsStringSync(toPrettyJson(benchmarkData));
@@ -922,12 +922,12 @@ class HotRunner extends ResidentRunner {
     if (_didAttach) {
       appFinished();
     } else {
-      await stopApp();
+      await exitApp();
     }
   }
 
   @override
-  Future<void> preStop() async {
+  Future<void> preExit() async {
     await _cleanupDevFS();
     await hotRunnerConfig.runPreShutdownOperations();
   }

@@ -623,7 +623,7 @@ class SectorHitTestResult extends HitTestResult {
 
   // TODO(goderbauer): Add convenience methods to transform hit test positions
   //    once we have RenderSector implementations that move the origin of their
-  //    children (e.g. RenderSectorTransform analogues to RenderTransform).
+  //    children (e.g. RenderSectorTransform analogs to RenderTransform).
 }
 
 /// A hit test entry used by [RenderSector].
