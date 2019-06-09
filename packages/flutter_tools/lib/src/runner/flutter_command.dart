@@ -320,6 +320,12 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildInfo getBuildInfo() {
+    TargetPlatform targetPlatform;
+    if (argParser.options.containsKey('target-platform') &&
+        argResults['target-platform'] != 'default') {
+      targetPlatform = getTargetPlatformForName(argResults['target-platform']);
+    }
+
     final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
         ? argResults['track-widget-creation']
         : false;
@@ -356,6 +362,10 @@ abstract class FlutterCommand extends Command<void> {
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
           : null,
+      buildSharedLibrary: argParser.options.containsKey('build-shared-library')
+        ? argResults['build-shared-library']
+        : false,
+      targetPlatform: targetPlatform,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
           ? argResults[FlutterOptions.kFileSystemRoot] : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)

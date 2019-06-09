@@ -2,7 +2,6 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 import com.android.builder.model.AndroidProject
-import com.android.build.OutputFile
 import org.apache.tools.ant.taskdefs.condition.Os
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -37,49 +36,6 @@ android {
 apply plugin: FlutterPlugin
 
 class FlutterPlugin implements Plugin<Project> {
-    // The platforms that can be passed to the `--Ptarget-platform` flag.
-    private static final String PLATFORM_ARM32  = "android-arm";
-    private static final String PLATFORM_ARM64  = "android-arm64";
-    private static final String PLATFORM_X86    = "android-x86";
-    private static final String PLATFORM_X86_64 = "android-x64";
-
-    // The ABI architectures.
-    private static final String ARCH_ARM32      = "armeabi-v7a";
-    private static final String ARCH_ARM64      = "arm64-v8a";
-    private static final String ARCH_X86        = "x86";
-    private static final String ARCH_X86_64     = "x86_64";
-
-    // Maps platforms to ABI architectures.
-    private static final Map PLATFORM_ARCH_MAP = [
-        (PLATFORM_ARM32)    : ARCH_ARM32,
-        (PLATFORM_ARM64)    : ARCH_ARM64,
-        (PLATFORM_X86)      : ARCH_X86,
-        (PLATFORM_X86_64)   : ARCH_X86_64,
-    ]
-
-    // The version code that gives each ABI a value.
-    // For each APK variant, use the following versions to override the version of the Universal APK.
-    // Otherwise, the Play Store will complain that the APK variants have the same version.
-    private static final Map ABI_VERSION = [
-        (ARCH_ARM32)        : 1,
-        (ARCH_ARM64)        : 2,
-        (ARCH_X86)          : 3,
-        (ARCH_X86_64)       : 4,
-    ]
-
-    // When split is enabled, multiple APKs are generated per each ABI.
-    private static final List DEFAULT_PLATFORMS = [
-        PLATFORM_ARM32,
-        PLATFORM_ARM64,
-    ]
-
-    // The name prefix for flutter builds.  This is used to identify gradle tasks
-    // where we expect the flutter tool to provide any error output, and skip the
-    // standard Gradle error output in the FlutterEventLogger. If you change this,
-    // be sure to change any instances of this string in symbols in the code below
-    // to match.
-    static final String FLUTTER_BUILD_PREFIX = "flutterBuild"
-
     private Path baseEnginePath
     private File flutterRoot
     private File flutterExecutable
@@ -93,6 +49,29 @@ class FlutterPlugin implements Plugin<Project> {
     private File dynamicProfileFlutterJar
     private File dynamicReleaseFlutterJar
 
+    // The name prefix for flutter builds.  This is used to identify gradle tasks
+    // where we expect the flutter tool to provide any error output, and skip the
+    // standard Gradle error output in the FlutterEventLogger. If you change this,
+    // be sure to change any instances of this string in symbols in the code below
+    // to match.
+    static final String flutterBuildPrefix = "flutterBuild"
+
+    // The platforms (or CPU architectures) for which native code is generated.
+    static final Map allTargetPlatforms = [
+        'android-arm': 'armeabi-v7a',
+        'android-arm64': 'arm64-v8a',
+        'android-x64': 'x86_64',
+        'android-x86': 'x86',
+    ]
+
+    // Supports ARM 32 and 64 bits.
+    // When splits are enabled, multiple APKs are generated per each CPU architecture,
+    // which helps decrease the size of each APK.
+    static final Set allArmPlatforms = [
+        'android-arm',
+        'android-arm64'
+    ]
+
     private Properties readPropertiesIfExist(File propertiesFile) {
         Properties result = new Properties()
         if (propertiesFile.exists()) {
@@ -101,28 +80,16 @@ class FlutterPlugin implements Plugin<Project> {
         return result
     }
 
-    private List<String> getTargetPlatforms(Project project) {
-        if (!project.hasProperty('target-platform')) {
-            return DEFAULT_PLATFORMS
+    private String getTargetPlatform(Project project) {
+        if (project.hasProperty('target-platform')) {
+            return project.property('target-platform')
         }
-        return project.property('target-platform').split(',').collect {
-            if (!PLATFORM_ARCH_MAP[it]) {
-                throw new GradleException("Invalid platform: $it.")
-            }
-            return it
-        }
+        return 'android-arm-all';
     }
 
     private Boolean getBuildShareLibrary(Project project) {
         if (project.hasProperty('build-shared-library')) {
             return project.property('build-shared-library').toBoolean()
-        }
-        return false;
-    }
-
-    private Boolean splitPerAbi(Project project) {
-        if (project.hasProperty('split-per-abi')) {
-            return project.property('split-per-abi').toBoolean()
         }
         return false;
     }
@@ -144,55 +111,21 @@ class FlutterPlugin implements Plugin<Project> {
         return result
     }
 
-    /**
-     * Returns the platform that is used to extract the `libflutter.so` and the .class files.
-     *
-     * Note: This is only needed to add the .class files.
-     * Unfortunately, the engine artifacts include the .class and libflutter.so files.
-     */
-    private String getBasePlatform(Project project) {
-        if (PLATFORM_ARM64 in getTargetPlatforms(project)) {
-            return PLATFORM_ARM64;
-        }
-        return PLATFORM_ARM32;
-    }
-
     @Override
     void apply(Project project) {
         project.extensions.create("flutter", FlutterExtension)
         project.afterEvaluate this.&addFlutterTask
 
-        // By default, assembling APKs generates fat APKs if multiple platforms are passed.
-        // Configuring split per ABI allows to generate separate APKs for each abi.
-        // This is a noop when building a bundle.
-        if (this.splitPerAbi(project)) {
-            project.android {
-                splits {
-                    abi {
-                        // Enables building multiple APKs per ABI.
-                        enable true
-                        // Resets the list of ABIs that Gradle should create APKs for to none.
-                        reset()
-                        // Specifies that we do not want to also generate a universal APK that includes all ABIs.
-                        universalApk false
-                    }
-                }
-            }
-        }
-        this.getTargetPlatforms(project).each { targetArch ->
-            String abiValue = PLATFORM_ARCH_MAP[targetArch]
+        allTargetPlatforms.each { currentTargetPlatformValue, abi ->
             project.android {
                 packagingOptions {
-                    pickFirst "lib/${abiValue}/libflutter.so"
-                    // Prevent the ELF library from getting corrupted.
-                    doNotStrip "*/${abiValue}/libapp.so"
-                }
-                if (this.splitPerAbi(project)) {
-                    splits {
-                        abi {
-                            include abiValue
-                        }
-                    }
+                    pickFirst "lib/${abi}/libflutter.so"
+
+                    // Disable warning by *-android-strip: File format not recognized
+                    doNotStrip "*/${abi}/lib_vm_snapshot_data.so"
+                    doNotStrip "*/${abi}/lib_vm_snapshot_instr.so"
+                    doNotStrip "*/${abi}/lib_isolate_snapshot_data.so"
+                    doNotStrip "*/${abi}/lib_isolate_snapshot_instr.so"
                 }
             }
         }
@@ -240,7 +173,7 @@ class FlutterPlugin implements Plugin<Project> {
             baseEnginePath = Paths.get(engineOut.absolutePath)
             flutterJar = baseEnginePath.resolve("flutter.jar").toFile()
             if (!flutterJar.isFile()) {
-                throw new GradleException('Local engine jar not found: ' + flutterJar)
+                throw new GradleException('File not found: ' + flutterJar)
             }
 
             localEngine = engineOut.name
@@ -253,14 +186,14 @@ class FlutterPlugin implements Plugin<Project> {
             dynamicProfileFlutterJar = flutterJar
             dynamicReleaseFlutterJar = flutterJar
         } else {
-            String basePlatformArch = getBasePlatform(project)
-            // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
+            String targetPlatform = getTargetPlatform(project)
+            String targetArch = targetPlatform == 'android-arm64' ? 'arm64' : 'arm'
             baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
-            debugFlutterJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
-            profileFlutterJar = baseEnginePath.resolve("${basePlatformArch}-profile").resolve("flutter.jar").toFile()
-            releaseFlutterJar = baseEnginePath.resolve("${basePlatformArch}-release").resolve("flutter.jar").toFile()
-            dynamicProfileFlutterJar = baseEnginePath.resolve("${basePlatformArch}-dynamic-profile").resolve("flutter.jar").toFile()
-            dynamicReleaseFlutterJar = baseEnginePath.resolve("${basePlatformArch}-dynamic-release").resolve("flutter.jar").toFile()
+            debugFlutterJar = baseEnginePath.resolve("android-${targetArch}").resolve("flutter.jar").toFile()
+            profileFlutterJar = baseEnginePath.resolve("android-${targetArch}-profile").resolve("flutter.jar").toFile()
+            releaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-release").resolve("flutter.jar").toFile()
+            dynamicProfileFlutterJar = baseEnginePath.resolve("android-${targetArch}-dynamic-profile").resolve("flutter.jar").toFile()
+            dynamicReleaseFlutterJar = baseEnginePath.resolve("android-${targetArch}-dynamic-release").resolve("flutter.jar").toFile()
         }
 
         if (!debugFlutterJar.isFile()) {
@@ -276,7 +209,7 @@ class FlutterPlugin implements Plugin<Project> {
 
         // Add x86/x86_64 native library. Debug mode only, for now.
         File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-        Task debugX86JarTask = project.tasks.create("${FLUTTER_BUILD_PREFIX}X86Jar", Jar) {
+        Task debugX86JarTask = project.tasks.create("${flutterBuildPrefix}X86Jar", Jar) {
             destinationDir flutterX86Jar.parentFile
             archiveName flutterX86Jar.name
             from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
@@ -288,7 +221,7 @@ class FlutterPlugin implements Plugin<Project> {
         }
         // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
         // added after applying the Flutter plugin.
-        project.android.buildTypes.each {
+        project.android.buildTypes.each { 
             addFlutterJarApiDependency(project, it, debugX86JarTask)
         }
         project.android.buildTypes.whenObjectAdded {
@@ -405,19 +338,6 @@ class FlutterPlugin implements Plugin<Project> {
         return "release"
     }
 
-    private static String getEngineArtifactDirName(buildType, targetArch) {
-        if (buildType.name == "profile") {
-            return "${targetArch}-profile"
-        } else if (buildType.name == "dynamicProfile") {
-            return "${targetArch}-dynamic-profile"
-        } else if (buildType.name == "dynamicRelease") {
-            return "${targetArch}-dynamic-release"
-        } else if (buildType.debuggable) {
-            return "${targetArch}"
-        }
-        return "${targetArch}-release"
-    }
-
     private void addFlutterTask(Project project) {
         if (project.state.failure) {
             return
@@ -475,24 +395,13 @@ class FlutterPlugin implements Plugin<Project> {
             extraGenSnapshotOptionsValue = project.property('extra-gen-snapshot-options')
         }
 
-        def targetPlatforms = this.getTargetPlatforms(project)
-        def addFlutterDeps = { variant ->
-            if (this.splitPerAbi(project)) {
-                variant.outputs.each { output ->
-                    // Assigns the new version code to versionCodeOverride, which changes the version code
-                    // for only the output APK, not for the variant itself. Skipping this step simply
-                    // causes Gradle to use the value of variant.versionCode for the APK.
-                    // For more, see https://developer.android.com/studio/build/configure-apk-splits
-                    def abiVersionCode = ABI_VERSION.get(output.getFilter(OutputFile.ABI))
-                    if (abiVersionCode != null) {
-                        output.versionCodeOverride =
-                            abiVersionCode * 1000 + variant.versionCode
-                    }
-                }
-            }
+        Boolean buildSharedLibraryValue = this.getBuildShareLibrary(project)
+        String targetPlatformValue = this.getTargetPlatform(project)
 
+        def addFlutterDeps = { variant ->
             String flutterBuildMode = buildModeFor(variant.buildType)
-            if (flutterBuildMode == 'debug' && project.tasks.findByName("${FLUTTER_BUILD_PREFIX}X86Jar")) {
+
+            if (flutterBuildMode == 'debug' && project.tasks.findByName('${flutterBuildPrefix}X86Jar')) {
                 Task task = project.tasks.findByName("compile${variant.name.capitalize()}JavaWithJavac")
                 if (task) {
                     task.dependsOn project.flutterBuildX86Jar
@@ -504,10 +413,22 @@ class FlutterPlugin implements Plugin<Project> {
             }
 
             def flutterTasks = []
-            targetPlatforms.each { targetArch ->
-                String abiValue = PLATFORM_ARCH_MAP[targetArch]
-                String taskName = "compile${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}${targetArch.replace('android-', '').capitalize()}"
-                FlutterTask compileTask = project.tasks.create(name: taskName, type: FlutterTask) {
+            def targetPlatforms = []
+
+            if (targetPlatformValue == 'android-arm-all') {
+                if (flutterBuildMode == 'release') {
+                    targetPlatforms.addAll(allArmPlatforms)
+                } else {
+                    targetPlatforms.add('android-arm')
+                }
+            } else {
+                targetPlatforms.add(targetPlatformValue)
+            }
+
+            targetPlatforms.each { currentTargetPlatformValue ->
+                String abiValue = allTargetPlatforms[currentTargetPlatformValue]
+                FlutterTask compileTask = project.tasks.create(name: "compile${flutterBuildPrefix}${variant.name.capitalize()}${currentTargetPlatformValue}", 
+                    type: FlutterTask) {
                     flutterRoot this.flutterRoot
                     flutterExecutable this.flutterExecutable
                     buildMode flutterBuildMode
@@ -523,53 +444,56 @@ class FlutterPlugin implements Plugin<Project> {
                     createPatch createPatchValue
                     buildNumber buildNumberValue
                     baselineDir baselineDirValue
-                    targetPlatform targetArch
+                    buildSharedLibrary buildSharedLibraryValue
+                    targetPlatform currentTargetPlatformValue
                     sourceDir project.file(project.flutter.source)
-                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${targetArch}")
+                    intermediateDir project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/${currentTargetPlatformValue}")
                     extraFrontEndOptions extraFrontEndOptionsValue
                     extraGenSnapshotOptions extraGenSnapshotOptionsValue
                 }
                 flutterTasks.add(compileTask)
             }
-            def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
-            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
+
+            def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/libs.jar")
+            Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packFlutterSnapshotsAndLibs${flutterBuildPrefix}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
-                targetPlatforms.each { targetArch ->
-                    // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
-                    // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
-                    // is included as an implementation dependency, which causes duplicated `libflutter.so`.
-                    if (getBasePlatform(project) != targetArch) {
-                        def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
-                        // Include `libflutter.so`.
-                        // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
-                        from(project.zipTree("${flutterRoot}/bin/cache/artifacts/engine/${engineArtifactSubdir}/flutter.jar")) {
-                            include 'lib/**'
-                        }
+                targetPlatforms.each { targetPlatform ->
+                    // Include `libflutter.so` for each abi.
+                    // TODO(blasten): The libs should be outside `flutter.jar` when the artifacts are downloaded.
+                    from(project.zipTree("${flutterRoot}/bin/cache/artifacts/engine/${targetPlatform}-release/flutter.jar")) {
+                        include 'lib/**'
                     }
                 }
+
                 dependsOn flutterTasks
-                // Add the ELF library.
-                flutterTasks.each { flutterTask ->
+                // Add the snapshots and rename them as `lib/{abi}/*.so`.
+                flutterTasks.each { flutterTask -> 
                     from(flutterTask.intermediateDir) {
-                        include '*.so'
-                        rename { String filename ->
-                            return "lib/${flutterTask.abi}/lib${filename}"
+                        include 'vm_snapshot_data'
+                        include 'vm_snapshot_instr'
+                        include 'isolate_snapshot_data'
+                        include 'isolate_snapshot_instr'
+                        rename {  String filename ->
+                            return "lib/${flutterTask.abi}/lib_${filename}.so"
                         }
                     }
                 }
             }
+
             // Include the snapshots and libflutter.so in `lib/`.
-            project.dependencies {
-                String configuration;
-                if (project.getConfigurations().findByName("api")) {
-                    configuration = buildType.name + "Api";
-                } else {
-                    configuration = buildType.name + "Compile";
+            if (flutterBuildMode == 'release' && targetPlatformValue == 'android-arm-all') {
+                project.dependencies {
+                    String configuration;
+                    if (project.getConfigurations().findByName("api")) {
+                        configuration = buildType.name + "Api";
+                    } else {
+                        configuration = buildType.name + "Compile";
+                    }
+                    add(configuration, project.files {
+                        packFlutterSnapshotsAndLibsTask
+                    })
                 }
-                add(configuration, project.files {
-                    packFlutterSnapshotsAndLibsTask
-                })
             }
             // We know that the flutter app is a subproject in another Android app when these tasks exist.
             Task packageAssets = project.tasks.findByPath(":flutter:package${variant.name.capitalize()}Assets")
@@ -586,8 +510,12 @@ class FlutterPlugin implements Plugin<Project> {
                     variant.mergeAssets.mustRunAfter("clean${variant.mergeAssets.name.capitalize()}")
                     into variant.mergeAssets.outputDir
                 }
-                flutterTasks.each { flutterTask ->
+                flutterTasks.each { flutterTask -> 
                     with flutterTask.assets
+                    // Include the snapshots in the assets directory.
+                    if (flutterBuildMode != 'release' || targetPlatformValue != 'android-arm-all') {
+                        with flutterTask.snapshots
+                    }
                 }
             }
             if (packageAssets) {
@@ -648,6 +576,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     @Optional @Input
     String baselineDir
     @Optional @Input
+    Boolean buildSharedLibrary
+    @Optional @Input
     String targetPlatform
     @Input
     String abi
@@ -692,10 +622,8 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "build", "aot"
                 args "--suppress-analytics"
                 args "--quiet"
-                args "--build-shared-library"
                 args "--target", targetPath
                 args "--output-dir", "${intermediateDir}"
-                args "--target-platform", "${targetPlatform}"
                 if (trackWidgetCreation) {
                     args "--track-widget-creation"
                 }
@@ -704,6 +632,14 @@ abstract class BaseFlutterTask extends DefaultTask {
                 }
                 if (extraGenSnapshotOptions != null) {
                     args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
+                }
+                if (buildSharedLibrary) {
+                    args "--build-shared-library"
+                }
+                if (targetPlatform == null) {
+                    args "--target-platform", "android-arm"
+                } else {
+                    args "--target-platform", "${targetPlatform}"
                 }
                 args "--${buildMode}"
             }
@@ -719,7 +655,6 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "build", "bundle"
             args "--suppress-analytics"
             args "--target", targetPath
-            args "--target-platform", "${targetPlatform}"
             if (verbose) {
                 args "--verbose"
             }
@@ -752,6 +687,9 @@ abstract class BaseFlutterTask extends DefaultTask {
             }
             if (extraGenSnapshotOptions != null) {
                 args "--extra-gen-snapshot-options", "${extraGenSnapshotOptions}"
+            }
+            if (targetPlatform != null) {
+                args "--target-platform", "${targetPlatform}"
             }
             if (buildMode == "release" || buildMode == "profile") {
                 args "--precompiled"
@@ -793,7 +731,14 @@ class FlutterTask extends BaseFlutterTask {
             from "${intermediateDir}"
 
             if (buildMode == 'release' || buildMode == 'profile') {
-                include "app.so"
+                if (buildSharedLibrary) {
+                    include "app.so"
+                } else {
+                    include "vm_snapshot_data"
+                    include "vm_snapshot_instr"
+                    include "isolate_snapshot_data"
+                    include "isolate_snapshot_instr"
+                }
             }
         }
     }
@@ -860,7 +805,7 @@ class FlutterEventLogger extends BuildAdapter implements TaskExecutionListener {
 
     void buildFinished(BuildResult result) {
         if (result.failure != null) {
-            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.FLUTTER_BUILD_PREFIX)) {
+            if (!(result.failure instanceof GradleException) || !mostRecentTask.startsWith(FlutterPlugin.flutterBuildPrefix)) {
                 result.rethrowFailure()
             }
         }
