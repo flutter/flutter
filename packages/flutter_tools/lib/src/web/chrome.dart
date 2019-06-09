@@ -108,21 +108,18 @@ class ChromeLauncher {
       .listen(printTrace);
 
     // Wait until the DevTools are listening before trying to connect.
-    if (!headless) {
-      await process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .firstWhere((String line) => line.startsWith('DevTools listening'))
-          .timeout(const Duration(seconds: 60), onTimeout: () {
-            throwToolExit('Unable to connect to Chrome DevTools.');
-            return null;
-          });
-    } else {
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printTrace);
-    }
+    await process.stderr
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map((String line) {
+          printTrace(line);
+          return line;
+        })
+        .firstWhere((String line) => line.startsWith('DevTools listening'))
+        .timeout(const Duration(seconds: 60), onTimeout: () {
+          throwToolExit('Unable to connect to Chrome DevTools.');
+          return null;
+        });
     final Uri remoteDebuggerUri = await _getRemoteDebuggerUrl(Uri.parse('http://localhost:$port'));
 
     return _connect(Chrome._(
