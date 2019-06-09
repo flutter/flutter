@@ -180,7 +180,7 @@ void main() {
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
     expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, height: 123.0x, ellipsis: unspecified, locale: unspecified)');
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
 
   test('TextStyle with text direction', () {
@@ -212,7 +212,7 @@ void main() {
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   test('TextStyle font family fallback', () {
     const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
@@ -237,7 +237,7 @@ void main() {
 
     final ui.TextStyle uis1 = s2.getTextStyle();
     expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   test('TextStyle.debugLabel', () {
     const TextStyle unknown = TextStyle();
@@ -353,5 +353,15 @@ void main() {
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).backgroundColor, isNull);
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .25).background.color, red);
     expect(TextStyle.lerp(redPaintTextStyle, bluePaintTextStyle, .75).background.color, blue);
+  });
+
+  test('TextStyle strut textScaleFactor', () {
+    const TextStyle style0 = TextStyle(fontSize: 10);
+    final ui.ParagraphStyle paragraphStyle0 = style0.getParagraphStyle(textScaleFactor: 2.5);
+
+    const TextStyle style1 = TextStyle(fontSize: 25);
+    final ui.ParagraphStyle paragraphStyle1 = style1.getParagraphStyle(textScaleFactor: 1);
+
+    expect(paragraphStyle0 == paragraphStyle1, true);
   });
 }

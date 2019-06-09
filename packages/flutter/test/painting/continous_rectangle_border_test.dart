@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -43,7 +42,7 @@ void main() {
     const BorderSide side = BorderSide(width: 4.0);
     expect(const ContinuousRectangleBorder(side: side).getOuterPath(rect1), looksLikeRect1);
     expect(const ContinuousRectangleBorder(side: side).getInnerPath(rect1), looksLikeInnerPath);
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   test('ContinuousRectangleBorder non-zero BorderRadius', () {
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
@@ -56,7 +55,7 @@ void main() {
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   testWidgets('Golden test even radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -73,9 +72,9 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_even_radii.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
-  }, tags: 'golden');
+  }, skip: isBrowser);
 
   testWidgets('Golden test varying radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -95,9 +94,9 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
-  }, tags: 'golden');
+  }, skip: isBrowser);
 
   testWidgets('Golden test large radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -114,8 +113,8 @@ void main() {
     await expectLater(
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
-  }, tags: 'golden');
+  }, skip: isBrowser);
 
 }

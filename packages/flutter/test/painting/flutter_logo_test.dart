@@ -79,7 +79,7 @@ void main() {
     expect(
       FlutterLogoDecoration.lerp(null, end, 0.5).toString(),
       equals(
-        'FlutterLogoDecoration(Color(0xffffffff)/Color(0xff000000) on Color(0xff81d4fa),' + ignoreWebNumericQuirks(' style: stacked, transition -1.0:0.5)'),
+        'FlutterLogoDecoration(Color(0xffffffff)/Color(0xff000000) on Color(0xff81d4fa), style: stacked, transition -1.0:0.5)',
       ),
     );
   });
