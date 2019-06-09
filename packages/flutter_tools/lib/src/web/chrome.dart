@@ -101,8 +101,8 @@ class ChromeLauncher {
         ...<String>['--headless', '--disable-gpu'],
       url,
     ];
-    printTrace(processManager.canRun('chrome').toString());
-    final Process process = await processManager.start(args);
+    printTrace(processManager.canRun('google-chrome').toString());
+    final Process process = await processManager.start(args, runInShell: true);
     unawaited(process.exitCode.then((int code) {
       printTrace('chrome exited with code $code');
     }));

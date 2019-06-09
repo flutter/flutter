@@ -33,4 +33,4 @@ echo "Updating packages for Flutter."
 # Download chrome stable.
 echo "Downloading Chrom stable"
 wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-dpkg -i google-chrome-stable_current_amd64.deb
+sudo dpkg -i google-chrome-stable_current_amd64.deb
