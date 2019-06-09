@@ -45,6 +45,7 @@ Future<int> runTests(
   String icudtlPath,
   Directory coverageDirectory,
   bool web = false,
+  bool lowResourcesMode = false,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -73,13 +74,17 @@ Future<int> runTests(
       .absolute
       .uri
       .toFilePath();
-    await webCompilationProxy.initialize(
+    final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
+      lowResourcesMode: lowResourcesMode,
       targets: testFiles.map((String testFile) {
         return fs.path.relative(testFile, from: flutterProject.directory.path);
       }).toList(),
     );
+    if (!result) {
+      throwToolExit('Failed to compile tests');
+    }
     testArgs.add('--platform=chrome');
     testArgs.add('--precompiled=$tempBuildDir');
     testArgs.add('--');

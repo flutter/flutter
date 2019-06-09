@@ -173,10 +173,12 @@ class FlutterWebPlatform extends PlatformPlugin {
     if (request.url.path.contains('flutter_goldens')) {
       final Map<String, Object> body = json.decode(await request.readAsString());
       final String goldenKey = body['key'];
-      final double left = body['left'];
-      final double right = body['right'];
-      final double top = body['top'];
-      final double bottom = body['bottom'];
+      // TODO(jonahwilliams): figure out how to correctly translate the
+      // coordinates from the element into page coordinates.
+      // final num left = body['left'];
+      // final num right = body['right'];
+      // final num top = body['top'];
+      // final num bottom = body['bottom'];
       final Runtime browser = Runtime.chrome;
       final BrowserManager browserManager = await _browserManagerFor(browser);
       final ChromeTab chromeTab = await browserManager._browser.chromeConnection.getTab((ChromeTab tab) {
@@ -184,12 +186,13 @@ class FlutterWebPlatform extends PlatformPlugin {
       });
       final WipConnection connection = await chromeTab.connect();
       final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
-        'clip': <String, Object>{
-          'x': left,
-          'y': top,
-          'width': right - left,
-          'height': bottom - top,
-        }
+        // 'clip': <String, Object>{
+        //   'x': left.toDouble(),
+        //   'y': top.toDouble(),
+        //   'width': (right - left).toDouble(),
+        //   'height': (bottom - top).toDouble(),
+        //   'scale': 1.0,
+        // }
       });
       final String output = response.result['data'];
       fs.file(goldenKey)

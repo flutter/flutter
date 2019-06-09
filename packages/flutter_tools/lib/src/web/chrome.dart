@@ -102,11 +102,19 @@ class ChromeLauncher {
       url,
     ];
     final Process process = await processManager.start(args);
+    process.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .listen(printTrace);
 
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
+        .map((String line) {
+          printTrace(line);
+          return line;
+        })
         .firstWhere((String line) => line.startsWith('DevTools listening'))
         .timeout(const Duration(seconds: 60), onTimeout: () {
           throwToolExit('Unable to connect to Chrome DevTools.');

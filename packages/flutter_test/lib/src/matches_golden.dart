@@ -9,7 +9,7 @@ import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementa
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 import '_matches_golden_io.dart'
-  if (dart.library.html) '_matches_golden_http.dart' as _golden;
+  if (dart.library.html) '_matches_golden_web.dart' as _golden;
 import 'finders.dart';
 import 'goldens.dart';
 

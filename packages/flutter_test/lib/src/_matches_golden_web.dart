@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:html' as html; // ignore: uri_does_not_exist
 import 'dart:ui';
 
@@ -49,16 +50,17 @@ class _MatchesGoldenFile extends AsyncMatcher {
       final html.HttpRequest request = await html.HttpRequest.request(
         'flutter_goldens',
         method: 'POST',
-        sendData: <String, Object>{
+        sendData: json.encode(<String, Object>{
           'key': key.toString(),
           'left': boundsInScreen.left,
           'right': boundsInScreen.right,
           'top': boundsInScreen.top,
           'bottom': boundsInScreen.bottom,
-        },
+        }),
       );
-      final bool response = request.response;
-      return response ? null : 'does not match';
+      final Object response = request.response;
+      print(response);
+      return response == 'true' ? null : 'does not match';
     }, additionalTime: const Duration(seconds: 11));
   }
 

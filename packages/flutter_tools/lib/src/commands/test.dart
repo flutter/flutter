@@ -104,12 +104,19 @@ class TestCommand extends FastFlutterCommand {
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
         help: 'The platform to run the unit tests on. Defaults to "tester".'
+      )
+      ..addFlag('low-resources-mode',
+        defaultsTo: false,
+        negatable: false,
+        help: 'Run compiler in a configuration that is slower but uses fewer'
+        ' resources, generally for CI systems.'
       );
   }
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
+    DevelopmentArtifact.web,
   };
 
   @override
@@ -238,6 +245,7 @@ class TestCommand extends FastFlutterCommand {
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: argResults['platform'] == 'chrome',
+      lowResourcesMode: argResults['low-resources-mode'],
     );
 
     if (collector != null) {

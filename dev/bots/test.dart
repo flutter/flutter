@@ -341,15 +341,8 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
-  final List<String> testfiles = <String>[];
-  final Directory foundation = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test', 'foundation'));
-  for (FileSystemEntity entity in foundation.listSync(recursive: true)) {
-    if (entity is File) {
-      testfiles.add(entity.path);
-    }
-  }
-  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: true, tests: <String>[
-    path.join('test', 'foundation'),
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
+    'test/foundation/binary_search_test.dart',
   ]);
 }
 
@@ -612,13 +605,11 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
-  final List<String> args = <String>['test', '--platform=chrome'];
+  final List<String> args = <String>['test', '--platform=chrome', '--low-resources-mode'];
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  args.add('--machine');
   args.addAll(tests);
-
   await runCommand(
     flutter,
     args,
