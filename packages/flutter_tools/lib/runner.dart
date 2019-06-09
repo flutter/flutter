@@ -57,7 +57,7 @@ Future<int> run(
     );
 
     String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
-    return runZoned<Future<int>>(() async {
+    return await runZoned<Future<int>>(() async {
       try {
         await runner.run(args);
         return await _exit(0);
