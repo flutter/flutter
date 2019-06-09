@@ -412,8 +412,8 @@ class AndroidDevice extends Device {
         androidArch = AndroidArch.x86;
         break;
       default:
-      printError('Android platforms are only supported.');
-      return LaunchResult.failed();
+        printError('Android platforms are only supported.');
+        return LaunchResult.failed();
     }
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
