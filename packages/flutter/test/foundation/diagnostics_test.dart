@@ -1187,7 +1187,7 @@ void main() {
     expect(missing.isFiltered(DiagnosticLevel.info), isFalse);
     validateObjectFlagPropertyJsonSerialization(present);
     validateObjectFlagPropertyJsonSerialization(missing);
-  });
+  }, skip: isBrowser);
 
   test('describe bool property', () {
     final FlagProperty yes = FlagProperty(

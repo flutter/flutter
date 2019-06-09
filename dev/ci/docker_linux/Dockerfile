@@ -1,4 +1,4 @@
-# Flutter (https://flutter.dev) Developement Environment for Linux
+# Flutter (https://flutter.dev) Development Environment for Linux
 # ===============================================================
 #
 # This environment passes all Linux Flutter Doctor checks and is sufficient
@@ -26,6 +26,10 @@ RUN apt-get install -y --no-install-recommends \
   ca-certificates \
   gnupg
 
+# Add repo for chrome stable
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add -
+RUN echo 'deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main' | tee /etc/apt/sources.list.d/google-chrome.list
+
 # Add nodejs repository to apt sources and install it.
 ENV NODEJS_INSTALL="/opt/nodejs_install"
 RUN mkdir -p "${NODEJS_INSTALL}"
@@ -43,7 +47,8 @@ RUN apt-get install -y --no-install-recommends \
   libstdc++6 \
   libglu1-mesa \
   build-essential \
-  default-jdk-headless
+  default-jdk-headless \
+  google-chrome-stable
 
 # Install the Android SDK Dependency.
 ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip"
