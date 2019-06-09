@@ -8,7 +8,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 const bool skipTestsWithKnownBugs = true;
 const bool skipExpectsWithKnownBugs = false;
-const bool skipTestOnWeb = identical(0, 0.0);
 
 void main() {
   test('TextPainter - basic words', () {
