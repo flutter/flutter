@@ -137,7 +137,7 @@ class AOTSnapshotter {
       final String aotSharedLibrary = fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
-      genSnapshotArgs.add('--elf=$aotSharedLibrary');
+      genSnapshotArgs.add('--assembly=$aotSharedLibrary');
     } else {
       // Blob AOT snapshot.
       final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');

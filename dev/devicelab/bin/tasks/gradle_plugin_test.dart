@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
@@ -47,263 +46,6 @@ Future<void> main() async {
     print('\nUsing JAVA_HOME=$javaHome');
 
     try {
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('APK content for task assembleDebug without explicit target platform');
-        await pluginProject.runGradleTask('assembleDebug');
-
-        if (!pluginProject.hasDebugApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/armeabi-v7a/libflutter.so',
-          // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
-          'lib/x86_64/libflutter.so',
-        ], apkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'lib/arm64-v8a/libapp.so',
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
-        ], apkFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('APK content for task assembleDebug with target platform = android-arm');
-        await pluginProject.runGradleTask('assembleDebug',
-            options: <String>['-Ptarget-platform=android-arm']);
-
-        if (!pluginProject.hasDebugApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/armeabi-v7a/libflutter.so',
-          // Debug mode intentionally includes `x86` and `x86_64`.
-          'lib/x86/libflutter.so',
-          'lib/x86_64/libflutter.so',
-        ], apkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libapp.so',
-          'lib/x86/libapp.so',
-          'lib/x86_64/libapp.so',
-        ], apkFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('APK content for task assembleRelease without explicit target platform');
-        await pluginProject.runGradleTask('assembleRelease');
-
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
-          'lib/armeabi-v7a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
-        ], apkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('APK content for task assembleRelease with target platform = android-arm');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm']);
-
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/armeabi-v7a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
-        ], apkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('APK content for task assembleRelease with target platform = android-arm64');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm64']);
-
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
-        ], apkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'lib/armeabi-v7a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('APK content for task assembleRelease with target platform = android-arm, android-arm64');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm,android-arm64']);
-
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/armeabi-v7a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
-        ], apkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('APK content for task assembleRelease with '
-                'target platform = android-arm, android-arm64 and split per ABI');
-        await pluginProject.runGradleTask('assembleRelease',
-            options: <String>['-Ptarget-platform=android-arm,android-arm64', '-Psplit-per-abi=true']);
-
-        if (!pluginProject.hasReleaseArmApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk at: ${pluginProject.releaseArmApkPath}');
-
-        final Iterable<String> armApkFiles = await pluginProject.getFilesInApk(pluginProject.releaseArmApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/armeabi-v7a/libflutter.so',
-          'lib/armeabi-v7a/libapp.so',
-        ], armApkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], armApkFiles);
-
-        if (!pluginProject.hasReleaseArm64Apk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk at: ${pluginProject.releaseArm64ApkPath}');
-
-        final Iterable<String> arm64ApkFiles = await pluginProject.getFilesInApk(pluginProject.releaseArm64ApkPath);
-
-        _checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
-        ], arm64ApkFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], arm64ApkFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('App bundle content for task bundleRelease without explicit target platform');
-        await pluginProject.runGradleTask('bundleRelease');
-
-        if (!pluginProject.hasReleaseBundle)
-          throw TaskResult.failure(
-              'Gradle did not produce a release aab file at: ${pluginProject.releaseBundlePath}');
-
-        final Iterable<String> bundleFiles = await pluginProject.getFilesInAppBundle(pluginProject.releaseBundlePath);
-
-        _checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
-          'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
-          'base/lib/armeabi-v7a/libapp.so',
-          'base/lib/armeabi-v7a/libflutter.so',
-        ], bundleFiles);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('App bundle content for task bundleRelease with target platform = android-arm');
-        await pluginProject.runGradleTask('bundleRelease',
-            options: <String>['-Ptarget-platform=android-arm']);
-
-        if (!pluginProject.hasReleaseBundle)
-          throw TaskResult.failure(
-              'Gradle did not produce a release aab file at: ${pluginProject.releaseBundlePath}');
-
-        final Iterable<String> bundleFiles = await pluginProject.getFilesInAppBundle(pluginProject.releaseBundlePath);
-
-        _checkItContains<String>(<String>[
-          'base/manifest/AndroidManifest.xml',
-          'base/dex/classes.dex',
-          'base/lib/armeabi-v7a/libapp.so',
-          'base/lib/armeabi-v7a/libflutter.so',
-        ], bundleFiles);
-
-        _checkItDoesNotContain<String>(<String>[
-          'base/lib/arm64-v8a/libapp.so',
-          'base/lib/arm64-v8a/libflutter.so',
-        ], bundleFiles);
-      });
-
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
@@ -338,9 +80,32 @@ Future<void> main() async {
               'release',
               targetPlatform);
 
-          final String sharedLibrary = path.join(androidArmSnapshotPath, 'app.so');
-          if (!File(sharedLibrary).existsSync()) {
-            throw TaskResult.failure('Shared library doesn\'t exist');
+          final String isolateSnapshotData =
+              path.join(androidArmSnapshotPath, 'isolate_snapshot_data');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $isolateSnapshotData');
+          }
+
+          final String isolateSnapshotInstr =
+              path.join(androidArmSnapshotPath, 'isolate_snapshot_instr');
+          if (!File(isolateSnapshotInstr).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $isolateSnapshotInstr');
+          }
+
+          final String vmSnapshotData =
+              path.join(androidArmSnapshotPath, 'vm_snapshot_data');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $vmSnapshotData');
+          }
+
+          final String vmSnapshotInstr =
+              path.join(androidArmSnapshotPath, 'vm_snapshot_instr');
+          if (!File(isolateSnapshotData).existsSync()) {
+            throw TaskResult.failure(
+                'Snapshot doesn\'t exist: $vmSnapshotInstr');
           }
         }
       });
@@ -416,23 +181,6 @@ Future<void> main() async {
       return TaskResult.failure(e.toString());
     }
   });
-}
-
-
-void _checkItContains<T>(Iterable<T> values, Iterable<T> collection) {
-  for (T value in values) {
-    if (!collection.contains(value)) {
-      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
-    }
-  }
-}
-
-void _checkItDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
-  for (T value in values) {
-    if (collection.contains(value)) {
-      throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
-    }
-  }
 }
 
 TaskResult _failure(String message, ProcessResult result) {
@@ -540,37 +288,12 @@ class FlutterPluginProject {
   String get examplePath => path.join(rootPath, 'example');
   String get exampleAndroidPath => path.join(examplePath, 'android');
   String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
-  String get releaseApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-release.apk');
-  String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-armeabi-v7a-release.apk');
-  String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-arm64-v8a-release.apk');
-  String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
-
-  bool get hasDebugApk => File(debugApkPath).existsSync();
-  bool get hasReleaseApk => File(releaseApkPath).existsSync();
-  bool get hasReleaseArmApk => File(releaseArmApkPath).existsSync();
-  bool get hasReleaseArm64Apk => File(releaseArm64ApkPath).existsSync();
-  bool get hasReleaseBundle => File(releaseBundlePath).existsSync();
 
   Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
-  Future<Iterable<String>> getFilesInApk(String apk) async {
-    final Process unzip = await startProcess(
-      'unzip',
-      <String>['-v', apk],
-      isBot: false, // we just want to test the output, not have any debugging info
-    );
-    return unzip.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .map((String line) => line.split(' ').last)
-        .toList();
-  }
-
-  Future<Iterable<String>> getFilesInAppBundle(String bundle) {
-    return getFilesInApk(bundle);
-  }
+  bool get hasDebugApk => File(debugApkPath).existsSync();
 }
 
 Future<void> _runGradleTask({String workingDirectory, String task, List<String> options}) async {

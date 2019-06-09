@@ -388,27 +388,18 @@ class AndroidDevice extends Device {
     if (!await _checkForSupportedAdbVersion() || !await _checkForSupportedAndroidVersion())
       return LaunchResult.failed();
 
-
-    if (!debuggingOptions.buildInfo.isDebug &&
-          !debuggingOptions.buildInfo.isDynamic) {
-      printError('Profile and release builds are only supported.');
+    final TargetPlatform devicePlatform = await targetPlatform;
+    if (!(devicePlatform == TargetPlatform.android_arm ||
+          devicePlatform == TargetPlatform.android_arm64) &&
+        !(debuggingOptions.buildInfo.isDebug ||
+          debuggingOptions.buildInfo.isDynamic)) {
+      printError('Profile and release builds are only supported on ARM targets.');
       return LaunchResult.failed();
     }
 
-    final TargetPlatform devicePlatform = await targetPlatform;
-
-    AndroidArch androidArch;
-    switch (devicePlatform) {
-      case TargetPlatform.android_arm:
-        androidArch = AndroidArch.armeabi_v7a;
-        break;
-      case TargetPlatform.android_arm64:
-        androidArch = AndroidArch.arm64_v8a;
-        break;
-      default:
-        printError('ARM targets are only supported.');
-        return LaunchResult.failed();
-    }
+    BuildInfo buildInfo = debuggingOptions.buildInfo;
+    if (buildInfo.targetPlatform == null && devicePlatform == TargetPlatform.android_arm64)
+      buildInfo = buildInfo.withTargetPlatform(TargetPlatform.android_arm64);
 
     if (!prebuiltApplication || androidSdk.licensesAvailable && androidSdk.latestVersion == null) {
       printTrace('Building APK');
@@ -416,9 +407,7 @@ class AndroidDevice extends Device {
       await buildApk(
           project: project,
           target: mainPath,
-          androidBuildInfo: AndroidBuildInfo(debuggingOptions.buildInfo,
-            targetArchs: <AndroidArch>[androidArch]
-          ),
+          buildInfo: buildInfo,
       );
       // Package has been built, so we can get the updated application ID and
       // activity name from the .apk.
