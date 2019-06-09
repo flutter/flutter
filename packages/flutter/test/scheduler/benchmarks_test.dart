@@ -35,11 +35,7 @@ class TestBinding extends LiveTestWidgetsFlutterBinding {
 }
 
 void main() {
-  TestBinding binding;
-
-  setUp(() {
-    binding = TestBinding();
-  });
+  final TestBinding binding = TestBinding();
 
   test('test pumpBenchmark() only runs one frame', () async {
     await benchmarkWidgets((WidgetTester tester) async {
@@ -67,6 +63,9 @@ void main() {
 
       expect(endFramesBegun, equals(startFramesBegun + 1));
       expect(endFramesDrawn, equals(startFramesDrawn + 1));
-    });
-  }, tags: 'web_unimplemented');
+    },
+    // We are not interested in the performance of the "benchmark", we are just
+    // testing the behavior. So it's OK that asserts are enabled.
+    mayRunWithAsserts: true);
+  }, skip: isBrowser);
 }

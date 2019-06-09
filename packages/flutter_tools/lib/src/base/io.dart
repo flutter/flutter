@@ -47,6 +47,8 @@ export 'dart:io'
         HttpClient,
         HttpClientRequest,
         HttpClientResponse,
+        // TODO(tvolkert): Uncomment (flutter/flutter#33791)
+        //HttpClientResponseCompressionState,
         HttpHeaders,
         HttpRequest,
         HttpServer,

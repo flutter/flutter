@@ -282,7 +282,7 @@ class FlutterErrorDetails extends Diagnosticable {
       // Regular _AssertionErrors thrown by assert() put the message last, after
       // some code snippets. This leads to ugly messages. To avoid this, we move
       // the assertion message up to before the code snippets, separated by a
-      // newline, if we recognise that format is being used.
+      // newline, if we recognize that format is being used.
       final Object message = exception.message;
       final String fullMessage = exception.toString();
       if (message is String && message != fullMessage) {
