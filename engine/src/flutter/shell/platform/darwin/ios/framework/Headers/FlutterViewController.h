@@ -18,7 +18,7 @@
 @class FlutterEngine;
 
 /**
- * The name used for semantic update nofications via `NSNotificationCenter`.
+ * The name used for semantic update notifications via `NSNotificationCenter`.
  *
  * The object passed as the sender is the `FlutterViewController` associated
  * with the update.
