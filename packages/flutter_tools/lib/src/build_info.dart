@@ -17,8 +17,6 @@ class BuildInfo {
     this.compilationTraceFilePath,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
-    this.buildSharedLibrary,
-    this.targetPlatform,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.buildNumber,
@@ -49,12 +47,6 @@ class BuildInfo {
 
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
-
-  /// Whether to prefer AOT compiling to a *so file.
-  final bool buildSharedLibrary;
-
-  /// Target platform for the build (e.g. android_arm versus android_arm64).
-  final TargetPlatform targetPlatform;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.
@@ -98,15 +90,31 @@ class BuildInfo {
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
+}
 
-  BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
-      BuildInfo(mode, flavor,
-          trackWidgetCreation: trackWidgetCreation,
-          compilationTraceFilePath: compilationTraceFilePath,
-          extraFrontEndOptions: extraFrontEndOptions,
-          extraGenSnapshotOptions: extraGenSnapshotOptions,
-          buildSharedLibrary: buildSharedLibrary,
-          targetPlatform: targetPlatform);
+/// Information about an Android build to be performed or used.
+class AndroidBuildInfo {
+  const AndroidBuildInfo(
+    this.buildInfo, {
+    this.targetArchs = const <AndroidArch>[
+      AndroidArch.armeabi_v7a,
+      AndroidArch.arm64_v8a,
+    ],
+    this.splitPerAbi = false,
+  });
+
+  // The build info containing the mode and flavor.
+  final BuildInfo buildInfo;
+
+  /// Whether to split the shared library per ABI.
+  ///
+  /// When this is false, multiple ABIs will be contained within one primary
+  /// build artifact. When this is true, multiple build artifacts (one per ABI)
+  /// will be produced.
+  final bool splitPerAbi;
+
+  /// The target platforms for the build.
+  final Iterable<AndroidArch> targetArchs;
 }
 
 /// The type of build.
@@ -254,6 +262,13 @@ enum IOSArch {
   arm64,
 }
 
+enum AndroidArch {
+  armeabi_v7a,
+  arm64_v8a,
+  x86,
+  x86_64,
+}
+
 /// The default set of iOS device architectures to build for.
 const List<IOSArch> defaultIOSArchs = <IOSArch>[
   IOSArch.arm64,
@@ -332,6 +347,51 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.web_javascript;
   }
   assert(platform != null);
+  return null;
+}
+
+AndroidArch getAndroidArchForName(String platform) {
+  switch (platform) {
+    case 'android-arm':
+      return AndroidArch.armeabi_v7a;
+    case 'android-arm64':
+      return AndroidArch.arm64_v8a;
+    case 'android-x64':
+      return AndroidArch.x86_64;
+    case 'android-x86':
+      return AndroidArch.x86;
+  }
+  assert(false);
+  return null;
+}
+
+String getNameForAndroidArch(AndroidArch arch) {
+  switch (arch) {
+    case AndroidArch.armeabi_v7a:
+      return 'armeabi-v7a';
+    case AndroidArch.arm64_v8a:
+      return 'arm64-v8a';
+    case AndroidArch.x86_64:
+      return 'x86_64';
+    case AndroidArch.x86:
+      return 'x86';
+  }
+  assert(false);
+  return null;
+}
+
+String getPlatformNameForAndroidArch(AndroidArch arch) {
+  switch (arch) {
+    case AndroidArch.armeabi_v7a:
+      return 'android-arm';
+    case AndroidArch.arm64_v8a:
+      return 'android-arm64';
+    case AndroidArch.x86_64:
+      return 'android-x64';
+    case AndroidArch.x86:
+      return 'android-x86';
+  }
+  assert(false);
   return null;
 }
 
