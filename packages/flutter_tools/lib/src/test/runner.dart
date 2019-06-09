@@ -73,13 +73,16 @@ Future<int> runTests(
       .absolute
       .uri
       .toFilePath();
-    await webCompilationProxy.initialize(
+    final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
       targets: testFiles.map((String testFile) {
         return fs.path.relative(testFile, from: flutterProject.directory.path);
       }).toList(),
     );
+    if (!result) {
+      throwToolExit('Failed to compile tests');
+    }
     testArgs.add('--platform=chrome');
     testArgs.add('--precompiled=$tempBuildDir');
     testArgs.add('--');
