@@ -623,6 +623,7 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
       timeout: timeout,
       environment: <String, String>{
         'FLUTTER_WEB': 'true',
+        'FLUTTER_LOW_RESOURCE_MODE': 'true',
       },
     );
   } finally {
