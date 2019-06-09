@@ -83,7 +83,6 @@ class WebCompilationProxy {
     @required List<String> targets,
     String testOutputDir,
     bool release,
-    bool lowResourcesMode,
   }) async {
     throw UnimplementedError();
   }

@@ -97,9 +97,8 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
-      '--no-sandbox', // TODO(jonahwilliams): remove flag.
       if (headless)
-        ...<String>['--headless', '--disable-gpu'],
+        ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
       url,
     ];
 

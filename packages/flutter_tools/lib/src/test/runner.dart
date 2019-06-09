@@ -45,7 +45,6 @@ Future<int> runTests(
   String icudtlPath,
   Directory coverageDirectory,
   bool web = false,
-  bool lowResourcesMode = false,
 }) async {
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[];
@@ -77,7 +76,6 @@ Future<int> runTests(
     final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
-      lowResourcesMode: lowResourcesMode,
       targets: testFiles.map((String testFile) {
         return fs.path.relative(testFile, from: flutterProject.directory.path);
       }).toList(),

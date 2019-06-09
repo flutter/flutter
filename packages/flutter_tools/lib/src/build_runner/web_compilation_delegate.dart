@@ -197,7 +197,6 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     @required List<String> targets,
     String testOutputDir,
     bool release = false,
-    bool lowResourcesMode = false,
   }) async {
     // Create the .dart_tool directory if it doesn't exist.
     projectDirectory.childDirectory('.dart_tool').createSync();
@@ -227,7 +226,6 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       skipBuildScriptCheck: true,
       trackPerformance: false,
       deleteFilesByDefault: true,
-      enableLowResourcesMode: lowResourcesMode,
     );
     final Set<core.BuildDirectory> buildDirs = <core.BuildDirectory>{
       if (testOutputDir != null)
