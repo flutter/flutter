@@ -226,6 +226,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       skipBuildScriptCheck: true,
       trackPerformance: false,
       deleteFilesByDefault: true,
+      enableLowResourcesMode: true,
     );
     final Set<core.BuildDirectory> buildDirs = <core.BuildDirectory>{
       if (testOutputDir != null)
