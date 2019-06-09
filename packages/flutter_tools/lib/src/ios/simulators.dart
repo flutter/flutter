@@ -387,7 +387,8 @@ class IOSSimulator extends Device {
     final BuildInfo debugBuildInfo = BuildInfo(BuildMode.debug, buildInfo.flavor,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions);
+        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
+        buildSharedLibrary: buildInfo.buildSharedLibrary);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,

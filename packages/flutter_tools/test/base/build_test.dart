@@ -80,7 +80,7 @@ void main() {
     });
   });
 
-  group('Snapshotter - AOT', () {
+  group('Snapshotter - iOS AOT', () {
     const String kSnapshotDart = 'snapshot.dart';
     String skyEnginePath;
 
@@ -395,11 +395,10 @@ void main() {
       ]);
     }, overrides: contextOverrides);
 
-    testUsingContext('builds shared library for android-arm', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
+    testUsingContext('returns failure if buildSharedLibrary is true but no NDK is found', () async {
       final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
+
+      when(mockAndroidSdk.ndk).thenReturn(null);
 
       final int genSnapshotExitCode = await snapshotter.build(
         platform: TargetPlatform.android_arm,
@@ -410,45 +409,8 @@ void main() {
         buildSharedLibrary: true,
       );
 
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm);
-      expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--snapshot_kind=app-aot-elf',
-        '--elf=build/foo/app.so',
-        '--no-sim-use-hardfp',
-        '--no-use-integer-division',
-        'main.dill',
-      ]);
-    }, overrides: contextOverrides);
-
-    testUsingContext('builds shared library for android-arm64', () async {
-      fs.file('main.dill').writeAsStringSync('binary magic');
-
-      final String outputPath = fs.path.join('build', 'foo');
-      fs.directory(outputPath).createSync(recursive: true);
-
-      final int genSnapshotExitCode = await snapshotter.build(
-        platform: TargetPlatform.android_arm64,
-        buildMode: BuildMode.release,
-        mainPath: 'main.dill',
-        packagesPath: '.packages',
-        outputPath: outputPath,
-        buildSharedLibrary: true,
-      );
-
-      expect(genSnapshotExitCode, 0);
-      expect(genSnapshot.callCount, 1);
-      expect(genSnapshot.snapshotType.platform, TargetPlatform.android_arm64);
-      expect(genSnapshot.snapshotType.mode, BuildMode.release);
-      expect(genSnapshot.additionalArgs, <String>[
-        '--deterministic',
-        '--snapshot_kind=app-aot-elf',
-        '--elf=build/foo/app.so',
-        'main.dill',
-      ]);
+      expect(genSnapshotExitCode, isNot(0));
+      expect(genSnapshot.callCount, 0);
     }, overrides: contextOverrides);
 
     testUsingContext('builds Android arm release AOT snapshot', () async {
