@@ -97,15 +97,13 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--no-sandbox', // TODO(jonahwilliams): remove flag.
       if (headless)
         ...<String>['--headless', '--disable-gpu'],
       url,
     ];
-    printTrace(processManager.canRun('google-chrome').toString());
+
     final Process process = await processManager.start(args, runInShell: true);
-    unawaited(process.exitCode.then((int code) {
-      printTrace('chrome exited with code $code');
-    }));
 
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr
