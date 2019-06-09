@@ -610,16 +610,22 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
     args.addAll(flutterTestArgs);
 
   args.addAll(tests);
-  await runCommand(
-    flutter,
-    args,
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
-    timeout: timeout,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
-  );
+  final Directory oldCurrent = Directory.current;
+  Directory.current = path.join(flutterRoot, 'packages', 'flutter');
+  try {
+    await runCommand(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      timeout: timeout,
+      environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      },
+    );
+  } finally {
+    Directory.current = oldCurrent;
+  }
 }
 
 Future<void> _runFlutterTest(String workingDirectory, {
