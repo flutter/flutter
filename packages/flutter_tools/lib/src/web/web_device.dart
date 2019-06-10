@@ -115,6 +115,8 @@ class WebDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
+    // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
+    // for the web initialization and server logic.
     return LaunchResult.succeeded(observatoryUri: null);
   }
 
