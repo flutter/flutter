@@ -12,6 +12,151 @@ import 'package:flutter/widgets.dart';
 import 'button.dart';
 import 'theme.dart';
 
+class ToggleButtons extends StatelessWidget {
+  const ToggleButtons({
+    this.children,
+    this.isSelected,
+    this.onPressed,
+    this.color,
+    this.activeColor,
+    this.disabledColor,
+    this.borderColor,
+    this.activeBorderColor,
+    this.disabledBorderColor,
+    this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
+    this.borderWidth = 1.0,
+  }); // borderRadius cannot be null
+
+  final List<Widget> children;
+
+  final List<bool> isSelected;
+
+  final Function onPressed;
+
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
+  final Color color;
+
+  /// The color for [Text] and [Icon] widgets.
+  ///
+  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
+  final Color activeColor;
+
+  /// The color for [Text] and [Icon] widgets if the button is disabled.
+  ///
+  /// If [onPressed] is null, this color will be used.
+  final Color disabledColor;
+
+  final Color borderColor;
+
+  final Color activeBorderColor;
+
+  final Color disabledBorderColor;
+
+  final double borderWidth;
+
+  final BorderRadius borderRadius;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData themeData = Theme.of(context);
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: List<Widget>.generate(children.length, (int index) {
+        BorderSide horizontalBorderSide;
+        BorderSide leadingBorderSide;
+        BorderSide trailingBorderSide;
+
+        if (onPressed != null && isSelected[index]) {
+          horizontalBorderSide = BorderSide(
+            color: borderColor ?? themeData.colorScheme.primary,
+            width: borderWidth,
+          );
+        } else if (onPressed != null && !isSelected[index]) {
+          horizontalBorderSide = BorderSide(
+            color: activeBorderColor ?? themeData.colorScheme.onSurface,
+            width: borderWidth,
+          );
+        } else {
+          horizontalBorderSide = BorderSide(
+            color: disabledBorderColor ?? themeData.disabledColor,
+            width: borderWidth,
+          );
+        }
+
+        if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
+          leadingBorderSide = BorderSide(
+            color: borderColor ?? themeData.colorScheme.primary,
+            width: borderWidth,
+          );
+        } else if (onPressed != null && !isSelected[index]) {
+          leadingBorderSide = BorderSide(
+            color: activeBorderColor ?? themeData.colorScheme.onSurface,
+            width: borderWidth,
+          );
+        } else {
+          leadingBorderSide = BorderSide(
+            color: disabledBorderColor ?? themeData.disabledColor,
+            width: borderWidth,
+          );
+        }
+
+        if (index != children.length - 1) {
+          trailingBorderSide = null;
+        } else {
+          if (onPressed != null && (isSelected[index])) {
+            trailingBorderSide = BorderSide(
+            color: borderColor ?? themeData.colorScheme.primary,
+            width: borderWidth,
+          );
+          } else if (onPressed != null && !isSelected[index]) {
+            trailingBorderSide = BorderSide(
+            color: activeBorderColor ?? themeData.colorScheme.onSurface,
+            width: borderWidth,
+          );
+          } else {
+            trailingBorderSide = BorderSide(
+              color: disabledBorderColor ?? themeData.disabledColor,
+              width: borderWidth,
+            );
+          }
+        }
+
+        // consider rtl languages
+        BorderRadius edgeBorderRadius;
+        if (index == 0) {
+          edgeBorderRadius = BorderRadius.only(
+            topLeft: borderRadius.topLeft,
+            bottomLeft: borderRadius.bottomLeft,
+          );
+        } else if (index == children.length - 1) {
+          edgeBorderRadius = BorderRadius.only(
+            topRight: borderRadius.topRight,
+            bottomRight: borderRadius.bottomRight,
+          );
+        }
+
+        return _ToggleButton(
+          onPressed: onPressed != null
+            ? () { onPressed(index); }
+            : null,
+          selected: isSelected[index],
+          leadingBorderSide: leadingBorderSide,
+          horizontalBorderSide: horizontalBorderSide,
+          trailingBorderSide: trailingBorderSide,
+          borderRadius: edgeBorderRadius ?? BorderRadius.zero,
+          isFirstButton: index == 0,
+          child: children[index],
+        );
+      }),
+    );
+  }
+
+  // TODO(WIP): include debugFillProperties method
+}
+
 /// An individual toggle button, otherwise known as a segmented button.
 ///
 /// This button is used by [ToggleButtons] to implement a set of segmented controls.
@@ -309,149 +454,4 @@ class _SelectToggleButtonRenderObject extends RenderProxyBox {
       context.canvas.drawPath(rightPath, trailingPaint);
     }
   }
-}
-
-class ToggleButtons extends StatelessWidget {
-  const ToggleButtons({
-    this.children,
-    this.isSelected,
-    this.onPressed,
-    this.color,
-    this.activeColor,
-    this.disabledColor,
-    this.borderColor,
-    this.activeBorderColor,
-    this.disabledBorderColor,
-    this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
-    this.borderWidth = 1.0,
-  }); // borderRadius cannot be null
-
-  final List<Widget> children;
-
-  final List<bool> isSelected;
-
-  final Function onPressed;
-
-  /// The color for [Text] and [Icon] widgets.
-  ///
-  /// If [selected] is set to false and [onPressed] is not null, this color will be used.
-  final Color color;
-
-  /// The color for [Text] and [Icon] widgets.
-  ///
-  /// If [selected] is set to true and [onPressed] is not null, this color will be used.
-  final Color activeColor;
-
-  /// The color for [Text] and [Icon] widgets if the button is disabled.
-  ///
-  /// If [onPressed] is null, this color will be used.
-  final Color disabledColor;
-
-  final Color borderColor;
-
-  final Color activeBorderColor;
-
-  final Color disabledBorderColor;
-
-  final double borderWidth;
-
-  final BorderRadius borderRadius;
-
-  @override
-  Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List<Widget>.generate(children.length, (int index) {
-        BorderSide horizontalBorderSide;
-        BorderSide leadingBorderSide;
-        BorderSide trailingBorderSide;
-
-        if (onPressed != null && isSelected[index]) {
-          horizontalBorderSide = BorderSide(
-            color: borderColor ?? themeData.colorScheme.primary,
-            width: borderWidth,
-          );
-        } else if (onPressed != null && !isSelected[index]) {
-          horizontalBorderSide = BorderSide(
-            color: activeBorderColor ?? themeData.colorScheme.onSurface,
-            width: borderWidth,
-          );
-        } else {
-          horizontalBorderSide = BorderSide(
-            color: disabledBorderColor ?? themeData.disabledColor,
-            width: borderWidth,
-          );
-        }
-
-        if (onPressed != null && (isSelected[index] || (index != 0 && isSelected[index - 1]))) {
-          leadingBorderSide = BorderSide(
-            color: borderColor ?? themeData.colorScheme.primary,
-            width: borderWidth,
-          );
-        } else if (onPressed != null && !isSelected[index]) {
-          leadingBorderSide = BorderSide(
-            color: activeBorderColor ?? themeData.colorScheme.onSurface,
-            width: borderWidth,
-          );
-        } else {
-          leadingBorderSide = BorderSide(
-            color: disabledBorderColor ?? themeData.disabledColor,
-            width: borderWidth,
-          );
-        }
-
-        if (index != children.length - 1) {
-          trailingBorderSide = null;
-        } else {
-          if (onPressed != null && (isSelected[index])) {
-            trailingBorderSide = BorderSide(
-            color: borderColor ?? themeData.colorScheme.primary,
-            width: borderWidth,
-          );
-          } else if (onPressed != null && !isSelected[index]) {
-            trailingBorderSide = BorderSide(
-            color: activeBorderColor ?? themeData.colorScheme.onSurface,
-            width: borderWidth,
-          );
-          } else {
-            trailingBorderSide = BorderSide(
-              color: disabledBorderColor ?? themeData.disabledColor,
-              width: borderWidth,
-            );
-          }
-        }
-
-        // consider rtl languages
-        BorderRadius edgeBorderRadius;
-        if (index == 0) {
-          edgeBorderRadius = BorderRadius.only(
-            topLeft: borderRadius.topLeft,
-            bottomLeft: borderRadius.bottomLeft,
-          );
-        } else if (index == children.length - 1) {
-          edgeBorderRadius = BorderRadius.only(
-            topRight: borderRadius.topRight,
-            bottomRight: borderRadius.bottomRight,
-          );
-        }
-
-        return _ToggleButton(
-          onPressed: onPressed != null
-            ? () { onPressed(index); }
-            : null,
-          selected: isSelected[index],
-          leadingBorderSide: leadingBorderSide,
-          horizontalBorderSide: horizontalBorderSide,
-          trailingBorderSide: trailingBorderSide,
-          borderRadius: edgeBorderRadius ?? BorderRadius.zero,
-          isFirstButton: index == 0,
-          child: children[index],
-        );
-      }),
-    );
-  }
-
-  // TODO(WIP): include debugFillProperties method
 }
