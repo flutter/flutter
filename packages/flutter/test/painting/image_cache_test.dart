@@ -9,8 +9,11 @@ import '../rendering/rendering_tester.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-  TestRenderingFlutterBinding(); // initializes the imageCache
   group(ImageCache, () {
+    setUpAll(() {
+      TestRenderingFlutterBinding(); // initializes the imageCache
+    });
+
     tearDown(() {
       imageCache.clear();
       imageCache.maximumSize = 1000;
