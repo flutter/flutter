@@ -43,73 +43,118 @@ void main() {
       }
     });
 
-    testUsingContext('dart-flags option is not available on stable channel', () async {
-      when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
-          FakeDevice(),
-        ]);
+
+    group('dart-flags option', () {
+      testUsingContext('is not available on stable channel', () async {
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+          return Stream<Device>.fromIterable(<Device>[
+            FakeDevice(),
+          ]);
+        });
+
+        final RunCommand command = TestRunCommand();
+        final List<String> args = <String> [
+                                    'run',
+                                    '--dart-flags', '"--observe"',
+                                    '--no-hot',
+                                  ];
+
+        // Stable branch.
+        try {
+          await createTestCommandRunner(command).run(args);
+          fail('Expect exception');
+        // ignore: unused_catch_clause
+        } on UsageException catch(e) {
+          // Not available while on stable branch.
+        }
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => mockDeviceManager,
+        FlutterVersion: () => mockStableFlutterVersion,
       });
 
-      final RunCommand command = TestRunCommand();
-      final List<String> args = <String> [
-                                  'run',
-                                  '--dart-flags', '"--observe"',
-                                  '--no-hot',
-                                ];
+      testUsingContext('is populated in debug mode', () async {
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+          return Stream<Device>.fromIterable(<Device>[
+            FakeDevice(),
+          ]);
+        });
+        final RunCommand command = TestRunCommand();
+        final List<String> args = <String> [
+                                    'run',
+                                    '--dart-flags', '"--observe"',
+                                    '--no-hot',
+                                  ];
 
-      // Stable branch.
-      try {
-        await createTestCommandRunner(command).run(args);
-        fail('Expect exception');
-      // ignore: unused_catch_clause
-      } on UsageException catch(e) {
-        // Not available while on stable branch.
-      }
-    }, overrides: <Type, Generator>{
-      DeviceManager: () => mockDeviceManager,
-      FlutterVersion: () => mockStableFlutterVersion,
-    });
-
-    testUsingContext('dart-flags option is only populated for debug and profile modes', () async {
-      when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-        return Stream<Device>.fromIterable(<Device>[
-          FakeDevice(),
-        ]);
+        // FakeDevice.startApp checks that --dart-flags doesn't get dropped and
+        // throws ToolExit with FakeDevice.kSuccess if the flag is populated.
+        try {
+          await createTestCommandRunner(command).run(args);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.exitCode, FakeDevice.kSuccess);
+        }
+      }, overrides: <Type, Generator>{
+        ApplicationPackageFactory: () => mockApplicationPackageFactory,
+        DeviceManager: () => mockDeviceManager,
+        FlutterVersion: () => mockUnstableFlutterVersion,
       });
-      final RunCommand command = TestRunCommand();
-      final List<String> args = <String> [
-                                  'run',
-                                  '--dart-flags', '"--observe"',
-                                  '--no-hot',
-                                ];
 
-      // Debug mode
-      try {
-        await createTestCommandRunner(command).run(args);
-        fail('Expect exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode, FakeDevice.kSuccess);
-      }
+      testUsingContext('is populated in profile mode', () async {
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+          return Stream<Device>.fromIterable(<Device>[
+            FakeDevice(),
+          ]);
+        });
+        final RunCommand command = TestRunCommand();
+        final List<String> args = <String> [
+                                    'run',
+                                    '--profile',
+                                    '--dart-flags', '"--observe"',
+                                    '--no-hot',
+                                  ];
 
-      // Profile mode
-      try {
-        await createTestCommandRunner(command).run(<String>[...args, '--profile']);
-        fail('Expect exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode, FakeDevice.kSuccess);
-      }
+        // FakeDevice.startApp checks that --dart-flags doesn't get dropped and
+        // throws ToolExit with FakeDevice.kSuccess if the flag is populated.
+        try {
+          await createTestCommandRunner(command).run(args);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.exitCode, FakeDevice.kSuccess);
+        }
+      }, overrides: <Type, Generator>{
+        ApplicationPackageFactory: () => mockApplicationPackageFactory,
+        DeviceManager: () => mockDeviceManager,
+        FlutterVersion: () => mockUnstableFlutterVersion,
+      });
 
-      // Release mode
-      try {
-        await createTestCommandRunner(command).run(<String>[...args, '--release']);
-        fail('Expect exception');
-      } on ToolExit catch (e) {
-        expect(e.exitCode, FakeDevice.kSuccess);
-      }
-    }, overrides: <Type, Generator>{
-      ApplicationPackageFactory: () => mockApplicationPackageFactory,
-      DeviceManager: () => mockDeviceManager,
-      FlutterVersion: () => mockUnstableFlutterVersion,
+      testUsingContext('is not populated in release mode', () async {
+        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
+          return Stream<Device>.fromIterable(<Device>[
+            FakeDevice(),
+          ]);
+        });
+        final RunCommand command = TestRunCommand();
+        final List<String> args = <String> [
+                                    'run',
+                                    '--release',
+                                    '--dart-flags', '"--observe"',
+                                    '--no-hot',
+                                  ];
+
+        // FakeDevice.startApp checks that --dart-flags *does* get dropped and
+        // throws ToolExit with FakeDevice.kSuccess if the flag is set to the
+        // empty string.
+        try {
+          await createTestCommandRunner(command).run(args);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.exitCode, FakeDevice.kSuccess);
+        }
+      }, overrides: <Type, Generator>{
+        ApplicationPackageFactory: () => mockApplicationPackageFactory,
+        DeviceManager: () => mockDeviceManager,
+        FlutterVersion: () => mockUnstableFlutterVersion,
+      });
     });
 
     testUsingContext('should only request artifacts corresponding to connected devices', () async {
@@ -226,6 +271,9 @@ class FakeDevice extends Fake implements Device {
     bool ipv6 = false,
   }) async {
     final String dartFlags = debuggingOptions.dartFlags;
+    // In release mode, --dart-flags should be set to the empty string and
+    // provided flags should be dropped. In debug and profile modes,
+    // --dart-flags should not be empty.
     if (debuggingOptions.buildInfo.isRelease) {
       if (dartFlags.isNotEmpty) {
         _throwToolExit(kFailure);
