@@ -100,7 +100,7 @@ class Target {
 
   /// Check if we can skip the target invocation and collect hashes for all inputs.
   Future<Map<String, ChangeType>> computeChanges(
-    List<FileSystemEntity> inputs,
+    List<SourceFile> inputs,
     Environment environment,
     FileCache fileCache,
   ) async {
@@ -126,13 +126,13 @@ class Target {
     // for it. If not and it is a directory we skip hashing and instead use a
     // timestamp. If it is a file we collect it to be sent of for hashing as
     // a group.
-    final List<File> filesToHash = <File>[];
-    for (FileSystemEntity entity in inputs) {
+    final List<SourceFile> sourcesToHash = <SourceFile>[];
+    for (SourceFile entity in inputs) {
       if (!entity.existsSync()) {
-        throw MissingInputException(entity, name);
+        throw MissingInputException(entity.path, name);
       }
 
-      final String absolutePath = entity.resolveSymbolicLinksSync();
+      final String absolutePath = entity.path;
       final String previousHash = fileCache.previousHashes[absolutePath];
       if (fileCache.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileCache.currentHashes[absolutePath];
@@ -141,32 +141,17 @@ class Target {
               ? ChangeType.Modified
               : ChangeType.Added;
         }
-      } else if (entity is File) {
-        filesToHash.add(entity);
-      } else if (entity is Directory) {
-        // In case of a directory use the stat for now.
-        final String currentHash = entity
-            .statSync()
-            .modified
-            .toIso8601String();
-        if (currentHash != previousHash) {
-          updates[absolutePath] = previousInputs.contains(absolutePath)
-              ? ChangeType.Modified
-              : ChangeType.Added;
-        }
-        fileCache.currentHashes[absolutePath] = currentHash;
       } else {
-        assert(false);
-        // Skip in production mode.
+        sourcesToHash.add(entity);
       }
     }
 
     // If we have files to hash, compute them asynchronously and then
     // update the result.
-    if (filesToHash.isNotEmpty) {
-      final List<File> dirty = await fileCache.hashFiles(filesToHash);
-      for (File file in dirty) {
-        final String absolutePath = file.resolveSymbolicLinksSync();
+    if (sourcesToHash.isNotEmpty) {
+      final List<SourceFile> dirty = await fileCache.hashFiles(sourcesToHash);
+      for (SourceFile file in dirty) {
+        final String absolutePath = file.path;
         updates[absolutePath] = previousInputs.contains(absolutePath)
             ? ChangeType.Modified
             : ChangeType.Added;
@@ -175,7 +160,7 @@ class Target {
 
     // Find which, if any, inputs have been deleted.
     final Set<String> currentInputPaths = Set<String>.from(
-      inputs.map<String>((FileSystemEntity entity) => entity.resolveSymbolicLinksSync())
+      inputs.map<String>((SourceFile entity) => entity.path)
     );
     for (String previousInput in previousInputs) {
       if (!currentInputPaths.contains(previousInput)) {
@@ -186,21 +171,21 @@ class Target {
   }
 
   void _writeStamp(
-    List<FileSystemEntity> inputs,
-    List<FileSystemEntity> outputs,
+    List<SourceFile> inputs,
+    List<SourceFile> outputs,
     Environment environment,
   ) {
     final File stamp = _findStampFile(name, environment);
     final List<String> inputStamps = <String>[];
-    for (FileSystemEntity input in inputs) {
-      inputStamps.add(input.absolute.path);
+    for (SourceFile input in inputs) {
+      inputStamps.add(input.path);
     }
     final List<String> outputStamps = <String>[];
-    for (FileSystemEntity output in outputs) {
+    for (SourceFile output in outputs) {
       if (!output.existsSync()) {
-        throw MissingOutputException(output, name);
+        throw MissingOutputException(output.path, name);
       }
-      outputStamps.add(output.absolute.path);
+      outputStamps.add(output.path);
     }
     final Map<String, Object> result = <String, Object>{
       'inputs': inputStamps,
@@ -214,17 +199,17 @@ class Target {
 
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
-  List<FileSystemEntity> resolveInputs(
+  List<SourceFile> resolveInputs(
     Environment environment,
   ) {
     return _resolveConfiguration(inputs, environment);
   }
 
   /// Find the current set of declared outputs, including wildcard directories.
-  List<FileSystemEntity> resolveOutputs(
+  List<SourceFile> resolveOutputs(
     Environment environment,
   ) {
-    final List<FileSystemEntity> outputEntities = _resolveConfiguration(outputs, environment);
+    final List<SourceFile> outputEntities = _resolveConfiguration(outputs, environment);
     verifyOutputDirectories(outputEntities, environment, this);
     return outputEntities;
   }
@@ -246,7 +231,7 @@ class Target {
       'name': name,
       'dependencies': dependencies.map((Target target) => target.name).toList(),
       'inputs': resolveInputs(environment)
-          .map((FileSystemEntity file) => file.absolute.path)
+          .map((SourceFile file) => file.path)
           .toList(),
       'stamp': _findStampFile(name, environment).absolute.path,
     };
@@ -261,7 +246,7 @@ class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static List<FileSystemEntity> _resolveConfiguration(
+  static List<SourceFile> _resolveConfiguration(
       List<Source> config, Environment environment) {
     final SourceVisitor collector = SourceVisitor(environment);
     for (Source source in config) {
@@ -320,6 +305,7 @@ class Environment {
     assert(buildMode != null);
     return Environment._(
       projectDir: projectDir,
+      flutterRootDir: fs.directory(Cache.flutterRoot),
       buildDir: buildDir ?? projectDir.childDirectory('build'),
       cacheDir: cacheDir ??
           Cache.instance.getCacheArtifacts().childDirectory('engine'),
@@ -336,6 +322,7 @@ class Environment {
     @required this.targetPlatform,
     @required this.buildMode,
     @required this.flavor,
+    @required this.flutterRootDir,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -346,6 +333,9 @@ class Environment {
 
   /// The [Source] value which is substituted with the path to [cacheDir].
   static const String kCacheDirectory = '{CACHE_DIR}';
+
+  /// The [Source] value which is substituted with a path to the flutter root.
+  static const String kFlutterRoot = '{FLUTTER_ROOT}';
 
   /// The [Source] value which is substituted with [targetPlatform].
   static const String kPlatform = '{platform}';
@@ -373,6 +363,11 @@ class Environment {
   /// Defaults to `{FLUTTER_ROOT}/bin/cache`. The root of the artifact cache for
   /// the flutter tool.
   final Directory cacheDir;
+
+  /// The `FLUTTER_ROOT` environment variable.
+  ///
+  /// Defaults to the root of the flutter checkout for which this command is run.
+  final Directory flutterRootDir;
 
   /// The currently selected build mode.
   final BuildMode buildMode;
@@ -475,9 +470,8 @@ class _BuildInstance {
   Future<void> _invokeInternal(Target target) async {
     final PoolResource resource = await resourcePool.request();
     try {
-      final List<FileSystemEntity> inputs = target.resolveInputs(environment);
-      final Map<String, ChangeType> updates = await target.computeChanges(
-          inputs, environment, fileCache);
+      final List<SourceFile> inputs = target.resolveInputs(environment);
+      final Map<String, ChangeType> updates = await target.computeChanges(inputs, environment, fileCache);
       if (updates.isEmpty) {
         printTrace('Skipping target: ${target.name}');
       } else {
@@ -485,7 +479,7 @@ class _BuildInstance {
         await target.invocation(updates, environment);
         printTrace('${target.name}: Complete');
 
-        final List<FileSystemEntity> outputs = target.resolveOutputs(environment);
+        final List<SourceFile> outputs = target.resolveOutputs(environment);
         target._writeStamp(inputs, outputs, environment);
       }
     } finally {
@@ -516,13 +510,13 @@ void checkCycles(Target initial) {
 }
 
 /// Verifies that all  files are in a subdirectory of [Environment.buildDir].
-void verifyOutputDirectories(List<FileSystemEntity> outputs, Environment environment, Target target) {
+void verifyOutputDirectories(List<SourceFile> outputs, Environment environment, Target target) {
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
-  for (FileSystemEntity entity in outputs) {
-    if (!entity.resolveSymbolicLinksSync().startsWith(buildDirectory)
-        && !entity.resolveSymbolicLinksSync().startsWith(projectDirectory)) {
-      throw MisplacedOutputException(entity, target);
+  for (SourceFile sourceFile in outputs) {
+    final String path = sourceFile.path;
+    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
+      throw MisplacedOutputException(path, target);
     }
   }
 }

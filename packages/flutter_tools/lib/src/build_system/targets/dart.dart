@@ -37,14 +37,14 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
 ///
 /// This does not attempt to determine if a file is used or imported, so it
 /// may otherwise report more files than strictly necessary.
-List<FileSystemEntity> listDartSources(Environment environment) {
+List<SourceFile> listDartSources(Environment environment) {
   final Map<String, Uri> packageMap = PackageMap(PackageMap.globalPackagesPath).map;
-  final List<File> dartFiles = <File>[];
+  final List<SourceFile> dartFiles = <SourceFile>[];
   for (Uri uri in packageMap.values) {
     final Directory libDirectory = fs.directory(uri.toFilePath(windows: platform.isWindows));
     for (FileSystemEntity entity in libDirectory.listSync(recursive: true)) {
       if (entity is File && entity.path.endsWith('.dart')) {
-        dartFiles.add(entity);
+        dartFiles.add(SourceFile(entity));
       }
     }
   }

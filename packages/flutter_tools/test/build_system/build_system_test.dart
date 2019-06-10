@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
@@ -155,7 +156,7 @@ void main() {
       fs.directory('build').createSync();
       final FileCache fileCache = FileCache(environment);
       fileCache.initialize();
-      final List<FileSystemEntity> inputs = fooTarget.resolveInputs(environment);
+      final List<SourceFile> inputs = fooTarget.resolveInputs(environment);
       final Map<String, ChangeType> changes = await fooTarget.computeChanges(inputs, environment, fileCache);
       fileCache.persist();
 
@@ -197,15 +198,15 @@ void main() {
     }));
 
     test('saves and restores to file cache', () => testbed.run(() {
-      final File file = fs.file('foo.dart')
+      final SourceFile file = SourceFile(fs.file('foo.dart')
         ..createSync()
-        ..writeAsStringSync('hello');
+        ..writeAsStringSync('hello'));
       final FileCache fileCache = FileCache(environment);
       fileCache.initialize();
-      fileCache.hashFiles(<File>[file]);
+      fileCache.hashFiles(<SourceFile>[file]);
       fileCache.persist();
 
-      final String currentHash =  fileCache.currentHashes[file.absolute.path];
+      final String currentHash =  fileCache.currentHashes[file.path];
       expect(fs.file('build/.filecache').readAsStringSync(), '/foo.dart : $currentHash');
       expect(fs.file('build/.filecache_version').readAsStringSync(), '1');
 
@@ -303,6 +304,48 @@ void main() {
     }));
   });
 
+  group('SourceFile', () {
+    MemoryFileSystem memoryFileSystem;
+
+    setUp(() {
+       memoryFileSystem = MemoryFileSystem();
+    });
+
+    test('exposes limited API from the underlying file', () {
+      final File file = memoryFileSystem.file('test')
+        ..createSync()
+        ..writeAsBytesSync(<int>[1, 2, 3]);
+      final SourceFile sourceFile = SourceFile(file);
+
+      expect(sourceFile.existsSync(), true);
+      expect(sourceFile.path, '/test');
+      expect(sourceFile.bytesForVersion(), <int>[1, 2, 3]);
+    });
+
+    test('exposes limited API from the underlying directory', () {
+      final Directory directory = memoryFileSystem.directory('test')
+        ..createSync();
+      final SourceFile sourceFile = SourceFile(directory);
+
+      expect(sourceFile.existsSync(), true);
+      expect(sourceFile.path, '/test');
+      expect(sourceFile.bytesForVersion(), directory.statSync().modified.toIso8601String().codeUnits);
+    });
+
+    test('Allows separate versioning of file', () {
+      final File file = memoryFileSystem.file('test')
+        ..writeAsBytesSync(<int>[1, 2, 3])
+        ..createSync();
+      final File version = memoryFileSystem.file('version')
+        ..createSync()
+        ..writeAsBytesSync(<int>[4, 5, 6]);
+      final SourceFile sourceFile = SourceFile(file, version);
+
+      expect(sourceFile.existsSync(), true);
+      expect(sourceFile.path, '/test');
+      expect(sourceFile.bytesForVersion(), <int>[4, 5, 6]);
+    });
+  });
 
   group('Patterns', () {
     Testbed testbed;
