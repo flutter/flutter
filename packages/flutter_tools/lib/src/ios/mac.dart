@@ -10,7 +10,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -21,19 +20,16 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart';
-import '../plugins.dart';
+import '../macos/cocoapod_utils.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../services.dart';
-import 'cocoapods.dart';
+import '../usage.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
-const int kXcodeRequiredVersionMajor = 9;
-const int kXcodeRequiredVersionMinor = 0;
-
 IMobileDevice get iMobileDevice => context.get<IMobileDevice>();
 PlistBuddy get plistBuddy => context.get<PlistBuddy>();
-Xcode get xcode => context.get<Xcode>();
 
 class PlistBuddy {
   const PlistBuddy();
@@ -151,100 +147,6 @@ class IMobileDevice {
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
     return runCheckedAsync(<String>['idevicescreenshot', outputFile.path]);
-  }
-}
-
-class Xcode {
-  bool get isInstalledAndMeetsVersionCheck => isInstalled && isVersionSatisfactory;
-
-  String _xcodeSelectPath;
-  String get xcodeSelectPath {
-    if (_xcodeSelectPath == null) {
-      try {
-        _xcodeSelectPath = processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']).stdout.trim();
-      } on ProcessException {
-        // Ignored, return null below.
-      }
-    }
-    return _xcodeSelectPath;
-  }
-
-  bool get isInstalled {
-    if (xcodeSelectPath == null || xcodeSelectPath.isEmpty)
-      return false;
-    return xcodeProjectInterpreter.isInstalled;
-  }
-
-  int get majorVersion => xcodeProjectInterpreter.majorVersion;
-
-  int get minorVersion => xcodeProjectInterpreter.minorVersion;
-
-  String get versionText => xcodeProjectInterpreter.versionText;
-
-  bool _eulaSigned;
-  /// Has the EULA been signed?
-  bool get eulaSigned {
-    if (_eulaSigned == null) {
-      try {
-        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'clang']);
-        if (result.stdout != null && result.stdout.contains('license'))
-          _eulaSigned = false;
-        else if (result.stderr != null && result.stderr.contains('license'))
-          _eulaSigned = false;
-        else
-          _eulaSigned = true;
-      } on ProcessException {
-        _eulaSigned = false;
-      }
-    }
-    return _eulaSigned;
-  }
-
-  bool _isSimctlInstalled;
-
-  /// Verifies that simctl is installed by trying to run it.
-  bool get isSimctlInstalled {
-    if (_isSimctlInstalled == null) {
-      try {
-        // This command will error if additional components need to be installed in
-        // xcode 9.2 and above.
-        final ProcessResult result = processManager.runSync(<String>['/usr/bin/xcrun', 'simctl', 'list']);
-        _isSimctlInstalled = result.stderr == null || result.stderr == '';
-      } on ProcessException {
-        _isSimctlInstalled = false;
-      }
-    }
-    return _isSimctlInstalled;
-  }
-
-  bool get isVersionSatisfactory {
-    if (!xcodeProjectInterpreter.isInstalled)
-      return false;
-    if (majorVersion > kXcodeRequiredVersionMajor)
-      return true;
-    if (majorVersion == kXcodeRequiredVersionMajor)
-      return minorVersion >= kXcodeRequiredVersionMinor;
-    return false;
-  }
-
-  Future<RunResult> cc(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'cc']..addAll(args));
-  }
-
-  Future<RunResult> clang(List<String> args) {
-    return runCheckedAsync(<String>['xcrun', 'clang']..addAll(args));
-  }
-
-  String getSimulatorPath() {
-    if (xcodeSelectPath == null)
-      return null;
-    final List<String> searchPaths = <String>[
-      fs.path.join(xcodeSelectPath, 'Applications', 'Simulator.app'),
-    ];
-    return searchPaths.where((String p) => p != null).firstWhere(
-      (String p) => fs.directory(p).existsSync(),
-      orElse: () => null,
-    );
   }
 }
 
@@ -371,29 +273,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  refreshPluginsList(project);
-  if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
-    // If the Xcode project, Podfile, or Generated.xcconfig have changed since
-    // last run, pods should be updated.
-    final Fingerprinter fingerprinter = Fingerprinter(
-      fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
-      paths: <String>[
-        app.project.xcodeProjectInfoFile.path,
-        app.project.podfile.path,
-        app.project.generatedXcodePropertiesFile.path,
-      ],
-      properties: <String, String>{},
-    );
-
-    final bool didPodInstall = await cocoaPods.processPods(
-      iosProject: project.ios,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
-    );
-    if (didPodInstall)
-      await fingerprinter.writeFingerprint();
-  }
+  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
@@ -495,7 +375,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
-  final Stopwatch buildStopwatch = Stopwatch()..start();
+  final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
@@ -508,18 +388,18 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildSubStatus = null;
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
-  buildStopwatch.stop();
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
   );
+  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(
     (List<String>
         .from(buildCommands)
         ..add('-showBuildSettings'))
-        // Undocumented behaviour: xcodebuild craps out if -showBuildSettings
+        // Undocumented behavior: xcodebuild craps out if -showBuildSettings
         // is used together with -allowProvisioningUpdates or
         // -allowProvisioningDeviceRegistration and freezes forever.
         .where((String buildCommand) {

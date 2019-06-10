@@ -190,7 +190,7 @@ void main() {
     });
   });
 
-  group('doctor with overriden validators', () {
+  group('doctor with overridden validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
       expect(await doctor.diagnose(verbose: false), isTrue);
       expect(testLogger.statusText, equals(

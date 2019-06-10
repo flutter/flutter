@@ -69,7 +69,7 @@ follows:
   Identical to the `stateful_widget` template, except that the default code
   block is inserted as the `build` function in a
   StatelessWidget. There is no need to include the @override before the build
-  funciton (the template adds this for you).
+  function (the template adds this for you).
 
 - [`stateful_widget_material`](stateful_widget_material.tmpl) : Similar to
   `stateful_widget`, except that it imports the material library, and uses
