@@ -208,9 +208,15 @@ class RunCommand extends RunCommandBase {
   @override
   Future<Map<String, String>> get usageValues async {
     final bool isEmulator = await devices[0].isLocalEmulator;
-    final String deviceType = devices.length == 1
-            ? getNameForTargetPlatform(await devices[0].targetPlatform)
-            : 'multiple';
+    String deviceType, deviceOsVersion;
+    if (devices.length == 1) {
+      deviceType = getNameForTargetPlatform(await devices[0].targetPlatform);
+      deviceOsVersion = await devices[0].sdkNameAndVersion;
+    } else {
+      deviceType = 'multiple';
+      deviceOsVersion = 'multiple';
+    }
+    final String modeName = getBuildInfo().modeName;
     final AndroidProject androidProject = FlutterProject.current().android;
     final IosProject iosProject = FlutterProject.current().ios;
     final List<String> hostLanguage = <String>[];
@@ -225,6 +231,8 @@ class RunCommand extends RunCommandBase {
     return <String, String>{
       kCommandRunIsEmulator: '$isEmulator',
       kCommandRunTargetName: deviceType,
+      kCommandRunTargetOsVersion: deviceOsVersion,
+      kCommandRunModeName: modeName,
       kCommandRunProjectModule: '${FlutterProject.current().isModule}',
       kCommandRunProjectHostLanguage: hostLanguage.join(','),
     };
@@ -403,8 +411,7 @@ class RunCommand extends RunCommandBase {
     // in a "hot mode".
     final bool webMode = !FlutterVersion.instance.isStable
       && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web_javascript
-      && hotMode;
+      && await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
@@ -430,6 +437,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
+        debuggingOptions: _createDebuggingOptions(),
       );
     } else {
       runner = ColdRunner(
