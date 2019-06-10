@@ -12,11 +12,10 @@ import 'button.dart';
 import 'colors.dart';
 import 'localizations.dart';
 
-
-const Color _kHandlesColor = Color(0xFF136FE0);
-const double _kSelectionHandleOverlap = 1.5;
 // Read off from the output on iOS 12. This color does not vary with the
 // application's theme color.
+const Color _kHandlesColor = Color(0xFF136FE0);
+const double _kSelectionHandleOverlap = 1.5;
 const double _kSelectionHandleRadius = 5.5;
 
 // Minimal padding from all edges of the selection toolbar to all edges of the

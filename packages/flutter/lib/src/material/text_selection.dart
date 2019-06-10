@@ -136,7 +136,7 @@ class _MaterialTextSelectionControls extends TextSelectionControls {
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
-    double textlineHeight,
+    double textLineHeight,
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
