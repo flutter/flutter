@@ -7,8 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'diagnostics_test.dart';
-
 void main() {
   test('Element diagnostics json includes widgetRuntimeType', () async {
     final Element element = _TestElement();
@@ -237,5 +235,40 @@ class _TestElement extends Element {
   @override
   void performRebuild() {
     // Intentionally left empty.
+  }
+}
+
+class TestTree extends Object with DiagnosticableTreeMixin {
+  TestTree({
+    this.name,
+    this.style,
+    this.children = const <TestTree>[],
+    this.properties = const <DiagnosticsNode>[],
+  });
+
+  final String name;
+  final List<TestTree> children;
+  final List<DiagnosticsNode> properties;
+  final DiagnosticsTreeStyle style;
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
+    for (TestTree child in this.children) {
+      children.add(child.toDiagnosticsNode(
+        name: 'child ${child.name}',
+        style: child.style,
+      ));
+    }
+    return children;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    if (style != null)
+      properties.defaultDiagnosticsTreeStyle = style;
+
+    this.properties.forEach(properties.add);
   }
 }

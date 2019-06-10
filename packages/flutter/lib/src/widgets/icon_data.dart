@@ -69,7 +69,6 @@ class IconData {
 
 /// [DiagnosticsProperty] that has an [IconData] as value.
 class IconDataDiagnosticsProperty extends DiagnosticsProperty<IconData> {
-
   /// Create a diagnostics property for strings.
   ///
   /// The [showName], [style], and [level] arguments must not be null.
