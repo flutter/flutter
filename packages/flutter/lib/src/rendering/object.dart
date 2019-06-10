@@ -9,7 +9,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/semantics.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -1853,7 +1852,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       owner._nodesNeedingCompositingBitsUpdate.add(this);
   }
 
-  bool _needsCompositing; // initialised in the constructor
+  bool _needsCompositing; // initialized in the constructor
   /// Whether we or one of our descendants has a compositing layer.
   ///
   /// If this node needs compositing as indicated by this bit, then all ancestor

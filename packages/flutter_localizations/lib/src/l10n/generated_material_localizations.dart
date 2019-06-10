@@ -1275,7 +1275,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => r'VORM.';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
   String get backButtonTooltip => r'Zurück';
@@ -1347,7 +1347,7 @@ class MaterialLocalizationDe extends GlobalMaterialLocalizations {
   String get popupMenuLabel => r'Pop-up-Menü';
 
   @override
-  String get postMeridiemAbbreviation => r'NACHM.';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get previousMonthTooltip => r'Vorheriger Monat';
@@ -5298,7 +5298,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get alertDialogLabel => r'Benachrichtigung';
 
   @override
-  String get anteMeridiemAbbreviation => r'VORM.';
+  String get anteMeridiemAbbreviation => r'AM';
 
   @override
   String get backButtonTooltip => r'Zurück';
@@ -5370,7 +5370,7 @@ class MaterialLocalizationGsw extends GlobalMaterialLocalizations {
   String get popupMenuLabel => r'Pop-up-Menü';
 
   @override
-  String get postMeridiemAbbreviation => r'NACHM.';
+  String get postMeridiemAbbreviation => r'PM';
 
   @override
   String get previousMonthTooltip => r'Vorheriger Monat';

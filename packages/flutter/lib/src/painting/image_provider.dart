@@ -475,7 +475,7 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 /// See also:
 ///
 ///  * [Image.network] for a shorthand of an [Image] widget backed by [NetworkImage].
-// TODO(ianh): Find some way to honour cache headers to the extent that when the
+// TODO(ianh): Find some way to honor cache headers to the extent that when the
 // last reference to an image is released, we proactively evict the image from
 // our cache if the headers describe the image as having expired at that point.
 class NetworkImage extends ImageProvider<NetworkImage> {

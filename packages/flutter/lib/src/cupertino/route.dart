@@ -884,7 +884,7 @@ Future<T> showCupertinoModalPopup<T>({
 }
 
 // The curve and initial scale values were mostly eyeballed from iOS, however
-// they reuse the same animation curve that was modelled after native page
+// they reuse the same animation curve that was modeled after native page
 // transitions.
 final Animatable<double> _dialogScaleTween = Tween<double>(begin: 1.3, end: 1.0)
   .chain(CurveTween(curve: Curves.linearToEaseOut));

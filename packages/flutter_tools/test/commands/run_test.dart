@@ -66,7 +66,7 @@ void main() {
 
       when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.fromIterable(<Device>[
-          MockDevice(TargetPlatform.web),
+          MockDevice(TargetPlatform.web_javascript),
         ]);
       });
 

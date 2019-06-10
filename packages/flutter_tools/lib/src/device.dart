@@ -23,6 +23,7 @@ import 'macos/macos_device.dart';
 import 'project.dart';
 import 'tester/flutter_tester.dart';
 import 'web/web_device.dart';
+import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
@@ -306,7 +307,7 @@ abstract class Device {
 
   /// Whether flutter applications running on this device can be terminated
   /// from the vmservice.
-  bool get supportsStopApp => true;
+  bool get supportsFlutterExit => true;
 
   /// Whether the device supports taking screenshots of a running flutter
   /// application.

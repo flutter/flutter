@@ -60,6 +60,17 @@ The `version()` command responds with a String with the protocol version.
 
 The `shutdown()` command will terminate the flutter daemon. It is not necessary to call this before shutting down the daemon; it is perfectly acceptable to just kill the daemon process.
 
+### daemon.getSupportedPlatforms
+
+The `getSupportedPlatforms()` command will enumerate all platforms supported by the project located at the provided `projectRoot`. It returns a Map with the key 'platforms' containing a List of strings which describe the set of all possibly supported platforms. Possible values include:
+   - android
+   - ios
+   - linux #experimental
+   - macos #experimental
+   - windows #experimental
+   - fuchsia #experimental
+   - web #experimental
+
 #### Events
 
 #### daemon.connected
@@ -239,6 +250,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.5.0: Added `daemon.getSupportedPlatforms` command
 - 0.4.2: Added `app.detach` command
 - 0.4.1: Added `flutter attach --machine`
 - 0.4.0: Added `emulator.create` command
