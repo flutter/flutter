@@ -45,13 +45,15 @@ void main() {
 
 
     group('dart-flags option', () {
-      testUsingContext('is not available on stable channel', () async {
+      setUpAll(() {
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
           return Stream<Device>.fromIterable(<Device>[
             FakeDevice(),
           ]);
         });
+      });
 
+      testUsingContext('is not available on stable channel', () async {
         final RunCommand command = TestRunCommand();
         final List<String> args = <String> [
                                     'run',
@@ -100,11 +102,6 @@ void main() {
       });
 
       testUsingContext('is populated in profile mode', () async {
-        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-          return Stream<Device>.fromIterable(<Device>[
-            FakeDevice(),
-          ]);
-        });
         final RunCommand command = TestRunCommand();
         final List<String> args = <String> [
                                     'run',
@@ -128,11 +125,6 @@ void main() {
       });
 
       testUsingContext('is not populated in release mode', () async {
-        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-          return Stream<Device>.fromIterable(<Device>[
-            FakeDevice(),
-          ]);
-        });
         final RunCommand command = TestRunCommand();
         final List<String> args = <String> [
                                     'run',
