@@ -88,7 +88,7 @@ void main() {
         await createTestCommandRunner(command).run(args);
         fail('Expect exception');
       } on ToolExit catch (e) {
-        expect(e.exitCode ?? 1, 1);
+        expect(e.exitCode, FakeDevice.kSuccess);
       }
 
       // Profile mode
@@ -96,7 +96,7 @@ void main() {
         await createTestCommandRunner(command).run(<String>[...args, '--profile']);
         fail('Expect exception');
       } on ToolExit catch (e) {
-        expect(e.exitCode ?? 1, 1);
+        expect(e.exitCode, FakeDevice.kSuccess);
       }
 
       // Release mode
@@ -104,7 +104,7 @@ void main() {
         await createTestCommandRunner(command).run(<String>[...args, '--release']);
         fail('Expect exception');
       } on ToolExit catch (e) {
-        expect(e.exitCode ?? 1, 1);
+        expect(e.exitCode, FakeDevice.kSuccess);
       }
     }, overrides: <Type, Generator>{
       ApplicationPackageFactory: () => mockApplicationPackageFactory,
@@ -188,6 +188,8 @@ class MockStableFlutterVersion extends MockFlutterVersion {
 }
 
 class FakeDevice extends Fake implements Device {
+  static const int kSuccess = 1;
+  static const int kFailure = -1;
   final TargetPlatform _targetPlatform = TargetPlatform.ios;
 
   void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
@@ -226,14 +228,14 @@ class FakeDevice extends Fake implements Device {
     final String dartFlags = debuggingOptions.dartFlags;
     if (debuggingOptions.buildInfo.isRelease) {
       if (dartFlags.isNotEmpty) {
-        _throwToolExit(-1);
+        _throwToolExit(kFailure);
       }
-      _throwToolExit(1);
+      _throwToolExit(kSuccess);
     } else {
       if (dartFlags.isEmpty) {
-        _throwToolExit(-1);
+        _throwToolExit(kFailure);
       }
-      _throwToolExit(1);
+      _throwToolExit(kSuccess);
     }
     return null;
   }
