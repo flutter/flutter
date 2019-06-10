@@ -24,6 +24,24 @@ void main() {
     });
 
     group('isRunningOnBot', () {
+      testUsingContext('returns false unconditionally if BOT=false is set', () async {
+        fakePlatform.environment['BOT'] = 'false';
+        fakePlatform.environment['TRAVIS'] = 'true';
+        expect(botDetector.isRunningOnBot, isFalse);
+      }, overrides: <Type, Generator>{
+        Stdio: () => mockStdio,
+        Platform: () => fakePlatform,
+      });
+
+      testUsingContext('returns false unconditionally if FLUTTER_HOST is set', () async {
+        fakePlatform.environment['FLUTTER_HOST'] = 'foo';
+        fakePlatform.environment['TRAVIS'] = 'true';
+        expect(botDetector.isRunningOnBot, isFalse);
+      }, overrides: <Type, Generator>{
+        Stdio: () => mockStdio,
+        Platform: () => fakePlatform,
+      });
+
       testUsingContext('returns true for non-interactive terminals', () async {
         mockStdio.stdout.hasTerminal = true;
         expect(botDetector.isRunningOnBot, isFalse);
