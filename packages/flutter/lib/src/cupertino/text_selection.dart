@@ -99,9 +99,6 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   @override
   bool get isRepaintBoundary => true;
 
-  @override
-  bool get needsCompositing => false;
-
   double _barTopY;
   set barTopY(double value) {
     if (_barTopY == value) {
