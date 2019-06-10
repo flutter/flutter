@@ -49,6 +49,11 @@ class _TextSelectionToolbar extends StatelessWidget {
     if (handleSelectAll != null)
       items.add(FlatButton(child: Text(localizations.selectAllButtonLabel), onPressed: handleSelectAll));
 
+    // If there is no option available, build an empty widget.
+    if (items.isEmpty) {
+      return Container(width: 0.0, height: 0.0);
+    }
+
     return Material(
       elevation: 1.0,
       child: Container(
