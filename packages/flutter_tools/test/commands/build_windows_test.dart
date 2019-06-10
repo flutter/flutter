@@ -19,40 +19,29 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  MockProcessManager mockProcessManager;
-  MemoryFileSystem memoryFilesystem;
-  MockProcess mockProcess;
-  MockPlatform windowsPlatform;
-  MockPlatform notWindowsPlatform;
-  MockVisualStudio mockVisualStudio;
+  Cache.disableLocking();
+  final MockProcessManager mockProcessManager = MockProcessManager();
+  final MemoryFileSystem memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
+  final MockProcess mockProcess = MockProcess();
+  final MockPlatform windowsPlatform = MockPlatform()
+      ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
+  final MockPlatform notWindowsPlatform = MockPlatform();
+  final MockVisualStudio mockVisualStudio = MockVisualStudio();
   const String solutionPath = r'C:\windows\Runner.sln';
   const String visualStudioPath = r'C:\Program Files (x86)\Microsoft Visual Studio\2017\Community';
   const String vcvarsPath = visualStudioPath + r'\VC\Auxiliary\Build\vcvars64.bat';
 
-  setUpAll(() {
-    Cache.disableLocking();
+  when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
+    return 0;
   });
-
-  setUp(() {
-    mockProcessManager = MockProcessManager();
-    memoryFilesystem = MemoryFileSystem(style: FileSystemStyle.windows);
-    mockProcess = MockProcess();
-    windowsPlatform = MockPlatform()
-        ..environment['PROGRAMFILES(X86)'] = r'C:\Program Files (x86)\';
-    notWindowsPlatform = MockPlatform();
-    mockVisualStudio = MockVisualStudio();
-    when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
-    when(mockProcess.stderr).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
-    });
-    when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
-    });
-    when(windowsPlatform.isWindows).thenReturn(true);
-    when(notWindowsPlatform.isWindows).thenReturn(false);
+  when(mockProcess.stderr).thenAnswer((Invocation invocation) {
+    return const Stream<List<int>>.empty();
   });
+  when(mockProcess.stdout).thenAnswer((Invocation invocation) {
+    return const Stream<List<int>>.empty();
+  });
+  when(windowsPlatform.isWindows).thenReturn(true);
+  when(notWindowsPlatform.isWindows).thenReturn(false);
 
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
