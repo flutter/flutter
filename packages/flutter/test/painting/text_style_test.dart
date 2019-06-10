@@ -180,7 +180,7 @@ void main() {
     final ui.ParagraphStyle ps5 = s5.getParagraphStyle();
     expect(ps5, equals(ui.ParagraphStyle(fontWeight: FontWeight.w700, fontSize: 12.0, height: 123.0)));
     expect(ps5.toString(), 'ParagraphStyle(textAlign: unspecified, textDirection: unspecified, fontWeight: FontWeight.w700, fontStyle: unspecified, maxLines: unspecified, fontFamily: unspecified, fontSize: 12.0, height: 123.0x, ellipsis: unspecified, locale: unspecified)');
-  });
+  }, skip: isBrowser);
 
 
   test('TextStyle with text direction', () {
@@ -212,7 +212,7 @@ void main() {
 
     const TextStyle s10 = TextStyle(fontFamilyFallback: <String>[], package: 'p');
     expect(s10.fontFamilyFallback, <String>[]);
-  });
+  }, skip: isBrowser);
 
   test('TextStyle font family fallback', () {
     const TextStyle s1 = TextStyle(fontFamilyFallback: <String>['Roboto', 'test']);
@@ -237,7 +237,7 @@ void main() {
 
     final ui.TextStyle uis1 = s2.getTextStyle();
     expect(uis1.toString(), 'TextStyle(color: unspecified, decoration: unspecified, decorationColor: unspecified, decorationStyle: unspecified, decorationThickness: unspecified, fontWeight: unspecified, fontStyle: unspecified, textBaseline: unspecified, fontFamily: foo, fontFamilyFallback: [Roboto, test], fontSize: unspecified, letterSpacing: unspecified, wordSpacing: unspecified, height: unspecified, locale: unspecified, background: unspecified, foreground: unspecified, shadows: unspecified, fontFeatures: unspecified)');
-  });
+  }, skip: isBrowser);
 
   test('TextStyle.debugLabel', () {
     const TextStyle unknown = TextStyle();
