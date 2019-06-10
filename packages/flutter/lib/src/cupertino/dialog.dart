@@ -1055,7 +1055,7 @@ class CupertinoDialogAction extends StatelessWidget {
 
   /// Set to true if button is the default choice in the dialog.
   ///
-  /// Default buttons are bold. Similar to
+  /// Default buttons have bold text. Similar to
   /// [UIAlertController.preferredAction](https://developer.apple.com/documentation/uikit/uialertcontroller/1620102-preferredaction),
   /// but more than one action can have this attribute set to true in the same
   /// [CupertinoAlertDialog].
