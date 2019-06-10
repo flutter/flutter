@@ -13,14 +13,10 @@ namespace flutter {
 
 class ShaderMaskLayer : public ContainerLayer {
  public:
-  ShaderMaskLayer();
+  ShaderMaskLayer(sk_sp<SkShader> shader,
+                  const SkRect& mask_rect,
+                  SkBlendMode blend_mode);
   ~ShaderMaskLayer() override;
-
-  void set_shader(sk_sp<SkShader> shader) { shader_ = shader; }
-
-  void set_mask_rect(const SkRect& mask_rect) { mask_rect_ = mask_rect; }
-
-  void set_blend_mode(SkBlendMode blend_mode) { blend_mode_ = blend_mode; }
 
   void Paint(PaintContext& context) const override;
 
