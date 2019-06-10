@@ -23,7 +23,7 @@ void main() {
 
     final List<String> description = builder.properties
         .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
-        .map((DiagnosticsNode node) => node.toString())git
+        .map((DiagnosticsNode node) => node.toString())
         .toList();
 
     expect(description, <String>[]);
