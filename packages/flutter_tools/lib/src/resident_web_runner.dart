@@ -32,15 +32,14 @@ class ResidentWebRunner extends ResidentRunner {
     String target,
     @required this.flutterProject,
     @required bool ipv6,
+    @required DebuggingOptions debuggingOptions,
   }) : super(
           flutterDevices,
           target: target,
           usesTerminalUI: true,
           stayResident: true,
           saveCompilationTrace: false,
-          debuggingOptions: DebuggingOptions.enabled(
-            const BuildInfo(BuildMode.debug, ''),
-          ),
+          debuggingOptions: debuggingOptions,
           ipv6: ipv6,
         );
 
@@ -65,14 +64,14 @@ class ResidentWebRunner extends ResidentRunner {
   Future<void> cleanupAfterSignal() async {
     await _connection.sendCommand('Browser.close');
     _connection = null;
-    return _server?.dispose();
+    await _server?.dispose();
   }
 
   @override
   Future<void> cleanupAtFinish() async {
     await _connection?.sendCommand('Browser.close');
     _connection = null;
-    return _server?.dispose();
+    await _server?.dispose();
   }
 
   @override
@@ -95,6 +94,12 @@ class ResidentWebRunner extends ResidentRunner {
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
     );
+    const String warning = '👻 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Flutter\'s support for building web applications is highly experimental.');
+    printStatus('For more information see https://github.com/flutter/flutter/issues/34082.');
+    printStatus(warning * 20);
+    printStatus('');
     printStatus(message);
     const String quitMessage = 'To quit, press "q".';
     printStatus('For a more detailed help message, press "h". $quitMessage');
@@ -128,8 +133,7 @@ class ResidentWebRunner extends ResidentRunner {
     if (build != 0) {
       throwToolExit('Error: Failed to build asset bundle');
     }
-    await writeBundle(
-        fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Step 2: Start an HTTP server
     _server = WebAssetServer(flutterProject, target, ipv6);
@@ -143,7 +147,7 @@ class ResidentWebRunner extends ResidentRunner {
     });
     _connection = await chromeTab.connect();
     _connection.onClose.listen((WipConnection connection) {
-      appFinished();
+      exit();
     });
 
     // We don't support the debugging proxy yet.

@@ -13,12 +13,14 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../usage.dart';
 
 /// The [WebCompilationProxy] instance.
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
 Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo) async {
   final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
+  final Stopwatch sw = Stopwatch()..start();
   final Directory outputDir = fs.directory(getWebBuildDirectory())
     ..createSync(recursive: true);
   bool result;
@@ -55,6 +57,11 @@ Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo bu
   if (result == false) {
     throwToolExit('Failed to compile $target for the Web.');
   }
+  String buildName = 'ddc';
+  if (buildInfo.isRelease) {
+    buildName = 'dart2js';
+  }
+  flutterUsage.sendTiming('build', buildName, Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
 /// An indirection on web compilation.
