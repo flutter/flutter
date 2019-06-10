@@ -55,7 +55,8 @@ class BotDetector {
 
         // Properties on Flutter's Chrome Infra bots.
         || platform.environment['CHROME_HEADLESS'] == '1'
-        || platform.environment.containsKey('BUILDBOT_BUILDERNAME');
+        || platform.environment.containsKey('BUILDBOT_BUILDERNAME')
+        || platform.environment.containsKey('SWARMING_TASK_ID');
   }
 }
 
