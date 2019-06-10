@@ -99,9 +99,11 @@ class IconDataDiagnosticsProperty extends DiagnosticsProperty<IconData> {
   @override
   Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
     final Map<String, Object> json = super.toJsonMap(delegate);
-    json['valueProperties'] = <String, Object>{
-      'codePoint': value.codePoint,
-    };
+    if (value != null) {
+      json['valueProperties'] = <String, Object>{
+        'codePoint': value.codePoint,
+      };
+    }
     return json;
   }
 }
