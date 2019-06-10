@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 
+import 'application_package.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
@@ -112,7 +113,14 @@ class ResidentWebRunner extends ResidentRunner {
     String route,
     bool shouldBuild = true,
   }) async {
-    final FlutterProject currentProject = FlutterProject.current();
+    final ApplicationPackage package = await ApplicationPackageFactory.instance.getPackageForPlatform(
+      TargetPlatform.web_javascript,
+      applicationBinary: null,
+    );
+    if (package == null) {
+      printError('No application found for TargetPlatform.web_javascript');
+      return 1;
+    }
     if (!fs.isFileSync(mainPath)) {
       String message = 'Tried to run $mainPath, but that file does not exist.';
       if (target == null) {
@@ -124,7 +132,7 @@ class ResidentWebRunner extends ResidentRunner {
     }
     // Start the web compiler and build the assets.
     await webCompilationProxy.initialize(
-      projectDirectory: currentProject.directory,
+      projectDirectory: FlutterProject.current().directory,
       targets: <String>[target],
     );
     _lastCompiled = DateTime.now();

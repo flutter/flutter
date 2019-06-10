@@ -19,6 +19,9 @@ import '../usage.dart';
 WebCompilationProxy get webCompilationProxy => context.get<WebCompilationProxy>();
 
 Future<void> buildWeb(FlutterProject flutterProject, String target, BuildInfo buildInfo) async {
+  if (!flutterProject.web.existsSync()) {
+    throwToolExit('Missing index.html.');
+  }
   final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   final Directory outputDir = fs.directory(getWebBuildDirectory())
