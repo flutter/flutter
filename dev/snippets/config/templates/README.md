@@ -43,7 +43,7 @@ interpolated into the template's stateful widget's state object body.
 For other sections of the template, the interpolation occurs by appending the string
 that comes after `code-` into the code block. For example, the
 [`stateful_widget`](stateful_widget.tmpl) template contains
-`{{code-imports}}`. to interpolate code into `{{code-imports}}`, you would
+`{{code-imports}}`. To interpolate code into `{{code-imports}}`, you would
 have to do add the following:
 
 ```dart
