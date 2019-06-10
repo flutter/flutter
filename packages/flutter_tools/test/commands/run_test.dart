@@ -199,6 +199,9 @@ class FakeDevice extends Fake implements Device {
   bool get supportsHotReload => false;
 
   @override
+  Future<String> get sdkNameAndVersion => Future<String>.value('');
+
+  @override
   DeviceLogReader getLogReader({ ApplicationPackage app }) {
     return MockDeviceLogReader();
   }
