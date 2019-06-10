@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../project.dart';
@@ -60,6 +60,8 @@ class BuildBundleCommand extends BuildSubCommand {
               'in the application\'s LICENSE file.',
         defaultsTo: false);
     usesPubOption();
+
+    bundleFactory ??= BundleFactory();
   }
 
   BundleFactory bundleFactory;
@@ -77,7 +79,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Map<String, String>> get usageValues async {
-    final String projectDir = File(targetFile).parent.parent.path;
+    final String projectDir = fs.file(targetFile).parent.parent.path;
     final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
 
     if (futterProject == null) {
@@ -112,7 +114,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
-    await bundleFactory.build(
+    await bundleFactory.buildBundle(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,

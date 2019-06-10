@@ -25,7 +25,7 @@ void main() {
 
       mockBundleFactory = MockBundleFactory();
       when(
-        mockBundleFactory.build(
+        mockBundleFactory.buildBundle(
           platform: anyNamed('platform'),
           buildMode: anyNamed('buildMode'),
           mainPath: anyNamed('mainPath'),

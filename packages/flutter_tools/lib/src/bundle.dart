@@ -49,7 +49,7 @@ const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 
 class BundleFactory {
-  Future<void> build({
+  Future<void> buildBundle({
     TargetPlatform platform,
     BuildMode buildMode,
     String mainPath = defaultMainPath,
@@ -68,24 +68,24 @@ class BundleFactory {
     List<String> fileSystemRoots,
     String fileSystemScheme,
   }) => build(
-      platform: platform,
-      buildMode: buildMode,
-      mainPath: defaultMainPath,
-      manifestPath: defaultManifestPath,
-      applicationKernelFilePath: applicationKernelFilePath,
-      depfilePath: depfilePath,
-      privateKeyPath: privateKeyPath,
-      assetDirPath: assetDirPath,
-      packagesPath: packagesPath,
-      precompiledSnapshot: precompiledSnapshot,
-      reportLicensedPackages: reportLicensedPackages,
-      trackWidgetCreation: trackWidgetCreation,
-      compilationTraceFilePath: compilationTraceFilePath,
-      extraFrontEndOptions: extraFrontEndOptions,
-      extraGenSnapshotOptions: extraGenSnapshotOptions,
-      fileSystemRoots: fileSystemRoots,
-      fileSystemScheme: fileSystemScheme,
-    );
+    platform: platform,
+    buildMode: buildMode,
+    mainPath: defaultMainPath,
+    manifestPath: defaultManifestPath,
+    applicationKernelFilePath: applicationKernelFilePath,
+    depfilePath: depfilePath,
+    privateKeyPath: privateKeyPath,
+    assetDirPath: assetDirPath,
+    packagesPath: packagesPath,
+    precompiledSnapshot: precompiledSnapshot,
+    reportLicensedPackages: reportLicensedPackages,
+    trackWidgetCreation: trackWidgetCreation,
+    compilationTraceFilePath: compilationTraceFilePath,
+    extraFrontEndOptions: extraFrontEndOptions,
+    extraGenSnapshotOptions: extraGenSnapshotOptions,
+    fileSystemRoots: fileSystemRoots,
+    fileSystemScheme: fileSystemScheme,
+  );
 }
 
 Future<void> build({
