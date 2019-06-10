@@ -30,11 +30,9 @@ public class AndroidKeyProcessor {
   }
 
   public void onKeyDown(@NonNull KeyEvent keyEvent) {
-    if (keyEvent.getDeviceId() != KeyCharacterMap.VIRTUAL_KEYBOARD) {
-      if (textInputPlugin.getLastInputConnection() != null
-          && textInputPlugin.getInputMethodManager().isAcceptingText()) {
-        textInputPlugin.getLastInputConnection().sendKeyEvent(keyEvent);
-      }
+    if (textInputPlugin.getLastInputConnection() != null
+        && textInputPlugin.getInputMethodManager().isAcceptingText()) {
+      textInputPlugin.getLastInputConnection().sendKeyEvent(keyEvent);
     }
 
     Character complexCharacter = applyCombiningCharacterToBaseCharacter(keyEvent.getUnicodeChar());
