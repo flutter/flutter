@@ -39,7 +39,8 @@ import 'viewport.dart';
 ///
 /// {@tool sample}
 ///
-/// This widget introduces a [PageView] with two pages using the default constructor. Both pages contain a [RaisedButton] allowing you
+/// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
+/// using the default constructor. Both pages contain a [RaisedButton] allowing you
 /// to animate the [PageView] using a [PageController].
 ///
 /// ```dart
@@ -66,49 +67,54 @@ import 'viewport.dart';
 ///
 ///   @override
 ///   Widget build(BuildContext context) {
-///     return PageView(
-///       controller: _pageController,
-///       children: [
-///         Container(
-///           color: Colors.red,
-///           child: Center(
-///             child: RaisedButton(
-///               color: Colors.white,
-///               onPressed: () {
-///                 if (_pageController.hasClients) {
-///                   _pageController.animateToPage(
-///                     1,
-///                     duration: const Duration(milliseconds: 400),
-///                     curve: Curves.easeInOut,
-///                   );
-///                 }
-///               },
-///               child: Text('Next'),
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: PageView(
+///           controller: _pageController,
+///           children: [
+///             Container(
+///               color: Colors.red,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         1,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Next'),
+///                 ),
+///               ),
 ///             ),
-///           ),
-///         ),
-///         Container(
-///           color: Colors.blue,
-///           child: Center(
-///             child: RaisedButton(
-///               color: Colors.white,
-///               onPressed: () {
-///                 if (_pageController.hasClients) {
-///                   _pageController.animateToPage(
-///                     0,
-///                     duration: const Duration(milliseconds: 400),
-///                     curve: Curves.easeInOut,
-///                   );
-///                 }
-///               },
-///               child: Text('Previous'),
+///             Container(
+///               color: Colors.blue,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         0,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Previous'),
+///                 ),
+///               ),
 ///             ),
-///           ),
+///           ],
 ///         ),
-///       ],
+///       ),
 ///     );
 ///   }
 /// }
+///
 /// ```
 /// {@end-tool}
 class PageController extends ScrollController {
