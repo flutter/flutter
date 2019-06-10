@@ -256,13 +256,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // The size of the scrollable area.
     final double trackExtent = _lastMetrics.viewportDimension - 2 * mainAxisMargin - mainAxisPadding;
 
-    final bool shouldPaint =
-      // Skip painting if there's not enough space.
-      (_lastMetrics.viewportDimension > mainAxisPadding && trackExtent > 0)
-      // Skip painting if there's not enough content to scroll.
-      && (_lastMetrics.maxScrollExtent > _lastMetrics.minScrollExtent);
-
-    if (!shouldPaint) {
+    // Skip painting if there's not enough space.
+    if (_lastMetrics.viewportDimension <= mainAxisPadding || trackExtent <= 0) {
       return;
     }
 
