@@ -507,8 +507,8 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
-    void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    void expectExists(String relPath, [bool expectation = true]) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), expectation);
     }
 
     expectExists('lib/main.dart');
@@ -549,6 +549,9 @@ void main() {
     final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    // Xcode build system
+    final String xcodeWorkspaceSettingsPath = fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata', 'WorkspaceSettings.xcsettings');
+    expectExists(xcodeWorkspaceSettingsPath, false);
 
     final String versionPath = fs.path.join('.metadata');
     expectExists(versionPath);
