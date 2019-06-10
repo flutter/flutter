@@ -485,10 +485,10 @@ class FloatingActionButton extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('foregroundColor', foregroundColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('backgroundColor', backgroundColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('hoverColor', hoverColor, defaultValue: null));
     properties.add(ObjectFlagProperty<Object>('heroTag', heroTag, ifPresent: 'hero'));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('focusElevation', focusElevation, defaultValue: null));

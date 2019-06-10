@@ -3188,7 +3188,7 @@ mixin DiagnosticableMixin {
   ///     // provide the right UI affordances. For example, in this case even
   ///     // if color is null, a debugging tool still knows the value is a Color
   ///     // and can display relevant color related UI.
-  ///     properties.add(DiagnosticsProperty<Color>('color', color));
+  ///     properties.add(ColorDiagnosticsProperty('color', color));
   ///
   ///     // Use a custom description to generate a more terse summary than the
   ///     // `toString` method on the map class.

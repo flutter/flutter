@@ -334,12 +334,12 @@ class IconButton extends StatelessWidget {
     properties.add(DiagnosticsProperty<Widget>('icon', icon, showName: false));
     properties.add(StringProperty('tooltip', tooltip, defaultValue: null, quoted: false));
     properties.add(ObjectFlagProperty<VoidCallback>('onPressed', onPressed, ifNull: 'disabled'));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', splashColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('color', color, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('disabledColor', disabledColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('focusColor', focusColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('hoverColor', hoverColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('highlightColor', highlightColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('splashColor', splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
   }

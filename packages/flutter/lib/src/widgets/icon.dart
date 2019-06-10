@@ -200,6 +200,6 @@ class Icon extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(IconDataDiagnosticsProperty('icon', icon, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('color', color, defaultValue: null));
   }
 }

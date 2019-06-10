@@ -460,3 +460,44 @@ class ColorSwatch<T> extends Color {
   @override
   String toString() => '$runtimeType(primary value: ${super.toString()})';
 }
+
+/// [DiagnosticsProperty] that has an [Color] as value.
+class ColorDiagnosticsProperty extends DiagnosticsProperty<Color> {
+  /// Create a diagnostics property for [Color].
+  ///
+  /// The [showName], [style], and [level] arguments must not be null.
+  ColorDiagnosticsProperty(
+    String name,
+    Color value, {
+      String description,
+      String ifNull,
+      bool showName = true,
+      Object defaultValue = kNoDefaultValue,
+      String tooltip,
+      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+      DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(showName != null),
+       assert(style != null),
+       assert(level != null),
+       super(name, value,
+         description: description,
+         defaultValue: defaultValue,
+         tooltip: tooltip,
+         showName: showName,
+         ifNull: ifNull,
+         style: style,
+         level: level,
+       );
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    json['valueProperties'] = <String, Object>{
+      'red': value.red,
+      'green': value.green,
+      'blue': value.blue,
+      'alpha': value.alpha,
+    };
+    return json;
+  }
+}

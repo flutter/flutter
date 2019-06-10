@@ -180,8 +180,8 @@ class OutlineButton extends MaterialButton {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<BorderSide>('borderSide', borderSide, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledBorderColor', disabledBorderColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('disabledBorderColor', disabledBorderColor, defaultValue: null));
+    properties.add(ColorDiagnosticsProperty('highlightedBorderColor', highlightedBorderColor, defaultValue: null));
   }
 }
 

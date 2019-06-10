@@ -33,7 +33,6 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'icon_data.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
@@ -1490,25 +1489,7 @@ mixin WidgetInspectorService {
     DiagnosticsNode node,
     _SerializeConfig config,
   ) {
-    if (node == null)
-      return null;
-
-    final Map<String, Object> json = node.toJsonMap(_configToDelegate(config));
-
-    final Object value = node.value;
-    if (node is DiagnosticsProperty) {
-      // Add additional information about properties needed for graphical
-      // display of properties.
-      if (value is Color) {
-        json['valueProperties'] = <String, Object>{
-          'red': value.red,
-          'green': value.green,
-          'blue': value.blue,
-          'alpha': value.alpha,
-        };
-      }
-    }
-    return json;
+    return node?.toJsonMap(_configToDelegate(config));
   }
 
   bool _isValueCreatedByLocalProject(Object value) {
