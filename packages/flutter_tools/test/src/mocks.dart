@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' as io show IOSink, ProcessSignal;
+import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
@@ -342,17 +342,56 @@ class MemoryIOSink implements IOSink {
   Future<void> flush() async { }
 }
 
+class MemoryStdout extends MemoryIOSink implements io.Stdout {
+  @override
+  bool get hasTerminal => _hasTerminal;
+  set hasTerminal(bool value) {
+    assert(value != null);
+    _hasTerminal = value;
+  }
+  bool _hasTerminal = true;
+
+  @override
+  io.IOSink get nonBlocking => this;
+
+  @override
+  bool get supportsAnsiEscapes => _supportsAnsiEscapes;
+  set supportsAnsiEscapes(bool value) {
+    assert(value != null);
+    _supportsAnsiEscapes = value;
+  }
+  bool _supportsAnsiEscapes = true;
+
+  @override
+  int get terminalColumns {
+    if (_terminalColumns != null)
+      return _terminalColumns;
+    throw const io.StdoutException('unspecified mock value');
+  }
+  set terminalColumns(int value) => _terminalColumns = value;
+  int _terminalColumns;
+
+  @override
+  int get terminalLines {
+    if (_terminalLines != null)
+      return _terminalLines;
+    throw const io.StdoutException('unspecified mock value');
+  }
+  set terminalLines(int value) => _terminalLines = value;
+  int _terminalLines;
+}
+
 /// A Stdio that collects stdout and supports simulated stdin.
 class MockStdio extends Stdio {
-  final MemoryIOSink _stdout = MemoryIOSink();
+  final MemoryStdout _stdout = MemoryStdout();
   final MemoryIOSink _stderr = MemoryIOSink();
   final StreamController<List<int>> _stdin = StreamController<List<int>>();
 
   @override
-  IOSink get stdout => _stdout;
+  MemoryStdout get stdout => _stdout;
 
   @override
-  IOSink get stderr => _stderr;
+  MemoryIOSink get stderr => _stderr;
 
   @override
   Stream<List<int>> get stdin => _stdin.stream;
