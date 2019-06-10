@@ -227,7 +227,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       skipBuildScriptCheck: true,
       trackPerformance: false,
       deleteFilesByDefault: true,
-      enableLowResourcesMode: lowResourcesMode,
+      enableLowResourcesMode: platform.environment['FLUTTER_LOW_RESOURCE_MODE']?.toLowerCase() == 'true',
     );
     final Set<core.BuildDirectory> buildDirs = <core.BuildDirectory>{
       if (testOutputDir != null)
