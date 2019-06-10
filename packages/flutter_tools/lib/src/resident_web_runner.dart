@@ -65,14 +65,14 @@ class ResidentWebRunner extends ResidentRunner {
   Future<void> cleanupAfterSignal() async {
     await _connection.sendCommand('Browser.close');
     _connection = null;
-    return _server?.dispose();
+    await _server?.dispose();
   }
 
   @override
   Future<void> cleanupAtFinish() async {
     await _connection?.sendCommand('Browser.close');
     _connection = null;
-    return _server?.dispose();
+    await _server?.dispose();
   }
 
   @override
@@ -95,6 +95,12 @@ class ResidentWebRunner extends ResidentRunner {
       fire + terminal.bolden(rawMessage),
       TerminalColor.red,
     );
+    const String warning = '👻 ';
+    printStatus(warning * 20);
+    printStatus('Warning: Flutter\'s support for building web applications is highly experimental.');
+    printStatus('For more information see https://github.com/flutter/flutter/issues/34082.');
+    printStatus(warning * 20);
+    printStatus('');
     printStatus(message);
     const String quitMessage = 'To quit, press "q".';
     printStatus('For a more detailed help message, press "h". $quitMessage');
@@ -143,7 +149,7 @@ class ResidentWebRunner extends ResidentRunner {
     });
     _connection = await chromeTab.connect();
     _connection.onClose.listen((WipConnection connection) {
-      appFinished();
+      exit();
     });
 
     // We don't support the debugging proxy yet.

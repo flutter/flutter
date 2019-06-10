@@ -250,6 +250,7 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.5.0: Added `daemon.getSupportedPlatforms` command
 - 0.4.2: Added `app.detach` command
 - 0.4.1: Added `flutter attach --machine`
 - 0.4.0: Added `emulator.create` command

@@ -684,24 +684,19 @@ class _SerializeConfig {
     this.groupName,
     this.summaryTree = false,
     this.subtreeDepth  = 1,
-    this.pathToInclude,
     this.includeProperties = false,
     this.expandPropertyValues = true,
-    this.includeToStringDeep = false,
     this.maxDescendentsTruncatableNode = -1,
   });
 
   _SerializeConfig.merge(
     _SerializeConfig base, {
     int subtreeDepth,
-    Iterable<Diagnosticable> pathToInclude,
   }) : groupName = base.groupName,
        summaryTree = base.summaryTree,
        subtreeDepth = subtreeDepth ?? base.subtreeDepth,
-       pathToInclude = pathToInclude ?? base.pathToInclude,
        includeProperties = base.includeProperties,
        expandPropertyValues = base.expandPropertyValues,
-       includeToStringDeep = base.includeToStringDeep,
        maxDescendentsTruncatableNode = base.maxDescendentsTruncatableNode;
 
   /// Optional object group name used to manage manage lifetimes of object
@@ -718,10 +713,6 @@ class _SerializeConfig {
   /// How many levels of children to include in the JSON payload.
   final int subtreeDepth;
 
-  /// Path of nodes through the children of this node to include even if
-  /// subtreeDepth is exceeded.
-  final Iterable<Diagnosticable> pathToInclude;
-
   /// Include information about properties in the JSON instead of requiring
   /// a separate request to determine properties.
   final bool includeProperties;
@@ -736,9 +727,6 @@ class _SerializeConfig {
   /// If [interactive] is true, a call to `ext.flutter.inspector.disposeGroup`
   /// is required before objects in the tree will ever be garbage collected.
   bool get interactive => groupName != null;
-
-  /// Include the text rendering of the nodes (helpful for debugging).
-  final bool includeToStringDeep;
 
   final int maxDescendentsTruncatableNode;
 }
@@ -980,7 +968,6 @@ mixin WidgetInspectorService {
       details.toDiagnosticsNode(),
       _SerializeConfig(
         groupName: _consoleObjectGroup,
-        includeToStringDeep: true,
         subtreeDepth: 5,
         includeProperties: true,
         expandPropertyValues: true,
@@ -1484,8 +1471,7 @@ mixin WidgetInspectorService {
       }
     }
 
-    if (config.subtreeDepth > 0 ||
-        (config.pathToInclude != null && config.pathToInclude.isNotEmpty)) {
+    if (config.subtreeDepth > 0) {
       json['children'] = _nodesToJson(_getChildrenHelper(node, config), config, parent: node);
     }
 
@@ -1599,16 +1585,6 @@ mixin WidgetInspectorService {
     }
     final List<Map<String, Object>> json = nodes.map<Map<String, Object>>(
       (DiagnosticsNode node) {
-        if (config.pathToInclude != null && config.pathToInclude.isNotEmpty) {
-          if (config.pathToInclude.first == node.value) {
-            return _nodeToJson(
-              node,
-              _SerializeConfig.merge(config, pathToInclude: config.pathToInclude.skip(1)),
-            );
-          } else {
-            return _nodeToJson(node, _SerializeConfig.merge(config));
-          }
-        }
         // The tricky special case here is that when in the detailsTree,
         // we keep subtreeDepth from going down to zero until we reach nodes
         // that also exist in the summary tree. This ensures that every time
@@ -1708,19 +1684,12 @@ mixin WidgetInspectorService {
     return _isValueCreatedByLocalProject(value);
   }
 
-  bool _isDeepStyle(DiagnosticsTreeStyle style) => false;
-
   List<DiagnosticsNode> _getChildrenFiltered(
     DiagnosticsNode node,
     _SerializeConfig config,
   ) {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    final Object value = node.value;
-    List<DiagnosticsNode> rawChildren = node.getChildren();
-    if (rawChildren.isEmpty && node is DiagnosticsProperty && value is Diagnosticable && config.expandPropertyValues &&
-        _isDeepStyle(node.style)) {
-      rawChildren = value.toDiagnosticsNode().getChildren();
-    }
+    final List<DiagnosticsNode> rawChildren = node.getChildren();
 
     for (DiagnosticsNode child in rawChildren) {
       if (!config.summaryTree || _shouldShowInSummaryTree(child)) {

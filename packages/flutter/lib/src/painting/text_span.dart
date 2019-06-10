@@ -74,11 +74,15 @@ class TextSpan extends InlineSpan {
     this.semanticsLabel,
   }) : super(style: style,);
 
-  /// The text contained in the span.
+  /// The text contained in this span.
   ///
   /// If both [text] and [children] are non-null, the text will precede the
   /// children.
+  ///
+  /// This getter does not include the contents of its children.
+  @override
   final String text;
+
 
   /// Additional spans to include as children.
   ///
@@ -89,6 +93,7 @@ class TextSpan extends InlineSpan {
   /// supported and may have unexpected results.
   ///
   /// The list must not contain any nulls.
+  @override
   final List<InlineSpan> children;
 
   /// A gesture recognizer that will receive events that hit this span.
@@ -165,6 +170,7 @@ class TextSpan extends InlineSpan {
   /// }
   /// ```
   /// {@end-tool}
+  @override
   final GestureRecognizer recognizer;
 
   /// An alternative semantics label for this [TextSpan].
@@ -205,8 +211,11 @@ class TextSpan extends InlineSpan {
       builder.pop();
   }
 
-  /// Walks this text span and its descendants in pre-order and calls [visitor]
+  /// Walks this [TextSpan] and its descendants in pre-order and calls [visitor]
   /// for each span that has text.
+  ///
+  /// When `visitor` returns true, the walk will continue. When `visitor` returns
+  /// false, then the walk will end.
   @override
   bool visitChildren(InlineSpanVisitor visitor) {
     if (text != null) {
@@ -216,6 +225,30 @@ class TextSpan extends InlineSpan {
     if (children != null) {
       for (InlineSpan child in children) {
         if (!child.visitChildren(visitor))
+          return false;
+      }
+    }
+    return true;
+  }
+
+  // TODO(garyq): Remove this after next stable release.
+  /// Walks this [TextSpan] and any descendants in pre-order and calls `visitor`
+  /// for each span that has content.
+  ///
+  /// When `visitor` returns true, the walk will continue. When `visitor` returns
+  /// false, then the walk will end.
+  @override
+  @Deprecated('Use to visitChildren instead')
+  bool visitTextSpan(bool visitor(TextSpan span)) {
+    if (text != null) {
+      if (!visitor(this))
+        return false;
+    }
+    if (children != null) {
+      for (InlineSpan child in children) {
+        assert(child is TextSpan, 'visitTextSpan is deprecated. Use visitChildren to support InlineSpans');
+        final TextSpan textSpanChild = child;
+        if (!textSpanChild.visitTextSpan(visitor))
           return false;
       }
     }
