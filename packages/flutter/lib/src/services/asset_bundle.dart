@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -120,7 +121,8 @@ class NetworkAssetBundle extends AssetBundle {
         'Unable to load asset: $key\n'
         'HTTP status code: ${response.statusCode}'
       );
-    final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
+    final TransferableTypedData transferrable = await consolidateHttpClientResponseBytes(response);
+    final Uint8List bytes = transferrable.materialize() as Uint8List;
     return bytes.buffer.asByteData();
   }
 

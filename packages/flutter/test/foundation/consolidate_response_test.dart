@@ -6,6 +6,7 @@
 
 import 'dart:async';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
@@ -52,7 +53,7 @@ void main() {
       when(response.contentLength)
           .thenReturn(chunkOne.length + chunkTwo.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response, client: client);
+      (await consolidateHttpClientResponseBytes(response, client: client)).materialize().asUint8List();
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -60,7 +61,7 @@ void main() {
     test('Converts a compressed HttpClientResponse with contentLength to bytes', () async {
       when(response.contentLength).thenReturn(chunkOne.length);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response, client: client);
+      (await consolidateHttpClientResponseBytes(response, client: client)).materialize().asUint8List();
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -68,7 +69,7 @@ void main() {
     test('Converts an HttpClientResponse without contentLength to bytes', () async {
       when(response.contentLength).thenReturn(-1);
       final List<int> bytes =
-          await consolidateHttpClientResponseBytes(response, client: client);
+      (await consolidateHttpClientResponseBytes(response, client: client)).materialize().asUint8List();
 
       expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
     });
@@ -122,7 +123,7 @@ void main() {
 
     test('Propagates error to Future return value if onBytesReceived throws', () async {
       when(response.contentLength).thenReturn(-1);
-      final Future<List<int>> result = consolidateHttpClientResponseBytes(
+      final Future<TransferableTypedData> result = consolidateHttpClientResponseBytes(
         response,
         client: client,
         onBytesReceived: (int cumulative, int total) {
@@ -164,14 +165,14 @@ void main() {
       test('Uncompresses GZIP bytes if autoUncompress is true and response.autoUncompress is false', () async {
         when(client.autoUncompress).thenReturn(false);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> bytes = await consolidateHttpClientResponseBytes(response, client: client);
+        final List<int> bytes = (await consolidateHttpClientResponseBytes(response, client: client)).materialize().asUint8List();
         expect(bytes, <int>[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
       });
 
       test('returns gzipped bytes if autoUncompress is false and response.autoUncompress is false', () async {
         when(client.autoUncompress).thenReturn(false);
         when(response.contentLength).thenReturn(gzipped.length);
-        final List<int> bytes = await consolidateHttpClientResponseBytes(response, client: client, autoUncompress: false);
+        final List<int> bytes = (await consolidateHttpClientResponseBytes(response, client: client, autoUncompress: false)).materialize().asUint8List();
         expect(bytes, gzipped);
       });
 

@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:isolate';
+
 
 /// Signature for getting notified when chunks of bytes are received while
 /// consolidating the bytes of an [HttpClientResponse] into a [Uint8List].
@@ -44,14 +46,14 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
 /// parameter to false.
 // TODO(tvolkert): Remove the [client] param once https://github.com/dart-lang/sdk/issues/36971 is fixed.
-Future<Uint8List> consolidateHttpClientResponseBytes(
+Future<TransferableTypedData> consolidateHttpClientResponseBytes(
   HttpClientResponse response, {
   HttpClient client,
   bool autoUncompress = true,
   BytesReceivedCallback onBytesReceived,
 }) {
   assert(autoUncompress != null);
-  final Completer<Uint8List> completer = Completer<Uint8List>.sync();
+  final Completer<TransferableTypedData> completer = Completer<TransferableTypedData>.sync();
 
   final _OutputBuffer output = _OutputBuffer();
   ByteConversionSink sink = output;
@@ -85,41 +87,22 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
     }
   }, onDone: () {
     sink.close();
-    completer.complete(output.bytes);
+    completer.complete(TransferableTypedData.fromList(output.chunks));
   }, onError: completer.completeError, cancelOnError: true);
 
   return completer.future;
 }
 
 class _OutputBuffer extends ByteConversionSinkBase {
-  List<List<int>> _chunks = <List<int>>[];
-  int _contentLength = 0;
-  Uint8List _bytes;
+  List<Uint8List> _chunks = <Uint8List>[];
 
   @override
   void add(List<int> chunk) {
-    assert(_bytes == null);
     _chunks.add(chunk);
-    _contentLength += chunk.length;
   }
 
   @override
-  void close() {
-    if (_bytes != null) {
-      // We've already been closed; this is a no-op
-      return;
-    }
-    _bytes = Uint8List(_contentLength);
-    int offset = 0;
-    for (List<int> chunk in _chunks) {
-      _bytes.setRange(offset, offset + chunk.length, chunk);
-      offset += chunk.length;
-    }
-    _chunks = null;
-  }
+  void close() {}
 
-  Uint8List get bytes {
-    assert(_bytes != null);
-    return _bytes;
-  }
+  List<Uint8List> get chunks => _chunks;
 }
