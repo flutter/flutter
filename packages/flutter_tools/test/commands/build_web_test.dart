@@ -5,6 +5,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/resident_web_runner.dart';
@@ -67,6 +68,7 @@ void main() {
       <FlutterDevice>[],
       flutterProject: FlutterProject.current(),
       ipv6: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
     );
     expect(await runner.run(), 1);
   }));
