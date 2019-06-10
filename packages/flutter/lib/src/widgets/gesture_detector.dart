@@ -773,11 +773,10 @@ class RawGestureDetector extends StatefulWidget {
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
-    bool excludeFromSemantics = false,
-    GestureSemanticsMapping semanticsMapping = const DefaultGestureSemanticsMapping(),
+    this.excludeFromSemantics = false,
+    this.semanticsMapping = const DefaultGestureSemanticsMapping(),
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
-       _semanticsMapping = excludeFromSemantics ? null : semanticsMapping,
        super(key: key);
 
   /// The widget below this widget in the tree.
@@ -805,15 +804,17 @@ class RawGestureDetector extends StatefulWidget {
   /// excluded because the tooltip itself is included in the semantics
   /// tree directly and so having a gesture to show it would result in
   /// duplication of information.
-  bool get excludeFromSemantics => _semanticsMapping == null;
+  final bool excludeFromSemantics;
 
   /// Describes how gestures from the semantics server are mapped into callbacks
-  /// of recognizers. For example, during a semantic tap, a detector might want
-  /// to call the callbacks of its TapGestureRecognizer if there is one.
+  /// of recognizers. For example, if a detector wants semantic taps to invoke
+  /// the callbacks of its TapGestureRecognizer (if there is one), the semantics
+  /// mapping it receives should have the desired behavior defined in the
+  /// returned handler of [GestureSemanticsMapping.getTapHandler].
   ///
-  /// It is null if [excludeFromSemantics] is true.
-  GestureSemanticsMapping get semanticsMapping => _semanticsMapping;
-  final GestureSemanticsMapping _semanticsMapping;
+  /// It defaults to [DefaultGestureSemanticsMapping]. It has no effect if
+  /// [excludeFromSemantics] is true.
+  final GestureSemanticsMapping semanticsMapping;
 
   @override
   RawGestureDetectorState createState() => RawGestureDetectorState();
@@ -946,7 +947,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
           ? null : _handleSemanticVertical;
   }
   GestureRecognizer _findRecognizer(Type type) => _recognizers[type];
-  GestureSemanticsMapping get _semanticsMapping => widget._semanticsMapping;
+  GestureSemanticsMapping get _semanticsMapping {
+    return widget.excludeFromSemantics ? null : widget.semanticsMapping;
+  }
   // The following methods handles semantic gestures, and are assigned to the
   // render object [RenderSemanticsGestureHandler].
   // They are assigned only when both semanticsMapping and the corresponding
