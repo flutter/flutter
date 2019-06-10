@@ -45,6 +45,10 @@ const String kCommandCreateProjectType = 'cd19';
 const String kCommandPackagesNumberPlugins = 'cd20';
 const String kCommandPackagesProjectModule = 'cd21';
 
+const String kCommandBuildBundleTargetPlatform = 'cd24';
+const String kCommandBuildBundleIsModule = 'cd25';
+// Next ID: cd26
+
 Usage get flutterUsage => Usage.instance;
 
 class Usage {

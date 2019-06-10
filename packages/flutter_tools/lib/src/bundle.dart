@@ -48,6 +48,46 @@ const String _kVMSnapshotData = 'vm_snapshot_data';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 
+class BundleFactory {
+  Future<void> build({
+    TargetPlatform platform,
+    BuildMode buildMode,
+    String mainPath = defaultMainPath,
+    String manifestPath = defaultManifestPath,
+    String applicationKernelFilePath,
+    String depfilePath,
+    String privateKeyPath = defaultPrivateKeyPath,
+    String assetDirPath,
+    String packagesPath,
+    bool precompiledSnapshot = false,
+    bool reportLicensedPackages = false,
+    bool trackWidgetCreation = false,
+    String compilationTraceFilePath,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+  }) => build(
+      platform: platform,
+      buildMode: buildMode,
+      mainPath: defaultMainPath,
+      manifestPath: defaultManifestPath,
+      applicationKernelFilePath: applicationKernelFilePath,
+      depfilePath: depfilePath,
+      privateKeyPath: privateKeyPath,
+      assetDirPath: assetDirPath,
+      packagesPath: packagesPath,
+      precompiledSnapshot: precompiledSnapshot,
+      reportLicensedPackages: reportLicensedPackages,
+      trackWidgetCreation: trackWidgetCreation,
+      compilationTraceFilePath: compilationTraceFilePath,
+      extraFrontEndOptions: extraFrontEndOptions,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
+      fileSystemRoots: fileSystemRoots,
+      fileSystemScheme: fileSystemScheme,
+    );
+}
+
 Future<void> build({
   TargetPlatform platform,
   BuildMode buildMode,
