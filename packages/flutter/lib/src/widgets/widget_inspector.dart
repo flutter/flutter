@@ -1506,10 +1506,6 @@ mixin WidgetInspectorService {
           'blue': value.blue,
           'alpha': value.alpha,
         };
-      } else if (value is IconData) {
-        json['valueProperties'] = <String, Object>{
-          'codePoint': value.codePoint,
-        };
       }
     }
     return json;

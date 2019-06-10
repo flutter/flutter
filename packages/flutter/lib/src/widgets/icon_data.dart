@@ -66,3 +66,42 @@ class IconData {
   @override
   String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
 }
+
+/// [DiagnosticsProperty] that has an [IconData] as value.
+class IconDataDiagnosticsProperty extends DiagnosticsProperty<IconData> {
+
+  /// Create a diagnostics property for strings.
+  ///
+  /// The [showName], [style], and [level] arguments must not be null.
+  IconDataDiagnosticsProperty(
+    String name,
+    IconData value, {
+      String description,
+      String ifNull,
+      bool showName = true,
+      Object defaultValue = kNoDefaultValue,
+      String tooltip,
+      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+      DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(showName != null),
+       assert(style != null),
+       assert(level != null),
+       super(name, value,
+         description: description,
+         defaultValue: defaultValue,
+         tooltip: tooltip,
+         showName: showName,
+         ifNull: ifNull,
+         style: style,
+         level: level,
+       );
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    json['valueProperties'] = <String, Object>{
+      'codePoint': value.codePoint,
+    };
+    return json;
+  }
+}
