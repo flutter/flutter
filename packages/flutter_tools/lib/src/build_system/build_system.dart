@@ -129,7 +129,7 @@ class Target {
     final List<SourceFile> sourcesToHash = <SourceFile>[];
     for (SourceFile entity in inputs) {
       if (!entity.existsSync()) {
-        throw MissingInputException(entity.path, name);
+        throw MissingInputException(entity.unresolvedPath, name);
       }
 
       final String absolutePath = entity.path;
@@ -183,7 +183,7 @@ class Target {
     final List<String> outputStamps = <String>[];
     for (SourceFile output in outputs) {
       if (!output.existsSync()) {
-        throw MissingOutputException(output.path, name);
+        throw MissingOutputException(output.unresolvedPath, name);
       }
       outputStamps.add(output.path);
     }
@@ -298,6 +298,7 @@ class Environment {
     @required BuildMode buildMode,
     Directory buildDir,
     Directory cacheDir,
+    Directory flutterRootDir,
     String flavor,
   }) {
     assert(projectDir != null);
@@ -305,7 +306,7 @@ class Environment {
     assert(buildMode != null);
     return Environment._(
       projectDir: projectDir,
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: flutterRootDir ?? fs.directory(Cache.flutterRoot),
       buildDir: buildDir ?? projectDir.childDirectory('build'),
       cacheDir: cacheDir ??
           Cache.instance.getCacheArtifacts().childDirectory('engine'),
@@ -335,7 +336,7 @@ class Environment {
   static const String kCacheDirectory = '{CACHE_DIR}';
 
   /// The [Source] value which is substituted with a path to the flutter root.
-  static const String kFlutterRoot = '{FLUTTER_ROOT}';
+  static const String kFlutterRootDirectory = '{FLUTTER_ROOT}';
 
   /// The [Source] value which is substituted with [targetPlatform].
   static const String kPlatform = '{platform}';

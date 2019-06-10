@@ -23,8 +23,11 @@ class SourceFile {
   /// Whether the source exists on disk.
   bool existsSync() => _fileSystemEntity.existsSync();
 
-  /// The path to the file.
+  /// The path to the file or directory.
   String get path => _fileSystemEntity.resolveSymbolicLinksSync();
+
+  /// The unresolved path to the file or directory.
+  String get unresolvedPath => _fileSystemEntity.path;
 
   /// Return the bytes used to compute a version hash for the file.
   List<int> bytesForVersion() {
@@ -89,6 +92,9 @@ class SourceVisitor {
         segments.addAll(fs.path.split(environment.buildDir.absolute.path));
         break;
       case Environment.kCacheDirectory:
+        segments.addAll(fs.path.split(environment.cacheDir.absolute.path));
+        break;
+      case Environment.kFlutterRootDirectory:
         segments.addAll(fs.path.split(environment.cacheDir.absolute.path));
         break;
       default:

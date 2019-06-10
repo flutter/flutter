@@ -362,12 +362,14 @@ void main() {
           targetPlatform: TargetPlatform.android_arm,
           buildMode: BuildMode.debug,
           flavor: 'flavor_town',
+          flutterRootDir: fs.currentDirectory,
         );
         visitor = SourceVisitor(environment);
       });
     });
 
     test('can substitute {PROJECT_DIR}/foo', () => testbed.run(() {
+      fs.file('foo').createSync();
       const Source fooSource = Source.pattern('{PROJECT_DIR}/foo');
       fooSource.accept(visitor);
 
@@ -375,31 +377,38 @@ void main() {
     }));
 
     test('can substitute {BUILD_DIR}/bar', () => testbed.run(() {
+      final String path = fs.path.join('build', 'bar');
+      fs.file(path).createSync();
       const Source barSource = Source.pattern('{BUILD_DIR}/bar');
       barSource.accept(visitor);
 
-      expect(visitor.sources.single.path, fs.path.absolute(fs.path.join('build', 'bar')));
+      expect(visitor.sources.single.path, fs.path.absolute(path));
     }));
 
     test('can substitute {CACHE_DIR}/fizz', () => testbed.run(() {
+      final String path = fs.path.join('cache', 'fizz');
+      fs.file(path).createSync();
       const Source fizzSource = Source.pattern('{CACHE_DIR}/fizz');
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, fs.path.absolute(fs.path.join('cache', 'fizz')));
+      expect(visitor.sources.single.path, fs.path.absolute(path));
     }));
 
     test('can substitute {PROJECT_DIR}/{mode}/{flavor}/{platform}/fizz', () => testbed.run(() {
+      final String path = fs.path.join('debug', 'flavor_town', 'android-arm', 'fizz');
+      fs.file(path).createSync(recursive: true);
       const Source fizzSource = Source.pattern('{PROJECT_DIR}/{mode}/{flavor}/{platform}/fizz');
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, fs.path.absolute(fs.path.join('debug', 'flavor_town', 'android-arm', 'fizz')));
+      expect(visitor.sources.single.path, fs.path.absolute(path));
     }));
 
     test('can substitute {PROJECT_DIR}/{mode}.{flavor}.{platform}.fizz', () => testbed.run(() {
+      fs.file('debug.flavor_town.android-arm.fizz').createSync();
       const Source fizzSource = Source.pattern('{PROJECT_DIR}/{mode}.{flavor}.{platform}.fizz');
       fizzSource.accept(visitor);
 
-      expect(visitor.sources.single.path, fs.path.absolute(fs.path.join('debug.flavor_town.android-arm.fizz')));
+      expect(visitor.sources.single.path, fs.path.absolute('debug.flavor_town.android-arm.fizz'));
     }));
 
     test('can substitute {PROJECT_DIR}/*.fizz', () => testbed.run(() {
