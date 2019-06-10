@@ -1515,7 +1515,8 @@ abstract class DiagnosticsNode {
 
   String get _separator => showSeparator ? ':' : '';
 
-  /// Serialize the node excluding its descendants to a JSON map.
+  /// Serialize the node to a JSON map according to the configuration provided
+  /// in the [DiagnosticsSerialisationDelegate].
   ///
   /// Subclasses should override if they have additional properties that are
   /// useful for the GUI tools that consume this JSON.
@@ -1576,7 +1577,12 @@ abstract class DiagnosticsNode {
     return data;
   }
 
+  /// Serialize the properties of this node to a JSON list according to the
+  /// configuration provided in the [DiagnosticsSerialisationDelegate].
   ///
+  /// By default, this will just call [toJsonList] on the return value of
+  /// [getProperties]. Subclasses should override this if their properties
+  /// need special processing.
   @protected
   List<Map<String, Object>> propertiesToJsonList(DiagnosticsSerialisationDelegate delegate) {
     List<DiagnosticsNode> properties = getProperties();
@@ -1584,7 +1590,12 @@ abstract class DiagnosticsNode {
     return toJsonList(properties, this, delegate);
   }
 
+  /// Serialize the children of this node to a JSON list according to the
+  /// configuration provided in the [DiagnosticsSerialisationDelegate].
   ///
+  /// By default, this will just call [toJsonList] on the return value of
+  /// [getChildren]. Subclasses should override this if their children
+  /// need special processing.
   @protected
   List<Map<String, Object>> childrenToJsonList(DiagnosticsSerialisationDelegate delegate) {
     List<DiagnosticsNode> children = getChildren();
@@ -1592,8 +1603,16 @@ abstract class DiagnosticsNode {
     return toJsonList(children, this, delegate);
   }
 
+  /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
+  /// the configuration provided by the [DiagnosticsSerialisationDelegate].
   ///
-  static List<Map<String, Object>> toJsonList(List<DiagnosticsNode> nodes, DiagnosticsNode parent, DiagnosticsSerialisationDelegate delegate) {
+  /// The provided `nodes` may be properties or children of the `parent`
+  /// [DiagnosticsNode].
+  static List<Map<String, Object>> toJsonList(
+      List<DiagnosticsNode> nodes,
+      DiagnosticsNode parent,
+      DiagnosticsSerialisationDelegate delegate,
+  ) {
     bool truncated = false;
     if (nodes == null)
       return <Map<String, Object>>[];
@@ -3408,9 +3427,13 @@ class DiagnosticsBlock extends DiagnosticsNode {
   String toDescription({TextTreeConfiguration parentConfiguration}) => _description;
 }
 
-///
+/// A delegate that configures how a hierarchy of [DiagnosticsNode]s should be
+/// serialized.
 class DiagnosticsSerialisationDelegate {
+  /// Creates a [DiagnosticsSerialisationDelegate].
   ///
+  /// The [subtreeDepth], [includeProperties], and [expandPropertyValues]
+  /// arguments must not be null.
   DiagnosticsSerialisationDelegate({
     this.subtreeDepth = 0,
     this.includeProperties = false,
@@ -3420,9 +3443,11 @@ class DiagnosticsSerialisationDelegate {
     this.filterProperties,
     this.nodeTruncator,
     this.delegateForAddingNode,
-  });
+  }) : assert(subtreeDepth != null),
+       assert(includeProperties != null),
+       assert(expandPropertyValues != null);
 
-  ///
+  /// 
   final NodeToMap additionalNodeProperties;
 
   ///
