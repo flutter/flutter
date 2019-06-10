@@ -19,32 +19,23 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  MockProcessManager mockProcessManager;
-  MockProcess mockProcess;
-  MockPlatform linuxPlatform;
-  MockPlatform notLinuxPlatform;
+  Cache.disableLocking();
+  final MockProcessManager mockProcessManager = MockProcessManager();
+  final MockProcess mockProcess = MockProcess();
+  final MockPlatform linuxPlatform = MockPlatform();
+  final MockPlatform notLinuxPlatform = MockPlatform();
 
-  setUpAll(() {
-    Cache.disableLocking();
+  when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
+    return 0;
   });
-
-  setUp(() {
-    mockProcessManager = MockProcessManager();
-    mockProcess = MockProcess();
-    linuxPlatform = MockPlatform();
-    notLinuxPlatform = MockPlatform();
-    when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
-      return 0;
-    });
-    when(mockProcess.stderr).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
-    });
-    when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
-    });
-    when(linuxPlatform.isLinux).thenReturn(true);
-    when(notLinuxPlatform.isLinux).thenReturn(false);
+  when(mockProcess.stderr).thenAnswer((Invocation invocation) {
+    return const Stream<List<int>>.empty();
   });
+  when(mockProcess.stdout).thenAnswer((Invocation invocation) {
+    return const Stream<List<int>>.empty();
+  });
+  when(linuxPlatform.isLinux).thenReturn(true);
+  when(notLinuxPlatform.isLinux).thenReturn(false);
 
   testUsingContext('Linux build fails when there is no linux project', () async {
     final BuildCommand command = BuildCommand();
