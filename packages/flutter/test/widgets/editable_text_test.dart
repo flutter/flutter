@@ -129,7 +129,7 @@ void main() {
         equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -161,7 +161,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "go" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -185,7 +185,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "next" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -193,7 +193,7 @@ void main() {
       action: TextInputAction.next,
       serializedActionName: 'TextInputAction.next',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "previous" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -201,7 +201,7 @@ void main() {
       action: TextInputAction.previous,
       serializedActionName: 'TextInputAction.previous',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "continue" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -209,7 +209,7 @@ void main() {
       action: TextInputAction.continueAction,
       serializedActionName: 'TextInputAction.continueAction',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "join" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -217,7 +217,7 @@ void main() {
       action: TextInputAction.join,
       serializedActionName: 'TextInputAction.join',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "route" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(

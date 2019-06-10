@@ -35,7 +35,7 @@ void main() {
       skip: !isLinux
     ); // shadows render differently on different platforms
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -96,7 +96,7 @@ void main() {
       skip: !isLinux,
     ); // shadows render differently on different platforms
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
     debugDisableShadows = false;
