@@ -101,16 +101,8 @@ For more information about how to create, use, or update templates, see
 
 ## Skeletons
 
-The code block generation tools process the source input and emit HTML for output,
-which dartdoc places back into the documentation. Any options given to the
- `{@tool ...}` directive are passed on verbatim to the tool.
-
-To render the these examples, the `snippets` tool needs to render the code in a
-combination of markdown and HTML, using the `{@inject-html}` dartdoc directive.
-
-A skeleton (in relation to this tool, in the [config/skeletons](config/skeletons)
-directory) is an HTML template into which the Dart code blocks and descriptions
-are interpolated, in order to display it nicely.
+A skeleton (in relation to this tool) is an HTML template into which the Dart
+code blocks and descriptions are interpolated.
 
 There is currently one skeleton for
 [application](config/skeletons/application.html) `snippets` and one for
@@ -120,6 +112,13 @@ Skeletons use mustache notation (e.g. `{{code}}`) to mark where components will
 be interpolated into the template. It doesn't actually use the mustache
 package, since these are simple string substitutions, but it uses the same
 syntax.
+
+The code block generation tools process the source input and emit HTML for output,
+which dartdoc places back into the documentation. Any options given to the
+ `{@tool ...}` directive are passed on verbatim to the tool.
+
+The `snippets` tool renders these examples through a combination of markdown
+and HTML using the `{@inject-html}` dartdoc directive.
 
 ## Test Doc Generation Workflow
 
