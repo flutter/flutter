@@ -10,7 +10,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/fingerprint.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
@@ -21,11 +20,11 @@ import '../base/utils.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../globals.dart';
-import '../macos/cocoapods.dart';
+import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
-import '../plugins.dart';
 import '../project.dart';
 import '../services.dart';
+import '../usage.dart';
 import 'code_signing.dart';
 import 'xcodeproj.dart';
 
@@ -274,29 +273,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     targetOverride: targetOverride,
     buildInfo: buildInfo,
   );
-  refreshPluginsList(project);
-  if (hasPlugins(project) || (project.isModule && project.ios.podfile.existsSync())) {
-    // If the Xcode project, Podfile, or Generated.xcconfig have changed since
-    // last run, pods should be updated.
-    final Fingerprinter fingerprinter = Fingerprinter(
-      fingerprintPath: fs.path.join(getIosBuildDirectory(), 'pod_inputs.fingerprint'),
-      paths: <String>[
-        app.project.xcodeProjectInfoFile.path,
-        app.project.podfile.path,
-        app.project.generatedXcodePropertiesFile.path,
-      ],
-      properties: <String, String>{},
-    );
-
-    final bool didPodInstall = await cocoaPods.processPods(
-      iosProject: project.ios,
-      iosEngineDir: flutterFrameworkDir(buildInfo.mode),
-      isSwift: project.ios.isSwift,
-      dependenciesChanged: !await fingerprinter.doesFingerprintMatch(),
-    );
-    if (didPodInstall)
-      await fingerprinter.writeFingerprint();
-  }
+  await processPodsIfNeeded(project.ios, getIosBuildDirectory(), buildInfo.mode);
 
   final List<String> buildCommands = <String>[
     '/usr/bin/env',
@@ -398,7 +375,7 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
-  final Stopwatch buildStopwatch = Stopwatch()..start();
+  final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(
     buildCommands,
@@ -411,11 +388,11 @@ Future<XcodeBuildResult> buildXcodeProject({
   buildSubStatus = null;
   initialBuildStatus?.cancel();
   initialBuildStatus = null;
-  buildStopwatch.stop();
   printStatus(
     'Xcode build done.'.padRight(kDefaultStatusPadding + 1)
-        + '${getElapsedAsSeconds(buildStopwatch.elapsed).padLeft(5)}',
+        + '${getElapsedAsSeconds(sw.elapsed).padLeft(5)}',
   );
+  flutterUsage.sendTiming('build', 'xcode-ios', Duration(milliseconds: sw.elapsedMilliseconds));
 
   // Run -showBuildSettings again but with the exact same parameters as the build.
   final Map<String, String> buildSettings = parseXcodeBuildSettings(runCheckedSync(

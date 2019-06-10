@@ -34,8 +34,8 @@ HttpClientProvider debugNetworkImageHttpClientProvider;
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See <https://docs.flutter.io/flutter/rendering/painting-library.html> for
-/// a complete list.
+/// See [the painting library](painting/painting-library.html) for a complete
+/// list.
 ///
 /// The `debugDisableShadowsOverride` argument can be provided to override
 /// the expected value for [debugDisableShadows]. (This exists because the

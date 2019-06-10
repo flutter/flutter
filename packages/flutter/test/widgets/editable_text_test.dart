@@ -1170,7 +1170,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1271,7 +1271,7 @@ void main() {
     expect(controller.selection.extentOffset, 2);
 
     semantics.dispose();
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   testWidgets('can extend selection with a11y means - word', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1373,7 +1373,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1870,8 +1870,9 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
     expect(renderEditable.text.children.length, 3);
-    expect(renderEditable.text.children[1].text, 'composing');
-    expect(renderEditable.text.children[1].style.decoration, TextDecoration.underline);
+    final TextSpan textSpan = renderEditable.text.children[1];
+    expect(textSpan.text, 'composing');
+    expect(textSpan.style.decoration, TextDecoration.underline);
 
     focusNode.unfocus();
     await tester.pump();
@@ -1893,6 +1894,7 @@ void main() {
         child: SizedBox(
           width: 100,
           child: EditableText(
+            showSelectionHandles: true,
             controller: controller,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
@@ -1961,35 +1963,56 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<Positioned> positioned =
-        find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
+      final List<CompositedTransformFollower> container =
+        find.byType(CompositedTransformFollower)
+          .evaluate()
+          .map((Element e) => e.widget)
+          .cast<CompositedTransformFollower>()
+          .toList();
 
       final Size viewport = renderEditable.size;
 
       void testPosition(double pos, HandlePositionInViewport expected) {
         switch (expected) {
           case HandlePositionInViewport.leftEdge:
-            expect(pos, equals(0.0));
+            expect(
+              pos,
+              inExclusiveRange(
+                0 - kMinInteractiveSize,
+                0 + kMinInteractiveSize,
+              ),
+            );
             break;
           case HandlePositionInViewport.rightEdge:
-            expect(pos, equals(viewport.width));
+            expect(
+              pos,
+              inExclusiveRange(
+                viewport.width - kMinInteractiveSize,
+                viewport.width + kMinInteractiveSize,
+              ),
+            );
             break;
           case HandlePositionInViewport.within:
-            expect(pos, inExclusiveRange(0.0, viewport.width));
+            expect(
+              pos,
+              inExclusiveRange(
+                0 - kMinInteractiveSize,
+                viewport.width + kMinInteractiveSize,
+              ),
+            );
             break;
           default:
             throw TestFailure('HandlePositionInViewport can\'t be null.');
         }
       }
-
-      testPosition(positioned[0].left, leftPosition);
-      testPosition(positioned[1].left, rightPosition);
+      expect(state.selectionOverlay.handlesAreVisible, isTrue);
+      testPosition(container[0].offset.dx, leftPosition);
+      testPosition(container[1].offset.dx, rightPosition);
     }
 
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
@@ -2011,7 +2034,6 @@ void main() {
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
@@ -2024,7 +2046,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -2038,6 +2060,7 @@ void main() {
           width: 100,
           child: EditableText(
             controller: controller,
+            showSelectionHandles: true,
             focusNode: FocusNode(),
             style: Typography(platform: TargetPlatform.android).black.subhead,
             cursorColor: Colors.blue,
@@ -2056,15 +2079,31 @@ void main() {
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     state.renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
-    final List<Positioned> positioned =
-      find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
-    expect(positioned[0].left, 0.0);
-    expect(positioned[1].left, 70.0);
+    final List<CompositedTransformFollower> container =
+      find.byType(CompositedTransformFollower)
+        .evaluate()
+        .map((Element e) => e.widget)
+        .cast<CompositedTransformFollower>()
+        .toList();
+    expect(
+      container[0].offset.dx,
+      inExclusiveRange(
+        -kMinInteractiveSize,
+        kMinInteractiveSize,
+      ),
+    );
+    expect(
+      container[1].offset.dx,
+      inExclusiveRange(
+        70.0 - kMinInteractiveSize,
+        70.0 + kMinInteractiveSize,
+      ),
+    );
+    expect(state.selectionOverlay.handlesAreVisible, isTrue);
     expect(controller.selection.base.offset, 0);
     expect(controller.selection.extent.offset, 5);
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
@@ -2081,6 +2120,7 @@ void main() {
           child: SizedBox(
             width: 100,
             child: EditableText(
+              showSelectionHandles: true,
               controller: controller,
               focusNode: FocusNode(),
               style: Typography(platform: TargetPlatform.iOS).black.subhead,
@@ -2148,35 +2188,56 @@ void main() {
 
       // Check that the handles' positions are correct.
 
-      final List<Positioned> positioned =
-        find.byType(Positioned).evaluate().map((Element e) => e.widget).cast<Positioned>().toList();
+      final List<CompositedTransformFollower> container =
+        find.byType(CompositedTransformFollower)
+          .evaluate()
+          .map((Element e) => e.widget)
+          .cast<CompositedTransformFollower>()
+          .toList();
 
       final Size viewport = renderEditable.size;
 
       void testPosition(double pos, HandlePositionInViewport expected) {
         switch (expected) {
           case HandlePositionInViewport.leftEdge:
-            expect(pos, equals(0.0));
+            expect(
+              pos,
+              inExclusiveRange(
+                0 - kMinInteractiveSize,
+                0 + kMinInteractiveSize,
+              ),
+            );
             break;
           case HandlePositionInViewport.rightEdge:
-            expect(pos, equals(viewport.width));
+            expect(
+              pos,
+              inExclusiveRange(
+                viewport.width - kMinInteractiveSize,
+                viewport.width + kMinInteractiveSize,
+              ),
+            );
             break;
           case HandlePositionInViewport.within:
-            expect(pos, inExclusiveRange(0.0, viewport.width));
+            expect(
+              pos,
+              inExclusiveRange(
+                0 - kMinInteractiveSize,
+                viewport.width + kMinInteractiveSize,
+              ),
+            );
             break;
           default:
             throw TestFailure('HandlePositionInViewport can\'t be null.');
         }
       }
-
-      testPosition(positioned[1].left, leftPosition);
-      testPosition(positioned[2].left, rightPosition);
+      expect(state.selectionOverlay.handlesAreVisible, isTrue);
+      testPosition(container[0].offset.dx, leftPosition);
+      testPosition(container[1].offset.dx, rightPosition);
     }
 
     // Select the first word. Both handles should be visible.
     await tester.tapAt(const Offset(20, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.leftEdge, true, HandlePositionInViewport.within, true);
 
@@ -2198,7 +2259,6 @@ void main() {
     // Now that the second word has been dragged fully into view, select it.
     await tester.tapAt(const Offset(80, 10));
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
-    state.showHandles();
     await tester.pump();
     await verifyVisibility(HandlePositionInViewport.within, true, HandlePositionInViewport.within, true);
 
@@ -2213,10 +2273,20 @@ void main() {
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
 
     debugDefaultTargetPlatformOverride = null;
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 }
 
-class MockTextSelectionControls extends Mock implements TextSelectionControls {}
+class MockTextSelectionControls extends Mock implements TextSelectionControls {
+  @override
+  Size getHandleSize(double textLineHeight) {
+    return Size.zero;
+  }
+
+  @override
+  Offset getHandleAnchor(TextSelectionHandleType type, double textLineHeight) {
+    return Offset.zero;
+  }
+}
 
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({

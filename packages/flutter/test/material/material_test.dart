@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -619,7 +617,7 @@ void main() {
       await expectLater(
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_above.png'),
-        skip: !Platform.isLinux,
+        skip: !isLinux,
       );
     });
 
@@ -660,7 +658,7 @@ void main() {
       await expectLater(
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_below.png'),
-        skip: !Platform.isLinux,
+        skip: !isLinux,
       );
     });
   });

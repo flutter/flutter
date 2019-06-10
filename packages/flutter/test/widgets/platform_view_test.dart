@@ -908,6 +908,100 @@ void main() {
       expect(containerFocusNode.hasFocus, isFalse);
       expect(androidViewFocusNode.hasFocus, isTrue);
     });
+
+    testWidgets('AndroidView sets a platform view text input client when focused', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      viewsController.createCompleter = Completer<void>();
+
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(
+        Center(
+          child: Column(
+            children: <Widget>[
+              const SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+              ),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      viewsController.createCompleter.complete();
+
+
+      final Element containerElement = tester.element(find.byKey(containerKey));
+      final FocusNode containerFocusNode = Focus.of(containerElement);
+
+      containerFocusNode.requestFocus();
+      await tester.pump();
+
+      int lastPlatformViewTextClient;
+      SystemChannels.textInput.setMockMethodCallHandler((MethodCall call) {
+        if (call.method == 'TextInput.setPlatformViewClient') {
+          lastPlatformViewTextClient = call.arguments;
+        }
+        return null;
+      });
+
+      viewsController.invokeViewFocused(currentViewId + 1);
+      await tester.pump();
+
+      expect(lastPlatformViewTextClient, currentViewId + 1);
+    });
+
+    testWidgets('AndroidView clears platform focus when unfocused', (WidgetTester tester) async {
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeAndroidPlatformViewsController viewsController = FakeAndroidPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      viewsController.createCompleter = Completer<void>();
+
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(
+        Center(
+          child: Column(
+            children: <Widget>[
+              const SizedBox(
+                width: 200.0,
+                height: 100.0,
+                child: AndroidView(viewType: 'webview', layoutDirection: TextDirection.ltr),
+              ),
+              Focus(
+                debugLabel: 'container',
+                child: Container(key: containerKey),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      viewsController.createCompleter.complete();
+
+      final Element containerElement = tester.element(find.byKey(containerKey));
+      final FocusNode containerFocusNode = Focus.of(containerElement);
+
+      containerFocusNode.requestFocus();
+      await tester.pump();
+
+      viewsController.invokeViewFocused(currentViewId + 1);
+      await tester.pump();
+
+      viewsController.lastClearedFocusViewId = null;
+
+      containerFocusNode.requestFocus();
+      await tester.pump();
+
+      expect(viewsController.lastClearedFocusViewId, currentViewId + 1);
+    });
   });
 
   group('UiKitView', () {

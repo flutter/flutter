@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
-
 void main() {
   group('PhysicalShape', () {
     testWidgets('properties', (WidgetTester tester) async {
@@ -52,7 +51,7 @@ void main() {
       expect(tester.hitTestOnBinding(const Offset(100.0, 300.0)), hits(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 299.0)), doesNotHit(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 301.0)), doesNotHit(renderPhysicalShape));
-    }, tags: 'web_unimplemented');
+    }, skip: isBrowser);
 
   });
 

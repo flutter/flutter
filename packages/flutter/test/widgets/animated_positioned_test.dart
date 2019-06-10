@@ -85,8 +85,8 @@ void main() {
     expect(
       box.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderLimitedBox#00000\n' +
-        ignoreWebNumericQuirks(' │ parentData: top=31.0; left=37.0; width=59.0; height=71.0;\n') +
+        'RenderLimitedBox#00000\n'
+        ' │ parentData: top=31.0; left=37.0; width=59.0; height=71.0;\n'
         ' │   offset=Offset(37.0, 31.0) (can use size)\n'
         ' │ constraints: BoxConstraints(w=59.0, h=71.0)\n'
         ' │ size: Size(59.0, 71.0)\n'
@@ -171,8 +171,8 @@ void main() {
     expect(
       box.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderLimitedBox#00000\n' +
-        ignoreWebNumericQuirks(' │ parentData: top=31.0; left=37.0; width=59.0; height=71.0;\n') +
+        'RenderLimitedBox#00000\n'
+        ' │ parentData: top=31.0; left=37.0; width=59.0; height=71.0;\n'
         ' │   offset=Offset(37.0, 31.0) (can use size)\n'
         ' │ constraints: BoxConstraints(w=59.0, h=71.0)\n'
         ' │ size: Size(59.0, 71.0)\n'
@@ -257,8 +257,8 @@ void main() {
     expect(
       box.toStringDeep(minLevel: DiagnosticLevel.info),
       equalsIgnoringHashCodes(
-        'RenderLimitedBox#00000\n' +
-        ignoreWebNumericQuirks(' │ parentData: top=31.0; right=37.0; width=59.0; height=71.0;\n') +
+        'RenderLimitedBox#00000\n'
+        ' │ parentData: top=31.0; right=37.0; width=59.0; height=71.0;\n'
         ' │   offset=Offset(704.0, 31.0) (can use size)\n'
         ' │ constraints: BoxConstraints(w=59.0, h=71.0)\n'
         ' │ size: Size(59.0, 71.0)\n'
