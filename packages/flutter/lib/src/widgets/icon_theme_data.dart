@@ -8,7 +8,6 @@ import 'dart:ui' as ui show lerpDouble;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
-
 /// Defines the color, opacity, and size of icons.
 ///
 /// Used by [IconTheme] to control the color, opacity, and size of icons in a
