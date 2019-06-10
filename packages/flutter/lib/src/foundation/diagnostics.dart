@@ -3432,9 +3432,9 @@ class DiagnosticsBlock extends DiagnosticsNode {
 class DiagnosticsSerialisationDelegate {
   /// Creates a [DiagnosticsSerialisationDelegate].
   ///
-  /// The [subtreeDepth], [includeProperties], and [expandPropertyValues]
-  /// arguments must not be null.
-  DiagnosticsSerialisationDelegate({
+  /// The [subtreeDepth], [includeProperties], [expandPropertyValues], and
+  /// [delegateForAddingNode] arguments must not be null.
+  const DiagnosticsSerialisationDelegate({
     this.subtreeDepth = 0,
     this.includeProperties = false,
     this.expandPropertyValues = false,
@@ -3442,36 +3442,88 @@ class DiagnosticsSerialisationDelegate {
     this.filterChildren,
     this.filterProperties,
     this.nodeTruncator,
-    this.delegateForAddingNode,
+    this.delegateForAddingNode = _defaultDelegateForAddingNode,
   }) : assert(subtreeDepth != null),
        assert(includeProperties != null),
-       assert(expandPropertyValues != null);
+       assert(expandPropertyValues != null),
+       assert(delegateForAddingNode != null);
 
-  /// 
-  final NodeToMap additionalNodeProperties;
-
+  /// Delegate to add additional information to the serialization of a
+  /// [DiagnosticsNode].
   ///
-  final NodesFilter filterChildren;
+  /// This delegate is called for every [DiagnosticsNode] that's included in
+  /// the serialisation.
+  final DiagnosticsNodeAdditionalPropertiesCallback additionalNodeProperties;
 
+  /// Delegate to filter the list of [DiagnosticsNode]s that will be included
+  /// as children for a given node.
   ///
-  final NodesFilter filterProperties;
+  /// The callback may return a subset of the children in the provided list
+  /// or replace the entire list with new child nodes.
+  ///
+  /// See also:
+  ///
+  ///  * [subtreeDepth], which controls how many levels of children will be
+  ///    included in the serialization.
+  final DiagnosticsNodesFilter filterChildren;
 
+  /// Delegate to filter the list of [DiagnosticsNode]s that will be included
+  /// as properties for a given node.
   ///
-  final NodesFilter nodeTruncator;
+  /// The callback may return a subset of the nodes in the provided list
+  /// or replace the entire list with new property nodes.
+  ///
+  /// See also:
+  ///
+  ///  * [includeProperties], which controls whether properties will be included
+  ///    at all.
+  final DiagnosticsNodesFilter filterProperties;
 
+  /// Delegate that truncates a [List] of [DiagnosticsNode] that will be added
+  /// to the serialisation as children or properties of another node.
   ///
-  final NodeDelegateGetter delegateForAddingNode;
+  /// The provided callback must return a subset of the provided nodes and may
+  /// not replace any nodes. While [filterProperties] and [filterChildren]
+  /// completely hide a node from the serialisation, truncating a node will
+  /// leave a hint in the serialisation that there were additional nodes in the
+  /// result that are not included in the current serialisation.
+  final DiagnosticsNodesFilter nodeTruncator;
 
+  /// Callback that returns the [DiagnosticsSerialisationDelegate] to be used
+  /// for adding the provided [DiagnosticsNode] to the serialisation.
   ///
+  /// By default, this will return a copy of this delegate, which has the
+  /// [subtreeDepth] reduced by one.
+  ///
+  /// This is called for nodes that will be added to the serialisation as
+  /// property or child of another node. It may return the same delegate if no
+  /// changes to it are necessary.
+  final DiagnosticsNodeDelegateGetter delegateForAddingNode;
+
+  /// Controls how many levels of children will be included in the serialized
+  /// hierarchy of [DiagnosticsNode]s.
+  ///
+  /// See also:
+  ///
+  ///  * [filterChildren], which provides a way to filter the children that
+  ///    will be included.
   final int subtreeDepth;
 
+  /// Whether to include the properties of a [DiagnosticsNode] in the
+  /// serialisation.
   ///
+  /// See also:
+  ///
+  ///  * [filterProperties], which provides a way to filter the properties that
+  ///    will be included.
   final bool includeProperties;
 
-  ///
+  /// Whether properties that have a [Diagnosticable] as value should be
+  /// expanded.
   final bool expandPropertyValues;
 
-  ///
+  /// Creates a copy of this [DiagnosticsSerialisationDelegate] with the
+  /// provided values.
   DiagnosticsSerialisationDelegate copyWith({
     int subtreeDepth,
     bool includeProperties,
@@ -3487,8 +3539,35 @@ class DiagnosticsSerialisationDelegate {
       delegateForAddingNode: delegateForAddingNode,
     );
   }
+
+  static DiagnosticsSerialisationDelegate _defaultDelegateForAddingNode(
+    DiagnosticsNode node,
+    DiagnosticsSerialisationDelegate delegate,
+  ) {
+    return delegate.subtreeDepth > 0 ? delegate.copyWith(subtreeDepth: delegate.subtreeDepth - 1) : delegate;
+  }
 }
 
-typedef NodeToMap = Map<String, Object> Function(DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate);
-typedef NodesFilter = List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner, DiagnosticsSerialisationDelegate delegate);
-typedef NodeDelegateGetter = DiagnosticsSerialisationDelegate Function(DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate);
+/// A callback that given a [DiagnosticsNode] returns a JSON serializable map
+/// of additional properties that should be included in the serialization of
+/// that node.
+///
+/// Used by [DiagnosticsSerialisationDelegate.additionalNodeProperties].
+typedef DiagnosticsNodeAdditionalPropertiesCallback = Map<String, Object> Function(DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate);
+
+/// A callback that takes a list of child [DiagnosticsNode] owned by `owner`
+/// and filters them.
+///
+/// The provided child nodes can either be children or properties of the `owner`
+/// [DiagnosticsNode].
+///
+/// Used by [DiagnosticsSerialisationDelegate.filterChildren],
+/// [DiagnosticsSerialisationDelegate.filterProperties], and
+/// [DiagnosticsSerialisationDelegate.nodeTruncator].
+typedef DiagnosticsNodesFilter = List<DiagnosticsNode> Function(List<DiagnosticsNode> nodes, DiagnosticsNode owner, DiagnosticsSerialisationDelegate delegate);
+
+/// A callback that returns a [DiagnosticsNodeDelegateGetter] for adding `node`
+/// to the serialization as a child or property of another [DiagnosticsNode].
+///
+/// Used by [DiagnosticsNodeDelegateGetter.delegateForAddingNode].
+typedef DiagnosticsNodeDelegateGetter = DiagnosticsSerialisationDelegate Function(DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate);
