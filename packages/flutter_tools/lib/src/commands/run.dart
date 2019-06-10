@@ -411,8 +411,7 @@ class RunCommand extends RunCommandBase {
     // in a "hot mode".
     final bool webMode = !FlutterVersion.instance.isStable
       && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web_javascript
-      && hotMode;
+      && await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
@@ -438,6 +437,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
+        debuggingOptions: _createDebuggingOptions(),
       );
     } else {
       runner = ColdRunner(
