@@ -70,7 +70,8 @@ void main() {
 
       final BuildBundleCommand command = await runCommandIn(projectPath);
 
-      expect(await command.usageValues, containsPair(kCommandBuildBundleIsModule, 'true'));
+      expect(await command.usageValues,
+          containsPair(kCommandBuildBundleIsModule, 'true'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate that project is not a module', () async {
@@ -79,7 +80,8 @@ void main() {
 
       final BuildBundleCommand command = await runCommandIn(projectPath);
 
-      expect(await command.usageValues, containsPair(kCommandBuildBundleIsModule, 'false'));
+      expect(await command.usageValues,
+          containsPair(kCommandBuildBundleIsModule, 'false'));
     }, timeout: allowForCreateFlutterProject);
 
     testUsingContext('indicate the target platform', () async {
@@ -88,7 +90,8 @@ void main() {
 
       final BuildBundleCommand command = await runCommandIn(projectPath);
 
-      expect(await command.usageValues, containsPair(kCommandBuildBundleTargetPlatform, 'android-arm'));
+      expect(await command.usageValues,
+          containsPair(kCommandBuildBundleTargetPlatform, 'android-arm'));
     }, timeout: allowForCreateFlutterProject);
   });
 }
