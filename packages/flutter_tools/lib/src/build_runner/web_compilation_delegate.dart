@@ -161,7 +161,20 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     defaultGenerateFor: const InputSet(
       include: <String>[
         'lib/**',
-        'web/**',
+      ],
+    ),
+  ),
+  core.apply(
+    'flutter_tools|test_entrypoint',
+    <BuilderFactory>[
+      (BuilderOptions options) => FlutterWebTestEntrypointBuilder(
+        options.config['targets'] ?? const <String>[]
+      ),
+    ],
+    core.toRoot(),
+    hideOutput: true,
+    defaultGenerateFor: const InputSet(
+      include: <String>[
         'test/**_test.dart.browser_test.dart',
       ],
     ),
@@ -213,6 +226,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       skipBuildScriptCheck: true,
       trackPerformance: false,
       deleteFilesByDefault: true,
+      enableLowResourcesMode: platform.environment['FLUTTER_LOW_RESOURCE_MODE']?.toLowerCase() == 'true',
     );
     final Set<core.BuildDirectory> buildDirs = <core.BuildDirectory>{
       if (testOutputDir != null)
@@ -290,6 +304,10 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
           'targets': targets,
           'release': release,
         },
+        'flutter_tools|test_entrypoint': <String, dynamic>{
+          'targets': targets,
+          'release': release,
+        },
         'flutter_tools|shell': <String, dynamic>{
           'targets': targets,
         }
@@ -344,6 +362,40 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         await writer.delete(id);
       }
     }
+  }
+}
+
+/// A ddc-only entrypoint builder that respects the Flutter target flag.
+class FlutterWebTestEntrypointBuilder implements Builder {
+  const FlutterWebTestEntrypointBuilder(this.targets);
+
+  final List<String> targets;
+
+  @override
+  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
+        '.dart': <String>[
+          ddcBootstrapExtension,
+          jsEntrypointExtension,
+          jsEntrypointSourceMapExtension,
+          jsEntrypointArchiveExtension,
+          digestsEntrypointExtension,
+        ],
+      };
+
+  @override
+  Future<void> build(BuildStep buildStep) async {
+    bool matches = false;
+    for (String target in targets) {
+      if (buildStep.inputId.path.contains(target)) {
+        matches = true;
+        break;
+      }
+    }
+    if (!matches) {
+      return;
+    }
+    log.info('building for target ${buildStep.inputId.path}');
+    await bootstrapDdc(buildStep, platform: flutterWebPlatform);
   }
 }
 

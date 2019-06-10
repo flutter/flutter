@@ -463,6 +463,19 @@ class ValidationMessage {
 
   @override
   String toString() => message;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final ValidationMessage typedOther = other;
+    return typedOther.message == message
+      && typedOther.type == type;
+  }
+
+  @override
+  int get hashCode => type.hashCode ^ message.hashCode;
 }
 
 class FlutterValidator extends DoctorValidator {
