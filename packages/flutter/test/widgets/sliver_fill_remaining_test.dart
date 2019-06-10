@@ -86,9 +86,11 @@ void main() {
         ),
       ),
     );
+    expect(controller.offset, 0.0);
     expect(find.byType(Container), findsNWidgets(2));
-    controller.jumpTo(200.0);
+    controller.jumpTo(150.0);
     await tester.pumpAndSettle();
+    expect(controller.offset, 0.0);
     expect(find.byType(Container), findsNWidgets(2));
   });
 
@@ -113,9 +115,11 @@ void main() {
         ),
       ),
     );
+    expect(controller.offset, 0.0);
     expect(find.byType(Container), findsNWidgets(2));
-    controller.jumpTo(200.0);
+    controller.jumpTo(150.0);
     await tester.pumpAndSettle();
+    expect(controller.offset, 150.0);
     expect(find.byType(Container), findsOneWidget);
   });
 }
