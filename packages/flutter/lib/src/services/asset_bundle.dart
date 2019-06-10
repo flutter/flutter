@@ -122,7 +122,7 @@ class NetworkAssetBundle extends AssetBundle {
         'HTTP status code: ${response.statusCode}'
       );
     final TransferableTypedData transferrable = await consolidateHttpClientResponseBytes(response);
-    final Uint8List bytes = transferrable.materialize() as Uint8List;
+    final Uint8List bytes = transferrable.materialize().asUint8List();
     return bytes.buffer.asByteData();
   }
 

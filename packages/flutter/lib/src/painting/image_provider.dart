@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:developer';
 import 'dart:io';
 import 'dart:isolate';
 import 'dart:typed_data';
@@ -470,60 +469,50 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
   }
 }
 
-class DownloadRequest {
-  DownloadRequest(this.sendPort, this.uri, this.headers);
+class _DownloadRequest {
+  _DownloadRequest(this.sendPort, this.uri, this.headers);
 
   SendPort sendPort;
   Uri uri;
   Map<String, String> headers;
 }
 
-void handleHttpClientGet(List<dynamic> params) {
+class _HttpClientIsolateParameters {
+  _HttpClientIsolateParameters(this.sendPort, this.chunkEvents);
+
+  SendPort sendPort;
+  StreamController<ImageChunkEvent> chunkEvents;
+}
+
+void _handleHttpClientGet(_HttpClientIsolateParameters params) {
   final HttpClient _httpClient = HttpClient();
-  SendPort sendPort = params[0];
-  StreamController<ImageChunkEvent> chunkEvents = params[1];
+  final RawReceivePort receivePort = RawReceivePort((_DownloadRequest downloadRequest) async {
+      try {
+        final HttpClientRequest request = await _httpClient.getUrl(downloadRequest.uri);
+        downloadRequest.headers?.forEach((String name, String value) {
+          request.headers.add(name, value);
+        });
+        final HttpClientResponse response = await request.close();
+        if (response.statusCode != HttpStatus.ok) {
+          throw Exception(
+              'HTTP request failed, statusCode: ${response
+                  ?.statusCode}, ${downloadRequest.uri}');
+        }
+        final TransferableTypedData transferable = await consolidateHttpClientResponseBytes(
+            response,
+            onBytesReceived: (int cumulative, int total) {
+              params.chunkEvents.add(ImageChunkEvent(
+                cumulativeBytesLoaded: cumulative,
+                expectedTotalBytes: total,
+              ));
+            });
+        downloadRequest.sendPort.send(transferable);
+      } catch (error) {
+          downloadRequest.sendPort.send(error.toString());
+      }
+  });
 
-  RawReceivePort receivePort = RawReceivePort(
-      (DownloadRequest downloadRequest) {
-        Flow flow = Flow.begin();
-        Timeline.timeSync('handleHttpClientGet', () {
-          _httpClient.getUrl(downloadRequest.uri)
-              .then<TransferableTypedData>((HttpClientRequest request) {
-                  Future<TransferableTypedData> list = Timeline.timeSync('handleHttpClientGet.getUrl', () {
-                    downloadRequest.headers?.forEach((String name, String value) {
-                      request.headers.add(name, value);
-                    });
-                    return request.close().then<TransferableTypedData>((HttpClientResponse response) {
-                      return Timeline.timeSync('handleHttpClientGet.request.close()', () {
-                        if (response.statusCode != HttpStatus.ok)
-                          throw Exception('HTTP request failed, statusCode: ${response?.statusCode}, ${downloadRequest.uri}');
-                        return consolidateHttpClientResponseBytes(response,
-                            onBytesReceived: (int cumulative, int total) {
-                          chunkEvents.add(ImageChunkEvent(
-                            cumulativeBytesLoaded: cumulative,
-                            expectedTotalBytes: total,
-                          ));
-                        });
-                      }, arguments: <String, String> { 'uri': downloadRequest.uri.toString()}, flow: Flow.step(flow.id));
-                    });
-                  }, arguments: <String, String> { 'uri': downloadRequest.uri.toString()}, flow: Flow.step(flow.id));
-                  return list;})
-              .then((TransferableTypedData transferable) {
-                  Timeline.timeSync('handleHttpClientGet.consolidate', () {
-                      print('Sending downloaded bytes to other isolate');
-                      downloadRequest.sendPort.send(transferable);
-                    },
-                    arguments: <String, String> { 'uri': downloadRequest.uri.toString()}, flow: Flow.end(flow.id));
-                  })
-              .catchError((dynamic error, dynamic stackTrace) {
-                  downloadRequest.sendPort.send(error.toString());
-              });
-            },
-            arguments: <String, String> { 'uri': downloadRequest.uri.toString()}, flow: flow
-        );
-    });
-
-  sendPort.send(receivePort.sendPort);
+  params.sendPort.send(receivePort.sendPort);
 }
 
 /// Fetches the given URL from the network, associating it with the given scale.
@@ -618,7 +607,7 @@ class NetworkImage extends ImageProvider<NetworkImage> {
           ));
         },
       );
-      Uint8List bytes = transferable.materialize().asUint8List();
+      final Uint8List bytes = transferable.materialize().asUint8List();
       if (bytes.lengthInBytes == 0)
         throw Exception('NetworkImage is an empty file: $resolved');
 
@@ -639,9 +628,8 @@ class NetworkImage extends ImageProvider<NetworkImage> {
 
     final Uri resolved = Uri.base.resolve(key.url);
 
-    Completer<TransferableTypedData> completer = Completer<TransferableTypedData>();
-    DateTime started = DateTime.now();
-    RawReceivePort port = RawReceivePort((dynamic message) {
+    final Completer<TransferableTypedData> completer = Completer<TransferableTypedData>();
+    final RawReceivePort port = RawReceivePort((dynamic message) {
         if (message is TransferableTypedData) {
           completer.complete(message);
         } else {
@@ -650,39 +638,36 @@ class NetworkImage extends ImageProvider<NetworkImage> {
       }
     );
 
-    DownloadRequest downloadRequest = DownloadRequest(port.sendPort, resolved, headers);
+    final _DownloadRequest downloadRequest = _DownloadRequest(port.sendPort,
+        resolved, headers);
     if (_requestPort != null) {
       _requestPort.send(downloadRequest);
     } else {
       if (_pendingLoader == null) {
         _pendingLoaderUsers = <Function>[];
         _pendingLoader =
-          Isolate.spawn<List<dynamic>>(
-            handleHttpClientGet,
-            <dynamic> [RawReceivePort((SendPort sendPort) {
+          Isolate.spawn<_HttpClientIsolateParameters>(
+            _handleHttpClientGet,
+            _HttpClientIsolateParameters(RawReceivePort((SendPort sendPort) {
               _requestPort = sendPort;
               for (Function function in _pendingLoaderUsers) {
                 function(sendPort);
               }
-            }).sendPort, chunkEvents],
-          )..then<Isolate>((Isolate isolate) {
-            }).catchError((dynamic error, StackTrace stackTrace) {
+            }).sendPort, chunkEvents),
+          )..catchError((dynamic error, StackTrace stackTrace) {
               completer.completeError(error, stackTrace);
-            });
+          });
       }
       _pendingLoaderUsers.add((SendPort sendPort) {
         sendPort.send(downloadRequest);
       });
     }
 
-    TransferableTypedData transferable = await completer.future;
+    final TransferableTypedData transferable = await completer.future;
     port.close();
 
-    List<int> bytes = transferable.materialize().asUint8List();
-    int elapsed = DateTime.now().millisecondsSinceEpoch - started.millisecondsSinceEpoch;
-    print("${DateTime.now()} Received image ${bytes.length} elements in $elapsed ms: ${bytes.length/elapsed} elements/ms");
-
-    if (bytes.length == 0)
+    final Uint8List bytes = transferable.materialize().asUint8List();
+    if (bytes.isEmpty)
       throw Exception('NetworkImage is an empty file: $resolved');
 
     return await PaintingBinding.instance.instantiateImageCodec(bytes);

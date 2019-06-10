@@ -5,9 +5,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:isolate';
-
+import 'dart:typed_data';
 
 /// Signature for getting notified when chunks of bytes are received while
 /// consolidating the bytes of an [HttpClientResponse] into a [Uint8List].
@@ -94,7 +93,7 @@ Future<TransferableTypedData> consolidateHttpClientResponseBytes(
 }
 
 class _OutputBuffer extends ByteConversionSinkBase {
-  List<Uint8List> _chunks = <Uint8List>[];
+  final List<Uint8List> _chunks = <Uint8List>[];
 
   @override
   void add(List<int> chunk) {
