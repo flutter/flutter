@@ -6,7 +6,8 @@
 
 namespace flutter {
 
-ColorFilterLayer::ColorFilterLayer() = default;
+ColorFilterLayer::ColorFilterLayer(SkColor color, SkBlendMode blend_mode)
+    : color_(color), blend_mode_(blend_mode) {}
 
 ColorFilterLayer::~ColorFilterLayer() = default;
 

@@ -12,14 +12,21 @@ namespace flutter {
 const SkScalar kLightHeight = 600;
 const SkScalar kLightRadius = 800;
 
-PhysicalShapeLayer::PhysicalShapeLayer(Clip clip_behavior)
-    : isRect_(false), clip_behavior_(clip_behavior) {}
-
-PhysicalShapeLayer::~PhysicalShapeLayer() = default;
-
-void PhysicalShapeLayer::set_path(const SkPath& path) {
-  path_ = path;
-  isRect_ = false;
+PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
+                                       SkColor shadow_color,
+                                       SkScalar device_pixel_ratio,
+                                       float viewport_depth,
+                                       float elevation,
+                                       const SkPath& path,
+                                       Clip clip_behavior)
+    : color_(color),
+      shadow_color_(shadow_color),
+      device_pixel_ratio_(device_pixel_ratio),
+      viewport_depth_(viewport_depth),
+      elevation_(elevation),
+      path_(path),
+      isRect_(false),
+      clip_behavior_(clip_behavior) {
   SkRect rect;
   if (path.isRect(&rect)) {
     isRect_ = true;
@@ -40,6 +47,8 @@ void PhysicalShapeLayer::set_path(const SkPath& path) {
     frameRRect_ = SkRRect::MakeRect(path.getBounds());
   }
 }
+
+PhysicalShapeLayer::~PhysicalShapeLayer() = default;
 
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {

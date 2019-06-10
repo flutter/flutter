@@ -6,7 +6,8 @@
 
 namespace flutter {
 
-BackdropFilterLayer::BackdropFilterLayer() = default;
+BackdropFilterLayer::BackdropFilterLayer(sk_sp<SkImageFilter> filter)
+    : filter_(std::move(filter)) {}
 
 BackdropFilterLayer::~BackdropFilterLayer() = default;
 

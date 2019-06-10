@@ -104,7 +104,9 @@ void ShellTest::PumpOneFrame(Shell* shell) {
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
       [&latch, runtime_delegate]() {
         auto layer_tree = std::make_unique<LayerTree>();
-        auto root_layer = std::make_shared<TransformLayer>();
+        SkMatrix identity;
+        identity.setIdentity();
+        auto root_layer = std::make_shared<TransformLayer>(identity);
         layer_tree->set_root_layer(root_layer);
         runtime_delegate->Render(std::move(layer_tree));
         latch.Signal();

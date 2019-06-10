@@ -6,7 +6,10 @@
 
 namespace flutter {
 
-PlatformViewLayer::PlatformViewLayer() = default;
+PlatformViewLayer::PlatformViewLayer(const SkPoint& offset,
+                                     const SkSize& size,
+                                     int64_t view_id)
+    : offset_(offset), size_(size), view_id_(view_id) {}
 
 PlatformViewLayer::~PlatformViewLayer() = default;
 

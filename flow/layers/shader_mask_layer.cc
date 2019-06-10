@@ -6,7 +6,10 @@
 
 namespace flutter {
 
-ShaderMaskLayer::ShaderMaskLayer() = default;
+ShaderMaskLayer::ShaderMaskLayer(sk_sp<SkShader> shader,
+                                 const SkRect& mask_rect,
+                                 SkBlendMode blend_mode)
+    : shader_(shader), mask_rect_(mask_rect), blend_mode_(blend_mode) {}
 
 ShaderMaskLayer::~ShaderMaskLayer() = default;
 

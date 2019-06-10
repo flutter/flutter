@@ -11,10 +11,8 @@ namespace flutter {
 
 class ClipRectLayer : public ContainerLayer {
  public:
-  ClipRectLayer(Clip clip_behavior);
+  ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior);
   ~ClipRectLayer() override;
-
-  void set_clip_rect(const SkRect& clip_rect) { clip_rect_ = clip_rect; }
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;

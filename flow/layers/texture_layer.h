@@ -13,13 +13,11 @@ namespace flutter {
 
 class TextureLayer : public Layer {
  public:
-  TextureLayer();
+  TextureLayer(const SkPoint& offset,
+               const SkSize& size,
+               int64_t texture_id,
+               bool freeze);
   ~TextureLayer() override;
-
-  void set_offset(const SkPoint& offset) { offset_ = offset; }
-  void set_size(const SkSize& size) { size_ = size; }
-  void set_texture_id(int64_t texture_id) { texture_id_ = texture_id; }
-  void set_freeze(bool freeze) { freeze_ = freeze; }
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;

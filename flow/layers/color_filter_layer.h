@@ -11,12 +11,8 @@ namespace flutter {
 
 class ColorFilterLayer : public ContainerLayer {
  public:
-  ColorFilterLayer();
+  ColorFilterLayer(SkColor color, SkBlendMode blend_mode);
   ~ColorFilterLayer() override;
-
-  void set_color(SkColor color) { color_ = color; }
-
-  void set_blend_mode(SkBlendMode blend_mode) { blend_mode_ = blend_mode; }
 
   void Paint(PaintContext& context) const override;
 
