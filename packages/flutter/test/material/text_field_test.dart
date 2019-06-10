@@ -5221,7 +5221,7 @@ void main() {
   );
 
   testWidgets(
-    'double double tap toggles selection menu',
+    'double double tap just shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: '',
@@ -5245,17 +5245,17 @@ void main() {
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
 
-      // Double tap again hides the selection menu.
+      // Double tap again keeps the selection menu visible.
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tapAt(textOffsetToPosition(tester, 0));
       await tester.pump();
-      expect(find.text('PASTE'), findsNWidgets(0));
+      expect(find.text('PASTE'), findsOneWidget);
     },
   );
 
   testWidgets(
-    'double long press toggles selection menu',
+    'double long press just shows the selection menu',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
         text: '',
@@ -5277,10 +5277,10 @@ void main() {
       await tester.pump();
       expect(find.text('PASTE'), findsOneWidget);
 
-      // Double tap again hides the selection menu.
+      // Long press again keeps the selection menu visible.
       await tester.longPressAt(textOffsetToPosition(tester, 0));
       await tester.pump();
-      expect(find.text('PASTE'), findsNWidgets(0));
+      expect(find.text('PASTE'), findsOneWidget);
     },
   );
 

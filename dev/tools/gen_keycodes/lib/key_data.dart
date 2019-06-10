@@ -375,7 +375,7 @@ class Key {
 
   static String getCommentName(String constantName) {
     String upperCamel = lowerCamelToUpperCamel(constantName);
-    upperCamel = upperCamel.replaceAllMapped(RegExp(r'(Digit|Numpad|Lang)([0-9]+)'), (Match match) => '${match.group(1)} ${match.group(2)}');
+    upperCamel = upperCamel.replaceAllMapped(RegExp(r'(Digit|Numpad|Lang|Button|Left|Right)([0-9]+)'), (Match match) => '${match.group(1)} ${match.group(2)}');
     return upperCamel.replaceAllMapped(RegExp(r'([A-Z])'), (Match match) => ' ${match.group(1)}').trim();
   }
 

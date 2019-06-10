@@ -388,27 +388,29 @@ class _CardsDemoState extends State<CardsDemo> {
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
-        children: destinations.map<Widget>((TravelDestination destination) {
-          Widget child;
-          switch (destination.type) {
-            case CardDemoType.standard:
-              child = TravelDestinationItem(destination: destination, shape: _shape);
-              break;
-            case CardDemoType.tappable:
-              child = TappableTravelDestinationItem(destination: destination, shape: _shape);
-              break;
-            case CardDemoType.selectable:
-              child = SelectableTravelDestinationItem(destination: destination, shape: _shape);
-              break;
-          }
+      body: Scrollbar(
+        child: ListView(
+          padding: const EdgeInsets.only(top: 8.0, left: 8.0, right: 8.0),
+          children: destinations.map<Widget>((TravelDestination destination) {
+            Widget child;
+            switch (destination.type) {
+              case CardDemoType.standard:
+                child = TravelDestinationItem(destination: destination, shape: _shape);
+                break;
+              case CardDemoType.tappable:
+                child = TappableTravelDestinationItem(destination: destination, shape: _shape);
+                break;
+              case CardDemoType.selectable:
+                child = SelectableTravelDestinationItem(destination: destination, shape: _shape);
+                break;
+            }
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 8.0),
-            child: child,
-          );
-        }).toList(),
+            return Container(
+              margin: const EdgeInsets.only(bottom: 8.0),
+              child: child,
+            );
+          }).toList(),
+        ),
       ),
     );
   }

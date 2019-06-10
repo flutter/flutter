@@ -65,6 +65,9 @@ typedef InputCounterWidgetBuilder = Widget Function(
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
+///
 /// {@tool sample}
 /// This example shows how to create a [TextField] that will obscure input. The
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
@@ -91,6 +94,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
 ///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -745,7 +749,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cause: SelectionChangedCause.forcePress,
       );
       if (_shouldShowSelectionToolbar) {
-        _editableTextKey.currentState.toggleToolbar();
+        _editableTextKey.currentState.showToolbar();
       }
     }
   }
@@ -815,7 +819,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
     if (widget.selectionEnabled) {
       if (_shouldShowSelectionToolbar)
-        _editableTextKey.currentState.toggleToolbar();
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -823,7 +827,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
       if (_shouldShowSelectionToolbar) {
-        _editableText.toggleToolbar();
+        _editableText.showToolbar();
       }
     }
   }
