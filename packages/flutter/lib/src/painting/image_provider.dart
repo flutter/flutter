@@ -11,8 +11,8 @@ import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
-import '_image_provider_io.dart'
-  if (dart.library.html) '_image_provider_web.dart' as _image_provider;
+import '_network_image_io.dart'
+  if (dart.library.html) '_network_image_web.dart' as _image_provider;
 import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';

@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/src/painting/_image_resolution_io.dart' as io;
 
 class TestAssetBundle extends CachingAssetBundle {
   TestAssetBundle(this._assetBundleMap);
@@ -44,7 +43,7 @@ void main() {
 
       assetBundleMap[mainAssetPath] = <String>[];
 
-      final io.AssetImage assetImage = io.AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
           bundle: TestAssetBundle(assetBundleMap));
       const ImageConfiguration configuration = ImageConfiguration();
@@ -95,7 +94,7 @@ void main() {
       final TestAssetBundle testAssetBundle = TestAssetBundle(
           assetBundleMap);
 
-      final io.AssetImage assetImage = io.AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
           bundle: testAssetBundle);
 
@@ -128,7 +127,7 @@ void main() {
       final TestAssetBundle testAssetBundle = TestAssetBundle(
           assetBundleMap);
 
-      final io.AssetImage assetImage = io.AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
           bundle: TestAssetBundle(assetBundleMap));
 
@@ -167,7 +166,7 @@ void main() {
       final TestAssetBundle testAssetBundle = TestAssetBundle(
           assetBundleMap);
 
-      final io.AssetImage assetImage = io.AssetImage(
+      final AssetImage assetImage = AssetImage(
           mainAssetPath,
           bundle: testAssetBundle);
 

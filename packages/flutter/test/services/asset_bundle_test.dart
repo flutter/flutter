@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter/src/painting/_image_resolution_io.dart' as io;
 
 class TestAssetBundle extends CachingAssetBundle {
   Map<String, int> loadCallCount = <String, int>{};
@@ -52,7 +51,7 @@ void main() {
 
   test('AssetImage.obtainKey succeeds with ImageConfiguration.empty', () async {
     // This is a regression test for https://github.com/flutter/flutter/issues/12392
-    final io.AssetImage assetImage = io.AssetImage('one', bundle: TestAssetBundle());
+    final AssetImage assetImage = AssetImage('one', bundle: TestAssetBundle());
     final AssetBundleImageKey key = await assetImage.obtainKey(ImageConfiguration.empty);
     expect(key.name, 'one');
     expect(key.scale, 1.0);
