@@ -147,8 +147,6 @@ class IconButton extends StatelessWidget {
     this.highlightColor,
     this.splashColor,
     this.disabledColor,
-    this.containedInkWell = false,
-    this.highlightShape = BoxShape.circle,
     @required this.onPressed,
     this.focusNode,
     this.tooltip,
@@ -251,12 +249,6 @@ class IconButton extends StatelessWidget {
   ///
   /// See also [color].
   final Color disabledColor;
-
-  // TODO(shihaohong): Add comments here
-  final bool containedInkWell;
-
-  // TODO(shihaohong): Add comments here
-  final BoxShape highlightShape;
 
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
