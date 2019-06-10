@@ -10,13 +10,13 @@ syntax inside of the dartdoc comment for a Flutter class/variable/enum/etc.:
 /// above" or "see the code below", since the location of the description may
 /// change in the future. You can use dartdoc [Linking] in the description, and
 /// __Markdown__ too.
-/// 
+///
 /// ```dart preamble
 /// class Foo extends StatelessWidget {
 ///   const Foo({this.value = ''});
-/// 
-///   String value; 
-/// 
+///
+///   String value;
+///
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return Text(value);
@@ -28,7 +28,7 @@ syntax inside of the dartdoc comment for a Flutter class/variable/enum/etc.:
 /// short version of the snippet code sample.
 /// ```dart
 /// String myValue = 'Foo';
-/// 
+///
 /// @override
 /// Widget build(BuildContext) {
 ///   return const Foo(myValue);
@@ -39,6 +39,18 @@ syntax inside of the dartdoc comment for a Flutter class/variable/enum/etc.:
 
 This will result in the template having the section that's inside "```dart"
 interpolated into the template's stateful widget's state object body.
+
+For other sections of the template, the interpolation occurs by appending the string
+that comes after `code-` into the code block. For example, the
+[`stateful_widget`](stateful_widget.tmpl) template contains
+`{{code-imports}}`. To interpolate code into `{{code-imports}}`, you would
+have to do add the following:
+
+```dart
+/// ```dart imports
+/// import 'package:flutter/rendering.dart';
+/// ```
+```
 
 All code within a code block in a snippet needs to be able to be run through
 dartfmt without errors, so it needs to be valid code (This shouldn't be an
