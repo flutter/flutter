@@ -11,10 +11,6 @@ import '../src/common.dart';
 import '../src/context.dart';
 import '../src/mocks.dart';
 
-const String kExecutable = 'foo';
-const String kPath1 = '/bar/bin/$kExecutable';
-const String kPath2 = '/another/bin/$kExecutable';
-
 void main() {
   group('BotDetector', () {
     FakePlatform fakePlatform;
