@@ -126,6 +126,22 @@ class ChromeLauncher {
     ));
   }
 
+  /// Launch the chrome browser and connect to the devtools proxy.
+  ///
+  /// `headless` defaults to false, and controls whether we open a headless or
+  /// a `headfull` browser.
+  Future<WipConnection> connect(String url, {bool headless = false, void Function() onExit}) async {
+    final Chrome chrome = await launch(url, headless: headless);
+    final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+      return chromeTab.url.contains(url); // we don't care about trailing slashes or #
+    });
+    final WipConnection connection = await chromeTab.connect();
+    connection.onClose.listen((WipConnection connection) {
+      onExit();
+    });
+    return connection;
+  }
+
   static Future<Chrome> _connect(Chrome chrome) async {
     if (_currentCompleter.isCompleted) {
       throwToolExit('Only one instance of chrome can be started.');

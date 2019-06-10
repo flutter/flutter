@@ -142,14 +142,7 @@ class ResidentWebRunner extends ResidentRunner {
 
     // Step 3: Spawn an instance of Chrome and direct it to the created server.
     final String url = 'http://localhost:${_server.port}';
-    final Chrome chrome = await chromeLauncher.launch(url);
-    final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-      return chromeTab.url.contains(url); // we don't care about trailing slashes or #
-    });
-    _connection = await chromeTab.connect();
-    _connection.onClose.listen((WipConnection connection) {
-      exit();
-    });
+    _connection = await chromeLauncher.connect(url, onExit: exit);
 
     // We don't support the debugging proxy yet.
     appStartedCompleter?.complete();

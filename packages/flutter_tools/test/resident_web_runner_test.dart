@@ -22,23 +22,20 @@ void main() {
     Testbed testbed;
     MockWebCompilationProxy mockWebCompilationProxy;
     MockChromeLauncher mockChromeLauncher;
-    MockChrome mockChrome;
 
     setUp(() {
       mockWebCompilationProxy = MockWebCompilationProxy();
       mockChromeLauncher = MockChromeLauncher();
-      mockChrome = MockChrome();
       testbed = Testbed(setup: () async {
         fs.file('pubspec.yaml').createSync();
         fs.file('.packages').createSync();
         fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
         fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
-        when(mockChrome.chromeConnection).thenReturn(MockChromeConnection());
-        when(mockChromeLauncher.launch(
+        when(mockChromeLauncher.connect(
           any,
-          headless: anyNamed('headless')
+          onExit: anyNamed('onExit')
         )).thenAnswer((Invocation invocation) {
-          return Future<Chrome>.value(mockChrome);
+          return Future<MockWipConnection>.value(MockWipConnection());
         });
       }, overrides: <Type, Generator>{
         WebCompilationProxy: () => mockWebCompilationProxy,
@@ -86,7 +83,7 @@ void main() {
         return Future<bool>.value(true);
       });
 
-      unawaited(residentCompiler.run());
+      unawaited(residentCompiler.run(appStartedCompleter: completer));
       await completer.future;
     }));
   });
@@ -94,7 +91,5 @@ void main() {
 
 class MockWebCompilationProxy extends Mock implements WebCompilationProxy {}
 class MockChromeLauncher extends Mock implements ChromeLauncher {}
-class MockChrome extends Mock implements Chrome {}
-class MockChromeConnection extends Mock implements ChromeConnection {}
-
+class MockWipConnection extends Mock implements WipConnection {}
 
