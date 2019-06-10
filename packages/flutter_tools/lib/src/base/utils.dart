@@ -24,6 +24,9 @@ class BotDetector {
     return platform.environment['BOT'] != 'false'
        && (platform.environment['BOT'] == 'true'
 
+        // Non-interactive terminals are assumed to be bots.
+        || !io.stdout.hasTerminal
+
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         || platform.environment['TRAVIS'] == 'true'
         || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
