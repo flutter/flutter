@@ -417,7 +417,7 @@ class SliderThemeData extends Diagnosticable {
       overlayShape: const RoundSliderOverlayShape(),
       tickMarkShape: const RoundSliderTickMarkShape(),
       thumbShape: const RoundSliderThumbShape(),
-      trackShape: const RectangularSliderTrackShape(),
+      trackShape: const RoundedRectSliderTrackShape(),
       valueIndicatorShape: const PaddleSliderValueIndicatorShape(),
       rangeTickMarkShape: const RoundRangeSliderTickMarkShape(),
       rangeThumbShape: const RoundRangeSliderThumbShape(),
