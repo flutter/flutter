@@ -26,6 +26,13 @@ public class PlatformViewsChannel {
   private final MethodChannel channel;
   private PlatformViewsHandler handler;
 
+  public void invokeViewFocused(int viewId) {
+    if (channel == null) {
+      return;
+    }
+    channel.invokeMethod("viewFocused", viewId);
+  }
+
   private final MethodChannel.MethodCallHandler parsingHandler = new MethodChannel.MethodCallHandler() {
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
@@ -50,6 +57,9 @@ public class PlatformViewsChannel {
           break;
         case "setDirection":
           setDirection(call, result);
+          break;
+        case "clearFocus":
+          clearFocus(call, result);
           break;
         default:
           result.notImplemented();
@@ -172,6 +182,20 @@ public class PlatformViewsChannel {
         );
       }
     }
+
+    private void clearFocus(MethodCall call, MethodChannel.Result result) {
+      int viewId = call.arguments();
+      try {
+        handler.clearFocus(viewId);
+        result.success(null);
+      } catch (IllegalStateException exception) {
+        result.error(
+                "error",
+                exception.getMessage(),
+                null
+        );
+      }
+    }
   };
 
   /**
@@ -241,6 +265,11 @@ public class PlatformViewsChannel {
      */
     // TODO(mattcarroll): Introduce an annotation for @TextureId
     void setDirection(int viewId, int direction);
+
+    /**
+     * Clears the focus from the platform view with a give id if it is currently focused.
+     */
+    void clearFocus(int viewId);
   }
 
   /**
