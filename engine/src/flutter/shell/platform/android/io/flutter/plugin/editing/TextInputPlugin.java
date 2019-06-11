@@ -46,7 +46,8 @@ public class TextInputPlugin {
     // target is a platform view. See the comments on lockPlatformViewInputConnection for more details.
     private boolean isInputConnectionLocked;
 
-    public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor, PlatformViewsController platformViewsController) {
+    // TODO(mattcarroll): change @Nullable to @NonNull once new embedding integrates PlatformViewsController.
+    public TextInputPlugin(View view, @NonNull DartExecutor dartExecutor, @Nullable PlatformViewsController platformViewsController) {
         mView = view;
         mImm = (InputMethodManager) view.getContext().getSystemService(
                 Context.INPUT_METHOD_SERVICE);
@@ -84,7 +85,10 @@ public class TextInputPlugin {
             }
         });
         this.platformViewsController = platformViewsController;
-        platformViewsController.attachTextInputPlugin(this);
+        // TODO(mattcarroll): remove if-statement once new embedding integrates PlatformViewsController.
+        if (platformViewsController != null) {
+            platformViewsController.attachTextInputPlugin(this);
+        }
     }
 
     @NonNull
@@ -123,7 +127,10 @@ public class TextInputPlugin {
      * The TextInputPlugin instance should not be used after calling this.
      */
     public void destroy() {
-        platformViewsController.detachTextInputPlugin();
+        // TODO(mattcarroll): Remove if-statement once new embedding integrates PlatformViewsController.
+        if (platformViewsController != null) {
+            platformViewsController.detachTextInputPlugin();
+        }
     }
 
     private static int inputTypeFromTextInputType(
