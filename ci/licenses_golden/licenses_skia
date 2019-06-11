@@ -1,4 +1,4 @@
-Signature: 4a8cdaf3de9f6702d1032f4d48ebce1e
+Signature: 23a010cde64776f2bd1a9f9c0675841e
 
 UNUSED LICENSES:
 
@@ -1905,6 +1905,7 @@ FILE: ../../../third_party/skia/infra/bots/assets/procdump_win/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/protoc/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skimage/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/skp/VERSION
+FILE: ../../../third_party/skia/infra/bots/assets/skparagraph/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/svg/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/valgrind/VERSION
 FILE: ../../../third_party/skia/infra/bots/assets/win_ninja/VERSION
@@ -2092,7 +2093,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5-GPU-Adreno330-arm-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus5x-GPU-Adreno418-arm-Release-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Nexus7-CPU-Tegra3-arm-Release-All-Android.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-NexusPlayer-GPU-PowerVRG6430-x86-Release-All-Android.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm-Debug-All-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel-GPU-Adreno530-arm64-Debug-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Clang-Pixel3-GPU-Adreno630-arm64-Debug-All-Android_Vulkan.json
@@ -2243,7 +2243,34 @@ FILE: ../../../third_party/skia/modules/pathkit/perf/path.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/pathops.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/perfReporter.js
 FILE: ../../../third_party/skia/modules/pathkit/ready.js
+FILE: ../../../third_party/skia/modules/skparagraph/include/DartTypes.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/FontCollection.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/Paragraph.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphBuilder.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphStyle.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/TextShadow.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/TextStyle.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/FontCollection.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/FontIterator.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/FontIterator.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphCache.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphImpl.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphStyle.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/Run.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/Run.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/TextLine.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/TextLine.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/TextShadow.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/TextStyle.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/TypefaceFontProvider.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/TypefaceFontProvider.h
 FILE: ../../../third_party/skia/public.bzl
+FILE: ../../../third_party/skia/samplecode/SampleParagraph.cpp
 FILE: ../../../third_party/skia/site/METADATA
 FILE: ../../../third_party/skia/site/dev/METADATA
 FILE: ../../../third_party/skia/site/dev/design/PdfLogicalDocumentStructure.png
@@ -3194,7 +3221,6 @@ FILE: ../../../third_party/skia/gm/textblobrandomfont.cpp
 FILE: ../../../third_party/skia/gm/textblobtransforms.cpp
 FILE: ../../../third_party/skia/gm/textblobuseaftergpufree.cpp
 FILE: ../../../third_party/skia/gm/transparency.cpp
-FILE: ../../../third_party/skia/gm/xform.cpp
 FILE: ../../../third_party/skia/include/android/SkBRDAllocator.h
 FILE: ../../../third_party/skia/include/android/SkBitmapRegionDecoder.h
 FILE: ../../../third_party/skia/include/codec/SkAndroidCodec.h
@@ -4099,61 +4125,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/bench/ReadPixBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/bench/ParagraphBench.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/bench/ReadPixBench.cpp
-FILE: ../../../third_party/skia/bench/WriterBench.cpp
-FILE: ../../../third_party/skia/include/effects/SkColorFilterImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkLightingImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMagnifierImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMatrixConvolutionImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMergeImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkMorphologyImageFilter.h
-FILE: ../../../third_party/skia/include/effects/SkOffsetImageFilter.h
-FILE: ../../../third_party/skia/src/core/SkImageFilter.cpp
-FILE: ../../../third_party/skia/src/core/SkUtilsArm.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkMorphologyImageFilter.cpp
-FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.cpp
-FILE: ../../../third_party/skia/src/images/SkImageEncoderFns.h
-----------------------------------------------------------------------------------------------------
-Copyright 2012 The Android Open Source Project
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================================================
-
-====================================================================================================
-LIBRARY: skia
-ORIGIN: ../../../third_party/skia/bench/ShaperBench.cpp + ../../../third_party/skia/LICENSE
-TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/ParagraphBench.cpp
 FILE: ../../../third_party/skia/bench/ShaperBench.cpp
 FILE: ../../../third_party/skia/docs/examples/Alpha_Constants_a.cpp
 FILE: ../../../third_party/skia/docs/examples/Alpha_Constants_b.cpp
@@ -5247,11 +5221,6 @@ FILE: ../../../third_party/skia/experimental/editor/run_handler.cpp
 FILE: ../../../third_party/skia/experimental/editor/run_handler.h
 FILE: ../../../third_party/skia/experimental/editor/stringslice.cpp
 FILE: ../../../third_party/skia/experimental/editor/stringslice.h
-FILE: ../../../third_party/skia/experimental/xform/SkShape.cpp
-FILE: ../../../third_party/skia/experimental/xform/SkShape.h
-FILE: ../../../third_party/skia/experimental/xform/SkXform.cpp
-FILE: ../../../third_party/skia/experimental/xform/SkXform.h
-FILE: ../../../third_party/skia/experimental/xform/XContext.cpp
 FILE: ../../../third_party/skia/gm/crbug_918512.cpp
 FILE: ../../../third_party/skia/gm/preservefillrule.cpp
 FILE: ../../../third_party/skia/gm/tilemodes_alpha.cpp
@@ -5268,6 +5237,59 @@ FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFType1Font.h
 ----------------------------------------------------------------------------------------------------
 Copyright 2019 Google LLC.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+   * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+   * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/bench/ReadPixBench.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/ReadPixBench.cpp
+FILE: ../../../third_party/skia/bench/WriterBench.cpp
+FILE: ../../../third_party/skia/include/effects/SkColorFilterImageFilter.h
+FILE: ../../../third_party/skia/include/effects/SkLightingImageFilter.h
+FILE: ../../../third_party/skia/include/effects/SkMagnifierImageFilter.h
+FILE: ../../../third_party/skia/include/effects/SkMatrixConvolutionImageFilter.h
+FILE: ../../../third_party/skia/include/effects/SkMergeImageFilter.h
+FILE: ../../../third_party/skia/include/effects/SkMorphologyImageFilter.h
+FILE: ../../../third_party/skia/include/effects/SkOffsetImageFilter.h
+FILE: ../../../third_party/skia/src/core/SkImageFilter.cpp
+FILE: ../../../third_party/skia/src/core/SkUtilsArm.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkColorFilterImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkLightingImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMagnifierImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMatrixConvolutionImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMergeImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkMorphologyImageFilter.cpp
+FILE: ../../../third_party/skia/src/effects/imagefilters/SkOffsetImageFilter.cpp
+FILE: ../../../third_party/skia/src/images/SkImageEncoderFns.h
+----------------------------------------------------------------------------------------------------
+Copyright 2012 The Android Open Source Project
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
