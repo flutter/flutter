@@ -863,9 +863,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       return true;
     }());
     _syncAll(gestures);
-    if (!widget.excludeFromSemantics) {
+    if (_effectiveSemanticsMapping != null) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      _assignSemantics(semanticsGestureHandler);
+      _updateSemanticsForObject(semanticsGestureHandler);
     }
   }
 
@@ -933,39 +933,53 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
-  void _assignSemantics(RenderSemanticsGestureHandler renderObject) {
-    if (_semanticsMapping == null)
-      return;
-    renderObject
-      ..onTap = _semanticsMapping.getTapHandler(_findRecognizer) == null
-          ? null : _handleSemanticTap
-      ..onLongPress = _semanticsMapping.getLongPressHandler(_findRecognizer) == null
-          ? null : _handleSemanticLongPress
-      ..onHorizontalDragUpdate = _semanticsMapping.getHorizontalDragUpdateHandler(_findRecognizer) == null
-          ? null : _handleSemanticHorizontal
-      ..onVerticalDragUpdate = _semanticsMapping.getVerticalDragUpdateHandler(_findRecognizer) == null
-          ? null : _handleSemanticVertical;
-  }
-  GestureRecognizer _findRecognizer(Type type) => _recognizers[type];
-  GestureSemanticsMapping get _semanticsMapping {
+  GestureSemanticsMapping get _effectiveSemanticsMapping {
     return widget.excludeFromSemantics ? null : widget.semanticsMapping;
   }
-  // The following methods handles semantic gestures, and are assigned to the
-  // render object [RenderSemanticsGestureHandler].
-  // They are assigned only when both semanticsMapping and the corresponding
-  // handler are non-null, therefore no null check of them is needed in the
-  // bodies. They are defined in a widget state because they need to be cached.
-  void _handleSemanticTap() {
-    _semanticsMapping.getTapHandler(_findRecognizer)();
+
+  // This method assigns proper semantics callbacks to the underlying
+  // [RenderSemanticsGestureHandler] element.
+  // It is called when the element is created, updated, or during
+  // [replaceGestureRecognizers].
+  void _updateSemanticsForObject(RenderSemanticsGestureHandler renderObject) {
+    GestureRecognizer _findRecognizer(Type type) {
+      return _recognizers[type];
+    };
+    final GestureSemanticsMapping mapping = _effectiveSemanticsMapping;
+    _handleSemanticTap = mapping?.getTapHandler(_findRecognizer);
+    _handleSemanticLongPress = mapping?.getLongPressHandler(_findRecognizer);
+    _handleSemanticHorizontal = mapping?.getHorizontalDragUpdateHandler(_findRecognizer);
+    _handleSemanticVertical = mapping?.getVerticalDragUpdateHandler(_findRecognizer);
+    renderObject
+      ..onTap = _handleSemanticTap == null
+          ? null : _performSemanticTap
+      ..onLongPress = _handleSemanticLongPress == null
+          ? null : _performSemanticLongPress
+      ..onHorizontalDragUpdate = _handleSemanticHorizontal == null
+          ? null : _performSemanticHorizontal
+      ..onVerticalDragUpdate = _handleSemanticVertical == null
+          ? null : _performSemanticVertical;
   }
-  void _handleSemanticLongPress() {
-    _semanticsMapping.getLongPressHandler(_findRecognizer)();
+  GestureTapCallback _handleSemanticTap;
+  GestureLongPressCallback _handleSemanticLongPress;
+  GestureDragUpdateCallback _handleSemanticHorizontal;
+  GestureDragUpdateCallback _handleSemanticVertical;
+  // The following methods are cached wrappers of the performing callbacks.
+  // Caching ensures that the arguments for [RenderSemanticsGestureHandler]
+  // remain the same references.
+  // They are assigned only when the corresponding performing callback is not
+  // null, therefore no null-check is needed.
+  void _performSemanticTap() {
+    _handleSemanticTap();
   }
-  void _handleSemanticHorizontal(DragUpdateDetails details) {
-    _semanticsMapping.getHorizontalDragUpdateHandler(_findRecognizer)(details);
+  void _performSemanticLongPress() {
+    _handleSemanticLongPress();
   }
-  void _handleSemanticVertical(DragUpdateDetails details) {
-    _semanticsMapping.getVerticalDragUpdateHandler(_findRecognizer)(details);
+  void _performSemanticHorizontal(DragUpdateDetails details) {
+    _handleSemanticHorizontal(details);
+  }
+  void _performSemanticVertical(DragUpdateDetails details) {
+    _handleSemanticVertical(details);
   }
 
   @override
@@ -975,11 +989,10 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       behavior: widget.behavior ?? _defaultBehavior,
       child: widget.child,
     );
-    if (!widget.excludeFromSemantics)
+    if (_effectiveSemanticsMapping != null)
       result = _GestureSemantics(
-        owner: this,
         child: result,
-        assignSemantics: _assignSemantics,
+        assignSemantics: _updateSemanticsForObject,
       );
     return result;
   }
@@ -1004,13 +1017,10 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   const _GestureSemantics({
     Key key,
     Widget child,
-    @required this.owner,
     @required this.assignSemantics,
-  }) : assert(owner != null),
-       assert(assignSemantics != null),
+  }) : assert(assignSemantics != null),
        super(key: key, child: child);
 
-  final RawGestureDetectorState owner;
   final _AssignSemantics assignSemantics;
 
   @override

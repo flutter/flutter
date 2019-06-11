@@ -106,11 +106,14 @@ void main() {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     // How the test is set up:
-    //  - Base state: RawGestureDetector with a HorizontalGR
-    //  - Calling `introduceLayoutPerformer()` adds a `TestLayoutPerformer` as
-    //    child of RawGestureDetector.
-    //  - TestLayoutPerformer calls RawGestureDetector.replaceGestureRecognizers
-    //    during layout phase, which replaces the recognizers with a TapGR.
+    //
+    //  * In the base state, RawGestureDetector's recognizer is a HorizontalGR
+    //  * Calling `introduceLayoutPerformer()` adds a `_TestLayoutPerformer` as
+    //    child of RawGestureDetector, which invokes a given callback during
+    //    layout phase.
+    //  * The aforementioned callback replaces the detector's recognizer with a
+    //    TapGR.
+    //  * This test makes sure the replacement correctly updates semantics.
 
     final Set<String> logs = <String>{};
     final GlobalKey<RawGestureDetectorState> detectorKey = GlobalKey();
@@ -148,7 +151,7 @@ void main() {
                   },
                 )
               },
-              child: hasLayoutPerformer ? TestLayoutPerformer(performLayout: performLayout) : null,
+              child: hasLayoutPerformer ? _TestLayoutPerformer(performLayout: performLayout) : null,
             ),
           );
         },
@@ -167,6 +170,49 @@ void main() {
     tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
     expect(logs, <String>{'tap'});
     logs.clear();
+
+    semantics.dispose();
+  });
+
+  testWidgets('RawGestureDetector caches handlers returned by GestureSemanticsMapping', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final List<String> logs = <String>[];
+    final GlobalKey detectorKey = GlobalKey();
+
+    bool objectUpdated = false;
+    VoidCallback updateRenderObject;
+    await tester.pumpWidget(
+      StatefulBuilder(
+        builder: (BuildContext context, StateSetter setter) {
+          updateRenderObject = () {
+            setter(() {
+              objectUpdated = true;
+            });
+          };
+          return Directionality(
+            textDirection: TextDirection.ltr,
+            child: RawGestureDetector(
+              key: detectorKey,
+              semanticsMapping: _UnstableGestureSemanticsMapping(
+                onTap: (int counter) => logs.add('Tap$counter'),
+              ),
+              child: objectUpdated ? Container() : const Icon(IconData(3)),
+            ),
+          );
+        }
+      ),
+    );
+
+    final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
+    expect(logs, <String>['Tap1']);
+    logs.clear();
+
+    updateRenderObject();
+    await tester.pumpAndSettle();
+    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
+    expect(logs, <String>['Tap1']);
 
     semantics.dispose();
   });
@@ -396,8 +442,8 @@ void main() {
   });
 }
 
-class TestLayoutPerformer extends SingleChildRenderObjectWidget {
-  const TestLayoutPerformer({
+class _TestLayoutPerformer extends SingleChildRenderObjectWidget {
+  const _TestLayoutPerformer({
     Key key,
     this.performLayout,
   }) : super(key: key);
@@ -405,13 +451,13 @@ class TestLayoutPerformer extends SingleChildRenderObjectWidget {
   final VoidCallback performLayout;
 
   @override
-  RenderTestLayoutPerformer createRenderObject(BuildContext context) {
-    return RenderTestLayoutPerformer(performLayout: performLayout);
+  _RenderTestLayoutPerformer createRenderObject(BuildContext context) {
+    return _RenderTestLayoutPerformer(performLayout: performLayout);
   }
 }
 
-class RenderTestLayoutPerformer extends RenderBox {
-  RenderTestLayoutPerformer({VoidCallback performLayout}) : _performLayout = performLayout;
+class _RenderTestLayoutPerformer extends RenderBox {
+  _RenderTestLayoutPerformer({VoidCallback performLayout}) : _performLayout = performLayout;
 
   VoidCallback _performLayout;
 
@@ -421,4 +467,27 @@ class RenderTestLayoutPerformer extends RenderBox {
     if (_performLayout != null)
       _performLayout();
   }
+}
+
+// This mapping calls the given onTap with an integer, but this integer increases
+// every time getTapHander is called.
+class _UnstableGestureSemanticsMapping implements GestureSemanticsMapping {
+  _UnstableGestureSemanticsMapping({
+    this.onTap,
+  });
+
+  final void Function(int) onTap;
+  int _counter = 0;
+
+  @override
+  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
+    _counter++;
+    return () => onTap(_counter);
+  }
+  @override
+  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer) => null;
+  @override
+  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer) => null;
+  @override
+  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer) => null;
 }
