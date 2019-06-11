@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -1303,13 +1304,13 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   */
 
   @override
-  StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
+  StreamSubscription<Uint8List> listen(
+    void onData(Uint8List event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
+    return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
