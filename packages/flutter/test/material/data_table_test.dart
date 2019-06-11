@@ -276,18 +276,14 @@ void main() {
     Finder checkbox;
     Finder padding;
 
-    Widget buildTable({
+    Widget buildDefaultTable({
       int sortColumnIndex,
       bool sortAscending = true,
-      double tablePadding = _defaultTablePadding,
-      double columnSpacing = _defaultColumnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
         sortAscending: sortAscending,
         onSelectAll: (bool value) {},
-        tablePadding: tablePadding,
-        columnSpacing: columnSpacing,
         columns: <DataColumn>[
           const DataColumn(
             label: Text('Name'),
@@ -332,7 +328,7 @@ void main() {
 
     // DEFAULT VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable()),
+      home: Material(child: buildDefaultTable()),
     ));
 
     // default checkbox padding
@@ -383,9 +379,63 @@ void main() {
       _defaultTablePadding,
     );
 
+    Widget buildCustomTable({
+      int sortColumnIndex,
+      bool sortAscending = true,
+      double tablePadding,
+      double columnSpacing,
+    }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        sortAscending: sortAscending,
+        onSelectAll: (bool value) {},
+        tablePadding: tablePadding,
+        columnSpacing: columnSpacing,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: const Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+          DataColumn(
+            label: const Text('Fat'),
+            tooltip: 'Fat',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: Key(dessert.name),
+            onSelectChanged: (bool selected) {},
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+              DataCell(
+                Text('${dessert.fat}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(
+      home: Material(child: buildCustomTable(
         tablePadding: _customTablePadding,
         columnSpacing: _customColumnSpacing,
       )),
@@ -448,11 +498,100 @@ void main() {
     Finder cellContent;
     Finder padding;
 
-    Widget buildTable({
+    Widget buildDefaultTable({
       int sortColumnIndex,
       bool sortAscending = true,
-      double tablePadding = _defaultTablePadding,
-      double columnSpacing = _defaultColumnSpacing,
+    }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        sortAscending: sortAscending,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: const Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+          DataColumn(
+            label: const Text('Fat'),
+            tooltip: 'Fat',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: Key(dessert.name),
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+              DataCell(
+                Text('${dessert.fat}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // DEFAULT VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildDefaultTable()),
+    ));
+
+    // default first column padding
+    padding = find.widgetWithText(Padding, 'Frozen yogurt');
+    cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultTablePadding,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultColumnSpacing / 2,
+    );
+
+    // default middle column padding
+    padding = find.widgetWithText(Padding, '159');
+    cellContent = find.widgetWithText(Align, '159');
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultColumnSpacing / 2,
+    );
+
+    // default last column padding
+    padding = find.widgetWithText(Padding, '6.0');
+    cellContent = find.widgetWithText(Align, '6.0');
+    expect(
+      tester.getRect(cellContent).left - tester.getRect(padding).left,
+      _defaultColumnSpacing / 2,
+    );
+    expect(
+      tester.getRect(padding).right - tester.getRect(cellContent).right,
+      _defaultTablePadding,
+    );
+
+    Widget buildCustomTable({
+      int sortColumnIndex,
+      bool sortAscending = true,
+      double tablePadding,
+      double columnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -500,50 +639,9 @@ void main() {
       );
     }
 
-    // DEFAULT VALUES
-    await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable()),
-    ));
-
-    // default first column padding
-    padding = find.widgetWithText(Padding, 'Frozen yogurt');
-    cellContent = find.widgetWithText(Align, 'Frozen yogurt'); // DataTable wraps its DataCells in an Align widget
-    expect(
-      tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultTablePadding,
-    );
-    expect(
-      tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultColumnSpacing / 2,
-    );
-
-    // default middle column padding
-    padding = find.widgetWithText(Padding, '159');
-    cellContent = find.widgetWithText(Align, '159');
-    expect(
-      tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultColumnSpacing / 2,
-    );
-    expect(
-      tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultColumnSpacing / 2,
-    );
-
-    // default last column padding
-    padding = find.widgetWithText(Padding, '6.0');
-    cellContent = find.widgetWithText(Align, '6.0');
-    expect(
-      tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultColumnSpacing / 2,
-    );
-    expect(
-      tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultTablePadding,
-    );
-
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(
+      home: Material(child: buildCustomTable(
         tablePadding: _customTablePadding,
         columnSpacing: _customColumnSpacing,
       )),

@@ -309,11 +309,8 @@ void main() {
     Finder checkbox;
     Finder padding;
 
-    Widget buildPaginatedTable({
-      double tablePadding,
-      double columnSpacing,
-    }) {
-      return PaginatedDataTable(
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
@@ -328,13 +325,7 @@ void main() {
           DataColumn(label: Text('Calories'), numeric: true),
           DataColumn(label: Text('Generation')),
         ],
-        tablePadding: tablePadding,
-        columnSpacing: columnSpacing,
-      );
-    }
-
-    await tester.pumpWidget(MaterialApp(
-      home: buildPaginatedTable(),
+      ),
     ));
 
     // default checkbox padding
@@ -387,10 +378,26 @@ void main() {
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildPaginatedTable(
-        tablePadding: _customTablePadding,
-        columnSpacing: _customColumnSpacing,
-      )),
+      home: Material(
+        child: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: source,
+          rowsPerPage: 2,
+          availableRowsPerPage: const <int>[
+            2, 4,
+          ],
+          onRowsPerPageChanged: (int rowsPerPage) {},
+          onPageChanged: (int rowIndex) {},
+          onSelectAll: (bool value) {},
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+          tablePadding: _customTablePadding,
+          columnSpacing: _customColumnSpacing,
+        ),
+      ),
     ));
 
     // custom checkbox padding
@@ -451,11 +458,8 @@ void main() {
     Finder cellContent;
     Finder padding;
 
-    Widget buildPaginatedTable({
-      double tablePadding,
-      double columnSpacing,
-    }) {
-      return PaginatedDataTable(
+    await tester.pumpWidget(MaterialApp(
+      home: PaginatedDataTable(
         header: const Text('Test table'),
         source: source,
         rowsPerPage: 2,
@@ -469,18 +473,7 @@ void main() {
           DataColumn(label: Text('Calories'), numeric: true),
           DataColumn(label: Text('Generation')),
         ],
-        tablePadding: tablePadding,
-        columnSpacing: columnSpacing,
-      );
-    }
-
-    await tester.pumpWidget(MaterialApp(
-      home: buildPaginatedTable(),
-    ));
-
-    // DEFAULT VALUES
-    await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildPaginatedTable()),
+      ),
     ));
 
     // default first column padding
@@ -521,10 +514,25 @@ void main() {
 
     // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildPaginatedTable(
-        tablePadding: _customTablePadding,
-        columnSpacing: _customColumnSpacing,
-      )),
+      home: Material(
+        child: PaginatedDataTable(
+          header: const Text('Test table'),
+          source: source,
+          rowsPerPage: 2,
+          availableRowsPerPage: const <int>[
+            2, 4, 8, 16,
+          ],
+          onRowsPerPageChanged: (int rowsPerPage) {},
+          onPageChanged: (int rowIndex) {},
+          columns: const <DataColumn>[
+            DataColumn(label: Text('Name')),
+            DataColumn(label: Text('Calories'), numeric: true),
+            DataColumn(label: Text('Generation')),
+          ],
+          tablePadding: _customTablePadding,
+          columnSpacing: _customColumnSpacing,
+        ),
+      ),
     ));
 
     // custom first column padding
