@@ -24,28 +24,30 @@ namespace flutter {
 // clang-format on
 
 DEF_SWITCHES_START
-DEF_SWITCH(AotSharedLibraryPath, "aot-shared-library-path", "Path to the *.so.")
-DEF_SWITCH(AotSnapshotPath,
-           "aot-snapshot-path",
+DEF_SWITCH(AotSharedLibraryName,
+           "aot-shared-library-name",
+           "Name of the *.so containing AOT compiled Dart assets.")
+DEF_SWITCH(SnapshotAssetPath,
+           "snapshot-asset-path",
            "Path to the directory containing the four files specified by "
-           "AotVmSnapshotData, AotVmSnapshotInstructions, "
-           "AotVmSnapshotInstructions and AotIsolateSnapshotInstructions.")
-DEF_SWITCH(AotVmSnapshotData,
+           "VmSnapshotData, VmSnapshotInstructions, "
+           "VmSnapshotInstructions and IsolateSnapshotInstructions.")
+DEF_SWITCH(VmSnapshotData,
            "vm-snapshot-data",
            "The VM snapshot data that will be memory mapped as read-only. "
-           "AotSnapshotPath must be present.")
-DEF_SWITCH(AotVmSnapshotInstructions,
+           "SnapshotAssetPath must be present.")
+DEF_SWITCH(VmSnapshotInstructions,
            "vm-snapshot-instr",
            "The VM instructions snapshot that will be memory mapped as read "
-           "and executable. AotSnapshotPath must be present.")
-DEF_SWITCH(AotIsolateSnapshotData,
+           "and executable. SnapshotAssetPath must be present.")
+DEF_SWITCH(IsolateSnapshotData,
            "isolate-snapshot-data",
            "The isolate snapshot data that will be memory mapped as read-only. "
-           "AotSnapshotPath must be present.")
-DEF_SWITCH(AotIsolateSnapshotInstructions,
+           "SnapshotAssetPath must be present.")
+DEF_SWITCH(IsolateSnapshotInstructions,
            "isolate-snapshot-instr",
            "The isolate instructions snapshot that will be memory mapped as "
-           "read and executable. AotSnapshotPath must be present.")
+           "read and executable. SnapshotAssetPath must be present.")
 DEF_SWITCH(CacheDirPath, "cache-dir-path", "Path to the cache directory.")
 DEF_SWITCH(ICUDataFilePath, "icu-data-file-path", "Path to the ICU data file.")
 DEF_SWITCH(ICUSymbolPrefix,

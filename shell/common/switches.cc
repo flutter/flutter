@@ -235,42 +235,42 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   command_line.GetOptionValue(FlagForSwitch(Switch::FlutterAssetsDir),
                               &settings.assets_path);
 
-  std::string aot_shared_library_path;
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotSharedLibraryPath),
-                              &aot_shared_library_path);
+  std::string aot_shared_library_name;
+  command_line.GetOptionValue(FlagForSwitch(Switch::AotSharedLibraryName),
+                              &aot_shared_library_name);
 
-  std::string aot_snapshot_path;
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotSnapshotPath),
-                              &aot_snapshot_path);
+  std::string snapshot_asset_path;
+  command_line.GetOptionValue(FlagForSwitch(Switch::SnapshotAssetPath),
+                              &snapshot_asset_path);
 
-  std::string aot_vm_snapshot_data_filename;
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotVmSnapshotData),
-                              &aot_vm_snapshot_data_filename);
+  std::string vm_snapshot_data_filename;
+  command_line.GetOptionValue(FlagForSwitch(Switch::VmSnapshotData),
+                              &vm_snapshot_data_filename);
 
-  std::string aot_vm_snapshot_instr_filename;
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotVmSnapshotInstructions),
-                              &aot_vm_snapshot_instr_filename);
+  std::string vm_snapshot_instr_filename;
+  command_line.GetOptionValue(FlagForSwitch(Switch::VmSnapshotInstructions),
+                              &vm_snapshot_instr_filename);
 
-  std::string aot_isolate_snapshot_data_filename;
-  command_line.GetOptionValue(FlagForSwitch(Switch::AotIsolateSnapshotData),
-                              &aot_isolate_snapshot_data_filename);
+  std::string isolate_snapshot_data_filename;
+  command_line.GetOptionValue(FlagForSwitch(Switch::IsolateSnapshotData),
+                              &isolate_snapshot_data_filename);
 
-  std::string aot_isolate_snapshot_instr_filename;
+  std::string isolate_snapshot_instr_filename;
   command_line.GetOptionValue(
-      FlagForSwitch(Switch::AotIsolateSnapshotInstructions),
-      &aot_isolate_snapshot_instr_filename);
+      FlagForSwitch(Switch::IsolateSnapshotInstructions),
+      &isolate_snapshot_instr_filename);
 
-  if (aot_shared_library_path.size() > 0) {
-    settings.application_library_path = aot_shared_library_path;
-  } else if (aot_snapshot_path.size() > 0) {
-    settings.vm_snapshot_data_path = fml::paths::JoinPaths(
-        {aot_snapshot_path, aot_vm_snapshot_data_filename});
+  if (aot_shared_library_name.size() > 0) {
+    settings.application_library_path = aot_shared_library_name;
+  } else if (snapshot_asset_path.size() > 0) {
+    settings.vm_snapshot_data_path =
+        fml::paths::JoinPaths({snapshot_asset_path, vm_snapshot_data_filename});
     settings.vm_snapshot_instr_path = fml::paths::JoinPaths(
-        {aot_snapshot_path, aot_vm_snapshot_instr_filename});
+        {snapshot_asset_path, vm_snapshot_instr_filename});
     settings.isolate_snapshot_data_path = fml::paths::JoinPaths(
-        {aot_snapshot_path, aot_isolate_snapshot_data_filename});
+        {snapshot_asset_path, isolate_snapshot_data_filename});
     settings.isolate_snapshot_instr_path = fml::paths::JoinPaths(
-        {aot_snapshot_path, aot_isolate_snapshot_instr_filename});
+        {snapshot_asset_path, isolate_snapshot_instr_filename});
   }
 
   command_line.GetOptionValue(FlagForSwitch(Switch::CacheDirPath),
