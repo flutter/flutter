@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
+import 'dart:developer' show Flow, Timeline;
 import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
