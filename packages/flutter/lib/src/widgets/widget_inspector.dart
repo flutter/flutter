@@ -1425,7 +1425,7 @@ mixin WidgetInspectorService {
   }
 
   DiagnosticsSerialisationDelegate _configToDelegate(_SerializeConfig config) {
-    final Set<DiagnosticsNode> createdByLocalProject = <DiagnosticsNode>{};
+    final Set<DiagnosticsNode> nodesCreatedByLocalProject = <DiagnosticsNode>{};
     return DiagnosticsSerialisationDelegate(
       subtreeDepth: config.subtreeDepth,
       includeProperties: config.includeProperties,
@@ -1445,7 +1445,7 @@ mixin WidgetInspectorService {
           result['locationId'] = _toLocationId(creationLocation);
           result['creationLocation'] = creationLocation.toJsonMap();
           if (_isLocalCreationLocation(creationLocation)) {
-            createdByLocalProject.add(node);
+            nodesCreatedByLocalProject.add(node);
             result['createdByLocalProject'] = true;
           }
         }
@@ -1455,12 +1455,9 @@ mixin WidgetInspectorService {
         return _filterChildren(children, config);
       },
       filterProperties: (List<DiagnosticsNode> properties, DiagnosticsNode parent, DiagnosticsSerialisationDelegate _) {
+        final bool createdByLocalProject = nodesCreatedByLocalProject.contains(parent);
         return properties.where((DiagnosticsNode node) {
-          return !node.isFiltered(
-              createdByLocalProject.contains(node)
-                  ? DiagnosticLevel.fine
-                  : DiagnosticLevel.info
-          );
+          return !node.isFiltered(createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel.info);
         }).toList();
       },
       nodeTruncator: (List<DiagnosticsNode> nodes, DiagnosticsNode parent, DiagnosticsSerialisationDelegate _) {
