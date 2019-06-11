@@ -95,7 +95,7 @@ class IconThemeData extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(ColorDiagnosticsProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DoubleProperty('opacity', opacity, defaultValue: null));
     properties.add(DoubleProperty('size', size, defaultValue: null));
   }

@@ -1092,8 +1092,8 @@ class TextStyle extends Diagnosticable {
     if (debugLabel != null)
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(ColorDiagnosticsProperty('${prefix}color', color, defaultValue: null));
-    styles.add(ColorDiagnosticsProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null));
+    styles.add(ColorProperty('${prefix}color', color, defaultValue: null));
+    styles.add(ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
     styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
@@ -1125,7 +1125,7 @@ class TextStyle extends Diagnosticable {
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
-      styles.add(ColorDiagnosticsProperty('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
+      styles.add(ColorProperty('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
       if (decorationColor != null)
         decorationDescription.add('$decorationColor');

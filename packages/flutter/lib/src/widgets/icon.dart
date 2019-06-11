@@ -198,8 +198,8 @@ class Icon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(IconDataDiagnosticsProperty('icon', icon, ifNull: '<empty>', showName: false));
+    properties.add(IconDataProperty('icon', icon, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
-    properties.add(ColorDiagnosticsProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
   }
 }

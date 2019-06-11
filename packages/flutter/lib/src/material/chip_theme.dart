@@ -486,13 +486,13 @@ class ChipThemeData extends Diagnosticable {
       brightness: defaultTheme.brightness,
       labelStyle: defaultTheme.textTheme.body2,
     );
-    properties.add(ColorDiagnosticsProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(ColorDiagnosticsProperty('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));
-    properties.add(ColorDiagnosticsProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
-    properties.add(ColorDiagnosticsProperty('selectedColor', selectedColor, defaultValue: defaultData.selectedColor));
-    properties.add(ColorDiagnosticsProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: defaultData.secondarySelectedColor));
-    properties.add(ColorDiagnosticsProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
-    properties.add(ColorDiagnosticsProperty('selectedShadowColor', selectedShadowColor, defaultValue: defaultData.selectedShadowColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(ColorProperty('deleteIconColor', deleteIconColor, defaultValue: defaultData.deleteIconColor));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
+    properties.add(ColorProperty('selectedColor', selectedColor, defaultValue: defaultData.selectedColor));
+    properties.add(ColorProperty('secondarySelectedColor', secondarySelectedColor, defaultValue: defaultData.secondarySelectedColor));
+    properties.add(ColorProperty('shadowColor', shadowColor, defaultValue: defaultData.shadowColor));
+    properties.add(ColorProperty('selectedShadowColor', selectedShadowColor, defaultValue: defaultData.selectedShadowColor));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('labelPadding', labelPadding, defaultValue: defaultData.labelPadding));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: defaultData.padding));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));

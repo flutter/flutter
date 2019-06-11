@@ -3073,9 +3073,9 @@ mixin DiagnosticableMixin {
   ///  * [ObjectFlagProperty], which provides terse descriptions of whether a
   ///    property value is present or not. For example, whether an `onClick`
   ///    callback is specified or an animation is in progress.
-  ///  * [ColorDiagnosticsProperty], which must be used if the property value is
+  ///  * [ColorProperty], which must be used if the property value is
   ///    a [Color] or one of its subclasses.
-  ///  * [IconDataDiagnosticsProperty], which must be used if the property value
+  ///  * [IconDataProperty], which must be used if the property value
   ///    is of type [IconData].
   ///
   /// If none of these subclasses apply, use the [DiagnosticsProperty]

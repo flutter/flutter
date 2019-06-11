@@ -1607,7 +1607,7 @@ class PhysicalModelLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(ColorDiagnosticsProperty('color', color));
+    properties.add(ColorProperty('color', color));
   }
 }
 

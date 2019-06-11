@@ -462,11 +462,11 @@ class ColorSwatch<T> extends Color {
 }
 
 /// [DiagnosticsProperty] that has an [Color] as value.
-class ColorDiagnosticsProperty extends DiagnosticsProperty<Color> {
+class ColorProperty extends DiagnosticsProperty<Color> {
   /// Create a diagnostics property for [Color].
   ///
   /// The [showName], [style], and [level] arguments must not be null.
-  ColorDiagnosticsProperty(
+  ColorProperty(
     String name,
     Color value, {
       bool showName = true,

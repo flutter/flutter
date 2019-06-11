@@ -263,7 +263,7 @@ class ShapeDecoration extends Decoration {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    properties.add(ColorDiagnosticsProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(IterableProperty<BoxShadow>('shadows', shadows, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));

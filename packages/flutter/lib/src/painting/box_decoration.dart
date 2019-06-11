@@ -320,7 +320,7 @@ class BoxDecoration extends Decoration {
       ..defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace
       ..emptyBodyDescription = '<no decorations specified>';
 
-    properties.add(ColorDiagnosticsProperty('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxBorder>('border', border, defaultValue: null));
     properties.add(DiagnosticsProperty<BorderRadiusGeometry>('borderRadius', borderRadius, defaultValue: null));

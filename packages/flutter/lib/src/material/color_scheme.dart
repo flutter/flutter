@@ -307,18 +307,18 @@ class ColorScheme extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const ColorScheme defaultScheme = ColorScheme.light();
-    properties.add(ColorDiagnosticsProperty('primary', primary, defaultValue: defaultScheme.primary));
-    properties.add(ColorDiagnosticsProperty('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
-    properties.add(ColorDiagnosticsProperty('secondary', secondary, defaultValue: defaultScheme.secondary));
-    properties.add(ColorDiagnosticsProperty('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
-    properties.add(ColorDiagnosticsProperty('surface', surface, defaultValue: defaultScheme.surface));
-    properties.add(ColorDiagnosticsProperty('background', background, defaultValue: defaultScheme.background));
-    properties.add(ColorDiagnosticsProperty('error', error, defaultValue: defaultScheme.error));
-    properties.add(ColorDiagnosticsProperty('onPrimary', onPrimary, defaultValue: defaultScheme.onPrimary));
-    properties.add(ColorDiagnosticsProperty('onSecondary', onSecondary, defaultValue: defaultScheme.onSecondary));
-    properties.add(ColorDiagnosticsProperty('onSurface', onSurface, defaultValue: defaultScheme.onSurface));
-    properties.add(ColorDiagnosticsProperty('onBackground', onBackground, defaultValue: defaultScheme.onBackground));
-    properties.add(ColorDiagnosticsProperty('onError', onError, defaultValue: defaultScheme.onError));
+    properties.add(ColorProperty('primary', primary, defaultValue: defaultScheme.primary));
+    properties.add(ColorProperty('primaryVariant', primaryVariant, defaultValue: defaultScheme.primaryVariant));
+    properties.add(ColorProperty('secondary', secondary, defaultValue: defaultScheme.secondary));
+    properties.add(ColorProperty('secondaryVariant', secondaryVariant, defaultValue: defaultScheme.secondaryVariant));
+    properties.add(ColorProperty('surface', surface, defaultValue: defaultScheme.surface));
+    properties.add(ColorProperty('background', background, defaultValue: defaultScheme.background));
+    properties.add(ColorProperty('error', error, defaultValue: defaultScheme.error));
+    properties.add(ColorProperty('onPrimary', onPrimary, defaultValue: defaultScheme.onPrimary));
+    properties.add(ColorProperty('onSecondary', onSecondary, defaultValue: defaultScheme.onSecondary));
+    properties.add(ColorProperty('onSurface', onSurface, defaultValue: defaultScheme.onSurface));
+    properties.add(ColorProperty('onBackground', onBackground, defaultValue: defaultScheme.onBackground));
+    properties.add(ColorProperty('onError', onError, defaultValue: defaultScheme.onError));
     properties.add(DiagnosticsProperty<Brightness>('brightness', brightness, defaultValue: defaultScheme.brightness));
   }
 }
