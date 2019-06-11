@@ -829,7 +829,7 @@ class TextInput {
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
       if (_kIsBrowser) {
-        // TODO(flutter_web): what makes sense here?
+        // TODO(flutterweb): what makes sense here?
         return true;
       }
       if (Platform.isIOS) {
