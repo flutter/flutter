@@ -96,6 +96,10 @@ struct FlutterDesktopWindow {
 
   // The ratio of pixels per screen coordinate for the window.
   double pixels_per_screen_coordinate = 1.0;
+
+  // Resizing triggers a window refresh, but the resize already updates Flutter.
+  // To avoid double messages, the refresh after each resize is skipped.
+  bool skip_next_window_refresh = false;
 };
 
 // Struct for storing state of a Flutter engine instance.
@@ -166,31 +170,53 @@ static double GetScreenCoordinatesPerInch() {
   return primary_monitor_mode->width / (primary_monitor_width_mm / 25.4);
 }
 
+// Sends a window metrics update to the Flutter engine using the given
+// framebuffer size and the current window information in |state|.
+static void SendWindowMetrics(FlutterDesktopWindowControllerState* state,
+                              int width,
+                              int height) {
+  double dpi = state->window_wrapper->pixels_per_screen_coordinate *
+               state->monitor_screen_coordinates_per_inch;
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = width;
+  event.height = height;
+  // The Flutter pixel_ratio is defined as DPI/dp. Limit the ratio to a minimum
+  // of 1 to avoid rendering a smaller UI on standard resolution monitors.
+  event.pixel_ratio = std::max(dpi / kDpPerInch, 1.0);
+  FlutterEngineSendWindowMetricsEvent(state->engine, &event);
+}
+
 // When GLFW calls back to the window with a framebuffer size change, notify
 // FlutterEngine about the new window metrics.
-// The Flutter pixel_ratio is defined as DPI/dp.
 static void GLFWFramebufferSizeCallback(GLFWwindow* window,
                                         int width_px,
                                         int height_px) {
   int width;
   glfwGetWindowSize(window, &width, nullptr);
-
-  auto state = GetSavedWindowState(window);
+  auto* state = GetSavedWindowState(window);
   state->window_wrapper->pixels_per_screen_coordinate =
       width > 0 ? width_px / width : 1;
 
-  double dpi = state->window_wrapper->pixels_per_screen_coordinate *
-               state->monitor_screen_coordinates_per_inch;
-  // Limit the ratio to 1 to avoid rendering a smaller UI in standard resolution
-  // monitors.
-  double pixel_ratio = std::max(dpi / kDpPerInch, 1.0);
+  SendWindowMetrics(state, width_px, height_px);
+  state->window_wrapper->skip_next_window_refresh = true;
+}
 
-  FlutterWindowMetricsEvent event = {};
-  event.struct_size = sizeof(event);
-  event.width = width_px;
-  event.height = height_px;
-  event.pixel_ratio = pixel_ratio;
-  FlutterEngineSendWindowMetricsEvent(state->engine, &event);
+// Indicates that the window needs to be redrawn.
+void GLFWWindowRefreshCallback(GLFWwindow* window) {
+  auto* state = GetSavedWindowState(window);
+  if (state->window_wrapper->skip_next_window_refresh) {
+    state->window_wrapper->skip_next_window_refresh = false;
+    return;
+  }
+  // There's no engine API to request a redraw explicitly, so instead send a
+  // window metrics event with the current size to trigger it.
+  int width_px, height_px;
+  glfwGetFramebufferSize(window, &width_px, &height_px);
+  if (width_px > 0 && height_px > 0) {
+    SendWindowMetrics(state, width_px, height_px);
+  }
 }
 
 // Sends a pointer event to the Flutter engine based on the given data.
@@ -589,6 +615,7 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
 
   // Set up GLFW callbacks for the window.
   glfwSetFramebufferSizeCallback(window, GLFWFramebufferSizeCallback);
+  glfwSetWindowRefreshCallback(window, GLFWWindowRefreshCallback);
   GLFWAssignEventCallbacks(window);
 
   return state.release();
