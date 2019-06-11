@@ -48,6 +48,7 @@ const String _kVMSnapshotData = 'vm_snapshot_data';
 const String _kIsolateSnapshotData = 'isolate_snapshot_data';
 const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
 
+/// Allows to mock `buildBundle`.
 class BundleFactory {
   Future<void> buildBundle({
     TargetPlatform platform,
