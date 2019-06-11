@@ -191,10 +191,10 @@ void main() {
       fileCache.initialize();
       fileCache.persist();
 
-      expect(fs.file('build/.filecache').existsSync(), true);
-      expect(fs.file('build/.filecache').readAsStringSync(), '');
-      expect(fs.file('build/.filecache_version').existsSync(), true);
-      expect(fs.file('build/.filecache_version').readAsStringSync(), '1');
+      expect(fs.file(fs.path.join('build', '.filecache')).existsSync(), true);
+      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '');
+      expect(fs.file(fs.path.join('build', '.filecache_version')).existsSync(), true);
+      expect(fs.file(fs.path.join('build', '.filecache_version')).readAsStringSync(), '1');
     }));
 
     test('saves and restores to file cache', () => testbed.run(() {
@@ -207,7 +207,7 @@ void main() {
       fileCache.persist();
 
       final String currentHash =  fileCache.currentHashes[file.path];
-      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '/foo.dart : $currentHash');
+      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '${fs.path.absolute('foo.dart')} : $currentHash');
       expect(fs.file(fs.path.join('build', '.filecache_version')).readAsStringSync(), '1');
 
       final FileCache newFileCache = FileCache(environment);
@@ -217,7 +217,7 @@ void main() {
       newFileCache.persist();
 
       // Still persisted correctly.
-      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '/foo.dart : $currentHash');
+      expect(fs.file(fs.path.join('build', '.filecache')).readAsStringSync(), '${fs.path.absolute('foo.dart')} : $currentHash');
       expect(fs.file(fs.path.join('build', '.filecache_version')).readAsStringSync(), '1');
     }));
   });
