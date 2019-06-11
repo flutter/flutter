@@ -6,22 +6,12 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
-import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-
-String javaHome;
-String errorMessage;
 
 Future<void> main() async {
   await task(() async {
-    section('Find Java');
-
-    javaHome = await findJavaHome();
-    if (javaHome == null)
-      return TaskResult.failure('Could not find Java');
-    print('\nUsing JAVA_HOME=$javaHome');
-
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug without explicit target platform');

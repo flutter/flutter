@@ -5,22 +5,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/apk_utils.dart';
+import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-
-String javaHome;
-String errorMessage;
 
 Future<void> main() async {
   await task(() async {
-    section('Find Java');
-
-    javaHome = await findJavaHome();
-    if (javaHome == null)
-      return TaskResult.failure('Could not find Java');
-    print('\nUsing JAVA_HOME=$javaHome');
-
     try {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('APK content for task assembleDebug with target platform = android-arm');
@@ -109,7 +99,7 @@ Future<void> main() async {
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleDebug');
         await project.runGradleTask('assembleDebug');
-        errorMessage = validateSnapshotDependency(project, 'build/app.dill');
+        final String errorMessage = validateSnapshotDependency(project, 'build/app.dill');
         if (errorMessage != null) {
           throw TaskResult.failure(errorMessage);
         }

@@ -10,9 +10,6 @@ import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
-String javaHome;
-String errorMessage;
-
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
   final Directory tempDir = Directory.systemTemp.createTempSync('flutter_devicelab_gradle_plugin_test.');
@@ -207,7 +204,15 @@ Future<void> _runGradleTask({String workingDirectory, String task, List<String> 
 }
 
 Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
-    List<String> options}) {
+    List<String> options}) async {
+  section('Find Java');
+  final String javaHome = await findJavaHome();
+
+  if (javaHome == null)
+    throw TaskResult.failure('Could not find Java');
+
+  print('\nUsing JAVA_HOME=$javaHome');
+
   final List<String> args = <String>['app:$task'];
   if (options != null) {
     args.addAll(options);
