@@ -26,7 +26,7 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, ProcessSignal, stderr, stdin, stdout;
+import 'dart:io' as io show exit, IOSink, ProcessSignal, stderr, stdin, Stdout, stdout;
 
 import 'package:meta/meta.dart';
 
@@ -47,6 +47,8 @@ export 'dart:io'
         HttpClient,
         HttpClientRequest,
         HttpClientResponse,
+        // TODO(tvolkert): Uncomment (flutter/flutter#33791)
+        //HttpClientResponseCompressionState,
         HttpHeaders,
         HttpRequest,
         HttpServer,
@@ -70,6 +72,7 @@ export 'dart:io'
         Stdin,
         StdinException,
         // stdout,           NO! Use `io.dart`
+        Stdout,
         Socket,
         SocketException,
         systemEncoding,
@@ -154,7 +157,7 @@ class Stdio {
   const Stdio();
 
   Stream<List<int>> get stdin => io.stdin;
-  io.IOSink get stdout => io.stdout;
+  io.Stdout get stdout => io.stdout;
   io.IOSink get stderr => io.stderr;
 
   bool get hasTerminal => io.stdout.hasTerminal;
@@ -163,7 +166,7 @@ class Stdio {
   bool get supportsAnsiEscapes => hasTerminal ? io.stdout.supportsAnsiEscapes : false;
 }
 
-Stdio get stdio => context.get<Stdio>();
-io.IOSink get stdout => stdio.stdout;
+Stdio get stdio => context.get<Stdio>() ?? const Stdio();
+io.Stdout get stdout => stdio.stdout;
 Stream<List<int>> get stdin => stdio.stdin;
 io.IOSink get stderr => stdio.stderr;

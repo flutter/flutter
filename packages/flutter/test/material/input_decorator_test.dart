@@ -4,7 +4,6 @@
 
 @TestOn('!chrome') // needs substantial triage.
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -2032,17 +2031,17 @@ void main() {
       await expectLater(
         find.byType(InputDecorator),
         matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-        skip: !Platform.isLinux,
+        skip: !isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
         matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-        skip: !Platform.isLinux,
+        skip: !isLinux,
       );
     },
-    tags: 'golden',
+    skip: !isLinux,
   );
 
   testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {

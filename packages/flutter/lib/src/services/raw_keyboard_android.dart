@@ -33,6 +33,9 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
     this.keyCode = 0,
     this.scanCode = 0,
     this.metaState = 0,
+    this.eventSource = 0,
+    this.vendorId = 0,
+    this.productId = 0,
   }) : assert(flags != null),
        assert(codePoint != null),
        assert(keyCode != null),
@@ -105,12 +108,60 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
   ///  * [isMetaPressed], to see if a META key is pressed.
   final int metaState;
 
+  /// The source of the event.
+  ///
+  /// See <https://developer.android.com/reference/android/view/KeyEvent.html#getSource()>
+  /// for the numerical values of the `source`. Many of these constants are also
+  /// replicated as static constants in this class.
+  final int eventSource;
+
+  /// The vendor ID of the device that produced the event.
+  ///
+  /// See <https://developer.android.com/reference/android/view/InputDevice.html#getVendorId()>
+  /// for the numerical values of the `vendorId`.
+  final int vendorId;
+
+  /// The product ID of the device that produced the event.
+  ///
+  /// See <https://developer.android.com/reference/android/view/InputDevice.html#getProductId()>
+  /// for the numerical values of the `productId`.
+  final int productId;
+
+  // The source code that indicates that an event came from a joystick.
+  // from https://developer.android.com/reference/android/view/InputDevice.html#SOURCE_JOYSTICK
+  static const int _sourceJoystick = 0x01000010;
+
   // Android only reports a single code point for the key label.
   @override
   String get keyLabel => plainCodePoint == 0 ? null : String.fromCharCode(plainCodePoint & _kCombiningCharacterMask);
 
   @override
-  PhysicalKeyboardKey get physicalKey => kAndroidToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
+  PhysicalKeyboardKey get physicalKey {
+    if (kAndroidToPhysicalKey.containsKey(scanCode)) {
+      return kAndroidToPhysicalKey[scanCode] ?? PhysicalKeyboardKey.none;
+    }
+
+    // Android sends DPAD_UP, etc. as the keyCode for joystick DPAD events, but
+    // it doesn't set the scanCode for those, so we have to detect this, and set
+    // our own DPAD physical keys. The logical key will still match "arrowUp",
+    // etc.
+    if (eventSource & _sourceJoystick == _sourceJoystick) {
+      final LogicalKeyboardKey foundKey = kAndroidToLogicalKey[keyCode];
+      if (foundKey == LogicalKeyboardKey.arrowUp) {
+        return PhysicalKeyboardKey.arrowUp;
+      }
+      if (foundKey == LogicalKeyboardKey.arrowDown) {
+        return PhysicalKeyboardKey.arrowDown;
+      }
+      if (foundKey == LogicalKeyboardKey.arrowLeft) {
+        return PhysicalKeyboardKey.arrowLeft;
+      }
+      if (foundKey == LogicalKeyboardKey.arrowRight) {
+        return PhysicalKeyboardKey.arrowRight;
+      }
+    }
+    return PhysicalKeyboardKey.none;
+  }
 
   @override
   LogicalKeyboardKey get logicalKey {

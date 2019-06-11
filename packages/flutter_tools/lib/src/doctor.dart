@@ -33,6 +33,9 @@ import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
+import 'web/web_validator.dart';
+import 'web/workflow.dart';
+import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
 
 Doctor get doctor => context.get<Doctor>();
@@ -65,6 +68,12 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosValidator);
+
+      if (windowsWorkflow.appliesToHostPlatform)
+        _validators.add(visualStudioValidator);
+
+      if (webWorkflow.appliesToHostPlatform)
+        _validators.add(const WebValidator());
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);
@@ -278,6 +287,8 @@ class Doctor {
 
 /// A series of tools and required install steps for a target platform (iOS or Android).
 abstract class Workflow {
+  const Workflow();
+
   /// Whether the workflow applies to this platform (as in, should we ever try and use it).
   bool get appliesToHostPlatform;
 
@@ -452,6 +463,19 @@ class ValidationMessage {
 
   @override
   String toString() => message;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final ValidationMessage typedOther = other;
+    return typedOther.message == message
+      && typedOther.type == type;
+  }
+
+  @override
+  int get hashCode => type.hashCode ^ message.hashCode;
 }
 
 class FlutterValidator extends DoctorValidator {

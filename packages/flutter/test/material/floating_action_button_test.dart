@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome')
-import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -738,7 +736,7 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('floating_action_button_test.clip.2.png'), // .clip.1.png is obsolete and can be removed
-      skip: !Platform.isLinux,
+      skip: !isLinux,
     );
   });
 
