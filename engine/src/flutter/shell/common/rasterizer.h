@@ -26,6 +26,13 @@ class Rasterizer final : public SnapshotDelegate {
    public:
     virtual void OnFrameRasterized(const FrameTiming&) = 0;
   };
+  // TODO(dnfield): remove once embedders have caught up.
+  class DummyDelegate : public Delegate {
+    void OnFrameRasterized(const FrameTiming&) override {}
+  };
+  Rasterizer(TaskRunners task_runners,
+             std::unique_ptr<flutter::CompositorContext> compositor_context);
+
   Rasterizer(Delegate& delegate, TaskRunners task_runners);
 
   Rasterizer(Delegate& delegate,

@@ -22,6 +22,15 @@ namespace flutter {
 // used within this interval.
 static constexpr std::chrono::milliseconds kSkiaCleanupExpiration(15000);
 
+// TODO(dnfield): Remove this once internal embedders have caught up.
+static Rasterizer::DummyDelegate dummy_delegate_;
+Rasterizer::Rasterizer(
+    TaskRunners task_runners,
+    std::unique_ptr<flutter::CompositorContext> compositor_context)
+    : Rasterizer(dummy_delegate_,
+                 std::move(task_runners),
+                 std::move(compositor_context)) {}
+
 Rasterizer::Rasterizer(Delegate& delegate, TaskRunners task_runners)
     : Rasterizer(delegate,
                  std::move(task_runners),
