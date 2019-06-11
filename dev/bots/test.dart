@@ -348,6 +348,7 @@ Future<void> _runWebTests() async {
     'test/services/',
     'test/painting/',
     'test/scheduler/',
+    'test/widgets/',
     'test/semantics/',
   ]);
 }
