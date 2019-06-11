@@ -53,14 +53,18 @@ void main() {
         });
       });
 
-      testUsingContext('is not available on stable channel', () async {
-        final RunCommand command = TestRunCommand();
-        final List<String> args = <String> [
-                                    'run',
-                                    '--dart-flags', '"--observe"',
-                                    '--no-hot',
-                                  ];
+      RunCommand command;
+      List<String> args;
+      setUp(() {
+        command = TestRunCommand();
+        args = <String> [
+          'run',
+          '--dart-flags', '"--observe"',
+          '--no-hot',
+        ];
+      });
 
+      testUsingContext('is not available on stable channel', () async {
         // Stable branch.
         try {
           await createTestCommandRunner(command).run(args);
@@ -75,18 +79,6 @@ void main() {
       });
 
       testUsingContext('is populated in debug mode', () async {
-        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-          return Stream<Device>.fromIterable(<Device>[
-            FakeDevice(),
-          ]);
-        });
-        final RunCommand command = TestRunCommand();
-        final List<String> args = <String> [
-                                    'run',
-                                    '--dart-flags', '"--observe"',
-                                    '--no-hot',
-                                  ];
-
         // FakeDevice.startApp checks that --dart-flags doesn't get dropped and
         // throws ToolExit with FakeDevice.kSuccess if the flag is populated.
         try {
@@ -102,13 +94,7 @@ void main() {
       });
 
       testUsingContext('is populated in profile mode', () async {
-        final RunCommand command = TestRunCommand();
-        final List<String> args = <String> [
-                                    'run',
-                                    '--profile',
-                                    '--dart-flags', '"--observe"',
-                                    '--no-hot',
-                                  ];
+        args.add('--profile');
 
         // FakeDevice.startApp checks that --dart-flags doesn't get dropped and
         // throws ToolExit with FakeDevice.kSuccess if the flag is populated.
@@ -125,13 +111,7 @@ void main() {
       });
 
       testUsingContext('is not populated in release mode', () async {
-        final RunCommand command = TestRunCommand();
-        final List<String> args = <String> [
-                                    'run',
-                                    '--release',
-                                    '--dart-flags', '"--observe"',
-                                    '--no-hot',
-                                  ];
+        args.add('--release');
 
         // FakeDevice.startApp checks that --dart-flags *does* get dropped and
         // throws ToolExit with FakeDevice.kSuccess if the flag is set to the
