@@ -1475,7 +1475,7 @@ mixin WidgetInspectorService {
         // you expand a node in the details tree, you expand the entire subtree
         // up until you reach the next nodes shared with the summary tree.
         if (config.summaryTree || delegate.subtreeDepth > 1 || _shouldShowInSummaryTree(node)) {
-          delegate = delegate.copyWith(subtreeDepth: config.subtreeDepth - 1);
+          delegate = delegate.copyWith(subtreeDepth: delegate.subtreeDepth - 1);
         }
         return delegate;
       },
