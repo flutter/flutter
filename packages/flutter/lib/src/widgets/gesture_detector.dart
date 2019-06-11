@@ -766,15 +766,14 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// Gesture detectors can contribute semantic information to the tree that is
   /// used by assistive technology. The behavior can be configured by
-  /// `semanticsMapping`, which defaults to [DefaultGestureSemanticsMapping].
-  /// It can also be disabled with [excludeFromSemantics].
+  /// `semanticsMapping`, or disabled with [excludeFromSemantics].
   const RawGestureDetector({
     Key key,
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
-    this.semanticsMapping = const DefaultGestureSemanticsMapping(),
+    this.semanticsMapping,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);
@@ -806,14 +805,25 @@ class RawGestureDetector extends StatefulWidget {
   /// duplication of information.
   final bool excludeFromSemantics;
 
-  /// Describes how gestures from the semantics server are mapped into callbacks
-  /// of recognizers. For example, if a detector wants semantic taps to invoke
-  /// the callbacks of its TapGestureRecognizer (if there is one), the semantics
-  /// mapping it receives should have the desired behavior defined in the
-  /// returned handler of [GestureSemanticsMapping.getTapHandler].
+  /// Describes the semantics notations that should be added to the underlying
+  /// render object [RenderSemanticsGestureHandler].
   ///
-  /// It defaults to [DefaultGestureSemanticsMapping]. It has no effect if
-  /// [excludeFromSemantics] is true.
+  /// It has no effect if [excludeFromSemantics] is true.
+  ///
+  /// When [semanticsMapping] is null, [RawGestureDetector] will fall back to
+  /// default mapping that behaves as follows:
+  ///
+  ///  * On a semantic tap, it looks for [TapGestureRecognizer] and calls
+  ///    `onTapDown`, `onTapUp`, and `onTap`.
+  ///  * On a semantic long press, it looks for [LongPressGestureRecognizer] and
+  ///    calls `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
+  ///    `onLongPressUp`.
+  ///  * On a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
+  ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
+  ///    for [PanGestureRecognizer] and calls the same methods.
+  ///  * On a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
+  ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
+  ///    for [PanGestureRecognizer] and calls the same methods.
   final GestureSemanticsMapping semanticsMapping;
 
   @override
@@ -823,16 +833,25 @@ class RawGestureDetector extends StatefulWidget {
 /// State for a [RawGestureDetector].
 class RawGestureDetectorState extends State<RawGestureDetector> {
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
+  GestureSemanticsMapping _semanticsMapping;
 
   @override
   void initState() {
     super.initState();
+    _semanticsMapping = widget.semanticsMapping ??
+      _DefaultGestureSemanticsMapping(this);
     _syncAll(widget.gestures);
   }
 
   @override
   void didUpdateWidget(RawGestureDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
+    // Re-initialize semantics mapping unless mapping has always been default
+    // (avoid unnecessary construction of _DefaultGestureSemanticsMapping).
+    if (!(oldWidget.semanticsMapping == null && widget.semanticsMapping == null)) {
+      _semanticsMapping = widget.semanticsMapping ??
+        _DefaultGestureSemanticsMapping(this);
+    }
     _syncAll(widget.gestures);
   }
 
@@ -863,7 +882,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       return true;
     }());
     _syncAll(gestures);
-    if (_effectiveSemanticsMapping != null) {
+    if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
       _updateSemanticsForObject(semanticsGestureHandler);
     }
@@ -933,53 +952,10 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
-  GestureSemanticsMapping get _effectiveSemanticsMapping {
-    return widget.excludeFromSemantics ? null : widget.semanticsMapping;
-  }
-
-  // This method assigns proper semantics callbacks to the underlying
-  // [RenderSemanticsGestureHandler] element.
-  // It is called when the element is created, updated, or during
-  // [replaceGestureRecognizers].
   void _updateSemanticsForObject(RenderSemanticsGestureHandler renderObject) {
-    GestureRecognizer _findRecognizer(Type type) {
-      return _recognizers[type];
-    };
-    final GestureSemanticsMapping mapping = _effectiveSemanticsMapping;
-    _handleSemanticTap = mapping?.getTapHandler(_findRecognizer);
-    _handleSemanticLongPress = mapping?.getLongPressHandler(_findRecognizer);
-    _handleSemanticHorizontal = mapping?.getHorizontalDragUpdateHandler(_findRecognizer);
-    _handleSemanticVertical = mapping?.getVerticalDragUpdateHandler(_findRecognizer);
-    renderObject
-      ..onTap = _handleSemanticTap == null
-          ? null : _performSemanticTap
-      ..onLongPress = _handleSemanticLongPress == null
-          ? null : _performSemanticLongPress
-      ..onHorizontalDragUpdate = _handleSemanticHorizontal == null
-          ? null : _performSemanticHorizontal
-      ..onVerticalDragUpdate = _handleSemanticVertical == null
-          ? null : _performSemanticVertical;
-  }
-  GestureTapCallback _handleSemanticTap;
-  GestureLongPressCallback _handleSemanticLongPress;
-  GestureDragUpdateCallback _handleSemanticHorizontal;
-  GestureDragUpdateCallback _handleSemanticVertical;
-  // The following methods are cached wrappers of the performing callbacks.
-  // Caching ensures that each handler for [RenderSemanticsGestureHandler]
-  // is either null or a same callback, respectively.
-  // They are assigned only when the corresponding performing callback is not
-  // null, therefore no null-check is needed.
-  void _performSemanticTap() {
-    _handleSemanticTap();
-  }
-  void _performSemanticLongPress() {
-    _handleSemanticLongPress();
-  }
-  void _performSemanticHorizontal(DragUpdateDetails details) {
-    _handleSemanticHorizontal(details);
-  }
-  void _performSemanticVertical(DragUpdateDetails details) {
-    _handleSemanticVertical(details);
+    assert(!widget.excludeFromSemantics);
+    assert(_semanticsMapping != null);
+    _semanticsMapping.assignSemantics(renderObject);
   }
 
   @override
@@ -989,7 +965,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       behavior: widget.behavior ?? _defaultBehavior,
       child: widget.child,
     );
-    if (_effectiveSemanticsMapping != null)
+    if (!widget.excludeFromSemantics)
       result = _GestureSemantics(
         child: result,
         assignSemantics: _updateSemanticsForObject,
@@ -1007,8 +983,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
       properties.add(IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
       properties.add(DiagnosticsProperty<bool>('excludeFromSemantics', widget.excludeFromSemantics, defaultValue: false));
-      properties.add(DiagnosticsProperty<GestureSemanticsMapping>('semanticsMapping', widget.semanticsMapping,
-        defaultValue: const DefaultGestureSemanticsMapping()));
+      properties.add(DiagnosticsProperty<GestureSemanticsMapping>('semanticsMapping', widget.semanticsMapping));
     }
     properties.add(EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
@@ -1041,84 +1016,68 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 
 typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 
-/// A base class that tells [RawGestureDetector]s how to handle specific
-/// gestures from the semantics server (e.g. an accessibility tool) based on the
-/// recognizers.
-///
-/// Each method of [GestureSemanticsMapping] is responsible for a kind of semantics
-/// gesture, and can return either a callback or null. If it returns a callback,
-/// the semantics information will be added to the semantics tree, and the
-/// callback will be called during the gesture.
-///
-/// Each method has a parameter `getRecognizer`, which returns the recognizer
-/// of the given type that is owned by the detector, or null if not found. The
-/// callback can depend on the state of recognizers, but it must not modify them.
-///
-/// The callbacks are collected by [RawGestureDetector] during initialization,
-/// then updated when the underlying render object is updated, and during
-/// [RawGestureDetector.replaceGestureRecognizers]. Therefore, the methods
-/// should probably not decide whether to return null based on mutable
-/// properties, such as recognizers' handlers.
-///
-/// See also:
-///
-///  * [DefaultGestureSemanticsMapping], the default mapping used by
-///    [RawGestureDetector].
-///  * [RenderSemanticsGestureHandler], which defines the kinds of semantics
-///    gestures.
+/// A base class that describes what semantics notations a [RawGestureDetector]
+/// should add to the render object [RenderSemanticsGestureHandler].
 abstract class GestureSemanticsMapping {
   /// Create a mapping of gesture semantics.
-  const GestureSemanticsMapping();
+  GestureSemanticsMapping();
 
-  /// Returns a callback that is called when the user taps on the render object.
-  /// Returns null if the mapping isn't interested in tap.
-  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
-    return null;
-  }
-
-  /// Returns a callback that is called when the user presses on the render
-  /// object for a long period of time. Returns null if the mapping isn't
-  /// interested in long press.
-  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer) {
-    return null;
-  }
-
-  /// Returns a callback that is called when the user scrolls to the left or to
-  /// the right. Returns null if the mapping isn't interested in horizontal drag.
-  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
-    return null;
-  }
-
-  /// Returns a callback that is called when the user scrolls up or down.
-  /// Returns null if the mapping isn't interested in horizontal drag.
-  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
-    return null;
-  }
-
-  @override
-  String toString() => '$runtimeType()';
+  /// Assigns semantics notations to the render object
+  /// [RenderSemanticsGestureHandler] of the gesture detector.
+  /// It is called when the widget is created, updated, or during
+  /// [RawGestureDetector.replaceGestureRecognizers].
+  void assignSemantics(RenderSemanticsGestureHandler renderObject);
 }
 
-/// The default mapping used by [RawGestureDetector]. Its behavior is as follows:
-///
-///  * On a semantic tap, it looks for [TapGestureRecognizer] and calls
-///    `onTapDown`, `onTapUp`, and `onTap`.
-///  * On a semantic long press, it looks for [LongPressGestureRecognizer] and
-///    calls `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
-///    `onLongPressUp`.
-///  * On a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
-///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-///    for [PanGestureRecognizer] and calls the same methods.
-///  * On a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
-///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-///    for [PanGestureRecognizer] and calls the same methods.
-class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
-  /// Create a [DefaultGestureSemanticsMapping].
-  const DefaultGestureSemanticsMapping();
+class _DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
+  _DefaultGestureSemanticsMapping(this.detectorState);
+
+  final RawGestureDetectorState detectorState;
+
+  GestureTapCallback _handleSemanticTap;
+  GestureLongPressCallback _handleSemanticLongPress;
+  GestureDragUpdateCallback _handleSemanticHorizontal;
+  GestureDragUpdateCallback _handleSemanticVertical;
 
   @override
-  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
-    final TapGestureRecognizer tap = getRecognizer(TapGestureRecognizer);
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+    assert(!detectorState.widget.excludeFromSemantics);
+    final Map<Type, GestureRecognizer> recognizers = detectorState._recognizers;
+    _handleSemanticTap = _getTapHandler(recognizers);
+    _handleSemanticLongPress = _getLongPressHandler(recognizers);
+    _handleSemanticHorizontal = _getHorizontalDragUpdateHandler(recognizers);
+    _handleSemanticVertical = _getVerticalDragUpdateHandler(recognizers);
+    renderObject
+      ..onTap = _handleSemanticTap == null
+          ? null : _performSemanticTap
+      ..onLongPress = _handleSemanticLongPress == null
+          ? null : _performSemanticLongPress
+      ..onHorizontalDragUpdate = _handleSemanticHorizontal == null
+          ? null : _performSemanticHorizontal
+      ..onVerticalDragUpdate = _handleSemanticVertical == null
+          ? null : _performSemanticVertical;
+  }
+
+  // The following methods are cached wrappers of the handling callbacks.
+  // Caching ensures that for each gesture of [RenderSemanticsGestureHandler],
+  // the callback is either null or an identical one as previously.
+  // They are assigned only when the corresponding performing callback is not
+  // null, therefore no null-check is needed.
+  void _performSemanticTap() {
+    _handleSemanticTap();
+  }
+  void _performSemanticLongPress() {
+    _handleSemanticLongPress();
+  }
+  void _performSemanticHorizontal(DragUpdateDetails details) {
+    _handleSemanticHorizontal(details);
+  }
+  void _performSemanticVertical(DragUpdateDetails details) {
+    _handleSemanticVertical(details);
+  }
+
+  GestureTapCallback _getTapHandler(Map<Type, GestureRecognizer> recognizers) {
+    final TapGestureRecognizer tap = recognizers[TapGestureRecognizer];
     if (tap == null)
       return null;
     assert(tap is TapGestureRecognizer);
@@ -1134,9 +1093,8 @@ class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
     };
   }
 
-  @override
-  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer) {
-    final LongPressGestureRecognizer longPress = getRecognizer(LongPressGestureRecognizer);
+  GestureLongPressCallback _getLongPressHandler(Map<Type, GestureRecognizer> recognizers) {
+    final LongPressGestureRecognizer longPress = recognizers[LongPressGestureRecognizer];
     if (longPress == null)
       return null;
 
@@ -1153,10 +1111,9 @@ class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
     };
   }
 
-  @override
-  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
-    final HorizontalDragGestureRecognizer horizontal = getRecognizer(HorizontalDragGestureRecognizer);
-    final PanGestureRecognizer pan = getRecognizer(PanGestureRecognizer);
+  GestureDragUpdateCallback _getHorizontalDragUpdateHandler(Map<Type, GestureRecognizer> recognizers) {
+    final HorizontalDragGestureRecognizer horizontal = recognizers[HorizontalDragGestureRecognizer];
+    final PanGestureRecognizer pan = recognizers[PanGestureRecognizer];
 
     final GestureDragUpdateCallback horizontalHandler = horizontal == null ?
       null :
@@ -1196,10 +1153,9 @@ class DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
     };
   }
 
-  @override
-  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
-    final VerticalDragGestureRecognizer vertical = getRecognizer(VerticalDragGestureRecognizer);
-    final PanGestureRecognizer pan = getRecognizer(PanGestureRecognizer);
+  GestureDragUpdateCallback _getVerticalDragUpdateHandler(Map<Type, GestureRecognizer> recognizers) {
+    final VerticalDragGestureRecognizer vertical = recognizers[VerticalDragGestureRecognizer];
+    final PanGestureRecognizer pan = recognizers[PanGestureRecognizer];
 
     final GestureDragUpdateCallback verticalHandler = vertical == null ?
       null :

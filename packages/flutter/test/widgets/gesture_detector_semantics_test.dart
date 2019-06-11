@@ -217,226 +217,359 @@ void main() {
     semantics.dispose();
   });
 
-  group('DefaultGestureSemanticsMapping', () {
-    group('getTapHandler', () {
-      test('should return null when there is no TapGR', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureTapCallback callback = mapping.getTapHandler((Type type) {
-          return null;
-        });
-        expect(callback, isNull);
-      });
+  group('RawGestureDetector\'s default semantics mapping', () {
+    Map<Type, GestureRecognizerFactory> buildGestureMap<T extends GestureRecognizer>(
+      GestureRecognizerFactoryConstructor<T> constructor,
+      GestureRecognizerFactoryInitializer<T> initializer,
+    ) {
+      if (constructor == null)
+        return <Type, GestureRecognizerFactory>{};
+      return <Type, GestureRecognizerFactory>{
+        T: GestureRecognizerFactoryWithHandlers<T>(
+          constructor,
+          initializer ?? (T o) {},
+        ),
+      };
+    }
 
-      test('should return non-null when there is TapGR with no callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureTapCallback callback = mapping.getTapHandler((Type type) {
-          switch(type) {
-            case TapGestureRecognizer :
-              return TapGestureRecognizer();
-            default:
-              return null;
-          }
-        });
-        expect(callback, isNotNull);
-      });
-
-      test('should return a callback that correctly calls callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final List<String> logs = <String>[];
-        final GestureTapCallback callback = mapping.getTapHandler((Type type) {
-          switch(type) {
-            case TapGestureRecognizer :
-              return TapGestureRecognizer()
-                ..onTap = () {logs.add('tap');}
-                ..onTapUp = (_) {logs.add('tapUp');}
-                ..onTapDown = (_) {logs.add('tapDown');}
-                ..onTapCancel = () {logs.add('WRONG');}
-                ..onSecondaryTapDown = (_) {logs.add('WRONG');};
-            default:
-              return null;
-          }
-        });
-        expect(callback, isNotNull);
-        callback();
-        expect(logs, <String>['tapDown', 'tapUp', 'tap']);
-      });
-    });
-
-    group('getLongPressHandler', () {
-      test('should return null when there is no LongPressGR', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureLongPressCallback callback = mapping.getLongPressHandler((Type type) {
-          return null;
-        });
-        expect(callback, isNull);
-      });
-
-      test('should return non-null when there is LongPressGR with no callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureLongPressCallback callback = mapping.getLongPressHandler((Type type) {
-          switch(type) {
-            case LongPressGestureRecognizer:
-              return LongPressGestureRecognizer();
-            default:
-              return null;
-          }
-        });
-        expect(callback, isNotNull);
-      });
-
-      test('should return a callback that correctly calls callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final List<String> logs = <String>[];
-        final GestureLongPressCallback callback = mapping.getLongPressHandler((Type type) {
-          switch(type) {
-            case LongPressGestureRecognizer:
-              return LongPressGestureRecognizer()
-                ..onLongPress = () {logs.add('LP');}
-                ..onLongPressStart = (_) {logs.add('LPStart');}
-                ..onLongPressUp = () {logs.add('LPUp');}
-                ..onLongPressEnd = (_) {logs.add('LPEnd');}
-                ..onLongPressMoveUpdate = (_) {logs.add('WRONG');};
-            default:
-              return null;
-          }
-        });
-        expect(callback, isNotNull);
-        callback();
-        expect(logs, <String>['LPStart', 'LP', 'LPEnd', 'LPUp']);
-      });
-    });
-
-    group('getHorizontalDragUpdateHandler', () {
-      test('should return null when there is no matching recognizers', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureDragUpdateCallback callback = mapping.getHorizontalDragUpdateHandler(
-          (Type type) { return null; }
+    group('should map onTap to', () {
+      testWidgets('null when there is no TapGR', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(null, null),
+              child: Container(),
+            ),
+          )
         );
-        expect(callback, isNull);
+
+        expect(semantics, isNot(includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
+        )));
+
+        semantics.dispose();
       });
 
-      test('should return non-null when there is either matching recognizer with no callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureDragUpdateCallback callback1 = mapping.getHorizontalDragUpdateHandler((Type type) {
-          switch(type) {
-            case HorizontalDragGestureRecognizer:
-              return HorizontalDragGestureRecognizer();
-            default:
-              return null;
-          }
-        });
-        expect(callback1, isNotNull);
-
-        final GestureDragUpdateCallback callback2 = mapping.getHorizontalDragUpdateHandler(
-          (Type type) {
-            switch(type) {
-              case PanGestureRecognizer:
-                return PanGestureRecognizer();
-              default:
-                return null;
-            }
-          }
+      testWidgets('non-null when there is TapGR with no callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(
+                () => TapGestureRecognizer(),
+                null,
+              ),
+              child: Container(),
+            ),
+          )
         );
-        expect(callback2, isNotNull);
-      });
 
-      test('should return a callback that correctly calls callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final List<String> logs = <String>[];
-        final GestureDragUpdateCallback callback = mapping.getHorizontalDragUpdateHandler((Type type) {
-          switch(type) {
-            case PanGestureRecognizer:
-              return PanGestureRecognizer()
-                ..onStart = (_) {logs.add('PStart');}
-                ..onDown = (_) {logs.add('PDown');}
-                ..onEnd = (_) {logs.add('PEnd');}
-                ..onUpdate = (_) {logs.add('PUpdate');}
-                ..onCancel = () {logs.add('WRONG');};
-            case HorizontalDragGestureRecognizer:
-              return HorizontalDragGestureRecognizer()
-                ..onStart = (_) {logs.add('HStart');}
-                ..onDown = (_) {logs.add('HDown');}
-                ..onEnd = (_) {logs.add('HEnd');}
-                ..onUpdate = (_) {logs.add('HUpdate');}
-                ..onCancel = () {logs.add('WRONG');};
-            default:
-              return null;
-          }
-        });
-        expect(callback, isNotNull);
-        callback(DragUpdateDetails(
-          delta: const Offset(0, 0),
-          globalPosition: const Offset(0, 0),
+        expect(semantics, includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.tap],
         ));
+
+        semantics.dispose();
+      });
+
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        final GlobalKey detectorKey = GlobalKey();
+        final List<String> logs = <String>[];
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              key: detectorKey,
+              gestures: buildGestureMap(
+                () => TapGestureRecognizer(),
+                (TapGestureRecognizer tap) {
+                  tap
+                    ..onTap = () {logs.add('tap');}
+                    ..onTapUp = (_) {logs.add('tapUp');}
+                    ..onTapDown = (_) {logs.add('tapDown');}
+                    ..onTapCancel = () {logs.add('WRONG');}
+                    ..onSecondaryTapDown = (_) {logs.add('WRONG');};
+                }
+              ),
+              child: Container(),
+            ),
+          )
+        );
+
+        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
+        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
+        expect(logs, <String>['tapDown', 'tapUp', 'tap']);
+
+        semantics.dispose();
+      });
+    });
+
+    group('should map onLongPress to', () {
+      testWidgets('null when there is no LongPressGR ', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(null, null),
+              child: Container(),
+            ),
+          )
+        );
+
+        expect(semantics, isNot(includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.longPress],
+        )));
+
+        semantics.dispose();
+      });
+
+      testWidgets('non-null when there is LongPressGR with no callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(
+                () => LongPressGestureRecognizer(),
+                null,
+              ),
+              child: Container(),
+            ),
+          )
+        );
+
+        expect(semantics, includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.longPress],
+        ));
+
+        semantics.dispose();
+      });
+
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        final GlobalKey detectorKey = GlobalKey();
+        final List<String> logs = <String>[];
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              key: detectorKey,
+              gestures: buildGestureMap(
+                () => LongPressGestureRecognizer(),
+                (LongPressGestureRecognizer longPress) {
+                  longPress
+                    ..onLongPress = () {logs.add('LP');}
+                    ..onLongPressStart = (_) {logs.add('LPStart');}
+                    ..onLongPressUp = () {logs.add('LPUp');}
+                    ..onLongPressEnd = (_) {logs.add('LPEnd');}
+                    ..onLongPressMoveUpdate = (_) {logs.add('WRONG');};
+                }
+              ),
+              child: Container(),
+            ),
+          )
+        );
+
+        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
+        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.longPress);
+        expect(logs, <String>['LPStart', 'LP', 'LPEnd', 'LPUp']);
+
+        semantics.dispose();
+      });
+    });
+
+    group('should map onHorizontalDragUpdate to', () {
+      testWidgets('null when there is no matching recognizers ', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(null, null),
+              child: Container(),
+            ),
+          )
+        );
+
+        expect(semantics, isNot(includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
+        )));
+
+        semantics.dispose();
+      });
+
+      testWidgets('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(
+                () => HorizontalDragGestureRecognizer(),
+                null,
+              ),
+              child: Container(),
+            ),
+          )
+        );
+
+        expect(semantics, includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
+        ));
+
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(
+                () => PanGestureRecognizer(),
+                null,
+              ),
+              child: Container(),
+            ),
+          )
+        );
+
+        expect(semantics, includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight,
+            SemanticsAction.scrollDown, SemanticsAction.scrollUp],
+        ));
+
+        semantics.dispose();
+      });
+
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        final GlobalKey detectorKey = GlobalKey();
+        final List<String> logs = <String>[];
+        final Map<Type, GestureRecognizerFactory> gestures = buildGestureMap(
+          () => HorizontalDragGestureRecognizer(),
+          (HorizontalDragGestureRecognizer horizontal) {
+            horizontal
+              ..onStart = (_) {logs.add('HStart');}
+              ..onDown = (_) {logs.add('HDown');}
+              ..onEnd = (_) {logs.add('HEnd');}
+              ..onUpdate = (_) {logs.add('HUpdate');}
+              ..onCancel = () {logs.add('WRONG');};
+          }
+        )..addAll(buildGestureMap(
+          () => PanGestureRecognizer(),
+          (PanGestureRecognizer pan) {
+            pan
+              ..onStart = (_) {logs.add('PStart');}
+              ..onDown = (_) {logs.add('PDown');}
+              ..onEnd = (_) {logs.add('PEnd');}
+              ..onUpdate = (_) {logs.add('PUpdate');}
+              ..onCancel = () {logs.add('WRONG');};
+          }
+        ));
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              key: detectorKey,
+              gestures: gestures,
+              child: Container(),
+            ),
+          )
+        );
+
+        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
+        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
         expect(logs, <String>['HDown', 'HStart', 'HUpdate', 'HEnd',
           'PDown', 'PStart', 'PUpdate', 'PEnd',]);
+        logs.clear();
+
+        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollLeft);
+        expect(logs, <String>['HDown', 'HStart', 'HUpdate', 'HEnd',
+          'PDown', 'PStart', 'PUpdate', 'PEnd',]);
+
+        semantics.dispose();
       });
     });
 
-    group('getVerticalDragUpdateHandler', () {
-      test('should return null when there is no matching recognizers', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureDragUpdateCallback callback = mapping.getVerticalDragUpdateHandler(
-          (Type type) { return null; }
+    group('should map onVerticalDragUpdate to', () {
+      testWidgets('null when there is no matching recognizers ', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(null, null),
+              child: Container(),
+            ),
+          )
         );
-        expect(callback, isNull);
+
+        expect(semantics, isNot(includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
+        )));
+
+        semantics.dispose();
       });
 
-      test('should return non-null when there is either matching recognizer with no callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final GestureDragUpdateCallback callback1 = mapping.getVerticalDragUpdateHandler((Type type) {
-          switch(type) {
-            case VerticalDragGestureRecognizer:
-              return VerticalDragGestureRecognizer();
-            default:
-              return null;
-          }
-        });
-        expect(callback1, isNotNull);
-
-        final GestureDragUpdateCallback callback2 = mapping.getVerticalDragUpdateHandler(
-          (Type type) {
-            switch(type) {
-              case PanGestureRecognizer:
-                return PanGestureRecognizer();
-              default:
-                return null;
-            }
-          }
+      testWidgets('non-null when there is either matching recognizer with no callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              gestures: buildGestureMap(
+                () => VerticalDragGestureRecognizer(),
+                null,
+              ),
+              child: Container(),
+            ),
+          )
         );
-        expect(callback2, isNotNull);
-      });
 
-      test('should return a callback that correctly calls callbacks', () {
-        const GestureSemanticsMapping mapping = DefaultGestureSemanticsMapping();
-        final List<String> logs = <String>[];
-        final GestureDragUpdateCallback callback = mapping.getVerticalDragUpdateHandler((Type type) {
-          switch(type) {
-            case PanGestureRecognizer:
-              return PanGestureRecognizer()
-                ..onStart = (_) {logs.add('PStart');}
-                ..onDown = (_) {logs.add('PDown');}
-                ..onEnd = (_) {logs.add('PEnd');}
-                ..onUpdate = (_) {logs.add('PUpdate');}
-                ..onCancel = () {logs.add('WRONG');};
-            case VerticalDragGestureRecognizer:
-              return VerticalDragGestureRecognizer()
-                ..onStart = (_) {logs.add('VStart');}
-                ..onDown = (_) {logs.add('VDown');}
-                ..onEnd = (_) {logs.add('VEnd');}
-                ..onUpdate = (_) {logs.add('VUpdate');}
-                ..onCancel = () {logs.add('WRONG');};
-            default:
-              return null;
-          }
-        });
-        expect(callback, isNotNull);
-        callback(DragUpdateDetails(
-          delta: const Offset(0, 0),
-          globalPosition: const Offset(0, 0),
+        expect(semantics, includesNodeWith(
+          actions: <SemanticsAction>[SemanticsAction.scrollUp, SemanticsAction.scrollDown],
         ));
+
+        // Pan has bene tested in Horizontal
+
+        semantics.dispose();
+      });
+
+      testWidgets('a callback that correctly calls callbacks', (WidgetTester tester) async {
+        final SemanticsTester semantics = SemanticsTester(tester);
+        final GlobalKey detectorKey = GlobalKey();
+        final List<String> logs = <String>[];
+        final Map<Type, GestureRecognizerFactory> gestures = buildGestureMap(
+          () => VerticalDragGestureRecognizer(),
+          (VerticalDragGestureRecognizer horizontal) {
+            horizontal
+              ..onStart = (_) {logs.add('VStart');}
+              ..onDown = (_) {logs.add('VDown');}
+              ..onEnd = (_) {logs.add('VEnd');}
+              ..onUpdate = (_) {logs.add('VUpdate');}
+              ..onCancel = () {logs.add('WRONG');};
+          }
+        )..addAll(buildGestureMap(
+          () => PanGestureRecognizer(),
+          (PanGestureRecognizer pan) {
+            pan
+              ..onStart = (_) {logs.add('PStart');}
+              ..onDown = (_) {logs.add('PDown');}
+              ..onEnd = (_) {logs.add('PEnd');}
+              ..onUpdate = (_) {logs.add('PUpdate');}
+              ..onCancel = () {logs.add('WRONG');};
+          }
+        ));
+        await tester.pumpWidget(
+          Center(
+            child: RawGestureDetector(
+              key: detectorKey,
+              gestures: gestures,
+              child: Container(),
+            ),
+          )
+        );
+
+        final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
+        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollUp);
         expect(logs, <String>['VDown', 'VStart', 'VUpdate', 'VEnd',
           'PDown', 'PStart', 'PUpdate', 'PEnd',]);
+        logs.clear();
+
+        tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.scrollDown);
+        expect(logs, <String>['VDown', 'VStart', 'VUpdate', 'VEnd',
+          'PDown', 'PStart', 'PUpdate', 'PEnd',]);
+
+        semantics.dispose();
       });
     });
   });
@@ -471,7 +604,7 @@ class _RenderTestLayoutPerformer extends RenderBox {
 
 // This mapping calls the given onTap with an integer, but this integer increases
 // every time getTapHander is called.
-class _UnstableGestureSemanticsMapping implements GestureSemanticsMapping {
+class _UnstableGestureSemanticsMapping extends GestureSemanticsMapping {
   _UnstableGestureSemanticsMapping({
     this.onTap,
   });
@@ -480,14 +613,8 @@ class _UnstableGestureSemanticsMapping implements GestureSemanticsMapping {
   int _counter = 0;
 
   @override
-  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
     _counter++;
-    return () => onTap(_counter);
+    renderObject.onTap = () => onTap(_counter);
   }
-  @override
-  GestureLongPressCallback getLongPressHandler(GetRecognizerHandler getRecognizer) => null;
-  @override
-  GestureDragUpdateCallback getHorizontalDragUpdateHandler(GetRecognizerHandler getRecognizer) => null;
-  @override
-  GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer) => null;
 }
