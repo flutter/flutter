@@ -48,7 +48,58 @@ void main() {
     overrides: <Type, Generator>{
       Cache: () => cache,
     });
+    testUsingContext('reports command that results in success', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
 
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+      await flutterCommand.run();
+
+      expect(
+        verify(usage.sendEvent(captureAny, captureAny,
+            parameters: captureAnyNamed('parameters'))).captured,
+        <dynamic>[
+          'command-result',
+          'dummy',
+          <String, String>{'result': 'success'}
+        ],
+      );
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in error', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          throwToolExit('fail');
+          return null; // unreachable
+        }
+      );
+
+      try {
+        await flutterCommand.run();
+        fail('Mock should make this fail');
+      } on ToolExit {
+        expect(
+          verify(usage.sendEvent(captureAny, captureAny,
+              parameters: captureAnyNamed('parameters'))).captured,
+          <dynamic>[
+            'command-result',
+            'dummy',
+            <String, String>{'result': 'failure'}
+          ],
+        );
+      }
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
     testUsingContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
@@ -61,7 +112,12 @@ void main() {
         verify(usage.sendTiming(
                 captureAny, captureAny, captureAny,
                 label: captureAnyNamed('label'))).captured,
-        <dynamic>['flutter', 'dummy', const Duration(milliseconds: 1000), null],
+        <dynamic>[
+          'flutter',
+          'dummy',
+          const Duration(milliseconds: 1000),
+          null
+        ],
       );
     },
     overrides: <Type, Generator>{

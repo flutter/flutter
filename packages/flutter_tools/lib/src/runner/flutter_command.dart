@@ -85,6 +85,16 @@ abstract class FlutterCommand extends Command<void> {
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
+  /// The parameters to attach to the event when the command resulted in success.
+  static Map<String, String> successEventParams = <String, String>{
+    'result': 'success',
+  };
+
+  /// The parameters to attach to the event when the command resulted in failure.
+  static Map<String, String> failureEventParams = <String, String>{
+    'result': 'failure',
+  };
+
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
@@ -412,8 +422,10 @@ abstract class FlutterCommand extends Command<void> {
         FlutterCommandResult commandResult;
         try {
           commandResult = await verifyThenRunCommand(commandPath);
+          flutterUsage.sendEvent('command-result', name, parameters: successEventParams);
         } on ToolExit {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
+          flutterUsage.sendEvent('command-result', name, parameters: failureEventParams);
           rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
