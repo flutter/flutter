@@ -948,12 +948,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     super.dispose();
   }
 
-  @override
-  void reassemble() {
-    super.reassemble();
-    hideToolbar();
-  }
-
   // TextInputClient implementation:
 
   TextEditingValue _lastKnownRemoteTextEditingValue;
