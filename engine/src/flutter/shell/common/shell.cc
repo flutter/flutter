@@ -934,9 +934,20 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
   // threshold here is mainly for unit tests (so we don't have to write a
   // 1-second unit test), and make sure that our vector won't grow too big with
   // future 120fps, 240fps, or 1000fps displays.
+  //
+  // In the profile/debug mode, the timings are used by development tools which
+  // require a latency of no more than 100ms. Hence we lower that 1-second
+  // threshold to 100ms because performance overhead isn't that critical in
+  // those cases.
   if (UnreportedFramesCount() >= 100) {
     ReportTimings();
   } else if (!frame_timings_report_scheduled_) {
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
+    constexpr int kBatchTimeInMilliseconds = 1000;
+#else
+    constexpr int kBatchTimeInMilliseconds = 100;
+#endif
+
     // Also make sure that frame times get reported with a max latency of 1
     // second. Otherwise, the timings of last few frames of an animation may
     // never be reported until the next animation starts.
@@ -951,7 +962,7 @@ void Shell::OnFrameRasterized(const FrameTiming& timing) {
             self->ReportTimings();
           }
         },
-        fml::TimeDelta::FromSeconds(1));
+        fml::TimeDelta::FromMilliseconds(kBatchTimeInMilliseconds));
   }
 }
 

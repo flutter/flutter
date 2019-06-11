@@ -13,12 +13,13 @@ typedef FrameCallback = void Function(Duration duration);
 /// Signature for [Window.onReportTimings].
 ///
 /// {@template dart.ui.TimingsCallback.list}
-/// The callback takes a list of [FrameTiming] because it may not be immediately
-/// triggered after each frame. Instead, Flutter tries to batch frames together
-/// and send all their timings at once to decrease the overhead (as this is
-/// available in the release mode). The list is sorted in ascending order of
-/// time (earliest frame first). The timing of any frame will be sent within
-/// about 1 second even if there are no later frames to batch.
+/// The callback takes a list of [FrameTiming] because it may not be
+/// immediately triggered after each frame. Instead, Flutter tries to batch
+/// frames together and send all their timings at once to decrease the
+/// overhead (as this is available in the release mode). The list is sorted in
+/// ascending order of time (earliest frame first). The timing of any frame
+/// will be sent within about 1 second (100ms if in the profile/debug mode)
+/// even if there are no later frames to batch.
 /// {@endtemplate}
 typedef TimingsCallback = void Function(List<FrameTiming> timings);
 
