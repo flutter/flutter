@@ -96,7 +96,29 @@ class Cache {
   final List<CachedArtifact> _artifacts = <CachedArtifact>[];
 
   // Initialized by FlutterCommandRunner on startup.
-  static String flutterRoot;
+  static String get flutterRoot => _flutterRoot;
+  static String _flutterRoot;
+  static set flutterRoot(String value) {
+    // Verify that we have writable permission in the flutter root. If not,
+    // we're liable to crash in unintuitive ways. This can happen if the user
+    // is using a homebrew or other unofficial channel, or otherwise installs
+    // Flutter into directory without permissions.
+    try {
+      fs.file(fs.path.join(value, 'bin', '.test'))
+        ..createSync();
+      fs.file(fs.path.join(value, 'bin', '.test'))
+        ..deleteSync();
+    } on FileSystemException catch (err) {
+      printError('Warning: Flutter is missing permissions to read and write files');
+      printError('in its installation directory - "$value" is missing these permissions. ');
+      printError('It is recommended that you install Flutter into a directory such as ');
+      printError('Documents which has these permissions by default. If you are using a ');
+      printError('version of Flutter distributed via a package manager such as Brew, it is ');
+      printError('recommended to instead install from an official channel.');
+      printError('For more information see https://flutter.dev/docs/get-started/install');
+      throwToolExit(err.toString());
+    }
+  }
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
