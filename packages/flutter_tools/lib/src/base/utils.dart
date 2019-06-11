@@ -21,8 +21,20 @@ class BotDetector {
   const BotDetector();
 
   bool get isRunningOnBot {
-    return platform.environment['BOT'] != 'false'
-       && (platform.environment['BOT'] == 'true'
+    if (
+        // Explicitly stated to not be a bot.
+        platform.environment['BOT'] == 'false'
+
+        // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
+        || platform.environment.containsKey('FLUTTER_HOST')
+    ) {
+      return false;
+    }
+
+    return platform.environment['BOT'] == 'true'
+
+        // Non-interactive terminals are assumed to be bots.
+        || !io.stdout.hasTerminal
 
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
         || platform.environment['TRAVIS'] == 'true'
@@ -43,7 +55,8 @@ class BotDetector {
 
         // Properties on Flutter's Chrome Infra bots.
         || platform.environment['CHROME_HEADLESS'] == '1'
-        || platform.environment.containsKey('BUILDBOT_BUILDERNAME'));
+        || platform.environment.containsKey('BUILDBOT_BUILDERNAME')
+        || platform.environment.containsKey('SWARMING_TASK_ID');
   }
 }
 

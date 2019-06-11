@@ -60,7 +60,7 @@ void main() {
     projectUnderTest = FlutterProject.fromDirectory(fs.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     cocoaPodsUnderTest = CocoaPods();
-    pretendPodVersionIs('1.5.0');
+    pretendPodVersionIs('1.6.0');
     fs.file(fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
@@ -123,28 +123,21 @@ void main() {
     });
 
     testUsingContext('detects below minimum version', () async {
-      pretendPodVersionIs('0.39.8');
+      pretendPodVersionIs('1.5.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowMinimumVersion);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
 
-    testUsingContext('detects below recommended version', () async {
-      pretendPodVersionIs('1.4.99');
-      expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.belowRecommendedVersion);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
-
     testUsingContext('detects at recommended version', () async {
-      pretendPodVersionIs('1.5.0');
+      pretendPodVersionIs('1.6.0');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
 
     testUsingContext('detects above recommended version', () async {
-      pretendPodVersionIs('1.5.1');
+      pretendPodVersionIs('1.6.1');
       expect(await cocoaPodsUnderTest.evaluateCocoaPodsInstallation, CocoaPodsStatus.recommended);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,

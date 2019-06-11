@@ -479,6 +479,9 @@ Future<void> main() async {
   // we don't have an embedder yet this is the lowest-most layer we can put
   // this stuff in.
   await ui.webOnlyInitializeEngine();
+  // TODO(flutterweb): remove need for dynamic cast.
+  (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
+  (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
   internalBootstrapBrowserTest(() => test.main);
 }
 
@@ -608,6 +611,7 @@ Future<void> bootstrapDart2Js(BuildStep buildStep) async {
     '-o',
     '$jsOutputPath',
     '--packages="$packageFile"',
+    '-Ddart.vm.product=true',
     dartPath,
   ];
   final Dart2JsBatchWorkerPool dart2js = await buildStep.fetchResource(dart2JsWorkerResource);
