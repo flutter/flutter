@@ -63,7 +63,17 @@ class GenSnapshot {
       final String hostArch = iosArch == IOSArch.armv7 ? '-i386' : '-x86_64';
       return runCommandAndStreamOutput(<String>['/usr/bin/arch', hostArch, snapshotterPath]..addAll(args));
     }
-    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args));
+
+    StringConverter outputFilter;
+    if (additionalArgs.contains('--strip')) {
+      // Filter out gen_snapshot's warning message about stripping debug symbols
+      // from ELF library snapshots.
+      const String kStripWarning = 'Warning: Generating ELF library without DWARF debugging information.';
+      outputFilter = (String line) => line != kStripWarning ? line : null;
+    }
+
+    return runCommandAndStreamOutput(<String>[snapshotterPath]..addAll(args),
+                                     mapFunction: outputFilter);
   }
 }
 
@@ -138,6 +148,7 @@ class AOTSnapshotter {
       outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
       genSnapshotArgs.add('--elf=$aotSharedLibrary');
+      genSnapshotArgs.add('--strip');
     } else {
       // Blob AOT snapshot.
       final String vmSnapshotData = fs.path.join(outputDir.path, 'vm_snapshot_data');

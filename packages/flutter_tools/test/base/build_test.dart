@@ -418,6 +418,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-elf',
         '--elf=build/foo/app.so',
+        '--strip',
         '--no-sim-use-hardfp',
         '--no-use-integer-division',
         'main.dill',
@@ -447,6 +448,7 @@ void main() {
         '--deterministic',
         '--snapshot_kind=app-aot-elf',
         '--elf=build/foo/app.so',
+        '--strip',
         'main.dill',
       ]);
     }, overrides: contextOverrides);
