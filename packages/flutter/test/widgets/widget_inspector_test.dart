@@ -2380,7 +2380,21 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
       );
 
-      service.setPubRootDirectories(<String>['file:///Users/goderbauer/dev/flutter/packages/flutter/test/widgets/']);
+      // Figure out the pubRootDirectory
+      final Map<String, Object> jsonObject = await service.testExtension(
+          'getSelectedWidget',
+          <String, String>{'arg': null, 'objectGroup': 'my-group'},
+      );
+      final Map<String, Object> creationLocation =
+      jsonObject['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String file = creationLocation['file'];
+      expect(file, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(file).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
+      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      service.setPubRootDirectories(<String>[pubRootTest]);
+
       final String summary = service.getRootWidgetSummaryTree('foo1');
       final List<dynamic> childrenOfRoot = json.decode(summary)['children'];
       final List<dynamic> childrenOfMaterialApp = childrenOfRoot.first['children'];
