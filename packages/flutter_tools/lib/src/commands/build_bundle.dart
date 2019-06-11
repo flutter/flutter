@@ -15,7 +15,7 @@ import '../version.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
-  BuildBundleCommand({bool verboseHelp = false, this.bundleFactory}) {
+  BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -61,10 +61,10 @@ class BuildBundleCommand extends BuildSubCommand {
         defaultsTo: false);
     usesPubOption();
 
-    bundleFactory ??= BundleFactory();
+    bundleBuilder ??= BundleBuilder();
   }
 
-  BundleFactory bundleFactory;
+  BundleBuilder bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -114,7 +114,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
-    await bundleFactory.buildBundle(
+    await bundleBuilder.build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,

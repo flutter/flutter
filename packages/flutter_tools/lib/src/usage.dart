@@ -70,7 +70,7 @@ class Usage {
     }
     _analytics.analyticsOpt = AnalyticsOpt.optOut;
 
-    final bool suppressEnvFlag = platform.environment['SUPPRESS_ANALYTICS'] == 'true';
+    final bool suppressEnvFlag = platform.environment['FLUTTER_SUPPRESS_ANALYTICS'] == 'true';
     // Many CI systems don't do a full git checkout.
     if (version.endsWith('/unknown') || isRunningOnBot || suppressEnvFlag) {
       // If we think we're running on a CI system, suppress sending analytics.

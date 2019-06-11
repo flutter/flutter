@@ -281,7 +281,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   // Don't log analytics for downstream Flutter commands.
   // e.g. `flutter build bundle`.
-  buildCommands.add('SUPPRESS_ANALYTICS=true');
+  buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);

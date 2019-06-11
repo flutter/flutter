@@ -18,14 +18,14 @@ void main() {
 
   group('getUsage', () {
     Directory tempDir;
-    MockBundleFactory mockBundleFactory;
+    MockBundleBuilder mockBundleBuilder;
 
     setUp(() {
       tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
 
-      mockBundleFactory = MockBundleFactory();
+      mockBundleBuilder = MockBundleBuilder();
       when(
-        mockBundleFactory.buildBundle(
+        mockBundleBuilder.build(
           platform: anyNamed('platform'),
           buildMode: anyNamed('buildMode'),
           mainPath: anyNamed('mainPath'),
@@ -52,7 +52,7 @@ void main() {
     });
 
     Future<BuildBundleCommand> runCommandIn(String projectPath, { List<String> arguments }) async {
-      final BuildBundleCommand command = BuildBundleCommand(bundleFactory: mockBundleFactory);
+      final BuildBundleCommand command = BuildBundleCommand(bundleBuilder: mockBundleBuilder);
       final CommandRunner<void> runner = createTestCommandRunner(command);
 
       final List<String> commandArgs = <String>['bundle'];
@@ -96,4 +96,4 @@ void main() {
   });
 }
 
-class MockBundleFactory extends Mock implements BundleFactory {}
+class MockBundleBuilder extends Mock implements BundleBuilder {}
