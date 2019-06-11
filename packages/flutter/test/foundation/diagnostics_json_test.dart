@@ -11,7 +11,7 @@ void main() {
   test('Element diagnostics json includes widgetRuntimeType', () async {
     final Element element = _TestElement();
 
-    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(DiagnosticsSerialisationDelegate());
+    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerialisationDelegate());
     expect(json['widgetRuntimeType'], 'Placeholder');
     expect(json['stateful'], isFalse);
   });
@@ -19,7 +19,7 @@ void main() {
   test('StatefulElement diganostics are stateful', () {
     final Element element = StatefulElement(const Tooltip(message: 'foo'));
 
-    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(DiagnosticsSerialisationDelegate());
+    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerialisationDelegate());
     expect(json['widgetRuntimeType'], 'Tooltip');
     expect(json['stateful'], isTrue);
   });
@@ -68,13 +68,13 @@ void main() {
     );
 
     test('default', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(DiagnosticsSerialisationDelegate());
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerialisationDelegate());
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
     });
 
     test('subtreeDepth 1', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(DiagnosticsSerialisationDelegate(subtreeDepth: 1));
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerialisationDelegate(subtreeDepth: 1));
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object>> children = result['children'];
       expect(children[0].containsKey('children'), isFalse);
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('subtreeDepth 5', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(DiagnosticsSerialisationDelegate(subtreeDepth: 5));
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerialisationDelegate(subtreeDepth: 5));
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object>> children = result['children'];
       expect(children[0]['children'], hasLength(0));
@@ -92,13 +92,13 @@ void main() {
     });
 
     test('includeProperties', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(DiagnosticsSerialisationDelegate(includeProperties: true));
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerialisationDelegate(includeProperties: true));
       expect(result.containsKey('children'), isFalse);
       expect(result['properties'], hasLength(7));
     });
 
     test('includeProperties with subtreedepth 1', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(DiagnosticsSerialisationDelegate(
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerialisationDelegate(
         includeProperties: true,
         subtreeDepth: 1,
       ));
