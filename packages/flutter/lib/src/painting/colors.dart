@@ -469,22 +469,16 @@ class ColorDiagnosticsProperty extends DiagnosticsProperty<Color> {
   ColorDiagnosticsProperty(
     String name,
     Color value, {
-      String description,
-      String ifNull,
       bool showName = true,
       Object defaultValue = kNoDefaultValue,
-      String tooltip,
       DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
       DiagnosticLevel level = DiagnosticLevel.info,
   }) : assert(showName != null),
        assert(style != null),
        assert(level != null),
        super(name, value,
-         description: description,
          defaultValue: defaultValue,
-         tooltip: tooltip,
          showName: showName,
-         ifNull: ifNull,
          style: style,
          level: level,
        );

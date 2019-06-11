@@ -1585,9 +1585,12 @@ abstract class DiagnosticsNode {
   /// need special processing.
   @protected
   List<Map<String, Object>> propertiesToJsonList(DiagnosticsSerialisationDelegate delegate) {
-    List<DiagnosticsNode> properties = getProperties();
-    properties = delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties;
-    return toJsonList(properties, this, delegate);
+    final List<DiagnosticsNode> properties = getProperties();
+    return toJsonList(
+      delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties,
+      this,
+      delegate,
+    );
   }
 
   /// Serialize the children of this node to a JSON list according to the
@@ -1598,9 +1601,12 @@ abstract class DiagnosticsNode {
   /// need special processing.
   @protected
   List<Map<String, Object>> childrenToJsonList(DiagnosticsSerialisationDelegate delegate) {
-    List<DiagnosticsNode> children = getChildren();
-    children = delegate.filterChildren != null ? delegate.filterChildren(children, this, delegate) : children;
-    return toJsonList(children, this, delegate);
+    final List<DiagnosticsNode> children = getChildren();
+    return toJsonList(
+      delegate.filterChildren != null ? delegate.filterChildren(children, this, delegate) : children,
+      this,
+      delegate,
+    );
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -1615,7 +1621,7 @@ abstract class DiagnosticsNode {
   ) {
     bool truncated = false;
     if (nodes == null)
-      return <Map<String, Object>>[];
+      return const <Map<String, Object>>[];
     final int originalNodeCount = nodes.length;
     if (delegate.nodeTruncator != null) {
       nodes = delegate.nodeTruncator(nodes, parent, delegate);
@@ -2539,13 +2545,13 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   final bool allowNameWrap;
 
-  bool _isExpandingPropertyValuesForJson(DiagnosticsSerialisationDelegate delegate) {
+  bool _expandPropertyValuesForJson(DiagnosticsSerialisationDelegate delegate) {
     return getProperties().isEmpty && delegate.expandPropertyValues && value is Diagnosticable;
   }
 
   @override
   Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
-    if (_isExpandingPropertyValuesForJson(delegate)) {
+    if (_expandPropertyValuesForJson(delegate)) {
       // Exclude children for expanded nodes to avoid cycles.
       delegate = delegate.copyWith(subtreeDepth: 0);
     }
@@ -2570,7 +2576,7 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
 
   @override
   List<Map<String, Object>> propertiesToJsonList(DiagnosticsSerialisationDelegate delegate) {
-    if (_isExpandingPropertyValuesForJson(delegate)) {
+    if (_expandPropertyValuesForJson(delegate)) {
       // Ignore can be removed when https://github.com/dart-lang/sdk/issues/37200 is fixed.
       final Diagnosticable diagnosticableValue = value as Diagnosticable; // ignore: avoid_as
       List<DiagnosticsNode> properties = diagnosticableValue.toDiagnosticsNode().getProperties();
@@ -3067,6 +3073,10 @@ mixin DiagnosticableMixin {
   ///  * [ObjectFlagProperty], which provides terse descriptions of whether a
   ///    property value is present or not. For example, whether an `onClick`
   ///    callback is specified or an animation is in progress.
+  ///  * [ColorDiagnosticsProperty], which must be used if the property value is
+  ///    a [Color] or one of its subclasses.
+  ///  * [IconDataDiagnosticsProperty], which must be used if the property value
+  ///    is of type [IconData].
   ///
   /// If none of these subclasses apply, use the [DiagnosticsProperty]
   /// constructor or in rare cases create your own [DiagnosticsProperty]

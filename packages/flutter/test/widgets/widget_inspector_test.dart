@@ -2373,8 +2373,8 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             appBar: AppBar(
               title: const Text('Hello, World'),
             ),
-            body: Center(
-              child: const Text('Hello, World!'),
+            body: const Center(
+              child: Text('Hello, World!'),
             ),
           ),
         ),
