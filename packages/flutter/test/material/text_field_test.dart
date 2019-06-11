@@ -437,16 +437,9 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-<<<<<<< HEAD
-      matchesGoldenFile('text_field_cursor_test.1.0.png'),
-      skip: !Platform.isLinux,
-    );
-  }, tags: 'golden');
-=======
       matchesGoldenFile('text_field_cursor_test.material.1.0.png'),
     );
   }, skip: !isLinux);
->>>>>>> 9d724d4c4483b585dfd4bfd719844802f8b38abe
 
   testWidgets('text field selection toolbar renders correctly inside opacity', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -498,7 +491,7 @@ void main() {
       matchesGoldenFile('text_field_opacity_test.0.2.png'),
       skip: !isLinux,
     );
-  }, tags: 'golden');
+  }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -2643,7 +2636,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  }, tags: 'web_unimplemented');
+  }, skip: isBrowser);
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(

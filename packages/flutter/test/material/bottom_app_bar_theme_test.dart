@@ -83,7 +83,7 @@ void main() {
       matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
       skip: !isLinux,
     );
-  }, tags: 'golden');
+  }, skip: isBrowser);
 
   testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(

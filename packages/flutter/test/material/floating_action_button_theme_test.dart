@@ -173,9 +173,9 @@ void main() {
     expect(description, <String>[
       'foregroundColor: Color(0xfeedfeed)',
       'backgroundColor: Color(0xcafecafe)',
-      ignoreWebNumericQuirks('elevation: 23.0'),
-      ignoreWebNumericQuirks('disabledElevation: 11.0'),
-      ignoreWebNumericQuirks('highlightElevation: 43.0'),
+      'elevation: 23.0',
+      'disabledElevation: 11.0',
+      'highlightElevation: 43.0',
       'shape: BeveledRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.zero)',
     ]);
   });

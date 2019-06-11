@@ -810,7 +810,7 @@ class SliderThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const SliderThemeData defaultData = SliderThemeData();
-    properties.add(DiagnosticsProperty<double>('trackHeight', trackHeight, defaultValue: defaultData.trackHeight));
+    properties.add(DoubleProperty('trackHeight', trackHeight, defaultValue: defaultData.trackHeight));
     properties.add(DiagnosticsProperty<Color>('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
     properties.add(DiagnosticsProperty<Color>('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
     properties.add(DiagnosticsProperty<Color>('inactiveTrackColor', inactiveTrackColor, defaultValue: defaultData.inactiveTrackColor));

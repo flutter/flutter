@@ -139,7 +139,7 @@ void main() {
     final RenderBox tip = tester.renderObject(find.text(tooltipText)).parent.parent.parent.parent.parent;
     expect(tip.size.height, equals(24.0)); // 14.0 height + 5.0 padding * 2 (top, bottom)
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)), equals(const Offset(10.0, 20.0)));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Does tooltip end up in the right place - center prefer above fits', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -366,7 +366,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Does tooltip end up in the right place - near the edge', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();

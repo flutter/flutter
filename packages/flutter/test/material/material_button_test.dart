@@ -32,7 +32,7 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
-    tags: 'web_unimplemented'
+    skip: isBrowser,
   );
 
 }
