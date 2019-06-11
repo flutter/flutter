@@ -2,46 +2,189 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: implementation_imports
 import 'dart:async';
 
-import 'package:flutter_tools/src/compile.dart';
-import 'package:flutter_tools/src/devfs.dart';
-import 'package:flutter_tools/src/run_cold.dart';
-import 'package:flutter_tools/src/vmservice.dart';
+import 'package:build_daemon/client.dart';
+import 'package:build_daemon/data/build_status.dart';
+import 'package:build_daemon/data/build_target.dart';
+import 'package:build_daemon/data/server_log.dart';
+import 'package:dwds/service.dart';
+import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
-import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
 import 'package:vm_service_lib/vm_service_lib.dart';
+import 'package:webdev/src/command/configuration.dart';
+import 'package:webdev/src/daemon_client.dart';
+import 'package:webdev/src/logging.dart';
+import 'package:webdev/src/serve/chrome.dart';
+import 'package:webdev/src/serve/debugger/app_debug_services.dart';
+import 'package:webdev/src/serve/debugger/devtools.dart';
+import 'package:webdev/src/serve/handlers/dev_handler.dart';
+import 'package:webdev/src/serve/server_manager.dart';
+import 'package:webdev/src/serve/webdev_server.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import 'application_package.dart';
-import 'asset.dart';
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'bundle.dart';
-import 'dart/package_map.dart';
+import 'convert.dart';
 import 'device.dart';
 import 'globals.dart';
 import 'project.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
 import 'web/asset_server.dart';
-import 'web/chrome.dart';
-import 'web/compile.dart';
 
+Future<BuildDaemonClient> connectClient(String workingDirectory, List<String> options, Function(ServerLog) logHandler) {
+  return BuildDaemonClient.connect(
+    workingDirectory,
+    // On Windows we need to call the snapshot directly otherwise
+    // the process will start in a disjoint cmd without access to
+    // STDIO. We also want to ensure the version of pub is consistent with
+    // the SDK that was used to launch webdev.
+    <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      fs.path.join(artifacts.getArtifactPath(Artifact.engineDartSdkPath), 'bin', 'pub'),
+      'run',
+      'build_runner',
+      'daemon',
+      ...options,
+    ],
+    logHandler: logHandler,
+  );
+}
 
-import 'package:build_daemon/client.dart';
-import 'package:webdev/src/serve/webdev_server.dart';
-import 'package:webdev/src/serve/debugger/devtools.dart';
+Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory, List<String> buildOptions) async {
+  try {
+    return await connectClient(
+      workingDirectory,
+      buildOptions,
+      (ServerLog serverLog) {
+        switch (serverLog.level) {
+          case Level.CONFIG:
+          case Level.FINE:
+          case Level.FINER:
+          case Level.FINEST:
+          case Level.INFO:
+             printTrace(serverLog.message);
+             break;
+          case Level.SEVERE:
+          case Level.SHOUT:
+            printError(
+              serverLog.message,
+              stackTrace: StackTrace.fromString(serverLog.stackTrace),
+            );
+        }
+      },
+    );
+  } on OptionsSkew {
+    // TODO(grouma) - Give an option to kill the running daemon.
+    throw StateError(
+        'Incompatible options with current running build daemon.\n\n'
+        'Please stop other WebDev instances running in this directory '
+        'before starting a new instance with these options.');
+  }
+}
 
+Future<Chrome> _startChrome(
+  Configuration configuration,
+  ServerManager serverManager,
+  BuildDaemonClient client,
+) async {
+  final List<String> uris =
+      serverManager.servers.map((WebDevServer s) => 'http://${s.host}:${s.port}/').toList();
+  try {
+    if (configuration.launchInChrome) {
+      return await Chrome.start(uris, port: configuration.chromeDebugPort);
+    } else if (configuration.chromeDebugPort != 0) {
+      return await Chrome.fromExisting(configuration.chromeDebugPort);
+    }
+  } on ChromeError {
+    await serverManager.stop();
+    await client.close();
+    rethrow;
+  }
+  return null;
+}
 
-import 'package:webdev/src/command/build_command.dart';
+Future<DevTools> _startDevTools(
+  Configuration configuration,
+) async {
+  if (configuration.debug) {
+    final DevTools devTools = await DevTools.start(configuration.hostname);
+    printTrace('Serving DevTools at http://${devTools.hostname}:${devTools.port}\n');
+    return devTools;
+  }
+  return null;
+}
 
-import 'package:webdev/src/daemon/app_domain.dart';
-import 'package:webdev/src/serve/handlers/dev_handler.dart';
-import 'package:webdev/src/serve/debugger/app_debug_services.dart';
+void _registerBuildTargets(
+  BuildDaemonClient client,
+  Configuration configuration,
+  Map<String, int> targetPorts,
+) {
+  // Register a target for each serve target.
+  for (String target in targetPorts.keys) {
+    OutputLocation outputLocation;
+    if (configuration.outputPath != null &&
+        (configuration.outputInput == null ||
+            target == configuration.outputInput)) {
+      outputLocation = OutputLocation((b) => b
+        ..output = configuration.outputPath
+        ..useSymlinks = true
+        ..hoist = true);
+    }
+    client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
+      ..target = target
+      ..outputLocation = outputLocation?.toBuilder()));
+  }
+  // Empty string indicates we should build everything, register a corresponding
+  // target.
+  if (configuration.outputInput == '') {
+    final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
+      ..output = configuration.outputPath
+      ..useSymlinks = true
+      ..hoist = false);
+    client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
+      ..target = ''
+      ..outputLocation = outputLocation?.toBuilder()));
+  }
+}
+
+Future<ServerManager> _startServerManager(
+  Configuration configuration,
+  Map<String, int> targetPorts,
+  String workingDirectory,
+  BuildDaemonClient client,
+  DevTools devTools,
+) async {
+  final int assetPort = daemonPort(workingDirectory);
+  final Set<ServerOptions> serverOptions = <ServerOptions>{};
+  for (String target in targetPorts.keys) {
+    serverOptions.add(ServerOptions(
+      configuration,
+      targetPorts[target],
+      target,
+      assetPort,
+    ));
+  }
+  logWriter(logging.Level.INFO, 'Starting resource servers...');
+  final ServerManager serverManager =
+      await ServerManager.start(serverOptions, client.buildResults, devTools);
+
+  for (WebDevServer server in serverManager.servers) {
+    printTrace(
+      'Serving `${server.target}` on '
+      'http://${server.host}:${server.port}\n');
+  }
+
+  return serverManager;
+}
 
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
@@ -62,36 +205,93 @@ class ResidentWebRunner extends ResidentRunner {
 
   final Device device;
   WebAssetServer _server;
-  DevHandler _devHandler;
-  AppDebugServices _appDebugServices;
   ProjectFileInvalidator projectFileInvalidator;
-  DateTime _lastCompiled;
   WipConnection _connection;
   final FlutterProject flutterProject;
+
+  StreamSubscription<BuildResults> _buildResults;
+  DevTools _devTools;
+  Chrome _chrome;
+  ServerManager _serverManager;
+  BuildDaemonClient _client;
+  AppDebugServices _appDebugServices;
+
+  DebugService get _debugService => _appDebugServices?.debugService;
+
+  VmService get _vmService => _appDebugServices?.webdevClient?.client;
+
+  StreamSubscription<BuildResult> _resultSub;
+
+  StreamSubscription<Event> _stdOutSub;
+  String _appId;
 
   @override
   Future<int> attach(
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
-    connectionInfoCompleter?.complete(DebugConnectionInfo());
+    // Connect to app and invoke main.
+    final DevHandler devHandler = _serverManager.servers.first.devHandler;
+    // This should probably only be for a single app for now..
+    final DevConnection connection = await devHandler.connectedApps.first;
+    await _stdOutSub?.cancel();
+    await _resultSub?.cancel();
+    _appDebugServices = await devHandler.loadAppServices(
+        connection.request.appId, connection.request.instanceId);
+    _appId = connection.request.appId;
+
+    // When a tab is closed we exit an app.
+    unawaited(_appDebugServices.chromeProxyService.tabConnection.onClose.first.then((_) {
+      appFinished();
+    }));
+
+    // Cleanup old subscriptions.
+    try {
+      await _vmService.streamCancel('Stdout');
+    } catch (_) {}
+    try {
+      await _vmService.streamListen('Stdout');
+    } catch (_) {}
+
+    _stdOutSub = _vmService.onStdoutEvent.listen((Event log) {
+      // TODO: determine correct print to let daemon pick.
+      printStatus(utf8.decode(base64.decode(log.bytes)));
+    });
+
+    // Response with debug info!
+    // How does this map from the existing code?
+    connectionInfoCompleter?.complete(DebugConnectionInfo(
+      wsUri: Uri.parse(_debugService.wsUri),
+    ));
+    // Run main!
+    connection.runMain();
+    _resultSub = devHandler.buildResults.listen(_handleBuildResult);
     setupTerminal();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
     return result;
   }
 
+  void _handleBuildResult(BuildResult result) {
+    // TODO: log correct format!.
+    printStatus(result.status.name);
+  }
+
   @override
   Future<void> cleanupAfterSignal() async {
-    await _connection.sendCommand('Browser.close');
-    _connection = null;
-    await _server?.dispose();
+    await _cleanup();
   }
 
   @override
   Future<void> cleanupAtFinish() async {
-    await _connection?.sendCommand('Browser.close');
-    _connection = null;
-    await _server?.dispose();
+    await _cleanup();
+  }
+
+  Future<void> _cleanup() async {
+    await _buildResults?.cancel();
+    await _chrome?.close();
+    await _client?.close();
+    await _devTools?.close();
+    await _serverManager?.stop();
   }
 
   @override
@@ -104,8 +304,6 @@ class ResidentWebRunner extends ResidentRunner {
       await restart(fullRestart: true);
     }
   }
-  
-  VmService get vmService => _appDebugServices?.webdevClient?.client;
 
   @override
   void printHelp({bool details}) {
@@ -151,54 +349,39 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
+    // Create configuration.
+    final Configuration configuration = Configuration();
+    final Map<String, int> targetPorts = <String, int>{};
 
-    /// Start a build daemon.
-    final DaemonHandle handle = await webCompilationProxy.daemon(
-      projectDirectory: FlutterProject.current().directory,
-      targets: <String>[target],
-      release: debuggingOptions.buildInfo.isRelease,
-    );
+    /// Start the build daemon.
+    final List<String> buildOptions = <String>[];
+    final String workingDirectory = fs.currentDirectory.path;
+    _client = await _startBuildDaemon(workingDirectory, buildOptions);
 
-    /// Start the webdev server?
-    final Chrome chrome = await chromeLauncher.launch('???');
-    final DevTools devTools = await DevTools.start('????????');
-    final ServerOptions serverOptions = ServerOptions(null, null, null, null);
-    final WebDevServer server = await WebDevServer.start(serverOptions, handle.buildResults, devTools);
-    _devHandler = server.devHandler;
-    final connection = await _devHandler.connectedApps.first;
-    _appDebugServices = await _devHandler.loadAppServices(
-      connection.request.appId, connection.request.instanceId);
+    // Listen to build results to log error messages.
+    _buildResults = _client.buildResults.listen((BuildResults data) {
+      if (data.results.any((BuildResult result) =>
+          result.status == BuildStatus.failed ||
+          result.status == BuildStatus.succeeded)) {
+        printError('Something failed!');
+      }
+    });
 
-    // where the magic is
-    // server.devHandler
+    // Register the current build targets.
+    _registerBuildTargets(_client, configuration, targetPorts);
 
-    // Start the web compiler and build the assets.
-    // await webCompilationProxy.initialize(
-    //   projectDirectory: FlutterProject.current().directory,
-    //   targets: <String>[target],
-    // );
-    // _lastCompiled = DateTime.now();
-    // final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    // final int build = await assetBundle.build();
-    // if (build != 0) {
-    //   throwToolExit('Error: Failed to build asset bundle');
-    // }
-    // await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+    // Start the daemon build.
+    _client.startBuild();
 
-    // // Step 2: Start an HTTP server
-    // _server = WebAssetServer(flutterProject, target, ipv6);
-    // await _server.initialize();
+    // Start flutter dev tools.
+    _devTools = await _startDevTools(configuration);
 
-    // // Step 3: Spawn an instance of Chrome and direct it to the created server.
-    // final String url = 'http://localhost:${_server.port}';
-    // final Chrome chrome = await chromeLauncher.launch(url);
-    // final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-    //   return chromeTab.url.contains(url); // we don't care about trailing slashes or #
-    // });
-    // _connection = await chromeTab.connect();
-    // _connection.onClose.listen((WipConnection connection) {
-    //   exit();
-    // });
+    // Start the server manager?
+    _serverManager = await _startServerManager(
+        configuration, targetPorts, workingDirectory, _client, _devTools);
+
+    // Start chrome?
+    _chrome = await _startChrome(configuration, _serverManager, _client);
 
     // We don't support the debugging proxy yet.
     appStartedCompleter?.complete();
@@ -215,86 +398,80 @@ class ResidentWebRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
   }) async {
+    if (!fullRestart) {
+      return OperationResult(1, 'hotReload not supported');
+    }
     final Stopwatch timer = Stopwatch()..start();
     final Status status = logger.startProgress(
       'Performing hot restart...',
       timeout: timeoutConfiguration.fastOperation,
       progressId: 'hot.restart',
     );
-    final Response response = await vmService.callMethod('hotRestart');
-    return OperationResult.ok;
-
-    // try {
-    //   final List<Uri> invalidatedSources = ProjectFileInvalidator.findInvalidated(
-    //     lastCompiled: _lastCompiled,
-    //     urisToMonitor: <Uri>[
-    //       for (FileSystemEntity entity in flutterProject.directory
-    //           .childDirectory('lib')
-    //           .listSync(recursive: true))
-    //         if (entity is File && entity.path.endsWith('.dart')) entity.uri
-    //     ], // Add new class to track this for web.
-    //     packagesPath: PackageMap.globalPackagesPath,
-    //   );
-    //   await webCompilationProxy.invalidate(inputs: invalidatedSources);
-    //   await _connection.sendCommand('Page.reload');
-    //   await Future<void>.delayed(const Duration(milliseconds: 150));
-    // } catch (err) {
-    //   result = OperationResult(1, err.toString());
-    // } finally {
-    //   printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-    //   status.cancel();
-    // }
-    // return result;
+    final Response response = await _vmService.callServiceExtension('hotRestart');
+    status.stop();
+    printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+    return response.type == 'Success'
+        ? OperationResult.ok
+        : OperationResult(1, response.toString());
   }
 
   @override
   Future<void> debugDumpApp() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugDumpApp');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugDumpApp');
+    print(response.json);
   }
 
   @override
   Future<void> debugDumpRenderTree() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugDumpRenderTree');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugDumpRenderTree');
+    print(response.json);
   }
 
   @override
   Future<void> debugDumpLayerTree() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugDumpLayerTree');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugDumpLayerTree');
+    print(response.json);
   }
 
   @override
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugDumpSemanticsTreeInTraversalOrder');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugDumpSemanticsTreeInTraversalOrder');
+    print(response.json);
   }
 
   @override
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugDumpSemanticsTreeInInverseHitTestOrder');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugDumpSemanticsTreeInInverseHitTestOrder');
+    print(response.json);
   }
 
   @override
   Future<void> debugToggleDebugPaintSizeEnabled() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugToggleDebugPaintSizeEnabled');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugToggleDebugPaintSizeEnabled');
+    print(response.json);
   }
 
   @override
   Future<void> debugToggleDebugCheckElevationsEnabled() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugToggleDebugCheckElevationsEnabled');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugToggleDebugCheckElevationsEnabled');
+    print(response.json);
   }
 
   @override
   Future<void> debugTogglePerformanceOverlayOverride() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugTogglePerformanceOverlayOverride');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugTogglePerformanceOverlayOverride');
+    print(response.json);
   }
 
   @override
   Future<void> debugToggleWidgetInspector() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugToggleWidgetInspector');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugToggleWidgetInspector');
+    print(response.json);
   }
 
   @override
   Future<void> debugToggleProfileWidgetBuilds() async {
-    final Response response = await vmService.callMethod('flutter.ext.debugToggleProfileWidgetBuilds');
+    final Response response = await _vmService.callServiceExtension('flutter.ext.debugToggleProfileWidgetBuilds');
+    print(response.json);
   }
-
 }
