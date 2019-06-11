@@ -37,6 +37,18 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   );
 }
 
+class MockApplicationPackageFactory extends Mock implements ApplicationPackageFactory {
+  final MockApplicationPackageStore _store = MockApplicationPackageStore();
+
+  @override
+  Future<ApplicationPackage> getPackageForPlatform(
+    TargetPlatform platform, {
+    File applicationBinary,
+  }) async {
+    return _store.getPackageForPlatform(platform);
+  }
+}
+
 /// An SDK installation with several SDK levels (19, 22, 23).
 class MockAndroidSdk extends Mock implements AndroidSdk {
   static Directory createSdkDirectory({
