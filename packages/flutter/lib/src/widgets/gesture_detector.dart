@@ -965,8 +965,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   GestureDragUpdateCallback _handleSemanticHorizontal;
   GestureDragUpdateCallback _handleSemanticVertical;
   // The following methods are cached wrappers of the performing callbacks.
-  // Caching ensures that the arguments for [RenderSemanticsGestureHandler]
-  // remain the same references.
+  // Caching ensures that each handler for [RenderSemanticsGestureHandler]
+  // is either null or a same callback, respectively.
   // They are assigned only when the corresponding performing callback is not
   // null, therefore no null-check is needed.
   void _performSemanticTap() {
@@ -1006,6 +1006,9 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       final List<String> gestures = _recognizers.values.map<String>((GestureRecognizer recognizer) => recognizer.debugDescription).toList();
       properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
       properties.add(IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
+      properties.add(DiagnosticsProperty<bool>('excludeFromSemantics', widget.excludeFromSemantics, defaultValue: false));
+      properties.add(DiagnosticsProperty<GestureSemanticsMapping>('semanticsMapping', widget.semanticsMapping,
+        defaultValue: const DefaultGestureSemanticsMapping()));
     }
     properties.add(EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
@@ -1091,6 +1094,9 @@ abstract class GestureSemanticsMapping {
   GestureDragUpdateCallback getVerticalDragUpdateHandler(GetRecognizerHandler getRecognizer) {
     return null;
   }
+
+  @override
+  String toString() => '$runtimeType()';
 }
 
 /// The default mapping used by [RawGestureDetector]. Its behavior is as follows:
