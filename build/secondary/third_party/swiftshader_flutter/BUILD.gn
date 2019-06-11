@@ -1,0 +1,699 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+source_root = "//third_party/swiftshader"
+
+config("internal_config") {
+  include_dirs = [
+    "$source_root/src",
+    "$source_root/include",
+    "$source_root/src/OpenGL",
+  ]
+
+  if (is_win) {
+    cflags = [
+      "/wd4005",
+      "/wd4018",
+      "/wd4141",
+      "/wd4146",
+      "/wd4201",
+      "/wd4245",
+      "/wd4267",
+      "/wd4291",
+      "/wd4310",
+      "/wd4324",
+      "/wd4334",
+      "/wd4389",
+      "/wd4701",
+      "/wd4702",
+      "/wd4703",
+      "/wd4706",
+      "/wd4800",
+      "/wd5030",
+    ]
+  } else {
+    cflags = [
+      "-Wno-header-hygiene",
+      "-Wno-thread-safety-analysis",
+      "-Wno-undefined-var-template",
+      "-Wno-unneeded-internal-declaration",
+    ]
+  }
+
+  defines = [ "NO_SANITIZE_FUNCTION=" ]
+}
+
+config("swiftshader_config") {
+  include_dirs = [ "$source_root/include" ]
+}
+
+source_set("compiler") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/OpenGL/compiler/AnalyzeCallDepth.cpp",
+    "$source_root/src/OpenGL/compiler/Compiler.cpp",
+    "$source_root/src/OpenGL/compiler/Diagnostics.cpp",
+    "$source_root/src/OpenGL/compiler/DirectiveHandler.cpp",
+    "$source_root/src/OpenGL/compiler/InfoSink.cpp",
+    "$source_root/src/OpenGL/compiler/Initialize.cpp",
+    "$source_root/src/OpenGL/compiler/InitializeParseContext.cpp",
+    "$source_root/src/OpenGL/compiler/IntermTraverse.cpp",
+    "$source_root/src/OpenGL/compiler/Intermediate.cpp",
+    "$source_root/src/OpenGL/compiler/OutputASM.cpp",
+    "$source_root/src/OpenGL/compiler/ParseHelper.cpp",
+    "$source_root/src/OpenGL/compiler/PoolAlloc.cpp",
+    "$source_root/src/OpenGL/compiler/SymbolTable.cpp",
+    "$source_root/src/OpenGL/compiler/TranslatorASM.cpp",
+    "$source_root/src/OpenGL/compiler/ValidateLimitations.cpp",
+    "$source_root/src/OpenGL/compiler/ValidateSwitch.cpp",
+    "$source_root/src/OpenGL/compiler/debug.cpp",
+    "$source_root/src/OpenGL/compiler/glslang_lex.cpp",
+    "$source_root/src/OpenGL/compiler/glslang_tab.cpp",
+    "$source_root/src/OpenGL/compiler/intermOut.cpp",
+    "$source_root/src/OpenGL/compiler/parseConst.cpp",
+    "$source_root/src/OpenGL/compiler/util.cpp",
+  ]
+}
+
+source_set("subzero") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  include_dirs = [
+    "$source_root/third_party/subzero",
+    "$source_root/third_party/subzero/pnacl-llvm/include",
+    "$source_root/third_party/llvm-subzero/include",
+  ]
+
+  if (is_win) {
+    include_dirs +=
+        [ "$source_root/third_party/llvm-subzero/build/Windows/include" ]
+  } else if (is_linux) {
+    include_dirs +=
+        [ "$source_root/third_party/llvm-subzero/build/Linux/include" ]
+  } else if (is_mac) {
+    include_dirs +=
+        [ "$source_root/third_party/llvm-subzero/build/MacOS/include" ]
+  } else {
+    assert(false, "Unsupported platform.")
+  }
+
+  defines = [
+    "ALLOW_DUMP=0",
+    "ALLOW_TIMERS=0",
+    "ALLOW_LLVM_CL=0",
+    "ALLOW_LLVM_IR=0",
+    "ALLOW_LLVM_IR_AS_INPUT=0",
+    "ALLOW_MINIMAL_BUILD=0",
+    "ALLOW_WASM=0",
+    "ICE_THREAD_LOCAL_HACK=0",
+  ]
+
+  if (is_win) {
+    defines += [ "SUBZERO_USE_MICROSOFT_ABI" ]
+  }
+
+  cflags = []
+
+  if (!is_win) {
+    cflags += [ "-Wno-macro-redefined" ]
+  }
+
+  if (target_cpu == "x64") {
+    defines += [
+      "SZTARGET=X8664",
+      "SUBZERO_TARGET=X8664",
+    ]
+  } else if (target_cpu == "x86") {
+    defines += [
+      "SZTARGET=X8632",
+      "SUBZERO_TARGET=X8632",
+    ]
+  } else {
+    assert(false, "Unsupported platform.")
+  }
+
+  sources = [
+    "$source_root/src/Reactor/Optimizer.cpp",
+    "$source_root/src/Reactor/SubzeroReactor.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Demangle/ItaniumDemangle.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/APInt.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Atomic.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/CommandLine.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/ConvertUTF.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/ConvertUTFWrapper.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Debug.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Errno.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/ErrorHandling.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/FoldingSet.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Hashing.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Host.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/ManagedStatic.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/MemoryBuffer.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Mutex.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/NativeFormatting.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Path.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Process.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Program.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Regex.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Signals.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/SmallPtrSet.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/SmallVector.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/StringExtras.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/StringMap.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/StringRef.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/StringSaver.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/TargetParser.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Threading.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Timer.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Triple.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/Twine.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/circular_raw_ostream.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/raw_os_ostream.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/raw_ostream.cpp",
+    "$source_root/third_party/llvm-subzero/lib/Support/regcomp.c",
+    "$source_root/third_party/llvm-subzero/lib/Support/regerror.c",
+    "$source_root/third_party/llvm-subzero/lib/Support/regexec.c",
+    "$source_root/third_party/llvm-subzero/lib/Support/regfree.c",
+    "$source_root/third_party/llvm-subzero/lib/Support/regstrlcpy.c",
+    "$source_root/third_party/subzero/src/IceAssembler.cpp",
+    "$source_root/third_party/subzero/src/IceCfg.cpp",
+    "$source_root/third_party/subzero/src/IceCfgNode.cpp",
+    "$source_root/third_party/subzero/src/IceClFlags.cpp",
+    "$source_root/third_party/subzero/src/IceELFObjectWriter.cpp",
+    "$source_root/third_party/subzero/src/IceELFSection.cpp",
+    "$source_root/third_party/subzero/src/IceFixups.cpp",
+    "$source_root/third_party/subzero/src/IceGlobalContext.cpp",
+    "$source_root/third_party/subzero/src/IceGlobalInits.cpp",
+    "$source_root/third_party/subzero/src/IceInst.cpp",
+    "$source_root/third_party/subzero/src/IceInstrumentation.cpp",
+    "$source_root/third_party/subzero/src/IceIntrinsics.cpp",
+    "$source_root/third_party/subzero/src/IceLiveness.cpp",
+    "$source_root/third_party/subzero/src/IceLoopAnalyzer.cpp",
+    "$source_root/third_party/subzero/src/IceMangling.cpp",
+    "$source_root/third_party/subzero/src/IceMemory.cpp",
+    "$source_root/third_party/subzero/src/IceOperand.cpp",
+    "$source_root/third_party/subzero/src/IceRNG.cpp",
+    "$source_root/third_party/subzero/src/IceRangeSpec.cpp",
+    "$source_root/third_party/subzero/src/IceRegAlloc.cpp",
+    "$source_root/third_party/subzero/src/IceRevision.cpp",
+    "$source_root/third_party/subzero/src/IceSwitchLowering.cpp",
+    "$source_root/third_party/subzero/src/IceTargetLowering.cpp",
+    "$source_root/third_party/subzero/src/IceTargetLoweringX86.cpp",
+    "$source_root/third_party/subzero/src/IceThreading.cpp",
+    "$source_root/third_party/subzero/src/IceTimerTree.cpp",
+    "$source_root/third_party/subzero/src/IceTypes.cpp",
+    "$source_root/third_party/subzero/src/IceVariableSplitting.cpp",
+  ]
+
+  if (target_cpu == "x64") {
+    sources += [
+      "$source_root/third_party/subzero/src/IceInstX8664.cpp",
+      "$source_root/third_party/subzero/src/IceTargetLoweringX8664.cpp",
+    ]
+  } else if (target_cpu == "x86") {
+    sources += [
+      "$source_root/third_party/subzero/src/IceInstX8632.cpp",
+      "$source_root/third_party/subzero/src/IceTargetLoweringX8632.cpp",
+    ]
+  } else {
+    assert(false, "Unsupported architecture.")
+  }
+}
+
+source_set("reactor") {
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/Reactor/Debug.cpp",
+    "$source_root/src/Reactor/ExecutableMemory.cpp",
+    "$source_root/src/Reactor/Reactor.cpp",
+    "$source_root/src/Reactor/Routine.cpp",
+  ]
+
+  deps = [
+    ":subzero",
+  ]
+}
+
+source_set("renderer") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/Renderer/Blitter.cpp",
+    "$source_root/src/Renderer/Clipper.cpp",
+    "$source_root/src/Renderer/Color.cpp",
+    "$source_root/src/Renderer/Context.cpp",
+    "$source_root/src/Renderer/ETC_Decoder.cpp",
+    "$source_root/src/Renderer/Matrix.cpp",
+    "$source_root/src/Renderer/PixelProcessor.cpp",
+    "$source_root/src/Renderer/Plane.cpp",
+    "$source_root/src/Renderer/Point.cpp",
+    "$source_root/src/Renderer/QuadRasterizer.cpp",
+    "$source_root/src/Renderer/Renderer.cpp",
+    "$source_root/src/Renderer/Sampler.cpp",
+    "$source_root/src/Renderer/SetupProcessor.cpp",
+    "$source_root/src/Renderer/Surface.cpp",
+    "$source_root/src/Renderer/TextureStage.cpp",
+    "$source_root/src/Renderer/Vector.cpp",
+    "$source_root/src/Renderer/VertexProcessor.cpp",
+  ]
+
+  deps = [
+    ":shader",
+  ]
+}
+
+source_set("opengl_common") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    # "$source_root/src/Common/SharedLibrary.cpp",
+    "$source_root/src/OpenGL/common/Image.cpp",
+    "$source_root/src/OpenGL/common/MatrixStack.cpp",
+    "$source_root/src/OpenGL/common/Object.cpp",
+    "$source_root/src/OpenGL/common/debug.cpp",
+  ]
+}
+
+source_set("common") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/Common/CPUID.cpp",
+    "$source_root/src/Common/Configurator.cpp",
+    "$source_root/src/Common/Debug.cpp",
+    "$source_root/src/Common/Half.cpp",
+    "$source_root/src/Common/Math.cpp",
+    "$source_root/src/Common/Memory.cpp",
+    "$source_root/src/Common/Resource.cpp",
+    "$source_root/src/Common/Socket.cpp",
+    "$source_root/src/Common/Thread.cpp",
+    "$source_root/src/Common/Timer.cpp",
+  ]
+}
+
+source_set("preprocessor") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/OpenGL/compiler/preprocessor/Macro.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/MacroExpander.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Preprocessor.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Token.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Tokenizer.cpp",
+  ]
+}
+
+source_set("opengl_preprocessor") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/OpenGL/compiler/preprocessor/DiagnosticsBase.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/DirectiveHandlerBase.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/DirectiveParser.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/ExpressionParser.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Input.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Lexer.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Macro.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/MacroExpander.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Preprocessor.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Token.cpp",
+    "$source_root/src/OpenGL/compiler/preprocessor/Tokenizer.cpp",
+  ]
+}
+
+source_set("opengl_compiler") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/OpenGL/compiler/AnalyzeCallDepth.cpp",
+    "$source_root/src/OpenGL/compiler/Compiler.cpp",
+    "$source_root/src/OpenGL/compiler/Diagnostics.cpp",
+    "$source_root/src/OpenGL/compiler/DirectiveHandler.cpp",
+    "$source_root/src/OpenGL/compiler/InfoSink.cpp",
+    "$source_root/src/OpenGL/compiler/Initialize.cpp",
+    "$source_root/src/OpenGL/compiler/InitializeParseContext.cpp",
+    "$source_root/src/OpenGL/compiler/IntermTraverse.cpp",
+    "$source_root/src/OpenGL/compiler/Intermediate.cpp",
+    "$source_root/src/OpenGL/compiler/OutputASM.cpp",
+    "$source_root/src/OpenGL/compiler/ParseHelper.cpp",
+    "$source_root/src/OpenGL/compiler/PoolAlloc.cpp",
+    "$source_root/src/OpenGL/compiler/SymbolTable.cpp",
+    "$source_root/src/OpenGL/compiler/TranslatorASM.cpp",
+    "$source_root/src/OpenGL/compiler/ValidateLimitations.cpp",
+    "$source_root/src/OpenGL/compiler/ValidateSwitch.cpp",
+    "$source_root/src/OpenGL/compiler/debug.cpp",
+    "$source_root/src/OpenGL/compiler/glslang_lex.cpp",
+    "$source_root/src/OpenGL/compiler/glslang_tab.cpp",
+    "$source_root/src/OpenGL/compiler/intermOut.cpp",
+    "$source_root/src/OpenGL/compiler/parseConst.cpp",
+    "$source_root/src/OpenGL/compiler/util.cpp",
+  ]
+
+  if (is_win) {
+    sources += [ "$source_root/src/OpenGL/compiler/ossource_win.cpp" ]
+  } else {
+    sources += [ "$source_root/src/OpenGL/compiler/ossource_posix.cpp" ]
+  }
+
+  deps = [
+    ":opengl_preprocessor",
+  ]
+}
+
+source_set("shader") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/Shader/Constants.cpp",
+    "$source_root/src/Shader/PixelPipeline.cpp",
+    "$source_root/src/Shader/PixelProgram.cpp",
+    "$source_root/src/Shader/PixelRoutine.cpp",
+    "$source_root/src/Shader/PixelShader.cpp",
+    "$source_root/src/Shader/SamplerCore.cpp",
+    "$source_root/src/Shader/SetupRoutine.cpp",
+    "$source_root/src/Shader/Shader.cpp",
+    "$source_root/src/Shader/ShaderCore.cpp",
+    "$source_root/src/Shader/VertexPipeline.cpp",
+    "$source_root/src/Shader/VertexProgram.cpp",
+    "$source_root/src/Shader/VertexRoutine.cpp",
+    "$source_root/src/Shader/VertexShader.cpp",
+  ]
+
+  deps = [
+    ":main",
+  ]
+}
+
+source_set("system") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/System/CPUID.cpp",
+    "$source_root/src/System/CPUID.hpp",
+    "$source_root/src/System/Configurator.cpp",
+    "$source_root/src/System/Configurator.hpp",
+    "$source_root/src/System/Debug.cpp",
+    "$source_root/src/System/Debug.hpp",
+    "$source_root/src/System/Half.cpp",
+    "$source_root/src/System/Half.hpp",
+    "$source_root/src/System/Math.cpp",
+    "$source_root/src/System/Math.hpp",
+    "$source_root/src/System/Memory.cpp",
+    "$source_root/src/System/Memory.hpp",
+    "$source_root/src/System/Resource.cpp",
+    "$source_root/src/System/Resource.hpp",
+    "$source_root/src/System/Socket.cpp",
+    "$source_root/src/System/Socket.hpp",
+    "$source_root/src/System/Thread.hpp",
+    "$source_root/src/System/Timer.cpp",
+    "$source_root/src/System/Timer.hpp",
+  ]
+}
+
+source_set("device") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  include_dirs = [ "$source_root/third_party/SPIRV-Headers/include" ]
+
+  sources = [
+    "$source_root/src/Device/Blitter.cpp",
+    "$source_root/src/Device/Blitter.hpp",
+    "$source_root/src/Device/Clipper.cpp",
+    "$source_root/src/Device/Clipper.hpp",
+    "$source_root/src/Device/Color.cpp",
+    "$source_root/src/Device/Color.hpp",
+    "$source_root/src/Device/Config.cpp",
+    "$source_root/src/Device/Config.hpp",
+    "$source_root/src/Device/Context.cpp",
+    "$source_root/src/Device/Context.hpp",
+    "$source_root/src/Device/ETC_Decoder.cpp",
+    "$source_root/src/Device/ETC_Decoder.hpp",
+    "$source_root/src/Device/Matrix.cpp",
+    "$source_root/src/Device/Matrix.hpp",
+    "$source_root/src/Device/PixelProcessor.cpp",
+    "$source_root/src/Device/PixelProcessor.hpp",
+    "$source_root/src/Device/Plane.cpp",
+    "$source_root/src/Device/Plane.hpp",
+    "$source_root/src/Device/Point.cpp",
+    "$source_root/src/Device/Point.hpp",
+    "$source_root/src/Device/QuadRasterizer.cpp",
+    "$source_root/src/Device/QuadRasterizer.hpp",
+    "$source_root/src/Device/Renderer.cpp",
+    "$source_root/src/Device/Renderer.hpp",
+    "$source_root/src/Device/SetupProcessor.cpp",
+    "$source_root/src/Device/SetupProcessor.hpp",
+    "$source_root/src/Device/SwiftConfig.cpp",
+    "$source_root/src/Device/SwiftConfig.hpp",
+    "$source_root/src/Device/Vector.cpp",
+    "$source_root/src/Device/Vector.hpp",
+    "$source_root/src/Device/VertexProcessor.cpp",
+    "$source_root/src/Device/VertexProcessor.hpp",
+  ]
+}
+
+source_set("main") {
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  sources = [
+    "$source_root/src/Main/Config.cpp",
+    "$source_root/src/Main/FrameBuffer.cpp",
+    "$source_root/src/Main/SwiftConfig.cpp",
+  ]
+
+  if (is_mac) {
+    sources += [ "$source_root/src/Main/FrameBufferOSX.mm" ]
+  } else if (is_linux) {
+    sources += [
+      "$source_root/src/Main/FrameBufferX11.cpp",
+      "$source_root/src/Main/libX11.cpp",
+    ]
+  } else if (is_win) {
+    sources += [
+      "$source_root/src/Main/FrameBufferDD.cpp",
+      "$source_root/src/Main/FrameBufferGDI.cpp",
+      "$source_root/src/Main/FrameBufferWin.cpp",
+    ]
+  }
+
+  deps = [
+    ":common",
+  ]
+}
+
+shared_library("egl") {
+  if (is_win) {
+    output_name = "libEGL"
+  } else {
+    output_name = "EGL"
+  }
+
+  public = []
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  public_configs = [ ":swiftshader_config" ]
+
+  defines = [ "EGL_EGLEXT_PROTOTYPES=1" ]
+
+  if (is_win) {
+    defines += [ "EGLAPI=__declspec(dllexport)" ]
+  } else {
+    defines += [ "EGLAPI=__attribute__((visibility(\"default\")))" ]
+  }
+
+  sources = [
+    "$source_root/src/Common/SharedLibrary.cpp",
+    "$source_root/src/OpenGL/common/Object.cpp",
+    "$source_root/src/OpenGL/common/debug.cpp",
+    "$source_root/src/OpenGL/libEGL/Config.cpp",
+    "$source_root/src/OpenGL/libEGL/Display.cpp",
+    "$source_root/src/OpenGL/libEGL/Surface.cpp",
+    "$source_root/src/OpenGL/libEGL/libEGL.cpp",
+    "$source_root/src/OpenGL/libEGL/main.cpp",
+    "$source_root/src/OpenGL/libEGL/resource.h",
+  ]
+
+  if (is_mac) {
+    sources += [ "$source_root/src/OpenGL/libEGL/OSXUtils.mm" ]
+  } else if (is_linux) {
+    sources += [ "$source_root/src/WSI/libX11.cpp" ]
+  }
+
+  if (is_mac) {
+    libs = [
+      "IOSurface.framework",
+      "QuartzCore.framework",
+      "AppKit.framework",
+    ]
+  }
+
+  if (is_mac) {
+    ldflags = [ "-Wl,-install_name,@executable_path/libEGL.dylib" ]
+  }
+}
+
+shared_library("gles") {
+  if (is_win) {
+    output_name = "libGLESv2"
+  } else {
+    output_name = "GLESv2"
+  }
+
+  configs += [ ":internal_config" ]
+
+  if (is_win) {
+    configs -= [ "//build/config/win:unicode" ]
+  }
+
+  public_configs = [ ":swiftshader_config" ]
+
+  include_dirs = [ "$source_root/src/OpenGL" ]
+
+  public = []
+
+  defines = [ "GL_API=GL_APICALL" ]
+  if (is_win) {
+    defines += [ "GL_APICALL=__declspec(dllexport)" ]
+  } else {
+    defines += [ "GL_APICALL=__attribute__((visibility(\"default\")))" ]
+  }
+
+  sources = [
+    "$source_root/src/Common/SharedLibrary.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Buffer.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Context.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Device.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Fence.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Framebuffer.cpp",
+    "$source_root/src/OpenGL/libGLESv2/IndexDataManager.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Program.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Query.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Renderbuffer.cpp",
+    "$source_root/src/OpenGL/libGLESv2/ResourceManager.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Shader.cpp",
+    "$source_root/src/OpenGL/libGLESv2/Texture.cpp",
+    "$source_root/src/OpenGL/libGLESv2/TransformFeedback.cpp",
+    "$source_root/src/OpenGL/libGLESv2/VertexArray.cpp",
+    "$source_root/src/OpenGL/libGLESv2/VertexDataManager.cpp",
+    "$source_root/src/OpenGL/libGLESv2/entry_points.cpp",
+    "$source_root/src/OpenGL/libGLESv2/libGLESv2.cpp",
+    "$source_root/src/OpenGL/libGLESv2/libGLESv3.cpp",
+    "$source_root/src/OpenGL/libGLESv2/main.cpp",
+    "$source_root/src/OpenGL/libGLESv2/resource.h",
+    "$source_root/src/OpenGL/libGLESv2/utilities.cpp",
+  ]
+
+  deps = [
+    ":opengl_common",
+    ":opengl_compiler",
+    ":reactor",
+    ":renderer",
+  ]
+
+  libs = []
+  ldflags = []
+
+  if (is_mac) {
+    libs += [
+      "IOSurface.framework",
+      "QuartzCore.framework",
+      "ImageIO.framework",
+      "CoreFoundation.framework",
+      "CoreGraphics.framework",
+      "AppKit.framework",
+    ]
+    ldflags += [ "-Wl,-install_name,@executable_path/libGLESv2.dylib" ]
+  } else if (is_win) {
+    libs += [ "dxguid.lib" ]
+  }
+}
+
+group("swiftshader") {
+  deps = [
+    ":egl",
+    ":gles",
+  ]
+}
