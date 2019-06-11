@@ -46,6 +46,7 @@ static const std::string gDartFlagsWhitelist[] = {
     "--max_profile_depth",
     "--profile_period",
     "--random_seed",
+    "--enable_mirrors",
 };
 // clang-format on
 

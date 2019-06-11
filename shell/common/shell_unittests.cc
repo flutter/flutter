@@ -15,6 +15,7 @@
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
 #include "flutter/fml/synchronization/waitable_event.h"
+#include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/common/platform_view.h"
 #include "flutter/shell/common/rasterizer.h"
 #include "flutter/shell/common/shell_test.h"
@@ -196,6 +197,21 @@ TEST_F(ShellTest, SecondaryIsolateBindingsAreSetupViaShellSettings) {
   ASSERT_TRUE(DartVMRef::IsInstanceRunning());
   shell.reset();
   ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+}
+
+TEST(ShellTestNoFixture, EnableMirrorsIsWhitelisted) {
+  if (DartVM::IsRunningPrecompiledCode()) {
+    // This covers profile and release modes which use AOT (where this flag does
+    // not make sense anyway).
+    GTEST_SKIP();
+    return;
+  }
+
+  const std::vector<fml::CommandLine::Option> options = {
+      fml::CommandLine::Option("dart-flags", "--enable_mirrors")};
+  fml::CommandLine command_line("", options, std::vector<std::string>());
+  flutter::Settings settings = flutter::SettingsFromCommandLine(command_line);
+  EXPECT_EQ(settings.dart_flags.size(), 1u);
 }
 
 TEST_F(ShellTest, BlacklistedDartVMFlag) {
