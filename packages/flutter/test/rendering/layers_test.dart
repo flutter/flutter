@@ -455,5 +455,5 @@ void main() {
 
       _testConflicts(layerA, layerB, expectedErrorCount: 1);
     });
-  });
+  }, skip: isBrowser);
 }

@@ -56,14 +56,19 @@ Future<int> run(
       onFailure: (String _) => 'en_US',
     );
 
-    try {
-      await runner.run(args);
-      await _exit(0);
-    } catch (error, stackTrace) {
-      String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
-      return await _handleToolError(error, stackTrace, verbose, args, reportCrashes, getVersion);
-    }
-    return 0;
+    String getVersion() => flutterVersion ?? FlutterVersion.instance.getVersionString(redactUnknownBranches: true);
+    return await runZoned<Future<int>>(() async {
+      try {
+        await runner.run(args);
+        return await _exit(0);
+      } catch (error, stackTrace) {
+        return await _handleToolError(
+            error, stackTrace, verbose, args, reportCrashes, getVersion);
+      }
+    }, onError: (Object error, StackTrace stackTrace) async {
+      await _handleToolError(
+          error, stackTrace, verbose, args, reportCrashes, getVersion);
+    });
   }, overrides: overrides);
 }
 

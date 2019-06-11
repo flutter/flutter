@@ -42,7 +42,7 @@ void main() {
     const BorderSide side = BorderSide(width: 4.0);
     expect(const ContinuousRectangleBorder(side: side).getOuterPath(rect1), looksLikeRect1);
     expect(const ContinuousRectangleBorder(side: side).getInnerPath(rect1), looksLikeInnerPath);
-  });
+  }, skip: isBrowser);
 
   test('ContinuousRectangleBorder non-zero BorderRadius', () {
     const Rect rect = Rect.fromLTRB(10.0, 20.0, 30.0, 40.0);
@@ -55,7 +55,7 @@ void main() {
     );
     expect(border.getOuterPath(rect), looksLikeRect);
     expect(border.getInnerPath(rect), looksLikeRect);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Golden test even radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -74,7 +74,7 @@ void main() {
       matchesGoldenFile('continuous_rectangle_border.golden_test_even_radii.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Golden test varying radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -96,7 +96,7 @@ void main() {
       matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Golden test large radii', (WidgetTester tester) async {
     await tester.pumpWidget(RepaintBoundary(
@@ -115,6 +115,6 @@ void main() {
       matchesGoldenFile('continuous_rectangle_border.golden_test_large_radii.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
 }
