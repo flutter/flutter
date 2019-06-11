@@ -99,25 +99,37 @@ class Cache {
   static String get flutterRoot => _flutterRoot;
   static String _flutterRoot;
   static set flutterRoot(String value) {
+    if (value == null) {
+      _flutterRoot = null;
+      return;
+    }
     // Verify that we have writable permission in the flutter root. If not,
     // we're liable to crash in unintuitive ways. This can happen if the user
     // is using a homebrew or other unofficial channel, or otherwise installs
     // Flutter into directory without permissions.
     try {
-      fs.file(fs.path.join(value, 'bin', '.test'))
+      // Check bin.
+      fs.file(fs.path.join(value, 'bin', '.check'))
         ..createSync();
-      fs.file(fs.path.join(value, 'bin', '.test'))
+      fs.file(fs.path.join(value, 'bin', '.check'))
+        ..deleteSync();
+      // Check root.
+      fs.file(fs.path.join(value, '.check'))
+        ..createSync();
+      fs.file(fs.path.join(value, '.check'))
         ..deleteSync();
     } on FileSystemException catch (err) {
-      printError('Warning: Flutter is missing permissions to read and write files');
-      printError('in its installation directory - "$value" is missing these permissions. ');
-      printError('It is recommended that you install Flutter into a directory such as ');
-      printError('Documents which has these permissions by default. If you are using a ');
-      printError('version of Flutter distributed via a package manager such as Brew, it is ');
-      printError('recommended to instead install from an official channel.');
-      printError('For more information see https://flutter.dev/docs/get-started/install');
+      printError(
+        'Warning: Flutter is missing permissions to write files '
+        'in its installation directory - "$value". '
+        'It is recommended that you install Flutter into a directory such as '
+        '"Documents" which has these permissions by default. If you are using a '
+        'version of Flutter distributed via a package manager such as Brew, it is '
+        'recommended to instead install from an official channel.\n'
+        'For more information see https://flutter.dev/docs/get-started/install');
       throwToolExit(err.toString());
     }
+    _flutterRoot = value;
   }
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
