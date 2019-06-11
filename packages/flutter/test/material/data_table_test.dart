@@ -279,8 +279,8 @@ void main() {
     Widget buildTable({
       int sortColumnIndex,
       bool sortAscending = true,
-      double tablePadding,
-      double columnSpacing,
+      double tablePadding = _defaultTablePadding,
+      double columnSpacing = _defaultColumnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -451,8 +451,8 @@ void main() {
     Widget buildTable({
       int sortColumnIndex,
       bool sortAscending = true,
-      double tablePadding,
-      double columnSpacing,
+      double tablePadding = _defaultTablePadding,
+      double columnSpacing = _defaultColumnSpacing,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,

@@ -262,13 +262,15 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    this.tablePadding,
-    this.columnSpacing,
+    this.tablePadding = 24.0,
+    this.columnSpacing = 56.0,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
+       assert(tablePadding != null),
+       assert(columnSpacing != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        _onlyTextColumn = _initOnlyTextColumn(columns),
@@ -319,12 +321,12 @@ class DataTable extends StatelessWidget {
   /// When a checkbox is displayed, it is also the padding between the checkbox
   /// the content in the first data column.
   ///
-  /// This value is optional and defaults to 24.0.
+  /// This value defaults to 24.0 to adhere to the Material Design specifications.
   final double tablePadding;
 
   /// The horizontal padding between the contents of each data column.
   ///
-  /// This value is optional and defaults to 56.0.
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;
 
   /// The data to show in each row (excluding the row that contains
@@ -352,14 +354,6 @@ class DataTable extends StatelessWidget {
         || rows.any((DataRow row) => row._debugInteractive);
   }
 
-  double _getTablePadding() {
-    return tablePadding ?? _tablePadding;
-  }
-
-  double _getColumnSpacing() {
-    return columnSpacing ?? _columnSpacing;
-  }
-
   static final LocalKey _headingRowKey = UniqueKey();
 
   void _handleSelectAll(bool checked) {
@@ -375,8 +369,6 @@ class DataTable extends StatelessWidget {
 
   static const double _headingRowHeight = 56.0;
   static const double _dataRowHeight = 48.0;
-  static const double _tablePadding = 24.0;
-  static const double _columnSpacing = 56.0;
   static const double _sortArrowPadding = 2.0;
   static const double _headingFontSize = 12.0;
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
@@ -392,7 +384,7 @@ class DataTable extends StatelessWidget {
     Widget contents = Semantics(
       container: true,
       child: Padding(
-        padding: EdgeInsetsDirectional.only(start: _getTablePadding(), end: _getTablePadding() / 2.0),
+        padding: EdgeInsetsDirectional.only(start: tablePadding, end: tablePadding / 2.0),
         child: Center(
           child: Checkbox(
             activeColor: color,
@@ -557,7 +549,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (showCheckboxColumn) {
-      tableColumns[0] = FixedColumnWidth(_getTablePadding() + Checkbox.width + _getTablePadding() / 2.0);
+      tableColumns[0] = FixedColumnWidth(tablePadding + Checkbox.width + tablePadding / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
         checked: allChecked,
@@ -581,18 +573,18 @@ class DataTable extends StatelessWidget {
 
       double paddingStart;
       if (dataColumnIndex == 0 && showCheckboxColumn) {
-        paddingStart = _getTablePadding() / 2.0;
+        paddingStart = tablePadding / 2.0;
       } else if (dataColumnIndex == 0 && !showCheckboxColumn) {
-        paddingStart = _getTablePadding();
+        paddingStart = tablePadding;
       } else {
-        paddingStart = _getColumnSpacing() / 2.0;
+        paddingStart = columnSpacing / 2.0;
       }
 
       double paddingEnd;
       if (dataColumnIndex == columns.length - 1) {
-        paddingEnd = _getTablePadding();
+        paddingEnd = tablePadding;
       } else {
-        paddingEnd = _getColumnSpacing() / 2.0;
+        paddingEnd = columnSpacing / 2.0;
       }
 
       final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
