@@ -46,5 +46,5 @@ void main() {
       matchesGoldenFile('backdrop_filter_test.cull_rect.1.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 }
