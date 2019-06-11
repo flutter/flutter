@@ -434,5 +434,52 @@ TEST(SettingsTest, FrameTimingSetsAndGetsProperly) {
   }
 }
 
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
+TEST_F(ShellTest, ReportTimingsIsCalledSoonerInNonReleaseMode) {
+#else
+TEST_F(ShellTest, ReportTimingsIsCalledLaterInNonReleaseMode) {
+#endif
+  fml::TimePoint start = fml::TimePoint::Now();
+  auto settings = CreateSettingsForFixture();
+  std::unique_ptr<Shell> shell = CreateShell(std::move(settings));
+
+  // Create the surface needed by rasterizer
+  PlatformViewNotifyCreated(shell.get());
+
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  ASSERT_TRUE(configuration.IsValid());
+  configuration.SetEntrypoint("reportTimingsMain");
+  fml::AutoResetWaitableEvent reportLatch;
+  std::vector<int64_t> timestamps;
+  auto nativeTimingCallback = [&reportLatch,
+                               &timestamps](Dart_NativeArguments args) {
+    Dart_Handle exception = nullptr;
+    timestamps = tonic::DartConverter<std::vector<int64_t>>::FromArguments(
+        args, 0, exception);
+    reportLatch.Signal();
+  };
+  AddNativeCallback("NativeReportTimingsCallback",
+                    CREATE_NATIVE_ENTRY(nativeTimingCallback));
+  RunEngine(shell.get(), std::move(configuration));
+
+  PumpOneFrame(shell.get());
+
+  reportLatch.Wait();
+  shell.reset();
+
+  fml::TimePoint finish = fml::TimePoint::Now();
+  fml::TimeDelta ellapsed = finish - start;
+
+#if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
+  // Our batch time is 1000ms. Hopefully the 800ms limit is relaxed enough to
+  // make it not too flaky.
+  ASSERT_TRUE(ellapsed >= fml::TimeDelta::FromMilliseconds(800));
+#else
+  // Our batch time is 100ms. Hopefully the 500ms limit is relaxed enough to
+  // make it not too flaky.
+  ASSERT_TRUE(ellapsed <= fml::TimeDelta::FromMilliseconds(500));
+#endif
+}
+
 }  // namespace testing
 }  // namespace flutter
