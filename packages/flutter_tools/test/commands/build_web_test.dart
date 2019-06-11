@@ -67,7 +67,7 @@ void main() {
     fs.file(fs.path.join('web', 'index.html')).deleteSync();
 
     final ResidentWebRunner runner = ResidentWebRunner(
-      <FlutterDevice>[],
+      null,
       flutterProject: FlutterProject.current(),
       ipv6: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),

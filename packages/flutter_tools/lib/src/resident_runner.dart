@@ -605,61 +605,61 @@ abstract class ResidentRunner {
     await Future.wait(futures);
   }
 
-  Future<void> _debugDumpApp() async {
+  Future<void> debugDumpApp() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpApp();
   }
 
-  Future<void> _debugDumpRenderTree() async {
+  Future<void> debugDumpRenderTree() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpRenderTree();
   }
 
-  Future<void> _debugDumpLayerTree() async {
+  Future<void> debugDumpLayerTree() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpLayerTree();
   }
 
-  Future<void> _debugDumpSemanticsTreeInTraversalOrder() async {
+  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpSemanticsTreeInTraversalOrder();
   }
 
-  Future<void> _debugDumpSemanticsTreeInInverseHitTestOrder() async {
+  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugDumpSemanticsTreeInInverseHitTestOrder();
   }
 
-  Future<void> _debugToggleDebugPaintSizeEnabled() async {
+  Future<void> debugToggleDebugPaintSizeEnabled() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleDebugPaintSizeEnabled();
   }
 
-  Future<void> _debugToggleDebugCheckElevationsEnabled() async {
+  Future<void> debugToggleDebugCheckElevationsEnabled() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleDebugCheckElevationsEnabled();
   }
 
-  Future<void> _debugTogglePerformanceOverlayOverride() async {
+  Future<void> debugTogglePerformanceOverlayOverride() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.debugTogglePerformanceOverlayOverride();
   }
 
-  Future<void> _debugToggleWidgetInspector() async {
+  Future<void> debugToggleWidgetInspector() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices)
       await device.toggleWidgetInspector();
   }
 
-  Future<void> _debugToggleProfileWidgetBuilds() async {
+  Future<void> debugToggleProfileWidgetBuilds() async {
     await refreshViews();
     for (FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
@@ -850,41 +850,41 @@ abstract class ResidentRunner {
       return true;
     } else if (lower == 'w') {
       if (supportsServiceProtocol) {
-        await _debugDumpApp();
+        await debugDumpApp();
         return true;
       }
     } else if (lower == 't') {
       if (supportsServiceProtocol) {
-        await _debugDumpRenderTree();
+        await debugDumpRenderTree();
         return true;
       }
     } else if (character == 'L') {
       if (supportsServiceProtocol) {
-        await _debugDumpLayerTree();
+        await debugDumpLayerTree();
         return true;
       }
     } else if (character == 'S') {
       if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInTraversalOrder();
+        await debugDumpSemanticsTreeInTraversalOrder();
         return true;
       }
     } else if (character == 'U') {
       if (supportsServiceProtocol) {
-        await _debugDumpSemanticsTreeInInverseHitTestOrder();
+        await debugDumpSemanticsTreeInInverseHitTestOrder();
         return true;
       }
     } else if (character == 'p') {
       if (supportsServiceProtocol && isRunningDebug) {
-        await _debugToggleDebugPaintSizeEnabled();
+        await debugToggleDebugPaintSizeEnabled();
         return true;
       }
     } else if (character == 'P') {
       if (supportsServiceProtocol) {
-        await _debugTogglePerformanceOverlayOverride();
+        await debugTogglePerformanceOverlayOverride();
       }
     } else if (lower == 'i') {
       if (supportsServiceProtocol) {
-        await _debugToggleWidgetInspector();
+        await debugToggleWidgetInspector();
         return true;
       }
     } else if (character == 's') {
@@ -895,7 +895,7 @@ abstract class ResidentRunner {
       return true;
     } else if (character == 'a') {
       if (supportsServiceProtocol) {
-        await _debugToggleProfileWidgetBuilds();
+        await debugToggleProfileWidgetBuilds();
       }
     } else if (lower == 'o') {
       if (supportsServiceProtocol && isRunningDebug) {
@@ -910,7 +910,7 @@ abstract class ResidentRunner {
       await detach();
       return true;
     } else if (lower == 'z') {
-      await _debugToggleDebugCheckElevationsEnabled();
+      await debugToggleDebugCheckElevationsEnabled();
       return true;
     }
 

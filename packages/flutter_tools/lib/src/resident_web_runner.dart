@@ -4,8 +4,13 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/compile.dart';
+import 'package:flutter_tools/src/devfs.dart';
+import 'package:flutter_tools/src/run_cold.dart';
+import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart';
+import 'package:vm_service_lib/vm_service_lib.dart';
 
 import 'application_package.dart';
 import 'asset.dart';
@@ -26,16 +31,27 @@ import 'web/asset_server.dart';
 import 'web/chrome.dart';
 import 'web/compile.dart';
 
+
+import 'package:build_daemon/client.dart';
+import 'package:webdev/src/serve/webdev_server.dart';
+import 'package:webdev/src/serve/debugger/devtools.dart';
+
+
+import 'package:webdev/src/command/build_command.dart';
+
+import 'package:webdev/src/daemon/app_domain.dart';
+import 'package:webdev/src/serve/handlers/dev_handler.dart';
+import 'package:webdev/src/serve/debugger/app_debug_services.dart';
+
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
-  ResidentWebRunner(
-    List<FlutterDevice> flutterDevices, {
+  ResidentWebRunner(this.device, {
     String target,
     @required this.flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
   }) : super(
-          flutterDevices,
+          [],
           target: target,
           usesTerminalUI: true,
           stayResident: true,
@@ -44,7 +60,10 @@ class ResidentWebRunner extends ResidentRunner {
           ipv6: ipv6,
         );
 
+  final Device device;
   WebAssetServer _server;
+  DevHandler _devHandler;
+  AppDebugServices _appDebugServices;
   ProjectFileInvalidator projectFileInvalidator;
   DateTime _lastCompiled;
   WipConnection _connection;
@@ -85,6 +104,8 @@ class ResidentWebRunner extends ResidentRunner {
       await restart(fullRestart: true);
     }
   }
+  
+  VmService get vmService => _appDebugServices?.webdevClient?.client;
 
   @override
   void printHelp({bool details}) {
@@ -130,33 +151,54 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
-    // Start the web compiler and build the assets.
-    await webCompilationProxy.initialize(
+
+    /// Start a build daemon.
+    final DaemonHandle handle = await webCompilationProxy.daemon(
       projectDirectory: FlutterProject.current().directory,
       targets: <String>[target],
+      release: debuggingOptions.buildInfo.isRelease,
     );
-    _lastCompiled = DateTime.now();
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build();
-    if (build != 0) {
-      throwToolExit('Error: Failed to build asset bundle');
-    }
-    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
-    // Step 2: Start an HTTP server
-    _server = WebAssetServer(flutterProject, target, ipv6);
-    await _server.initialize();
+    /// Start the webdev server?
+    final Chrome chrome = await chromeLauncher.launch('???');
+    final DevTools devTools = await DevTools.start('????????');
+    final ServerOptions serverOptions = ServerOptions(null, null, null, null);
+    final WebDevServer server = await WebDevServer.start(serverOptions, handle.buildResults, devTools);
+    _devHandler = server.devHandler;
+    final connection = await _devHandler.connectedApps.first;
+    _appDebugServices = await _devHandler.loadAppServices(
+      connection.request.appId, connection.request.instanceId);
 
-    // Step 3: Spawn an instance of Chrome and direct it to the created server.
-    final String url = 'http://localhost:${_server.port}';
-    final Chrome chrome = await chromeLauncher.launch(url);
-    final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-      return chromeTab.url.contains(url); // we don't care about trailing slashes or #
-    });
-    _connection = await chromeTab.connect();
-    _connection.onClose.listen((WipConnection connection) {
-      exit();
-    });
+    // where the magic is
+    // server.devHandler
+
+    // Start the web compiler and build the assets.
+    // await webCompilationProxy.initialize(
+    //   projectDirectory: FlutterProject.current().directory,
+    //   targets: <String>[target],
+    // );
+    // _lastCompiled = DateTime.now();
+    // final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    // final int build = await assetBundle.build();
+    // if (build != 0) {
+    //   throwToolExit('Error: Failed to build asset bundle');
+    // }
+    // await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+
+    // // Step 2: Start an HTTP server
+    // _server = WebAssetServer(flutterProject, target, ipv6);
+    // await _server.initialize();
+
+    // // Step 3: Spawn an instance of Chrome and direct it to the created server.
+    // final String url = 'http://localhost:${_server.port}';
+    // final Chrome chrome = await chromeLauncher.launch(url);
+    // final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+    //   return chromeTab.url.contains(url); // we don't care about trailing slashes or #
+    // });
+    // _connection = await chromeTab.connect();
+    // _connection.onClose.listen((WipConnection connection) {
+    //   exit();
+    // });
 
     // We don't support the debugging proxy yet.
     appStartedCompleter?.complete();
@@ -179,27 +221,80 @@ class ResidentWebRunner extends ResidentRunner {
       timeout: timeoutConfiguration.fastOperation,
       progressId: 'hot.restart',
     );
-    OperationResult result = OperationResult.ok;
-    try {
-      final List<Uri> invalidatedSources = ProjectFileInvalidator.findInvalidated(
-        lastCompiled: _lastCompiled,
-        urisToMonitor: <Uri>[
-          for (FileSystemEntity entity in flutterProject.directory
-              .childDirectory('lib')
-              .listSync(recursive: true))
-            if (entity is File && entity.path.endsWith('.dart')) entity.uri
-        ], // Add new class to track this for web.
-        packagesPath: PackageMap.globalPackagesPath,
-      );
-      await webCompilationProxy.invalidate(inputs: invalidatedSources);
-      await _connection.sendCommand('Page.reload');
-      await Future<void>.delayed(const Duration(milliseconds: 150));
-    } catch (err) {
-      result = OperationResult(1, err.toString());
-    } finally {
-      printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
-      status.cancel();
-    }
-    return result;
+    final Response response = await vmService.callMethod('hotRestart');
+    return OperationResult.ok;
+
+    // try {
+    //   final List<Uri> invalidatedSources = ProjectFileInvalidator.findInvalidated(
+    //     lastCompiled: _lastCompiled,
+    //     urisToMonitor: <Uri>[
+    //       for (FileSystemEntity entity in flutterProject.directory
+    //           .childDirectory('lib')
+    //           .listSync(recursive: true))
+    //         if (entity is File && entity.path.endsWith('.dart')) entity.uri
+    //     ], // Add new class to track this for web.
+    //     packagesPath: PackageMap.globalPackagesPath,
+    //   );
+    //   await webCompilationProxy.invalidate(inputs: invalidatedSources);
+    //   await _connection.sendCommand('Page.reload');
+    //   await Future<void>.delayed(const Duration(milliseconds: 150));
+    // } catch (err) {
+    //   result = OperationResult(1, err.toString());
+    // } finally {
+    //   printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
+    //   status.cancel();
+    // }
+    // return result;
   }
+
+  @override
+  Future<void> debugDumpApp() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugDumpApp');
+  }
+
+  @override
+  Future<void> debugDumpRenderTree() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugDumpRenderTree');
+  }
+
+  @override
+  Future<void> debugDumpLayerTree() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugDumpLayerTree');
+  }
+
+  @override
+  Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugDumpSemanticsTreeInTraversalOrder');
+  }
+
+  @override
+  Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugDumpSemanticsTreeInInverseHitTestOrder');
+  }
+
+  @override
+  Future<void> debugToggleDebugPaintSizeEnabled() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugToggleDebugPaintSizeEnabled');
+  }
+
+  @override
+  Future<void> debugToggleDebugCheckElevationsEnabled() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugToggleDebugCheckElevationsEnabled');
+  }
+
+  @override
+  Future<void> debugTogglePerformanceOverlayOverride() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugTogglePerformanceOverlayOverride');
+  }
+
+  @override
+  Future<void> debugToggleWidgetInspector() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugToggleWidgetInspector');
+  }
+
+  @override
+  Future<void> debugToggleProfileWidgetBuilds() async {
+    final Response response = await vmService.callMethod('flutter.ext.debugToggleProfileWidgetBuilds');
+  }
+
 }
