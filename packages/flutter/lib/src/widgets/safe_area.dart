@@ -45,6 +45,7 @@ class SafeArea extends StatelessWidget {
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
+    this.maintainViewPadding = false,
     @required this.child,
   }) : assert(left != null),
        assert(top != null),
@@ -70,6 +71,9 @@ class SafeArea extends StatelessWidget {
   /// The greater of the minimum insets and the media padding will be applied.
   final EdgeInsets minimum;
 
+  /// TODO
+  final bool maintainViewPadding;
+
   /// The widget below this widget in the tree.
   ///
   /// The padding on the [MediaQuery] for the [child] will be suitably adjusted
@@ -81,7 +85,9 @@ class SafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = MediaQuery.of(context).padding;
+    final EdgeInsets padding = maintainViewPadding
+      ? MediaQuery.of(context).viewPadding
+      : MediaQuery.of(context).padding;
     return Padding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),
