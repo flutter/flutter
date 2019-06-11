@@ -176,7 +176,8 @@ static void GLFWFramebufferSizeCallback(GLFWwindow* window,
   glfwGetWindowSize(window, &width, nullptr);
 
   auto state = GetSavedWindowState(window);
-  state->window_wrapper->pixels_per_screen_coordinate = width_px / width;
+  state->window_wrapper->pixels_per_screen_coordinate =
+      width > 0 ? width_px / width : 1;
 
   double dpi = state->window_wrapper->pixels_per_screen_coordinate *
                state->monitor_screen_coordinates_per_inch;
