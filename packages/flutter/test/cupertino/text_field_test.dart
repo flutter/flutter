@@ -2829,7 +2829,7 @@ void main() {
 
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, 0);
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathPointsMatcher(
             excludes: <Offset> [
@@ -2845,7 +2845,7 @@ void main() {
       );
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
@@ -2891,7 +2891,7 @@ void main() {
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset - 1);
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathPointsMatcher(
             excludes: <Offset> [
@@ -2907,7 +2907,7 @@ void main() {
       );
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
@@ -2951,7 +2951,7 @@ void main() {
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset);
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathPointsMatcher(
             includes: <Offset> [
@@ -2963,7 +2963,7 @@ void main() {
       );
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
@@ -3019,7 +3019,7 @@ void main() {
       final Offset selectionPosition = (textOffsetToBottomLeftPosition(tester, 0) + textOffsetToBottomLeftPosition(tester, 4)) / 2;
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathPointsMatcher(
             includes: <Offset> [
@@ -3031,7 +3031,7 @@ void main() {
       );
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
@@ -3091,7 +3091,7 @@ void main() {
       );
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathPointsMatcher(
             includes: <Offset> [
@@ -3103,7 +3103,7 @@ void main() {
       );
 
       expect(
-        find.byType(CupertinoToolbar),
+        find.byType(CupertinoTextSelectionToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
             bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),

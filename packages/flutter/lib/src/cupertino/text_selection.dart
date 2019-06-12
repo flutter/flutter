@@ -53,37 +53,40 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
 ///
 /// See also:
 ///
-/// * [TextSelectionControls.buildToolbar], where [CupertinoToolbar] will be used
-///   to build an iOS-style toolbar.
+/// * [TextSelectionControls.buildToolbar], where [CupertinoTextSelectionToolbar]
+///   will be used to build an iOS-style toolbar.
 @visibleForTesting
-class CupertinoToolbar extends SingleChildRenderObjectWidget {
-  const CupertinoToolbar._({
+class CupertinoTextSelectionToolbar extends SingleChildRenderObjectWidget {
+  const CupertinoTextSelectionToolbar._({
     Key key,
-    this.barTopY,
-    this.arrowTipX,
-    this.isArrowPointingDown,
+    double barTopY,
+    double arrowTipX,
+    bool isArrowPointingDown,
     Widget child,
-  }) : super(key: key, child: child);
+  }) : _barTopY = barTopY,
+       _arrowTipX = arrowTipX,
+       _isArrowPointingDown = isArrowPointingDown,
+       super(key: key, child: child);
 
-  /// The y-coordinate of toolbar's top edge, in global coordinate system.
-  final double barTopY;
+  // The y-coordinate of toolbar's top edge, in global coordinate system.
+  final double _barTopY;
 
-  /// The y-coordinate of the tip of the arrow, in global coordinate system.
-  final double arrowTipX;
+  // The y-coordinate of the tip of the arrow, in global coordinate system.
+  final double _arrowTipX;
 
-  /// Whether the arrow should point down and be attached to the bottom
-  /// of the toolbar, or point up and be attached to the top of the toolbar.
-  final bool isArrowPointingDown;
+  // Whether the arrow should point down and be attached to the bottom
+  // of the toolbar, or point up and be attached to the top of the toolbar.
+  final bool _isArrowPointingDown;
 
   @override
-  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(barTopY, arrowTipX, isArrowPointingDown, null);
+  _ToolbarRenderBox createRenderObject(BuildContext context) => _ToolbarRenderBox(_barTopY, _arrowTipX, _isArrowPointingDown, null);
 
   @override
   void updateRenderObject(BuildContext context, _ToolbarRenderBox renderObject) {
     renderObject
-      ..barTopY = barTopY
-      ..arrowTipX = arrowTipX
-      ..isArrowPointingDown = isArrowPointingDown;
+      ..barTopY = _barTopY
+      ..arrowTipX = _arrowTipX
+      ..isArrowPointingDown = _isArrowPointingDown;
   }
 }
 
@@ -350,7 +353,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     return items.isEmpty
       ? Container()
-      : CupertinoToolbar._(
+      : CupertinoTextSelectionToolbar._(
         barTopY: localBarTopY + globalEditableRegion.top,
         arrowTipX: arrowTipX,
         isArrowPointingDown: isArrowPointingDown,
