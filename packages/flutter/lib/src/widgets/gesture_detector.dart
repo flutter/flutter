@@ -45,6 +45,7 @@ export 'package:flutter/gestures.dart' show
   TapUpDetails,
   ForcePressDetails,
   Velocity;
+export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
 // Examples can assume:
 // bool _lights;
@@ -1026,7 +1027,7 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 /// callbacks that are assigned to [RenderSemanticsGestureHandler].
 abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
-  const SemanticsGestureDelegate();
+  SemanticsGestureDelegate();
 
   /// Assigns semantics notations to the render object
   /// [RenderSemanticsGestureHandler] of the gesture detector.
