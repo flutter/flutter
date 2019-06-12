@@ -24,7 +24,7 @@ void main() {
     expect(json['stateful'], isTrue);
   });
 
-  group('Serialisation', () {
+  group('Serialization', () {
     final TestTree testTree = TestTree(
       properties: <DiagnosticsNode>[
         StringProperty('stringProperty1', 'value1', quoted: false),

@@ -3421,7 +3421,7 @@ abstract class DiagnosticsSerializationDelegate {
   /// in the serialization of the given [DiagnosticsNode].
   ///
   /// This method is called for every [DiagnosticsNode] that's included in
-  /// the serialisation.
+  /// the serialization.
   Map<String, Object> additionalNodeProperties(DiagnosticsNode node);
 
   /// Filters the list of [DiagnosticsNode]s that will be included as children
@@ -3451,24 +3451,24 @@ abstract class DiagnosticsSerializationDelegate {
   List<DiagnosticsNode> filterProperties(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
 
   /// Truncates the given list of [DiagnosticsNode] that will be added to the
-  /// serialisation as children or properties of the `owner` node.
+  /// serialization as children or properties of the `owner` node.
   ///
   /// The method must return a subset of the provided nodes and may
   /// not replace any nodes. While [filterProperties] and [filterChildren]
-  /// completely hide a node from the serialisation, truncating a node will
-  /// leave a hint in the serialisation that there were additional nodes in the
-  /// result that are not included in the current serialisation.
+  /// completely hide a node from the serialization, truncating a node will
+  /// leave a hint in the serialization that there were additional nodes in the
+  /// result that are not included in the current serialization.
   ///
   /// By default, `nodes` is returned as-is.
   List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
 
   /// Returns the [DiagnosticsSerializationDelegate] to be used
-  /// for adding the provided [DiagnosticsNode] to the serialisation.
+  /// for adding the provided [DiagnosticsNode] to the serialization.
   ///
   /// By default, this will return a copy of this delegate, which has the
   /// [subtreeDepth] reduced by one.
   ///
-  /// This is called for nodes that will be added to the serialisation as
+  /// This is called for nodes that will be added to the serialization as
   /// property or child of another node. It may return the same delegate if no
   /// changes to it are necessary.
   DiagnosticsSerializationDelegate delegateForAddingNode(DiagnosticsNode node);
@@ -3485,7 +3485,7 @@ abstract class DiagnosticsSerializationDelegate {
   int get subtreeDepth;
 
   /// Whether to include the properties of a [DiagnosticsNode] in the
-  /// serialisation.
+  /// serialization.
   ///
   /// Defaults to false.
   ///
