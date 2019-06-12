@@ -24,6 +24,7 @@ import 'package:webdev/src/serve/debugger/devtools.dart';
 import 'package:webdev/src/serve/handlers/dev_handler.dart';
 import 'package:webdev/src/serve/server_manager.dart';
 import 'package:webdev/src/serve/webdev_server.dart';
+import 'package:webdev/src/serve/injected/configuration.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -372,6 +373,7 @@ class ResidentWebRunner extends ResidentRunner {
       verbose: true,
       debug: true,
       hostname: 'localhost',
+      reload: ReloadConfiguration.hotRestart,
     );
     final Map<String, int> targetPorts = <String, int>{
       'web': await os.findFreePort()
@@ -507,6 +509,7 @@ class ResidentWebRunner extends ResidentRunner {
       timeout: timeoutConfiguration.fastOperation,
       progressId: 'hot.restart',
     );
+    // await _vmService.callServiceExtension('ext.flutter.disassemble');
     final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
     status.stop();
     printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
