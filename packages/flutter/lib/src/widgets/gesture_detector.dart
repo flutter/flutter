@@ -824,7 +824,7 @@ class RawGestureDetector extends StatefulWidget {
   ///  * On a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
   ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
   ///    for [PanGestureRecognizer] and calls the same methods.
-  final GestureSemanticsMapping semanticsMapping;
+  final SemanticsGestureDelegate semanticsMapping;
 
   @override
   RawGestureDetectorState createState() => RawGestureDetectorState();
@@ -833,13 +833,13 @@ class RawGestureDetector extends StatefulWidget {
 /// State for a [RawGestureDetector].
 class RawGestureDetectorState extends State<RawGestureDetector> {
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
-  GestureSemanticsMapping _semanticsMapping;
+  SemanticsGestureDelegate _semanticsMapping;
 
   @override
   void initState() {
     super.initState();
     _semanticsMapping = widget.semanticsMapping ??
-      _DefaultGestureSemanticsMapping(this);
+      _DefaultSemanticsGestureDelegate(this);
     _syncAll(widget.gestures);
   }
 
@@ -850,7 +850,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     // (avoid unnecessary construction of _DefaultGestureSemanticsMapping).
     if (!(oldWidget.semanticsMapping == null && widget.semanticsMapping == null)) {
       _semanticsMapping = widget.semanticsMapping ??
-        _DefaultGestureSemanticsMapping(this);
+        _DefaultSemanticsGestureDelegate(this);
     }
     _syncAll(widget.gestures);
   }
@@ -983,7 +983,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
       properties.add(IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
       properties.add(DiagnosticsProperty<bool>('excludeFromSemantics', widget.excludeFromSemantics, defaultValue: false));
-      properties.add(DiagnosticsProperty<GestureSemanticsMapping>('semanticsMapping', widget.semanticsMapping));
+      properties.add(DiagnosticsProperty<SemanticsGestureDelegate>('semanticsMapping', widget.semanticsMapping));
     }
     properties.add(EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
@@ -1018,19 +1018,26 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 
 /// A base class that describes what semantics notations a [RawGestureDetector]
 /// should add to the render object [RenderSemanticsGestureHandler].
-abstract class GestureSemanticsMapping {
+///
+/// It is used when defining a custom gesture detector. The callbacks of
+/// [GestureRecognizer]s can be shared on semantics.
+///
+/// It is recommended to store this object in a widget state, and cache the
+/// callbacks that are assigned to [RenderSemanticsGestureHandler].
+abstract class SemanticsGestureDelegate {
   /// Create a mapping of gesture semantics.
-  GestureSemanticsMapping();
+  SemanticsGestureDelegate();
 
   /// Assigns semantics notations to the render object
   /// [RenderSemanticsGestureHandler] of the gesture detector.
+  ///
   /// It is called when the widget is created, updated, or during
   /// [RawGestureDetector.replaceGestureRecognizers].
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 }
 
-class _DefaultGestureSemanticsMapping extends GestureSemanticsMapping {
-  _DefaultGestureSemanticsMapping(this.detectorState);
+class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
+  _DefaultSemanticsGestureDelegate(this.detectorState);
 
   final RawGestureDetectorState detectorState;
 
