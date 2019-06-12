@@ -1567,46 +1567,24 @@ abstract class DiagnosticsNode {
     }
 
     if (delegate.includeProperties) {
-      data['properties'] = propertiesToJsonList(delegate);
+      final List<DiagnosticsNode> properties = getProperties();
+      data['properties'] = toJsonList(
+        delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties,
+        this,
+        delegate,
+      );
     }
 
     if (delegate.subtreeDepth > 0) {
-      data['children'] = childrenToJsonList(delegate);
+      final List<DiagnosticsNode> children = getChildren();
+      data['children'] = toJsonList(
+        delegate.filterChildren != null ? delegate.filterChildren(children, this, delegate) : children,
+        this,
+        delegate,
+      );
     }
 
     return data;
-  }
-
-  /// Serialize the properties of this node to a JSON list according to the
-  /// configuration provided in the [DiagnosticsSerialisationDelegate].
-  ///
-  /// By default, this will just call [toJsonList] on the return value of
-  /// [getProperties]. Subclasses should override this if their properties
-  /// need special processing.
-  @protected
-  List<Map<String, Object>> propertiesToJsonList(DiagnosticsSerialisationDelegate delegate) {
-    final List<DiagnosticsNode> properties = getProperties();
-    return toJsonList(
-      delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties,
-      this,
-      delegate,
-    );
-  }
-
-  /// Serialize the children of this node to a JSON list according to the
-  /// configuration provided in the [DiagnosticsSerialisationDelegate].
-  ///
-  /// By default, this will just call [toJsonList] on the return value of
-  /// [getChildren]. Subclasses should override this if their children
-  /// need special processing.
-  @protected
-  List<Map<String, Object>> childrenToJsonList(DiagnosticsSerialisationDelegate delegate) {
-    final List<DiagnosticsNode> children = getChildren();
-    return toJsonList(
-      delegate.filterChildren != null ? delegate.filterChildren(children, this, delegate) : children,
-      this,
-      delegate,
-    );
   }
 
   /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
@@ -2545,17 +2523,21 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   @override
   final bool allowNameWrap;
 
-  bool _expandPropertyValuesForJson(DiagnosticsSerialisationDelegate delegate) {
-    return getProperties().isEmpty && delegate.expandPropertyValues && value is Diagnosticable;
-  }
-
   @override
   Map<String, Object> toJsonMap(DiagnosticsSerialisationDelegate delegate) {
-    if (_expandPropertyValuesForJson(delegate)) {
+    final T v = value;
+    List<Map<String, Object>> jsonProperties;
+    if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
       // Exclude children for expanded nodes to avoid cycles.
-      delegate = delegate.copyWith(subtreeDepth: 0);
+      delegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
+      List<DiagnosticsNode> properties = v.toDiagnosticsNode().getProperties();
+      properties = delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties;
+      jsonProperties = DiagnosticsNode.toJsonList(properties, this, delegate);
     }
     final Map<String, Object> json = super.toJsonMap(delegate);
+    if (jsonProperties != null) {
+      json['properties'] = jsonProperties;
+    }
     if (defaultValue != kNoDefaultValue)
       json['defaultValue'] = defaultValue.toString();
     if (ifEmpty != null)
@@ -2572,21 +2554,6 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
     return json;
-  }
-
-  @override
-  List<Map<String, Object>> propertiesToJsonList(DiagnosticsSerialisationDelegate delegate) {
-    if (_expandPropertyValuesForJson(delegate)) {
-      // Ignore can be removed when https://github.com/dart-lang/sdk/issues/37200 is fixed.
-      final Diagnosticable diagnosticableValue = value as Diagnosticable; // ignore: avoid_as
-      List<DiagnosticsNode> properties = diagnosticableValue.toDiagnosticsNode().getProperties();
-      properties = delegate.filterProperties != null ? delegate.filterProperties(properties, this, delegate) : properties;
-      return DiagnosticsNode.toJsonList(properties, this, delegate.copyWith(
-        // Exclude properties for expanded nodes to avoid cycles.
-        includeProperties: false
-      ));
-    }
-    return super.propertiesToJsonList(delegate);
   }
 
   /// Returns a string representation of the property value.
@@ -3579,5 +3546,5 @@ typedef DiagnosticsNodesFilter = List<DiagnosticsNode> Function(List<Diagnostics
 /// A callback that returns a [DiagnosticsNodeDelegateGetter] for adding `node`
 /// to the serialization as a child or property of another [DiagnosticsNode].
 ///
-/// Used by [DiagnosticsNodeDelegateGetter.delegateForAddingNode].
+/// Used by [DiagnosticsSerialisationDelegate.delegateForAddingNode].
 typedef DiagnosticsNodeDelegateGetter = DiagnosticsSerialisationDelegate Function(DiagnosticsNode node, DiagnosticsSerialisationDelegate delegate);
