@@ -168,7 +168,9 @@ mixin AnimationLocalStatusListenersMixin {
   /// Listeners can be removed with [removeStatusListener].
   void addStatusListener(AnimationStatusListener listener) {
     didRegisterListener();
-    _statusListeners.add(listener);
+    try {
+      _statusListeners.add(listener);
+    } on TypeError {}
   }
 
   /// Stops calling the listener every time the status of the animation changes.

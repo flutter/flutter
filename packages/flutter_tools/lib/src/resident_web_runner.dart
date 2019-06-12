@@ -28,6 +28,7 @@ import 'package:webdev/src/serve/injected/configuration.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
+import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -35,6 +36,7 @@ import 'base/os.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'bundle.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
@@ -42,8 +44,6 @@ import 'globals.dart';
 import 'project.dart';
 import 'resident_runner.dart';
 import 'run_hot.dart';
-
-import 'web/asset_server.dart';
 
 Future<BuildDaemonClient> connectClient(
   String workingDirectory,
@@ -64,7 +64,6 @@ Future<BuildDaemonClient> connectClient(
       buildScript,
       'daemon',
       '--skip-build-script-check',
-      '--delete-conflicting-outputs',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=release=false', // hard coded for now
@@ -369,8 +368,6 @@ class ResidentWebRunner extends ResidentRunner {
     // Create configuration.
     final Configuration configuration = Configuration(
       autoRun: true,
-      logRequests: true,
-      verbose: true,
       debug: true,
       hostname: 'localhost',
       reload: ReloadConfiguration.hotRestart,
@@ -408,7 +405,6 @@ class ResidentWebRunner extends ResidentRunner {
     print('1');
     _serverManager = await _startServerManager(
       configuration, targetPorts, workingDirectory, _client, _devTools, (Request request) async {
-      print('Looking for ${request.url}');
       if (request.url.path.contains('main.dart.js')) {
         final File file = fs.file(fs.path.join(
           flutterProject.dartTool.path,
@@ -476,9 +472,19 @@ class ResidentWebRunner extends ResidentRunner {
           'main_web_entrypoint.digests',
         ));
         return Response.ok(file.readAsBytesSync());
+      } else if (request.url.path.contains('assets')) {
+        final String assetPath = request.url.path.replaceFirst('assets/', '');
+        print(assetPath);
+        final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
+        print(file.path);
+        return Response.ok(file.readAsBytesSync());
       }
       return Response.notFound('');
     });
+    // Copy assets.
+    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
+    await assetBundle.build();
+    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Start chrome?
     print('2');
