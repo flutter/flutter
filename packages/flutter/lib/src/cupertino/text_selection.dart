@@ -47,8 +47,17 @@ const TextStyle _kToolbarButtonFontStyle = TextStyle(
   color: CupertinoColors.white,
 );
 
-class _Toolbar extends SingleChildRenderObjectWidget {
-  const _Toolbar({
+/// An iOS-style toolbar that appears in response to text selection.
+///
+/// Typically displays buttons for text manipulation, e.g. copying and pasting text.
+///
+/// See also:
+///
+/// * [TextSelectionControls.buildToolbar], where [CupertinoToolbar] will be used
+///   to build an iOS-style toolbar.
+@visibleForTesting
+class CupertinoToolbar extends SingleChildRenderObjectWidget {
+  const CupertinoToolbar._({
     Key key,
     this.barTopY,
     this.arrowTipX,
@@ -341,7 +350,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
 
     return items.isEmpty
       ? Container()
-      : _Toolbar(
+      : CupertinoToolbar._(
         barTopY: localBarTopY + globalEditableRegion.top,
         arrowTipX: arrowTipX,
         isArrowPointingDown: isArrowPointingDown,
