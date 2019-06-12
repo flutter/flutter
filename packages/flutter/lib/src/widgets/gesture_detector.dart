@@ -45,6 +45,7 @@ export 'package:flutter/gestures.dart' show
   TapUpDetails,
   ForcePressDetails,
   Velocity;
+export 'package:flutter/rendering.dart' show RenderSemanticsGestureHandler;
 
 // Examples can assume:
 // bool _lights;
@@ -838,8 +839,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   @override
   void initState() {
     super.initState();
-    _semantics = widget.semantics ??
-      _DefaultSemanticsGestureDelegate(this);
+    _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     _syncAll(widget.gestures);
   }
 
@@ -849,8 +849,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     // Re-initialize semantics delegate unless delegate has always been default
     // (avoid unnecessary construction of _DefaultGestureSemanticsDelegate).
     if (!(oldWidget.semantics == null && widget.semantics == null)) {
-      _semantics = widget.semantics ??
-        _DefaultSemanticsGestureDelegate(this);
+      _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     }
     _syncAll(widget.gestures);
   }
@@ -1014,19 +1013,12 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   }
 }
 
-typedef GetRecognizerHandler = GestureRecognizer Function(Type);
-
 /// A base class that describes what semantics notations a [RawGestureDetector]
-/// should add to the render object [RenderSemanticsGestureHandler].
-///
-/// It is used when defining a custom gesture detector. The callbacks of
-/// [GestureRecognizer]s can be shared on semantics.
-///
-/// It is recommended to store this object in a widget state, and cache the
-/// callbacks that are assigned to [RenderSemanticsGestureHandler].
+/// should add to the render object [RenderSemanticsGestureHandler]. It is
+/// used when defining a custom gesture detector.
 abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
-  const SemanticsGestureDelegate();
+  SemanticsGestureDelegate();
 
   /// Assigns semantics notations to the render object
   /// [RenderSemanticsGestureHandler] of the gesture detector.
@@ -1036,51 +1028,31 @@ abstract class SemanticsGestureDelegate {
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 }
 
+// The default semantics delegate of [RawGestureDetector]. Its behavior is
+// described in [RawGestureDetector.semantics].
+//
+// For readers who come here to learn how to write custom semantics delegates:
+// this is not a proper sample code. It has access to the detector state as well
+// as its private properties, which are inaccessible normally. It is designed
+// this way in order to work independenly in a [RawGestureRecognizer] to
+// preserve existing behavior.
+//
+// Instead, a normal delegate will store callbacks as properties, and use them
+// in `assignSemantics`.
 class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
   _DefaultSemanticsGestureDelegate(this.detectorState);
 
   final RawGestureDetectorState detectorState;
 
-  GestureTapCallback _handleSemanticTap;
-  GestureLongPressCallback _handleSemanticLongPress;
-  GestureDragUpdateCallback _handleSemanticHorizontal;
-  GestureDragUpdateCallback _handleSemanticVertical;
-
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
     assert(!detectorState.widget.excludeFromSemantics);
     final Map<Type, GestureRecognizer> recognizers = detectorState._recognizers;
-    _handleSemanticTap = _getTapHandler(recognizers);
-    _handleSemanticLongPress = _getLongPressHandler(recognizers);
-    _handleSemanticHorizontal = _getHorizontalDragUpdateHandler(recognizers);
-    _handleSemanticVertical = _getVerticalDragUpdateHandler(recognizers);
     renderObject
-      ..onTap = _handleSemanticTap == null
-          ? null : _performSemanticTap
-      ..onLongPress = _handleSemanticLongPress == null
-          ? null : _performSemanticLongPress
-      ..onHorizontalDragUpdate = _handleSemanticHorizontal == null
-          ? null : _performSemanticHorizontal
-      ..onVerticalDragUpdate = _handleSemanticVertical == null
-          ? null : _performSemanticVertical;
-  }
-
-  // The following methods are cached wrappers of the handling callbacks.
-  // Caching ensures that for each gesture of [RenderSemanticsGestureHandler],
-  // the callback is either null or an identical one as previously.
-  // They are assigned only when the corresponding performing callback is not
-  // null, therefore no null-check is needed.
-  void _performSemanticTap() {
-    _handleSemanticTap();
-  }
-  void _performSemanticLongPress() {
-    _handleSemanticLongPress();
-  }
-  void _performSemanticHorizontal(DragUpdateDetails details) {
-    _handleSemanticHorizontal(details);
-  }
-  void _performSemanticVertical(DragUpdateDetails details) {
-    _handleSemanticVertical(details);
+      ..onTap = _getTapHandler(recognizers)
+      ..onLongPress = _getLongPressHandler(recognizers)
+      ..onHorizontalDragUpdate = _getHorizontalDragUpdateHandler(recognizers)
+      ..onVerticalDragUpdate = _getVerticalDragUpdateHandler(recognizers);
   }
 
   GestureTapCallback _getTapHandler(Map<Type, GestureRecognizer> recognizers) {
