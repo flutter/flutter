@@ -126,11 +126,8 @@ Future<Chrome> _startChrome(
 Future<DevTools> _startDevTools(
   Configuration configuration,
 ) async {
-  DevTools devTool;
-  try {
-    devTool = await DevTools.start(configuration.hostname);
-      printTrace('Serving DevTools at http://${devTool.hostname}:${devTool.port}\n');
-  } catch (err) {}
+  final DevTools devTool = await DevTools.start(configuration.hostname);
+  printTrace('Serving DevTools at http://${devTool.hostname}:${devTool.port}\n');
   return devTool;
 }
 
@@ -217,9 +214,7 @@ class ResidentWebRunner extends ResidentRunner {
         );
 
   final Device device;
-  // WebAssetServer _server;
   ProjectFileInvalidator projectFileInvalidator;
-  // WipConnection _connection;
   final FlutterProject flutterProject;
 
   StreamSubscription<BuildResults> _buildResults;
@@ -234,24 +229,18 @@ class ResidentWebRunner extends ResidentRunner {
   vmservice.VmService get _vmService => _appDebugServices?.webdevClient?.client;
 
   StreamSubscription<BuildResult> _resultSub;
-
   StreamSubscription<vmservice.Event> _stdOutSub;
-  //String _appId;
 
   @override
   Future<int> attach(
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
-    // Connect to app and invoke main.
     final DevHandler devHandler = _serverManager.servers.first.devHandler;
-    // This should probably only be for a single app for now..
-
     final DevConnection connection = await devHandler.connectedApps.first;
     await _stdOutSub?.cancel();
     await _resultSub?.cancel();
     _appDebugServices = await devHandler.loadAppServices(
         connection.request.appId, connection.request.instanceId);
-    //_appId = connection.request.appId;
 
     // When a tab is closed we exit an app.
     unawaited(_appDebugServices.chromeProxyService.tabConnection.onClose.first.then((_) {
@@ -267,7 +256,6 @@ class ResidentWebRunner extends ResidentRunner {
     } catch (_) {}
 
     _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
-      // TODO: determine correct print to let daemon pick.
       printStatus(utf8.decode(base64.decode(log.bytes)));
     });
 
@@ -365,7 +353,6 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
-    // Create configuration.
     final Configuration configuration = Configuration(
       autoRun: true,
       debug: true,
@@ -394,109 +381,105 @@ class ResidentWebRunner extends ResidentRunner {
     // Register the current build targets.
     _registerBuildTargets(_client, configuration, targetPorts);
 
-    // Start the daemon build.
-    _client.startBuild();
-
-    // Start flutter dev tools.
+    // Start dev tools.
     _devTools = await _startDevTools(configuration);
 
-    // Start the server manager?
-
-    print('1');
+    // Start the web dev server.
     _serverManager = await _startServerManager(
-      configuration, targetPorts, workingDirectory, _client, _devTools, (Request request) async {
-      if (request.url.path.contains('main.dart.js')) {
-        final File file = fs.file(fs.path.join(
-          flutterProject.dartTool.path,
-          'build',
-          'flutter_web',
-          flutterProject.manifest.appName,
-          'lib',
-          'main_web_entrypoint.dart.js',
-        ));
-        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-          'Content-Type': 'text/javascript',
-        });
-      } else if (request.url.path.contains('stack_trace_mapper')) {
-        final File file = fs.file(fs.path.join(
-          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-          'lib',
-          'dev_compiler',
-          'web',
-          'dart_stack_trace_mapper.js'
-        ));
-        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-          'Content-Type': 'text/javascript',
-        });
-      } else if (request.url.path.contains('require.js')) {
-        final File file = fs.file(fs.path.join(
-          artifacts.getArtifactPath(Artifact.engineDartSdkPath),
-          'lib',
-          'dev_compiler',
-          'kernel',
-          'amd',
-          'require.js'
-        ));
-        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-          'Content-Type': 'text/javascript',
-        });
-      } else if (request.url.path.contains('.bootstrap.js')) {
-        final File file = fs.file(fs.path.join(
-          flutterProject.dartTool.path,
-          'build',
-          'flutter_web',
-          flutterProject.manifest.appName,
-          'lib',
-          'main_web_entrypoint.dart.bootstrap.js',
-        ));
-        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-          'Content-Type': 'text/javascript',
-        });
-      } else if (request.url.path.contains('dart_sdk')) {
-        final File file = fs.file(fs.path.join(
-          artifacts.getArtifactPath(Artifact.flutterWebSdk),
-          'kernel',
-          'amd',
-          'dart_sdk.js',
-        ));
-        return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-          'Content-Type': 'text/javascript',
-        });
-      } else if (request.url.path.contains('main_web_entrypoint.digests')) {
-        final File file = fs.file(fs.path.join(
-          flutterProject.dartTool.path,
-          'build',
-          'flutter_web',
-          flutterProject.manifest.appName,
-          'lib',
-          'main_web_entrypoint.digests',
-        ));
-        return Response.ok(file.readAsBytesSync());
-      } else if (request.url.path.contains('assets')) {
-        final String assetPath = request.url.path.replaceFirst('assets/', '');
-        print(assetPath);
-        final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
-        print(file.path);
-        return Response.ok(file.readAsBytesSync());
-      }
-      return Response.notFound('');
-    });
-    // Copy assets.
+      configuration,
+      targetPorts,
+      workingDirectory,
+      _client,
+      _devTools,
+      _assetHandler,
+    );
+
+    // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
-    // Start chrome?
-    print('2');
+    // Launch chrome.
     _chrome = await _startChrome(configuration, _serverManager, _client);
 
-    // We don't support the debugging proxy yet.
     appStartedCompleter?.complete();
-    print('3');
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
     );
+  }
+
+  Future<Response> _assetHandler(Request request) async {
+    final String generated = fs.path.join(
+      flutterProject.dartTool.path,
+      'build',
+      'flutter_web',
+      flutterProject.manifest.appName,
+    );
+    if (request.url.path.contains('main.dart.js')) {
+      final File file = fs.file(fs.path.join(
+        generated,
+        'lib',
+        'main_web_entrypoint.dart.js',
+      ));
+      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': 'text/javascript',
+      });
+    } else if (request.url.path.contains('stack_trace_mapper')) {
+      final File file = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'web',
+        'dart_stack_trace_mapper.js'
+      ));
+      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': 'text/javascript',
+      });
+    } else if (request.url.path.contains('require.js')) {
+      final File file = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'kernel',
+        'amd',
+        'require.js'
+      ));
+      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': 'text/javascript',
+      });
+    } else if (request.url.path.contains('.bootstrap.js')) {
+      final File file = fs.file(fs.path.join(
+        generated,
+        'lib',
+        'main_web_entrypoint.dart.bootstrap.js',
+      ));
+      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': 'text/javascript',
+      });
+    } else if (request.url.path.contains('dart_sdk')) {
+      final File file = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        'kernel',
+        'amd',
+        'dart_sdk.js',
+      ));
+      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
+        'Content-Type': 'text/javascript',
+      });
+    } else if (request.url.path.contains('main_web_entrypoint.digests')) {
+      final File file = fs.file(fs.path.join(
+        generated,
+        'lib',
+        'main_web_entrypoint.digests',
+      ));
+      return Response.ok(file.readAsBytesSync());
+    } else if (request.url.path.contains('assets')) {
+      final String assetPath = request.url.path.replaceFirst('assets/', '');
+      final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
+      return Response.ok(file.readAsBytesSync());
+    }
+    return Response.notFound('');
   }
 
   @override
