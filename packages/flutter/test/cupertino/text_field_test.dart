@@ -70,20 +70,15 @@ class PathBoundsMatcher extends Matcher {
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
     final Map<Matcher, dynamic> map = matchState['failedMatcher'];
-    final Iterable<Description> descriptions = map?.entries
-      .map<Description>(
-        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, entry.key.describe(description), matchState, verbose)
+    final Iterable<String> descriptions = map.entries
+      .map<String>(
+        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
       );
 
     if (descriptions != null) {
       description
         ..add('mismatch Rect: ${item.getBounds()}')
-        .addAll(
-          '',
-          ', ',
-          '',
-          descriptions,
-        );
+        .addAll(': ', ', ', '. ', descriptions);
     }
 
     return description;
@@ -2833,30 +2828,30 @@ void main() {
       await tester.pumpAndSettle();
 
       bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, 0);
-      print('!!!! $bottomLeftSelectionPosition');
       expect(
         find.byType(CupertinoToolbar),
         paints..clipPath(
           pathMatcher: PathPointsMatcher(
             excludes: <Offset> [
               // Arrow should not point to the selection handle.
-              bottomLeftSelectionPosition.translate(0, 8 + 3.5),
+              bottomLeftSelectionPosition.translate(0, 8 + 0.1),
             ],
             includes: <Offset> [
               // Expected center of the arrow.
-              Offset(26.0, bottomLeftSelectionPosition.dy + 8 + 3.5),
+              Offset(26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
             ],
           ),
         ),
       );
 
-      print(bottomLeftSelectionPosition.dy + 8);
       expect(
         find.byType(CupertinoToolbar),
         paints..clipPath(
           pathMatcher: PathBoundsMatcher(
-            topMatcher: moreOrLessEquals(8, epsilon: 0.001),
-            leftMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.001),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            leftMatcher: moreOrLessEquals(8),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
           ),
         ),
       );
@@ -2892,7 +2887,8 @@ void main() {
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
-      final Offset selectPostion = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset);
+      // -1 because we want to reach the end of the line, not the start of a new line.
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset - 1);
 
       expect(
         find.byType(CupertinoToolbar),
@@ -2900,28 +2896,27 @@ void main() {
           pathMatcher: PathPointsMatcher(
             excludes: <Offset> [
               // Arrow should not point to the selection handle.
-              selectPostion.translate(0, 8 + 3.5),
-              // The toolbar bubble should respect the minimum right padding.
-              Offset(400 - 7.9, selectPostion.dy + 8 + 20),
+              bottomLeftSelectionPosition.translate(0, 8 + 0.1),
             ],
             includes: <Offset> [
               // Expected center of the arrow.
-              Offset(400 - 26.0, selectPostion.dy + 8 + 3.5),
-              // The toolbar bubble should respect the minimum left padding.
-              Offset(400 - 8.1, selectPostion.dy + 8 + 20),
+              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
             ],
           ),
         ),
       );
 
-
-      /*
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('text_field.toolbar.collapsed_selection_topRight.png'),
-        skip: !Platform.isLinux,
+      expect(
+        find.byType(CupertinoToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            rightMatcher: moreOrLessEquals(400.0 - 8),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
       );
-        */
 
       // Normal centered collapsed selection. The toolbar arrow should point down, and
       // it should point exactly to the caret.
@@ -2953,12 +2948,31 @@ void main() {
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
-      /*
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('text_field.toolbar.collapsed_selection_center.png'),
-        skip: !Platform.isLinux,
-      ); */
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset);
+
+      expect(
+        find.byType(CupertinoToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              bottomLeftSelectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
     });
 
     testWidgets('selecting multiple words works', (WidgetTester tester) async {
@@ -2991,6 +3005,7 @@ void main() {
       );
 
       state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
 
       // Select the first 2 words.
       state.renderEditable.selectPositionAt(
@@ -3001,12 +3016,31 @@ void main() {
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
-      /*
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('text_field.toolbar.multiword_selection_center.png'),
-        skip: !Platform.isLinux,
-      ); */
+      final Offset selectionPosition = (textOffsetToBottomLeftPosition(tester, 0) + textOffsetToBottomLeftPosition(tester, 4)) / 2;
+
+      expect(
+        find.byType(CupertinoToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              selectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
     });
 
     testWidgets('selecting multiline works', (WidgetTester tester) async {
@@ -3039,6 +3073,7 @@ void main() {
       );
 
       state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
 
       // Select the first 2 words.
       state.renderEditable.selectPositionAt(
@@ -3049,12 +3084,35 @@ void main() {
       expect(state.showToolbar(), true);
       await tester.pumpAndSettle();
 
-      /*
-      await expectLater(
-        find.byType(CupertinoApp),
-        matchesGoldenFile('text_field.toolbar.multiline_selection_center.png'),
-        skip: !Platform.isLinux,
-      ); */
+      final Offset selectionPosition = Offset(
+        // Toolbar should be centered.
+        200,
+        textOffsetToBottomLeftPosition(tester, 0).dy,
+      );
+
+      expect(
+        find.byType(CupertinoToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              selectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
     });
   });
 }

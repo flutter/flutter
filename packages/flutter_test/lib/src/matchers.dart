@@ -1120,6 +1120,12 @@ class _MoreOrLessEquals extends Matcher {
 
   @override
   Description describe(Description description) => description.add('$value (±$epsilon)');
+
+  @override
+  Description describeMismatch(Object item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    return super.describeMismatch(item, mismatchDescription, matchState, verbose)
+      ..add('$item is not in the range of ${value - epsilon} - ${value + epsilon}.');
+  }
 }
 
 class _IsMethodCall extends Matcher {
