@@ -153,19 +153,19 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       buildEnvironment,
       builders,
       <String, Map<String, dynamic>>{
-        'flutter_tools|ddc': <String, dynamic>{
+        'flutter_tools:ddc': <String, dynamic>{
           'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
         },
-        'flutter_tools|entrypoint': <String, dynamic>{
+        'flutter_tools:entrypoint': <String, dynamic>{
           'targets': targets,
           'release': release,
           'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
         },
-        'flutter_tools|test_entrypoint': <String, dynamic>{
+        'flutter_tools:test_entrypoint': <String, dynamic>{
           'targets': targets,
           'release': release,
         },
-        'flutter_tools|shell': <String, dynamic>{
+        'flutter_tools:shell': <String, dynamic>{
           'targets': targets,
         }
       },

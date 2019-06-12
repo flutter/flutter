@@ -65,7 +65,7 @@ final DartPlatform flutterWebPlatform =
 /// The build application to compile a flutter application to the web.
 final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
-    'flutter_tools|test_bootstrap',
+    'flutter_tools:test_bootstrap',
     <BuilderFactory>[
       (BuilderOptions options) => const DebugTestBuilder(),
       (BuilderOptions options) => const FlutterWebTestBootstrapBuilder(),
@@ -79,7 +79,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     ),
   ),
   core.apply(
-    'flutter_tools|shell',
+    'flutter_tools:shell',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebShellBuilder(
         options.config['targets'] ?? <String>['lib/main.dart']
@@ -95,14 +95,14 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     ),
   ),
   core.apply(
-      'flutter_tools|module_library',
+      'flutter_tools:module_library',
       <Builder Function(BuilderOptions)>[moduleLibraryBuilder],
       core.toAllPackages(),
       isOptional: true,
       hideOutput: true,
-      appliesBuilders: <String>['flutter_tools|module_cleanup']),
+      appliesBuilders: <String>['flutter_tools:module_cleanup']),
   core.apply(
-      'flutter_tools|ddc_modules',
+      'flutter_tools:ddc_modules',
       <Builder Function(BuilderOptions)>[
         (BuilderOptions options) => MetaModuleBuilder(flutterWebPlatform),
         (BuilderOptions options) => MetaModuleCleanBuilder(flutterWebPlatform),
@@ -111,9 +111,9 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       core.toNoneByDefault(),
       isOptional: true,
       hideOutput: true,
-      appliesBuilders: <String>['flutter_tools|module_cleanup']),
+      appliesBuilders: <String>['flutter_tools:module_cleanup']),
   core.apply(
-      'flutter_tools|ddc',
+      'flutter_tools:ddc',
       <Builder Function(BuilderOptions)>[
         (BuilderOptions builderOptions) => KernelBuilder(
               platformSdk: builderOptions.config['flutterWebSdk'],
@@ -133,13 +133,13 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       core.toAllPackages(),
       isOptional: true,
       hideOutput: true,
-      appliesBuilders: <String>['flutter_tools|ddc_modules']),
+      appliesBuilders: <String>['flutter_tools:ddc_modules']),
   core.apply(
-    'flutter_tools|entrypoint',
+    'flutter_tools:entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
           options.config['targets'] ?? <String>['lib/main.dart'],
-          options.config['release'],
+          options.config['release'] ??  false,
           options.config['flutterWebSdk'],
       ),
     ],
@@ -152,7 +152,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     ),
   ),
   core.apply(
-    'flutter_tools|test_entrypoint',
+    'flutter_tools:test_entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebTestEntrypointBuilder(
         options.config['targets'] ?? const <String>[]
@@ -166,7 +166,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       ],
     ),
   ),
-  core.applyPostProcess('flutter_tools|module_cleanup', moduleCleanup,
+  core.applyPostProcess('flutter_tools:module_cleanup', moduleCleanup,
       defaultGenerateFor: const InputSet())
 ];
 
