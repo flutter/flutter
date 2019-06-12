@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
@@ -837,7 +838,9 @@ class FlutterPlatform extends PlatformPlugin {
     ]);
     printTrace(command.join(' '));
     final Map<String, String> environment = <String, String>{
-      'FLUTTER_TEST': 'true',
+      'FLUTTER_TEST': io.Platform.environment.containsKey('FLUTTER_TEST')
+        ? '${io.Platform.environment['FLUTTER_TEST']}'
+        : 'true',
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
     };
