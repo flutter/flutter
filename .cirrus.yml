@@ -186,6 +186,8 @@ task:
   # with the actual time - this should help to verify
   print_date_script:
     - date
+  install_cocoapods_script:
+    - sudo gem install cocoapods
   git_fetch_script:
     - git clean -xfd
     - git fetch origin

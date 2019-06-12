@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -507,8 +508,8 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
-    void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    void expectExists(String relPath, [bool expectation = true]) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), expectation);
     }
 
     expectExists('lib/main.dart');
@@ -549,6 +550,9 @@ void main() {
     final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    // Xcode build system
+    final String xcodeWorkspaceSettingsPath = fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata', 'WorkspaceSettings.xcsettings');
+    expectExists(xcodeWorkspaceSettingsPath, false);
 
     final String versionPath = fs.path.join('.metadata');
     expectExists(versionPath);
@@ -1300,13 +1304,13 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   */
 
   @override
-  StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
+  StreamSubscription<Uint8List> listen(
+    void onData(Uint8List event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
+    return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
