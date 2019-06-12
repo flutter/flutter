@@ -81,8 +81,8 @@ void SessionConnection::EnqueueClearOps() {
 }
 
 void SessionConnection::PresentSession() {
-  FML_TRACE_EVENT0("gfx", "SessionConnection::PresentSession");
-  FML_TRACE_FLOW_BEGIN("gfx", "Session::Present", next_present_trace_id_);
+  TRACE_EVENT0("gfx", "SessionConnection::PresentSession");
+  TRACE_FLOW_BEGIN("gfx", "Session::Present", next_present_trace_id_);
   next_present_trace_id_++;
 
   ToggleSignal(vsync_event_handle_, false);

@@ -78,7 +78,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
        &platform_view,  //
        io_task_runner   //
   ]() {
-        FML_TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
+        TRACE_EVENT0("flutter", "ShellSetupIOSubsystem");
         io_manager = std::make_unique<ShellIOManager>(
             platform_view->CreateResourceContext(), io_task_runner);
         io_latch.Signal();
@@ -96,7 +96,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                                         shell = shell.get(),   //
                                         &snapshot_delegate     //
   ]() {
-        FML_TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
+        TRACE_EVENT0("flutter", "ShellSetupGPUSubsystem");
         if (auto new_rasterizer = on_create_rasterizer(*shell)) {
           rasterizer = std::move(new_rasterizer);
           snapshot_delegate = rasterizer->GetSnapshotDelegate();
@@ -120,7 +120,7 @@ std::unique_ptr<Shell> Shell::CreateShellOnPlatformThread(
                          snapshot_delegate = std::move(snapshot_delegate),  //
                          io_manager = io_manager->GetWeakPtr()              //
   ]() mutable {
-        FML_TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
+        TRACE_EVENT0("flutter", "ShellSetupUISubsystem");
         const auto& task_runners = shell->GetTaskRunners();
 
         // The animator is owned by the UI thread but it gets its vsync pulses
@@ -212,7 +212,7 @@ std::unique_ptr<Shell> Shell::Create(
     Shell::CreateCallback<Rasterizer> on_create_rasterizer) {
   PerformInitializationTasks(settings);
 
-  FML_TRACE_EVENT0("flutter", "Shell::Create");
+  TRACE_EVENT0("flutter", "Shell::Create");
 
   auto vm = DartVMRef::Create(settings);
   FML_CHECK(vm) << "Must be able to initialize the VM.";
@@ -239,7 +239,7 @@ std::unique_ptr<Shell> Shell::Create(
     DartVMRef vm) {
   PerformInitializationTasks(settings);
 
-  FML_TRACE_EVENT0("flutter", "Shell::CreateWithSnapshots");
+  TRACE_EVENT0("flutter", "Shell::CreateWithSnapshots");
 
   if (!task_runners.IsValid() || !on_create_platform_view ||
       !on_create_rasterizer) {
@@ -439,7 +439,7 @@ DartVM* Shell::GetDartVM() {
 
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
-  FML_TRACE_EVENT0("flutter", "Shell::OnPlatformViewCreated");
+  TRACE_EVENT0("flutter", "Shell::OnPlatformViewCreated");
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -523,7 +523,7 @@ void Shell::OnPlatformViewCreated(std::unique_ptr<Surface> surface) {
 
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewDestroyed() {
-  FML_TRACE_EVENT0("flutter", "Shell::OnPlatformViewDestroyed");
+  TRACE_EVENT0("flutter", "Shell::OnPlatformViewDestroyed");
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
 
@@ -625,8 +625,8 @@ void Shell::OnPlatformViewDispatchPlatformMessage(
 // |PlatformView::Delegate|
 void Shell::OnPlatformViewDispatchPointerDataPacket(
     std::unique_ptr<PointerDataPacket> packet) {
-  FML_TRACE_EVENT0("flutter", "Shell::OnPlatformViewDispatchPointerDataPacket");
-  FML_TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
+  TRACE_EVENT0("flutter", "Shell::OnPlatformViewDispatchPointerDataPacket");
+  TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
   FML_DCHECK(is_setup_);
   FML_DCHECK(task_runners_.GetPlatformTaskRunner()->RunsTasksOnCurrentThread());
   task_runners_.GetUITaskRunner()->PostTask(fml::MakeCopyable(
@@ -1198,7 +1198,7 @@ bool Shell::OnServiceProtocolSetAssetBundlePath(
 Rasterizer::Screenshot Shell::Screenshot(
     Rasterizer::ScreenshotType screenshot_type,
     bool base64_encode) {
-  FML_TRACE_EVENT0("flutter", "Shell::Screenshot");
+  TRACE_EVENT0("flutter", "Shell::Screenshot");
   fml::AutoResetWaitableEvent latch;
   Rasterizer::Screenshot screenshot;
   fml::TaskRunner::RunNowOrPostTask(

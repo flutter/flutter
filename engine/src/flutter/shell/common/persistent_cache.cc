@@ -79,7 +79,7 @@ bool PersistentCache::IsValid() const {
 
 // |GrContextOptions::PersistentCache|
 sk_sp<SkData> PersistentCache::load(const SkData& key) {
-  FML_TRACE_EVENT0("flutter", "PersistentCacheLoad");
+  TRACE_EVENT0("flutter", "PersistentCacheLoad");
   if (!IsValid()) {
     return nullptr;
   }
@@ -97,7 +97,7 @@ sk_sp<SkData> PersistentCache::load(const SkData& key) {
     return nullptr;
   }
 
-  FML_TRACE_EVENT0("flutter", "PersistentCacheLoadHit");
+  TRACE_EVENT0("flutter", "PersistentCacheLoadHit");
   return SkData::MakeWithCopy(mapping->GetMapping(), mapping->GetSize());
 }
 
@@ -110,7 +110,7 @@ static void PersistentCacheStore(fml::RefPtr<fml::TaskRunner> worker,
                          file_name = std::move(key),  //
                          mapping = std::move(value)   //
   ]() mutable {
-        FML_TRACE_EVENT0("flutter", "PersistentCacheStore");
+        TRACE_EVENT0("flutter", "PersistentCacheStore");
         if (!fml::WriteAtomically(*cache_directory,   //
                                   file_name.c_str(),  //
                                   *mapping)           //

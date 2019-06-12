@@ -419,7 +419,7 @@ sk_sp<SkTypeface> FuchsiaFontManager::FetchTypeface(const char family_name[],
                                                     int bcp47_count,
                                                     SkUnichar character,
                                                     uint32_t flags) const {
-  FML_TRACE_EVENT0("flutter", "FuchsiaFontManager::FetchTypeface");
+  TRACE_EVENT0("flutter", "FuchsiaFontManager::FetchTypeface");
   fuchsia::fonts::Request request;
   request.family = family_name;
   request.weight = style.weight();

@@ -48,7 +48,7 @@ sk_sp<GrContext> EmbedderSurfaceSoftware::CreateResourceContext() const {
 // |GPUSurfaceSoftwareDelegate|
 sk_sp<SkSurface> EmbedderSurfaceSoftware::AcquireBackingStore(
     const SkISize& size) {
-  FML_TRACE_EVENT0("flutter", "EmbedderSurfaceSoftware::AcquireBackingStore");
+  TRACE_EVENT0("flutter", "EmbedderSurfaceSoftware::AcquireBackingStore");
   if (!IsValid()) {
     FML_LOG(ERROR)
         << "Could not acquire backing store for the software surface.";

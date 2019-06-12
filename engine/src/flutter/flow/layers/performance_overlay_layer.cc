@@ -76,7 +76,7 @@ void PerformanceOverlayLayer::Paint(PaintContext& context) const {
   if (!options_)
     return;
 
-  FML_TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
+  TRACE_EVENT0("flutter", "PerformanceOverlayLayer::Paint");
   SkScalar x = paint_bounds().x() + padding;
   SkScalar y = paint_bounds().y() + padding;
   SkScalar width = paint_bounds().width() - (padding * 2);

@@ -26,7 +26,7 @@ constexpr SkColorType kSkiaColorType = kBGRA_8888_SkColorType;
 bool CreateVulkanImage(vulkan::VulkanProvider& vulkan_provider,
                        const SkISize& size,
                        VulkanImage* out_vulkan_image) {
-  FML_TRACE_EVENT0("flutter", "CreateVulkanImage");
+  TRACE_EVENT0("flutter", "CreateVulkanImage");
 
   FML_DCHECK(!size.isEmpty());
   FML_DCHECK(out_vulkan_image != nullptr);
@@ -244,7 +244,7 @@ bool VulkanSurface::AllocateDeviceMemory(sk_sp<GrContext> context,
   };
 
   {
-    FML_TRACE_EVENT0("flutter", "vkAllocateMemory");
+    TRACE_EVENT0("flutter", "vkAllocateMemory");
     VkDeviceMemory vk_memory = VK_NULL_HANDLE;
     if (VK_CALL_LOG_ERROR(vulkan_provider_.vk().AllocateMemory(
             vulkan_provider_.vk_device(), &alloc_info, NULL, &vk_memory)) !=

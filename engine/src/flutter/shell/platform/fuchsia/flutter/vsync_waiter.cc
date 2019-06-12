@@ -66,7 +66,7 @@ void VsyncWaiter::AwaitVSync() {
 }
 
 void VsyncWaiter::FireCallbackWhenSessionAvailable() {
-  FML_TRACE_EVENT0("flutter", "VsyncWaiter::FireCallbackWhenSessionAvailable");
+  TRACE_EVENT0("flutter", "VsyncWaiter::FireCallbackWhenSessionAvailable");
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
   if (session_wait_.Begin(async_get_default_dispatcher()) != ZX_OK) {
     FML_LOG(ERROR) << "Could not begin wait for Vsync.";

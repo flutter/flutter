@@ -70,7 +70,7 @@ sk_sp<SkImage> ConvertToRasterImageIfNecessary(sk_sp<SkImage> image,
     return nullptr;
   }
 
-  FML_TRACE_EVENT0("flutter", __FUNCTION__);
+  TRACE_EVENT0("flutter", __FUNCTION__);
 
   // Create a GPU surface with the context and then do a device to host copy of
   // image contents.
@@ -135,7 +135,7 @@ sk_sp<SkData> CopyImageByteData(sk_sp<SkImage> raster_image,
 sk_sp<SkData> EncodeImage(sk_sp<SkImage> p_image,
                           GrContext* context,
                           ImageByteFormat format) {
-  FML_TRACE_EVENT0("flutter", __FUNCTION__);
+  TRACE_EVENT0("flutter", __FUNCTION__);
 
   // Check validity of the image.
   if (p_image == nullptr) {

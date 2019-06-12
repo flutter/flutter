@@ -54,7 +54,7 @@ void Scene::dispose() {
 Dart_Handle Scene::toImage(uint32_t width,
                            uint32_t height,
                            Dart_Handle raw_image_callback) {
-  FML_TRACE_EVENT0("flutter", "Scene::toImage");
+  TRACE_EVENT0("flutter", "Scene::toImage");
 
   if (!m_layerTree) {
     return tonic::ToDart("Scene did not contain a layer tree.");

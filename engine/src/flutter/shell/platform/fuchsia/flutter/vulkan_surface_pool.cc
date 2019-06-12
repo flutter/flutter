@@ -108,7 +108,7 @@ std::unique_ptr<VulkanSurface> VulkanSurfacePool::GetCachedOrCreateSurface(
 void VulkanSurfacePool::SubmitSurface(
     std::unique_ptr<flutter::SceneUpdateContext::SurfaceProducerSurface>
         p_surface) {
-  FML_TRACE_EVENT0("flutter", "VulkanSurfacePool::SubmitSurface");
+  TRACE_EVENT0("flutter", "VulkanSurfacePool::SubmitSurface");
 
   // This cast is safe because |VulkanSurface| is the only implementation of
   // |SurfaceProducerSurface| for Flutter on Fuchsia.  Additionally, it is
@@ -157,7 +157,7 @@ void VulkanSurfacePool::SubmitSurface(
 
 std::unique_ptr<VulkanSurface> VulkanSurfacePool::CreateSurface(
     const SkISize& size) {
-  FML_TRACE_EVENT0("flutter", "VulkanSurfacePool::CreateSurface");
+  TRACE_EVENT0("flutter", "VulkanSurfacePool::CreateSurface");
   auto surface = std::make_unique<VulkanSurface>(vulkan_provider_, context_,
                                                  scenic_session_, size);
   if (!surface->IsValid()) {
@@ -217,7 +217,7 @@ void VulkanSurfacePool::SignalRetainedReady(flutter::LayerRasterCacheKey key) {
 }
 
 void VulkanSurfacePool::AgeAndCollectOldBuffers() {
-  FML_TRACE_EVENT0("flutter", "VulkanSurfacePool::AgeAndCollectOldBuffers");
+  TRACE_EVENT0("flutter", "VulkanSurfacePool::AgeAndCollectOldBuffers");
 
   // Remove all surfaces that are no longer valid or are too old.
   available_surfaces_.erase(

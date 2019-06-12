@@ -192,8 +192,8 @@ void AndroidShellHolder::DispatchPointerDataPacket(
     return;
   }
 
-  FML_TRACE_EVENT0("flutter", "AndroidShellHolder::DispatchPointerDataPacket");
-  FML_TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
+  TRACE_EVENT0("flutter", "AndroidShellHolder::DispatchPointerDataPacket");
+  TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
 
   shell_->GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
       [engine = shell_->GetEngine(), packet = std::move(packet),
