@@ -1026,7 +1026,7 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 /// callbacks that are assigned to [RenderSemanticsGestureHandler].
 abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
-  SemanticsGestureDelegate();
+  const SemanticsGestureDelegate();
 
   /// Assigns semantics notations to the render object
   /// [RenderSemanticsGestureHandler] of the gesture detector.
