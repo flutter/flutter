@@ -10,21 +10,21 @@ import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/service.dart';
-import 'package:logging/logging.dart' as logging;
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/src/request.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
-import 'package:webdev/src/command/configuration.dart';
-import 'package:webdev/src/daemon_client.dart';
-import 'package:webdev/src/logging.dart';
-import 'package:webdev/src/serve/chrome.dart';
-import 'package:webdev/src/serve/debugger/app_debug_services.dart';
-import 'package:webdev/src/serve/debugger/devtools.dart';
-import 'package:webdev/src/serve/handlers/dev_handler.dart';
-import 'package:webdev/src/serve/server_manager.dart';
-import 'package:webdev/src/serve/webdev_server.dart';
-import 'package:webdev/src/serve/injected/configuration.dart';
+
+/// SRC IMPORTS
+import 'package:webdev/src/command/configuration.dart' show Configuration;
+import 'package:webdev/src/daemon_client.dart' show daemonPort;
+import 'package:webdev/src/serve/chrome.dart' show Chrome, ChromeError;
+import 'package:webdev/src/serve/debugger/app_debug_services.dart' show AppDebugServices;
+import 'package:webdev/src/serve/debugger/devtools.dart'  show DevTools;
+import 'package:webdev/src/serve/handlers/dev_handler.dart'  show DevHandler, DevConnection;
+import 'package:webdev/src/serve/injected/configuration.dart' show ReloadConfiguration;
+import 'package:webdev/src/serve/webdev_server.dart' show WebDevServer, ServerOptions;
+////
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -66,7 +66,7 @@ Future<BuildDaemonClient> connectClient(
       '--skip-build-script-check',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
-      '--define', 'flutter_tools:entrypoint=release=false', // hard coded for now
+      '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
       '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
       ...options,
     ],
@@ -100,24 +100,26 @@ Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory, List<String
       },
     );
   } on OptionsSkew {
-    throw StateError(
-        'Incompatible options with current running build daemon.\n\n'
-        'Please stop other WebDev instances running in this directory '
-        'before starting a new instance with these options.');
+    throwToolExit(
+      'Incompatible options with current running build daemon.\n\n'
+      'Please stop other flutter_tool instances running in this directory '
+      'before starting a new instance with these options.');
   }
+  return null;
 }
 
 Future<Chrome> _startChrome(
   Configuration configuration,
-  ServerManager serverManager,
+  WebDevServer server,
   BuildDaemonClient client,
 ) async {
-  final List<String> uris =
-      serverManager.servers.map((WebDevServer s) => 'http://${s.host}:${s.port}/').toList();
+  final List<String> uris = <String>[
+    'http://${server.host}:${server.port}/'
+  ];
   try {
     return await Chrome.start(uris, port: configuration.chromeDebugPort);
   } on ChromeError {
-    await serverManager.stop();
+    await server.stop();
     await client.close();
     rethrow;
   }
@@ -164,38 +166,6 @@ void _registerBuildTargets(
   }
 }
 
-Future<ServerManager> _startServerManager(
-  Configuration configuration,
-  Map<String, int> targetPorts,
-  String workingDirectory,
-  BuildDaemonClient client,
-  DevTools devTools,
-  Handler handler,
-) async {
-  final int assetPort = daemonPort(workingDirectory);
-  final Set<ServerOptions> serverOptions = <ServerOptions>{};
-  for (String target in targetPorts.keys) {
-    serverOptions.add(ServerOptions(
-      configuration,
-      targetPorts[target],
-      target,
-      assetPort,
-      handler,
-    ));
-  }
-  logWriter(logging.Level.INFO, 'Starting resource servers...');
-  final ServerManager serverManager =
-      await ServerManager.start(serverOptions, client.buildResults, devTools);
-
-  for (WebDevServer server in serverManager.servers) {
-    printTrace(
-      'Serving `${server.target}` on '
-      'http://${server.host}:${server.port}\n');
-  }
-
-  return serverManager;
-}
-
 /// A hot-runner which handles browser specific delegation.
 class ResidentWebRunner extends ResidentRunner {
   ResidentWebRunner(this.device, {
@@ -220,9 +190,9 @@ class ResidentWebRunner extends ResidentRunner {
   StreamSubscription<BuildResults> _buildResults;
   DevTools _devTools;
   Chrome _chrome;
-  ServerManager _serverManager;
   BuildDaemonClient _client;
   AppDebugServices _appDebugServices;
+  WebDevServer _webdevServer;
 
   DebugService get _debugService => _appDebugServices?.debugService;
 
@@ -230,48 +200,6 @@ class ResidentWebRunner extends ResidentRunner {
 
   StreamSubscription<BuildResult> _resultSub;
   StreamSubscription<vmservice.Event> _stdOutSub;
-
-  @override
-  Future<int> attach(
-      {Completer<DebugConnectionInfo> connectionInfoCompleter,
-      Completer<void> appStartedCompleter}) async {
-    final DevHandler devHandler = _serverManager.servers.first.devHandler;
-    final DevConnection connection = await devHandler.connectedApps.first;
-    await _stdOutSub?.cancel();
-    await _resultSub?.cancel();
-    _appDebugServices = await devHandler.loadAppServices(
-        connection.request.appId, connection.request.instanceId);
-
-    // When a tab is closed we exit an app.
-    unawaited(_appDebugServices.chromeProxyService.tabConnection.onClose.first.then((_) {
-      appFinished();
-    }));
-
-    // Cleanup old subscriptions.
-    try {
-      await _vmService.streamCancel('Stdout');
-    } catch (_) {}
-    try {
-      await _vmService.streamListen('Stdout');
-    } catch (_) {}
-
-    _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
-      printStatus(utf8.decode(base64.decode(log.bytes)));
-    });
-
-    // Response with debug info!
-    // How does this map from the existing code?
-    connectionInfoCompleter?.complete(DebugConnectionInfo(
-      wsUri: Uri.parse(_debugService.wsUri),
-    ));
-    // Run main!
-    connection.runMain();
-    _resultSub = devHandler.buildResults.listen(_handleBuildResult);
-    setupTerminal();
-    final int result = await waitForAppToFinish();
-    await cleanupAtFinish();
-    return result;
-  }
 
   void _handleBuildResult(BuildResult result) {
     printStatus(result.status.name);
@@ -292,7 +220,7 @@ class ResidentWebRunner extends ResidentRunner {
     await _chrome?.close();
     await _client?.close();
     await _devTools?.close();
-    await _serverManager?.stop();
+    await _webdevServer?.stop();
   }
 
   @override
@@ -385,14 +313,14 @@ class ResidentWebRunner extends ResidentRunner {
     _devTools = await _startDevTools(configuration);
 
     // Start the web dev server.
-    _serverManager = await _startServerManager(
+    final int assetPort = daemonPort(workingDirectory);
+    _webdevServer = await WebDevServer.start(ServerOptions(
       configuration,
-      targetPorts,
-      workingDirectory,
-      _client,
-      _devTools,
+      targetPorts['web'],
+      'web',
+      assetPort,
       _assetHandler,
-    );
+    ), _client.buildResults, _devTools);
 
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -400,13 +328,55 @@ class ResidentWebRunner extends ResidentRunner {
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
     // Launch chrome.
-    _chrome = await _startChrome(configuration, _serverManager, _client);
+    _chrome = await _startChrome(configuration, _webdevServer, _client);
 
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
       appStartedCompleter: appStartedCompleter,
     );
+  }
+
+  @override
+  Future<int> attach(
+      {Completer<DebugConnectionInfo> connectionInfoCompleter,
+      Completer<void> appStartedCompleter}) async {
+    final DevHandler devHandler = _webdevServer.devHandler;
+    final DevConnection connection = await devHandler.connectedApps.first;
+    await _stdOutSub?.cancel();
+    await _resultSub?.cancel();
+    _appDebugServices = await devHandler.loadAppServices(
+        connection.request.appId, connection.request.instanceId);
+
+    // When a tab is closed we exit an app.
+    unawaited(_appDebugServices.chromeProxyService.tabConnection.onClose.first.then((_) {
+      appFinished();
+    }));
+
+    // Cleanup old subscriptions.
+    try {
+      await _vmService.streamCancel('Stdout');
+    } catch (_) {}
+    try {
+      await _vmService.streamListen('Stdout');
+    } catch (_) {}
+
+    _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
+      printStatus(utf8.decode(base64.decode(log.bytes)));
+    });
+
+    // Response with debug info!
+    // How does this map from the existing code?
+    connectionInfoCompleter?.complete(DebugConnectionInfo(
+      wsUri: Uri.parse(_debugService.wsUri),
+    ));
+    // Run main!
+    connection.runMain();
+    _resultSub = devHandler.buildResults.listen(_handleBuildResult);
+    setupTerminal();
+    final int result = await waitForAppToFinish();
+    await cleanupAtFinish();
+    return result;
   }
 
   Future<Response> _assetHandler(Request request) async {
@@ -498,7 +468,6 @@ class ResidentWebRunner extends ResidentRunner {
       timeout: timeoutConfiguration.fastOperation,
       progressId: 'hot.restart',
     );
-    // await _vmService.callServiceExtension('ext.flutter.disassemble');
     final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
     status.stop();
     printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');

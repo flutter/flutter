@@ -55,7 +55,7 @@ void main() {
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, 105.0);
     expect(largeSize.height, equals(21.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Text respects textScaleFactor with explicit font size', (WidgetTester tester) async {
     await tester.pumpWidget(const Center(
@@ -83,7 +83,7 @@ void main() {
     final Size largeSize = tester.getSize(find.byType(RichText));
     expect(largeSize.width, anyOf(131.0, 130.0));
     expect(largeSize.height, equals(26.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Text throws a nice error message if there\'s no Directionality', (WidgetTester tester) async {
     await tester.pumpWidget(const Text('Hello'));
@@ -227,7 +227,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
 
   testWidgets('recognizers split semantic node - bidi', (WidgetTester tester) async {
@@ -356,7 +356,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('inline widgets semantic nodes scale', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -427,7 +427,7 @@ void main() {
     );
     expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true,));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Overflow is clipping correctly - short text with overflow: clip', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -447,7 +447,7 @@ void main() {
     );
 
     expect(find.byType(Text), paints..clipRect(rect: const Rect.fromLTWH(0, 0, 50, 50)));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Overflow is clipping correctly - short text with overflow: ellipsis', (WidgetTester tester) async {
     await _pumpTextWidget(
@@ -534,7 +534,7 @@ void main() {
     final Size textSizeLongestLine = tester.getSize(find.byType(Text));
     expect(textSizeLongestLine.width, equals(630.0));
     expect(textSizeLongestLine.height, equals(fontHeight * 2));
-  });
+  }, skip: isBrowser);
 }
 
 Future<void> _pumpTextWidget({ WidgetTester tester, String text, TextOverflow overflow }) {
