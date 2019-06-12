@@ -174,7 +174,7 @@ void main() {
     semantics.dispose();
   });
 
-  group('RawGestureDetector\'s default semantics mapping', () {
+  group('RawGestureDetector\'s default semantics delegate', () {
     Map<Type, GestureRecognizerFactory> buildGestureMap<T extends GestureRecognizer>(
       GestureRecognizerFactoryConstructor<T> constructor,
       GestureRecognizerFactoryInitializer<T> initializer,

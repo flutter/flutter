@@ -766,14 +766,14 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// Gesture detectors can contribute semantic information to the tree that is
   /// used by assistive technology. The behavior can be configured by
-  /// `semanticsMapping`, or disabled with [excludeFromSemantics].
+  /// `semantics`, or disabled with [excludeFromSemantics].
   const RawGestureDetector({
     Key key,
     this.child,
     this.gestures = const <Type, GestureRecognizerFactory>{},
     this.behavior,
     this.excludeFromSemantics = false,
-    this.semanticsMapping,
+    this.semantics,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);
@@ -810,21 +810,21 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// It has no effect if [excludeFromSemantics] is true.
   ///
-  /// When [semanticsMapping] is null, [RawGestureDetector] will fall back to
-  /// default mapping that behaves as follows:
+  /// When [semantics] is null, [RawGestureDetector] will fall back to
+  /// default delegate that behaves as follows:
   ///
-  ///  * On a semantic tap, it looks for [TapGestureRecognizer] and calls
+  ///  * During a semantic tap, it looks for [TapGestureRecognizer] and calls
   ///    `onTapDown`, `onTapUp`, and `onTap`.
-  ///  * On a semantic long press, it looks for [LongPressGestureRecognizer] and
-  ///    calls `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
+  ///  * During a semantic long press, it looks for [LongPressGestureRecognizer]
+  ///    and calls `onLongPressStart`, `onLongPress`, `onLongPressEnd` and
   ///    `onLongPressUp`.
-  ///  * On a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
+  ///  * During a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
   ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
   ///    for [PanGestureRecognizer] and calls the same methods.
-  ///  * On a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
+  ///  * During a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
   ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
   ///    for [PanGestureRecognizer] and calls the same methods.
-  final SemanticsGestureDelegate semanticsMapping;
+  final SemanticsGestureDelegate semantics;
 
   @override
   RawGestureDetectorState createState() => RawGestureDetectorState();
@@ -833,12 +833,12 @@ class RawGestureDetector extends StatefulWidget {
 /// State for a [RawGestureDetector].
 class RawGestureDetectorState extends State<RawGestureDetector> {
   Map<Type, GestureRecognizer> _recognizers = const <Type, GestureRecognizer>{};
-  SemanticsGestureDelegate _semanticsMapping;
+  SemanticsGestureDelegate _semantics;
 
   @override
   void initState() {
     super.initState();
-    _semanticsMapping = widget.semanticsMapping ??
+    _semantics = widget.semantics ??
       _DefaultSemanticsGestureDelegate(this);
     _syncAll(widget.gestures);
   }
@@ -846,10 +846,10 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   @override
   void didUpdateWidget(RawGestureDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Re-initialize semantics mapping unless mapping has always been default
-    // (avoid unnecessary construction of _DefaultGestureSemanticsMapping).
-    if (!(oldWidget.semanticsMapping == null && widget.semanticsMapping == null)) {
-      _semanticsMapping = widget.semanticsMapping ??
+    // Re-initialize semantics delegate unless delegate has always been default
+    // (avoid unnecessary construction of _DefaultGestureSemanticsDelegate).
+    if (!(oldWidget.semantics == null && widget.semantics == null)) {
+      _semantics = widget.semantics ??
         _DefaultSemanticsGestureDelegate(this);
     }
     _syncAll(widget.gestures);
@@ -954,8 +954,8 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   void _updateSemanticsForObject(RenderSemanticsGestureHandler renderObject) {
     assert(!widget.excludeFromSemantics);
-    assert(_semanticsMapping != null);
-    _semanticsMapping.assignSemantics(renderObject);
+    assert(_semantics != null);
+    _semantics.assignSemantics(renderObject);
   }
 
   @override
@@ -983,7 +983,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       properties.add(IterableProperty<String>('gestures', gestures, ifEmpty: '<none>'));
       properties.add(IterableProperty<GestureRecognizer>('recognizers', _recognizers.values, level: DiagnosticLevel.fine));
       properties.add(DiagnosticsProperty<bool>('excludeFromSemantics', widget.excludeFromSemantics, defaultValue: false));
-      properties.add(DiagnosticsProperty<SemanticsGestureDelegate>('semanticsMapping', widget.semanticsMapping));
+      properties.add(DiagnosticsProperty<SemanticsGestureDelegate>('semantics', widget.semantics));
     }
     properties.add(EnumProperty<HitTestBehavior>('behavior', widget.behavior, defaultValue: null));
   }
@@ -1025,7 +1025,7 @@ typedef GetRecognizerHandler = GestureRecognizer Function(Type);
 /// It is recommended to store this object in a widget state, and cache the
 /// callbacks that are assigned to [RenderSemanticsGestureHandler].
 abstract class SemanticsGestureDelegate {
-  /// Create a mapping of gesture semantics.
+  /// Create a delegate of gesture semantics.
   SemanticsGestureDelegate();
 
   /// Assigns semantics notations to the render object
