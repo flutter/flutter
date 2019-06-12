@@ -42,6 +42,8 @@ class EmbedderConfigBuilder {
 
   void SetSoftwareRendererConfig();
 
+  void SetOpenGLRendererConfig();
+
   void SetAssetsPath();
 
   void SetSnapshots();
@@ -63,6 +65,7 @@ class EmbedderConfigBuilder {
   FlutterProjectArgs project_args_ = {};
   FlutterRendererConfig renderer_config_ = {};
   FlutterSoftwareRendererConfig software_renderer_config_ = {};
+  FlutterOpenGLRendererConfig opengl_renderer_config_ = {};
   std::string dart_entrypoint_;
   FlutterCustomTaskRunners custom_task_runners_ = {};
   std::vector<std::string> command_line_arguments_;

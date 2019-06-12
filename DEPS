@@ -19,6 +19,7 @@
 
 vars = {
   'chromium_git': 'https://chromium.googlesource.com',
+  'swiftshader_git': 'https://swiftshader.googlesource.com',
   'dart_git': 'https://dart.googlesource.com',
   'fuchsia_git': 'https://fuchsia.googlesource.com',
   'github_git': 'https://github.com',
@@ -121,7 +122,7 @@ allowed_hosts = [
 ]
 
 deps = {
-  'src': 'https://github.com/flutter/buildroot.git' + '@' + '263ee3b119f686591f8bb131bf22f53d384c2be2',
+  'src': 'https://github.com/flutter/buildroot.git' + '@' + '95662021f20c859d1a1d30d3e436375b1078a39d',
 
    # Fuchsia compatibility
    #
@@ -393,6 +394,9 @@ deps = {
    # Headers for Vulkan 1.1
    'src/third_party/vulkan':
    Var('github_git') + '/KhronosGroup/Vulkan-Docs.git' + '@' + 'v1.1.91',
+
+   'src/third_party/swiftshader':
+   Var('swiftshader_git') + '/SwiftShader.git' + '@' + '95b1db9619fb0f5f232c09995bc00729273f74ee',
 
   'src/third_party/pkg/when':
    Var('dart_git') + '/when.git' + '@' + '0.2.0',

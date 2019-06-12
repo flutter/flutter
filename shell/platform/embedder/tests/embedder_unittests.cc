@@ -209,5 +209,12 @@ TEST(EmbedderTestNoFixture, CanGetCurrentTimeInNanoseconds) {
   ASSERT_LT((point2 - point1), fml::TimeDelta::FromMilliseconds(1));
 }
 
+TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
+  EmbedderConfigBuilder builder(GetEmbedderContext());
+  builder.SetOpenGLRendererConfig();
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+}
+
 }  // namespace testing
 }  // namespace flutter

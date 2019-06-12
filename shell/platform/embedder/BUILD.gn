@@ -60,33 +60,41 @@ test_fixtures("fixtures") {
   dart_main = "fixtures/main.dart"
 }
 
-executable("embedder_unittests") {
-  testonly = true
+if (is_mac || is_linux || is_win) {
+  executable("embedder_unittests") {
+    testonly = true
 
-  configs += [ "$flutter_root:export_dynamic_symbols" ]
+    configs += [
+      "$flutter_root:export_dynamic_symbols",
+      "//third_party/swiftshader_flutter:swiftshader_config",
+    ]
 
-  include_dirs = [ "." ]
+    include_dirs = [ "." ]
 
-  sources = [
-    "tests/embedder_a11y_unittests.cc",
-    "tests/embedder_config_builder.cc",
-    "tests/embedder_config_builder.h",
-    "tests/embedder_context.cc",
-    "tests/embedder_context.h",
-    "tests/embedder_test.cc",
-    "tests/embedder_test.h",
-    "tests/embedder_unittests.cc",
-  ]
+    sources = [
+      "tests/embedder_a11y_unittests.cc",
+      "tests/embedder_config_builder.cc",
+      "tests/embedder_config_builder.h",
+      "tests/embedder_context.cc",
+      "tests/embedder_context.h",
+      "tests/embedder_test.cc",
+      "tests/embedder_test.h",
+      "tests/embedder_test_gl_surface.cc",
+      "tests/embedder_test_gl_surface.h",
+      "tests/embedder_unittests.cc",
+    ]
 
-  deps = [
-    ":embedder",
-    ":fixtures",
-    "$flutter_root/lib/ui",
-    "$flutter_root/runtime",
-    "$flutter_root/testing:dart",
-    "//third_party/skia",
-    "//third_party/tonic",
-  ]
+    deps = [
+      ":embedder",
+      ":fixtures",
+      "$flutter_root/lib/ui",
+      "$flutter_root/runtime",
+      "$flutter_root/testing:dart",
+      "//third_party/skia",
+      "//third_party/swiftshader_flutter:swiftshader",
+      "//third_party/tonic",
+    ]
+  }
 }
 
 shared_library("flutter_engine_library") {
