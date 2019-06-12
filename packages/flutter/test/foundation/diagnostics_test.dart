@@ -52,7 +52,7 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerialisationDelegate())));
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate.defaults())));
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
