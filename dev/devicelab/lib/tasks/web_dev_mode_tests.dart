@@ -17,7 +17,7 @@ final Directory flutterGalleryDir = dir(path.join(flutterDirectory.path, 'exampl
 TaskFunction createWebDevModeTest() {
   return () async {
     final List<String> options = <String>[
-      '--hot', '-d', 'web', '--verbose', '--resident', '--target=lib/main_web.dart',
+      '--hot', '-d', 'web', '--verbose', '--resident', '--target=lib/main.dart',
     ];
     setLocalEngineOptionIfNecessary(options);
     int hotRestartCount = 0;

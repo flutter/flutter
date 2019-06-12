@@ -341,15 +341,15 @@ Future<void> _runTests() async {
 }
 
 Future<void> _runWebTests() async {
-  final List<String> testfiles = <String>[];
-  final Directory foundation = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test', 'foundation'));
-  for (FileSystemEntity entity in foundation.listSync(recursive: true)) {
-    if (entity is File) {
-      testfiles.add(entity.path);
-    }
-  }
-  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: true, tests: <String>[
-    path.join('test', 'foundation'),
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
+    'test/foundation/',
+    'test/physics/',
+    'test/rendering/',
+    'test/services/',
+    'test/painting/',
+    'test/scheduler/',
+    'test/widgets/',
+    'test/semantics/',
   ]);
 }
 
@@ -612,23 +612,30 @@ Future<void> _runFlutterWebTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   List<String> tests,
 }) async {
-  final List<String> args = <String>['test', '--platform=chrome'];
+  final List<String> args = <String>['test', '-v', '--platform=chrome'];
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
     args.addAll(flutterTestArgs);
 
-  args.add('--machine');
   args.addAll(tests);
 
-  await runCommand(
-    flutter,
-    args,
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
-    timeout: timeout,
-    environment: <String, String>{
-      'FLUTTER_WEB': 'true',
-    },
-  );
+  // TODO(jonahwilliams): fix relative path issues to make this unecessary.
+  final Directory oldCurrent = Directory.current;
+  Directory.current = Directory(path.join(flutterRoot, 'packages', 'flutter'));
+  try {
+    await runCommand(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      timeout: timeout,
+      environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+        'FLUTTER_LOW_RESOURCE_MODE': 'true',
+      },
+    );
+  } finally {
+    Directory.current = oldCurrent;
+  }
 }
 
 Future<void> _runFlutterTest(String workingDirectory, {
@@ -762,7 +769,9 @@ Future<void> _integrationTestsAndroidSdk() async {
 
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
   if (!Platform.isWindows) {
-    await _runDevicelabTest('gradle_plugin_test', env: env);
+    await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
+    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+    await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
   }
   // note: this also covers plugin_test_win as long as Windows has an Android SDK available.

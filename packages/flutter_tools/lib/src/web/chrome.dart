@@ -98,16 +98,19 @@ class ChromeLauncher {
       '--disable-default-apps',
       '--disable-translate',
       if (headless)
-        ...<String>['--headless', '--disable-gpu'],
+        ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
       url,
     ];
-    final Process process = await processManager.start(args);
+
+    final Process process = await processManager.start(args, runInShell: true);
 
     // Wait until the DevTools are listening before trying to connect.
     await process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .firstWhere((String line) => line.startsWith('DevTools listening'))
+        .firstWhere((String line) => line.startsWith('DevTools listening'), orElse: () {
+          return 'Failed to spawn stderr';
+        })
         .timeout(const Duration(seconds: 60), onTimeout: () {
           throwToolExit('Unable to connect to Chrome DevTools.');
           return null;

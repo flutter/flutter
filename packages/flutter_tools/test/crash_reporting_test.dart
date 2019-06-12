@@ -19,6 +19,7 @@ import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/crash_reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:pedantic/pedantic.dart';
 
 import 'src/common.dart';
 import 'src/context.dart';
@@ -40,85 +41,40 @@ void main() {
     });
 
     testUsingContext('should send crash reports', () async {
-      String method;
-      Uri uri;
-      Map<String, String> fields;
+      final RequestInfo requestInfo = RequestInfo();
 
-      CrashReportSender.initializeWith(MockClient((Request request) async {
-        method = request.method;
-        uri = request.url;
-
-        // A very ad-hoc multipart request parser. Good enough for this test.
-        String boundary = request.headers['Content-Type'];
-        boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
-        fields = Map<String, String>.fromIterable(
-          utf8.decode(request.bodyBytes)
-              .split('--$boundary')
-              .map<List<String>>((String part) {
-                final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
-                if (nameMatch == null)
-                  return null;
-                final String name = nameMatch[1];
-                final String value = part.split('\n').skip(2).join('\n').trim();
-                return <String>[name, value];
-              })
-              .where((List<String> pair) => pair != null),
-          key: (dynamic key) {
-            final List<String> pair = key;
-            return pair[0];
-          },
-          value: (dynamic value) {
-            final List<String> pair = value;
-            return pair[1];
-          },
-        );
-
-        return Response(
-            'test-report-id',
-            200,
-        );
-      }));
-
+      CrashReportSender.initializeWith(MockCrashReportSender(requestInfo));
       final int exitCode = await tools.run(
         <String>['crash'],
         <FlutterCommand>[_CrashCommand()],
         reportCrashes: true,
         flutterVersion: 'test-version',
       );
-
       expect(exitCode, 1);
 
-      // Verify that we sent the crash report.
-      expect(method, 'POST');
-      expect(uri, Uri(
-        scheme: 'https',
-        host: 'clients2.google.com',
-        port: 443,
-        path: '/cr/report',
-        queryParameters: <String, String>{
-          'product': 'Flutter_Tools',
-          'version': 'test-version',
-        },
+      await verifyCrashReportSent(requestInfo);
+    }, overrides: <Type, Generator>{
+      Stdio: () => const _NoStderr(),
+    });
+
+    testUsingContext('should send crash reports when async throws', () async {
+      final Completer<int> exitCodeCompleter = Completer<int>();
+      setExitFunctionForTests((int exitCode) {
+        exitCodeCompleter.complete(exitCode);
+      });
+
+      final RequestInfo requestInfo = RequestInfo();
+
+      CrashReportSender.initializeWith(MockCrashReportSender(requestInfo));
+
+      unawaited(tools.run(
+        <String>['crash'],
+        <FlutterCommand>[_CrashAsyncCommand()],
+        reportCrashes: true,
+        flutterVersion: 'test-version',
       ));
-      expect(fields['uuid'], '00000000-0000-4000-0000-000000000000');
-      expect(fields['product'], 'Flutter_Tools');
-      expect(fields['version'], 'test-version');
-      expect(fields['osName'], platform.operatingSystem);
-      expect(fields['osVersion'], 'fake OS name and version');
-      expect(fields['type'], 'DartError');
-      expect(fields['error_runtime_type'], 'StateError');
-      expect(fields['error_message'], 'Bad state: Test bad state error');
-
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText, 'Sending crash report to Google.\n'
-          'Crash report sent (report ID: test-report-id)\n');
-
-      // Verify that we've written the crash report to disk.
-      final List<String> writtenFiles =
-        (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
-            .map((FileSystemEntity e) => e.path).toList();
-      expect(writtenFiles, hasLength(1));
-      expect(writtenFiles, contains('flutter_01.log'));
+      expect(await exitCodeCompleter.future, equals(1));
+      await verifyCrashReportSent(requestInfo);
     }, overrides: <Type, Generator>{
       Stdio: () => const _NoStderr(),
     });
@@ -198,6 +154,83 @@ void main() {
   });
 }
 
+class RequestInfo {
+  String method;
+  Uri uri;
+  Map<String, String> fields;
+}
+
+Future<void> verifyCrashReportSent(RequestInfo crashInfo) async {
+  // Verify that we sent the crash report.
+  expect(crashInfo.method, 'POST');
+  expect(crashInfo.uri, Uri(
+    scheme: 'https',
+    host: 'clients2.google.com',
+    port: 443,
+    path: '/cr/report',
+    queryParameters: <String, String>{
+      'product': 'Flutter_Tools',
+      'version': 'test-version',
+    },
+  ));
+  expect(crashInfo.fields['uuid'], '00000000-0000-4000-0000-000000000000');
+  expect(crashInfo.fields['product'], 'Flutter_Tools');
+  expect(crashInfo.fields['version'], 'test-version');
+  expect(crashInfo.fields['osName'], platform.operatingSystem);
+  expect(crashInfo.fields['osVersion'], 'fake OS name and version');
+  expect(crashInfo.fields['type'], 'DartError');
+  expect(crashInfo.fields['error_runtime_type'], 'StateError');
+  expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
+
+  final BufferLogger logger = context.get<Logger>();
+  expect(logger.statusText, 'Sending crash report to Google.\n'
+      'Crash report sent (report ID: test-report-id)\n');
+
+  // Verify that we've written the crash report to disk.
+  final List<String> writtenFiles =
+  (await tools.crashFileSystem.directory('/').list(recursive: true).toList())
+      .map((FileSystemEntity e) => e.path).toList();
+  expect(writtenFiles, hasLength(1));
+  expect(writtenFiles, contains('flutter_01.log'));
+}
+
+class MockCrashReportSender extends MockClient {
+  MockCrashReportSender(RequestInfo crashInfo) : super((Request request) async {
+      crashInfo.method = request.method;
+      crashInfo.uri = request.url;
+
+      // A very ad-hoc multipart request parser. Good enough for this test.
+      String boundary = request.headers['Content-Type'];
+      boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
+      crashInfo.fields = Map<String, String>.fromIterable(
+        utf8.decode(request.bodyBytes)
+            .split('--$boundary')
+            .map<List<String>>((String part) {
+          final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
+          if (nameMatch == null)
+            return null;
+          final String name = nameMatch[1];
+          final String value = part.split('\n').skip(2).join('\n').trim();
+          return <String>[name, value];
+        })
+            .where((List<String> pair) => pair != null),
+        key: (dynamic key) {
+          final List<String> pair = key;
+          return pair[0];
+        },
+        value: (dynamic value) {
+          final List<String> pair = value;
+          return pair[1];
+        },
+      );
+
+      return Response(
+        'test-report-id',
+        200,
+      );
+    });
+}
+
 /// Throws a random error to simulate a CLI crash.
 class _CrashCommand extends FlutterCommand {
 
@@ -224,6 +257,24 @@ class _CrashCommand extends FlutterCommand {
     fn3();
 
     return null;
+  }
+}
+
+/// Throws StateError from async callback.
+class _CrashAsyncCommand extends FlutterCommand {
+
+  @override
+  String get description => 'Simulates a crash';
+
+  @override
+  String get name => 'crash';
+
+  @override
+  Future<FlutterCommandResult> runCommand() async {
+    Timer.run(() {
+      throw StateError('Test bad state error');
+    });
+    return Completer<FlutterCommandResult>().future; // expect StateError
   }
 }
 
