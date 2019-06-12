@@ -1042,46 +1042,15 @@ class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
 
   final RawGestureDetectorState detectorState;
 
-  GestureTapCallback _handleSemanticTap;
-  GestureLongPressCallback _handleSemanticLongPress;
-  GestureDragUpdateCallback _handleSemanticHorizontal;
-  GestureDragUpdateCallback _handleSemanticVertical;
-
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
     assert(!detectorState.widget.excludeFromSemantics);
     final Map<Type, GestureRecognizer> recognizers = detectorState._recognizers;
-    _handleSemanticTap = _getTapHandler(recognizers);
-    _handleSemanticLongPress = _getLongPressHandler(recognizers);
-    _handleSemanticHorizontal = _getHorizontalDragUpdateHandler(recognizers);
-    _handleSemanticVertical = _getVerticalDragUpdateHandler(recognizers);
     renderObject
-      ..onTap = _handleSemanticTap == null
-          ? null : _performSemanticTap
-      ..onLongPress = _handleSemanticLongPress == null
-          ? null : _performSemanticLongPress
-      ..onHorizontalDragUpdate = _handleSemanticHorizontal == null
-          ? null : _performSemanticHorizontal
-      ..onVerticalDragUpdate = _handleSemanticVertical == null
-          ? null : _performSemanticVertical;
-  }
-
-  // The following methods are cached wrappers of the handling callbacks.
-  // Caching ensures that for each gesture of [RenderSemanticsGestureHandler],
-  // the callback is either null or an identical one as previously.
-  // They are assigned only when the corresponding performing callback is not
-  // null, therefore no null-check is needed.
-  void _performSemanticTap() {
-    _handleSemanticTap();
-  }
-  void _performSemanticLongPress() {
-    _handleSemanticLongPress();
-  }
-  void _performSemanticHorizontal(DragUpdateDetails details) {
-    _handleSemanticHorizontal(details);
-  }
-  void _performSemanticVertical(DragUpdateDetails details) {
-    _handleSemanticVertical(details);
+      ..onTap = _getTapHandler(recognizers)
+      ..onLongPress = _getLongPressHandler(recognizers)
+      ..onHorizontalDragUpdate = _getHorizontalDragUpdateHandler(recognizers)
+      ..onVerticalDragUpdate = _getVerticalDragUpdateHandler(recognizers);
   }
 
   GestureTapCallback _getTapHandler(Map<Type, GestureRecognizer> recognizers) {

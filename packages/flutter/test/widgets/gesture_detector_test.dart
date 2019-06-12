@@ -224,7 +224,7 @@ void main() {
     expect(didTap, isFalse);
   });
 
-  testWidgets('cache unchanged callbacks', (WidgetTester tester) async {
+  testWidgets('cache render object', (WidgetTester tester) async {
     final GestureTapCallback inputCallback = () { };
 
     await tester.pumpWidget(
@@ -237,7 +237,6 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback1 = renderObj1.onTap;
 
     await tester.pumpWidget(
       Center(
@@ -249,10 +248,8 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback2 = renderObj2.onTap;
 
     expect(renderObj1, same(renderObj2));
-    expect(actualCallback1, same(actualCallback2)); // Should be cached.
   });
 
   testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
