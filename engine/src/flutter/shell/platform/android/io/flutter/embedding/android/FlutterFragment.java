@@ -607,6 +607,7 @@ public class FlutterFragment extends Fragment {
 
     // Null out the platformPlugin to avoid a possible retain cycle between the plugin, this Fragment,
     // and this Fragment's Activity.
+    platformPlugin.destroy();
     platformPlugin = null;
 
     // Destroy our FlutterEngine if we're not set to retain it.

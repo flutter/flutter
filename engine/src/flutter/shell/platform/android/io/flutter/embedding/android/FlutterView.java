@@ -561,11 +561,16 @@ public class FlutterView extends FrameLayout {
     }
     Log.d(TAG, "Detaching from Flutter Engine");
 
+    // Disconnect and clean up the AccessibilityBridge.
+    accessibilityBridge.release();
+    accessibilityBridge = null;
+
     // Inform the Android framework that it should retrieve a new InputConnection
     // now that the engine is detached. The new InputConnection will be null, which
     // signifies that this View does not process input (until a new engine is attached).
     // TODO(mattcarroll): once this is proven to work, move this line ot TextInputPlugin
     textInputPlugin.getInputMethodManager().restartInput(this);
+    textInputPlugin.destroy();
 
     // Instruct our FlutterRenderer that we are no longer interested in being its RenderSurface.
     didRenderFirstFrame = false;
