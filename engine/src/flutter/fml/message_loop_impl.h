@@ -13,6 +13,7 @@
 #include <utility>
 
 #include "flutter/fml/closure.h"
+#include "flutter/fml/delayed_task.h"
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/message_loop.h"
@@ -58,30 +59,6 @@ class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
   MessageLoopImpl();
 
  private:
-  struct DelayedTask {
-    size_t order;
-    fml::closure task;
-    fml::TimePoint target_time;
-
-    DelayedTask(size_t p_order,
-                fml::closure p_task,
-                fml::TimePoint p_target_time);
-
-    DelayedTask(const DelayedTask& other);
-
-    ~DelayedTask();
-  };
-
-  struct DelayedTaskCompare {
-    bool operator()(const DelayedTask& a, const DelayedTask& b) {
-      return a.target_time == b.target_time ? a.order > b.order
-                                            : a.target_time > b.target_time;
-    }
-  };
-
-  using DelayedTaskQueue = std::
-      priority_queue<DelayedTask, std::deque<DelayedTask>, DelayedTaskCompare>;
-
   std::mutex tasks_flushing_mutex_;
 
   std::mutex observers_mutex_;

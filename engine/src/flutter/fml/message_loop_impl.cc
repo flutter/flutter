@@ -133,7 +133,7 @@ void MessageLoopImpl::RegisterTask(fml::closure task,
   }
   std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
   delayed_tasks_.push({++order_, std::move(task), target_time});
-  WakeUp(delayed_tasks_.top().target_time);
+  WakeUp(delayed_tasks_.top().GetTargetTime());
 }
 
 void MessageLoopImpl::FlushTasks(FlushType type) {
@@ -158,10 +158,10 @@ void MessageLoopImpl::FlushTasks(FlushType type) {
     auto now = fml::TimePoint::Now();
     while (!delayed_tasks_.empty()) {
       const auto& top = delayed_tasks_.top();
-      if (top.target_time > now) {
+      if (top.GetTargetTime() > now) {
         break;
       }
-      invocations.emplace_back(std::move(top.task));
+      invocations.emplace_back(std::move(top.GetTask()));
       delayed_tasks_.pop();
       if (type == FlushType::kSingle) {
         break;
@@ -169,7 +169,7 @@ void MessageLoopImpl::FlushTasks(FlushType type) {
     }
 
     WakeUp(delayed_tasks_.empty() ? fml::TimePoint::Max()
-                                  : delayed_tasks_.top().target_time);
+                                  : delayed_tasks_.top().GetTargetTime());
   }
 
   for (const auto& invocation : invocations) {
@@ -188,14 +188,5 @@ void MessageLoopImpl::RunExpiredTasksNow() {
 void MessageLoopImpl::RunSingleExpiredTaskNow() {
   FlushTasks(FlushType::kSingle);
 }
-
-MessageLoopImpl::DelayedTask::DelayedTask(size_t p_order,
-                                          fml::closure p_task,
-                                          fml::TimePoint p_target_time)
-    : order(p_order), task(std::move(p_task)), target_time(p_target_time) {}
-
-MessageLoopImpl::DelayedTask::DelayedTask(const DelayedTask& other) = default;
-
-MessageLoopImpl::DelayedTask::~DelayedTask() = default;
 
 }  // namespace fml
