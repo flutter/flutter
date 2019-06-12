@@ -143,9 +143,9 @@ void main() {
 
     final Map<String, dynamic> event = events.first;
     expect(event['number'], isNonNegative);
-    expect(event['startTime'], isNonNegative);
-    expect(event['elapsed'], isNonNegative);
-    expect(event['build'], isNonNegative);
-    expect(event['raster'], isNonNegative);
+    expect(event['startTime'], 10000);
+    expect(event['elapsed'], 10000);
+    expect(event['build'], 5000);
+    expect(event['raster'], 4000);
   });
 }
