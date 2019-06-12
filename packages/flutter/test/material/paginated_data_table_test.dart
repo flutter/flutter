@@ -292,9 +292,9 @@ void main() {
   testWidgets('PaginatedDataTable custom row height', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
 
-    Widget buildPaginatedTable({
-      double dataRowHeight,
-      double headingRowHeight,
+    Widget buildCustomHeightPaginatedTable({
+      double dataRowHeight = 48.0,
+      double headingRowHeight = 56.0,
     }) {
       return PaginatedDataTable(
         header: const Text('Test table'),
@@ -315,8 +315,23 @@ void main() {
       );
     }
 
+    // DEFAULT VALUES
     await tester.pumpWidget(MaterialApp(
-      home: buildPaginatedTable(),
+      home: PaginatedDataTable(
+        header: const Text('Test table'),
+        source: source,
+        rowsPerPage: 2,
+        availableRowsPerPage: const <int>[
+          2, 4, 8, 16,
+        ],
+        onRowsPerPageChanged: (int rowsPerPage) {},
+        onPageChanged: (int rowIndex) {},
+        columns: const <DataColumn>[
+          DataColumn(label: Text('Name')),
+          DataColumn(label: Text('Calories'), numeric: true),
+          DataColumn(label: Text('Generation')),
+        ],
+      ),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Name').first
@@ -325,29 +340,30 @@ void main() {
       find.widgetWithText(Container, 'Frozen yogurt (0)').first
     ).size.height, 48.0); // This is the data row height
 
+    // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildPaginatedTable(headingRowHeight: 48.0)),
+      home: Material(child: buildCustomHeightPaginatedTable(headingRowHeight: 48.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Name').first
     ).size.height, 48.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildPaginatedTable(headingRowHeight: 64.0)),
+      home: Material(child: buildCustomHeightPaginatedTable(headingRowHeight: 64.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Name').first
     ).size.height, 64.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildPaginatedTable(dataRowHeight: 30.0)),
+      home: Material(child: buildCustomHeightPaginatedTable(dataRowHeight: 30.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Frozen yogurt (0)').first
     ).size.height, 30.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildPaginatedTable(dataRowHeight: 56.0)),
+      home: Material(child: buildCustomHeightPaginatedTable(dataRowHeight: 56.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Frozen yogurt (0)').first

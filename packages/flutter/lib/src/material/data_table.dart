@@ -262,8 +262,8 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    this.dataRowHeight,
-    this.headingRowHeight,
+    this.dataRowHeight = 48.0,
+    this.headingRowHeight = 56.0,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -315,12 +315,12 @@ class DataTable extends StatelessWidget {
 
   /// The height of each row (excluding the row that contains column headings).
   ///
-  /// This value is optional and defaults to 48.0 if not specified.
+  /// This value defaults to 48.0 to adhere to the Material Design specifications.
   final double dataRowHeight;
 
   /// The height of the heading row.
   ///
-  /// This value is optional and defaults to 56.0 if not specified.
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double headingRowHeight;
 
   /// The data to show in each row (excluding the row that contains
@@ -363,8 +363,6 @@ class DataTable extends StatelessWidget {
     }
   }
 
-  static const double _headingRowHeight = 56.0;
-  static const double _dataRowHeight = 48.0;
   static const double _tablePadding = 24.0;
   static const double _columnSpacing = 56.0;
   static const double _sortArrowPadding = 2.0;
@@ -428,14 +426,14 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: headingRowHeight ?? _headingRowHeight,
+      height: headingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
         style: TextStyle(
           // TODO(ianh): font family should match Theme; see https://github.com/flutter/flutter/issues/3116
           fontWeight: FontWeight.w500,
           fontSize: _headingFontSize,
-          height: math.min(1.0, (headingRowHeight ?? _headingRowHeight) / _headingFontSize),
+          height: math.min(1.0, headingRowHeight / _headingFontSize),
           color: (Theme.of(context).brightness == Brightness.light)
             ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
             : ((onSort != null && sorted) ? Colors.white : Colors.white70),
@@ -481,7 +479,7 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: dataRowHeight ?? _dataRowHeight,
+      height: dataRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: TextStyle(

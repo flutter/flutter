@@ -268,11 +268,11 @@ void main() {
   });
 
   testWidgets('DataTable custom row height', (WidgetTester tester) async {
-    Widget buildTable({
+    Widget buildCustomTable({
       int sortColumnIndex,
       bool sortAscending = true,
-      double dataRowHeight,
-      double headingRowHeight,
+      double dataRowHeight = 48.0,
+      double headingRowHeight = 56.0,
     }) {
       return DataTable(
         sortColumnIndex: sortColumnIndex,
@@ -311,8 +311,41 @@ void main() {
       );
     }
 
+    // DEFAULT VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable()),
+      home: Material(
+        child: DataTable(
+          onSelectAll: (bool value) {},
+          columns: <DataColumn>[
+            const DataColumn(
+              label: Text('Name'),
+              tooltip: 'Name',
+            ),
+            DataColumn(
+              label: const Text('Calories'),
+              tooltip: 'Calories',
+              numeric: true,
+              onSort: (int columnIndex, bool ascending) {},
+            ),
+          ],
+          rows: kDesserts.map<DataRow>((Dessert dessert) {
+            return DataRow(
+              key: Key(dessert.name),
+              onSelectChanged: (bool selected) {},
+              cells: <DataCell>[
+                DataCell(
+                  Text(dessert.name),
+                ),
+                DataCell(
+                  Text('${dessert.calories}'),
+                  showEditIcon: true,
+                  onTap: () {},
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Name')
@@ -321,29 +354,30 @@ void main() {
       find.widgetWithText(Container, 'Frozen yogurt')
     ).size.height, 48.0); // This is the data row height
 
+    // CUSTOM VALUES
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(headingRowHeight: 48.0)),
+      home: Material(child: buildCustomTable(headingRowHeight: 48.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Name')
     ).size.height, 48.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(headingRowHeight: 64.0)),
+      home: Material(child: buildCustomTable(headingRowHeight: 64.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Name')
     ).size.height, 64.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(dataRowHeight: 30.0)),
+      home: Material(child: buildCustomTable(dataRowHeight: 30.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Frozen yogurt')
     ).size.height, 30.0);
 
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(dataRowHeight: 56.0)),
+      home: Material(child: buildCustomTable(dataRowHeight: 56.0)),
     ));
     expect(tester.renderObject<RenderBox>(
       find.widgetWithText(Container, 'Frozen yogurt')
