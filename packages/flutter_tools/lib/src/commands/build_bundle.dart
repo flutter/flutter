@@ -5,14 +5,17 @@
 import 'dart:async';
 
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
+import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
+import '../usage.dart';
 import '../version.dart';
 import 'build.dart';
 
 class BuildBundleCommand extends BuildSubCommand {
-  BuildBundleCommand({bool verboseHelp = false}) {
+  BuildBundleCommand({bool verboseHelp = false, this.bundleBuilder}) {
     usesTargetOption();
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
@@ -57,7 +60,11 @@ class BuildBundleCommand extends BuildSubCommand {
               'in the application\'s LICENSE file.',
         defaultsTo: false);
     usesPubOption();
+
+    bundleBuilder ??= BundleBuilder();
   }
+
+  BundleBuilder bundleBuilder;
 
   @override
   final String name = 'bundle';
@@ -69,6 +76,21 @@ class BuildBundleCommand extends BuildSubCommand {
   final String usageFooter = 'The Flutter assets directory contains your '
       'application code and resources; they are used by some Flutter Android and'
       ' iOS runtimes.';
+
+  @override
+  Future<Map<String, String>> get usageValues async {
+    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
+
+    if (futterProject == null) {
+      return const <String, String>{};
+    }
+
+    return <String, String>{
+      kCommandBuildBundleTargetPlatform: argResults['target-platform'],
+      kCommandBuildBundleIsModule: '${futterProject.isModule}'
+    };
+  }
 
   @override
   Future<FlutterCommandResult> runCommand() async {
@@ -92,7 +114,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
     final BuildMode buildMode = getBuildMode();
 
-    await build(
+    await bundleBuilder.build(
       platform: platform,
       buildMode: buildMode,
       mainPath: targetFile,

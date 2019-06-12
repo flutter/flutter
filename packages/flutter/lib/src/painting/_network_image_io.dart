@@ -52,7 +52,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
       informationCollector: () {
         return <DiagnosticsNode>[
           DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-          DiagnosticsProperty<NetworkImage>('Image key', key),
+          DiagnosticsProperty<image_provider.NetworkImage>('Image key', key),
         ];
       },
     );
@@ -92,7 +92,6 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
 
       final Uint8List bytes = await consolidateHttpClientResponseBytes(
         response,
-        client: _httpClient,
         onBytesReceived: (int cumulative, int total) {
           chunkEvents.add(ImageChunkEvent(
             cumulativeBytesLoaded: cumulative,
