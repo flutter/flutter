@@ -839,8 +839,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   @override
   void initState() {
     super.initState();
-    _semantics = widget.semantics ??
-      _DefaultSemanticsGestureDelegate(this);
+    _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     _syncAll(widget.gestures);
   }
 
@@ -850,8 +849,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     // Re-initialize semantics delegate unless delegate has always been default
     // (avoid unnecessary construction of _DefaultGestureSemanticsDelegate).
     if (!(oldWidget.semantics == null && widget.semantics == null)) {
-      _semantics = widget.semantics ??
-        _DefaultSemanticsGestureDelegate(this);
+      _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     }
     _syncAll(widget.gestures);
   }
@@ -1016,13 +1014,8 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
 }
 
 /// A base class that describes what semantics notations a [RawGestureDetector]
-/// should add to the render object [RenderSemanticsGestureHandler].
-///
-/// It is used when defining a custom gesture detector. The callbacks of
-/// [GestureRecognizer]s can be shared on semantics.
-///
-/// It is recommended to store this object in a widget state, and cache the
-/// callbacks that are assigned to [RenderSemanticsGestureHandler].
+/// should add to the render object [RenderSemanticsGestureHandler]. It is
+/// used when defining a custom gesture detector.
 abstract class SemanticsGestureDelegate {
   /// Create a delegate of gesture semantics.
   SemanticsGestureDelegate();
@@ -1035,6 +1028,17 @@ abstract class SemanticsGestureDelegate {
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 }
 
+// The default semantics delegate of [RawGestureDetector]. Its behavior is
+// described in [RawGestureDetector.semantics].
+//
+// For readers who come here to learn how to write custom semantics delegates:
+// this is not a proper sample code. It has access to the detector state as well
+// as its private properties, which are inaccessible normally. It is designed
+// this way in order to work independenly in a [RawGestureRecognizer] to
+// preserve existing behavior.
+//
+// Instead, a normal delegate will store callbacks as properties, and use them
+// in `assignSemantics`.
 class _DefaultSemanticsGestureDelegate extends SemanticsGestureDelegate {
   _DefaultSemanticsGestureDelegate(this.detectorState);
 
