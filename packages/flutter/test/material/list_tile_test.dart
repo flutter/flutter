@@ -190,7 +190,7 @@ void main() {
     testChildren();
     testHorizontalGeometry();
     testVerticalGeometry(128.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('ListTile geometry (RTL)', (WidgetTester tester) async {
     const double leftPadding = 10.0;

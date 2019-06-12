@@ -1639,7 +1639,7 @@ void main() {
     expect(semantics, hasSemantics(expectedSemantics));
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('correct scrolling semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

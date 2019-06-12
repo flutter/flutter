@@ -421,7 +421,7 @@ void main() {
     expect(tip.localToGlobal(tip.size.topLeft(Offset.zero)).dy, equals(310.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dx, equals(790.0));
     expect(tip.localToGlobal(tip.size.bottomRight(Offset.zero)).dy, equals(324.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Does tooltip end up with the right default size, shape, and color', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -457,7 +457,7 @@ void main() {
       rrect: RRect.fromRectAndRadius(tip.paintBounds, const Radius.circular(4.0)),
       color: const Color(0xe6616161),
     ));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Can tooltip decoration be customized', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
@@ -497,7 +497,7 @@ void main() {
     expect(tip, paints..path(
       color: const Color(0x80800000),
     ));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Tooltip stays around', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -707,7 +707,7 @@ void main() {
     expect(tester.getSize(find.text(tooltipText)), equals(const Size(168.0, 56.0)));
     tip = tester.renderObject(find.text(tooltipText)).parent;
     expect(tip.size.height, equals(56.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Haptic feedback', (WidgetTester tester) async {
     final FeedbackTester feedback = FeedbackTester();
