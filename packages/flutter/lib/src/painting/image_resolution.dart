@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'image_provider.dart';
 
 const String _kAssetManifestFileName = 'AssetManifest.json';
-const String _kSeparator = '/';
 
 /// Fetches an image from an [AssetBundle], having determined the exact image to
 /// use based on the context.
@@ -265,10 +264,10 @@ class AssetImage extends AssetBundleImageProvider {
       return _naturalResolution;
     }
 
-    final List<String> assetPathSegments = key.split(_kSeparator);
+    final Uri assetUri = Uri.parse(key);
     String directoryPath = '';
-    if (assetPathSegments.length > 1) {
-      directoryPath = assetPathSegments[assetPathSegments.length - 2];
+    if (assetUri.pathSegments.length > 1) {
+      directoryPath = assetUri.pathSegments[assetUri.pathSegments.length - 2];
     }
 
     final Match match = _extractRatioRegExp.firstMatch(directoryPath);

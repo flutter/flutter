@@ -12,7 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
-  if (dart.library.html) '_network_image_web.dart' as _image_provider;
+  if (dart.library.html) '_network_image_web.dart' as network_image;
 import 'binding.dart';
 import 'image_cache.dart';
 import 'image_stream.dart';
@@ -482,8 +482,8 @@ abstract class AssetBundleImageProvider extends ImageProvider<AssetBundleImageKe
 abstract class NetworkImage extends ImageProvider<NetworkImage> {
   /// Creates an object that fetches the image at the given URL.
   ///
-  /// The arguments must not be null.
-  const factory NetworkImage(String url, { double scale, Map<String, String> headers }) = _image_provider.NetworkImage;
+  /// The arguments [url] and [scale] must not be null.
+  const factory NetworkImage(String url, { double scale, Map<String, String> headers }) = network_image.NetworkImage;
 
   /// The URL from which the image will be fetched.
   String get url;
@@ -492,7 +492,12 @@ abstract class NetworkImage extends ImageProvider<NetworkImage> {
   double get scale;
 
   /// The HTTP headers that will be used with [HttpClient.get] to fetch image from network.
+  ///
+  /// When running flutter on the web, headers are not used.
   Map<String, String> get headers;
+
+  @override
+  ImageStreamCompleter load(NetworkImage key);
 }
 
 /// Decodes the given [File] object as an image, associating it with the given

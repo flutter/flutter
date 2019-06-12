@@ -158,7 +158,6 @@ void main() {
 
         Future<void> loadNetworkImage() async {
           final NetworkImage networkImage = NetworkImage(nonconst('foo'));
-          // ignore: invalid_use_of_protected_member
           final ImageStreamCompleter completer = networkImage.load(networkImage);
           completer.addListener(ImageStreamListener(
             (ImageInfo image, bool synchronousCall) { },
