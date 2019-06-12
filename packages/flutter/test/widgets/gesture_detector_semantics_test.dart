@@ -174,49 +174,6 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('RawGestureDetector caches handlers returned by GestureSemanticsMapping', (WidgetTester tester) async {
-    final SemanticsTester semantics = SemanticsTester(tester);
-
-    final List<String> logs = <String>[];
-    final GlobalKey detectorKey = GlobalKey();
-
-    bool objectUpdated = false;
-    VoidCallback updateRenderObject;
-    await tester.pumpWidget(
-      StatefulBuilder(
-        builder: (BuildContext context, StateSetter setter) {
-          updateRenderObject = () {
-            setter(() {
-              objectUpdated = true;
-            });
-          };
-          return Directionality(
-            textDirection: TextDirection.ltr,
-            child: RawGestureDetector(
-              key: detectorKey,
-              semanticsMapping: _UnstableGestureSemanticsMapping(
-                onTap: (int counter) => logs.add('Tap$counter'),
-              ),
-              child: objectUpdated ? Container() : const Icon(IconData(3)),
-            ),
-          );
-        }
-      ),
-    );
-
-    final int detectorId = detectorKey.currentContext.findRenderObject().debugSemantics.id;
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
-    expect(logs, <String>['Tap1']);
-    logs.clear();
-
-    updateRenderObject();
-    await tester.pumpAndSettle();
-    tester.binding.pipelineOwner.semanticsOwner.performAction(detectorId, SemanticsAction.tap);
-    expect(logs, <String>['Tap1']);
-
-    semantics.dispose();
-  });
-
   group('RawGestureDetector\'s default semantics mapping', () {
     Map<Type, GestureRecognizerFactory> buildGestureMap<T extends GestureRecognizer>(
       GestureRecognizerFactoryConstructor<T> constructor,
@@ -599,22 +556,5 @@ class _RenderTestLayoutPerformer extends RenderBox {
     size = const Size(1, 1);
     if (_performLayout != null)
       _performLayout();
-  }
-}
-
-// This mapping calls the given onTap with an integer, but this integer increases
-// every time getTapHander is called.
-class _UnstableGestureSemanticsMapping extends GestureSemanticsMapping {
-  _UnstableGestureSemanticsMapping({
-    this.onTap,
-  });
-
-  final void Function(int) onTap;
-  int _counter = 0;
-
-  @override
-  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
-    _counter++;
-    renderObject.onTap = () => onTap(_counter);
   }
 }
