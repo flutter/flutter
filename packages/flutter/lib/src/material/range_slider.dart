@@ -1274,6 +1274,7 @@ class _RenderRangeSlider extends RenderBox {
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       isOnTop: false,
+      textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: bottomThumb,
     );
@@ -1284,6 +1285,7 @@ class _RenderRangeSlider extends RenderBox {
       enableAnimation: _enableAnimation,
       isDiscrete: isDiscrete,
       isOnTop: thumbDelta < sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete).width,
+      textDirection: textDirection,
       sliderTheme: _sliderTheme,
       thumb: _lastThumbSelection,
     );
