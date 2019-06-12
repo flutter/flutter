@@ -72,7 +72,7 @@ std::unique_ptr<Surface> AndroidSurfaceSoftware::CreateGPUSurface() {
 
 sk_sp<SkSurface> AndroidSurfaceSoftware::AcquireBackingStore(
     const SkISize& size) {
-  FML_TRACE_EVENT0("flutter", "AndroidSurfaceSoftware::AcquireBackingStore");
+  TRACE_EVENT0("flutter", "AndroidSurfaceSoftware::AcquireBackingStore");
   if (!IsValid()) {
     return nullptr;
   }
@@ -94,7 +94,7 @@ sk_sp<SkSurface> AndroidSurfaceSoftware::AcquireBackingStore(
 
 bool AndroidSurfaceSoftware::PresentBackingStore(
     sk_sp<SkSurface> backing_store) {
-  FML_TRACE_EVENT0("flutter", "AndroidSurfaceSoftware::PresentBackingStore");
+  TRACE_EVENT0("flutter", "AndroidSurfaceSoftware::PresentBackingStore");
   if (!IsValid() || backing_store == nullptr) {
     return false;
   }

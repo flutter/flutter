@@ -94,13 +94,12 @@ static int64_t FxlToDartOrEarlier(fml::TimePoint time) {
 
 void Animator::BeginFrame(fml::TimePoint frame_start_time,
                           fml::TimePoint frame_target_time) {
-  FML_TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending",
-                             frame_number_++);
+  TRACE_EVENT_ASYNC_END0("flutter", "Frame Request Pending", frame_number_++);
 
-  FML_TRACE_EVENT0("flutter", "Animator::BeginFrame");
+  TRACE_EVENT0("flutter", "Animator::BeginFrame");
   while (!trace_flow_ids_.empty()) {
     uint64_t trace_flow_id = trace_flow_ids_.front();
-    FML_TRACE_FLOW_END("flutter", "PointerEvent", trace_flow_id);
+    TRACE_FLOW_END("flutter", "PointerEvent", trace_flow_id);
     trace_flow_ids_.pop_front();
   }
 
@@ -131,8 +130,8 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   last_begin_frame_time_ = frame_start_time;
   dart_frame_deadline_ = FxlToDartOrEarlier(frame_target_time);
   {
-    FML_TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
-                     FrameParity());
+    TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
+                 FrameParity());
     delegate_.OnAnimatorBeginFrame(last_begin_frame_time_);
   }
 
@@ -156,7 +155,7 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
           // assume that we are idle, and notify the engine of this.
           if (notify_idle_task_id == self->notify_idle_task_id_ &&
               !self->frame_scheduled_) {
-            FML_TRACE_EVENT0("flutter", "BeginFrame idle callback");
+            TRACE_EVENT0("flutter", "BeginFrame idle callback");
             self->delegate_.OnAnimatorNotifyIdle(Dart_TimelineGetMicros() +
                                                  100000);
           }
@@ -213,15 +212,14 @@ void Animator::RequestFrame(bool regenerate_layer_tree) {
   // started an expensive operation right after posting this message however.
   // To support that, we need edge triggered wakes on VSync.
 
-  task_runners_.GetUITaskRunner()->PostTask(
-      [self = weak_factory_.GetWeakPtr(), frame_number = frame_number_]() {
-        if (!self.get()) {
-          return;
-        }
-        FML_TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending",
-                                     frame_number);
-        self->AwaitVSync();
-      });
+  task_runners_.GetUITaskRunner()->PostTask([self = weak_factory_.GetWeakPtr(),
+                                             frame_number = frame_number_]() {
+    if (!self.get()) {
+      return;
+    }
+    TRACE_EVENT_ASYNC_BEGIN0("flutter", "Frame Request Pending", frame_number);
+    self->AwaitVSync();
+  });
   frame_scheduled_ = true;
 }
 

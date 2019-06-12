@@ -42,7 +42,7 @@ std::weak_ptr<DartIsolate> DartIsolate::CreateRootIsolate(
     Dart_IsolateFlags* flags,
     fml::closure isolate_create_callback,
     fml::closure isolate_shutdown_callback) {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::CreateRootIsolate");
+  TRACE_EVENT0("flutter", "DartIsolate::CreateRootIsolate");
   Dart_Isolate vm_isolate = nullptr;
   std::weak_ptr<DartIsolate> embedder_isolate;
 
@@ -142,7 +142,7 @@ DartIsolate::Phase DartIsolate::GetPhase() const {
 }
 
 bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::Initialize");
+  TRACE_EVENT0("flutter", "DartIsolate::Initialize");
   if (phase_ != Phase::Uninitialized) {
     return false;
   }
@@ -245,7 +245,7 @@ bool DartIsolate::UpdateThreadPoolNames() const {
 }
 
 bool DartIsolate::LoadLibraries(bool is_root_isolate) {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::LoadLibraries");
+  TRACE_EVENT0("flutter", "DartIsolate::LoadLibraries");
   if (phase_ != Phase::Initialized) {
     return false;
   }
@@ -271,8 +271,7 @@ bool DartIsolate::LoadLibraries(bool is_root_isolate) {
 }
 
 bool DartIsolate::PrepareForRunningFromPrecompiledCode() {
-  FML_TRACE_EVENT0("flutter",
-                   "DartIsolate::PrepareForRunningFromPrecompiledCode");
+  TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromPrecompiledCode");
   if (phase_ != Phase::LibrariesSetup) {
     return false;
   }
@@ -330,7 +329,7 @@ FML_WARN_UNUSED_RESULT
 bool DartIsolate::PrepareForRunningFromKernel(
     std::shared_ptr<const fml::Mapping> mapping,
     bool last_piece) {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromKernel");
+  TRACE_EVENT0("flutter", "DartIsolate::PrepareForRunningFromKernel");
   if (phase_ != Phase::LibrariesSetup) {
     return false;
   }
@@ -420,7 +419,7 @@ bool DartIsolate::PrepareForRunningFromKernels(
 }
 
 bool DartIsolate::MarkIsolateRunnable() {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::MarkIsolateRunnable");
+  TRACE_EVENT0("flutter", "DartIsolate::MarkIsolateRunnable");
   if (phase_ != Phase::LibrariesSetup) {
     return false;
   }
@@ -477,7 +476,7 @@ FML_WARN_UNUSED_RESULT
 bool DartIsolate::Run(const std::string& entrypoint_name,
                       const std::vector<std::string>& args,
                       fml::closure on_run) {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::Run");
+  TRACE_EVENT0("flutter", "DartIsolate::Run");
   if (phase_ != Phase::Ready) {
     return false;
   }
@@ -507,7 +506,7 @@ bool DartIsolate::RunFromLibrary(const std::string& library_name,
                                  const std::string& entrypoint_name,
                                  const std::vector<std::string>& args,
                                  fml::closure on_run) {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::RunFromLibrary");
+  TRACE_EVENT0("flutter", "DartIsolate::RunFromLibrary");
   if (phase_ != Phase::Ready) {
     return false;
   }
@@ -534,7 +533,7 @@ bool DartIsolate::RunFromLibrary(const std::string& library_name,
 }
 
 bool DartIsolate::Shutdown() {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::Shutdown");
+  TRACE_EVENT0("flutter", "DartIsolate::Shutdown");
   // This call may be re-entrant since Dart_ShutdownIsolate can invoke the
   // cleanup callback which deletes the embedder side object of the dart isolate
   // (a.k.a. this).
@@ -676,7 +675,7 @@ DartIsolate::CreateDartVMAndEmbedderObjectPair(
     std::shared_ptr<DartIsolate>* p_parent_embedder_isolate,
     bool is_root_isolate,
     char** error) {
-  FML_TRACE_EVENT0("flutter", "DartIsolate::CreateDartVMAndEmbedderObjectPair");
+  TRACE_EVENT0("flutter", "DartIsolate::CreateDartVMAndEmbedderObjectPair");
 
   std::unique_ptr<std::shared_ptr<DartIsolate>> embedder_isolate(
       p_parent_embedder_isolate);

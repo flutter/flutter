@@ -287,7 +287,7 @@ void PlatformView::OnScenicError(std::string error) {
 
 void PlatformView::OnScenicEvent(
     std::vector<fuchsia::ui::scenic::Event> events) {
-  FML_TRACE_EVENT0("flutter", "PlatformView::OnScenicEvent");
+  TRACE_EVENT0("flutter", "PlatformView::OnScenicEvent");
   for (const auto& event : events) {
     switch (event.Which()) {
       case fuchsia::ui::scenic::Event::Tag::kGfx:
@@ -426,13 +426,13 @@ static trace_flow_id_t PointerTraceHACK(float fa, float fb) {
 
 bool PlatformView::OnHandlePointerEvent(
     const fuchsia::ui::input::PointerEvent& pointer) {
-  FML_TRACE_EVENT0("flutter", "PlatformView::OnHandlePointerEvent");
+  TRACE_EVENT0("flutter", "PlatformView::OnHandlePointerEvent");
 
 #if !defined(FUCHSIA_SDK)
   // TODO(SCN-1278): Use proper trace_id for tracing flow.
   trace_flow_id_t trace_id =
       PointerTraceHACK(pointer.radius_major, pointer.radius_minor);
-  FML_TRACE_FLOW_END("input", "dispatch_event_to_client", trace_id);
+  TRACE_FLOW_END("input", "dispatch_event_to_client", trace_id);
 #endif  //  !defined(FUCHSIA_SDK)
 
   flutter::PointerData pointer_data;

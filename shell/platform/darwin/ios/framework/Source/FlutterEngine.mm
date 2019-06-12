@@ -120,8 +120,8 @@
 }
 
 - (void)dispatchPointerDataPacket:(std::unique_ptr<flutter::PointerDataPacket>)packet {
-  FML_TRACE_EVENT0("flutter", "dispatchPointerDataPacket");
-  FML_TRACE_FLOW_BEGIN("flutter", "PointerEvent", _nextPointerFlowId);
+  TRACE_EVENT0("flutter", "dispatchPointerDataPacket");
+  TRACE_FLOW_BEGIN("flutter", "PointerEvent", _nextPointerFlowId);
   self.shell.GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
       [engine = self.shell.GetEngine(), packet = std::move(packet), flow_id = _nextPointerFlowId] {
         if (engine) {

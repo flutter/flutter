@@ -12,7 +12,7 @@ ColorFilterLayer::ColorFilterLayer(SkColor color, SkBlendMode blend_mode)
 ColorFilterLayer::~ColorFilterLayer() = default;
 
 void ColorFilterLayer::Paint(PaintContext& context) const {
-  FML_TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
+  TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
   FML_DCHECK(needs_painting());
 
   SkPaint paint;

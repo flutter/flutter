@@ -143,7 +143,7 @@ void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
 #endif  // defined(OS_FUCHSIA)
 
 void PhysicalShapeLayer::Paint(PaintContext& context) const {
-  FML_TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
+  TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
   FML_DCHECK(needs_painting());
 
   if (elevation_ != 0) {

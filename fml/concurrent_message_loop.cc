@@ -59,7 +59,7 @@ void ConcurrentMessageLoop::WorkerMain() {
     if (!shutdown_) {
       wait_condition_.wait(lock);
     }
-    FML_TRACE_EVENT0("fml", "ConcurrentWorkerWake");
+    TRACE_EVENT0("fml", "ConcurrentWorkerWake");
     RunSingleExpiredTaskNow();
   }
 

@@ -98,7 +98,7 @@ static RasterCacheResult Rasterize(
     bool checkerboard,
     const SkRect& logical_rect,
     std::function<void(SkCanvas*)> draw_function) {
-  FML_TRACE_EVENT0("flutter", "RasterCachePopulate");
+  TRACE_EVENT0("flutter", "RasterCachePopulate");
   SkIRect cache_rect = RasterCache::GetDeviceBounds(logical_rect, ctm);
 
   const SkImageInfo image_info = SkImageInfo::MakeN32Premul(

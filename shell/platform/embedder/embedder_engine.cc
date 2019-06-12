@@ -94,8 +94,8 @@ bool EmbedderEngine::DispatchPointerDataPacket(
     return false;
   }
 
-  FML_TRACE_EVENT0("flutter", "EmbedderEngine::DispatchPointerDataPacket");
-  FML_TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
+  TRACE_EVENT0("flutter", "EmbedderEngine::DispatchPointerDataPacket");
+  TRACE_FLOW_BEGIN("flutter", "PointerEvent", next_pointer_flow_id_);
 
   shell_->GetTaskRunners().GetUITaskRunner()->PostTask(fml::MakeCopyable(
       [engine = shell_->GetEngine(), packet = std::move(packet),

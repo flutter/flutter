@@ -40,7 +40,7 @@ int main(int argc, const char** argv) {
   fbl::unique_ptr<trace::TraceProvider> provider;
 
   {
-    FML_TRACE_EVENT0("dart", "CreateTraceProvider");
+    TRACE_EVENT0("dart", "CreateTraceProvider");
     bool already_started;
     // Use CreateSynchronously to prevent loss of early events.
     trace::TraceProvider::CreateSynchronously(loop.dispatcher(), "dart_runner",

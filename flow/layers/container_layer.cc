@@ -16,7 +16,7 @@ void ContainerLayer::Add(std::shared_ptr<Layer> layer) {
 }
 
 void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
-  FML_TRACE_EVENT0("flutter", "ContainerLayer::Preroll");
+  TRACE_EVENT0("flutter", "ContainerLayer::Preroll");
 
   SkRect child_paint_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, matrix, &child_paint_bounds);

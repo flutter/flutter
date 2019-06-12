@@ -37,7 +37,7 @@ void PictureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
 }
 
 void PictureLayer::Paint(PaintContext& context) const {
-  FML_TRACE_EVENT0("flutter", "PictureLayer::Paint");
+  TRACE_EVENT0("flutter", "PictureLayer::Paint");
   FML_DCHECK(picture_.get());
   FML_DCHECK(needs_painting());
 

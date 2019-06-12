@@ -189,8 +189,7 @@ void DartRunner::StartComponent(
     fuchsia::sys::Package package,
     fuchsia::sys::StartupInfo startup_info,
     ::fidl::InterfaceRequest<fuchsia::sys::ComponentController> controller) {
-  FML_TRACE_EVENT1("dart", "StartComponent", "url",
-                   package.resolved_url.c_str());
+  TRACE_EVENT1("dart", "StartComponent", "url", package.resolved_url.c_str());
   std::thread thread(RunApplication, this, std::move(package),
                      std::move(startup_info), context_->svc(),
                      std::move(controller));
