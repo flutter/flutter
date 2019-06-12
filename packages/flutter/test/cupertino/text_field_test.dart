@@ -74,13 +74,10 @@ class PathBoundsMatcher extends Matcher {
         (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
       );
 
-    if (descriptions != null) {
-      description
+    // description is guaranteed to be non-null.
+    return description
         ..add('mismatch Rect: ${item.getBounds()}')
         .addAll(': ', ', ', '. ', descriptions);
-    }
-
-    return description;
   }
 }
 
