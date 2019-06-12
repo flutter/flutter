@@ -56,13 +56,14 @@ class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
   String get debugDescription => 'anyTap';
 }
 
-class _AnyTapSemanticsMapping extends GestureSemanticsMapping {
+class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
+  _ModalBarrierSemanticsDelegate({this.onAnyTapDown});
+
+  VoidCallback onAnyTapDown;
+
   @override
-  GestureTapCallback getTapHandler(GetRecognizerHandler getRecognizer) {
-    final _AnyTapGestureRecognizer tap = getRecognizer(_AnyTapGestureRecognizer);
-    // We can directly return the method here because AnyTap ensures non-null
-    // `onAnyTapDown`.
-    return tap.onAnyTapDown;
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+    renderObject.onTap = onAnyTapDown;
   }
 }
 
@@ -97,7 +98,7 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
     return RawGestureDetector(
       gestures: gestures,
       behavior: HitTestBehavior.opaque,
-      semanticsMapping: _AnyTapSemanticsMapping(),
+      semantics: _ModalBarrierSemanticsDelegate(onAnyTapDown: onAnyTapDown),
       child: child,
     );
   }
