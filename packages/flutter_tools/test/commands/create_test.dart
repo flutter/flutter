@@ -1295,13 +1295,10 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   @override
   String get reasonPhrase => '<reason phrase>';
 
-  // TODO(tvolkert): Update (flutter/flutter#33791)
-  /*
   @override
   HttpClientResponseCompressionState get compressionState {
     return HttpClientResponseCompressionState.decompressed;
   }
-  */
 
   @override
   StreamSubscription<Uint8List> listen(
@@ -1316,10 +1313,6 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
 
   @override
   dynamic noSuchMethod(Invocation invocation) {
-    // TODO(tvolkert): Update (flutter/flutter#33791)
-    if (invocation.memberName == #compressionState) {
-      return null;
-    }
     throw 'io.HttpClientResponse - $invocation';
   }
 }
