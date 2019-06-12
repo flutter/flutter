@@ -12,8 +12,31 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     InitializationPreference preference)
     : context_(context) {
   project_args_.struct_size = sizeof(project_args_);
-  software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
+
   custom_task_runners_.struct_size = sizeof(FlutterCustomTaskRunners);
+
+  opengl_renderer_config_.struct_size = sizeof(FlutterOpenGLRendererConfig);
+  opengl_renderer_config_.make_current = [](void* context) -> bool {
+    return reinterpret_cast<EmbedderContext*>(context)->GLMakeCurrent();
+  };
+  opengl_renderer_config_.clear_current = [](void* context) -> bool {
+    return reinterpret_cast<EmbedderContext*>(context)->GLClearCurrent();
+  };
+  opengl_renderer_config_.present = [](void* context) -> bool {
+    return reinterpret_cast<EmbedderContext*>(context)->GLPresent();
+  };
+  opengl_renderer_config_.fbo_callback = [](void* context) -> uint32_t {
+    return reinterpret_cast<EmbedderContext*>(context)->GLGetFramebuffer();
+  };
+  opengl_renderer_config_.make_resource_current = [](void* context) -> bool {
+    return reinterpret_cast<EmbedderContext*>(context)->GLMakeResourceCurrent();
+  };
+  opengl_renderer_config_.gl_proc_resolver = [](void* context,
+                                                const char* name) -> void* {
+    return reinterpret_cast<EmbedderContext*>(context)->GLGetProcAddress(name);
+  };
+
+  software_renderer_config_.struct_size = sizeof(FlutterSoftwareRendererConfig);
   software_renderer_config_.surface_present_callback =
       [](void*, const void*, size_t, size_t) { return true; };
 
@@ -31,6 +54,12 @@ EmbedderConfigBuilder::~EmbedderConfigBuilder() = default;
 void EmbedderConfigBuilder::SetSoftwareRendererConfig() {
   renderer_config_.type = FlutterRendererType::kSoftware;
   renderer_config_.software = software_renderer_config_;
+}
+
+void EmbedderConfigBuilder::SetOpenGLRendererConfig() {
+  renderer_config_.type = FlutterRendererType::kOpenGL;
+  renderer_config_.open_gl = opengl_renderer_config_;
+  context_.SetupOpenGLSurface();
 }
 
 void EmbedderConfigBuilder::SetAssetsPath() {

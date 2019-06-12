@@ -111,5 +111,39 @@ EmbedderContext::GetUpdateSemanticsCustomActionCallbackHook() {
   };
 }
 
+void EmbedderContext::SetupOpenGLSurface() {
+  gl_surface_ = std::make_unique<EmbedderTestGLSurface>();
+}
+
+bool EmbedderContext::GLMakeCurrent() {
+  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  return gl_surface_->MakeCurrent();
+}
+
+bool EmbedderContext::GLClearCurrent() {
+  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  return gl_surface_->ClearCurrent();
+}
+
+bool EmbedderContext::GLPresent() {
+  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  return gl_surface_->Present();
+}
+
+uint32_t EmbedderContext::GLGetFramebuffer() {
+  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  return gl_surface_->GetFramebuffer();
+}
+
+bool EmbedderContext::GLMakeResourceCurrent() {
+  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  return gl_surface_->MakeResourceCurrent();
+}
+
+void* EmbedderContext::GLGetProcAddress(const char* name) {
+  FML_CHECK(gl_surface_) << "GL surface must be initialized.";
+  return gl_surface_->GetProcAddress(name);
+}
+
 }  // namespace testing
 }  // namespace flutter

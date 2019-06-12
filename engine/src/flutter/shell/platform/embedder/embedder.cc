@@ -340,6 +340,7 @@ FlutterEngineResult FlutterEngineRun(size_t version,
   }
 
   if (!IsRendererValid(config)) {
+    FML_LOG(WARNING) << "Invalid renderer config.";
     return LOG_EMBEDDER_ERROR(kInvalidArguments);
   }
 
