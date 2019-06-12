@@ -28,6 +28,31 @@ Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
   return thumbPath;
 }
 
+class _CustomRangeThumbShape extends RangeSliderThumbShape {
+  static const double _thumbSize = 4.0;
+  static const double _disabledThumbSize = 3.0;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
+  }
+
+  @override
+  void paint(
+    PaintingContext context,
+    Offset center, {
+    @required Animation<double> activationAnimation,
+    @required Animation<double> enableAnimation,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+    bool isOnTop,
+    @required SliderThemeData sliderTheme,
+    Thumb thumb,
+  }) {
+
+  }
+}
+
 class _CustomThumbShape extends SliderComponentShape {
   static const double _thumbSize = 4.0;
   static const double _disabledThumbSize = 3.0;
@@ -133,136 +158,211 @@ class _SliderDemoState extends State<SliderDemo> {
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sliders'),
-        actions: <Widget>[MaterialDemoDocumentationButton(SliderDemo.routeName)],
+
+    final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
+      ComponentDemoTabData(
+        tabName: 'SINGLE SLIDER',
+        description: 'Sliders containing 1 thumb',
+        demoWidget: _Sliders(),
+        documentationUrl: 'https://docs.flutter.io/flutter/material/Slider-class.html',
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 40.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Slider.adaptive(
-                  value: _value,
-                  min: 0.0,
-                  max: 100.0,
-                  onChanged: (double value) {
-                    setState(() {
-                      _value = value;
-                    });
-                  },
-                ),
-                const Text('Continuous'),
-              ],
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: Slider.adaptive(
-                        value: _value,
-                        min: 0.0,
-                        max: 100.0,
-                        onChanged: (double value) {
-                          setState(() {
-                            _value = value;
-                          });
-                        },
-                      ),
+      ComponentDemoTabData(
+        tabName: 'RANGE SLIDER',
+        description: 'Sliders containing 2 thumbs',
+        demoWidget: _RangeSliders(),
+        documentationUrl: 'https://docs.flutter.io/flutter/material/Slider-class.html',
+      ),
+    ];
+
+    return TabbedComponentDemoScaffold(
+      title: 'Sliders',
+      demos: demos,
+    );
+  }
+}
+
+class _Sliders extends StatefulWidget {
+  @override
+  _SlidersState createState() => _SlidersState();
+}
+
+class _SlidersState extends State<_Sliders> {
+  double _continuousValue = 25.0;
+  double _discreteValue = 20.0;
+  double _discreteCustomValue = 25.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Semantics(
+                label: 'Editable numerical value',
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  child: TextField(
+                    textAlign: TextAlign.center,
+                    onSubmitted: (String value) {
+                      final double newValue = double.tryParse(value);
+                      if (newValue != null && newValue != _continuousValue) {
+                        setState(() {
+                          _continuousValue = newValue.clamp(0, 100);
+                        });
+                      }
+                    },
+                    keyboardType: TextInputType.number,
+                    controller: TextEditingController(
+                      text: _continuousValue.toStringAsFixed(0),
                     ),
-                    Semantics(
-                      label: 'Editable numerical value',
-                      child: Container(
-                        width: 48,
-                        height: 48,
-                        child: TextField(
-                          onSubmitted: (String value) {
-                            final double newValue = double.tryParse(value);
-                            if (newValue != null && newValue != _value) {
-                              setState(() {
-                                _value = newValue.clamp(0, 100);
-                              });
-                            }
-                          },
-                          keyboardType: TextInputType.number,
-                          controller: TextEditingController(
-                            text: _value.toStringAsFixed(0),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
-                const Text('Continuous with Editable Numerical Value'),
-              ],
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: const <Widget>[
-                Slider.adaptive(value: 0.25, onChanged: null),
-                Text('Disabled'),
-              ],
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Slider.adaptive(
-                  value: _discreteValue,
+              ),
+              Slider.adaptive(
+                value: _continuousValue,
+                min: 0.0,
+                max: 100.0,
+                onChanged: (double value) {
+                  setState(() {
+                    _continuousValue = value;
+                  });
+                },
+              ),
+              const Text('Continuous with Editable Numerical Value'),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: const <Widget>[
+              Slider.adaptive(value: 0.25, onChanged: null),
+              Text('Disabled'),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Slider.adaptive(
+                value: _discreteValue,
+                min: 0.0,
+                max: 200.0,
+                divisions: 5,
+                label: '${_discreteValue.round()}',
+                onChanged: (double value) {
+                  setState(() {
+                    _discreteValue = value;
+                  });
+                },
+              ),
+              const Text('Discrete'),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SliderTheme(
+                data: theme.sliderTheme.copyWith(
+                  activeTrackColor: Colors.deepPurple,
+                  inactiveTrackColor: Colors.black26,
+                  activeTickMarkColor: Colors.white70,
+                  inactiveTickMarkColor: Colors.black,
+                  overlayColor: Colors.black12,
+                  thumbColor: Colors.deepPurple,
+                  valueIndicatorColor: Colors.deepPurpleAccent,
+                  thumbShape: _CustomThumbShape(),
+                  valueIndicatorShape: _CustomValueIndicatorShape(),
+                  valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
+                ),
+                child: Slider(
+                  value: _discreteCustomValue,
                   min: 0.0,
                   max: 200.0,
                   divisions: 5,
-                  label: '${_discreteValue.round()}',
+                  semanticFormatterCallback: (double value) => value.round().toString(),
+                  label: '${_discreteCustomValue.round()}',
                   onChanged: (double value) {
                     setState(() {
-                      _discreteValue = value;
+                      _discreteCustomValue = value;
                     });
                   },
                 ),
-                const Text('Discrete'),
-              ],
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                SliderTheme(
-                  data: theme.sliderTheme.copyWith(
-                    activeTrackColor: Colors.deepPurple,
-                    inactiveTrackColor: Colors.black26,
-                    activeTickMarkColor: Colors.white70,
-                    inactiveTickMarkColor: Colors.black,
-                    overlayColor: Colors.black12,
-                    thumbColor: Colors.deepPurple,
-                    valueIndicatorColor: Colors.deepPurpleAccent,
-                    thumbShape: _CustomThumbShape(),
-                    valueIndicatorShape: _CustomValueIndicatorShape(),
-                    valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
-                  ),
-                  child: Slider(
-                    value: _discreteValue,
-                    min: 0.0,
-                    max: 200.0,
-                    divisions: 5,
-                    semanticFormatterCallback: (double value) => value.round().toString(),
-                    label: '${_discreteValue.round()}',
-                    onChanged: (double value) {
-                      setState(() {
-                        _discreteValue = value;
-                      });
-                    },
-                  ),
-                ),
-                const Text('Discrete with Custom Theme'),
-              ],
-            ),
-          ],
-        ),
+              ),
+              const Text('Discrete with Custom Theme'),
+            ],
+          ),
+        ],
       ),
     );
   }
 }
+
+class _RangeSliders extends StatefulWidget {
+  @override
+  _RangeSlidersState createState() => _RangeSlidersState();
+}
+
+class _RangeSlidersState extends State<_RangeSliders> {
+  RangeValues _continuousValues = RangeValues(25.0, 75.0);
+  RangeValues _discreteValues = RangeValues(20.0, 120.0);
+  RangeValues _discreteCustomValues = RangeValues(25.0, 75.0);
+
+  @override
+  Widget build(BuildContext context) {
+    final ThemeData theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 40.0),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: <Widget>[
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              RangeSlider(
+                values: _continuousValues,
+                min: 0.0,
+                max: 100.0,
+                onChanged: (RangeValues values) {
+                  setState(() {
+                    _continuousValues = values;
+                  });
+                },
+              ),
+              const Text('Continuous'),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              RangeSlider(values: const RangeValues(0.25, 0.75), onChanged: null),
+              const Text('Disabled'),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              RangeSlider(
+                values: _discreteValues,
+                min: 0.0,
+                max: 200.0,
+                divisions: 5,
+                labels: RangeLabels('${_discreteValues.start.round()}', '${_discreteValues.end.round()}'),
+                onChanged: (RangeValues values) {
+                  setState(() {
+                    _discreteValues = values;
+                  });
+                },
+              ),
+              const Text('Discrete'),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
