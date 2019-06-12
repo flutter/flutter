@@ -883,7 +883,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     _syncAll(gestures);
     if (!widget.excludeFromSemantics) {
       final RenderSemanticsGestureHandler semanticsGestureHandler = context.findRenderObject();
-      _updateSemanticsForObject(semanticsGestureHandler);
+      _updateSemanticsForRenderObject(semanticsGestureHandler);
     }
   }
 
@@ -951,7 +951,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     return widget.child == null ? HitTestBehavior.translucent : HitTestBehavior.deferToChild;
   }
 
-  void _updateSemanticsForObject(RenderSemanticsGestureHandler renderObject) {
+  void _updateSemanticsForRenderObject(RenderSemanticsGestureHandler renderObject) {
     assert(!widget.excludeFromSemantics);
     assert(_semantics != null);
     _semantics.assignSemantics(renderObject);
@@ -967,7 +967,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     if (!widget.excludeFromSemantics)
       result = _GestureSemantics(
         child: result,
-        assignSemantics: _updateSemanticsForObject,
+        assignSemantics: _updateSemanticsForRenderObject,
       );
     return result;
   }
