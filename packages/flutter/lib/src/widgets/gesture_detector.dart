@@ -1015,8 +1015,6 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
   }
 }
 
-typedef GetRecognizerHandler = GestureRecognizer Function(Type);
-
 /// A base class that describes what semantics notations a [RawGestureDetector]
 /// should add to the render object [RenderSemanticsGestureHandler].
 ///
