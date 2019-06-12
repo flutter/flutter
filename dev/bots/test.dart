@@ -350,6 +350,7 @@ Future<void> _runWebTests() async {
     'test/scheduler/',
     'test/widgets/',
     'test/semantics/',
+    'test/material/',
   ]);
 }
 
