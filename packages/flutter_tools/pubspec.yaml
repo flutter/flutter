@@ -124,5 +124,7 @@ dartdoc:
 dependency_overrides:
   webdev:
     path: /Users/jonahwilliams/Documents/webdev/webdev
+  build_web_compilers:
+    path: /Users/jonahwilliams/Documents/build/build_web_compilers
 
 # PUBSPEC CHECKSUM: 8491
