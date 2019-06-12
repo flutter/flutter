@@ -335,7 +335,9 @@ class TestSemantics {
         result = false;
         return false;
       }
-      return true;
+    }
+    if (it.moveNext()) {
+      return false;
     }
     return result;
   }

@@ -766,9 +766,11 @@ class RenderParagraph extends RenderBox
       final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
-      Rect rect;
+      if (rects.isEmpty) {
+        return null;
+      }
+      Rect rect = Rect.zero;
       for (ui.TextBox textBox in rects) {
-        rect ??= textBox.toRect();
         rect = rect.expandToInclude(textBox.toRect());
         currentDirection = textBox.direction;
       }
@@ -800,12 +802,18 @@ class RenderParagraph extends RenderBox
       if (current != start) {
         final SemanticsNode node = SemanticsNode();
         final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
+        if (configuration == null) {
+          continue;
+        }
         node.updateWith(config: configuration);
         node.rect = currentRect;
         newChildren.add(node);
       }
       final dynamic inlineElement = _inlineSemanticsElements[j];
       final SemanticsConfiguration configuration = buildSemanticsConfig(start, end, includeText: false);
+      if (configuration == null) {
+        continue;
+      }
       if (inlineElement != null) {
         // Add semantics for this recognizer.
         final SemanticsNode node = SemanticsNode();
@@ -841,9 +849,11 @@ class RenderParagraph extends RenderBox
     if (current < rawLabel.length) {
       final SemanticsNode node = SemanticsNode();
       final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
-      node.updateWith(config: configuration);
-      node.rect = currentRect;
-      newChildren.add(node);
+      if (configuration != null) {
+        node.updateWith(config: configuration);
+        node.rect = currentRect;
+        newChildren.add(node);
+      }
     }
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }

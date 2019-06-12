@@ -185,6 +185,45 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('recognizers split semantic node on long text', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+    const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
+    await tester.pumpWidget(
+      Text.rich(
+        TextSpan(
+          children: <TextSpan>[
+            const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
+            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+          ],
+          style: textStyle,
+        ),
+        textDirection: TextDirection.ltr,
+        maxLines: 1,
+      ),
+    );
+    final TestSemantics expectedSemantics = TestSemantics.root(
+      children: <TestSemantics>[
+        TestSemantics.rootChild(
+          children: <TestSemantics>[
+            TestSemantics(
+              label: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n',
+              textDirection: TextDirection.ltr,
+            ),
+            TestSemantics(
+              label: 'world',
+              textDirection: TextDirection.ltr,
+              actions: <SemanticsAction>[
+                SemanticsAction.tap,
+              ],
+            ),
+          ],
+        ),
+      ],
+    );
+    expect(semantics, hasSemantics(expectedSemantics, ignoreTransform: true, ignoreId: true, ignoreRect: true));
+    semantics.dispose();
+  });
+
   testWidgets('recognizers split semantic nodes with text span labels', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
