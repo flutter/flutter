@@ -11,7 +11,7 @@ void main() {
   test('Element diagnostics json includes widgetRuntimeType', () async {
     final Element element = _TestElement();
 
-    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate.defaults());
+    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json['widgetRuntimeType'], 'Placeholder');
     expect(json['stateful'], isFalse);
   });
@@ -19,7 +19,7 @@ void main() {
   test('StatefulElement diganostics are stateful', () {
     final Element element = StatefulElement(const Tooltip(message: 'foo'));
 
-    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate.defaults());
+    final Map<String, Object> json = element.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
     expect(json['widgetRuntimeType'], 'Tooltip');
     expect(json['stateful'], isTrue);
   });
@@ -68,13 +68,13 @@ void main() {
     );
 
     test('default', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate.defaults());
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate());
       expect(result.containsKey('properties'), isFalse);
       expect(result.containsKey('children'), isFalse);
     });
 
     test('subtreeDepth 1', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate.defaults(subtreeDepth: 1));
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(subtreeDepth: 1));
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object>> children = result['children'];
       expect(children[0].containsKey('children'), isFalse);
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('subtreeDepth 5', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate.defaults(subtreeDepth: 5));
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(subtreeDepth: 5));
       expect(result.containsKey('properties'), isFalse);
       final List<Map<String, Object>> children = result['children'];
       expect(children[0]['children'], hasLength(0));
@@ -92,13 +92,13 @@ void main() {
     });
 
     test('includeProperties', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate.defaults(includeProperties: true));
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(includeProperties: true));
       expect(result.containsKey('children'), isFalse);
       expect(result['properties'], hasLength(7));
     });
 
     test('includeProperties with subtreedepth 1', () {
-      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate.defaults(
+      final Map<String, Object> result = testTree.toDiagnosticsNode().toJsonMap(const DiagnosticsSerializationDelegate(
         includeProperties: true,
         subtreeDepth: 1,
       ));
@@ -271,7 +271,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
   }
 }
 
-class TestDiagnosticsSerializationDelegate extends DiagnosticsSerializationDelegate {
+class TestDiagnosticsSerializationDelegate implements DiagnosticsSerializationDelegate {
   const TestDiagnosticsSerializationDelegate({
     this.includeProperties = false,
     this.subtreeDepth = 0,
@@ -294,7 +294,7 @@ class TestDiagnosticsSerializationDelegate extends DiagnosticsSerializationDeleg
   }
 
   @override
-  DiagnosticsSerializationDelegate delegateForAddingNode(DiagnosticsNode node) {
+  DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node) {
     if (nodeDelegator != null) {
       return nodeDelegator(node, this);
     }

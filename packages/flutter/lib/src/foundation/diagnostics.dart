@@ -1605,7 +1605,7 @@ abstract class DiagnosticsNode {
       truncated = true;
     }
     final List<Map<String, Object>> json = nodes.map<Map<String, Object>>((DiagnosticsNode node) {
-      return node.toJsonMap(delegate.delegateForAddingNode(node));
+      return node.toJsonMap(delegate.delegateForNode(node));
     }).toList();
     if (truncated)
       json.last['truncated'] = true;
@@ -3404,15 +3404,17 @@ class DiagnosticsBlock extends DiagnosticsNode {
 
 /// A delegate that configures how a hierarchy of [DiagnosticsNode]s should be
 /// serialized.
+///
+/// Implement this class in a subclass to fully configure how [DiagnosticsNode]s
+/// get serialized.
 abstract class DiagnosticsSerializationDelegate {
-  /// Const constructor to allow subclasses to be const.
-  const DiagnosticsSerializationDelegate();
-
-  /// Creates a [DiagnosticsSerializationDelegate] with default values.
+  /// Creates a simple [DiagnosticsSerializationDelegate] that controls the
+  /// [subtreeDepth] and whether to [includeProperties].
   ///
-  /// By default, no children or properties will be included in the
-  /// serialization.
-  const factory DiagnosticsSerializationDelegate.defaults({
+  /// For additional configuration options, extend
+  /// [DiagnosticsSerializationDelegate] and provide custom implementations
+  /// for the methods of this class.
+  const factory DiagnosticsSerializationDelegate({
     int subtreeDepth,
     bool includeProperties,
   }) = _DefaultDiagnosticsSerializationDelegate;
@@ -3471,7 +3473,7 @@ abstract class DiagnosticsSerializationDelegate {
   /// This is called for nodes that will be added to the serialization as
   /// property or child of another node. It may return the same delegate if no
   /// changes to it are necessary.
-  DiagnosticsSerializationDelegate delegateForAddingNode(DiagnosticsNode node);
+  DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node);
 
   /// Controls how many levels of children will be included in the serialized
   /// hierarchy of [DiagnosticsNode]s.
@@ -3507,7 +3509,7 @@ abstract class DiagnosticsSerializationDelegate {
   });
 }
 
-class _DefaultDiagnosticsSerializationDelegate extends DiagnosticsSerializationDelegate {
+class _DefaultDiagnosticsSerializationDelegate implements DiagnosticsSerializationDelegate {
   const _DefaultDiagnosticsSerializationDelegate({
     this.includeProperties = false,
     this.subtreeDepth = 0,
@@ -3519,7 +3521,7 @@ class _DefaultDiagnosticsSerializationDelegate extends DiagnosticsSerializationD
   }
 
   @override
-  DiagnosticsSerializationDelegate delegateForAddingNode(DiagnosticsNode node) {
+  DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node) {
     return subtreeDepth > 0 ? copyWith(subtreeDepth: subtreeDepth - 1) : this;
   }
 
