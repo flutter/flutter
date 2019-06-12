@@ -16,6 +16,8 @@ source_set("fml") {
     "compiler_specific.h",
     "concurrent_message_loop.cc",
     "concurrent_message_loop.h",
+    "delayed_task.cc",
+    "delayed_task.h",
     "eintr_wrapper.h",
     "file.cc",
     "file.h",
