@@ -61,7 +61,7 @@ void main() {
     renderObject = element.renderObject;
     expect(renderObject.decoration, equals(kBoxDecorationB));
     expect(renderObject.position, equals(DecorationPosition.background));
-  });
+  }, skip: isBrowser);
 
   testWidgets('RenderObjectWidget can add and remove children', (WidgetTester tester) async {
 
@@ -145,7 +145,7 @@ void main() {
     ));
 
     childBareTree();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Detached render tree is intact', (WidgetTester tester) async {
 
@@ -187,7 +187,7 @@ void main() {
     expect(grandChild.parent, equals(child));
     expect(grandChild.decoration, equals(kBoxDecorationC));
     expect(grandChild.child, isNull);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Can watch inherited widgets', (WidgetTester tester) async {
     final Key boxKey = UniqueKey();
@@ -209,5 +209,5 @@ void main() {
 
     decoration = renderBox.decoration;
     expect(decoration.color, equals(const Color(0xFF0000FF)));
-  });
+  }, skip: isBrowser);
 }
