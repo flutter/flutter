@@ -171,7 +171,16 @@ flutter::SemanticsAction GetSemanticsActionForScrollDirection(
   if ([self node].HasFlag(flutter::SemanticsFlags::kScopesRoute))
     return false;
 
-  return ([self node].flags != 0 &&
+  // If the only flag(s) set are scrolling related AND
+  // The only flags set are not kIsHidden OR
+  // The node doesn't have a label, value, or hint OR
+  // The only actions set are scrolling related actions.
+  //
+  // The kIsHidden flag set with any other flag just means this node is now
+  // hidden but still is a valid target for a11y focus in the tree, e.g. a list
+  // item that is currently off screen but the a11y navigation needs to know
+  // about.
+  return (([self node].flags & ~flutter::kScrollableSemanticsFlags) != 0 &&
           [self node].flags != static_cast<int32_t>(flutter::SemanticsFlags::kIsHidden)) ||
          ![self node].label.empty() || ![self node].value.empty() || ![self node].hint.empty() ||
          ([self node].actions & ~flutter::kScrollableSemanticsActions) != 0;

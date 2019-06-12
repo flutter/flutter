@@ -71,6 +71,9 @@ enum class SemanticsFlags : int32_t {
   kHasImplicitScrolling = 1 << 18,
 };
 
+const int kScrollableSemanticsFlags =
+    static_cast<int32_t>(SemanticsFlags::kHasImplicitScrolling);
+
 struct SemanticsNode {
   SemanticsNode();
 
