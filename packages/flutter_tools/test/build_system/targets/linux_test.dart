@@ -47,7 +47,7 @@ void main() {
     });
 
     test('Copies files to correct cache directory', () => testbed.run(() async {
-      await buildSystem.build('unpack_linux', environment);
+      await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
 
       expect(fs.file('linux/flutter/libflutter_linux.so').existsSync(), true);
       expect(fs.file('linux/flutter/flutter_export.h').existsSync(), true);
@@ -59,19 +59,19 @@ void main() {
     }));
 
     test('Does not re-copy files unecessarily', () => testbed.run(() async {
-      await buildSystem.build('unpack_linux', environment);
+      await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
       final DateTime modified = fs.file('linux/flutter/libflutter_linux.so').statSync().modified;
-      await buildSystem.build('unpack_linux', environment);
+      await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
 
       expect(fs.file('linux/flutter/libflutter_linux.so').statSync().modified, equals(modified));
     }));
 
     test('Detects changes in input cache files', () => testbed.run(() async {
-      await buildSystem.build('unpack_linux', environment);
+      await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
       final DateTime modified = fs.file('linux/flutter/libflutter_linux.so').statSync().modified;
       fs.file('cache/linux-x64/libflutter_linux.so').writeAsStringSync('asd'); // modify cache.
 
-      await buildSystem.build('unpack_linux', environment);
+      await buildSystem.build('unpack_linux', environment, const BuildSystemConfig());
 
       expect(fs.file('linux/flutter/libflutter_linux.so').statSync().modified, isNot(modified));
     }));

@@ -35,6 +35,16 @@ enum ChangeType {
   Modified,
 }
 
+/// Configuration for the build system itself.
+class BuildSystemConfig {
+  const BuildSystemConfig({this.resourcePoolSize});
+
+  /// The maximum number of concurrent tasks the build system will run.
+  ///
+  /// If not provided, defaults to [platform.numberOfProcessors].
+  final int resourcePoolSize;
+}
+
 /// A Target describes a single step during a flutter build.
 ///
 /// The target inputs are required to be files discoverable via a combination
@@ -259,9 +269,7 @@ class Target {
 /// The [Environment] defines several constants for use during the build.
 ///
 /// The environment contains configuration and file paths that are safe to
-/// depend on and reference during the build. Introducing additional config that
-/// is not from the environment or an input may result in non-reproducible
-/// builds.
+/// depend on and reference during the build.
 ///
 /// Example (Good):
 ///
@@ -295,6 +303,9 @@ class Target {
 ///        ..createSync()
 ///        ..writeAsStringSync('non_debug');
 ///    }
+// TODO(jonahwilliams): allow passing serializable defines to each rule that
+// could include somewhat arbitary config and be used to invalidate. Example:
+// android_arch, ios_arch.
 class Environment {
   /// Create a new [Environment] object.
   ///
@@ -401,6 +412,7 @@ class BuildSystem {
   Future<void> build(
     String name,
     Environment environment,
+    BuildSystemConfig buildSystemConfig,
   ) async {
     final Target target = _getNamedTarget(name);
     environment.buildDir.createSync(recursive: true);
@@ -422,7 +434,7 @@ class BuildSystem {
 
     // TODO(jonahwilliams): create a separate configuration for the settings and
     // constants which effect build running.
-    final _BuildInstance buildInstance = _BuildInstance(environment, fileCache);
+    final _BuildInstance buildInstance = _BuildInstance(environment, fileCache, buildSystemConfig);
     try {
       await buildInstance.invokeTarget(target);
     } finally {
@@ -463,9 +475,11 @@ class BuildSystem {
 
 /// An active instance of a build.
 class _BuildInstance {
-  _BuildInstance(this.environment, this.fileCache);
+  _BuildInstance(this.environment, this.fileCache, this.buildSystemConfig)
+    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
 
-  final Pool resourcePool = Pool(platform?.numberOfProcessors ?? 1);
+  final BuildSystemConfig buildSystemConfig;
+  final Pool resourcePool;
   final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
   final Environment environment;
   final FileCache fileCache;

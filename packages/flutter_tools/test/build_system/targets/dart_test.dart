@@ -44,7 +44,7 @@ flutter_tools:lib/''');
     });
 
     test('Produces correct output directory', () => testbed.run(() async {
-      await buildSystem.build('kernel_snapshot', environment);
+      await buildSystem.build('kernel_snapshot', environment, const BuildSystemConfig());
 
       expect(fs.file(fs.path.join('build', 'debug', 'main.app.dill')).existsSync(), true);
     }));

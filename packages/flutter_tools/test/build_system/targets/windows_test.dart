@@ -55,7 +55,7 @@ void main() {
     });
 
     test('Copies files to correct cache directory', () => testbed.run(() async {
-      await buildSystem.build('unpack_windows', environment);
+      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
 
       expect(fs.file(r'C:\windows\flutter\flutter_export.h').existsSync(), true);
       expect(fs.file(r'C:\windows\flutter\flutter_messenger.h').existsSync(), true);
@@ -72,19 +72,19 @@ void main() {
     }));
 
     test('Does not re-copy files unecessarily', () => testbed.run(() async {
-      await buildSystem.build('unpack_windows', environment);
+      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
       final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
-      await buildSystem.build('unpack_windows', environment);
+      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
 
       expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, equals(modified));
     }));
 
     test('Detects changes in input cache files', () => testbed.run(() async {
-      await buildSystem.build('unpack_windows', environment);
+      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
       final DateTime modified = fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified;
       fs.file(r'C:\cache\windows-x64\flutter_export.h').writeAsStringSync('asd'); // modify cache.
 
-      await buildSystem.build('unpack_windows', environment);
+      await buildSystem.build('unpack_windows', environment, const BuildSystemConfig());
 
       expect(fs.file(r'C:\windows\flutter\flutter_export.h').statSync().modified, isNot(modified));
     }));

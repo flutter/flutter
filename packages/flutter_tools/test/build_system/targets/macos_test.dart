@@ -50,7 +50,7 @@ void main() {
     });
 
     test('Copies files to correct cache directory', () => testbed.run(() async {
-      await buildSystem.build('unpack_macos', environment);
+      await buildSystem.build('unpack_macos', environment, const BuildSystemConfig());
 
       expect(fs.directory('macos/Flutter/FlutterMacOS.framework').existsSync(), true);
     }));

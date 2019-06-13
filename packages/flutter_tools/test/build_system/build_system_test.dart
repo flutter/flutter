@@ -87,7 +87,7 @@ void main() {
     });
 
     test('Throws exception if asked to build non-existent target', () => testbed.run(() {
-      expect(buildSystem.build('not_real', environment), throwsA(isInstanceOf<Exception>()));
+      expect(buildSystem.build('not_real', environment, const BuildSystemConfig()), throwsA(isInstanceOf<Exception>()));
     }));
 
     test('Throws exception if asked to build with unsupported environment', () => testbed.run(() {
@@ -97,18 +97,18 @@ void main() {
         targetPlatform: TargetPlatform.android_arm,
       );
 
-      expect(buildSystem.build('foo', environment), throwsA(isInstanceOf<InvalidBuildException>()));
+      expect(buildSystem.build('foo', environment, const BuildSystemConfig()), throwsA(isInstanceOf<InvalidBuildException>()));
     }));
 
     test('Throws exception if asked to build with missing inputs', () => testbed.run(() {
       // Delete required input file.
       fs.file('foo.dart').deleteSync();
 
-      expect(buildSystem.build('foo', environment), throwsA(isInstanceOf<MissingInputException>()));
+      expect(buildSystem.build('foo', environment, const BuildSystemConfig()), throwsA(isInstanceOf<MissingInputException>()));
     }));
 
     test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
-      await buildSystem.build('foo', environment);
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
 
       final File stampFile = fs.file('build/foo.debug.android-arm.none');
       expect(stampFile.existsSync(), true);
@@ -118,23 +118,23 @@ void main() {
     }));
 
     test('Does not re-invoke build if stamp is valid', () => testbed.run(() async {
-      await buildSystem.build('foo', environment);
-      await buildSystem.build('foo', environment);
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
 
       expect(fooInvocations, 1);
     }));
 
     test('Re-invoke build if input is modified', () => testbed.run(() async {
-      await buildSystem.build('foo', environment);
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
 
       fs.file('foo.dart').writeAsStringSync('new contents');
 
-      await buildSystem.build('foo', environment);
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
       expect(fooInvocations, 2);
     }));
 
     test('Runs dependencies of targets', () => testbed.run(() async {
-      await buildSystem.build('bar', environment);
+      await buildSystem.build('bar', environment, const BuildSystemConfig());
 
       expect(fs.file('build/bar').existsSync(), true);
       expect(fooInvocations, 1);
@@ -164,7 +164,7 @@ void main() {
         '/foo.dart': ChangeType.Added
       });
 
-      await buildSystem.build('foo', environment);
+      await buildSystem.build('foo', environment, const BuildSystemConfig());
       final Map<String, ChangeType> secondChanges = await fooTarget.computeChanges(inputs, environment, fileCache);
 
       expect(secondChanges, <String, ChangeType>{});
@@ -298,7 +298,7 @@ void main() {
     });
 
     test('Only invokes shared target once', () => testbed.run(() async {
-      await buildSystem.build('bar', environment);
+      await buildSystem.build('bar', environment, const BuildSystemConfig());
 
       expect(shared, 1);
     }));

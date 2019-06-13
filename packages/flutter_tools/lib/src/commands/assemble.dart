@@ -72,6 +72,10 @@ abstract class AssembleBase extends FlutterCommand {
         'release',
       ],
     );
+    argParser.addOption(
+      'resource-pool-size',
+      help: 'The maximum number of concurrent tasks the build system will run.'
+    );
   }
 
   /// Returns the provided target platform.
@@ -133,7 +137,9 @@ class AssembleRun extends AssembleBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     try {
-      await buildSystem.build(targetName, environment);
+      await buildSystem.build(targetName, environment, BuildSystemConfig(
+        resourcePoolSize: argResults['resource-pool-size'],
+      ));
     } on Exception catch (err) {
       throwToolExit(err.toString());
     }
