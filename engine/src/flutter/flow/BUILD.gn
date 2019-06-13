@@ -76,8 +76,6 @@ source_set("flow") {
 
   if (is_fuchsia) {
     sources += [
-      "export_node.cc",
-      "export_node.h",
       "layers/child_scene_layer.cc",
       "layers/child_scene_layer.h",
       "scene_update_context.cc",

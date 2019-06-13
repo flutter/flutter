@@ -256,8 +256,8 @@ void SceneBuilder::addChildScene(double dx,
     return;
   }
   auto layer = std::make_unique<flutter::ChildSceneLayer>(
-      sceneHost->id(), sceneHost->use_view_holder(), SkPoint::Make(dx, dy),
-      SkSize::Make(width, height), hitTestable);
+      sceneHost->id(), SkPoint::Make(dx, dy), SkSize::Make(width, height),
+      hitTestable);
   current_layer_->Add(std::move(layer));
 }
 #endif  // defined(OS_FUCHSIA)

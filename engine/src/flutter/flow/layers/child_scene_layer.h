@@ -18,7 +18,6 @@ namespace flutter {
 class ChildSceneLayer : public Layer {
  public:
   ChildSceneLayer(zx_koid_t layer_id,
-                  bool use_view_holder,
                   const SkPoint& offset,
                   const SkSize& size,
                   bool hit_testable);
@@ -35,7 +34,6 @@ class ChildSceneLayer : public Layer {
   SkPoint offset_;
   SkSize size_;
   bool hit_testable_ = true;
-  bool use_view_holder_ = true;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ChildSceneLayer);
 };
