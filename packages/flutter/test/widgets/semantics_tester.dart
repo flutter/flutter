@@ -605,8 +605,6 @@ class SemanticsTester {
       buf.writeln('  hint: \'${node.hint}\',');
     if (node.textDirection != null)
       buf.writeln('  textDirection: ${node.textDirection},');
-    if (node.rect != null)
-      buf.writeln('  rect: ${node.rect},');
     if (node.hasChildren) {
       buf.writeln('  children: <TestSemantics>[');
       for (final SemanticsNode child in node.debugListChildrenInOrder(childOrder)) {

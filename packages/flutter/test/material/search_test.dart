@@ -497,6 +497,17 @@ void main() {
                 textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 8,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isButton,
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Suggestions',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
                     id: 9,
                     children: <TestSemantics>[
                       TestSemantics(
@@ -528,17 +539,6 @@ void main() {
                         textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                       ),
                     ],
-                  ),
-                  TestSemantics(
-                    id: 8,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Suggestions',
-                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
