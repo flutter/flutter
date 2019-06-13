@@ -185,20 +185,22 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('recognizers split semantic node on long text', (WidgetTester tester) async {
+  testWidgets('recognizers split semantic node when TextSpan overflows', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     const TextStyle textStyle = TextStyle(fontFamily: 'Ahem');
     await tester.pumpWidget(
-      Text.rich(
-        TextSpan(
-          children: <TextSpan>[
-            const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
-            TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
-          ],
-          style: textStyle,
+      SizedBox(
+        height: 10,
+        child: Text.rich(
+          TextSpan(
+            children: <TextSpan>[
+              const TextSpan(text: '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'),
+              TextSpan(text: 'world', recognizer: TapGestureRecognizer()..onTap = () { }),
+            ],
+            style: textStyle,
+          ),
+          textDirection: TextDirection.ltr,
         ),
-        textDirection: TextDirection.ltr,
-        maxLines: 1,
       ),
     );
     final TestSemantics expectedSemantics = TestSemantics.root(
@@ -212,9 +214,7 @@ void main() {
             TestSemantics(
               label: 'world',
               textDirection: TextDirection.ltr,
-              actions: <SemanticsAction>[
-                SemanticsAction.tap,
-              ],
+              actions: <SemanticsAction>[SemanticsAction.tap]
             ),
           ],
         ),
