@@ -128,14 +128,20 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+    final double extent = constraints.remainingPaintExtent
+      - math.min(constraints.overlap, 0.0)
+      // Adding the offset for when this SliverFillRemaining is not scrollable,
+      // so it will stretch to fill on overscroll.
+      + (hasScrollBody ? 0.0 : constraints.scrollOffset);
     if (child != null)
       child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent), parentUsesSize: true);
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
-      scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : constraints.scrollOffset,
+      // 0.0 can be applied here for cases when there is not scroll body since
+      // SliverFillRemaining will not have any slivers following it.
+      scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : 0.0,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
