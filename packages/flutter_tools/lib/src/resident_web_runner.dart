@@ -15,16 +15,7 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/src/request.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
 
-/// SRC IMPORTS
-import 'package:webdev/src/command/configuration.dart' show Configuration;
-import 'package:webdev/src/daemon_client.dart' show daemonPort;
-import 'package:webdev/src/serve/chrome.dart' show Chrome, ChromeError;
-import 'package:webdev/src/serve/debugger/app_debug_services.dart' show AppDebugServices;
-import 'package:webdev/src/serve/debugger/devtools.dart'  show DevTools;
-import 'package:webdev/src/serve/handlers/dev_handler.dart'  show DevHandler, DevConnection;
-import 'package:webdev/src/serve/injected/configuration.dart' show ReloadConfiguration;
-import 'package:webdev/src/serve/webdev_server.dart' show WebDevServer, ServerOptions;
-////
+import 'package:webdev/webdev.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -108,23 +99,6 @@ Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory, List<String
   return null;
 }
 
-Future<Chrome> _startChrome(
-  Configuration configuration,
-  WebDevServer server,
-  BuildDaemonClient client,
-) async {
-  final List<String> uris = <String>[
-    'http://${server.host}:${server.port}/'
-  ];
-  try {
-    return await Chrome.start(uris, port: configuration.chromeDebugPort);
-  } on ChromeError {
-    await server.stop();
-    await client.close();
-    rethrow;
-  }
-}
-
 Future<DevTools> _startDevTools(
   Configuration configuration,
 ) async {
@@ -189,10 +163,8 @@ class ResidentWebRunner extends ResidentRunner {
 
   StreamSubscription<BuildResults> _buildResults;
   DevTools _devTools;
-  Chrome _chrome;
   BuildDaemonClient _client;
   AppDebugServices _appDebugServices;
-  WebDevServer _webdevServer;
 
   DebugService get _debugService => _appDebugServices?.debugService;
 
@@ -200,10 +172,15 @@ class ResidentWebRunner extends ResidentRunner {
 
   StreamSubscription<BuildResult> _resultSub;
   StreamSubscription<vmservice.Event> _stdOutSub;
+  WebDevHandler _webDevHandler;
 
-  void _handleBuildResult(BuildResult result) {
-    printStatus(result.status.name);
-  }
+  Map<String, int> targetPorts;
+  final Configuration configuration = Configuration(
+      autoRun: true,
+      debug: true,
+      hostname: 'localhost',
+      reload: ReloadConfiguration.hotRestart,
+    );
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -217,10 +194,11 @@ class ResidentWebRunner extends ResidentRunner {
 
   Future<void> _cleanup() async {
     await _buildResults?.cancel();
-    await _chrome?.close();
     await _client?.close();
     await _devTools?.close();
-    await _webdevServer?.stop();
+    await _webDevHandler.close();
+    await _resultSub?.cancel();
+    await _stdOutSub?.cancel();
   }
 
   @override
@@ -281,13 +259,7 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
-    final Configuration configuration = Configuration(
-      autoRun: true,
-      debug: true,
-      hostname: 'localhost',
-      reload: ReloadConfiguration.hotRestart,
-    );
-    final Map<String, int> targetPorts = <String, int>{
+    targetPorts = <String, int>{
       'web': await os.findFreePort()
     };
 
@@ -311,24 +283,21 @@ class ResidentWebRunner extends ResidentRunner {
 
     // Start dev tools.
     _devTools = await _startDevTools(configuration);
-
-    // Start the web dev server.
-    final int assetPort = daemonPort(workingDirectory);
-    _webdevServer = await WebDevServer.start(ServerOptions(
-      configuration,
-      targetPorts['web'],
-      'web',
-      assetPort,
-      _assetHandler,
-    ), _client.buildResults, _devTools);
-
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
-    // Launch chrome.
-    _chrome = await _startChrome(configuration, _webdevServer, _client);
+    _webDevHandler = await connectToWebdev(
+      configuration,
+      targetPorts['web'],
+      daemonPort(fs.currentDirectory.path),
+      'web',
+      _client.buildResults,
+      _devTools,
+      optionalHandler: _assetHandler,
+    );
+    _appDebugServices = _webDevHandler.appDebugServices;
 
     appStartedCompleter?.complete();
     return attach(
@@ -341,18 +310,10 @@ class ResidentWebRunner extends ResidentRunner {
   Future<int> attach(
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
-    final DevHandler devHandler = _webdevServer.devHandler;
-    final DevConnection connection = await devHandler.connectedApps.first;
-    await _stdOutSub?.cancel();
-    await _resultSub?.cancel();
-    _appDebugServices = await devHandler.loadAppServices(
-        connection.request.appId, connection.request.instanceId);
-
     // When a tab is closed we exit an app.
     unawaited(_appDebugServices.chromeProxyService.tabConnection.onClose.first.then((_) {
       appFinished();
     }));
-
     // Cleanup old subscriptions.
     try {
       await _vmService.streamCancel('Stdout');
@@ -360,7 +321,6 @@ class ResidentWebRunner extends ResidentRunner {
     try {
       await _vmService.streamListen('Stdout');
     } catch (_) {}
-
     _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
       printStatus(utf8.decode(base64.decode(log.bytes)));
     });
@@ -370,9 +330,7 @@ class ResidentWebRunner extends ResidentRunner {
     connectionInfoCompleter?.complete(DebugConnectionInfo(
       wsUri: Uri.parse(_debugService.wsUri),
     ));
-    // Run main!
-    connection.runMain();
-    _resultSub = devHandler.buildResults.listen(_handleBuildResult);
+    _webDevHandler.devConnection.runMain();
     setupTerminal();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
