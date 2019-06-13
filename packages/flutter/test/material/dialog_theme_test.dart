@@ -133,7 +133,7 @@ void main() {
       matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
     const String titleText = 'Title';
