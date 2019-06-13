@@ -2295,8 +2295,8 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     bool isDiscrete = false,
     bool isEnabled = false,
     bool isOnTop,
-    TextDirection textDirection,
     @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
     Thumb thumb,
   }) {
     assert(context != null);
