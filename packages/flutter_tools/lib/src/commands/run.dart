@@ -219,14 +219,21 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<Map<String, String>> get usageValues async {
-    final bool isEmulator = await devices[0].isLocalEmulator;
     String deviceType, deviceOsVersion;
-    if (devices.length == 1) {
+    bool isEmulator;
+
+    if (devices == null || devices.isEmpty) {
+      deviceType = 'none';
+      deviceOsVersion = 'none';
+      isEmulator = false;
+    } else if (devices.length == 1) {
       deviceType = getNameForTargetPlatform(await devices[0].targetPlatform);
       deviceOsVersion = await devices[0].sdkNameAndVersion;
+      isEmulator = await devices[0].isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
+      isEmulator = false;
     }
     final String modeName = getBuildInfo().modeName;
     final AndroidProject androidProject = FlutterProject.current().android;
