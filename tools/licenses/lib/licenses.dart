@@ -13,13 +13,14 @@ import 'patterns.dart';
 
 class FetchedContentsOf extends Key { FetchedContentsOf(dynamic value) : super(value); }
 
-enum LicenseType { unknown, bsd, gpl, lgpl, mpl, afl, mit, freetype, apache, apacheNotice, eclipse, ijg, zlib, icu, apsl, libpng, openssl }
+enum LicenseType { unknown, bsd, gpl, lgpl, mpl, afl, mit, freetype, apache, apacheNotice, eclipse, ijg, zlib, icu, apsl, libpng, openssl, vulkan }
 
 LicenseType convertLicenseNameToType(String name) {
   switch (name) {
     case 'Apache':
     case 'apache-license-2.0':
     case 'LICENSE-APACHE-2.0.txt':
+    case 'LICENSE.vulkan':
       return LicenseType.apache;
     case 'BSD':
     case 'BSD.txt':
@@ -45,6 +46,8 @@ LicenseType convertLicenseNameToType(String name) {
     case 'LICENSE.MPLv2':
     case 'COPYING-MPL-1.1':
       return LicenseType.mpl;
+    case 'COPYRIGHT.vulkan':
+      return LicenseType.vulkan;
     // common file names that don't say what the type is
     case 'COPYING':
     case 'COPYING.txt':
@@ -63,6 +66,7 @@ LicenseType convertLicenseNameToType(String name) {
     case 'license.txt':
       return LicenseType.unknown;
     // particularly weird file names
+    case 'COPYRIGHT.musl':
     case 'LICENSE-APPLE':
     case 'extreme.indiana.edu.license.TXT':
     case 'extreme.indiana.edu.license.txt':
@@ -196,6 +200,7 @@ abstract class License implements Comparable<License> {
         case LicenseType.ijg:
         case LicenseType.apsl:
           return MessageLicense._(body, type, origin: origin);
+        case LicenseType.vulkan:
         case LicenseType.openssl:
           return MultiLicense._(body, type, origin: origin);
         case LicenseType.libpng:
@@ -329,6 +334,7 @@ abstract class License implements Comparable<License> {
             assert(this is BlankLicense);
             break;
           case LicenseType.openssl:
+          case LicenseType.vulkan:
             assert(this is MultiLicense);
             break;
         }
@@ -338,6 +344,11 @@ abstract class License implements Comparable<License> {
       return true;
     }());
     final LicenseType detectedType = convertBodyToType(body);
+
+    // Fuchsia SDK Vulkan license is Apache 2.0 with some additional BSD-matching copyrights.
+    if (type == LicenseType.vulkan)
+      yesWeKnowWhatItLooksLikeButItIsNot = true;
+
     if (detectedType != LicenseType.unknown && detectedType != type && !yesWeKnowWhatItLooksLikeButItIsNot)
       throw 'Created a license of type $type but it looks like $detectedType\.';
     if (type != LicenseType.apache && type != LicenseType.apacheNotice) {

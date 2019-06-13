@@ -473,7 +473,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/mac-amd64',
-        'version': 'jlQvNeRMq6X81_VYiFI_Ol311YCXak0xACebeb8f6TcC'
+        'version': 'Cx51FRV5TCoqQ9nfs4E2QMfYkJ1JWt7arQXhV01tr7cC'
        }
      ],
      'condition': 'host_os == "mac"',
@@ -483,7 +483,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/clang/mac-amd64',
-        'version': '4OfgjQg8g3Ztj2OYJ4Zlz9Q6DGYjOTuHh3G8MSMhxg4C'
+        'version': 'BzmZEP9A83NSNSqnrff3k0tYJK7UXs0pknphn-quiZwC'
        }
      ],
      'condition': 'host_os == "mac"',
@@ -493,7 +493,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/sdk/core/linux-amd64',
-        'version': '9-zyx3CzWylM-x9RYdL5UTT9uU-sl_0ysOCcEGCtot0C'
+        'version': 'udf6w2VmM5E8PyQm5ggugW_jjiEdWs-Xl6efeLf2JdkC'
        }
      ],
      'condition': 'host_os == "linux"',
@@ -503,7 +503,7 @@ deps = {
      'packages': [
        {
         'package': 'fuchsia/clang/linux-amd64',
-        'version': 'WPg0zzXLyTjFNrOrz4uA5vPaXUuEYvTJ5DPyYdiaN3MC'
+        'version': 'dV3r0yk4WXi1C-QwjzNUA-pIkHCG3COYnrlt80GFacYC'
        }
      ],
      'condition': 'host_os == "linux"',
