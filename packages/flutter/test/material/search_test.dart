@@ -496,6 +496,8 @@ void main() {
                 label: routeName,
                 textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
+                  // TODO(dnfield): This is almost certainly wrong. Suggestions
+                  // should come after Back and Search. https://github.com/flutter/flutter/issues/34432
                   TestSemantics(
                     id: 8,
                     flags: <SemanticsFlag>[

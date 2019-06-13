@@ -460,6 +460,7 @@ void _tests() {
                                 id: 11,
                                 flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                 children: <TestSemantics>[
+                                  // TODO(dnfield): These shouldn't be here. https://github.com/flutter/flutter/issues/34431
                                   TestSemantics(),
                                   TestSemantics(),
                                   TestSemantics(),
