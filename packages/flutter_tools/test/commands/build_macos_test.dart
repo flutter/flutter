@@ -53,6 +53,7 @@ void main() {
     applyMocksToCommand(command);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
@@ -68,6 +69,7 @@ void main() {
     fs.directory('macos').createSync();
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
     final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
 
