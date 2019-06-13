@@ -1192,11 +1192,11 @@ abstract class RangeSliderThumbShape {
   /// If [isOnTop] is true this thumb is painted on top of the other slider
   /// thumb because this thumb is the one that was most recently selected.
   ///
+  /// {@macro flutter.material.rangeSlider.shape.sliderTheme}
+  ///
   /// [textDirection] can be used to determine how the orientation of either
   /// slider thumb should be changed, such as drawing different shapes for the
   /// left and right thumb.
-  ///
-  /// {@macro flutter.material.rangeSlider.shape.sliderTheme}
   ///
   /// {@macro flutter.material.rangeSlider.shape.thumb}
   void paint(
