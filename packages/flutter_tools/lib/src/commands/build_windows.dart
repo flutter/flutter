@@ -59,7 +59,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     if (!flutterProject.windows.existsSync()) {
       throwToolExit('No Windows desktop project configured.');
     }
-    await buildWindows(flutterProject.windows, buildInfo);
+    await buildWindows(flutterProject.windows, buildInfo, target: targetFile);
     return null;
   }
 }

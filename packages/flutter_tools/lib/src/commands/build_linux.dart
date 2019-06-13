@@ -59,7 +59,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!flutterProject.linux.existsSync()) {
       throwToolExit('No Linux desktop project configured.');
     }
-    await buildLinux(flutterProject.linux, buildInfo);
+    await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
     return null;
   }
 }

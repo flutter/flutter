@@ -59,7 +59,11 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!flutterProject.macos.existsSync()) {
       throwToolExit('No macOS desktop project configured.');
     }
-    await buildMacOS(flutterProject, buildInfo);
+    await buildMacOS(
+      flutterProject: flutterProject,
+      buildInfo: buildInfo,
+      targetOverride: targetFile,
+    );
     return null;
   }
 }
