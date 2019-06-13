@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
 import '../widgets/semantics_tester.dart';
+import '../rendering/mock_canvas.dart';
 import 'feedback_tester.dart';
 
 class MockClipboard {
@@ -854,7 +855,7 @@ void main() {
     expect(find.text('CUT'), findsNothing);
   });
 
-  testWidgets('text field build empty tool bar when no options available ios', (WidgetTester tester) async {
+  testWidgets('does not paint tool bar when no options available on ios', (WidgetTester tester) async {
     await tester.pumpWidget(
         MaterialApp(
           theme: ThemeData(platform: TargetPlatform.iOS),
@@ -872,11 +873,9 @@ void main() {
     await tester.tap(find.byType(TextField));
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
-    final RenderBox container = tester.renderObject(find.descendant(
-      of: find.byType(FadeTransition),
-      matching: find.byType(Container),
-    ));
-    expect(container.size, Size.zero);
+    final RenderBox container = tester.renderObject(find.byType(CupertinoTextSelectionToolbar));
+
+    expect(find.byType(CupertinoTextSelectionToolbar), paintsNothing);
   });
 
   testWidgets('text field build empty tool bar when no options available android', (WidgetTester tester) async {

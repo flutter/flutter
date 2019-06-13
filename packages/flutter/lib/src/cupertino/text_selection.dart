@@ -152,9 +152,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
   @override
   void performLayout() {
-    assert(child != null);
-
     size = constraints.biggest;
+
+    if (child == null) {
+      return;
+    }
     final BoxConstraints enforcedConstraint = constraints
       .deflate(const EdgeInsets.symmetric(horizontal: _kToolbarScreenPadding))
       .loosen();
@@ -204,8 +206,11 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final _ToolbarParentData childParentData = child.parentData;
+    if (child == null) {
+      return;
+    }
 
+    final _ToolbarParentData childParentData = child.parentData;
     context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
@@ -220,6 +225,10 @@ class _ToolbarRenderBox extends RenderShiftedBox {
   @override
   void debugPaintSize(PaintingContext context, Offset offset) {
     assert(() {
+        if (child == null) {
+          return true;
+        }
+
       _debugPaint ??= Paint()
       ..shader = ui.Gradient.linear(
         const Offset(0.0, 0.0),
@@ -351,17 +360,15 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     addToolbarButtonIfNeeded(localizations.pasteButtonLabel, canPaste, handlePaste);
     addToolbarButtonIfNeeded(localizations.selectAllButtonLabel, canSelectAll, handleSelectAll);
 
-    return items.isEmpty
-      ? Container()
-      : CupertinoTextSelectionToolbar._(
-        barTopY: localBarTopY + globalEditableRegion.top,
-        arrowTipX: arrowTipX,
-        isArrowPointingDown: isArrowPointingDown,
-        child: DecoratedBox(
-          decoration: const BoxDecoration(color: _kToolbarDividerColor),
-          child: Row(mainAxisSize: MainAxisSize.min, children: items),
-        ),
-      );
+    return CupertinoTextSelectionToolbar._(
+      barTopY: localBarTopY + globalEditableRegion.top,
+      arrowTipX: arrowTipX,
+      isArrowPointingDown: isArrowPointingDown,
+      child: items.isEmpty ? null : DecoratedBox(
+        decoration: const BoxDecoration(color: _kToolbarDividerColor),
+        child: Row(mainAxisSize: MainAxisSize.min, children: items),
+      ),
+    );
   }
 
   /// Builder for iOS text selection edges.
