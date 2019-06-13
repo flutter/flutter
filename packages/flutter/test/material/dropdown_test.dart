@@ -143,7 +143,7 @@ void main() {
       matchesGoldenFile('dropdown_test.default.0.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
@@ -156,7 +156,7 @@ void main() {
       matchesGoldenFile('dropdown_test.expanded.0.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';

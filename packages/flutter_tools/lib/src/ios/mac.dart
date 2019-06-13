@@ -279,6 +279,10 @@ Future<XcodeBuildResult> buildXcodeProject({
     buildCommands.add('SCRIPT_OUTPUT_STREAM_FILE=${scriptOutputPipeFile.absolute.path}');
   }
 
+  // Don't log analytics for downstream Flutter commands.
+  // e.g. `flutter build bundle`.
+  buildCommands.add('FLUTTER_SUPPRESS_ANALYTICS=true');
+
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
   final RunResult buildResult = await runAsync(

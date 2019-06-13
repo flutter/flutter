@@ -51,7 +51,7 @@ void main() {
       expect(tester.hitTestOnBinding(const Offset(100.0, 300.0)), hits(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 299.0)), doesNotHit(renderPhysicalShape));
       expect(tester.hitTestOnBinding(const Offset(100.0, 301.0)), doesNotHit(renderPhysicalShape));
-    });
+    }, skip: isBrowser);
 
   });
 
@@ -202,7 +202,7 @@ void main() {
         tester.getTopLeft(find.byKey(key2)).dy,
         closeTo(aboveBaseline1 - aboveBaseline2, .001),
       );
-    });
+    }, skip: isBrowser);
   });
 
   test('UnconstrainedBox toString', () {
