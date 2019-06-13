@@ -529,7 +529,8 @@ void main() {
         ),
     );
     await gesture.up();
-  });
+  }, skip: isBrowser
+  );
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
