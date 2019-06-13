@@ -129,9 +129,34 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   bool get disableShadows => false;
 
   /// Increase the timeout for the current test by the given duration.
-  void addTime(Duration duration) {
-    // Noop, see [AutomatedTestWidgetsFlutterBinding. addTime] for an actual implementation.
-  }
+  ///
+  /// This only matters if the test has an `initialTimeout` set on
+  /// [testWidgets], and the test is running via `flutter test`. By default,
+  /// tests do not have such a timeout. Tests run using `flutter run` never time
+  /// out even if one is specified.
+  ///
+  /// This method has no effect on the timeout specified via `timeout` on
+  /// [testWidgets]. That timeout is implemented by the `test` package.
+  ///
+  /// By default, each [pump] and [pumpWidget] call increases the timeout by a
+  /// hundred milliseconds, and each [matchesGoldenFile] expectation increases
+  /// it by a minute. If there is no timeout in the first place, this has no
+  /// effect.
+  ///
+  /// The granularity of timeouts is coarse: the time is checked once per
+  /// second, and only when the test is not executing. It is therefore possible
+  /// for a timeout to be exceeded by hundreds of milliseconds and for the test
+  /// to still succeed. If precise timing is required, it should be implemented
+  /// as a part of the test rather than relying on this mechanism.
+  ///
+  /// See also:
+  ///
+  ///  * [testWidgets], on which a timeout can be set using the `timeout`
+  ///    argument.
+  ///  * [defaultTestTimeout], the maximum that the timeout can reach.
+  ///    (That timeout is implemented by the `test` package.)
+  // See AutomatedTestWidgetsFlutterBinding.addTime for an actual implementation.
+  void addTime(Duration duration);
 
   /// The value to set [debugCheckIntrinsicSizes] to while tests are running.
   ///
@@ -183,11 +208,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The number of outstanding microtasks in the queue.
   int get microtaskCount;
 
-  /// The default test timeout for tests when using this binding.
+  /// The default maximum test timeout for tests when using this binding.
   ///
-  /// The [AutomatedTestWidgetsFlutterBinding] layers in an additional timeout
-  /// mechanism beyond this, with much more aggressive timeouts. See
-  /// [AutomatedTestWidgetsFlutterBinding.addTime].
+  /// This controls the default for the `timeout` argument on `testWidgets`. It
+  /// is 10 minutes for [AutomatedTestWidgetsFlutterBinding] (tests running
+  /// using `flutter test`), and unlimited for tests using
+  /// [LiveTestWidgetsFlutterBinding] (tests running using `flutter run`).
+  ///
+  /// This is the maximum that the timeout controlled by `initialTimeout` on
+  /// [testWidgets] can reach when augmented using [addTime].
   test_package.Timeout get defaultTestTimeout;
 
   /// The current time.
@@ -233,8 +262,8 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   ///
   /// The `additionalTime` argument is used by the
   /// [AutomatedTestWidgetsFlutterBinding] implementation to increase the
-  /// current timeout. See [AutomatedTestWidgetsFlutterBinding.addTime] for
-  /// details. The value is ignored by the [LiveTestWidgetsFlutterBinding].
+  /// current timeout, if any. See [AutomatedTestWidgetsFlutterBinding.addTime]
+  /// for details.
   Future<T> runAsync<T>(
     Future<T> callback(), {
     Duration additionalTime = const Duration(milliseconds: 1000),
@@ -422,7 +451,10 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The `description` is used by the [LiveTestWidgetsFlutterBinding] to
   /// show a label on the screen during the test. The description comes from
   /// the value passed to [testWidgets]. It must not be null.
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '' });
+  ///
+  /// The `timeout` argument sets the initial timeout, if any. It can
+  /// be increased with [addTime]. By default there is no timeout.
+  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration timeout });
 
   /// This is called during test execution before and after the body has been
   /// executed.
@@ -739,10 +771,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   @override
   bool get checkIntrinsicSizes => true;
 
-  // The timeout here is absurdly high because we do our own timeout logic and
-  // this is just a backstop.
   @override
-  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(Duration(minutes: 5));
+  test_package.Timeout get defaultTestTimeout => const test_package.Timeout(Duration(minutes: 10));
 
   @override
   bool get inTest => _currentFakeAsync != null;
@@ -933,6 +963,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
 
   void _checkTimeout(Timer timer) {
     assert(_timeoutTimer == timer);
+    assert(_timeout != null);
     if (_timeoutStopwatch.elapsed > _timeout) {
       _timeoutCompleter.completeError(
         TimeoutException(
@@ -944,33 +975,10 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     }
   }
 
-  /// Increase the timeout for the current test by the given duration.
-  ///
-  /// Tests by default time out after two seconds, but the timeout can be
-  /// increased before an expensive operation to allow it to complete without
-  /// hitting the test timeout.
-  ///
-  /// By default, each [pump] and [pumpWidget] call increases the timeout by a
-  /// hundred milliseconds, and each [matchesGoldenFile] expectation increases
-  /// it by several seconds.
-  ///
-  /// In general, unit tests are expected to run very fast, and this method is
-  /// usually not necessary.
-  ///
-  /// The granularity of timeouts is coarse: the time is checked once per
-  /// second, and only when the test is not executing. It is therefore possible
-  /// for a timeout to be exceeded by hundreds of milliseconds and for the test
-  /// to still succeed. If precise timing is required, it should be implemented
-  /// as a part of the test rather than relying on this mechanism.
-  ///
-  /// See also:
-  ///
-  ///  * [defaultTestTimeout], the maximum that the timeout can reach.
-  ///    (That timeout is implemented by the test package.)
   @override
   void addTime(Duration duration) {
-    assert(_timeout != null, 'addTime can only be called during a test.');
-    _timeout += duration;
+    if (_timeout != null)
+      _timeout += duration;
   }
 
   @override
@@ -978,7 +986,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     Future<void> testBody(),
     VoidCallback invariantTester, {
     String description = '',
-    Duration timeout = const Duration(seconds: 2),
+    Duration timeout,
   }) {
     assert(description != null);
     assert(!inTest);
@@ -986,9 +994,11 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     assert(_clock == null);
 
     _timeout = timeout;
-    _timeoutStopwatch = Stopwatch()..start();
-    _timeoutTimer = Timer.periodic(const Duration(seconds: 1), _checkTimeout);
-    _timeoutCompleter = Completer<void>();
+    if (_timeout != null) {
+      _timeoutStopwatch = Stopwatch()..start();
+      _timeoutTimer = Timer.periodic(const Duration(seconds: 1), _checkTimeout);
+      _timeoutCompleter = Completer<void>();
+    }
 
     final FakeAsync fakeAsync = FakeAsync();
     _currentFakeAsync = fakeAsync; // reset in postTest
@@ -997,7 +1007,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     fakeAsync.run((FakeAsync localFakeAsync) {
       assert(fakeAsync == _currentFakeAsync);
       assert(fakeAsync == localFakeAsync);
-      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter.future);
+      testBodyResult = _runTest(testBody, invariantTester, description, timeout: _timeoutCompleter?.future);
       assert(inTest);
     });
 
@@ -1051,7 +1061,7 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     _clock = null;
     _currentFakeAsync = null;
     _timeoutCompleter = null;
-    _timeoutTimer.cancel();
+    _timeoutTimer?.cancel();
     _timeoutTimer = null;
     _timeoutStopwatch = null;
     _timeout = null;
@@ -1204,6 +1214,12 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   LiveTestWidgetsFlutterBindingFramePolicy framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fadePointers;
 
   @override
+  void addTime(Duration duration) {
+    // We don't support timeouts on the LiveTestWidgetsFlutterBinding.
+    // See runTest().
+  }
+
+  @override
   void scheduleFrame() {
     if (framePolicy == LiveTestWidgetsFlutterBindingFramePolicy.benchmark)
       return; // In benchmark mode, don't actually schedule any engine frames.
@@ -1341,6 +1357,8 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
       );
     }());
 
+    addTime(additionalTime); // doesn't do anything since we don't actually track the timeout, but just for correctness...
+
     _runningAsyncTasks = true;
     try {
       return await callback();
@@ -1358,11 +1376,15 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '' }) async {
+  Future<void> runTest(Future<void> testBody(), VoidCallback invariantTester, { String description = '', Duration timeout }) async {
     assert(description != null);
     assert(!inTest);
     _inTest = true;
     renderView._setDescription(description);
+    // We drop the timeout on the floor in `flutter run` mode.
+    // We could support it, but we'd have to automatically add the entire duration of pumps
+    // and timers and so on, since those operate in real time when using this binding, but
+    // the timeouts expect them to happen near-instantaneously.
     return _runTest(testBody, invariantTester, description);
   }
 

@@ -1646,28 +1646,23 @@ class _MatchesReferenceImage extends AsyncMatcher {
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData()
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
-      if (bytes == null) {
-        return 'Failed to generate an image from engine within the 10,000ms timeout.';
-      }
+      final ByteData bytes = await image.toByteData();
+      if (bytes == null)
+        return 'could not be encoded.';
 
-      final ByteData referenceBytes = await referenceImage.toByteData()
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
-      if (referenceBytes == null) {
-        return 'Failed to generate an image from engine within the 10,000ms timeout.';
-      }
+      final ByteData referenceBytes = await referenceImage.toByteData();
+      if (referenceBytes == null)
+        return 'could not have its reference image encoded.';
 
-      if (referenceImage.height != image.height || referenceImage.width != image.width) {
+      if (referenceImage.height != image.height || referenceImage.width != image.width)
         return 'does not match as width or height do not match. $image != $referenceImage';
-      }
 
       final int countDifferentPixels = _countDifferentPixels(
         Uint8List.view(bytes.buffer),
         Uint8List.view(referenceBytes.buffer),
       );
       return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
-    }, additionalTime: const Duration(seconds: 21));
+    }, additionalTime: const Duration(minutes: 1));
   }
 
   @override
@@ -1704,10 +1699,9 @@ class _MatchesGoldenFile extends AsyncMatcher {
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null)
-        return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
+        return 'could not encode screenshot.';
       if (autoUpdateGoldenFiles) {
         await goldenFileComparator.update(key, bytes.buffer.asUint8List());
         return null;
@@ -1718,7 +1712,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 11));
+    }, additionalTime: const Duration(minutes: 1));
   }
 
   @override
