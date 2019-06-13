@@ -10,10 +10,8 @@ import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/service.dart';
-import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
-import 'package:shelf/src/request.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
 
 import 'package:webdev/webdev.dart';
@@ -39,11 +37,14 @@ import 'run_hot.dart';
 
 Future<BuildDaemonClient> connectClient(
   String workingDirectory,
-  List<String> options,
   Function(ServerLog) logHandler,
 ) {
   final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
-  final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
+  // Try and use the snapshot, but if that failed fall back to calling dart directly.
+  String buildScript = fs.path.join(artifacts.getArtifactPath(Artifact.flutterWebSdk), 'flutter_web_build.snapshot');
+  if (!fs.file(buildScript).existsSync()) {
+    buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
+  }
   final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
   return BuildDaemonClient.connect(
     workingDirectory,
@@ -56,21 +57,20 @@ Future<BuildDaemonClient> connectClient(
       buildScript,
       'daemon',
       '--skip-build-script-check',
+      '--no-something',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
       '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
-      ...options,
     ],
     logHandler: logHandler,
   );
 }
 
-Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory, List<String> buildOptions) async {
+Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory) async {
   try {
     return await connectClient(
       workingDirectory,
-      buildOptions,
       (ServerLog serverLog) {
         switch (serverLog.level) {
           case Level.CONFIG:
@@ -103,13 +103,7 @@ Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory, List<String
 Future<DevTools> _startDevTools(
   Configuration configuration,
 ) async {
-  final Uri devtoolsUri = PackageMap(fs.path.join(
-    Cache.flutterRoot,
-    'packages',
-    'flutter_tools',
-    '.packages'
-  )).map['devtools'];
-  final DevTools devTool = await DevTools.start(configuration.hostname, overrideUri: devtoolsUri.resolve('devtools.dart'));
+  final DevTools devTool = await DevTools.start(configuration.hostname);
   printTrace('Serving DevTools at http://${devTool.hostname}:${devTool.port}\n');
   return devTool;
 }
@@ -186,7 +180,7 @@ class ResidentWebRunner extends ResidentRunner {
       autoRun: true,
       debug: true,
       hostname: 'localhost',
-      reload: ReloadConfiguration.hotRestart,
+      reload: ReloadConfiguration.none,
     );
 
   @override
@@ -271,9 +265,8 @@ class ResidentWebRunner extends ResidentRunner {
     };
 
     /// Start the build daemon and run an initial build.
-    final List<String> buildOptions = <String>[];
     final String workingDirectory = fs.currentDirectory.path;
-    _client = await _startBuildDaemon(workingDirectory, buildOptions);
+    _client = await _startBuildDaemon(workingDirectory);
     _client.startBuild();
 
     // Listen to build results to log error messages.

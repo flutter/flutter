@@ -81,9 +81,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
     'flutter_tools:shell',
     <BuilderFactory>[
-      (BuilderOptions options) => FlutterWebShellBuilder(
-        options.config['targets'] ?? <String>['lib/main.dart']
-      ),
+      (BuilderOptions options) => const FlutterWebShellBuilder(),
     ],
     core.toRoot(),
     hideOutput: true,
@@ -124,7 +122,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
               librariesPath: 'libraries.json',
             ),
         (BuilderOptions builderOptions) => DevCompilerBuilder(
-              useIncrementalCompiler: false,
+              useIncrementalCompiler: true,
               platform: flutterWebPlatform,
               platformSdk: builderOptions.config['flutterWebSdk'],
               sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
@@ -138,7 +136,6 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     'flutter_tools:entrypoint',
     <BuilderFactory>[
       (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config['targets'] ?? <String>['lib/main.dart'],
           options.config['release'] ??  false,
           options.config['flutterWebSdk'],
       ),
@@ -154,9 +151,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
     'flutter_tools:test_entrypoint',
     <BuilderFactory>[
-      (BuilderOptions options) => FlutterWebTestEntrypointBuilder(
-        options.config['targets'] ?? const <String>[]
-      ),
+      (BuilderOptions options) => const FlutterWebTestEntrypointBuilder(),
     ],
     core.toRoot(),
     hideOutput: true,
@@ -179,9 +174,7 @@ Future<void> main(List<String> args, [SendPort sendPort]) async {
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebTestEntrypointBuilder implements Builder {
-  const FlutterWebTestEntrypointBuilder(this.targets);
-
-  final List<String> targets;
+  const FlutterWebTestEntrypointBuilder();
 
   @override
   Map<String, List<String>> get buildExtensions => const <String, List<String>>{
@@ -196,16 +189,6 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    bool matches = false;
-    for (String target in targets) {
-      if (buildStep.inputId.path.contains(target)) {
-        matches = true;
-        break;
-      }
-    }
-    if (!matches) {
-      return;
-    }
     log.info('building for target ${buildStep.inputId.path}');
     await bootstrapDdc(buildStep, platform: flutterWebPlatform);
   }
@@ -213,9 +196,8 @@ class FlutterWebTestEntrypointBuilder implements Builder {
 
 /// A ddc-only entrypoint builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
-  const FlutterWebEntrypointBuilder(this.targets, this.release, this.flutterWebSdk);
+  const FlutterWebEntrypointBuilder(this.release, this.flutterWebSdk);
 
-  final List<String> targets;
   final bool release;
   final String flutterWebSdk;
 
@@ -232,17 +214,6 @@ class FlutterWebEntrypointBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    bool matches = false;
-    for (String target in targets) {
-      if (buildStep.inputId.path.contains(path.setExtension(target, '_web_entrypoint.dart'))) {
-        matches = true;
-        break;
-      }
-    }
-    if (!matches) {
-      return;
-    }
-    log.info('building for target ${buildStep.inputId.path}');
     if (release) {
       await bootstrapDart2Js(buildStep, flutterWebSdk);
     } else {
@@ -362,22 +333,10 @@ void setStackTraceMapper(StackTraceMapper mapper) {
 
 /// A shell builder which generates the web specific entrypoint.
 class FlutterWebShellBuilder implements Builder {
-  const FlutterWebShellBuilder(this.targets);
-
-  final List<String> targets;
+  const FlutterWebShellBuilder();
 
   @override
   Future<void> build(BuildStep buildStep) async {
-    bool matches = false;
-    for (String target in targets) {
-      if (buildStep.inputId.path.contains(target)) {
-        matches = true;
-        break;
-      }
-    }
-    if (!matches) {
-      return;
-    }
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
     await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
@@ -419,8 +378,7 @@ Future<void> bootstrapDart2Js(BuildStep buildStep, String flutterWebSdk) async {
   final String librariesPath = path.join(flutterWebSdkPath, 'libraries.json');
   final List<String> args = <String>[
     '--libraries-spec="$librariesPath"',
-    '-m',
-    '-o4',
+    '-O4',
     '-o',
     '$jsOutputPath',
     '--packages="$packageFile"',
