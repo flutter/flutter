@@ -2099,7 +2099,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
-    properties.add(DoubleProperty('thicknes', thickness, defaultValue: 0.0));
+    properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
   }
 
   /// Returns a string representation of this node and its descendants.
@@ -2232,7 +2232,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     final List<_BoxEdge> edges = <_BoxEdge>[];
     for (SemanticsNode child in nodes) {
       // Using a small delta to shrink child rects removes overlapping cases.
-      final Rect childRect = child.rect.deflate(0.1);
+      final Rect childRect = child.rect.deflate(1e-15);
       edges.add(_BoxEdge(
         isLeadingEdge: true,
         offset: _pointInParentCoordinates(child, childRect.topLeft).dx,
@@ -2379,7 +2379,7 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   for (SemanticsNode child in children) {
     assert(child.rect.isFinite);
     // Using a small delta to shrink child rects removes overlapping cases.
-    final Rect childRect = child.rect.deflate(0.1);
+    final Rect childRect = child.rect.deflate(1e-15);
     edges.add(_BoxEdge(
       isLeadingEdge: true,
       offset: _pointInParentCoordinates(child, childRect.topLeft).dy,

@@ -762,7 +762,7 @@ class RenderParagraph extends RenderBox
     TextDirection currentDirection = textDirection;
     Rect currentRect;
 
-    SemanticsConfiguration buildSemanticsConfig(int start, int end, { bool includeText = true }) {
+    SemanticsConfiguration buildSemanticsConfig(int start, int end) {
       final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
@@ -786,10 +786,8 @@ class RenderParagraph extends RenderBox
       order += 1;
       final SemanticsConfiguration configuration = SemanticsConfiguration()
         ..sortKey = OrdinalSortKey(order)
-        ..textDirection = initialDirection;
-      if (includeText) {
-        configuration.label = rawLabel.substring(start, end);
-      }
+        ..textDirection = initialDirection
+        ..label = rawLabel.substring(start, end);
       return configuration;
     }
 
@@ -810,8 +808,8 @@ class RenderParagraph extends RenderBox
         newChildren.add(node);
       }
       final dynamic inlineElement = _inlineSemanticsElements[j];
-      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end, includeText: false);
-      if (configuration == null) {
+      final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
+      if (configuragion == null) {
         continue;
       }
       if (inlineElement != null) {
@@ -832,6 +830,9 @@ class RenderParagraph extends RenderBox
       } else if (childIndex < children.length) {
         // Add semantics for this placeholder. Semantics are precomputed in the children
         // argument.
+        // Placeholders should not get a label, which would come through as an
+        // object replacement character.
+        configuration.label = '';
         final SemanticsNode childNode = children.elementAt(childIndex);
         final TextParentData parentData = child.parentData;
         childNode.rect = Rect.fromLTWH(

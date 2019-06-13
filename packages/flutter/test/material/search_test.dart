@@ -497,6 +497,17 @@ void main() {
                 textDirection: TextDirection.ltr,
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 8,
+                    flags: <SemanticsFlag>[
+                      SemanticsFlag.isButton,
+                      SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isEnabled,
+                    ],
+                    actions: <SemanticsAction>[SemanticsAction.tap],
+                    label: 'Suggestions',
+                    textDirection: TextDirection.ltr,
+                  ),
+                  TestSemantics(
                     id: 9,
                     children: <TestSemantics>[
                       TestSemantics(
@@ -516,7 +527,7 @@ void main() {
                           SemanticsFlag.isTextField,
                           SemanticsFlag.isFocused,
                           SemanticsFlag.isHeader,
-                          SemanticsFlag.namesRoute,
+                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS) SemanticsFlag.namesRoute,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
@@ -525,19 +536,9 @@ void main() {
                         ],
                         label: 'Search',
                         textDirection: TextDirection.ltr,
+                        textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                       ),
                     ],
-                  ),
-                  TestSemantics(
-                    id: 8,
-                    flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
-                      SemanticsFlag.hasEnabledState,
-                      SemanticsFlag.isEnabled,
-                    ],
-                    actions: <SemanticsAction>[SemanticsAction.tap],
-                    label: 'Suggestions',
-                    textDirection: TextDirection.ltr,
                   ),
                 ],
               ),
