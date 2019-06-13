@@ -4,13 +4,17 @@
 
 assert(is_linux)
 
+import("$flutter_root/shell/platform/glfw/config.gni")
+
 group("linux") {
-  deps = [
-    ":flutter_linux",
-    "$flutter_root/shell/platform/common/cpp/client_wrapper:publish_wrapper",
-    "$flutter_root/shell/platform/glfw:publish_headers_glfw",
-    "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
-  ]
+  if (build_glfw_shell) {
+    deps = [
+      ":flutter_linux",
+      "$flutter_root/shell/platform/common/cpp/client_wrapper:publish_wrapper",
+      "$flutter_root/shell/platform/glfw:publish_headers_glfw",
+      "$flutter_root/shell/platform/glfw/client_wrapper:publish_wrapper_glfw",
+    ]
+  }
 }
 
 # Temporary workraround for the issue describe in
@@ -23,12 +27,14 @@ config("disable_fatal_link_warnings") {
   ldflags = [ "-Wl,--no-fatal-warnings" ]
 }
 
-shared_library("flutter_linux") {
-  deps = [
-    "$flutter_root/shell/platform/glfw:flutter_glfw",
-  ]
+if (build_glfw_shell) {
+  shared_library("flutter_linux") {
+    deps = [
+      "$flutter_root/shell/platform/glfw:flutter_glfw",
+    ]
 
-  configs += [ ":disable_fatal_link_warnings" ]
+    configs += [ ":disable_fatal_link_warnings" ]
 
-  public_configs = [ "$flutter_root:config" ]
+    public_configs = [ "$flutter_root:config" ]
+  }
 }
