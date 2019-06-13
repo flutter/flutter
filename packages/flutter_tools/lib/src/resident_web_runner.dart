@@ -10,6 +10,7 @@ import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
 import 'package:dwds/service.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:shelf/src/request.dart';
@@ -102,7 +103,13 @@ Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory, List<String
 Future<DevTools> _startDevTools(
   Configuration configuration,
 ) async {
-  final DevTools devTool = await DevTools.start(configuration.hostname);
+  final Uri devtoolsUri = PackageMap(fs.path.join(
+    Cache.flutterRoot,
+    'packages',
+    'flutter_tools',
+    '.packages'
+  )).map['devtools'];
+  final DevTools devTool = await DevTools.start(configuration.hostname, overrideUri: devtoolsUri.resolve('devtools.dart'));
   printTrace('Serving DevTools at http://${devTool.hostname}:${devTool.port}\n');
   return devTool;
 }
