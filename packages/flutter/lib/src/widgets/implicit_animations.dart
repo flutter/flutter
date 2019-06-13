@@ -1441,9 +1441,9 @@ class AnimatedPhysicalModel extends ImplicitlyAnimatedWidget {
     properties.add(EnumProperty<BoxShape>('shape', shape));
     properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
+    properties.add(ColorProperty('color', color));
     properties.add(DiagnosticsProperty<bool>('animateColor', animateColor));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    properties.add(ColorProperty('shadowColor', shadowColor));
     properties.add(DiagnosticsProperty<bool>('animateShadowColor', animateShadowColor));
   }
 }

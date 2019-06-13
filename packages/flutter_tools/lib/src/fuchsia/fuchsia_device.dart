@@ -252,6 +252,18 @@ class FuchsiaDevice extends Device {
     FuchsiaPackageServer fuchsiaPackageServer;
     bool serverRegistered = false;
     try {
+      // Ask amber to pre-fetch some things we'll need before setting up our own
+      // package server. This is to avoid relying on amber correctly using
+      // multiple package servers, support for which is in flux.
+      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles')) {
+        printError('Failed to get amber to prefetch tiles');
+        return LaunchResult.failed();
+      }
+      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles_ctl')) {
+        printError('Failed to get amber to prefetch tiles_ctl');
+        return LaunchResult.failed();
+      }
+
       // Start up a package server.
       fuchsiaPackageServer = FuchsiaPackageServer(packageRepo.path, host, port);
       if (!await fuchsiaPackageServer.start()) {
@@ -297,7 +309,7 @@ class FuchsiaDevice extends Device {
         await fuchsiaDeviceTools.amberCtl.rmSrc(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
-      fuchsiaPackageServer.stop();
+      fuchsiaPackageServer?.stop();
       packageRepo.deleteSync(recursive: true);
       status.cancel();
     }
