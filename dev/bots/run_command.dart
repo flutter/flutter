@@ -85,6 +85,7 @@ Future<void> runCommand(String executable, List<String> arguments, {
   String failureMessage,
   bool printOutput = true,
   bool skip = false,
+  bool expectFlaky = false,
   Duration timeout = _kLongTimeout,
 }) async {
   final String commandDescription = '${path.relative(executable, from: workingDirectory)} ${arguments.join(' ')}';
@@ -114,6 +115,9 @@ Future<void> runCommand(String executable, List<String> arguments, {
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
     stderr.writeln('Process timed out after $timeout');
+    if (expectFlaky) {
+      return 0;
+    }
     return expectNonZeroExit ? 0 : 1;
   });
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
