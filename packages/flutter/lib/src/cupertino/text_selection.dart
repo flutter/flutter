@@ -115,6 +115,10 @@ class _TextSelectionToolbar extends StatelessWidget {
         items.add(onePhysicalPixelVerticalDivider);
       items.add(_buildToolbarButton(localizations.selectAllButtonLabel, handleSelectAll));
     }
+    // If there is no option available, build an empty widget.
+    if (items.isEmpty) {
+      return Container(width: 0.0, height: 0.0);
+    }
 
     const Widget padding = Padding(padding: EdgeInsets.only(bottom: 10.0));
 

@@ -580,11 +580,14 @@ class WebProject {
 
   /// Whether this flutter project has a web sub-project.
   bool existsSync() {
-    return parent.directory.childDirectory('web').existsSync();
+    return parent.directory.childDirectory('web').existsSync()
+      && indexFile.existsSync();
   }
 
   /// The html file used to host the flutter web application.
-  File get indexFile => parent.directory.childDirectory('web').childFile('index.html');
+  File get indexFile => parent.directory
+      .childDirectory('web')
+      .childFile('index.html');
 
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }

@@ -3,14 +3,12 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-
-String javaHome;
-String errorMessage;
 
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
@@ -36,154 +34,23 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
-Future<void> main() async {
-  await task(() async {
-    section('Find Java');
-
-    javaHome = await findJavaHome();
-    if (javaHome == null)
-      return TaskResult.failure('Could not find Java');
-    print('\nUsing JAVA_HOME=$javaHome');
-
-    try {
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleDebug');
-        await project.runGradleTask('assembleDebug');
-        errorMessage = _validateSnapshotDependency(project, 'build/app.dill');
-        if (errorMessage != null) {
-          throw TaskResult.failure(errorMessage);
-        }
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleProfile');
-        await project.runGradleTask('assembleProfile');
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleRelease');
-        await project.runGradleTask('assembleRelease');
-
-        // When the platform-target isn't specified, we generate the snapshots
-        // for arm and arm64.
-        final List<String> targetPlatforms = <String>[
-          'android-arm',
-          'android-arm64'
-        ];
-        for (final String targetPlatform in targetPlatforms) {
-          final String androidArmSnapshotPath = path.join(
-              project.rootPath,
-              'build',
-              'app',
-              'intermediates',
-              'flutter',
-              'release',
-              targetPlatform);
-
-          final String isolateSnapshotData =
-              path.join(androidArmSnapshotPath, 'isolate_snapshot_data');
-          if (!File(isolateSnapshotData).existsSync()) {
-            throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $isolateSnapshotData');
-          }
-
-          final String isolateSnapshotInstr =
-              path.join(androidArmSnapshotPath, 'isolate_snapshot_instr');
-          if (!File(isolateSnapshotInstr).existsSync()) {
-            throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $isolateSnapshotInstr');
-          }
-
-          final String vmSnapshotData =
-              path.join(androidArmSnapshotPath, 'vm_snapshot_data');
-          if (!File(isolateSnapshotData).existsSync()) {
-            throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $vmSnapshotData');
-          }
-
-          final String vmSnapshotInstr =
-              path.join(androidArmSnapshotPath, 'vm_snapshot_instr');
-          if (!File(isolateSnapshotData).existsSync()) {
-            throw TaskResult.failure(
-                'Snapshot doesn\'t exist: $vmSnapshotInstr');
-          }
-        }
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleLocal (custom debug build)');
-        await project.addCustomBuildType('local', initWith: 'debug');
-        await project.runGradleTask('assembleLocal');
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleBeta (custom release build)');
-        await project.addCustomBuildType('beta', initWith: 'release');
-        await project.runGradleTask('assembleBeta');
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew assembleFreeDebug (product flavor)');
-        await project.addProductFlavor('free');
-        await project.runGradleTask('assembleFreeDebug');
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('gradlew on build script with error');
-        await project.introduceError();
-        final ProcessResult result =
-            await project.resultOfGradleTask('assembleRelease');
-        if (result.exitCode == 0)
-          throw _failure(
-              'Gradle did not exit with error as expected', result);
-        final String output = result.stdout + '\n' + result.stderr;
-        if (output.contains('GradleException') ||
-            output.contains('Failed to notify') ||
-            output.contains('at org.gradle'))
-          throw _failure(
-              'Gradle output should not contain stacktrace', result);
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
-          throw _failure(
-              'Gradle output should contain a readable error message',
-              result);
-      });
-
-      await runProjectTest((FlutterProject project) async {
-        section('flutter build apk on build script with error');
-        await project.introduceError();
-        final ProcessResult result = await project.resultOfFlutterCommand('build', <String>['apk']);
-        if (result.exitCode == 0)
-          throw _failure(
-              'flutter build apk should fail when Gradle does', result);
-        final String output = result.stdout + '\n' + result.stderr;
-        if (!output.contains('Build failed') || !output.contains('builTypes'))
-          throw _failure(
-              'flutter build apk output should contain a readable Gradle error message',
-              result);
-        if (_hasMultipleOccurrences(output, 'builTypes'))
-          throw _failure(
-              'flutter build apk should not invoke Gradle repeatedly on error',
-              result);
-      });
-
-      await runPluginProjectTest((FlutterPluginProject pluginProject) async {
-        section('gradlew assembleDebug on plugin example');
-        await pluginProject.runGradleTask('assembleDebug');
-        if (!pluginProject.hasDebugApk)
-          throw TaskResult.failure(
-              'Gradle did not produce an apk file at the expected place');
-      });
-
-      return TaskResult.success(null);
-    } on TaskResult catch (taskResult) {
-      return taskResult;
-    } catch (e) {
-      return TaskResult.failure(e.toString());
+void checkItContains<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (!collection.contains(value)) {
+      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
     }
-  });
+  }
 }
 
-TaskResult _failure(String message, ProcessResult result) {
+void checkItDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (collection.contains(value)) {
+      throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
+    }
+  }
+}
+
+TaskResult failure(String message, ProcessResult result) {
   print('Unexpected process result:');
   print('Exit code: ${result.exitCode}');
   print('Std out  :\n${result.stdout}');
@@ -191,7 +58,7 @@ TaskResult _failure(String message, ProcessResult result) {
   return TaskResult.failure(message);
 }
 
-bool _hasMultipleOccurrences(String text, Pattern pattern) {
+bool hasMultipleOccurrences(String text, Pattern pattern) {
   return text.indexOf(pattern) != text.lastIndexOf(pattern);
 }
 
@@ -288,12 +155,37 @@ class FlutterPluginProject {
   String get examplePath => path.join(rootPath, 'example');
   String get exampleAndroidPath => path.join(examplePath, 'android');
   String get debugApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'debug', 'app-debug.apk');
+  String get releaseApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-release.apk');
+  String get releaseArmApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-armeabi-v7a-release.apk');
+  String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-arm64-v8a-release.apk');
+  String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
+
+  bool get hasDebugApk => File(debugApkPath).existsSync();
+  bool get hasReleaseApk => File(releaseApkPath).existsSync();
+  bool get hasReleaseArmApk => File(releaseArmApkPath).existsSync();
+  bool get hasReleaseArm64Apk => File(releaseArm64ApkPath).existsSync();
+  bool get hasReleaseBundle => File(releaseBundlePath).existsSync();
 
   Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
   }
 
-  bool get hasDebugApk => File(debugApkPath).existsSync();
+  Future<Iterable<String>> getFilesInApk(String apk) async {
+    final Process unzip = await startProcess(
+      'unzip',
+      <String>['-v', apk],
+      isBot: false, // we just want to test the output, not have any debugging info
+    );
+    return unzip.stdout
+        .transform(utf8.decoder)
+        .transform(const LineSplitter())
+        .map((String line) => line.split(' ').last)
+        .toList();
+  }
+
+  Future<Iterable<String>> getFilesInAppBundle(String bundle) {
+    return getFilesInApk(bundle);
+  }
 }
 
 Future<void> _runGradleTask({String workingDirectory, String task, List<String> options}) async {
@@ -312,7 +204,15 @@ Future<void> _runGradleTask({String workingDirectory, String task, List<String> 
 }
 
 Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
-    List<String> options}) {
+    List<String> options}) async {
+  section('Find Java');
+  final String javaHome = await findJavaHome();
+
+  if (javaHome == null)
+    throw TaskResult.failure('Could not find Java');
+
+  print('\nUsing JAVA_HOME=$javaHome');
+
   final List<String> args = <String>['app:$task'];
   if (options != null) {
     args.addAll(options);
@@ -353,7 +253,7 @@ class _Dependencies {
 }
 
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
-String _validateSnapshotDependency(FlutterProject project, String expectedTarget) {
+String validateSnapshotDependency(FlutterProject project, String expectedTarget) {
   final _Dependencies deps = _Dependencies(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
           'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:args/command_runner.dart';
+
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/time.dart';
@@ -130,6 +132,16 @@ class RunCommand extends RunCommandBase {
         defaultsTo: true,
         help: 'If necessary, build the app before running.',
       )
+      ..addOption('dart-flags',
+        hide: !verboseHelp,
+        help: 'Pass a list of comma separated flags to the Dart instance at '
+              'application startup. Flags passed through this option must be '
+              'present on the whitelist defined within the Flutter engine. If '
+              'a non-whitelisted flag is encountered, the process will be '
+              'terminated immediately.\n\n'
+              'This flag is not available on the stable channel and is only '
+              'applied in debug and profile modes. This option should only '
+              'be used for experiments and should not be used by typical users.')
       ..addOption('use-application-binary',
         hide: !verboseHelp,
         help: 'Specify a pre-built application binary to use when running.',
@@ -207,14 +219,21 @@ class RunCommand extends RunCommandBase {
 
   @override
   Future<Map<String, String>> get usageValues async {
-    final bool isEmulator = await devices[0].isLocalEmulator;
     String deviceType, deviceOsVersion;
-    if (devices.length == 1) {
+    bool isEmulator;
+
+    if (devices == null || devices.isEmpty) {
+      deviceType = 'none';
+      deviceOsVersion = 'none';
+      isEmulator = false;
+    } else if (devices.length == 1) {
       deviceType = getNameForTargetPlatform(await devices[0].targetPlatform);
       deviceOsVersion = await devices[0].sdkNameAndVersion;
+      isEmulator = await devices[0].isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
+      isEmulator = false;
     }
     final String modeName = getBuildInfo().modeName;
     final AndroidProject androidProject = FlutterProject.current().android;
@@ -294,6 +313,7 @@ class RunCommand extends RunCommandBase {
         buildInfo,
         startPaused: argResults['start-paused'],
         disableServiceAuthCodes: argResults['disable-service-auth-codes'],
+        dartFlags: argResults['dart-flags'] ?? '',
         useTestFonts: argResults['use-test-fonts'],
         enableSoftwareRendering: argResults['enable-software-rendering'],
         skiaDeterministicRendering: argResults['skia-deterministic-rendering'],
@@ -348,6 +368,11 @@ class RunCommand extends RunCommandBase {
         timingLabelParts: <String>['daemon'],
         endTimeOverride: appStartedTime,
       );
+    }
+
+    if (argResults['dart-flags'] != null && FlutterVersion.instance.isStable) {
+      throw UsageException('--dart-flags is not available on the stable '
+                           'channel.', null);
     }
 
     for (Device device in devices) {
@@ -411,8 +436,7 @@ class RunCommand extends RunCommandBase {
     // in a "hot mode".
     final bool webMode = !FlutterVersion.instance.isStable
       && devices.length == 1
-      && await devices.single.targetPlatform == TargetPlatform.web_javascript
-      && hotMode;
+      && await devices.single.targetPlatform == TargetPlatform.web_javascript;
 
     ResidentRunner runner;
     final String applicationBinaryPath = argResults['use-application-binary'];
@@ -438,6 +462,7 @@ class RunCommand extends RunCommandBase {
         target: targetFile,
         flutterProject: flutterProject,
         ipv6: ipv6,
+        debuggingOptions: _createDebuggingOptions(),
       );
     } else {
       runner = ColdRunner(

@@ -386,7 +386,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0 + 40.0); // margin + bottom padding
-  });
+  }, skip: isBrowser);
 
   testWidgets('SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -439,7 +439,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 24.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 24.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 17.0); // margin (with no bottom padding)
-  });
+  }, skip: isBrowser);
 
   testWidgets('SnackBar should push FloatingActionButton above', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -536,7 +536,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
-  });
+  }, skip: isBrowser);
 
   testWidgets('Floating SnackBar is positioned above BottomNavigationBar', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
@@ -592,7 +592,7 @@ void main() {
     expect(actionTextBottomLeft.dx - textBottomRight.dx, 16.0);
     expect(snackBarBottomRight.dx - actionTextBottomRight.dx, 31.0 + 30.0); // margin + right padding
     expect(snackBarBottomRight.dy - actionTextBottomRight.dy, 27.0); // margin (with no bottom padding)
-  });
+  }, skip: isBrowser);
 
   testWidgets('Floating SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
