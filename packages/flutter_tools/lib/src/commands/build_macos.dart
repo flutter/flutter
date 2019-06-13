@@ -16,6 +16,7 @@ import 'build.dart';
 /// A command to build a macos desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
   BuildMacosCommand() {
+    usesTargetOption();
     argParser.addFlag('debug',
       negatable: false,
       help: 'Build a debug version of your app.',
