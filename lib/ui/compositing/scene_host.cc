@@ -10,7 +10,6 @@
 #include <third_party/tonic/dart_binding_macros.h>
 #include <third_party/tonic/logging/dart_invoke.h>
 
-#include "flutter/flow/export_node.h"
 #include "flutter/flow/view_holder.h"
 #include "flutter/fml/thread_local.h"
 #include "flutter/lib/ui/ui_dart_state.h"
@@ -23,17 +22,13 @@ FML_THREAD_LOCAL fml::ThreadLocalUniquePtr<SceneHostBindings>
     tls_scene_host_bindings;
 
 void SceneHost_constructor(Dart_NativeArguments args) {
-  tonic::DartCallConstructor(&flutter::SceneHost::Create, args);
-}
-
-void SceneHost_constructorViewHolderToken(Dart_NativeArguments args) {
   // This UI thread / Isolate contains at least 1 SceneHost.  Initialize the
   // per-Isolate bindings.
   if (tls_scene_host_bindings.get() == nullptr) {
     tls_scene_host_bindings.reset(new SceneHostBindings());
   }
 
-  tonic::DartCallConstructor(&flutter::SceneHost::CreateViewHolder, args);
+  tonic::DartCallConstructor(&flutter::SceneHost::Create, args);
 }
 
 flutter::SceneHost* GetSceneHost(scenic::ResourceId id) {
@@ -90,56 +85,59 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, SceneHost);
 
-#define FOR_EACH_BINDING(V) \
-  V(SceneHost, dispose)     \
-  V(SceneHost, setProperties)
+#define FOR_EACH_BINDING(V)   \
+  V(SceneHost, dispose)       \
+  V(SceneHost, setProperties) \
+  V(SceneHost, setOpacity)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
 void SceneHost::RegisterNatives(tonic::DartLibraryNatives* natives) {
-  natives->Register({{"SceneHost_constructor", SceneHost_constructor, 2, true},
-                     FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
-  natives->Register({{"SceneHost_constructorViewHolderToken",
-                      SceneHost_constructorViewHolderToken, 5, true},
+  natives->Register({{"SceneHost_constructor", SceneHost_constructor, 5, true},
                      FOR_EACH_BINDING(DART_REGISTER_NATIVE)});
 }
 
 fml::RefPtr<SceneHost> SceneHost::Create(
-    fml::RefPtr<zircon::dart::Handle> exportTokenHandle) {
-  return fml::MakeRefCounted<SceneHost>(exportTokenHandle);
-}
-
-fml::RefPtr<SceneHost> SceneHost::CreateViewHolder(
-    fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
+    fml::RefPtr<zircon::dart::Handle> viewHolderToken,
     Dart_Handle viewConnectedCallback,
     Dart_Handle viewDisconnectedCallback,
     Dart_Handle viewStateChangedCallback) {
-  return fml::MakeRefCounted<SceneHost>(
-      viewHolderTokenHandle, viewConnectedCallback, viewDisconnectedCallback,
-      viewStateChangedCallback);
+  return fml::MakeRefCounted<SceneHost>(viewHolderToken, viewConnectedCallback,
+                                        viewDisconnectedCallback,
+                                        viewStateChangedCallback);
 }
 
-SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> exportTokenHandle)
-    : gpu_task_runner_(
-          UIDartState::Current()->GetTaskRunners().GetGPUTaskRunner()),
-      koid_(GetKoid(exportTokenHandle->handle())),
-      use_view_holder_(false) {
-  // Pass the raw handle to the GPU thead; destroying a |zircon::dart::Handle|
-  // on that thread can cause a race condition.
-  gpu_task_runner_->PostTask(
-      [id = koid_, raw_handle = exportTokenHandle->ReleaseHandle()]() {
-        flutter::ExportNode::Create(id, zx::eventpair(raw_handle));
-      });
+void SceneHost::OnViewConnected(scenic::ResourceId id) {
+  auto* scene_host = GetSceneHost(id);
+
+  if (scene_host && !scene_host->view_connected_callback_.is_empty()) {
+    InvokeDartClosure(scene_host->view_connected_callback_);
+  }
 }
 
-SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
+void SceneHost::OnViewDisconnected(scenic::ResourceId id) {
+  auto* scene_host = GetSceneHost(id);
+
+  if (scene_host && !scene_host->view_disconnected_callback_.is_empty()) {
+    InvokeDartClosure(scene_host->view_disconnected_callback_);
+  }
+}
+
+void SceneHost::OnViewStateChanged(scenic::ResourceId id, bool state) {
+  auto* scene_host = GetSceneHost(id);
+
+  if (scene_host && !scene_host->view_state_changed_callback_.is_empty()) {
+    InvokeDartFunction(scene_host->view_state_changed_callback_, state);
+  }
+}
+
+SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderToken,
                      Dart_Handle viewConnectedCallback,
                      Dart_Handle viewDisconnectedCallback,
                      Dart_Handle viewStateChangedCallback)
     : gpu_task_runner_(
           UIDartState::Current()->GetTaskRunners().GetGPUTaskRunner()),
-      koid_(GetKoid(viewHolderTokenHandle->handle())),
-      use_view_holder_(true) {
+      koid_(GetKoid(viewHolderToken->handle())) {
   auto dart_state = UIDartState::Current();
 
   // Initialize callbacks it they are non-null in Dart.
@@ -169,7 +167,7 @@ SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
       [id = koid_,
        ui_task_runner =
            UIDartState::Current()->GetTaskRunners().GetUITaskRunner(),
-       raw_handle = viewHolderTokenHandle->ReleaseHandle(), bind_callback]() {
+       raw_handle = viewHolderToken->ReleaseHandle(), bind_callback]() {
         flutter::ViewHolder::Create(
             id, std::move(ui_task_runner),
             scenic::ToViewHolderToken(zx::eventpair(raw_handle)),
@@ -178,41 +176,16 @@ SceneHost::SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderTokenHandle,
 }
 
 SceneHost::~SceneHost() {
-  if (use_view_holder_) {
-    auto* bindings = tls_scene_host_bindings.get();
-    FML_DCHECK(bindings);
-    bindings->erase(koid_);
+  auto* bindings = tls_scene_host_bindings.get();
+  FML_DCHECK(bindings);
+  bindings->erase(koid_);
 
-    gpu_task_runner_->PostTask(
-        [id = koid_]() { flutter::ViewHolder::Destroy(id); });
-  } else {
-    gpu_task_runner_->PostTask(
-        [id = koid_]() { flutter::ExportNode::Destroy(id); });
-  }
+  gpu_task_runner_->PostTask(
+      [id = koid_]() { flutter::ViewHolder::Destroy(id); });
 }
 
-void SceneHost::OnViewConnected(scenic::ResourceId id) {
-  auto* scene_host = GetSceneHost(id);
-
-  if (scene_host && !scene_host->view_connected_callback_.is_empty()) {
-    InvokeDartClosure(scene_host->view_connected_callback_);
-  }
-}
-
-void SceneHost::OnViewDisconnected(scenic::ResourceId id) {
-  auto* scene_host = GetSceneHost(id);
-
-  if (scene_host && !scene_host->view_disconnected_callback_.is_empty()) {
-    InvokeDartClosure(scene_host->view_disconnected_callback_);
-  }
-}
-
-void SceneHost::OnViewStateChanged(scenic::ResourceId id, bool state) {
-  auto* scene_host = GetSceneHost(id);
-
-  if (scene_host && !scene_host->view_state_changed_callback_.is_empty()) {
-    InvokeDartFunction(scene_host->view_state_changed_callback_, state);
-  }
+void SceneHost::dispose() {
+  ClearDartWrapper();
 }
 
 void SceneHost::setProperties(double width,
@@ -222,8 +195,6 @@ void SceneHost::setProperties(double width,
                               double insetBottom,
                               double insetLeft,
                               bool focusable) {
-  FML_DCHECK(use_view_holder_);
-
   gpu_task_runner_->PostTask([id = koid_, width, height, insetTop, insetRight,
                               insetBottom, insetLeft, focusable]() {
     auto* view_holder = flutter::ViewHolder::FromId(id);
@@ -234,8 +205,13 @@ void SceneHost::setProperties(double width,
   });
 }
 
-void SceneHost::dispose() {
-  ClearDartWrapper();
+void SceneHost::setOpacity(double opacity) {
+  gpu_task_runner_->PostTask([id = koid_, opacity]() {
+    auto* view_holder = flutter::ViewHolder::FromId(id);
+    FML_DCHECK(view_holder);
+
+    view_holder->SetOpacity(opacity);
+  });
 }
 
 }  // namespace flutter

@@ -358,42 +358,38 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
 
 /// (Fuchsia-only) Hosts content provided by another application.
 class SceneHost extends NativeFieldWrapperClass2 {
-  /// Creates a host for a child scene.
+  /// Creates a host for a child scene's content.
   ///
-  /// The export token is bound to a scene graph node which acts as a container
-  /// for the child's content.  The creator of the scene host is responsible for
-  /// sending the corresponding import token (the other endpoint of the event pair)
-  /// to the child.
+  /// The ViewHolder token is bound to a ViewHolder scene graph node which acts
+  /// as a container for the child's content.  The creator of the SceneHost is
+  /// responsible for sending the corresponding ViewToken to the child.
   ///
-  /// The export token is a dart:zircon Handle, but that type isn't
+  /// The ViewHolder token is a dart:zircon Handle, but that type isn't
   /// available here. This is called by ChildViewConnection in
   /// //topaz/public/dart/fuchsia_scenic_flutter/.
   ///
-  /// The scene host takes ownership of the provided export token handle.
-  SceneHost(dynamic exportTokenHandle) {
-    _constructor(exportTokenHandle);
-  }
-  SceneHost.fromViewHolderToken(
-      dynamic viewHolderTokenHandle,
+  /// The SceneHost takes ownership of the provided ViewHolder token.
+  SceneHost(
+      dynamic viewHolderToken,
       void Function() viewConnectedCallback,
       void Function() viewDisconnectedCallback,
       void Function(bool) viewStateChangedCallback) {
-    _constructorViewHolderToken(viewHolderTokenHandle, viewConnectedCallback,
-        viewDisconnectedCallback, viewStateChangedCallback);
+    _constructor(viewHolderToken, viewConnectedCallback, viewDisconnectedCallback, viewStateChangedCallback);
+  }
+  SceneHost.fromViewHolderToken(
+      dynamic viewHolderToken,
+      void Function() viewConnectedCallback,
+      void Function() viewDisconnectedCallback,
+      void Function(bool) viewStateChangedCallback) {
+    _constructor(viewHolderToken, viewConnectedCallback, viewDisconnectedCallback, viewStateChangedCallback);
   }
 
-  void _constructor(dynamic exportTokenHandle) native 'SceneHost_constructor';
-  void
-      _constructorViewHolderToken(
-          dynamic viewHolderTokenHandle,
-          void Function() viewConnectedCallback,
-          void Function() viewDisconnectedCallback,
-          void Function(bool) viewStateChangedCallback)
-      native 'SceneHost_constructorViewHolderToken';
+  void _constructor(dynamic viewHolderToken, void Function() viewConnectedCallback, void Function() viewDisconnectedCallback, void Function(bool) viewStateChangedCallback)
+      native 'SceneHost_constructor';
 
-  /// Releases the resources associated with the child scene host.
+  /// Releases the resources associated with the SceneHost.
   ///
-  /// After calling this function, the child scene host cannot be used further.
+  /// After calling this function, the SceneHost cannot be used further.
   void dispose() native 'SceneHost_dispose';
 
   /// Set properties on the linked scene.  These properties include its bounds,
@@ -406,4 +402,8 @@ class SceneHost extends NativeFieldWrapperClass2 {
       double insetBottom,
       double insetLeft,
       bool focusable) native 'SceneHost_setProperties';
+
+  /// Set the opacity of the linked scene.  This opacity value is applied only
+  /// once, when the child scene is composited into our own.
+  void setOpacity(double opacity) native 'SceneHost_setOpacity';
 }
