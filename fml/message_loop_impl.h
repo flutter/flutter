@@ -17,6 +17,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/message_loop.h"
+#include "flutter/fml/message_loop_task_queue.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_point.h"
 
@@ -61,21 +62,9 @@ class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
  private:
   std::mutex tasks_flushing_mutex_;
 
-  std::mutex observers_mutex_;
-  std::map<intptr_t, fml::closure> task_observers_
-      FML_GUARDED_BY(observers_mutex_);
-
-  std::mutex delayed_tasks_mutex_;
-  DelayedTaskQueue delayed_tasks_ FML_GUARDED_BY(delayed_tasks_mutex_);
-  size_t order_ FML_GUARDED_BY(delayed_tasks_mutex_);
+  std::unique_ptr<MessageLoopTaskQueue> task_queue_;
   std::atomic_bool terminated_;
 
-  void RegisterTask(fml::closure task, fml::TimePoint target_time);
-
-  enum class FlushType {
-    kSingle,
-    kAll,
-  };
   void FlushTasks(FlushType type);
 
   FML_DISALLOW_COPY_AND_ASSIGN(MessageLoopImpl);
