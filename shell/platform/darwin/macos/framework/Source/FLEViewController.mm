@@ -18,6 +18,9 @@ static const int kDefaultWindowFramebuffer = 0;
 
 namespace {
 
+/// Clipboard plain text format.
+constexpr char kTextPlainFormat[] = "text/plain";
+
 /**
  * State tracking for mouse events, to adapt between the events coming from the system and the
  * events that the embedding API expects.
@@ -155,6 +158,18 @@ struct MouseState {
  * Handles messages received from the Flutter engine on the _*Channel channels.
  */
 - (void)handleMethodCall:(FlutterMethodCall*)call result:(FlutterResult)result;
+
+/**
+ * Reads the data from the clipboard. |format| specifies the media type of the
+ * data to obtain.
+ */
+- (NSDictionary*)getClipboardData:(NSString*)format;
+
+/**
+ * Clears contents and writes new data into clipboard. |data| is a dictionary where
+ * the keys are the type of data, and tervalue the data to be stored.
+ */
+- (void)setClipboardData:(NSDictionary*)data;
 
 @end
 
@@ -612,8 +627,31 @@ static void CommonInit(FLEViewController* controller) {
   if ([call.method isEqualToString:@"SystemNavigator.pop"]) {
     [NSApp terminate:self];
     result(nil);
+  } else if ([call.method isEqualToString:@"Clipboard.getData"]) {
+    result([self getClipboardData:call.arguments]);
+  } else if ([call.method isEqualToString:@"Clipboard.setData"]) {
+    [self setClipboardData:call.arguments];
+    result(nil);
   } else {
     result(FlutterMethodNotImplemented);
+  }
+}
+
+- (NSDictionary*)getClipboardData:(NSString*)format {
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  if ([format isEqualToString:@(kTextPlainFormat)]) {
+    NSString* stringInPasteboard = [pasteboard stringForType:NSPasteboardTypeString];
+    return stringInPasteboard == nil ? nil : @{@"text" : stringInPasteboard};
+  }
+  return nil;
+}
+
+- (void)setClipboardData:(NSDictionary*)data {
+  NSPasteboard* pasteboard = [NSPasteboard generalPasteboard];
+  NSString* text = data[@"text"];
+  if (text && ![text isEqual:[NSNull null]]) {
+    [pasteboard clearContents];
+    [pasteboard setString:text forType:NSPasteboardTypeString];
   }
 }
 
