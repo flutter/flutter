@@ -274,8 +274,8 @@ void main() {
   testWidgets('GetDiagnosticsTree', (WidgetTester tester) async {
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
-    Future<Map<String, Object>> getDiagnosticsTree(DiagnosticsType type, SerializableFinder finder, { int depth = 0}) async {
-      final Map<String, Object> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth).serialize();
+    Future<Map<String, Object>> getDiagnosticsTree(DiagnosticsType type, SerializableFinder finder, { int depth = 0, bool properties = true }) async {
+      final Map<String, Object> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth, includeProperties: properties).serialize();
       final DiagnosticsTreeResult result = DiagnosticsTreeResult((await extension.call(arguments))['response']);
       return result.json;
     }
@@ -299,6 +299,10 @@ void main() {
     expect(stringProperty['description'], '"Hello World"');
     expect(stringProperty['propertyType'], 'String');
 
+    result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 0, properties: false);
+    expect(result['widgetRuntimeType'], 'Text');
+    expect(result['properties'], isNull); // properties: false
+
     result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 1);
     List<Map<String, Object>> children = result['children'];
     expect(children.single['children'], isNull);
@@ -310,6 +314,11 @@ void main() {
     // RenderObject
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0);
     expect(result['children'], isNull); // depth: 0
+    expect(result['properties'], isNotNull);
+    expect(result['description'], startsWith('RenderParagraph'));
+
+    result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 0, properties: false);
+    expect(result['properties'], isNull); // properties: false
     expect(result['description'], startsWith('RenderParagraph'));
 
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 1);
