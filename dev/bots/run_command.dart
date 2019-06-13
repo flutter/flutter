@@ -115,12 +115,13 @@ Future<void> runCommand(String executable, List<String> arguments, {
 
   final int exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
     stderr.writeln('Process timed out after $timeout');
-    if (expectFlaky) {
-      return 0;
-    }
-    return expectNonZeroExit ? 0 : 1;
+    return (expectNonZeroExit || expectFlaky) ? 0 : 1;
   });
   print('$clock ELAPSED TIME: $bold${elapsedTime(start)}$reset for $commandDescription in $relativeWorkingDir: ');
+  // If the test is flaky we don't care about the actual exit.
+  if (expectFlaky) {
+    return;
+  }
   if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
     if (failureMessage != null) {
       print(failureMessage);
