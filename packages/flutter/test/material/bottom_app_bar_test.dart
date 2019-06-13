@@ -74,14 +74,16 @@ void main() {
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
+      skip: !Platform.isLinux,
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
+      skip: !Platform.isLinux,
     );
-  }, skip: !Platform.isLinux);
+  }, skip: isBrowser);
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(

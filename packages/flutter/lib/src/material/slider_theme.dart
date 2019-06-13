@@ -810,8 +810,7 @@ class SliderThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const SliderThemeData defaultData = SliderThemeData();
-    properties.add(DiagnosticsProperty<double>('trackHeight', trackHeight, defaultValue: defaultData.trackHeight));
-    properties.add(ColorProperty('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
+    properties.add(DoubleProperty('trackHeight', trackHeight, defaultValue: defaultData.trackHeight));
     properties.add(ColorProperty('activeTrackColor', activeTrackColor, defaultValue: defaultData.activeTrackColor));
     properties.add(ColorProperty('inactiveTrackColor', inactiveTrackColor, defaultValue: defaultData.inactiveTrackColor));
     properties.add(ColorProperty('disabledActiveTrackColor', disabledActiveTrackColor, defaultValue: defaultData.disabledActiveTrackColor));
@@ -836,7 +835,7 @@ class SliderThemeData extends Diagnosticable {
     properties.add(DiagnosticsProperty<RangeSliderValueIndicatorShape>('rangeValueIndicatorShape', rangeValueIndicatorShape, defaultValue: defaultData.rangeValueIndicatorShape));
     properties.add(EnumProperty<ShowValueIndicator>('showValueIndicator', showValueIndicator, defaultValue: defaultData.showValueIndicator));
     properties.add(DiagnosticsProperty<TextStyle>('valueIndicatorTextStyle', valueIndicatorTextStyle, defaultValue: defaultData.valueIndicatorTextStyle));
-    properties.add(DiagnosticsProperty<double>('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
+    properties.add(DoubleProperty('minThumbSeparation', minThumbSeparation, defaultValue: defaultData.minThumbSeparation));
     properties.add(DiagnosticsProperty<RangeThumbSelector>('thumbSelector', thumbSelector, defaultValue: defaultData.thumbSelector));
   }
 }
