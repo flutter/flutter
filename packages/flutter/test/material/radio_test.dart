@@ -279,6 +279,6 @@ void main() {
       matchesGoldenFile('radio.ink_ripple.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 }
 

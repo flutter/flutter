@@ -437,9 +437,12 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     // Send screen.
-    final Map<String, String> additionalUsageValues = Map<String, String>
-        .from(await usageValues);
+    final Map<String, String> additionalUsageValues = <String, String>{};
+    final Map<String, String> currentUsageValues = await usageValues;
 
+    if (currentUsageValues != null) {
+      additionalUsageValues.addAll(currentUsageValues);
+    }
     if (commandResult != null) {
       switch (commandResult.exitStatus) {
         case ExitStatus.success:

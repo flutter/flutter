@@ -717,7 +717,6 @@ abstract class BaseFlutterTask extends DefaultTask {
                 args "--local-engine-src-path", localEngineSrcPath
             }
             args "build", "bundle"
-            args "--suppress-analytics"
             args "--target", targetPath
             args "--target-platform", "${targetPlatform}"
             if (verbose) {

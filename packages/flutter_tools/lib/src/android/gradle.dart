@@ -601,6 +601,10 @@ Map<String, String> get _gradleEnv {
     // Use java bundled with Android Studio.
     env['JAVA_HOME'] = javaPath;
   }
+
+  // Don't log analytics for downstream Flutter commands.
+  // e.g. `flutter build bundle`.
+  env['FLUTTER_SUPPRESS_ANALYTICS'] = 'true';
   return env;
 }
 
