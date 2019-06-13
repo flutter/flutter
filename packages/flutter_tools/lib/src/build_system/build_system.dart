@@ -41,7 +41,7 @@ enum ChangeType {
 /// of at least one of the environment values and zero or more local values.
 ///
 /// To determine if a target needs to be executed, the [BuildSystem] performs
-/// an md5 hash of the file contents. This is tracked separately in the
+/// a  hash of the file contents. This is tracked separately in the
 /// [FileCache].
 ///
 /// The name of each stamp is the target name, joined with target platform and
@@ -263,16 +263,24 @@ class Target {
 /// is not from the environment or an input may result in non-reproducible
 /// builds.
 ///
-/// Example:
+/// Example (Good):
 ///
-/// Writing an output file during a build invocation.
+/// Use the environment to determine where to write an output file.
 ///
 ///    environment.buildDir.childFile('output')
 ///      ..createSync()
 ///      ..writeAsStringSync('output data');
 ///
+/// Example (Bad):
 ///
-/// Example:
+/// Use a hard-coded path or directory relative to the current working
+/// directory to write an output file.
+///
+///   fs.file('build/linux/out')
+///     ..createSync()
+///     ..writeAsStringSync('output data');
+///
+/// Example (Good):
 ///
 /// Using the build mode to produce different output. Note that the invocation
 /// is still responsible for outputting a different file, as defined by the
