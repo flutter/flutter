@@ -104,6 +104,11 @@ class TestCommand extends FastFlutterCommand {
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
         help: 'The platform to run the unit tests on. Defaults to "tester".'
+      )
+      ..addFlag('benchmark',
+        hide: true,
+        defaultsTo: false,
+        help: 'Run the tester in benchmark mode.'
       );
   }
 
@@ -222,6 +227,11 @@ class TestCommand extends FastFlutterCommand {
     final bool disableServiceAuthCodes =
       argResults['disable-service-auth-codes'];
 
+    Stopwatch stopwatch;
+    if (argResults['benchmark']) {
+      stopwatch = Stopwatch()..start();
+    }
+
     final int result = await runTests(
       files,
       workDir: workDir,
@@ -245,6 +255,13 @@ class TestCommand extends FastFlutterCommand {
       if (!await collector.collectCoverageData(
           argResults['coverage-path'], mergeCoverageData: argResults['merge-coverage']))
         throwToolExit(null);
+    }
+
+    if (argResults['benchmark']) {
+      fs.file('.benchmark_time')
+        ..createSync()
+        ..writeAsStringSync(stopwatch.elapsedMilliseconds.toString());
+      stopwatch.stop();
     }
 
     if (result != 0)

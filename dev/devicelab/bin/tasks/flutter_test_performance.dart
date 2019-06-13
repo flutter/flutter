@@ -37,68 +37,26 @@ enum TestStep {
 }
 
 Future<int> runTest({bool coverage = false}) async {
-  final Stopwatch clock = Stopwatch()..start();
   final List<String> arguments = <String>[
     'test',
+    '--benchmark'
   ];
   if (coverage) {
     arguments.add('--coverage');
   }
+  final String workingDirectory = path.join(flutterDirectory.path, 'dev', 'automated_tests');
   arguments.add(path.join('flutter_test', 'trivial_widget_test.dart'));
   final Process analysis = await startProcess(
     path.join(flutterDirectory.path, 'bin', 'flutter'),
     arguments,
-    workingDirectory: path.join(flutterDirectory.path, 'dev', 'automated_tests'),
+    workingDirectory: workingDirectory
   );
-  int badLines = 0;
-  TestStep step = TestStep.starting;
-  await for (String entry in analysis.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
-    print('test stdout ($step): $entry');
-    if (step == TestStep.starting && entry == 'Building flutter tool...') {
-      // ignore this line
-      step = TestStep.buildingFlutterTool;
-    } else if (step == TestStep.testPassed && entry.contains('Collecting coverage information...')) {
-      // ignore this line
-    } else if (step.index < TestStep.runningPubGet.index && entry == 'Running "flutter pub get" in automated_tests...') {
-      // ignore this line
-      step = TestStep.runningPubGet;
-    } else if (step.index < TestStep.testWritesFirstCarriageReturn.index && entry == '') {
-      // we have a blank line at the start
-      step = TestStep.testWritesFirstCarriageReturn;
-    } else {
-      final Match match = testOutputPattern.matchAsPrefix(entry);
-      if (match == null) {
-        badLines += 1;
-      } else {
-        if (step.index >= TestStep.testWritesFirstCarriageReturn.index && step.index <= TestStep.testLoading.index && match.group(1).startsWith('loading ')) {
-          // first the test loads
-          step = TestStep.testLoading;
-        } else if (step.index <= TestStep.testRunning.index && match.group(1) == 'A trivial widget test') {
-          // then the test runs
-          step = TestStep.testRunning;
-        } else if (step.index < TestStep.testPassed.index && match.group(1) == 'All tests passed!') {
-          // then the test finishes
-          step = TestStep.testPassed;
-        } else {
-          badLines += 1;
-        }
-      }
-    }
-  }
-  await for (String entry in analysis.stderr.transform<String>(utf8.decoder).transform<String>(const LineSplitter())) {
-    print('test stderr: $entry');
-    badLines += 1;
-  }
   final int result = await analysis.exitCode;
-  clock.stop();
-  if (result != 0)
-    throw Exception('flutter test failed with exit code $result');
-  if (badLines > 0)
-    throw Exception('flutter test rendered unexpected output ($badLines bad lines)');
-  if (step != TestStep.testPassed)
-    throw Exception('flutter test did not finish (only reached step $step)');
-  print('elapsed time: ${clock.elapsedMilliseconds}ms');
-  return clock.elapsedMilliseconds;
+  if (result != 0) {
+    throw Exception('Test process exited with non-zero exit code');
+  }
+  final String testTime = File(path.join(workingDirectory, '.benchmark_time')).readAsStringSync();
+  return int.tryParse(testTime);
 }
 
 void main() {
