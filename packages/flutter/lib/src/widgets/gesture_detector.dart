@@ -767,7 +767,7 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// Gesture detectors can contribute semantic information to the tree that is
   /// used by assistive technology. The behavior can be configured by
-  /// `semantics`, or disabled with [excludeFromSemantics].
+  /// [semantics], or disabled with [excludeFromSemantics].
   const RawGestureDetector({
     Key key,
     this.child,
@@ -811,7 +811,7 @@ class RawGestureDetector extends StatefulWidget {
   ///
   /// It has no effect if [excludeFromSemantics] is true.
   ///
-  /// When [semantics] is null, [RawGestureDetector] will fall back to
+  /// When [semantics] is null, [RawGestureDetector] will fall back to a
   /// default delegate that behaves as follows:
   ///
   ///  * During a semantic tap, it looks for [TapGestureRecognizer] and calls
@@ -821,10 +821,10 @@ class RawGestureDetector extends StatefulWidget {
   ///    `onLongPressUp`.
   ///  * During a semantic horizontal drag, it looks for [HorizontalDragGestureRecognizer]
   ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-  ///    for [PanGestureRecognizer] and calls the same methods.
+  ///    for [PanGestureRecognizer] and calls the same callbacks.
   ///  * During a semantic vertical drag, it looks for [VerticalDragGestureRecognizer]
   ///    and calls `onDown`, `onStart`, `onUpdate` and `onEnd`. Then it looks
-  ///    for [PanGestureRecognizer] and calls the same methods.
+  ///    for [PanGestureRecognizer] and calls the same callbacks.
   final SemanticsGestureDelegate semantics;
 
   @override
@@ -846,8 +846,6 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
   @override
   void didUpdateWidget(RawGestureDetector oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Re-initialize semantics delegate unless delegate has always been default
-    // (avoid unnecessary construction of _DefaultGestureSemanticsDelegate).
     if (!(oldWidget.semantics == null && widget.semantics == null)) {
       _semantics = widget.semantics ?? _DefaultSemanticsGestureDelegate(this);
     }
