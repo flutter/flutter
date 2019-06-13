@@ -1940,8 +1940,9 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// either the width or height is null, this widget will size itself to match
 /// the child's size in that dimension.
 ///
-/// If not given a child, this widget will size itself to the given width and
-/// height, treating nulls as zero.
+/// If not given a child, [SizedBox] will try to size itself as close to the
+/// specified height and width as possible given the parent's constraints. If
+/// [height] or [width] is null or unspecified, it will be treated as zero.
 ///
 /// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
