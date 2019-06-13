@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
+import 'package:flutter_driver/src/common/diagnostics_tree.dart';
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -520,6 +521,54 @@ class FlutterDriver {
   /// device pixels via [Window.devicePixelRatio].
   Future<DriverOffset> getCenter(SerializableFinder finder, { Duration timeout }) async {
     return _getOffset(finder, OffsetType.center, timeout: timeout);
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [RenderObject] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [RenderObject] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  Future<Map<String, Object>> getRenderObjectDiagnostics(
+      SerializableFinder finder, {
+      int subtreeDepth = 0,
+      bool includeProperties = true,
+      Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
+  }
+
+  /// Returns a JSON map of the [DiagnosticsNode] that is associated with the
+  /// [Widget] identified by `finder`.
+  ///
+  /// The `subtreeDepth` argument controls how many layers of children will be
+  /// included in the result. It defaults to zero, which means that no children
+  /// of the [Widget] identified by `finder` will be part of the result.
+  ///
+  /// The `includeProperties` argument controls whether properties of the
+  /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  Future<Map<String, Object>> getWidgetDiagnostics(
+    SerializableFinder finder, {
+    int subtreeDepth = 0,
+    bool includeProperties = true,
+    Duration timeout,
+  }) async {
+    return _sendCommand(GetDiagnosticsTree(
+      finder,
+      DiagnosticsType.renderObject,
+      subtreeDepth: subtreeDepth,
+      includeProperties: includeProperties,
+      timeout: timeout,
+    ));
   }
 
   /// Tell the driver to perform a scrolling action.
