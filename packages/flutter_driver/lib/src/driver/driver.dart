@@ -532,6 +532,10 @@ class FlutterDriver {
   ///
   /// The `includeProperties` argument controls whether properties of the
   /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [getWidgetDiagnostics], which gets the [DiagnosticsNode] of a [Widget].
   Future<Map<String, Object>> getRenderObjectDiagnostics(
       SerializableFinder finder, {
       int subtreeDepth = 0,
@@ -556,6 +560,11 @@ class FlutterDriver {
   ///
   /// The `includeProperties` argument controls whether properties of the
   /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// See also:
+  ///
+  ///  * [getRenderObjectDiagnostics], which gets the [DiagnosticsNode] of a
+  ///    [RenderObject].
   Future<Map<String, Object>> getWidgetDiagnostics(
     SerializableFinder finder, {
     int subtreeDepth = 0,
