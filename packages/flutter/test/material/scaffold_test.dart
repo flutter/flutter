@@ -927,14 +927,14 @@ void main() {
           resizeToAvoidBottomInset: false,
           body: const Placeholder(),
           bottomNavigationBar: BottomNavigationBar(
-            items: <BottomNavigationBarItem>[
+            items: const <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
-                title: const Text('test'),
+                title: Text('test'),
               ),
               BottomNavigationBarItem(
                 icon: Icon(Icons.add),
-                title: const Text('test'),
+                title: Text('test'),
               )
             ]
           ),
