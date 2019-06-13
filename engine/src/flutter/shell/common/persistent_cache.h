@@ -17,6 +17,9 @@
 
 namespace flutter {
 
+/// A cache of SkData that gets stored to disk.
+///
+/// This is mainly used for Shaders but is also written to by Dart.
 class PersistentCache : public GrContextOptions::PersistentCache {
  public:
   // Mutable static switch that can be set before GetCacheForProcess. If true,

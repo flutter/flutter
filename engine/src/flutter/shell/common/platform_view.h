@@ -25,6 +25,8 @@ namespace flutter {
 
 class Shell;
 
+/// Abstract Base Class that represents the platform specific view we will be
+/// rendering to.
 class PlatformView {
  public:
   class Delegate {

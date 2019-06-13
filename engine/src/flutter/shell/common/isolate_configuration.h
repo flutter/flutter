@@ -19,6 +19,7 @@
 
 namespace flutter {
 
+/// Abstract Base Class that will configure a |DartIsolate|.
 class IsolateConfiguration {
  public:
   static std::unique_ptr<IsolateConfiguration> InferFromSettings(

@@ -20,6 +20,7 @@
 
 namespace flutter {
 
+/// Takes |LayerTree|s and draws its contents.
 class Rasterizer final : public SnapshotDelegate {
  public:
   class Delegate {

@@ -18,6 +18,9 @@
 
 namespace flutter {
 
+/// Configuration pertaining to how we will execute the Dart code.
+///
+/// For example: what will be the first function we execute (entrypoint).
 class RunConfiguration {
  public:
   static RunConfiguration InferFromSettings(
