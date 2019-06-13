@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_validator.dart';
 import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -17,14 +17,16 @@ void main() {
     Testbed testbed;
     WebValidator webValidator;
     MockPlatform mockPlatform;
+    MockProcessManager mockProcessManager;
 
     setUp(() {
+      mockProcessManager = MockProcessManager();
       testbed = Testbed(setup: () {
-        fs.file(kMacOSExecutable).createSync(recursive: true);
-        fs.file('chrome_foo').createSync();
+        when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(true);
         return null;
       }, overrides: <Type, Generator>{
         Platform: () => mockPlatform,
+        ProcessManager: () => mockProcessManager,
       });
       webValidator = const WebValidator();
       mockPlatform = MockPlatform();
@@ -39,8 +41,17 @@ void main() {
     }));
 
     test('Can notice missing macOS executable ', () => testbed.run(() async {
-      fs.file(kMacOSExecutable).deleteSync();
+      when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
       final ValidationResult result = await webValidator.validate();
+      expect(result.type, ValidationType.missing);
+    }));
+
+    test('Doesn\'t warn about CHROME_EXECUTABLE unless it cant find chrome ', () => testbed.run(() async {
+      when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
+      final ValidationResult result = await webValidator.validate();
+      expect(result.messages, <ValidationMessage>[
+        ValidationMessage.hint('CHROME_EXECUTABLE not set')
+      ]);
       expect(result.type, ValidationType.missing);
     }));
   });
@@ -50,3 +61,5 @@ class MockPlatform extends Mock implements Platform  {
   @override
   Map<String, String> get environment => const <String, String>{};
 }
+
+class MockProcessManager extends Mock implements ProcessManager {}

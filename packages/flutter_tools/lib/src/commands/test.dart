@@ -110,6 +110,7 @@ class TestCommand extends FastFlutterCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.universal,
+    DevelopmentArtifact.web,
   };
 
   @override

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
@@ -216,13 +217,13 @@ class MockHttpClientResponse extends Stream<List<int>> implements io.HttpClientR
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
+  StreamSubscription<Uint8List> listen(
+    void onData(Uint8List event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromFuture(Future<List<int>>.error(const io.SocketException('test')))
+    return Stream<Uint8List>.fromFuture(Future<Uint8List>.error(const io.SocketException('test')))
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 
