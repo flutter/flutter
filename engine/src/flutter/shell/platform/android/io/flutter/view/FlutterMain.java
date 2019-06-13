@@ -143,7 +143,9 @@ public class FlutterMain {
             return;
         }
         try {
-            sResourceExtractor.waitForCompletion();
+            if (sResourceExtractor != null) {
+                sResourceExtractor.waitForCompletion();
+            }
 
             List<String> shellArgs = new ArrayList<>();
             shellArgs.add("--icu-symbol-prefix=_binary_icudtl_dat");
@@ -258,23 +260,28 @@ public class FlutterMain {
         new ResourceCleaner(applicationContext).start();
 
         final String dataDirPath = PathUtils.getDataDirectory(applicationContext);
-        final String packageName = applicationContext.getPackageName();
-        final PackageManager packageManager = applicationContext.getPackageManager();
-        final AssetManager assetManager = applicationContext.getResources().getAssets();
-        sResourceExtractor = new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager);
 
-        // In debug/JIT mode these assets will be written to disk and then
-        // mapped into memory so they can be provided to the Dart VM.
-        // AOT modes obtain compiled Dart assets from a ELF library that does
-        // not need to be extracted out of the APK.
         if (BuildConfig.DEBUG) {
-          sResourceExtractor
-              .addResource(fromFlutterAssets(sVmSnapshotData))
-              .addResource(fromFlutterAssets(sIsolateSnapshotData))
-              .addResource(fromFlutterAssets(DEFAULT_KERNEL_BLOB));
-        }
+            final String packageName = applicationContext.getPackageName();
+            final PackageManager packageManager = applicationContext.getPackageManager();
+            final AssetManager assetManager = applicationContext.getResources().getAssets();
+            sResourceExtractor = new ResourceExtractor(dataDirPath, packageName, packageManager, assetManager);
 
-        sResourceExtractor.start();
+            // In debug/JIT mode these assets will be written to disk and then
+            // mapped into memory so they can be provided to the Dart VM.
+            sResourceExtractor
+                .addResource(fromFlutterAssets(sVmSnapshotData))
+                .addResource(fromFlutterAssets(sIsolateSnapshotData))
+                .addResource(fromFlutterAssets(DEFAULT_KERNEL_BLOB));
+
+            sResourceExtractor.start();
+        } else {
+            // AOT modes obtain compiled Dart assets from a ELF library that does
+            // not need to be extracted out of the APK.
+            // Create an empty directory that can be passed as the bundle path
+            // in the engine RunBundle API.
+            new File(dataDirPath, sFlutterAssetsDir).mkdirs();
+        }
     }
 
     @Nullable
