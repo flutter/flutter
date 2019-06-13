@@ -2064,6 +2064,37 @@ class _RepositoryFuchsiaDirectory extends _RepositoryDirectory {
     return entry.name != 'toolchain'
         && super.shouldRecurse(entry);
   }
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'sdk')
+      return _RepositoryFuchsiaSdkDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class _RepositoryFuchsiaSdkDirectory extends _RepositoryDirectory {
+  _RepositoryFuchsiaSdkDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  _RepositoryDirectory createSubdirectory(fs.Directory entry) {
+    if (entry.name == 'linux' || entry.name == 'mac')
+      return _RepositoryFuchsiaSdkLinuxDirectory(this, entry);
+    return super.createSubdirectory(entry);
+  }
+}
+
+class _RepositoryFuchsiaSdkLinuxDirectory extends _RepositoryDirectory {
+  _RepositoryFuchsiaSdkLinuxDirectory(_RepositoryDirectory parent, fs.Directory io) : super(parent, io);
+
+  @override
+  bool shouldRecurse(fs.IoNode entry) {
+    return entry.name != '.build-id'
+        && entry.name != 'docs'
+        && entry.name != 'images'
+        && entry.name != 'meta'
+        && entry.name != 'tools';
+  }
 }
 
 class _RepositoryFlutterThirdPartyDirectory extends _RepositoryDirectory {
