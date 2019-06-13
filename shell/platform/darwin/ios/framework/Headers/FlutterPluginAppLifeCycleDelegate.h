@@ -67,11 +67,11 @@ FLUTTER_EXPORT
 /**
  * Called if this plugin has been registered for `UIApplicationDelegate` callbacks.
  */
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 - (void)application:(UIApplication*)application
-    didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings;
-#pragma GCC diagnostic pop
+    didRegisterUserNotificationSettings:(UIUserNotificationSettings*)notificationSettings
+    API_DEPRECATED(
+        "See -[UIApplicationDelegate application:didRegisterUserNotificationSettings:] deprecation",
+        ios(8.0, 10.0));
 
 /**
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
@@ -90,7 +90,10 @@ FLUTTER_EXPORT
  * Calls all plugins registered for `UIApplicationDelegate` callbacks.
  */
 - (void)application:(UIApplication*)application
-    didReceiveLocalNotification:(UILocalNotification*)notification;
+    didReceiveLocalNotification:(UILocalNotification*)notification
+    API_DEPRECATED(
+        "See -[UIApplicationDelegate application:didReceiveLocalNotification:] deprecation",
+        ios(4.0, 10.0));
 
 /**
  * Calls all plugins registered for `UNUserNotificationCenterDelegate` callbacks.
