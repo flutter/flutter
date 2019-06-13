@@ -52,6 +52,8 @@ source_set("compiler") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -87,6 +89,8 @@ source_set("subzero") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -236,6 +240,8 @@ source_set("subzero") {
 
 source_set("reactor") {
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -257,6 +263,8 @@ source_set("renderer") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -291,6 +299,8 @@ source_set("opengl_common") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -309,6 +319,8 @@ source_set("common") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -332,6 +344,8 @@ source_set("preprocessor") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -350,6 +364,8 @@ source_set("opengl_preprocessor") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -374,6 +390,8 @@ source_set("opengl_compiler") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -419,6 +437,8 @@ source_set("shader") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -449,6 +469,8 @@ source_set("system") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -481,6 +503,8 @@ source_set("device") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -528,6 +552,8 @@ source_set("main") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -569,6 +595,8 @@ shared_library("egl") {
   public = []
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]
@@ -623,6 +651,8 @@ shared_library("gles") {
   }
 
   configs += [ ":internal_config" ]
+  configs -= [ "//build/config/compiler:cxx_version_default" ]
+  configs += [ "//build/config/compiler:cxx_version_14" ]
 
   if (is_win) {
     configs -= [ "//build/config/win:unicode" ]

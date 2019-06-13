@@ -302,6 +302,7 @@ if (!is_clang && (is_asan || is_lsan || is_tsan || is_msan)) {
 _native_compiler_configs = [
   "//build/config:feature_flags",
   "//build/config/compiler:compiler",
+  "//build/config/compiler:cxx_version_default",
   "//build/config/compiler:compiler_arm_fpu",
   "//build/config/compiler:chromium_code",
   "//build/config/compiler:default_include_dirs",

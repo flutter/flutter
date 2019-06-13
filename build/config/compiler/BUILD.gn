@@ -387,15 +387,6 @@ config("compiler") {
 
   # C++ compiler flags setup.
   # -------------------------
-  if (is_win) {
-    cc_std = [ "/std:c++14" ]
-  } else if (is_fuchsia) {
-    cc_std = [ "-std=c++17" ]
-  } else {
-    cc_std = [ "-std=c++14" ]
-  }
-  cflags_cc += cc_std
-  cflags_objcc += cc_std
 
   # Android-specific flags setup.
   # -----------------------------
@@ -457,6 +448,46 @@ config("compiler") {
   }
 
   asmflags = cflags
+}
+
+config("cxx_version_default") {
+  if (is_win) {
+    cc_std = [ "/std:c++17" ]
+  } else {
+    cc_std = [ "-std=c++17" ]
+  }
+  cflags_cc = cc_std
+  cflags_objcc = cc_std
+}
+
+config("cxx_version_11") {
+  if (is_win) {
+    cc_std = [ "/std:c++11" ]
+  } else {
+    cc_std = [ "-std=c++11" ]
+  }
+  cflags_cc = cc_std
+  cflags_objcc = cc_std
+}
+
+config("cxx_version_14") {
+  if (is_win) {
+    cc_std = [ "/std:c++14" ]
+  } else {
+    cc_std = [ "-std=c++14" ]
+  }
+  cflags_cc = cc_std
+  cflags_objcc = cc_std
+}
+
+config("cxx_version_17") {
+  if (is_win) {
+    cc_std = [ "/std:c++17" ]
+  } else {
+    cc_std = [ "-std=c++17" ]
+  }
+  cflags_cc = cc_std
+  cflags_objcc = cc_std
 }
 
 config("compiler_arm_fpu") {
