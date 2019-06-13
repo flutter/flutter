@@ -14,8 +14,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 
-import '../widgets/semantics_tester.dart';
 import '../rendering/mock_canvas.dart';
+import '../widgets/semantics_tester.dart';
 import 'feedback_tester.dart';
 
 class MockClipboard {
@@ -873,7 +873,6 @@ void main() {
     await tester.tap(find.byType(TextField));
     // Wait for context menu to be built.
     await tester.pumpAndSettle();
-    final RenderBox container = tester.renderObject(find.byType(CupertinoTextSelectionToolbar));
 
     expect(find.byType(CupertinoTextSelectionToolbar), paintsNothing);
   });
