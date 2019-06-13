@@ -622,8 +622,12 @@ class PageView extends StatefulWidget {
   final bool pageSnapping;
 
   /// Called whenever the page in the center of the viewport changes.
+  ///
+  /// It is called before [pageDidChanged], in the middle of scroll animation.
   final ValueChanged<int> onPageChanged;
   /// Called whenever the page has changed and the scroll animation has stopped.
+  ///
+  /// It is called after [onPageChanged], at the end of scroll animation.
   final ValueChanged<int> pageDidChanged;
   /// A delegate that provides the children for the [PageView].
   ///
@@ -641,16 +645,19 @@ class PageView extends StatefulWidget {
 }
 
 class _PageViewState extends State<PageView> {
-  int _onPageChangedIndex = 0;
-  int _pageDidChangedIndex = 0;
+  /// A flag to record last index reported by [PageView.onPageChanged] and to decide
+  /// whether to call [PageView.onPageChanged];
+  int _lastOnPageChangedIndex = 0;
+
+  /// A flag to record last index reported by [PageView.pageDidChange] and to decide
+  /// whether to call [PageView.pageDidChanged];
+  int _lastPageDidChangedIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    /// a flag to decide whether to call [PageView.onPageChanged];
-    _onPageChangedIndex = widget.controller.initialPage;
-    /// a flag to decide whether to call [PageView.pageDidChanged];
-    _pageDidChangedIndex = widget.controller.initialPage;
+    _lastOnPageChangedIndex = widget.controller.initialPage;
+    _lastPageDidChangedIndex = widget.controller.initialPage;
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -678,15 +685,15 @@ class _PageViewState extends State<PageView> {
         if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
           final PageMetrics metrics = notification.metrics;
           final int currentPage = metrics.page.round();
-          if (currentPage != _onPageChangedIndex) {
-            _onPageChangedIndex = currentPage;
+          if (currentPage != _lastOnPageChangedIndex) {
+            _lastOnPageChangedIndex = currentPage;
             widget.onPageChanged(currentPage);
           }
         } else if (notification.depth == 0 && widget.pageDidChanged != null && notification is ScrollEndNotification) {
           final PageMetrics metrics = notification.metrics;
           final int currentPage = metrics.page.round();
-          if (currentPage != _pageDidChangedIndex) {
-            _pageDidChangedIndex = currentPage;
+          if (currentPage != _lastPageDidChangedIndex) {
+            _lastPageDidChangedIndex = currentPage;
             widget.pageDidChanged(currentPage);
           }
         }

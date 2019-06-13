@@ -355,7 +355,7 @@ void main() {
   });
 
   testWidgets('Bouncing scroll physics ballistics does not overshoot', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final List<String> log = <String>[];
     final PageController controller = PageController(viewportFraction: 0.9);
 
     Widget build(PageController controller, { Size size }) {
@@ -363,8 +363,8 @@ void main() {
         textDirection: TextDirection.ltr,
         child: PageView(
           controller: controller,
-          onPageChanged: log.add,
-          pageDidChanged: log.add,
+          onPageChanged: (int index) => log.add('onPageChanged $index'),
+          pageDidChanged: (int index) => log.add('pageDidChanged $index'),
           physics: const BouncingScrollPhysics(),
           children: kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
@@ -453,15 +453,15 @@ void main() {
   });
 
   testWidgets('Page snapping disable and reenable', (WidgetTester tester) async {
-    final List<int> log = <int>[];
+    final List<String> log = <String>[];
 
     Widget build({ bool pageSnapping }) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: PageView(
           pageSnapping: pageSnapping,
-          onPageChanged: log.add,
-          pageDidChanged: log.add,
+          onPageChanged: (int index) => log.add('onPageChanged $index'),
+          pageDidChanged: (int index) => log.add('pageDidChanged $index'),
           children:
               kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
@@ -476,7 +476,7 @@ void main() {
     // The page view is 800.0 wide, so this move is just beyond halfway.
     await gesture.moveBy(const Offset(-420.0, 0.0));
 
-    expect(log, equals(const <int>[1]));
+    expect(log, equals(const <String>['onPageChanged 1']));
     log.clear();
 
     // Release the gesture, confirm that the page settles on the next.
@@ -484,7 +484,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check if [PageView.pageDidChange] is triggered.
-    expect(log, equals(const <int>[1]));
+    expect(log, equals(const <String>['pageDidChanged 1']));
     log.clear();
 
     expect(find.text('Alabama'), findsNothing);
@@ -497,7 +497,7 @@ void main() {
     await gesture.moveBy(const Offset(-420.0, 0.0));
 
     // [PageView.onPageChanged] still get sent.
-    expect(log, equals(const <int>[2]));
+    expect(log, equals(const <String>['onPageChanged 2']));
     log.clear();
 
     // Release the gesture, confirm that both pages are visible.
@@ -514,7 +514,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // [PageView.pageDidChange] should be triggered.
-    expect(log, equals(const <int>[2]));
+    expect(log, equals(const <String>['pageDidChanged 2']));
 
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
@@ -603,7 +603,8 @@ void main() {
     final PageController controller = PageController(
       initialPage: kStates.length - 1,
     );
-    int changeIndex = 0;
+    int onPageChangedIndex = 0;
+    int pageDidChangedIndex = 0;
     Widget build() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -612,10 +613,10 @@ void main() {
               kStates.map<Widget>((String state) => Text(state)).toList(),
           controller: controller,
           onPageChanged: (int page) {
-            changeIndex = page;
+            onPageChangedIndex = page;
           },
           pageDidChanged: (int page) {
-            changeIndex = page;
+            pageDidChangedIndex = page;
           },
         ),
       );
@@ -624,9 +625,9 @@ void main() {
     await tester.pumpWidget(build());
     controller.jumpToPage(kStates.length * 2); // try to move beyond max range
     // change index should be zero, shouldn't fire onPageChanged or pageDidChanged
-    expect(changeIndex, 0);
+    expect(onPageChangedIndex, 0);
     await tester.pump();
-    expect(changeIndex, 0);
+    expect(pageDidChangedIndex, 0);
   });
 
   testWidgets('PageView can restore page', (WidgetTester tester) async {
