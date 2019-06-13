@@ -85,16 +85,6 @@ abstract class FlutterCommand extends Command<void> {
   /// The flag name for whether or not to use ipv6.
   static const String ipv6Flag = 'ipv6';
 
-  /// The parameters to attach to the event when the command resulted in success.
-  static Map<String, String> successEventParams = <String, String>{
-    'result': 'success',
-  };
-
-  /// The parameters to attach to the event when the command resulted in failure.
-  static Map<String, String> failureEventParams = <String, String>{
-    'result': 'failure',
-  };
-
   @override
   ArgParser get argParser => _argParser;
   final ArgParser _argParser = ArgParser(
@@ -418,42 +408,72 @@ abstract class FlutterCommand extends Command<void> {
       body: () async {
         if (flutterUsage.isFirstRun)
           flutterUsage.printWelcome();
-        final String commandPath = await usagePath;
         FlutterCommandResult commandResult;
         try {
-          commandResult = await verifyThenRunCommand(commandPath);
-          flutterUsage.sendEvent('command-result', name, parameters: successEventParams);
+          commandResult = await verifyThenRunCommand();
         } on ToolExit {
           commandResult = const FlutterCommandResult(ExitStatus.fail);
-          flutterUsage.sendEvent('command-result', name, parameters: failureEventParams);
           rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
           printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           printTrace('"flutter $name" took ${getElapsedAsMilliseconds(endTime.difference(startTime))}.');
-          if (commandPath != null) {
-            final List<String> labels = <String>[];
-            if (commandResult?.exitStatus != null)
-              labels.add(getEnumName(commandResult.exitStatus));
-            if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
-              labels.addAll(commandResult.timingLabelParts);
 
-            final String label = labels
-                .where((String label) => !isBlank(label))
-                .join('-');
-            flutterUsage.sendTiming(
-              'flutter',
-              name,
-              // If the command provides its own end time, use it. Otherwise report
-              // the duration of the entire execution.
-              (commandResult?.endTimeOverride ?? endTime).difference(startTime),
-              // Report in the form of `success-[parameter1-parameter2]`, all of which
-              // can be null if the command doesn't provide a FlutterCommandResult.
-              label: label == '' ? null : label,
-            );
-          }
+          await _sendUsage(commandResult, startTime, endTime);
         }
       },
+    );
+  }
+
+  /// Logs data about this command.
+  ///
+  /// For example, the command path (e.g. `build/apk`) and the result,
+  /// as well as the time spent running it.
+  Future<void> _sendUsage(FlutterCommandResult commandResult, DateTime startTime, DateTime endTime) async {
+    final String commandPath = await usagePath;
+
+    if (commandPath == null) {
+      return;
+    }
+
+    // Send screen.
+    final Map<String, String> additionalUsageValues = Map<String, String>
+        .from(await usageValues);
+
+    if (commandResult != null) {
+      switch (commandResult.exitStatus) {
+        case ExitStatus.success:
+          additionalUsageValues[kCommandResult] = 'success';
+          break;
+        case ExitStatus.warning:
+          additionalUsageValues[kCommandResult] = 'warning';
+          break;
+        case ExitStatus.fail:
+          additionalUsageValues[kCommandResult] = 'fail';
+          break;
+      }
+    }
+    flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
+
+    // Send timing.
+    final List<String> labels = <String>[];
+    if (commandResult?.exitStatus != null)
+      labels.add(getEnumName(commandResult.exitStatus));
+    if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+      labels.addAll(commandResult.timingLabelParts);
+
+    final String label = labels
+        .where((String label) => !isBlank(label))
+        .join('-');
+    flutterUsage.sendTiming(
+      'flutter',
+      name,
+      // If the command provides its own end time, use it. Otherwise report
+      // the duration of the entire execution.
+      (commandResult?.endTimeOverride ?? endTime).difference(startTime),
+      // Report in the form of `success-[parameter1-parameter2]`, all of which
+      // can be null if the command doesn't provide a FlutterCommandResult.
+      label: label == '' ? null : label,
     );
   }
 
@@ -465,7 +485,7 @@ abstract class FlutterCommand extends Command<void> {
   /// then call this method to execute the command
   /// rather than calling [runCommand] directly.
   @mustCallSuper
-  Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
+  Future<FlutterCommandResult> verifyThenRunCommand() async {
     await validateCommand();
 
     // Populate the cache. We call this before pub get below so that the sky_engine
@@ -481,11 +501,6 @@ abstract class FlutterCommand extends Command<void> {
     }
 
     setupApplicationPackages();
-
-    if (commandPath != null) {
-      final Map<String, String> additionalUsageValues = await usageValues;
-      flutterUsage.sendCommand(commandPath, parameters: additionalUsageValues);
-    }
 
     return await runCommand();
   }

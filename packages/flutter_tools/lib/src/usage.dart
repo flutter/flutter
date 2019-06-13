@@ -45,6 +45,8 @@ const String kCommandCreateProjectType = 'cd19';
 const String kCommandPackagesNumberPlugins = 'cd20';
 const String kCommandPackagesProjectModule = 'cd21';
 
+const String kCommandResult = 'cd24';
+
 Usage get flutterUsage => Usage.instance;
 
 class Usage {

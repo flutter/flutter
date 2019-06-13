@@ -48,22 +48,79 @@ void main() {
     overrides: <Type, Generator>{
       Cache: () => cache,
     });
+
     testUsingContext('reports command that results in success', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
 
-      final DummyFlutterCommand flutterCommand = DummyFlutterCommand();
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+      );
       await flutterCommand.run();
 
       expect(
-        verify(usage.sendEvent(captureAny, captureAny,
-            parameters: captureAnyNamed('parameters'))).captured,
+        verify(usage.sendCommand(captureAny,
+                parameters: captureAnyNamed('parameters'))).captured,
         <dynamic>[
-          'command-result',
           'dummy',
-          <String, String>{'result': 'success'}
+          const <String, String>{'cd24': 'success'}
         ],
       );
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in warning', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.warning);
+        }
+      );
+      await flutterCommand.run();
+
+      expect(
+        verify(usage.sendCommand(captureAny,
+                parameters: captureAnyNamed('parameters'))).captured,
+        <dynamic>[
+          'dummy',
+          const <String, String>{'cd24': 'warning'}
+        ],
+      );
+    },
+    overrides: <Type, Generator>{
+      SystemClock: () => clock,
+      Usage: () => usage,
+    });
+
+    testUsingContext('reports command that results in failure', () async {
+      // Crash if called a third time which is unexpected.
+      mockTimes = <int>[1000, 2000];
+
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          return const FlutterCommandResult(ExitStatus.fail);
+        }
+      );
+
+      try {
+        await flutterCommand.run();
+      } on ToolExit {
+        expect(
+          verify(usage.sendCommand(captureAny,
+                  parameters: captureAnyNamed('parameters'))).captured,
+          <dynamic>[
+            'dummy',
+            const <String, String>{'cd24': 'fail'}
+          ],
+        );
+      }
     },
     overrides: <Type, Generator>{
       SystemClock: () => clock,
@@ -86,12 +143,11 @@ void main() {
         fail('Mock should make this fail');
       } on ToolExit {
         expect(
-          verify(usage.sendEvent(captureAny, captureAny,
-              parameters: captureAnyNamed('parameters'))).captured,
+          verify(usage.sendCommand(captureAny,
+                  parameters: captureAnyNamed('parameters'))).captured,
           <dynamic>[
-            'command-result',
             'dummy',
-            <String, String>{'result': 'failure'}
+            const <String, String>{'cd24': 'fail'}
           ],
         );
       }
@@ -100,6 +156,7 @@ void main() {
       SystemClock: () => clock,
       Usage: () => usage,
     });
+
     testUsingContext('report execution timing by default', () async {
       // Crash if called a third time which is unexpected.
       mockTimes = <int>[1000, 2000];
