@@ -2099,7 +2099,7 @@ void main() {
     );
   });
 
-  test('DiagnosticsProeprty for basic types has value in json', () {
+  test('DiagnosticsProperty for basic types has value in json', () {
     DiagnosticsProperty<int> intProperty = DiagnosticsProperty<int>('int1', 10);
     Map<String, Object> json = simulateJsonSerialization(intProperty);
     expect(json['name'], 'int1');
