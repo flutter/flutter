@@ -76,6 +76,7 @@ void main() {
     await gesture.removePointer();
   },
     semanticsEnabled: true,
+    skip: isBrowser,
   );
 
   testWidgets('FlatButton with colored theme meets a11y contrast guidelines', (WidgetTester tester) async {
@@ -140,6 +141,7 @@ void main() {
     await gesture.removePointer();
   },
     semanticsEnabled: true,
+    skip: isBrowser,
   );
 
   testWidgets('FlatButton uses stateful color for text color in different states', (WidgetTester tester) async {
