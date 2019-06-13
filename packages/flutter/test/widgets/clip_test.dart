@@ -358,7 +358,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipRect.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('ClipRect save, overlay, and antialiasing', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -398,7 +398,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipRectOverlay.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('ClipRRect painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -447,7 +447,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipRRect.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('ClipOval painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -490,7 +490,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipOval.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('ClipPath painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -538,7 +538,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.ClipPath.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   Center genPhysicalModel(Clip clipBehavior) {
     return Center(
@@ -583,7 +583,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.antiAlias.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('PhysicalModel painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
@@ -591,7 +591,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.hardEdge.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   // There will be bleeding edges on the rect edges, but there shouldn't be any bleeding edges on the
   // round corners.
@@ -601,7 +601,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png', version: null),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Default PhysicalModel painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -643,7 +643,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalModel.default.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   Center genPhysicalShape(Clip clipBehavior) {
     return Center(
@@ -692,7 +692,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.antiAlias.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('PhysicalShape painting with Clip.hardEdge', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
@@ -700,7 +700,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.hardEdge.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('PhysicalShape painting with Clip.antiAliasWithSaveLayer', (WidgetTester tester) async {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
@@ -708,7 +708,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png', version: null),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('PhysicalShape painting', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -754,7 +754,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('clip.PhysicalShape.default.png', version: '1'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('ClipPath.shape', (WidgetTester tester) async {
     final List<String> logs = <String>[];

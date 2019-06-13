@@ -991,7 +991,7 @@ void main() {
 
     await gesture.up();
     await tester.pumpAndSettle();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Tick marks are skipped when they are too dense', (WidgetTester tester) async {
     Widget buildSlider({

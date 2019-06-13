@@ -13,7 +13,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
+import '../bundle.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
@@ -129,11 +129,11 @@ class FlutterTesterDevice extends Device {
 
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
-    final String applicationKernelFilePath = bundle.getKernelPathForTransformerOptions(
+    final String applicationKernelFilePath = getKernelPathForTransformerOptions(
       fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
-    await bundle.build(
+    await BundleBuilder().build(
       mainPath: mainPath,
       assetDirPath: assetDirPath,
       applicationKernelFilePath: applicationKernelFilePath,

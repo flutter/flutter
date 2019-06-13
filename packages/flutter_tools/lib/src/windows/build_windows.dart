@@ -13,6 +13,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../usage.dart';
 import 'msbuild_utils.dart';
 import 'visual_studio.dart';
 
@@ -48,6 +49,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
 
   final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
   final String solutionPath = windowsProject.solutionFile.path;
+  final Stopwatch sw = Stopwatch()..start();
   // Run the script with a relative path to the project using the enclosing
   // directory as the workingDirectory, to avoid hitting the limit on command
   // lengths in batch scripts if the absolute path to the project is long.
@@ -78,4 +80,5 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   if (result != 0) {
     throwToolExit('Build process failed');
   }
+  flutterUsage.sendTiming('build', 'vs_build', Duration(milliseconds: sw.elapsedMilliseconds));
 }

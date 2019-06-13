@@ -1515,7 +1515,8 @@ abstract class DiagnosticsNode {
 
   String get _separator => showSeparator ? ':' : '';
 
-  /// Serialize the node excluding its descendants to a JSON map.
+  /// Serialize the node to a JSON map according to the configuration provided
+  /// in the [DiagnosticsSerializationDelegate].
   ///
   /// Subclasses should override if they have additional properties that are
   /// useful for the GUI tools that consume this JSON.
@@ -1526,7 +1527,7 @@ abstract class DiagnosticsNode {
   ///    by this method and interactive tree views in the Flutter IntelliJ
   ///    plugin.
   @mustCallSuper
-  Map<String, Object> toJsonMap() {
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
     final Map<String, Object> data = <String, Object>{
       'description': toDescription(),
       'type': runtimeType.toString(),
@@ -1561,7 +1562,54 @@ abstract class DiagnosticsNode {
     if (allowNameWrap)
       data['allowNameWrap'] = allowNameWrap;
 
+    data.addAll(delegate.additionalNodeProperties(this));
+
+    if (delegate.includeProperties) {
+      final List<DiagnosticsNode> properties = getProperties();
+      data['properties'] = toJsonList(
+        delegate.filterProperties(properties, this),
+        this,
+        delegate,
+      );
+    }
+
+    if (delegate.subtreeDepth > 0) {
+      final List<DiagnosticsNode> children = getChildren();
+      data['children'] = toJsonList(
+        delegate.filterChildren(children, this),
+        this,
+        delegate,
+      );
+    }
+
     return data;
+  }
+
+  /// Serializes a [List] of [DiagnosticsNode]s to a JSON list according to
+  /// the configuration provided by the [DiagnosticsSerializationDelegate].
+  ///
+  /// The provided `nodes` may be properties or children of the `parent`
+  /// [DiagnosticsNode].
+  static List<Map<String, Object>> toJsonList(
+      List<DiagnosticsNode> nodes,
+      DiagnosticsNode parent,
+      DiagnosticsSerializationDelegate delegate,
+  ) {
+    bool truncated = false;
+    if (nodes == null)
+      return const <Map<String, Object>>[];
+    final int originalNodeCount = nodes.length;
+    nodes = delegate.truncateNodesList(nodes, parent);
+    if (nodes.length != originalNodeCount) {
+      nodes.add(DiagnosticsNode.message('...'));
+      truncated = true;
+    }
+    final List<Map<String, Object>> json = nodes.map<Map<String, Object>>((DiagnosticsNode node) {
+      return node.toJsonMap(delegate.delegateForNode(node));
+    }).toList();
+    if (truncated)
+      json.last['truncated'] = true;
+    return json;
   }
 
   /// Returns a string representation of this diagnostic that is compatible with
@@ -1751,8 +1799,8 @@ class StringProperty extends DiagnosticsProperty<String> {
   final bool quoted;
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     json['quoted'] = quoted;
     return json;
   }
@@ -1824,8 +1872,8 @@ abstract class _NumProperty<T extends num> extends DiagnosticsProperty<T> {
   );
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (unit != null)
       json['unit'] = unit;
 
@@ -2060,8 +2108,8 @@ class FlagProperty extends DiagnosticsProperty<bool> {
        );
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (ifTrue != null)
       json['ifTrue'] = ifTrue;
     if (ifFalse != null)
@@ -2194,8 +2242,8 @@ class IterableProperty<T> extends DiagnosticsProperty<Iterable<T>> {
   }
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (value != null) {
       json['values'] = value.map<String>((T value) => value.toString()).toList();
     }
@@ -2345,8 +2393,8 @@ class ObjectFlagProperty<T> extends DiagnosticsProperty<T> {
   }
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
     if (ifPresent != null)
       json['ifPresent'] = ifPresent;
     return json;
@@ -2472,8 +2520,22 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
   final bool allowNameWrap;
 
   @override
-  Map<String, Object> toJsonMap() {
-    final Map<String, Object> json = super.toJsonMap();
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final T v = value;
+    List<Map<String, Object>> properties;
+    if (delegate.expandPropertyValues && delegate.includeProperties && v is Diagnosticable && getProperties().isEmpty) {
+      // Exclude children for expanded nodes to avoid cycles.
+      delegate = delegate.copyWith(subtreeDepth: 0, includeProperties: false);
+      properties = DiagnosticsNode.toJsonList(
+        delegate.filterProperties(v.toDiagnosticsNode().getProperties(), this),
+        this,
+        delegate,
+      );
+    }
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    if (properties != null) {
+      json['properties'] = properties;
+    }
     if (defaultValue != kNoDefaultValue)
       json['defaultValue'] = defaultValue.toString();
     if (ifEmpty != null)
@@ -2735,8 +2797,9 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 }
 
 /// [DiagnosticsNode] for an instance of [DiagnosticableTree].
-class _DiagnosticableTreeNode extends DiagnosticableNode<DiagnosticableTree> {
-  _DiagnosticableTreeNode({
+class DiagnosticableTreeNode extends DiagnosticableNode<DiagnosticableTree> {
+  /// Creates a [DiagnosticableTreeNode].
+  DiagnosticableTreeNode({
     String name,
     @required DiagnosticableTree value,
     @required DiagnosticsTreeStyle style,
@@ -2975,6 +3038,10 @@ mixin DiagnosticableMixin {
   ///  * [ObjectFlagProperty], which provides terse descriptions of whether a
   ///    property value is present or not. For example, whether an `onClick`
   ///    callback is specified or an animation is in progress.
+  ///  * [ColorProperty], which must be used if the property value is
+  ///    a [Color] or one of its subclasses.
+  ///  * [IconDataProperty], which must be used if the property value
+  ///    is of type [IconData].
   ///
   /// If none of these subclasses apply, use the [DiagnosticsProperty]
   /// constructor or in rare cases create your own [DiagnosticsProperty]
@@ -3201,7 +3268,7 @@ abstract class DiagnosticableTree extends Diagnosticable {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return _DiagnosticableTreeNode(
+    return DiagnosticableTreeNode(
       name: name,
       value: this,
       style: style,
@@ -3268,7 +3335,7 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
 
   @override
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
-    return _DiagnosticableTreeNode(
+    return DiagnosticableTreeNode(
       name: name,
       value: this,
       style: style,
@@ -3333,4 +3400,160 @@ class DiagnosticsBlock extends DiagnosticsNode {
 
   @override
   String toDescription({TextTreeConfiguration parentConfiguration}) => _description;
+}
+
+/// A delegate that configures how a hierarchy of [DiagnosticsNode]s should be
+/// serialized.
+///
+/// Implement this class in a subclass to fully configure how [DiagnosticsNode]s
+/// get serialized.
+abstract class DiagnosticsSerializationDelegate {
+  /// Creates a simple [DiagnosticsSerializationDelegate] that controls the
+  /// [subtreeDepth] and whether to [includeProperties].
+  ///
+  /// For additional configuration options, extend
+  /// [DiagnosticsSerializationDelegate] and provide custom implementations
+  /// for the methods of this class.
+  const factory DiagnosticsSerializationDelegate({
+    int subtreeDepth,
+    bool includeProperties,
+  }) = _DefaultDiagnosticsSerializationDelegate;
+
+  /// Returns a serializable map of additional information that will be included
+  /// in the serialization of the given [DiagnosticsNode].
+  ///
+  /// This method is called for every [DiagnosticsNode] that's included in
+  /// the serialization.
+  Map<String, Object> additionalNodeProperties(DiagnosticsNode node);
+
+  /// Filters the list of [DiagnosticsNode]s that will be included as children
+  /// for the given `owner` node.
+  ///
+  /// The callback may return a subset of the children in the provided list
+  /// or replace the entire list with new child nodes.
+  ///
+  /// See also:
+  ///
+  ///  * [subtreeDepth], which controls how many levels of children will be
+  ///    included in the serialization.
+  List<DiagnosticsNode> filterChildren(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
+
+  /// Filters the list of [DiagnosticsNode]s that will be included as properties
+  /// for the given `owner` node.
+  ///
+  /// The callback may return a subset of the properties in the provided list
+  /// or replace the entire list with new property nodes.
+  ///
+  /// By default, `nodes` is returned as-is.
+  ///
+  /// See also:
+  ///
+  ///  * [includeProperties], which controls whether properties will be included
+  ///    at all.
+  List<DiagnosticsNode> filterProperties(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
+
+  /// Truncates the given list of [DiagnosticsNode] that will be added to the
+  /// serialization as children or properties of the `owner` node.
+  ///
+  /// The method must return a subset of the provided nodes and may
+  /// not replace any nodes. While [filterProperties] and [filterChildren]
+  /// completely hide a node from the serialization, truncating a node will
+  /// leave a hint in the serialization that there were additional nodes in the
+  /// result that are not included in the current serialization.
+  ///
+  /// By default, `nodes` is returned as-is.
+  List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode owner);
+
+  /// Returns the [DiagnosticsSerializationDelegate] to be used
+  /// for adding the provided [DiagnosticsNode] to the serialization.
+  ///
+  /// By default, this will return a copy of this delegate, which has the
+  /// [subtreeDepth] reduced by one.
+  ///
+  /// This is called for nodes that will be added to the serialization as
+  /// property or child of another node. It may return the same delegate if no
+  /// changes to it are necessary.
+  DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node);
+
+  /// Controls how many levels of children will be included in the serialized
+  /// hierarchy of [DiagnosticsNode]s.
+  ///
+  /// Defaults to zero.
+  ///
+  /// See also:
+  ///
+  ///  * [filterChildren], which provides a way to filter the children that
+  ///    will be included.
+  int get subtreeDepth;
+
+  /// Whether to include the properties of a [DiagnosticsNode] in the
+  /// serialization.
+  ///
+  /// Defaults to false.
+  ///
+  /// See also:
+  ///
+  ///  * [filterProperties], which provides a way to filter the properties that
+  ///    will be included.
+  bool get includeProperties;
+
+  /// Whether properties that have a [Diagnosticable] as value should be
+  /// expanded.
+  bool get expandPropertyValues;
+
+  /// Creates a copy of this [DiagnosticsSerializationDelegate] with the
+  /// provided values.
+  DiagnosticsSerializationDelegate copyWith({
+    int subtreeDepth,
+    bool includeProperties,
+  });
+}
+
+class _DefaultDiagnosticsSerializationDelegate implements DiagnosticsSerializationDelegate {
+  const _DefaultDiagnosticsSerializationDelegate({
+    this.includeProperties = false,
+    this.subtreeDepth = 0,
+  });
+
+  @override
+  Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
+    return const <String, Object>{};
+  }
+
+  @override
+  DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node) {
+    return subtreeDepth > 0 ? copyWith(subtreeDepth: subtreeDepth - 1) : this;
+  }
+
+  @override
+  bool get expandPropertyValues => false;
+
+  @override
+  List<DiagnosticsNode> filterChildren(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
+    return nodes;
+  }
+
+  @override
+  List<DiagnosticsNode> filterProperties(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
+    return nodes;
+  }
+
+  @override
+  final bool includeProperties;
+
+  @override
+  final int subtreeDepth;
+
+  @override
+  List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
+    return nodes;
+  }
+
+  @override
+  DiagnosticsSerializationDelegate copyWith({int subtreeDepth, bool includeProperties}) {
+    return _DefaultDiagnosticsSerializationDelegate(
+      subtreeDepth: subtreeDepth ?? this.subtreeDepth,
+      includeProperties: includeProperties ?? this.includeProperties,
+    );
+  }
 }

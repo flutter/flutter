@@ -509,7 +509,7 @@ class TextField extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
+    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
@@ -749,7 +749,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         cause: SelectionChangedCause.forcePress,
       );
       if (_shouldShowSelectionToolbar) {
-        _editableTextKey.currentState.toggleToolbar();
+        _editableTextKey.currentState.showToolbar();
       }
     }
   }
@@ -819,7 +819,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
     if (widget.selectionEnabled) {
       if (_shouldShowSelectionToolbar)
-        _editableTextKey.currentState.toggleToolbar();
+        _editableTextKey.currentState.showToolbar();
     }
   }
 
@@ -827,7 +827,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
       if (_shouldShowSelectionToolbar) {
-        _editableText.toggleToolbar();
+        _editableText.showToolbar();
       }
     }
   }

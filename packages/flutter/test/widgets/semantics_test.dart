@@ -536,7 +536,7 @@ void main() {
 
     expect(semantics, hasSemantics(expectedSemantics, ignoreId: true));
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Actions can be replaced without triggering semantics update', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

@@ -57,6 +57,9 @@ class ApplicationPackageFactory {
             ? MacOSApp.fromMacOSProject(FlutterProject.current().macos)
             : MacOSApp.fromPrebuiltApp(applicationBinary);
       case TargetPlatform.web_javascript:
+        if (!FlutterProject.current().web.existsSync()) {
+          return null;
+        }
         return WebApplicationPackage(FlutterProject.current());
       case TargetPlatform.linux_x64:
         return applicationBinary == null
