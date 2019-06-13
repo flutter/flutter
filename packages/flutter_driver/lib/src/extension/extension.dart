@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/semantics.dart';
-import 'package:flutter_driver/src/common/diagnostics_tree.dart';
 import 'package:meta/meta.dart';
 
 import 'package:flutter/cupertino.dart';
@@ -18,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';

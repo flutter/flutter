@@ -7,7 +7,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as f;
-import 'package:flutter_driver/src/common/diagnostics_tree.dart';
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart' as fuchsia;
 import 'package:json_rpc_2/error_code.dart' as error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
@@ -16,6 +15,7 @@ import 'package:path/path.dart' as p;
 import 'package:vm_service_client/vm_service_client.dart';
 import 'package:web_socket_channel/io.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
