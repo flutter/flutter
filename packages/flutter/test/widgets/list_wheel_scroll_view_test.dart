@@ -538,7 +538,7 @@ void main() {
         matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
         skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Default middle transform', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -593,7 +593,7 @@ void main() {
         matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
         skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 200.0);

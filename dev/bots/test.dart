@@ -343,7 +343,14 @@ Future<void> _runTests() async {
 Future<void> _runWebTests() async {
   await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), expectFailure: false, tests: <String>[
     'test/foundation/',
+    'test/physics/',
+    'test/rendering/',
+    'test/services/',
+    'test/painting/',
     'test/scheduler/',
+    'test/widgets/',
+    'test/semantics/',
+    'test/material/',
   ]);
 }
 
@@ -763,7 +770,9 @@ Future<void> _integrationTestsAndroidSdk() async {
 
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
   if (!Platform.isWindows) {
-    await _runDevicelabTest('gradle_plugin_test', env: env);
+    await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
+    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+    await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
   }
   // note: this also covers plugin_test_win as long as Windows has an Android SDK available.
