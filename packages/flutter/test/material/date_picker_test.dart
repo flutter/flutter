@@ -449,6 +449,7 @@ void _tests() {
               TestSemantics(
                 children: <TestSemantics>[
                   TestSemantics(
+                    id: 55,
                     actions: <SemanticsAction>[SemanticsAction.scrollLeft, SemanticsAction.scrollRight],
                     children: <TestSemantics>[
                       TestSemantics(
@@ -456,7 +457,21 @@ void _tests() {
                           TestSemantics(
                             children: <TestSemantics>[
                               TestSemantics(
+                                id: 11,
+                                flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling],
                                 children: <TestSemantics>[
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
+                                  TestSemantics(),
                                   TestSemantics(
                                     actions: <SemanticsAction>[SemanticsAction.tap],
                                     label: '1, Friday, January 1, 2016',

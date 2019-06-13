@@ -516,7 +516,7 @@ void main() {
                           SemanticsFlag.isTextField,
                           SemanticsFlag.isFocused,
                           SemanticsFlag.isHeader,
-                          SemanticsFlag.namesRoute,
+                          if (debugDefaultTargetPlatformOverride != TargetPlatform.iOS) SemanticsFlag.namesRoute,
                         ],
                         actions: <SemanticsAction>[
                           SemanticsAction.tap,
@@ -525,6 +525,7 @@ void main() {
                         ],
                         label: 'Search',
                         textDirection: TextDirection.ltr,
+                        textSelection: const TextSelection(baseOffset: 0, extentOffset: 0),
                       ),
                     ],
                   ),

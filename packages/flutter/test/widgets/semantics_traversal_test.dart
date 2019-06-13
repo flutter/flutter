@@ -202,13 +202,13 @@ void main() {
     await tester.test(
       textDirection: TextDirection.ltr,
       children: children,
-      expectedTraversal: 'A B C D E F G H I J K L M',
+      expectedTraversal: 'A B C D E G H F I J K L M',
     );
 
     await tester.test(
       textDirection: TextDirection.rtl,
       children: children,
-      expectedTraversal: 'D C B A H I G E F M L K J',
+      expectedTraversal: 'D C B A H G E I F M L K J',
     );
   });
 
