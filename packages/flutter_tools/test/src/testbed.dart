@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/usage.dart';
 
 import 'context.dart';
 
@@ -28,6 +29,7 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
     : FileSystemStyle.posix),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OutputPreferences: () => OutputPreferences(showColor: false), // configures BufferLogger to avoid color codes.
+  Usage: () => NoOpUsage(), // prevent addition of analytics from burdening test mocks
 };
 
 /// Manages interaction with the tool injection and runner system.
@@ -104,4 +106,42 @@ class Testbed {
       );
     });
   }
+}
+
+/// A no-op implementation of [Usage] for testing.
+class NoOpUsage implements Usage {
+  @override
+  bool enabled = false;
+
+  @override
+  bool suppressAnalytics = true;
+
+  @override
+  String get clientId => 'test';
+
+  @override
+  Future<void> ensureAnalyticsSent() {
+    return null;
+  }
+
+  @override
+  bool get isFirstRun => false;
+
+  @override
+  Stream<Map<String, Object>> get onSend => const Stream<Object>.empty();
+
+  @override
+  void printWelcome() {}
+
+  @override
+  void sendCommand(String command, {Map<String, String> parameters}) {}
+
+  @override
+  void sendEvent(String category, String parameter, {Map<String, String> parameters}) {}
+
+  @override
+  void sendException(dynamic exception, StackTrace trace) {}
+
+  @override
+  void sendTiming(String category, String variableName, Duration duration, {String label}) {}
 }

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // This whole test suite needs triage.
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
@@ -490,7 +491,7 @@ void main() {
       matchesGoldenFile('text_field_opacity_test.0.2.png'),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -852,6 +853,55 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('PASTE'), findsNothing);
     expect(find.text('CUT'), findsNothing);
+  });
+
+  testWidgets('text field build empty tool bar when no options available ios', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: const Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
+  });
+
+  testWidgets('text field build empty tool bar when no options available android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
   });
 
   testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
@@ -2586,7 +2636,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
