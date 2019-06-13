@@ -22,6 +22,10 @@ namespace testing {
 class ShellTest;
 }
 
+/// Executor of animations.
+///
+/// In conjunction with the |VsyncWaiter| it allows callers (typically Dart
+/// code) to schedule work that ends up generating a |LayerTree|.
 class Animator final {
  public:
   class Delegate {

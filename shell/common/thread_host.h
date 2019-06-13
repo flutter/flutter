@@ -12,6 +12,7 @@
 
 namespace flutter {
 
+/// The collection of all the threads used by the engine.
 struct ThreadHost {
   enum Type {
     Platform = 1 << 0,

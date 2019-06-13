@@ -41,6 +41,7 @@ class SurfaceFrame {
   FML_DISALLOW_COPY_AND_ASSIGN(SurfaceFrame);
 };
 
+/// Abstract Base Class that represents where we will be rendering content.
 class Surface {
  public:
   Surface();

@@ -34,6 +34,8 @@
 
 namespace flutter {
 
+/// Wraps up all the different components of Flutter engine and coordinates them
+/// through a series of delegates.
 class Shell final : public PlatformView::Delegate,
                     public Animator::Delegate,
                     public Engine::Delegate,
