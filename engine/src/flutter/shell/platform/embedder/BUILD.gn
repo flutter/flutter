@@ -60,7 +60,7 @@ test_fixtures("fixtures") {
   dart_main = "fixtures/main.dart"
 }
 
-if (is_mac || is_linux || is_win) {
+if (current_toolchain == host_toolchain) {
   executable("embedder_unittests") {
     testonly = true
 
