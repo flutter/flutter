@@ -907,6 +907,62 @@ void main() {
       );
     });
 
+    testWidgets('Scaffold BottomNavigationBar bottom padding is not consumed by viewInsets.', (WidgetTester tester) async {
+      Widget boilerplate(Widget child) {
+        return Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: child,
+          ),
+        );
+      }
+
+      final Widget child = boilerplate(
+        Scaffold(
+          resizeToAvoidBottomInset: false,
+          body: const Placeholder(),
+          bottomNavigationBar: BottomNavigationBar(
+            items: <BottomNavigationBarItem>[
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                title: const Text('test'),
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.add),
+                title: const Text('test'),
+              )
+            ]
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(padding: EdgeInsets.only(bottom: 20.0)),
+          child: child,
+        ),
+      );
+      final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
+      // Consume bottom padding - as if by the keyboard opening
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.zero,
+            viewPadding: EdgeInsets.only(bottom: 20),
+            viewInsets: EdgeInsets.only(bottom: 300),
+          ),
+          child: child,
+        ),
+      );
+      final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
+      expect(initialPoint, finalPoint);
+    });
+
     testWidgets('floatingActionButton', (WidgetTester tester) async {
       final GlobalKey key = GlobalKey();
       await tester.pumpWidget(MaterialApp(home: Scaffold(

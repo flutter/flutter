@@ -45,7 +45,7 @@ class SafeArea extends StatelessWidget {
     this.right = true,
     this.bottom = true,
     this.minimum = EdgeInsets.zero,
-    this.maintainViewPadding = false,
+    this.maintainBottomViewPadding = false,
     @required this.child,
   }) : assert(left != null),
        assert(top != null),
@@ -71,8 +71,14 @@ class SafeArea extends StatelessWidget {
   /// The greater of the minimum insets and the media padding will be applied.
   final EdgeInsets minimum;
 
-  /// TODO
-  final bool maintainViewPadding;
+  /// Specifies whether the [SafeArea] should maintain the [viewPadding] instead
+  /// of the [padding] when consumed by the [viewInsets] of the current
+  /// context's [MediaQuery], defaults to false.
+  ///
+  /// For example, if there is an onscreen keyboard displayed above the
+  /// SafeArea, the padding can be maintained below the obstruction rather than
+  /// being consumed.
+  final bool maintainBottomViewPadding;
 
   /// The widget below this widget in the tree.
   ///
@@ -85,9 +91,12 @@ class SafeArea extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMediaQuery(context));
-    final EdgeInsets padding = maintainViewPadding
-      ? MediaQuery.of(context).viewPadding
-      : MediaQuery.of(context).padding;
+    final MediaQueryData data = MediaQuery.of(context);
+    EdgeInsets padding = data.padding;
+    // Bottom padding has been consumed - i.e. by the keyboard
+    if(data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
+      padding = padding.copyWith(bottom: data.viewPadding.bottom);
+
     return Padding(
       padding: EdgeInsets.only(
         left: math.max(left ? padding.left : 0.0, minimum.left),
