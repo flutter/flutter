@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
@@ -98,18 +97,17 @@ class Cache {
 
   // Check whether there is a writable bit in the usr permissions.
   static bool _hasUserWritePermission(FileStat stat) {
-    // Unfortunately the memory file system by default specifies a mode of `0`
-    // and is used by the majority of our tests. Detect this case and assume
-    // writable.
-    if ((fs is MemoryFileSystem || fs is ForwardingFileSystem) && stat.mode == 0) {
-      return true;
-    }
     final int permissions = ((stat.mode & 0xFFF) >> 6) & 0x7;
     return permissions == 2
       || permissions == 3
       || permissions == 6
       || permissions == 7;
   }
+
+  // Unfortunately the memory file system by default specifies a mode of `0`
+  // and is used by the majority of our tests. Default to false and only set
+  // to true when we know it is safe.
+  static bool checkPermissions = false;
 
   // Initialized by FlutterCommandRunner on startup.
   static String get flutterRoot => _flutterRoot;
@@ -119,19 +117,21 @@ class Cache {
       _flutterRoot = null;
       return;
     }
-    // Verify that we have writable permission in the flutter root. If not,
-    // we're liable to crash in unintuitive ways. This can happen if the user
-    // is using a homebrew or other unofficial channel, or otherwise installs
-    // Flutter into directory without permissions.
-    final FileStat binStat = fs.statSync(fs.path.join(value, 'bin'));
-    final FileStat rootStat = fs.statSync(value);
-    if (rootStat != null && rootStat != null && (!_hasUserWritePermission(binStat) || !_hasUserWritePermission(rootStat))) {
-      throwToolExit(
-        'Warning: Flutter is missing permissions to write files '
-        'in its installation directory - "$value". '
-        'Please install Flutter from an official channel in a directory '
-        'where you have write permissions. For more information see '
-        'https://flutter.dev/docs/get-started/install');
+    if (checkPermissions) {
+      // Verify that we have writable permission in the flutter root. If not,
+      // we're liable to crash in unintuitive ways. This can happen if the user
+      // is using a homebrew or other unofficial channel, or otherwise installs
+      // Flutter into directory without permissions.
+      final FileStat binStat = fs.statSync(fs.path.join(value, 'bin'));
+      final FileStat rootStat = fs.statSync(value);
+      if (!_hasUserWritePermission(binStat) || !_hasUserWritePermission(rootStat)) {
+        throwToolExit(
+          'Warning: Flutter is missing permissions to write files '
+          'in its installation directory - "$value". '
+          'Please install Flutter from an official channel in a directory '
+          'where you have write permissions. For more information see '
+          'https://flutter.dev/docs/get-started/install');
+      }
     }
     _flutterRoot = value;
   }

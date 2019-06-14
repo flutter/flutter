@@ -478,6 +478,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   static void initFlutterRoot() {
+    Cache.checkPermissions = true;
     Cache.flutterRoot ??= defaultFlutterRoot;
   }
 

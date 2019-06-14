@@ -153,12 +153,27 @@ void main() {
       mockFileSystem = MockFileSystem();
       mockFileStat = MockFileStat();
       when(mockFileSystem.path).thenReturn(fs.path);
-      when(mockFileSystem.statSync(any)).thenReturn(mockFileStat);
-      when(mockFileStat.mode).thenReturn(344);
+      Cache.checkPermissions = true;
+    });
+
+    tearDown(() {
+      Cache.checkPermissions = false;
     });
 
     testUsingContext('Throws error if missing usr write permissions in flutterRoot', () {
+      when(mockFileSystem.statSync(any)).thenReturn(mockFileStat);
+      when(mockFileStat.mode).thenReturn(344);
+
       expect(() => Cache.flutterRoot = '', throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => mockFileSystem,
+    }, initializeFlutterRoot: false);
+
+    testUsingContext('Doesnt error if we have usr write permissions in flutterRoot', () {
+      when(mockFileSystem.statSync(any)).thenReturn(mockFileStat);
+      when(mockFileStat.mode).thenReturn(666);
+
+      Cache.flutterRoot = '';
     }, overrides: <Type, Generator>{
       FileSystem: () => mockFileSystem,
     }, initializeFlutterRoot: false);
