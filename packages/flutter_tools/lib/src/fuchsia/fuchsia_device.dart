@@ -265,7 +265,9 @@ class FuchsiaDevice extends Device {
       }
 
       // Start up a package server.
-      fuchsiaPackageServer = FuchsiaPackageServer(packageRepo.path, host, port);
+      const String packageServerName = 'flutter_tool';
+      fuchsiaPackageServer = FuchsiaPackageServer(
+          packageRepo.path, packageServerName, host, port);
       if (!await fuchsiaPackageServer.start()) {
         printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();
@@ -277,16 +279,17 @@ class FuchsiaDevice extends Device {
         return LaunchResult.failed();
       }
 
-      // Teach amber about the package server.
-      if (!await fuchsiaDeviceTools.amberCtl.addSrc(this, fuchsiaPackageServer)) {
+      // Teach the package controller about the package server.
+      if (!await fuchsiaDeviceTools.amberCtl.addRepoCfg(this, fuchsiaPackageServer)) {
         printError('Failed to teach amber about the package server');
         return LaunchResult.failed();
       }
       serverRegistered = true;
 
-      // Tell amber to prefetch the app.
-      if (!await fuchsiaDeviceTools.amberCtl.getUp(this, appName)) {
-        printError('Failed to get amber to prefetch the package');
+      // Tell the package controller to prefetch the app.
+      if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
+          this, fuchsiaPackageServer, appName)) {
+        printError('Failed to get pkgctl to prefetch the package');
         return LaunchResult.failed();
       }
 
@@ -298,15 +301,16 @@ class FuchsiaDevice extends Device {
 
       // Instruct tiles_ctl to start the app.
       final String fuchsiaUrl =
-          'fuchsia-pkg://fuchsia.com/$appName#meta/$appName.cmx';
+          'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
       if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
         printError('Failed to add the app to tiles');
         return LaunchResult.failed();
       }
     } finally {
-      // Try to un-teach amber about the package server if needed.
+      // Try to un-teach the package controller about the package server if
+      // needed.
       if (serverRegistered) {
-        await fuchsiaDeviceTools.amberCtl.rmSrc(this, fuchsiaPackageServer);
+        await fuchsiaDeviceTools.amberCtl.pkgCtlRepoRemove(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
       fuchsiaPackageServer?.stop();
