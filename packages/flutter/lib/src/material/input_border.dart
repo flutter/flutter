@@ -385,29 +385,62 @@ class OutlineInputBorder extends InputBorder {
   }
 
   Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
+
+    print(center.tlRadiusX * 2.0);
+    print(center.tlRadiusY * 2.0);
+    print(center.height / 2.0);
+    Rect trCorner;
+    Rect brCorner;
+    if (center.trRadiusY + center.brRadiusY > center.height) {
+      // find ratio of radii
+      final double adjustedTopRightRadius = center.trRadiusY / (center.trRadiusY + center.brRadiusY) * center.height;
+      final double adjustedBottomRightRadius = center.brRadiusY / (center.trRadiusY + center.brRadiusY) * center.height;
+
+      // convert radii to appropriate doubles that add up to height
+
+      // apply these to trCorner and trCorner
+      trCorner = Rect.fromLTWH(
+        center.right - adjustedTopRightRadius * 2.0,
+        center.top,
+        adjustedTopRightRadius * 2.0,
+        adjustedTopRightRadius * 2.0,
+      );
+      brCorner = Rect.fromLTWH(
+        center.right - adjustedBottomRightRadius * 2.0,
+        center.bottom - adjustedBottomRightRadius * 2.0,
+        adjustedBottomRightRadius * 2.0,
+        adjustedBottomRightRadius * 2.0,
+      );
+    } else {
+      trCorner = Rect.fromLTWH(
+        center.right - center.trRadiusX * 2.0,
+        center.top,
+        center.trRadiusX * 2.0,
+        center.trRadiusY * 2.0,
+      );
+      brCorner = Rect.fromLTWH(
+        center.right - center.brRadiusX * 2.0,
+        center.bottom - center.brRadiusY * 2.0,
+        center.brRadiusX * 2.0,
+        center.brRadiusY * 2.0,
+      );
+    }
+
     final Rect tlCorner = Rect.fromLTWH(
       center.left,
       center.top,
       center.tlRadiusX * 2.0,
       center.tlRadiusY * 2.0,
-    );
-    final Rect trCorner = Rect.fromLTWH(
-      center.right - center.trRadiusX * 2.0,
-      center.top,
-      center.trRadiusX * 2.0,
-      center.trRadiusY * 2.0,
-    );
-    final Rect brCorner = Rect.fromLTWH(
-      center.right - center.brRadiusX * 2.0,
-      center.bottom - center.brRadiusY * 2.0,
-      center.brRadiusX * 2.0,
-      center.brRadiusY * 2.0,
+      // math.min(center.tlRadiusX * 2.0, center.height / 2.0),
+      // math.min(center.tlRadiusY * 2.0, center.height / 2.0),
     );
     final Rect blCorner = Rect.fromLTWH(
       center.left,
       center.bottom - center.brRadiusY * 2.0,
       center.blRadiusX * 2.0,
-      center.blRadiusY * 2.0,
+      center.blRadiusX * 2.0
+      // math.min(center.blRadiusX * 2.0, center.height / 2.0),
+      // math.min(center.blRadiusY * 2.0, center.height / 2.0),
     );
 
     const double cornerArcSweep = math.pi / 2.0;
@@ -435,9 +468,11 @@ class OutlineInputBorder extends InputBorder {
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
+    // fix pathing here for tr and br for both cases
+
     return path
-      ..moveTo(center.right, center.top + center.trRadiusY)
-      ..lineTo(center.right, center.bottom - center.brRadiusY)
+      ..moveTo(center.right, center.top + trCorner.height / 2.0)
+      ..lineTo(center.right, center.bottom - brCorner.height / 2.0)
       ..addArc(brCorner, 0.0, cornerArcSweep)
       ..lineTo(center.left + center.blRadiusX, center.bottom)
       ..addArc(blCorner, math.pi / 2.0, cornerArcSweep)
