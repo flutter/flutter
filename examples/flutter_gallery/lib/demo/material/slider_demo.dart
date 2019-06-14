@@ -28,6 +28,32 @@ Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
   return thumbPath;
 }
 
+Path _leftTriangle(double size, Offset thumbCenter, {bool invert = false}) {
+  final Path thumbPath = Path();
+  final double height = math.sqrt(3.0) / 2.0;
+  final double halfSide = size / 2.0;
+  final double centerHeight = size * height / 3.0;
+  final double sign = invert ? -1.0 : 1.0;
+  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
+  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.close();
+  return thumbPath;
+}
+
+Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
+  final Path thumbPath = Path();
+  final double height = math.sqrt(3.0) / 2.0;
+  final double halfSide = size / 2.0;
+  final double centerHeight = size * height / 3.0;
+  final double sign = invert ? -1.0 : 1.0;
+  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
+  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.close();
+  return thumbPath;
+}
+
 class _CustomRangeThumbShape extends RangeSliderThumbShape {
   static const double _thumbSize = 4.0;
   static const double _disabledThumbSize = 3.0;
@@ -47,9 +73,39 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     bool isEnabled = false,
     bool isOnTop,
     @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
     Thumb thumb,
   }) {
+    final Canvas canvas = context.canvas;
+    final ColorTween colorTween = ColorTween(
+      begin: sliderTheme.disabledThumbColor,
+      end: sliderTheme.thumbColor,
+    );
 
+    Path thumbPath;
+    switch (textDirection) {
+      case TextDirection.rtl:
+        switch (thumb) {
+          case Thumb.start:
+            thumbPath = _rightTriangle(_thumbSize, center);
+            break;
+          case Thumb.end:
+            thumbPath = _leftTriangle(_thumbSize, center);
+            break;
+        }
+        break;
+      case TextDirection.ltr:
+        switch (thumb) {
+          case Thumb.start:
+            thumbPath = _leftTriangle(_thumbSize, center);
+            break;
+          case Thumb.end:
+            thumbPath = _rightTriangle(_thumbSize, center);
+            break;
+        }
+        break;
+    }
+    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
   }
 }
 
@@ -356,6 +412,38 @@ class _RangeSlidersState extends State<_RangeSliders> {
                     _discreteValues = values;
                   });
                 },
+              ),
+              const Text('Discrete'),
+            ],
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              SliderTheme(
+                data: SliderThemeData(
+                  activeTrackColor: Colors.deepPurple,
+                  inactiveTrackColor: Colors.black26,
+                  activeTickMarkColor: Colors.white70,
+                  inactiveTickMarkColor: Colors.black,
+                  overlayColor: Colors.black12,
+                  thumbColor: Colors.deepPurple,
+                  valueIndicatorColor: Colors.deepPurpleAccent,
+                  rangeThumbShape: _CustomRangeThumbShape(),
+                  valueIndicatorShape: _CustomValueIndicatorShape(),
+                  valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
+                ),
+                child: RangeSlider(
+                  values: _discreteValues,
+                  min: 0.0,
+                  max: 200.0,
+                  divisions: 5,
+                  labels: RangeLabels('${_discreteValues.start.round()}', '${_discreteValues.end.round()}'),
+                  onChanged: (RangeValues values) {
+                    setState(() {
+                      _discreteValues = values;
+                    });
+                  },
+                ),
               ),
               const Text('Discrete'),
             ],
