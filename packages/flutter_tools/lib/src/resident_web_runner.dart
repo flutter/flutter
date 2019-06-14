@@ -14,7 +14,7 @@ import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
 
-import 'package:webdev/webdev.dart';
+import 'package:webdev/src/webdev.dart';
 
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -247,7 +247,6 @@ class ResidentWebRunner extends ResidentRunner {
     // Register the current build targets.
     _registerBuildTargets(_client, targetPort);
 
-    // Start dev tools.
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
@@ -259,7 +258,7 @@ class ResidentWebRunner extends ResidentRunner {
       'web',
       _client.buildResults,
       optionalHandler: _assetHandler,
-    );
+    ).first;
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
