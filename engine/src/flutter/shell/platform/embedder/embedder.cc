@@ -842,11 +842,13 @@ FlutterEngineResult FlutterEngineSendPlatformMessageResponse(
 
   auto response = handle->message->response();
 
-  if (data_length == 0) {
-    response->CompleteEmpty();
-  } else {
-    response->Complete(std::make_unique<fml::DataMapping>(
-        std::vector<uint8_t>({data, data + data_length})));
+  if (response) {
+    if (data_length == 0) {
+      response->CompleteEmpty();
+    } else {
+      response->Complete(std::make_unique<fml::DataMapping>(
+          std::vector<uint8_t>({data, data + data_length})));
+    }
   }
 
   delete handle;
