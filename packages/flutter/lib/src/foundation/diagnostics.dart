@@ -1538,6 +1538,9 @@ abstract class DiagnosticsNode {
   ///    plugin.
   @mustCallSuper
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    if (kReleaseMode) {
+      return <String, Object>{};
+    }
     final Map<String, Object> data = <String, Object>{
       'description': toDescription(),
       'type': runtimeType.toString(),
@@ -1636,6 +1639,9 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.info,
   }) {
+    if (kReleaseMode) {
+      return super.toString();
+    }
     assert(style != null);
     assert(minLevel != null);
     if (_isSingleLine(style))
@@ -1709,6 +1715,9 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
+    if (kReleaseMode) {
+      return '';
+    }
     return TextTreeRenderer(
       minLevel: minLevel,
       wrapWidth: 65,
