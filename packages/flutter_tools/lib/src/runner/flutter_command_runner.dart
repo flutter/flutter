@@ -483,11 +483,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
-  static void initFlutterRoot() {
-    Cache.checkPermissions = true;
-    Cache.flutterRoot ??= defaultFlutterRoot;
-  }
-
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
     final String root = fs.path.absolute(Cache.flutterRoot);
