@@ -22,13 +22,13 @@ final String pub = path.join(flutterRoot, 'bin', 'cache', 'dart-sdk', 'bin', Pla
 final String pubCache = path.join(flutterRoot, '.pub-cache');
 final List<String> flutterTestArgs = <String>[];
 
-
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
 final bool noUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] == 'true';
 
 const Map<String, ShardRunner> _kShards = <String, ShardRunner>{
   'tests': _runTests,
+  'web_tests': _runWebTests,
   'tool_tests': _runToolTests,
   'build_tests': _runBuildTests,
   'coverage': _runCoverage,
@@ -340,6 +340,20 @@ Future<void> _runTests() async {
   print('${bold}DONE: All tests successful.$reset');
 }
 
+Future<void> _runWebTests() async {
+  await _runFlutterWebTest(path.join(flutterRoot, 'packages', 'flutter'), tests: <String>[
+    'test/foundation/',
+    'test/physics/',
+    'test/rendering/',
+    'test/services/',
+    'test/painting/',
+    'test/scheduler/',
+    'test/widgets/',
+    'test/semantics/',
+    'test/material/',
+  ]);
+}
+
 Future<void> _runCoverage() async {
   final File coverageFile = File(path.join(flutterRoot, 'packages', 'flutter', 'coverage', 'lcov.info'));
   if (!coverageFile.existsSync()) {
@@ -592,6 +606,38 @@ class EvalResult {
   final int exitCode;
 }
 
+Future<void> _runFlutterWebTest(String workingDirectory, {
+  bool printOutput = true,
+  bool skip = false,
+  Duration timeout = _kLongTimeout,
+  List<String> tests,
+}) async {
+  final List<String> args = <String>['test', '-v', '--platform=chrome'];
+  if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
+    args.addAll(flutterTestArgs);
+
+  args.addAll(tests);
+
+  // TODO(jonahwilliams): fix relative path issues to make this unecessary.
+  final Directory oldCurrent = Directory.current;
+  Directory.current = Directory(path.join(flutterRoot, 'packages', 'flutter'));
+  try {
+    await runCommand(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectFlaky: true,
+      timeout: timeout,
+      environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+        'FLUTTER_LOW_RESOURCE_MODE': 'true',
+      },
+    );
+  } finally {
+    Directory.current = oldCurrent;
+  }
+}
+
 Future<void> _runFlutterTest(String workingDirectory, {
   String script,
   bool expectFailure = false,
@@ -637,17 +683,17 @@ Future<void> _runFlutterTest(String workingDirectory, {
   }
 
   if (useFlutterTestFormatter) {
-  final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-  final Stream<String> testOutput = runAndGetStdout(
-    flutter,
-    args,
-    workingDirectory: workingDirectory,
-    expectNonZeroExit: expectFailure,
-    timeout: timeout,
-    beforeExit: formatter.finish,
-    environment: environment,
-  );
-  await _processTestOutput(formatter, testOutput, tableData);
+    final FlutterCompactFormatter formatter = FlutterCompactFormatter();
+    final Stream<String> testOutput = runAndGetStdout(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      timeout: timeout,
+      beforeExit: formatter.finish,
+      environment: environment,
+    );
+    await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
       flutter,
@@ -673,7 +719,7 @@ Future<void> _verifyVersion(String filename) async {
     print('$redLine');
     exit(1);
   }
-  final RegExp pattern = RegExp(r'^[0-9]+\.[0-9]+\.[0-9]+(-pre\.[0-9]+)?$');
+  final RegExp pattern = RegExp(r'^\d+\.\d+\.\d+(?:|-pre\.\d+|\+hotfix\.\d+)$');
   if (!version.contains(pattern)) {
     print('$redLine');
     print('The version logic generated an invalid version string.');
@@ -723,7 +769,9 @@ Future<void> _integrationTestsAndroidSdk() async {
 
   // TODO(dnfield): gradlew is crashing on the cirrus image and it's not clear why.
   if (!Platform.isWindows) {
-    await _runDevicelabTest('gradle_plugin_test', env: env);
+    await _runDevicelabTest('gradle_plugin_light_apk_test', env: env);
+    await _runDevicelabTest('gradle_plugin_fat_apk_test', env: env);
+    await _runDevicelabTest('gradle_plugin_bundle_test', env: env);
     await _runDevicelabTest('module_test', env: env);
   }
   // note: this also covers plugin_test_win as long as Windows has an Android SDK available.

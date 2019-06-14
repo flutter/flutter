@@ -55,24 +55,57 @@ $otherComments  static const PhysicalKeyboardKey ${entry.constantName} = Physica
   String get logicalDefinitions {
     String escapeLabel(String label) => label.contains("'") ? 'r"$label"' : "r'$label'";
     final StringBuffer definitions = StringBuffer();
-    for (Key entry in keyData.data) {
-      final String firstComment = wrapString('Represents the logical "${entry.commentName}" key on the keyboard.');
-      final String otherComments = wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
-      if (entry.keyLabel == null) {
+    void printKey(int flutterId, String keyLabel, String constantName, String commentName, {String otherComments}) {
+      final String firstComment = wrapString('Represents the logical "$commentName" key on the keyboard.');
+      otherComments ??= wrapString('See the function [RawKeyEvent.logicalKey] for more information.');
+      if (keyLabel == null) {
         definitions.write('''
 
 $firstComment  ///
-$otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalKeyboardKey(${toHex(entry.flutterId, digits: 11)}, debugName: kReleaseMode ? null : '${entry.commentName}');
+$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)}, debugName: kReleaseMode ? null : '$commentName');
 ''');
       } else {
         definitions.write('''
 
 $firstComment  ///
-$otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalKeyboardKey(${toHex(entry.flutterId, digits: 11)}, keyLabel: ${escapeLabel(entry.keyLabel)}, debugName: kReleaseMode ? null : '${entry.commentName}');
+$otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardKey(${toHex(flutterId, digits: 11)}, keyLabel: ${escapeLabel(keyLabel)}, debugName: kReleaseMode ? null : '$commentName');
 ''');
       }
     }
+
+    for (Key entry in keyData.data) {
+      printKey(
+        entry.flutterId,
+        entry.keyLabel,
+        entry.constantName,
+        entry.commentName,
+      );
+    }
+    for (String name in Key.synonyms.keys) {
+      // Use the first item in the synonyms as a template for the ID to use.
+      // It won't end up being the same value because it'll be in the pseudo-key
+      // plane.
+      final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
+      final Set<String> unionNames = Key.synonyms[name].map<String>((dynamic name) {
+        return upperCamelToLowerCamel(name);
+      }).toSet();
+      printKey(Key.synonymPlane | entry.flutterId, entry.keyLabel, name, Key.getCommentName(name),
+          otherComments: wrapString('This key represents the union of the keys '
+              '$unionNames when comparing keys. This key will never be generated '
+              'directly, its main use is in defining key maps.'));
+    }
     return definitions.toString();
+  }
+
+  String get logicalSynonyms {
+    final StringBuffer synonyms = StringBuffer();
+    for (String name in Key.synonyms.keys) {
+      for (String synonym in Key.synonyms[name]) {
+        final String keyName = upperCamelToLowerCamel(synonym);
+        synonyms.writeln('    $keyName: $name,');
+      }
+    }
+    return synonyms.toString();
   }
 
   /// This generates the map of USB HID codes to physical keys.
@@ -89,6 +122,16 @@ $otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalK
     final StringBuffer keyCodeMap = StringBuffer();
     for (Key entry in keyData.data) {
       keyCodeMap.writeln('    ${toHex(entry.flutterId, digits: 10)}: ${entry.constantName},');
+    }
+    for (String entry in Key.synonyms.keys) {
+      // Use the first item in the synonyms as a template for the ID to use.
+      // It won't end up being the same value because it'll be in the pseudo-key
+      // plane.
+      final Key primaryKey = keyData.data.firstWhere((Key item) {
+        return item.name == Key.synonyms[entry][0];
+      }, orElse: () => null);
+      assert(primaryKey != null);
+      keyCodeMap.writeln('    ${toHex(Key.synonymPlane | primaryKey.flutterId, digits: 10)}: $entry,');
     }
     return keyCodeMap.toString().trimRight();
   }
@@ -229,6 +272,7 @@ $otherComments  static const LogicalKeyboardKey ${entry.constantName} = LogicalK
       'PHYSICAL_KEY_MAP': predefinedHidCodeMap,
       'LOGICAL_KEY_MAP': predefinedKeyCodeMap,
       'LOGICAL_KEY_DEFINITIONS': logicalDefinitions,
+      'LOGICAL_KEY_SYNONYMS': logicalSynonyms,
       'PHYSICAL_KEY_DEFINITIONS': physicalDefinitions,
     };
 

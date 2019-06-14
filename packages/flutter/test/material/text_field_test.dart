@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // This whole test suite needs triage.
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
@@ -56,6 +57,19 @@ class WidgetsLocalizationsDelegate extends LocalizationsDelegate<WidgetsLocaliza
 }
 
 Widget overlay({ Widget child }) {
+  final OverlayEntry entry = OverlayEntry(
+    builder: (BuildContext context) {
+      return Center(
+        child: Material(
+          child: child,
+        ),
+      );
+    },
+  );
+  return overlayWithEntry(entry);
+}
+
+Widget overlayWithEntry(OverlayEntry entry) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: <LocalizationsDelegate<dynamic>>[
@@ -68,15 +82,7 @@ Widget overlay({ Widget child }) {
         data: const MediaQueryData(size: Size(800.0, 600.0)),
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            OverlayEntry(
-              builder: (BuildContext context) {
-                return Center(
-                  child: Material(
-                    child: child,
-                  ),
-                );
-              },
-            ),
+            entry
           ],
         ),
       ),
@@ -380,7 +386,7 @@ void main() {
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
 
-  testWidgets('cursor android golden', (WidgetTester tester) async {
+  testWidgets('Material cursor android golden', (WidgetTester tester) async {
     final Widget widget = overlay(
       child: const RepaintBoundary(
         key: ValueKey<int>(1),
@@ -402,11 +408,11 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.0.png'),
+      matchesGoldenFile('text_field_cursor_test.material.0.0.png'),
     );
   });
 
-  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+  testWidgets('Material cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final Widget widget = overlay(
@@ -431,7 +437,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.0.png'),
+      matchesGoldenFile('text_field_cursor_test.material.1.0.png'),
     );
   });
 
@@ -473,7 +479,7 @@ void main() {
     expect(state.showToolbar(), true);
 
     // This is needed for the AnimatedOpacity to turn from 0 to 1 so the toolbar is visible.
-    await tester.pump();
+    await tester.pumpAndSettle();
     await tester.pump(const Duration(seconds: 1));
 
     // Sanity check that the toolbar widget exists.
@@ -484,7 +490,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.2.png'),
     );
-  });
+  }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -810,6 +816,243 @@ void main() {
     expect(controller.selection.extentOffset, eIndex);
 
     await gesture.removePointer();
+  });
+
+  testWidgets('Read only text field basic', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+
+    await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            controller: controller,
+            readOnly: true,
+          ),
+        )
+    );
+    // Read only text field cannot open keyboard.
+    await tester.showKeyboard(find.byType(TextField));
+    expect(tester.testTextInput.hasAnyClients, false);
+    await skipPastScrollingAnimation(tester);
+
+    expect(controller.selection.isCollapsed, true);
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(tester.testTextInput.hasAnyClients, false);
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    // Collapse selection should not paint.
+    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+    // Long press on the 'd' character of text 'readOnly' to show context menu.
+    const int dIndex = 3;
+    final Offset dPos = textOffsetToPosition(tester, dIndex);
+    await tester.longPressAt(dPos);
+    await tester.pump();
+
+    // Context menu should not have paste and cut.
+    expect(find.text('COPY'), findsOneWidget);
+    expect(find.text('PASTE'), findsNothing);
+    expect(find.text('CUT'), findsNothing);
+  });
+
+  testWidgets('text field build empty tool bar when no options available ios', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: const Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
+  });
+
+  testWidgets('text field build empty tool bar when no options available android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
+  });
+
+  testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
+    TextEditingController controller = TextEditingController(text: 'readonly');
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Center(
+          child: Material(
+            child: TextField(
+              controller: controller,
+              readOnly: true,
+            ),
+          ),
+        );
+      },
+    );
+    await tester.pumpWidget(overlayWithEntry(entry));
+    const int dIndex = 3;
+    final Offset dPos = textOffsetToPosition(tester, dIndex);
+    await tester.longPressAt(dPos);
+    await tester.pumpAndSettle();
+    final EditableTextState state = tester.state(find.byType(EditableText));
+    TextSelection currentOverlaySelection =
+        state.selectionOverlay.value.selection;
+    expect(currentOverlaySelection.baseOffset, 0);
+    expect(currentOverlaySelection.extentOffset, 8);
+
+    // Update selection from [0 to 8] to [1 to 7].
+    controller = TextEditingController.fromValue(
+      controller.value.copyWith(selection: const TextSelection(
+          baseOffset: 1, extentOffset: 7
+      ))
+    );
+
+    // Mark entry to be dirty in order to trigger overlay update.
+    entry.markNeedsBuild();
+
+    await tester.pump();
+    currentOverlaySelection = state.selectionOverlay.value.selection;
+    expect(currentOverlaySelection.baseOffset, 1);
+    expect(currentOverlaySelection.extentOffset, 7);
+  });
+
+  testWidgets('Read only text should not compose', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController.fromValue(
+        const TextEditingValue(
+            text: 'readonly',
+            composing: TextRange(start: 0, end: 8) // Simulate text composing.
+        )
+    );
+
+    await tester.pumpWidget(
+        overlay(
+          child: TextField(
+            controller: controller,
+            readOnly: true,
+          ),
+        )
+    );
+
+    final RenderEditable renderEditable = findRenderEditable(tester);
+    // There should be no composing.
+    expect(renderEditable.isComposingText, false);
+  });
+
+  testWidgets('Dynamically switching between read only and not read only should hide or show collapse cursor', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+    bool readOnly = true;
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Center(
+          child: Material(
+            child: TextField(
+              controller: controller,
+              readOnly: readOnly,
+            ),
+          ),
+        );
+      },
+    );
+    await tester.pumpWidget(overlayWithEntry(entry));
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+
+    final EditableTextState editableText = tester.state(find.byType(EditableText));
+    // Collapse selection should not paint.
+    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+
+    readOnly = false;
+    // Mark entry to be dirty in order to trigger overlay update.
+    entry.markNeedsBuild();
+    await tester.pumpAndSettle();
+    expect(editableText.selectionOverlay.handlesAreVisible, isTrue);
+
+    readOnly = true;
+    entry.markNeedsBuild();
+    await tester.pumpAndSettle();
+    expect(editableText.selectionOverlay.handlesAreVisible, isFalse);
+  });
+
+  testWidgets('Dynamically switching to read only should close input connection', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+    bool readOnly = false;
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Center(
+          child: Material(
+            child: TextField(
+              controller: controller,
+              readOnly: readOnly,
+            ),
+          ),
+        );
+      },
+    );
+    await tester.pumpWidget(overlayWithEntry(entry));
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(tester.testTextInput.hasAnyClients, true);
+
+    readOnly = true;
+    // Mark entry to be dirty in order to trigger overlay update.
+    entry.markNeedsBuild();
+    await tester.pump();
+    expect(tester.testTextInput.hasAnyClients, false);
+  });
+
+  testWidgets('Dynamically switching to non read only should open input connection', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+    bool readOnly = true;
+    final OverlayEntry entry = OverlayEntry(
+      builder: (BuildContext context) {
+        return Center(
+          child: Material(
+            child: TextField(
+              controller: controller,
+              readOnly: readOnly,
+            ),
+          ),
+        );
+      },
+    );
+    await tester.pumpWidget(overlayWithEntry(entry));
+    await tester.tap(find.byType(TextField));
+    await tester.pump();
+    expect(tester.testTextInput.hasAnyClients, false);
+
+    readOnly = false;
+    // Mark entry to be dirty in order to trigger overlay update.
+    entry.markNeedsBuild();
+    await tester.pump();
+    expect(tester.testTextInput.hasAnyClients, true);
   });
 
   testWidgets('enableInteractiveSelection = false, long-press', (WidgetTester tester) async {
@@ -2392,7 +2635,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -3037,10 +3280,12 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
 
       await tester.idle();
+      // Need to wait for selection to catch up.
+      await tester.pump();
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(22, true, true, false);     // RIGHT_ARROW keydown, SHIFT_ON
+      sendKeyEventWithCode(21, true, true, false);     // LEFT_ARROW keydown, SHIFT_ON
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
 
@@ -3083,17 +3328,19 @@ void main() {
       await tester.enterText(find.byType(TextField), testValue);
 
       await tester.idle();
+      // Need to wait for selection to catch up.
+      await tester.pump();
       await tester.tap(find.byType(TextField));
       await tester.pumpAndSettle();
 
-      sendKeyEventWithCode(20, true, true, false);         // DOWN_ARROW keydown
+      sendKeyEventWithCode(19, true, true, false);         // UP_ARROW keydown
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
 
-      sendKeyEventWithCode(20, false, true, false);          // DOWN_ARROW keyup
+      sendKeyEventWithCode(19, false, true, false);          // UP_ARROW keyup
       await tester.pumpAndSettle();
-      sendKeyEventWithCode(19, true, true, false);           // UP_ARROW keydown
+      sendKeyEventWithCode(20, true, true, false);           // DOWN_ARROW keydown
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 0);
@@ -3148,6 +3395,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+    });
+
+    testWidgets('Read only keyboard selection test', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(text: 'readonly');
+      await tester.pumpWidget(
+          overlay(
+            child: TextField(
+              controller: controller,
+              readOnly: true,
+            ),
+          )
+      );
+
+      await tester.idle();
+      await tester.tap(find.byType(TextField));
+      await tester.pumpAndSettle();
+
+      sendKeyEventWithCode(21, true, true, false);     // LEFT_ARROW keydown, SHIFT_ON
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
     });
   });
 
@@ -3449,11 +3715,13 @@ void main() {
     await tester.enterText(find.byType(TextField).first, testValue);
 
     await tester.idle();
+    // Need to wait for selection to catch up.
+    await tester.pump();
     await tester.tap(find.byType(TextField).first);
     await tester.pumpAndSettle();
 
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
       await tester.pumpAndSettle();
     }
 
@@ -3487,7 +3755,7 @@ void main() {
     );
 
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
       await tester.pumpAndSettle();
     }
 
@@ -3531,31 +3799,34 @@ void main() {
       ),
     );
 
-    await tester.idle();
-    await tester.tap(find.byType(TextField).first);
 
     const String testValue = 'a big house';
     await tester.enterText(find.byType(TextField).first, testValue);
+    await tester.idle();
+    await tester.pump();
 
+    await tester.idle();
+    await tester.tap(find.byType(TextField).first);
     await tester.pumpAndSettle();
 
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
       await tester.pumpAndSettle();
     }
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
 
+    await tester.enterText(find.byType(TextField).last, testValue);
+    await tester.idle();
+    await tester.pump();
+
     await tester.idle();
     await tester.tap(find.byType(TextField).last);
-
-    await tester.enterText(find.byType(TextField).last, testValue);
-
     await tester.pumpAndSettle();
 
     for (int i = 0; i < 5; i += 1) {
-      sendKeyEventWithCode(22, true, true, false); // RIGHT_ARROW keydown
+      sendKeyEventWithCode(21, true, true, false); // LEFT_ARROW keydown
       await tester.pumpAndSettle();
     }
 
@@ -4999,6 +5270,70 @@ void main() {
   );
 
   testWidgets(
+    'double double tap just shows the selection menu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: '',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on the same location shows the selection menu.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+
+      // Double tap again keeps the selection menu visible.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'double long press just shows the selection menu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: '',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Long press shows the selection menu.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+
+      // Long press again keeps the selection menu visible.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'double tap hold selects word (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
@@ -6337,6 +6672,7 @@ void main() {
     // Tap to position the cursor and show the selection handles.
     final Offset ePos = textOffsetToPosition(tester, 5); // Index of 'e'.
     await tester.tapAt(ePos, pointer: 7);
+    await tester.pumpAndSettle();
 
     final EditableTextState editableText = tester.state(find.byType(EditableText));
     expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
@@ -6357,5 +6693,35 @@ void main() {
     // Tap the handle again to hide the toolbar.
     await tester.tapAt(handlePos, pointer: 7);
     expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+  });
+
+  testWidgets('when TextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Scaffold(
+        body: Center(
+          child: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              Container(height: 579), // Push field almost off screen.
+              TextField(controller: controller),
+              Container(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Tap the TextField to put the cursor into it and bring it into view.
+    expect(scrollController.offset, 0.0);
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // The ListView has scrolled to keep the TextField and cursor handle
+    // visible.
+    expect(scrollController.offset, 44.0);
   });
 }

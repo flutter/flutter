@@ -846,12 +846,18 @@ class SliverHitTestResult extends HitTestResult {
     assert(mainAxisPosition != null);
     assert(crossAxisPosition != null);
     assert(hitTest != null);
-    // TODO(goderbauer): use paintOffset when transforming pointer events is implemented.
-    return hitTest(
+    if (paintOffset != null) {
+      pushTransform(Matrix4.translationValues(paintOffset.dx, paintOffset.dy, 0));
+    }
+    final bool isHit = hitTest(
       this,
       mainAxisPosition: mainAxisPosition - mainAxisOffset,
       crossAxisPosition: crossAxisPosition - crossAxisOffset,
     );
+    if (paintOffset != null) {
+      popTransform();
+    }
+    return isHit;
   }
 }
 
@@ -863,7 +869,7 @@ class SliverHitTestEntry extends HitTestEntry {
   /// Creates a sliver hit test entry.
   ///
   /// The [mainAxisPosition] and [crossAxisPosition] arguments must not be null.
-  const SliverHitTestEntry(
+  SliverHitTestEntry(
     RenderSliver target, {
     @required this.mainAxisPosition,
     @required this.crossAxisPosition,

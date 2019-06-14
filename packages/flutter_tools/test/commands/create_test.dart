@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -378,6 +379,125 @@ void main() {
     ]);
   }, timeout: allowForRemotePubInvocation);
 
+
+  testUsingContext('androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx app project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('androidx app module', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--androidx', projectDir.path]);
+
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    expect(
+      project.usesAndroidX,
+      true,
+    );
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx app module', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--template=module', '--no-pub', '--no-androidx', projectDir.path]);
+
+    final FlutterProject project = FlutterProject.fromDirectory(projectDir);
+    expect(
+      project.usesAndroidX,
+      false,
+    );
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), true);
+  }, timeout: allowForCreateFlutterProject);
+
+  testUsingContext('non androidx plugin project', () async {
+    Cache.flutterRoot = '../..';
+    when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
+    when(mockFlutterVersion.channel).thenReturn(frameworkChannel);
+
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--no-androidx', projectDir.path]);
+
+    void expectExists(String relPath) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    }
+
+    expectExists('android/gradle.properties');
+
+    final String actualContents = await fs.file(projectDir.path + '/android/gradle.properties').readAsString();
+
+    expect(actualContents.contains('useAndroidX'), false);
+  }, timeout: allowForCreateFlutterProject);
+
   testUsingContext('has correct content and formatting with module template', () async {
     Cache.flutterRoot = '../..';
     when(mockFlutterVersion.frameworkRevision).thenReturn(frameworkRevision);
@@ -388,8 +508,8 @@ void main() {
 
     await runner.run(<String>['create', '--template=module', '--no-pub', '--org', 'com.foo.bar', projectDir.path]);
 
-    void expectExists(String relPath) {
-      expect(fs.isFileSync('${projectDir.path}/$relPath'), true);
+    void expectExists(String relPath, [bool expectation = true]) {
+      expect(fs.isFileSync('${projectDir.path}/$relPath'), expectation);
     }
 
     expectExists('lib/main.dart');
@@ -430,6 +550,9 @@ void main() {
     final File xcodeProjectFile = fs.file(fs.path.join(projectDir.path, xcodeProjectPath));
     final String xcodeProject = xcodeProjectFile.readAsStringSync();
     expect(xcodeProject, contains('PRODUCT_BUNDLE_IDENTIFIER = com.foo.bar.flutterProject'));
+    // Xcode build system
+    final String xcodeWorkspaceSettingsPath = fs.path.join('.ios', 'Runner.xcworkspace', 'xcshareddata', 'WorkspaceSettings.xcsettings');
+    expectExists(xcodeWorkspaceSettingsPath, false);
 
     final String versionPath = fs.path.join('.metadata');
     expectExists(versionPath);
@@ -1173,13 +1296,18 @@ class MockHttpClientResponse extends Stream<List<int>> implements HttpClientResp
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<List<int>> listen(
-    void onData(List<int> event), {
+  HttpClientResponseCompressionState get compressionState {
+    return HttpClientResponseCompressionState.decompressed;
+  }
+
+  @override
+  StreamSubscription<Uint8List> listen(
+    void onData(Uint8List event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<List<int>>.fromIterable(<List<int>>[result.codeUnits])
+    return Stream<Uint8List>.fromIterable(<Uint8List>[Uint8List.fromList(result.codeUnits)])
       .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
   }
 

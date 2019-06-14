@@ -32,9 +32,8 @@ void main() {
       find.byType(Container),
       matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
     );
-
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -91,10 +90,10 @@ void main() {
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile('shadow.PhysicalModel.enabled.png')
+      matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
     );
     debugDisableShadows = true;
-  });
+  }, skip: isBrowser);
 
   testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
     debugDisableShadows = false;

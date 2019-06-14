@@ -65,6 +65,9 @@ typedef InputCounterWidgetBuilder = Widget Function(
 /// To integrate the [TextField] into a [Form] with other [FormField] widgets,
 /// consider using [TextFormField].
 ///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
+///
 /// {@tool sample}
 /// This example shows how to create a [TextField] that will obscure input. The
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
@@ -91,6 +94,7 @@ typedef InputCounterWidgetBuilder = Widget Function(
 ///    [TextField]. The [EditableText] widget is rarely used directly unless
 ///    you are implementing an entirely different design language, such as
 ///    Cupertino.
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class TextField extends StatefulWidget {
   /// Creates a Material Design text field.
   ///
@@ -123,7 +127,10 @@ class TextField extends StatefulWidget {
   /// characters may be entered, and the error counter and divider will
   /// switch to the [decoration.errorStyle] when the limit is exceeded.
   ///
-  /// The [textAlign], [autofocus], [obscureText], [autocorrect],
+  /// The text cursor is not shown if [showCursor] is false or if [showCursor]
+  /// is null (the default) and [readOnly] is true.
+  ///
+  /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
   /// [maxLengthEnforced], [scrollPadding], [maxLines], and [maxLength]
   /// arguments must not be null.
   ///
@@ -143,6 +150,8 @@ class TextField extends StatefulWidget {
     this.strutStyle,
     this.textAlign = TextAlign.start,
     this.textDirection,
+    this.readOnly = false,
+    this.showCursor,
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
@@ -168,6 +177,7 @@ class TextField extends StatefulWidget {
     this.scrollController,
     this.scrollPhysics,
   }) : assert(textAlign != null),
+       assert(readOnly != null),
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
@@ -288,6 +298,12 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.expands}
   final bool expands;
+
+  /// {@macro flutter.widgets.editableText.readOnly}
+  final bool readOnly;
+
+  /// {@macro flutter.widgets.editableText.showCursor}
+  final bool showCursor;
 
   /// If [maxLength] is set to this value, only the "current input length"
   /// part of the character counter is shown.
@@ -493,7 +509,7 @@ class TextField extends StatefulWidget {
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
+    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('keyboardAppearance', keyboardAppearance, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('scrollPadding', scrollPadding, defaultValue: const EdgeInsets.all(20.0)));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
@@ -521,6 +537,8 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     && widget.decoration.counterText == null;
 
   bool _shouldShowSelectionToolbar = true;
+
+  bool _showSelectionHandles = false;
 
   InputDecoration _getEffectiveDecoration() {
     final MaterialLocalizations localizations = MaterialLocalizations.of(context);
@@ -606,6 +624,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (wasEnabled && !isEnabled) {
       _effectiveFocusNode.unfocus();
     }
+    if (_effectiveFocusNode.hasFocus && widget.readOnly != oldWidget.readOnly) {
+      if(_effectiveController.selection.isCollapsed) {
+        _showSelectionHandles = !widget.readOnly;
+      }
+    }
   }
 
   @override
@@ -629,6 +652,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     if (cause == SelectionChangedCause.keyboard)
       return false;
 
+    if (widget.readOnly && _effectiveController.selection.isCollapsed)
+      return false;
+
     if (cause == SelectionChangedCause.longPress)
       return true;
 
@@ -639,10 +665,11 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSelectionChanged(TextSelection selection, SelectionChangedCause cause) {
-    // iOS cursor doesn't move via a selection handle. The scroll happens
-    // directly from new text selection changes.
-    if (_shouldShowSelectionHandles(cause)) {
-      _editableText?.showHandles();
+    final bool willShowSelectionHandles = _shouldShowSelectionHandles(cause);
+    if (willShowSelectionHandles != _showSelectionHandles) {
+      setState(() {
+        _showSelectionHandles = willShowSelectionHandles;
+      });
     }
 
     switch (Theme.of(context).platform) {
@@ -721,8 +748,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
         from: details.globalPosition,
         cause: SelectionChangedCause.forcePress,
       );
-      if (_shouldShowSelectionToolbar)
+      if (_shouldShowSelectionToolbar) {
         _editableTextKey.currentState.showToolbar();
+      }
     }
   }
 
@@ -789,15 +817,18 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
   }
 
   void _handleSingleLongTapEnd(LongPressEndDetails details) {
-    if (_shouldShowSelectionToolbar)
-      _editableTextKey.currentState.showToolbar();
+    if (widget.selectionEnabled) {
+      if (_shouldShowSelectionToolbar)
+        _editableTextKey.currentState.showToolbar();
+    }
   }
 
   void _handleDoubleTapDown(TapDownDetails details) {
     if (widget.selectionEnabled) {
       _renderEditable.selectWord(cause: SelectionChangedCause.doubleTap);
-      if (_shouldShowSelectionToolbar)
-        _editableTextKey.currentState.showToolbar();
+      if (_shouldShowSelectionToolbar) {
+        _editableText.showToolbar();
+      }
     }
   }
 
@@ -927,6 +958,9 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
     Widget child = RepaintBoundary(
       child: EditableText(
         key: _editableTextKey,
+        readOnly: widget.readOnly,
+        showCursor: widget.showCursor,
+        showSelectionHandles: _showSelectionHandles,
         controller: controller,
         focusNode: focusNode,
         keyboardType: widget.keyboardType,

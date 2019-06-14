@@ -125,6 +125,12 @@ tasks:
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
 
+  windows_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab_win
+    required_agent_capabilities: ["windows/android"]
+
   # Android on-device tests
 
   complex_layout_scroll_perf__timeline_summary:
@@ -324,6 +330,20 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  linux_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+    flaky: true
+
+  web_size__compile_test:
+    description: >
+      Measures the size of a dart2js bundle.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
+
   # iOS on-device tests
 
   flavors_test_ios:
@@ -413,11 +433,16 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
-    flaky: true
 
   ios_sample_catalog_generator:
     description: >
       Builds sample catalog markdown pages and iOS screenshots
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  macos_chrome_dev_mode:
+    description: >
+      Run flutter web on the devicelab and hot restart.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
@@ -452,7 +477,6 @@ tasks:
       Checks that `flutter run` does not leak dart.exe on Windows.
     stage: devicelab_win
     required_agent_capabilities: ["windows/android"]
-    flaky: true
 
   # Tests running on Linux hosts
 
@@ -506,6 +530,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
     flaky: true
+
+  flutter_gallery__image_cache_memory:
+    description: >
+      Measures memory usage for a list of large red squares in smaller containers.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
 
   analyzer_benchmark:
     description: >

@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Platform;
 import 'dart:math';
 import 'dart:ui' as ui;
 
@@ -330,7 +329,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
-      String paragraphText(RenderParagraph paragraph) => paragraph.text.text;
+      String paragraphText(RenderParagraph paragraph) {
+        final TextSpan textSpan = paragraph.text;
+        return textSpan.text;
+      }
 
       await tester.pumpWidget(
         Directionality(
@@ -928,7 +930,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
 
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
@@ -1488,7 +1490,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
@@ -1583,7 +1585,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(51));
+      expect(location.line, equals(50));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1592,7 +1594,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(89));
+      expect(location.line, equals(88));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1617,7 +1619,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(51));
+      expect(location.line, equals(50));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1626,7 +1628,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(89));
+      expect(location.line, equals(88));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -2097,7 +2099,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       await expectLater(
         screenshotImage,
         matchesReferenceImage(await clipRectScreenshot),
-        skip: !Platform.isLinux,
+        skip: !isLinux,
       );
 
       // Test with a very visible debug paint
@@ -2133,7 +2135,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
         matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Screenshot of composited transforms - only offsets', (WidgetTester tester) async {
       // Composited transforms are challenging to take screenshots of as the
@@ -2227,7 +2229,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         ),
         matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Screenshot composited transforms - with rotations', (WidgetTester tester) async {
       final LayerLink link = LayerLink();
@@ -2333,7 +2335,64 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(identical(key2.currentContext.findRenderObject(), box2), isTrue);
       expect(box1.localToGlobal(Offset.zero), equals(position1));
       expect(box2.localToGlobal(Offset.zero), equals(position2));
-    });
+    }, skip: isBrowser);
+
+    testWidgets('getChildrenDetailsSubtree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Hello, World',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Hello, World'),
+            ),
+            body: const Center(
+              child: Text('Hello, World!'),
+            ),
+          ),
+        ),
+      );
+
+      // Figure out the pubRootDirectory
+      final Map<String, Object> jsonObject = await service.testExtension(
+          'getSelectedWidget',
+          <String, String>{'arg': null, 'objectGroup': 'my-group'},
+      );
+      final Map<String, Object> creationLocation =
+      jsonObject['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String file = creationLocation['file'];
+      expect(file, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(file).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
+      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      service.setPubRootDirectories(<String>[pubRootTest]);
+
+      final String summary = service.getRootWidgetSummaryTree('foo1');
+      final List<dynamic> childrenOfRoot = json.decode(summary)['children'];
+      final List<dynamic> childrenOfMaterialApp = childrenOfRoot.first['children'];
+      final Map<String, Object> scaffold = childrenOfMaterialApp.first;
+      expect(scaffold['description'], 'Scaffold');
+      final String objectId = scaffold['objectId'];
+      final String details = service.getDetailsSubtree(objectId, 'foo2');
+      final List<dynamic> detailedChildren = json.decode(details)['children'];
+
+      final List<Map<String, Object>> appBars = <Map<String, Object>>[];
+      void visitChildren(List<dynamic> children) {
+        for (Map<String, Object> child in children) {
+          if (child['description'] == 'AppBar') {
+            appBars.add(child);
+          }
+          if (child.containsKey('children')) {
+            visitChildren(child['children']);
+          }
+        }
+      }
+      visitChildren(detailedChildren);
+      expect(appBars.single.containsKey('children'), isFalse);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
   }
 }
 

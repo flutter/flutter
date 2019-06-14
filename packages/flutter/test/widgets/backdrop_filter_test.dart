@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('BackdropFilter\'s cull rect does not shrink', (WidgetTester tester) async {
+    tester.binding.addTime(const Duration(seconds: 15));
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -44,5 +45,5 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('backdrop_filter_test.cull_rect.1.png'),
     );
-  });
+  }, skip: isBrowser);
 }
