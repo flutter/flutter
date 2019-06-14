@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:ui' show window, FrameTiming;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -10,7 +11,18 @@ import 'package:flutter/services.dart';
 
 import '../flutter_test_alternative.dart';
 
-class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding { }
+class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding {
+  final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
+
+  @override
+  void postEvent(String eventKind, Map<dynamic, dynamic> eventData) {
+    getEventsDispatched(eventKind).add(eventData);
+  }
+
+  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
+  }
+}
 
 class TestStrategy {
   int allowedPriority = 10000;
@@ -21,7 +33,8 @@ class TestStrategy {
 }
 
 void main() {
-  SchedulerBinding scheduler;
+  TestSchedulerBinding scheduler;
+
   setUpAll(() {
     scheduler = TestSchedulerBinding();
   });
@@ -115,5 +128,24 @@ void main() {
     // events are locked.
     expect(timerQueueTasks.length, 2);
     expect(taskExecuted, false);
+  });
+
+  test('Flutter.Frame event fired', () async {
+    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
+      // build start, build finish
+      10000, 15000,
+      // raster start, raster finish
+      16000, 20000,
+    ])]);
+
+    final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
+    expect(events, hasLength(1));
+
+    final Map<String, dynamic> event = events.first;
+    expect(event['number'], isNonNegative);
+    expect(event['startTime'], 10000);
+    expect(event['elapsed'], 10000);
+    expect(event['build'], 5000);
+    expect(event['raster'], 4000);
   });
 }
