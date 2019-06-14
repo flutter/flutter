@@ -4,4 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
-void main() => runApp(const Center(child: Text('Hello, world!', textDirection: TextDirection.ltr)));
+void main() {
+  FlutterError.reportError(FlutterErrorDetails(exception: 'OH NO DID IT FAIL'));
+  runApp(const Center(child: Text('Hello, world!', textDirection: TextDirection.ltr)));
+  throw 'An exception!';
+}
