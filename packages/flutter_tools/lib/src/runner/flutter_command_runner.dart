@@ -343,6 +343,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initializer uses it).
     final String flutterRoot = topLevelResults['flutter-root'] ?? defaultFlutterRoot;
+    bool checkPermissions = true;
+    assert(() {
+      checkPermissions = false;
+      return true;
+    }());
+    Cache.checkPermissions = checkPermissions;
     Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
     // Set up the tooling configuration.
