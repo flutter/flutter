@@ -387,9 +387,21 @@ class OutlineInputBorder extends InputBorder {
   Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
     Rect trCorner;
     Rect brCorner;
-    if (center.trRadiusY + center.brRadiusY > center.height) {
-      final double adjustedTopRightRadius = center.trRadiusY / (center.trRadiusY + center.brRadiusY) * center.height;
-      final double adjustedBottomRightRadius = center.brRadiusY / (center.trRadiusY + center.brRadiusY) * center.height;
+    Rect tlCorner;
+    Rect blCorner;
+
+    // When the corner radii on a vertical side add up to be greater than the
+    // given height, all four corner radii are calculated via as ratio
+    // of the side with the largest denominator.
+    if (center.trRadiusY + center.brRadiusY > center.height || center.tlRadiusY + center.blRadiusY > center.height) {
+      final double totalLeftHeight = center.tlRadiusY + center.blRadiusY;
+      final double totalRightHeight = center.trRadiusY + center.brRadiusY;
+      final double maxDenominator = totalLeftHeight > totalRightHeight ? totalLeftHeight : totalRightHeight;
+
+      final double adjustedTopRightRadius = center.trRadiusY / maxDenominator * center.height;
+      final double adjustedBottomRightRadius = center.brRadiusY / maxDenominator * center.height;
+      final double adjustedTopLeftRadius = center.tlRadiusY / maxDenominator * center.height;
+      final double adjustedBottomLeftRadius = center.blRadiusY / maxDenominator * center.height;
 
       trCorner = Rect.fromLTWH(
         center.right - adjustedTopRightRadius * 2.0,
@@ -402,6 +414,18 @@ class OutlineInputBorder extends InputBorder {
         center.bottom - adjustedBottomRightRadius * 2.0,
         adjustedBottomRightRadius * 2.0,
         adjustedBottomRightRadius * 2.0,
+      );
+      tlCorner = Rect.fromLTWH(
+        center.left,
+        center.top,
+        adjustedTopLeftRadius,
+        adjustedTopLeftRadius,
+      );
+      blCorner = Rect.fromLTWH(
+        center.left,
+        center.bottom - adjustedBottomLeftRadius * 2.0,
+        adjustedBottomLeftRadius * 2.0,
+        adjustedBottomLeftRadius * 2.0,
       );
     } else {
       trCorner = Rect.fromLTWH(
@@ -416,28 +440,6 @@ class OutlineInputBorder extends InputBorder {
         center.brRadiusX * 2.0,
         center.brRadiusY * 2.0,
       );
-    }
-
-    Rect tlCorner;
-    Rect blCorner;
-
-    if (center.tlRadiusY + center.blRadiusY > center.height) {
-      final double adjustedTopLeftRadius = center.tlRadiusY / (center.tlRadiusY + center.blRadiusY) * center.height;
-      final double adjustedBottomLeftRadius = center.blRadiusY / (center.tlRadiusY + center.blRadiusY) * center.height;
-
-      tlCorner = Rect.fromLTWH(
-        center.left,
-        center.top,
-        adjustedTopLeftRadius,
-        adjustedTopLeftRadius,
-      );
-      blCorner = Rect.fromLTWH(
-        center.left,
-        center.bottom - adjustedBottomLeftRadius * 2.0,
-        adjustedBottomLeftRadius * 2.0,
-        adjustedBottomLeftRadius * 2.0,
-      );
-    } else {
       tlCorner = Rect.fromLTWH(
         center.left,
         center.top,
@@ -454,6 +456,8 @@ class OutlineInputBorder extends InputBorder {
 
     final double tlRadius = tlCorner.height / 2.0;
     final double blRadius = blCorner.height / 2.0;
+    final double trRadius = trCorner.height / 2.0;
+    final double brRadius = brCorner.height / 2.0;
 
     const double cornerArcSweep = math.pi / 2.0;
     final double tlCornerArcSweep = start < tlRadius
@@ -466,9 +470,6 @@ class OutlineInputBorder extends InputBorder {
 
     if (start > tlRadius)
       path.lineTo(center.left + start, center.top);
-
-    final double trRadius = trCorner.height / 2.0;
-    final double brRadius = brCorner.height / 2.0;
 
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
