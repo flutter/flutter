@@ -1,4 +1,4 @@
-Signature: 31f0f0d391c37f05d0a0b11f2e87f26e
+Signature: 9c3645e060e778765553630ad291d4cc
 
 UNUSED LICENSES:
 
@@ -1469,7 +1469,6 @@ FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieLayer.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieLayerEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottiePrecompLayer.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
 FILE: ../../../third_party/skia/modules/skottie/src/SkottieProperty.cpp
@@ -1707,10 +1706,9 @@ FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.cpp
 FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
 FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
-FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLInterpreter.h
 FILE: ../../../third_party/skia/src/sksl/SkSLJIT.cpp
 FILE: ../../../third_party/skia/src/sksl/SkSLJIT.h
 FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
@@ -5442,6 +5440,16 @@ FILE: ../../../third_party/skia/include/private/GrContext_Base.h
 FILE: ../../../third_party/skia/include/private/GrImageContext.h
 FILE: ../../../third_party/skia/include/private/GrRecordingContext.h
 FILE: ../../../third_party/skia/include/private/SkVx.h
+FILE: ../../../third_party/skia/modules/skottie/src/effects/DropShadowEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/Effects.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/Effects.h
+FILE: ../../../third_party/skia/modules/skottie/src/effects/FillEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/GaussianBlurEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/GradientEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/LevelsEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/TintEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/TransformEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/TritoneEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/text/RangeSelector.h
 FILE: ../../../third_party/skia/modules/skottie/src/text/SkottieShaper.cpp
