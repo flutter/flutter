@@ -75,6 +75,7 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
     await gesture.removePointer();
   },
+    skip: isBrowser,
     semanticsEnabled: true,
   );
 

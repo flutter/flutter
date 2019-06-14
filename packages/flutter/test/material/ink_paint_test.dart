@@ -223,7 +223,7 @@ void main() {
     expect(box, isNot(paints..circle()));
 
     await gesture.up();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14391

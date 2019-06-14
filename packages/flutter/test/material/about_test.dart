@@ -63,7 +63,7 @@ void main() {
     await tester.pumpAndSettle(const Duration(milliseconds: 100));
 
     expect(find.text('Pirate license'), findsOneWidget);
-  });
+  }, skip: isBrowser);
 
   testWidgets('About box logic defaults to executable name for app name', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -107,7 +107,7 @@ void main() {
     expect(find.text('BBB'), findsOneWidget);
     expect(find.text('Another package'), findsOneWidget);
     expect(find.text('Another license'), findsOneWidget);
-  });
+  }, skip: isBrowser);
 
   testWidgets('LicensePage respects the notch', (WidgetTester tester) async {
     const double safeareaPadding = 27.0;
@@ -132,5 +132,5 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(tester.getTopLeft(find.text('DEF')), const Offset(8.0 + safeareaPadding, 527.0));
-  });
+  }, skip: isBrowser);
 }
