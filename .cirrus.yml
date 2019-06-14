@@ -77,6 +77,8 @@ task:
         cpu: 4
         memory: 12G
     - name: web_tests-linux
+      # TODO(jonahwilliams): re-enabled once we've determined causes for flakiness
+      allow_failures: true
       env:
         SHARD: web_tests
       test_script:
