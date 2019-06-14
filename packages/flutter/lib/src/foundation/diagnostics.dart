@@ -90,6 +90,9 @@ enum DiagnosticLevel {
 ///  * [DiagnosticsNode.toStringDeep], which dumps text art trees for these
 ///    styles.
 enum DiagnosticsTreeStyle {
+  /// A style that does not display the tree, for release mode.
+  none,
+
   /// Sparse style for displaying trees.
   ///
   /// See also:
@@ -1108,6 +1111,9 @@ class TextTreeRenderer {
     String prefixOtherLines,
     TextTreeConfiguration parentConfiguration,
   }) {
+    if (kReleaseMode) {
+      return '';
+    }
     final bool isSingleLine = _isSingleLine(node.style) && parentConfiguration?.lineBreakProperties != true;
     prefixOtherLines ??= prefixLineOne;
     if (node.linePrefix != null) {
@@ -1379,11 +1385,14 @@ class TextTreeRenderer {
 
 /// Defines diagnostics data for a [value].
 ///
-/// [DiagnosticsNode] provides a high quality multi-line string dump via
-/// [toStringDeep]. The core members are the [name], [toDescription],
-/// [getProperties], [value], and [getChildren]. All other members exist
-/// typically to provide hints for how [toStringDeep] and debugging tools should
-/// format output.
+/// For debug and profile modes, [DiagnosticsNode] provides a high quality
+/// multi-line string dump via [toStringDeep]. The core members are the [name],
+/// [toDescription], [getProperties], [value], and [getChildren]. All other
+/// members exist typically to provide hints for how [toStringDeep] and
+/// debugging tools should format output.
+///
+/// In release mode, far less information is retained and some information may
+/// not print at all.
 abstract class DiagnosticsNode {
   /// Initializes the object.
   ///
@@ -1647,6 +1656,8 @@ abstract class DiagnosticsNode {
   TextTreeConfiguration get textTreeConfiguration {
     assert(style != null);
     switch (style) {
+      case DiagnosticsTreeStyle.none:
+        return null;
       case DiagnosticsTreeStyle.dense:
         return denseTextConfiguration;
       case DiagnosticsTreeStyle.sparse:
@@ -2781,7 +2792,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   DiagnosticsTreeStyle get style {
-    return kReleaseMode ? DiagnosticsTreeStyle.flat : super.style ?? _builder.defaultDiagnosticsTreeStyle;
+    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? _builder.defaultDiagnosticsTreeStyle;
   }
 
   @override
@@ -2798,7 +2809,7 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   @override
   String toDescription({ TextTreeConfiguration parentConfiguration }) {
     if (kReleaseMode) {
-      return toString();
+      return '';
     }
     return value.toStringShort();
   }
