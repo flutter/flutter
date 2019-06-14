@@ -30,26 +30,22 @@ Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
 
 Path _leftTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
-  final double height = math.sqrt(3.0) / 2.0;
   final double halfSide = size / 2.0;
-  final double centerHeight = size * height / 3.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy);
+  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy - halfSide * sign);
+  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + halfSide * sign);
   thumbPath.close();
   return thumbPath;
 }
 
 Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
-  final double height = math.sqrt(3.0) / 2.0;
   final double halfSide = size / 2.0;
-  final double centerHeight = size * height / 3.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
+  thumbPath.moveTo(thumbCenter.dx + halfSide, thumbCenter.dy);
+  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy - halfSide * sign);
+  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy + halfSide * sign);
   thumbPath.close();
   return thumbPath;
 }
@@ -62,6 +58,11 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return isEnabled ? const Size.fromRadius(_thumbSize) : const Size.fromRadius(_disabledThumbSize);
   }
+
+  static final Animatable<double> sizeTween = Tween<double>(
+    begin: _disabledThumbSize,
+    end: _thumbSize,
+  );
 
   @override
   void paint(
@@ -76,36 +77,41 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     TextDirection textDirection,
     Thumb thumb,
   }) {
+    assert(thumb != null);
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
 
+    final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
     Path thumbPath;
     switch (textDirection) {
       case TextDirection.rtl:
         switch (thumb) {
           case Thumb.start:
-            thumbPath = _rightTriangle(_thumbSize, center);
+            thumbPath = _rightTriangle(size, center);
             break;
           case Thumb.end:
-            thumbPath = _leftTriangle(_thumbSize, center);
+            thumbPath = _leftTriangle(size, center);
             break;
         }
         break;
       case TextDirection.ltr:
         switch (thumb) {
           case Thumb.start:
-            thumbPath = _leftTriangle(_thumbSize, center);
+            thumbPath = _leftTriangle(size, center);
             break;
           case Thumb.end:
-            thumbPath = _rightTriangle(_thumbSize, center);
+            thumbPath = _rightTriangle(size, center);
             break;
         }
         break;
     }
-    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
+    if (thumbPath != null) {
+      canvas.drawPath(thumbPath, Paint()
+        ..color = colorTween.evaluate(enableAnimation));
+    }
   }
 }
 
@@ -205,6 +211,47 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
           ..strokeWidth = 2.0);
     labelPainter.paint(canvas, thumbCenter + slideUpOffset + Offset(-labelPainter.width / 2.0, -labelPainter.height - 4.0));
   }
+}
+
+class _CustomRangeValueIndicatorShape extends RangeSliderValueIndicatorShape {
+  _CustomRangeValueIndicatorShape() : _customValueIndicatorShape = _CustomValueIndicatorShape();
+
+  final SliderComponentShape _customValueIndicatorShape;
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete, {TextPainter labelPainter}) {
+    return _customValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete);
+  }
+
+  @override
+  void paint(
+      PaintingContext context,
+      Offset center, {
+      Animation<double> activationAnimation,
+      Animation<double> enableAnimation,
+      bool isDiscrete,
+      bool isOnTop,
+      TextPainter labelPainter,
+      RenderBox parentBox,
+      SliderThemeData sliderTheme,
+      TextDirection textDirection,
+      double value,
+      Thumb thumb,
+    }) {
+    _customValueIndicatorShape.paint(
+      context,
+      center.translate(-5, 0),
+      activationAnimation: activationAnimation,
+      enableAnimation: enableAnimation,
+      isDiscrete: isDiscrete,
+      labelPainter: labelPainter,
+      parentBox: parentBox,
+      sliderTheme: sliderTheme,
+      textDirection: textDirection,
+      value: value,
+    );
+  }
+
 }
 
 class _SliderDemoState extends State<SliderDemo> {
@@ -429,23 +476,23 @@ class _RangeSlidersState extends State<_RangeSliders> {
                   thumbColor: Colors.deepPurple,
                   valueIndicatorColor: Colors.deepPurpleAccent,
                   rangeThumbShape: _CustomRangeThumbShape(),
-                  valueIndicatorShape: _CustomValueIndicatorShape(),
+                  rangeValueIndicatorShape: _CustomRangeValueIndicatorShape(),
                   valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
                 ),
                 child: RangeSlider(
-                  values: _discreteValues,
+                  values: _discreteCustomValues,
                   min: 0.0,
                   max: 200.0,
                   divisions: 5,
-                  labels: RangeLabels('${_discreteValues.start.round()}', '${_discreteValues.end.round()}'),
+                  labels: RangeLabels('${_discreteCustomValues.start.round()}', '${_discreteCustomValues.end.round()}'),
                   onChanged: (RangeValues values) {
                     setState(() {
-                      _discreteValues = values;
+                      _discreteCustomValues = values;
                     });
                   },
                 ),
               ),
-              const Text('Discrete'),
+              const Text('Discrete with Custom Theme'),
             ],
           ),
         ],
