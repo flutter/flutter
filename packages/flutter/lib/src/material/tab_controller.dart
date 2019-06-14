@@ -23,9 +23,31 @@ import 'constants.dart';
 ///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet --template=freeform}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
+///
+/// ```dart imports
+/// import 'dart:math' as math;
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart main
+/// void main() => runApp(MyApp());
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       title: 'Flutter Demo',
+///       theme: ThemeData(
+///         primarySwatch: Colors.blue,
+///       ),
+///       home: MyTabbedPage(title: 'Dynamic tabs demo'),
+///     );
+///   }
+/// }
+/// ```
 ///
 /// ```dart
 /// class MyTabbedPage extends StatefulWidget {
@@ -80,6 +102,139 @@ import 'constants.dart';
 /// }
 /// ```
 /// {@end-tool}
+///
+/// ## Dynamically updating tabs
+///
+/// To dynamically add or remove tabs, TabController has to be updated without
+/// creating a new [AnimationController].
+///
+/// {@tool snippet --template=freeform}
+///
+/// A sample application dynamically adds and removes tabs.
+///
+/// ```dart imports
+/// import 'dart:math' as math;
+/// import 'package:flutter/material.dart';
+/// ```
+///
+/// ```dart main
+/// void main() => runApp(MyApp());
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       title: 'Flutter Demo',
+///       theme: ThemeData(
+///         primarySwatch: Colors.blue,
+///       ),
+///       home: MyTabbedPage(title: 'Dynamic tabs demo'),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// class MyTabbedPage extends StatefulWidget {
+///   MyTabbedPage({Key key, this.title}) : super(key: key);
+///
+///   final String title;
+///
+///   @override
+///   _MyTabbedPageState createState() => _MyTabbedPageState();
+/// }
+///
+/// class _MyTabbedPageState extends State<MyTabbedPage> with SingleTickerProviderStateMixin {
+///   List<Tab> myTabs = <Tab>[
+///     Tab(text: '1'),
+///     Tab(text: '2'),
+///   ];
+///
+///   TabController _tabController;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _tabController = TabController(vsync: this, length: myTabs.length);
+///   }
+///
+///   @override
+///   void dispose() {
+///     _tabController.dispose();
+///     super.dispose();
+///   }
+///
+///   void _updateTabController() {
+///     int newIndex;
+///     int previousIndex = _tabController.previousIndex;
+///     if (_tabController.index >= myTabs.length) {
+///       newIndex = math.max(0, myTabs.length - 1);
+///       previousIndex = _tabController.index;
+///     }
+///
+///     if (_tabController.length != myTabs.length) {
+///       _tabController = _tabController.copyWith(
+///         index: newIndex,
+///         length: myTabs.length,
+///         previousIndex: previousIndex,
+///       );
+///     }
+///   }
+///
+///   void _addNewTab() {
+///     setState(() {
+///       myTabs = myTabs.toList()
+///         ..add(Tab(text: '${myTabs.length + 1}'));
+///       _updateTabController();
+///     });
+///   }
+///
+///   void _removeLastTab() {
+///     setState(() {
+///       myTabs = myTabs.toList()
+///         ..removeLast();
+///       _updateTabController();
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return Scaffold(
+///       appBar: AppBar(
+///         title: Text(widget.title),
+///         actions: [
+///           IconButton(
+///             icon: Icon(Icons.remove),
+///             onPressed: _removeLastTab,
+///           ),
+///         ],
+///         bottom: TabBar(
+///           controller: _tabController,
+///           tabs: myTabs,
+///         ),
+///       ),
+///       body: TabBarView(
+///         controller: _tabController,
+///         children: myTabs.map((Tab tab) {
+///           final String label = tab.text.toLowerCase();
+///           return Center(
+///             child: Text(
+///               'This is the $label tab',
+///               style: const TextStyle(fontSize: 36),
+///             ),
+///           );
+///         }).toList(),
+///       ),
+///       floatingActionButton: FloatingActionButton(
+///         onPressed: _addNewTab,
+///         child: Icon(Icons.add),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 class TabController extends ChangeNotifier {
   /// Creates an object that manages the state required by [TabBar] and a
   /// [TabBarView].
