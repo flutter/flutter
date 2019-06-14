@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:ui' show hashValues;
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -52,6 +51,8 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
+    // This API only exists in the web engine implementation and is not
+    // contained in the analyzer summary for Flutter.
     return ui.webOnlyInstantiateImageCodecFromUrl(resolved); // ignore: undefined_function
   }
 
@@ -65,7 +66,7 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   }
 
   @override
-  int get hashCode => hashValues(url, scale);
+  int get hashCode => ui.hashValues(url, scale);
 
   @override
   String toString() => '$runtimeType("$url", scale: $scale)';
