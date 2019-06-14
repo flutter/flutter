@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
@@ -40,7 +42,7 @@ void main() {
       await Cache.lock();
       Cache.checkLockAcquired();
     }, overrides: <Type, Generator>{
-      FileSystem: () => MockFileSystem(),
+      FileSystem: () => FakeFileSystem(),
     });
 
     testUsingContext('should not throw when FLUTTER_ALREADY_LOCKED is set', () async {
@@ -139,12 +141,35 @@ void main() {
     expect(flattenNameSubdirs(Uri.parse('http://docs.flutter.io/foo/bar')), 'docs.flutter.io/foo/bar');
     expect(flattenNameSubdirs(Uri.parse('https://www.flutter.dev')), 'www.flutter.dev');
   }, overrides: <Type, Generator>{
-    FileSystem: () => MockFileSystem(),
+    FileSystem: () => FakeFileSystem(),
+  });
+
+
+  group('Permissions test', () {
+    MockFileSystem mockFileSystem;
+    MockFileStat mockFileStat;
+
+    setUp(() {
+      mockFileSystem = MockFileSystem();
+      mockFileStat = MockFileStat();
+      when(mockFileSystem.path).thenReturn(fs.path);
+      when(mockFileSystem.statSync(any)).thenReturn(mockFileStat);
+      when(mockFileStat.mode).thenReturn(344);
+    });
+
+    testUsingContext('Throws error if missing usr write permissions in flutterRoot', () {
+      expect(() => Cache.flutterRoot = '', throwsA(isInstanceOf<ToolExit>()));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => mockFileSystem,
+    }, initializeFlutterRoot: false);
+
   });
 }
 
-class MockFileSystem extends ForwardingFileSystem {
-  MockFileSystem() : super(MemoryFileSystem());
+class MockFileSystem extends Mock implements FileSystem {}
+class MockFileStat extends Mock implements FileStat {}
+class FakeFileSystem extends ForwardingFileSystem {
+  FakeFileSystem() : super(MemoryFileSystem());
 
   @override
   File file(dynamic path) {

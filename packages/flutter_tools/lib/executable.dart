@@ -12,7 +12,6 @@ import 'src/base/context.dart';
 import 'src/build_runner/build_runner.dart';
 import 'src/build_runner/web_compilation_delegate.dart';
 
-import 'src/cache.dart';
 import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/attach.dart';

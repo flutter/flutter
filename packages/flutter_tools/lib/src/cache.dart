@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:file/memory.dart';
 import 'package:meta/meta.dart';
 
 import 'base/common.dart';
@@ -95,6 +96,21 @@ class Cache {
   final Directory _rootOverride;
   final List<CachedArtifact> _artifacts = <CachedArtifact>[];
 
+  // Check whether there is a writable bit in the usr permissions.
+  static bool _hasUserWritePermission(FileStat stat) {
+    // Unfortunately the memory file system by default specifies a mode of `0`
+    // and is used by the majority of our tests. Detect this case and assume
+    // writable.
+    if ((fs is MemoryFileSystem || fs is ForwardingFileSystem) && stat.mode == 0) {
+      return true;
+    }
+    final int permissions = ((stat.mode & 0xFFF) >> 6) & 0x7;
+    return permissions == 2
+      || permissions == 3
+      || permissions == 6
+      || permissions == 7;
+  }
+
   // Initialized by FlutterCommandRunner on startup.
   static String get flutterRoot => _flutterRoot;
   static String _flutterRoot;
@@ -107,27 +123,15 @@ class Cache {
     // we're liable to crash in unintuitive ways. This can happen if the user
     // is using a homebrew or other unofficial channel, or otherwise installs
     // Flutter into directory without permissions.
-    try {
-      // Check bin.
-      fs.file(fs.path.join(value, 'bin', '.check'))
-        ..createSync();
-      fs.file(fs.path.join(value, 'bin', '.check'))
-        ..deleteSync();
-      // Check root.
-      fs.file(fs.path.join(value, '.check'))
-        ..createSync();
-      fs.file(fs.path.join(value, '.check'))
-        ..deleteSync();
-    } on FileSystemException catch (err) {
-      printError(
+    final FileStat binStat = fs.statSync(fs.path.join(value, 'bin'));
+    final FileStat rootStat = fs.statSync(value);
+    if (rootStat != null && rootStat != null && (!_hasUserWritePermission(binStat) || !_hasUserWritePermission(rootStat))) {
+      throwToolExit(
         'Warning: Flutter is missing permissions to write files '
         'in its installation directory - "$value". '
-        'It is recommended that you install Flutter into a directory such as '
-        '"Documents" which has these permissions by default. If you are using a '
-        'version of Flutter distributed via a package manager such as Brew, it is '
-        'recommended to instead install from an official channel.\n'
-        'For more information see https://flutter.dev/docs/get-started/install');
-      throwToolExit(err.toString());
+        'Please install Flutter from an official channel in a directory '
+        'where you have write permissions. For more information see '
+        'https://flutter.dev/docs/get-started/install');
     }
     _flutterRoot = value;
   }
