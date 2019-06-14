@@ -9,7 +9,7 @@ import 'package:build_daemon/client.dart';
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
-import 'package:dwds/service.dart';
+
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
@@ -100,45 +100,26 @@ Future<BuildDaemonClient> _startBuildDaemon(String workingDirectory) async {
   return null;
 }
 
-Future<DevTools> _startDevTools(
-  Configuration configuration,
-) async {
-  final DevTools devTool = await DevTools.start(configuration.hostname);
-  printTrace('Serving DevTools at http://${devTool.hostname}:${devTool.port}\n');
-  return devTool;
-}
-
 void _registerBuildTargets(
   BuildDaemonClient client,
-  Configuration configuration,
-  Map<String, int> targetPorts,
+  int targetPorts,
 ) {
   // Register a target for each serve target.
-  for (String target in targetPorts.keys) {
+  {
     OutputLocation outputLocation;
-    if (configuration.outputPath != null &&
-        (configuration.outputInput == null ||
-            target == configuration.outputInput)) {
-      outputLocation = OutputLocation((OutputLocationBuilder b) => b
-        ..output = configuration.outputPath
-        ..useSymlinks = true
-        ..hoist = true);
-    }
     client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-      ..target = target
+      ..target = 'web'
       ..outputLocation = outputLocation?.toBuilder()));
   }
   // Empty string indicates we should build everything, register a corresponding
   // target.
-  if (configuration.outputInput == '') {
-    final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
-      ..output = configuration.outputPath
-      ..useSymlinks = true
-      ..hoist = false);
-    client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-      ..target = ''
-      ..outputLocation = outputLocation?.toBuilder()));
-  }
+  final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
+    ..output = ''
+    ..useSymlinks = true
+    ..hoist = false);
+  client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
+    ..target = ''
+    ..outputLocation = outputLocation?.toBuilder()));
 }
 
 /// A hot-runner which handles browser specific delegation.
@@ -163,25 +144,13 @@ class ResidentWebRunner extends ResidentRunner {
   final FlutterProject flutterProject;
 
   StreamSubscription<BuildResults> _buildResults;
-  DevTools _devTools;
   BuildDaemonClient _client;
-  AppDebugServices _appDebugServices;
-
-  DebugService get _debugService => _appDebugServices?.debugService;
-
-  vmservice.VmService get _vmService => _appDebugServices?.webdevClient?.client;
+  WebDevHandle _webDevHandle;
 
   StreamSubscription<BuildResult> _resultSub;
   StreamSubscription<vmservice.Event> _stdOutSub;
-  WebDevHandler _webDevHandler;
 
-  Map<String, int> targetPorts;
-  final Configuration configuration = Configuration(
-      autoRun: true,
-      debug: true,
-      hostname: 'localhost',
-      reload: ReloadConfiguration.none,
-    );
+  vmservice.VmService get _vmService => _webDevHandle.vmService;
 
   @override
   Future<void> cleanupAfterSignal() async {
@@ -196,8 +165,7 @@ class ResidentWebRunner extends ResidentRunner {
   Future<void> _cleanup() async {
     await _buildResults?.cancel();
     await _client?.close();
-    await _devTools?.close();
-    await _webDevHandler.close();
+    await _webDevHandle.close();
     await _resultSub?.cancel();
     await _stdOutSub?.cancel();
   }
@@ -260,9 +228,7 @@ class ResidentWebRunner extends ResidentRunner {
       printError(message);
       return 1;
     }
-    targetPorts = <String, int>{
-      'web': await os.findFreePort()
-    };
+    final int targetPort = await os.findFreePort();
 
     /// Start the build daemon and run an initial build.
     final String workingDirectory = fs.currentDirectory.path;
@@ -279,26 +245,21 @@ class ResidentWebRunner extends ResidentRunner {
     });
 
     // Register the current build targets.
-    _registerBuildTargets(_client, configuration, targetPorts);
+    _registerBuildTargets(_client, targetPort);
 
     // Start dev tools.
-    _devTools = await _startDevTools(configuration);
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
-    _webDevHandler = await connectToWebdev(
-      configuration,
-      targetPorts['web'],
-      daemonPort(fs.currentDirectory.path),
+    _webDevHandle = await connectToWebdev(
+      targetPort,
+      _client.port,
       'web',
       _client.buildResults,
-      _devTools,
       optionalHandler: _assetHandler,
     );
-    _appDebugServices = _webDevHandler.appDebugServices;
-
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -311,26 +272,26 @@ class ResidentWebRunner extends ResidentRunner {
       {Completer<DebugConnectionInfo> connectionInfoCompleter,
       Completer<void> appStartedCompleter}) async {
     // When a tab is closed we exit an app.
-    unawaited(_appDebugServices.chromeProxyService.tabConnection.onClose.first.then((_) {
+    unawaited(_webDevHandle.onTabClose.first.then((_) {
       appFinished();
     }));
     // Cleanup old subscriptions.
     try {
-      await _vmService.streamCancel('Stdout');
+      await _webDevHandle.vmService.streamCancel('Stdout');
     } catch (_) {}
     try {
-      await _vmService.streamListen('Stdout');
+      await _webDevHandle.vmService.streamListen('Stdout');
     } catch (_) {}
-    _stdOutSub = _vmService.onStdoutEvent.listen((vmservice.Event log) {
+    _stdOutSub = _webDevHandle.vmService.onStdoutEvent.listen((vmservice.Event log) {
       printStatus(utf8.decode(base64.decode(log.bytes)));
     });
 
     // Response with debug info!
     // How does this map from the existing code?
     connectionInfoCompleter?.complete(DebugConnectionInfo(
-      wsUri: Uri.parse(_debugService.wsUri),
+      wsUri: _webDevHandle.wsUri,
     ));
-    _webDevHandler.devConnection.runMain();
+    _webDevHandle.runMain();
     setupTerminal();
     final int result = await waitForAppToFinish();
     await cleanupAtFinish();
@@ -426,6 +387,18 @@ class ResidentWebRunner extends ResidentRunner {
       timeout: timeoutConfiguration.fastOperation,
       progressId: 'hot.restart',
     );
+    _client.startBuild();
+    await for (BuildResults results in _client.buildResults) {
+      // TODO(jonahwilliams): spend some time here to figure out ideal loig.c
+      final BuildResult result = results.results.firstWhere((BuildResult result) {
+        return result.target == 'web';
+      });
+      if (result.status == BuildStatus.failed) {
+        status.stop();
+        return OperationResult(1, result.error);
+      }
+      break;
+    }
     final vmservice.Response reloadResponse = await _vmService.callServiceExtension('hotRestart');
     status.stop();
     printStatus('Restarted application in ${getElapsedAsMilliseconds(timer.elapsed)}.');
