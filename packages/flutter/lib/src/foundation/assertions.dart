@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
+import 'constants.dart';
 import 'diagnostics.dart';
 import 'print.dart';
 
@@ -332,6 +333,9 @@ class FlutterErrorDetails extends Diagnosticable {
   /// otherwise the summary is inferred from the string representation of the
   /// exception.
   DiagnosticsNode get summary {
+    if (kReleaseMode) {
+      return DiagnosticsNode.message(exceptionAsString());
+    }
     final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     DiagnosticsNode summary;
     if (diagnosticable != null) {
