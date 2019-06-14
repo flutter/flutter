@@ -6,11 +6,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:path/path.dart' as path;
+import 'package:vm_service_client/vm_service_client.dart';
+
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
-import 'package:path/path.dart' as path;
-import 'package:vm_service_client/vm_service_client.dart';
 
 void main() {
   task(() async {
@@ -56,19 +57,10 @@ void main() {
       final VMServiceClient client = VMServiceClient.connect('ws://localhost:$vmServicePort/ws');
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.first;
-
-      final StreamController<VMExtensionEvent> frameEventsController = StreamController<VMExtensionEvent>();
-      final StreamController<VMExtensionEvent> navigationEventsController = StreamController<VMExtensionEvent>();
-      isolate.onExtensionEvent.listen((VMExtensionEvent event) {
-        if (event.kind == 'Flutter.Frame') {
-          frameEventsController.add(event);
-        } else if (event.kind == 'Flutter.Navigation') {
-          navigationEventsController.add(event);
-        }
-      });
-
-      final Stream<VMExtensionEvent> frameEvents = frameEventsController.stream;
-      final Stream<VMExtensionEvent> navigationEvents = navigationEventsController.stream;
+      final Stream<VMExtensionEvent> frameEvents = isolate.onExtensionEvent.where(
+              (VMExtensionEvent e) => e.kind == 'Flutter.Frame');
+      final Stream<VMExtensionEvent> navigationEvents = isolate.onExtensionEvent.where(
+              (VMExtensionEvent e) => e.kind == 'Flutter.Navigation');
 
       print('reassembling app...');
       final Future<VMExtensionEvent> frameFuture = frameEvents.first;
@@ -79,17 +71,13 @@ void main() {
       print('${event.kind}: ${event.data}');
 
       // validate the fields
-      // {number: 8, startTime: 0, elapsed: 1437, build: 600, raster: 800}
+      // {number: 8, startTime: 0, elapsed: 1437}
       expect(event.data['number'] is int);
       expect(event.data['number'] >= 0);
       expect(event.data['startTime'] is int);
       expect(event.data['startTime'] >= 0);
       expect(event.data['elapsed'] is int);
       expect(event.data['elapsed'] >= 0);
-      expect(event.data['build'] is int);
-      expect(event.data['build'] >= 0);
-      expect(event.data['raster'] is int);
-      expect(event.data['raster'] >= 0);
 
       final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
