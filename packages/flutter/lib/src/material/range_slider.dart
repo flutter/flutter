@@ -1229,6 +1229,7 @@ class _RenderRangeSlider extends RenderBox {
 
     final bool isLastThumbStart = _lastThumbSelection == Thumb.start;
     final Thumb bottomThumb = isLastThumbStart ? Thumb.end : Thumb.start;
+    final Thumb topThumb = isLastThumbStart ? Thumb.start : Thumb.end;
     final Offset bottomThumbCenter = isLastThumbStart ? endThumbCenter : startThumbCenter;
     final Offset topThumbCenter = isLastThumbStart ? startThumbCenter : endThumbCenter;
     final TextPainter bottomLabelPainter = isLastThumbStart ? _endLabelPainter : _startLabelPainter;
@@ -1262,7 +1263,7 @@ class _RenderRangeSlider extends RenderBox {
         parentBox: this,
         sliderTheme: _sliderTheme,
         textDirection: _textDirection,
-        thumb: _lastThumbSelection,
+        thumb: topThumb,
         value: topValue,
       );
     }
@@ -1287,7 +1288,7 @@ class _RenderRangeSlider extends RenderBox {
       isOnTop: thumbDelta < sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete).width,
       textDirection: textDirection,
       sliderTheme: _sliderTheme,
-      thumb: _lastThumbSelection,
+      thumb: topThumb,
     );
   }
 
