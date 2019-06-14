@@ -270,20 +270,25 @@ class _ToggleButton extends StatelessWidget {
       data: IconThemeData(
         color: currentColor,
       ),
-      child: RawMaterialButton(
-        textStyle: TextStyle(
-          color: currentColor,
+      child: ClipRRect(
+        borderRadius: borderRadius.subtract(
+          BorderRadius.circular(clipRadius),
         ),
-        elevation: 0.0,
-        highlightElevation: 0.0,
-        fillColor: selected ? fillColor : null,
-        focusColor: selected ? focusColor : null,
-        highlightColor: highlightColor,
-        hoverColor: hoverColor,
-        splashColor: splashColor,
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        onPressed: onPressed,
-        child: child,
+        child: RawMaterialButton(
+          textStyle: TextStyle(
+            color: currentColor,
+          ),
+          elevation: 0.0,
+          highlightElevation: 0.0,
+          fillColor: selected ? fillColor : null,
+          focusColor: selected ? focusColor : null,
+          highlightColor: highlightColor,
+          hoverColor: hoverColor,
+          splashColor: splashColor,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onPressed: onPressed,
+          child: child,
+        ),
       ),
     );
 
@@ -390,14 +395,14 @@ class _SelectToggleButtonRenderObject extends RenderProxyBox {
     final Rect tlCorner = Rect.fromLTWH(
       left,
       top,
-      tlRadius.x * 2,
-      tlRadius.y * 2,
+      tlRadius.x * 2.0,
+      tlRadius.y * 2.0,
     );
     final Rect blCorner = Rect.fromLTWH(
       left,
-      bottom - (blRadius.y * 2),
-      blRadius.x * 2,
-      blRadius.y * 2,
+      bottom - (blRadius.y * 2.0),
+      blRadius.x * 2.0,
+      blRadius.y * 2.0,
     );
 
     if (isFirstButton) {
