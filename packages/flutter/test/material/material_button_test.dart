@@ -32,6 +32,7 @@ void main() {
     await expectLater(tester, meetsGuideline(textContrastGuideline));
   },
     semanticsEnabled: true,
+    skip: isBrowser,
   );
 
 }
