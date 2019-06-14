@@ -30,22 +30,22 @@ Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
 
 Path _leftTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
-  final double halfSide = size / 2.0;
+  final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy);
-  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy - size * sign);
-  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + size * sign);
+  thumbPath.moveTo(thumbCenter.dx - halfSize, thumbCenter.dy);
+  thumbPath.lineTo(thumbCenter.dx + halfSize, thumbCenter.dy - size * sign);
+  thumbPath.lineTo(thumbCenter.dx + halfSize, thumbCenter.dy + size * sign);
   thumbPath.close();
   return thumbPath;
 }
 
 Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
-  final double halfSide = size / 2.0;
+  final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx + halfSide, thumbCenter.dy);
-  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy - size * sign);
-  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy + size * sign);
+  thumbPath.moveTo(thumbCenter.dx + halfSize, thumbCenter.dy);
+  thumbPath.lineTo(thumbCenter.dx - halfSize, thumbCenter.dy - size * sign);
+  thumbPath.lineTo(thumbCenter.dx - halfSize, thumbCenter.dy + size * sign);
   thumbPath.close();
   return thumbPath;
 }
@@ -77,7 +77,6 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
     TextDirection textDirection,
     Thumb thumb,
   }) {
-    assert(thumb != null);
     final Canvas canvas = context.canvas;
     final ColorTween colorTween = ColorTween(
       begin: sliderTheme.disabledThumbColor,
@@ -108,10 +107,7 @@ class _CustomRangeThumbShape extends RangeSliderThumbShape {
         }
         break;
     }
-    if (thumbPath != null) {
-      canvas.drawPath(thumbPath, Paint()
-        ..color = colorTween.evaluate(enableAnimation));
-    }
+    canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
   }
 }
 
