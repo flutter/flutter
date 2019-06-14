@@ -2030,14 +2030,20 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png', version: null),
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.ltr.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png', version: null),
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.rtl.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
     },

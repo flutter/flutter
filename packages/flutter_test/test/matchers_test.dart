@@ -339,7 +339,10 @@ void main() {
       testWidgets('Comparator succeeds incorporating version number', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
-        await expectLater(finder, matchesGoldenFile('foo.png', version: '1'));
+        await expectLater(finder, matchesGoldenFile(
+          'foo.png',
+          version: 1,
+        ));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, hasLength(greaterThan(0)));
         expect(comparator.golden, Uri.parse('foo.1.png'));
@@ -348,7 +351,10 @@ void main() {
       testWidgets('Comparator succeeds with null version number', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
-        await expectLater(finder, matchesGoldenFile('foo.png', version: null));
+        await expectLater(finder, matchesGoldenFile(
+          'foo.png',
+          version: null,
+        ));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, hasLength(greaterThan(0)));
         expect(comparator.golden, Uri.parse('foo.png'));
@@ -413,7 +419,10 @@ void main() {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         try {
-          await expectLater(finder, matchesGoldenFile('foo.png', version: '1'));
+          await expectLater(finder, matchesGoldenFile(
+            'foo.png',
+            version: 1,
+          ));
           fail('TestFailure expected but not thrown');
         } on TestFailure catch (error) {
           expect(comparator.invocation, _ComparatorInvocation.compare);
@@ -427,7 +436,10 @@ void main() {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         try {
-          await expectLater(finder, matchesGoldenFile('foo.png', version: null));
+          await expectLater(finder, matchesGoldenFile(
+            'foo.png',
+            version: null,
+          ));
           fail('TestFailure expected but not thrown');
         } on TestFailure catch (error) {
           expect(comparator.invocation, _ComparatorInvocation.compare);

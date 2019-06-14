@@ -293,13 +293,18 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
-/// golden image file identified by [key].
+/// golden image file identified by [key], with an optional [version] number.
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
 /// treated as the image for the widget.
 ///
 /// [key] may be either a [Uri] or a [String] representation of a URI.
+///
+/// [version] is a number that can be used to differentiate historical golden
+/// files. This parameter is optional. Version numbers are used in golden file
+/// tests for package:flutter. You can learn more about these tests [here]
+/// (https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
@@ -323,7 +328,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(dynamic key, {String version}) {
+AsyncMatcher matchesGoldenFile(dynamic key, {int version}) {
   if (key is Uri) {
     return _MatchesGoldenFile(key, version);
   } else if (key is String) {
@@ -1677,7 +1682,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
   _MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
 
   final Uri key;
-  final String version;
+  final int version;
 
   @override
   Future<String> matchAsync(dynamic item) async {
@@ -1722,15 +1727,15 @@ class _MatchesGoldenFile extends AsyncMatcher {
   Description describe(Description description) =>
       description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
 
-  Uri _getTestNameUri(Uri key, String version) {
+  Uri _getTestNameUri(Uri key, int version) {
     return version == null ? key : Uri.parse(
       key
         .toString()
         .splitMapJoin(
-        RegExp(r'.png'),
-        onMatch: (Match m) => '${'.' + version + m.group(0)}',
-        onNonMatch: (String n) => '$n'
-      )
+          RegExp(r'.png'),
+          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
+          onNonMatch: (String n) => '$n'
+        )
     );
   }
 }
