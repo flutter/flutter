@@ -7,6 +7,7 @@ import 'dart:ui' as ui show ParagraphStyle, TextStyle, StrutStyle, lerpDouble, S
 import 'package:flutter/foundation.dart';
 
 import 'basic_types.dart';
+import 'colors.dart';
 import 'strut_style.dart';
 
 const String _kDefaultDebugLabel = 'unknown';
@@ -1091,8 +1092,8 @@ class TextStyle extends Diagnosticable {
     if (debugLabel != null)
       properties.add(MessageProperty('${prefix}debugLabel', debugLabel));
     final List<DiagnosticsNode> styles = <DiagnosticsNode>[];
-    styles.add(DiagnosticsProperty<Color>('${prefix}color', color, defaultValue: null));
-    styles.add(DiagnosticsProperty<Color>('${prefix}backgroundColor', backgroundColor, defaultValue: null));
+    styles.add(ColorProperty('${prefix}color', color, defaultValue: null));
+    styles.add(ColorProperty('${prefix}backgroundColor', backgroundColor, defaultValue: null));
     styles.add(StringProperty('${prefix}family', fontFamily, defaultValue: null, quoted: false));
     styles.add(IterableProperty<String>('${prefix}familyFallback', fontFamilyFallback, defaultValue: null));
     styles.add(DoubleProperty('${prefix}size', fontSize, defaultValue: null));
@@ -1124,7 +1125,7 @@ class TextStyle extends Diagnosticable {
 
       // Hide decorationColor from the default text view as it is shown in the
       // terse decoration summary as well.
-      styles.add(DiagnosticsProperty<Color>('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
+      styles.add(ColorProperty('${prefix}decorationColor', decorationColor, defaultValue: null, level: DiagnosticLevel.fine));
 
       if (decorationColor != null)
         decorationDescription.add('$decorationColor');

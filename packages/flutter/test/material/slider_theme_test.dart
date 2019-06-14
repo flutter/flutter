@@ -68,7 +68,6 @@ void main() {
     expect(description, <String>[
       'trackHeight: 7.0',
       'activeTrackColor: Color(0xff000001)',
-      'activeTrackColor: Color(0xff000001)',
       'inactiveTrackColor: Color(0xff000002)',
       'disabledActiveTrackColor: Color(0xff000003)',
       'disabledInactiveTrackColor: Color(0xff000004)',
@@ -529,7 +528,8 @@ void main() {
         ),
     );
     await gesture.up();
-  });
+  }, skip: isBrowser
+  );
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);

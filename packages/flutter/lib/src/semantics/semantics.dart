@@ -2098,7 +2098,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     properties.add(DoubleProperty('scrollPosition', scrollPosition, defaultValue: null));
     properties.add(DoubleProperty('scrollExtentMax', scrollExtentMax, defaultValue: null));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
-    properties.add(DoubleProperty('thicknes', thickness, defaultValue: 0.0));
+    properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
   }
 
   /// Returns a string representation of this node and its descendants.
