@@ -532,7 +532,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    this.pageDidChanged,
+    this.pageDidChange,
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
   }) : controller = controller ?? _defaultPageController,
@@ -559,7 +559,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    this.pageDidChanged,
+    this.pageDidChange,
     @required IndexedWidgetBuilder itemBuilder,
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -577,7 +577,7 @@ class PageView extends StatefulWidget {
     this.physics,
     this.pageSnapping = true,
     this.onPageChanged,
-    this.pageDidChanged,
+    this.pageDidChange,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(childrenDelegate != null),
@@ -623,12 +623,12 @@ class PageView extends StatefulWidget {
 
   /// Called whenever the page in the center of the viewport changes.
   ///
-  /// It is called before [pageDidChanged], in the middle of scroll animation.
+  /// It is called before [pageDidChange], in the middle of the scroll animation.
   final ValueChanged<int> onPageChanged;
   /// Called whenever the page has changed and the scroll animation has stopped.
   ///
-  /// It is called after [onPageChanged], at the end of scroll animation.
-  final ValueChanged<int> pageDidChanged;
+  /// It is called after [onPageChanged], at the end of the scroll animation.
+  final ValueChanged<int> pageDidChange;
   /// A delegate that provides the children for the [PageView].
   ///
   /// The [PageView.custom] constructor lets you specify this delegate
@@ -650,14 +650,14 @@ class _PageViewState extends State<PageView> {
   int _lastOnPageChangedIndex = 0;
 
   /// A flag to record last index reported by [PageView.pageDidChange] and to decide
-  /// whether to call [PageView.pageDidChanged];
-  int _lastPageDidChangedIndex = 0;
+  /// whether to call [PageView.pageDidChange];
+  int _lastpageDidChangeIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _lastOnPageChangedIndex = widget.controller.initialPage;
-    _lastPageDidChangedIndex = widget.controller.initialPage;
+    _lastpageDidChangeIndex = widget.controller.initialPage;
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -689,12 +689,12 @@ class _PageViewState extends State<PageView> {
             _lastOnPageChangedIndex = currentPage;
             widget.onPageChanged(currentPage);
           }
-        } else if (notification.depth == 0 && widget.pageDidChanged != null && notification is ScrollEndNotification) {
+        } else if (notification.depth == 0 && widget.pageDidChange != null && notification is ScrollEndNotification) {
           final PageMetrics metrics = notification.metrics;
           final int currentPage = metrics.page.round();
-          if (currentPage != _lastPageDidChangedIndex) {
-            _lastPageDidChangedIndex = currentPage;
-            widget.pageDidChanged(currentPage);
+          if (currentPage != _lastpageDidChangeIndex) {
+            _lastpageDidChangeIndex = currentPage;
+            widget.pageDidChange(currentPage);
           }
         }
         return false;

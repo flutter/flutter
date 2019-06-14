@@ -332,7 +332,7 @@ void main() {
     await tester.pumpWidget(Directionality(
       textDirection: TextDirection.ltr,
       child: PageView(
-        pageDidChanged: log.add,
+        pageDidChange: log.add,
         children: kStates.map<Widget>((String state) => Text(state)).toList(),
       ),
     ));
@@ -364,7 +364,7 @@ void main() {
         child: PageView(
           controller: controller,
           onPageChanged: (int index) => log.add('onPageChanged $index'),
-          pageDidChanged: (int index) => log.add('pageDidChanged $index'),
+          pageDidChange: (int index) => log.add('pageDidChange $index'),
           physics: const BouncingScrollPhysics(),
           children: kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
@@ -461,7 +461,7 @@ void main() {
         child: PageView(
           pageSnapping: pageSnapping,
           onPageChanged: (int index) => log.add('onPageChanged $index'),
-          pageDidChanged: (int index) => log.add('pageDidChanged $index'),
+          pageDidChange: (int index) => log.add('pageDidChange $index'),
           children:
               kStates.map<Widget>((String state) => Text(state)).toList(),
         ),
@@ -484,7 +484,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Check if [PageView.pageDidChange] is triggered.
-    expect(log, equals(const <String>['pageDidChanged 1']));
+    expect(log, equals(const <String>['pageDidChange 1']));
     log.clear();
 
     expect(find.text('Alabama'), findsNothing);
@@ -514,7 +514,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // [PageView.pageDidChange] should be triggered.
-    expect(log, equals(const <String>['pageDidChanged 2']));
+    expect(log, equals(const <String>['pageDidChange 2']));
 
     expect(find.text('Alaska'), findsNothing);
     expect(find.text('Arizona'), findsOneWidget);
@@ -604,7 +604,7 @@ void main() {
       initialPage: kStates.length - 1,
     );
     int onPageChangedIndex = 0;
-    int pageDidChangedIndex = 0;
+    int pageDidChangeIndex = 0;
     Widget build() {
       return Directionality(
         textDirection: TextDirection.ltr,
@@ -615,8 +615,8 @@ void main() {
           onPageChanged: (int page) {
             onPageChangedIndex = page;
           },
-          pageDidChanged: (int page) {
-            pageDidChangedIndex = page;
+          pageDidChange: (int page) {
+            pageDidChangeIndex = page;
           },
         ),
       );
@@ -624,10 +624,10 @@ void main() {
 
     await tester.pumpWidget(build());
     controller.jumpToPage(kStates.length * 2); // try to move beyond max range
-    // change index should be zero, shouldn't fire onPageChanged or pageDidChanged
+    // change index should be zero, shouldn't fire onPageChanged or pageDidChange
     expect(onPageChangedIndex, 0);
     await tester.pump();
-    expect(pageDidChangedIndex, 0);
+    expect(pageDidChangeIndex, 0);
   });
 
   testWidgets('PageView can restore page', (WidgetTester tester) async {
