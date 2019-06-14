@@ -2361,6 +2361,63 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(box1.localToGlobal(Offset.zero), equals(position1));
       expect(box2.localToGlobal(Offset.zero), equals(position2));
     }, skip: isBrowser);
+
+    testWidgets('getChildrenDetailsSubtree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Hello, World',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Hello, World'),
+            ),
+            body: const Center(
+              child: Text('Hello, World!'),
+            ),
+          ),
+        ),
+      );
+
+      // Figure out the pubRootDirectory
+      final Map<String, Object> jsonObject = await service.testExtension(
+          'getSelectedWidget',
+          <String, String>{'arg': null, 'objectGroup': 'my-group'},
+      );
+      final Map<String, Object> creationLocation =
+      jsonObject['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String file = creationLocation['file'];
+      expect(file, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(file).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
+      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      service.setPubRootDirectories(<String>[pubRootTest]);
+
+      final String summary = service.getRootWidgetSummaryTree('foo1');
+      final List<dynamic> childrenOfRoot = json.decode(summary)['children'];
+      final List<dynamic> childrenOfMaterialApp = childrenOfRoot.first['children'];
+      final Map<String, Object> scaffold = childrenOfMaterialApp.first;
+      expect(scaffold['description'], 'Scaffold');
+      final String objectId = scaffold['objectId'];
+      final String details = service.getDetailsSubtree(objectId, 'foo2');
+      final List<dynamic> detailedChildren = json.decode(details)['children'];
+
+      final List<Map<String, Object>> appBars = <Map<String, Object>>[];
+      void visitChildren(List<dynamic> children) {
+        for (Map<String, Object> child in children) {
+          if (child['description'] == 'AppBar') {
+            appBars.add(child);
+          }
+          if (child.containsKey('children')) {
+            visitChildren(child['children']);
+          }
+        }
+      }
+      visitChildren(detailedChildren);
+      expect(appBars.single.containsKey('children'), isFalse);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
   }
 }
 
