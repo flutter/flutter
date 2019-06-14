@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
+import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -1760,18 +1762,38 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation(route);
     return route.popped;
   }
 
-  void _afterNavigation() {
+  void _afterNavigation<T>(Route<T> route) {
     if (!kReleaseMode) {
-      // This event is used by performance tools that show stats for the
-      // time interval since the last navigation event occurred ensuring that
-      // stats only reflect the current page.
-      // These tools do not need to know exactly what the new route is so no
-      // attempt is made to describe the current route as part of the event.
-      developer.postEvent('Flutter.Navigation', <String, dynamic>{});
+      // Among other uses, performance tools use this event to ensure that perf
+      // stats reflect the time interval since the last navigation event
+      // occurred, ensuring that stats only reflect the current page.
+      String description;
+      if (route is TransitionRoute<T>) {
+        final TransitionRoute<T> transitionRoute = route;
+        description = transitionRoute.debugLabel;
+      } else if (route != null) {
+        description = '$route';
+      }
+
+      final RouteSettings settings = route.settings;
+      final Map<String, dynamic> settingsJsonable = <String, dynamic> {
+        'name': settings.name,
+        'isInitialRoute': settings.isInitialRoute,
+      };
+      if (settings.arguments != null) {
+        settingsJsonable['arguments'] = jsonEncode(
+          settings.arguments,
+          toEncodable: (Object object) => '$object',
+        );
+      }
+      developer.postEvent('Flutter.Navigation', <String, dynamic>{
+        'routeDescription': description,
+        'settings' : settingsJsonable,
+      });
     }
     _cancelActivePointers();
   }
@@ -1825,7 +1847,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation(newRoute);
     return newRoute.popped;
   }
 
@@ -1879,7 +1901,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         observer.didRemove(removedRoute, oldRoute);
     }
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation(newRoute);
     return newRoute.popped;
   }
 
@@ -2032,7 +2054,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(!debugPredictedWouldPop);
     }
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation<dynamic>(route);
     return true;
   }
 
@@ -2074,7 +2096,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       observer.didRemove(route, previousRoute);
     route.dispose();
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation<dynamic>(nextRoute);
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
