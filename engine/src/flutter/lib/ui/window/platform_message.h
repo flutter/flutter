@@ -28,10 +28,10 @@ class PlatformMessage : public fml::RefCountedThreadSafe<PlatformMessage> {
   }
 
  private:
-  PlatformMessage(std::string name,
+  PlatformMessage(std::string channel,
                   std::vector<uint8_t> data,
                   fml::RefPtr<PlatformMessageResponse> response);
-  PlatformMessage(std::string name,
+  PlatformMessage(std::string channel,
                   fml::RefPtr<PlatformMessageResponse> response);
   ~PlatformMessage();
 
