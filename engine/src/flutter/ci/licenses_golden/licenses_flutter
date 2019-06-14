@@ -224,6 +224,7 @@ FILE: ../../../flutter/fml/trace_event.h
 FILE: ../../../flutter/fml/unique_fd.cc
 FILE: ../../../flutter/fml/unique_fd.h
 FILE: ../../../flutter/fml/unique_object.h
+FILE: ../../../flutter/fml/wakeable.h
 FILE: ../../../flutter/lib/io/dart_io.cc
 FILE: ../../../flutter/lib/io/dart_io.h
 FILE: ../../../flutter/lib/snapshot/libraries.json

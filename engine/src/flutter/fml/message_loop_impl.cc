@@ -41,6 +41,7 @@ fml::RefPtr<MessageLoopImpl> MessageLoopImpl::Create() {
 
 MessageLoopImpl::MessageLoopImpl() : terminated_(false) {
   task_queue_ = std::make_unique<MessageLoopTaskQueue>();
+  task_queue_->SetWakeable(this);
 }
 
 MessageLoopImpl::~MessageLoopImpl() = default;
@@ -53,8 +54,7 @@ void MessageLoopImpl::PostTask(fml::closure task, fml::TimePoint target_time) {
     // |task| synchronously within this function.
     return;
   }
-  const auto wake_up = task_queue_->RegisterTask(task, target_time);
-  WakeUp(wake_up);
+  task_queue_->RegisterTask(task, target_time);
 }
 
 void MessageLoopImpl::AddTaskObserver(intptr_t key, fml::closure callback) {
@@ -130,9 +130,7 @@ void MessageLoopImpl::FlushTasks(FlushType type) {
   // gather invocations -> Swap -> execute invocations
   // will lead us to run invocations on the wrong thread.
   std::lock_guard<std::mutex> task_flush_lock(tasks_flushing_mutex_);
-
-  const auto wake_up = task_queue_->GetTasksToRunNow(type, invocations);
-  WakeUp(wake_up);
+  task_queue_->GetTasksToRunNow(type, invocations);
 
   for (const auto& invocation : invocations) {
     invocation();

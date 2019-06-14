@@ -14,6 +14,7 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/memory/ref_counted.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
+#include "flutter/fml/wakeable.h"
 
 namespace fml {
 
@@ -23,7 +24,8 @@ enum class FlushType {
 };
 
 // This class keeps track of all the tasks and observers that
-// need to be run on it's MessageLoopImpl.
+// need to be run on it's MessageLoopImpl. This also wakes up the
+// loop at the required times.
 class MessageLoopTaskQueue {
  public:
   // Lifecycle.
@@ -36,13 +38,11 @@ class MessageLoopTaskQueue {
 
   // Tasks methods.
 
-  fml::TimePoint RegisterTask(fml::closure task, fml::TimePoint target_time);
+  void RegisterTask(fml::closure task, fml::TimePoint target_time);
 
   bool HasPendingTasks();
 
-  // Returns the wake up time.
-  fml::TimePoint GetTasksToRunNow(FlushType type,
-                                  std::vector<fml::closure>& invocations);
+  void GetTasksToRunNow(FlushType type, std::vector<fml::closure>& invocations);
 
   size_t GetNumPendingTasks();
 
@@ -58,7 +58,13 @@ class MessageLoopTaskQueue {
 
   void Swap(MessageLoopTaskQueue& other);
 
+  void SetWakeable(fml::Wakeable* wakeable);
+
  private:
+  void WakeUp(fml::TimePoint time);
+
+  Wakeable* wakeable_ = NULL;
+
   std::mutex observers_mutex_;
   std::map<intptr_t, fml::closure> task_observers_
       FML_GUARDED_BY(observers_mutex_);

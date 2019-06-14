@@ -20,10 +20,12 @@
 #include "flutter/fml/message_loop_task_queue.h"
 #include "flutter/fml/synchronization/thread_annotations.h"
 #include "flutter/fml/time/time_point.h"
+#include "flutter/fml/wakeable.h"
 
 namespace fml {
 
-class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
+class MessageLoopImpl : public Wakeable,
+                        public fml::RefCountedThreadSafe<MessageLoopImpl> {
  public:
   static fml::RefPtr<MessageLoopImpl> Create();
 
@@ -32,8 +34,6 @@ class MessageLoopImpl : public fml::RefCountedThreadSafe<MessageLoopImpl> {
   virtual void Run() = 0;
 
   virtual void Terminate() = 0;
-
-  virtual void WakeUp(fml::TimePoint time_point) = 0;
 
   void PostTask(fml::closure task, fml::TimePoint target_time);
 
