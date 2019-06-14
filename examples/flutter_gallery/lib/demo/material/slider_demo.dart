@@ -33,8 +33,8 @@ Path _leftTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final double halfSide = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
   thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy);
-  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy - halfSide * sign);
-  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + halfSide * sign);
+  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy - size * sign);
+  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + size * sign);
   thumbPath.close();
   return thumbPath;
 }
@@ -44,8 +44,8 @@ Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final double halfSide = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
   thumbPath.moveTo(thumbCenter.dx + halfSide, thumbCenter.dy);
-  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy - halfSide * sign);
-  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy + halfSide * sign);
+  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy - size * sign);
+  thumbPath.lineTo(thumbCenter.dx - halfSide, thumbCenter.dy + size * sign);
   thumbPath.close();
   return thumbPath;
 }
@@ -213,51 +213,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
   }
 }
 
-class _CustomRangeValueIndicatorShape extends RangeSliderValueIndicatorShape {
-  _CustomRangeValueIndicatorShape() : _customValueIndicatorShape = _CustomValueIndicatorShape();
-
-  final SliderComponentShape _customValueIndicatorShape;
-
-  @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete, {TextPainter labelPainter}) {
-    return _customValueIndicatorShape.getPreferredSize(isEnabled, isDiscrete);
-  }
-
-  @override
-  void paint(
-      PaintingContext context,
-      Offset center, {
-      Animation<double> activationAnimation,
-      Animation<double> enableAnimation,
-      bool isDiscrete,
-      bool isOnTop,
-      TextPainter labelPainter,
-      RenderBox parentBox,
-      SliderThemeData sliderTheme,
-      TextDirection textDirection,
-      double value,
-      Thumb thumb,
-    }) {
-    _customValueIndicatorShape.paint(
-      context,
-      center.translate(-5, 0),
-      activationAnimation: activationAnimation,
-      enableAnimation: enableAnimation,
-      isDiscrete: isDiscrete,
-      labelPainter: labelPainter,
-      parentBox: parentBox,
-      sliderTheme: sliderTheme,
-      textDirection: textDirection,
-      value: value,
-    );
-  }
-
-}
-
 class _SliderDemoState extends State<SliderDemo> {
-  double _value = 25.0;
-  double _discreteValue = 20.0;
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
@@ -416,7 +372,6 @@ class _RangeSlidersState extends State<_RangeSliders> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: Column(
@@ -474,10 +429,8 @@ class _RangeSlidersState extends State<_RangeSliders> {
                   inactiveTickMarkColor: Colors.black,
                   overlayColor: Colors.black12,
                   thumbColor: Colors.deepPurple,
-                  valueIndicatorColor: Colors.deepPurpleAccent,
                   rangeThumbShape: _CustomRangeThumbShape(),
-                  rangeValueIndicatorShape: _CustomRangeValueIndicatorShape(),
-                  valueIndicatorTextStyle: theme.accentTextTheme.body2.copyWith(color: Colors.black87),
+                  showValueIndicator: ShowValueIndicator.never,
                 ),
                 child: RangeSlider(
                   values: _discreteCustomValues,
