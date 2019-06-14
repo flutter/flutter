@@ -21,18 +21,15 @@ import 'constants.dart';
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample}
 ///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
-/// ```dart imports
-/// import 'dart:math' as math;
+/// ```dart
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart main
 /// void main() => runApp(MyApp());
 ///
 /// class MyApp extends StatelessWidget {
@@ -43,13 +40,11 @@ import 'constants.dart';
 ///       theme: ThemeData(
 ///         primarySwatch: Colors.blue,
 ///       ),
-///       home: MyTabbedPage(title: 'Dynamic tabs demo'),
+///       home: MyTabbedPage(),
 ///     );
 ///   }
 /// }
-/// ```
 ///
-/// ```dart
 /// class MyTabbedPage extends StatefulWidget {
 ///   const MyTabbedPage({ Key key }) : super(key: key);
 ///   @override
@@ -108,16 +103,14 @@ import 'constants.dart';
 /// To dynamically add or remove tabs, TabController has to be updated without
 /// creating a new [AnimationController].
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample}
 ///
 /// A sample application dynamically adds and removes tabs.
 ///
-/// ```dart imports
+/// ```dart
 /// import 'dart:math' as math;
 /// import 'package:flutter/material.dart';
-/// ```
 ///
-/// ```dart main
 /// void main() => runApp(MyApp());
 ///
 /// class MyApp extends StatelessWidget {
@@ -132,9 +125,7 @@ import 'constants.dart';
 ///     );
 ///   }
 /// }
-/// ```
 ///
-/// ```dart
 /// class MyTabbedPage extends StatefulWidget {
 ///   MyTabbedPage({Key key, this.title}) : super(key: key);
 ///
@@ -219,7 +210,7 @@ import 'constants.dart';
 ///           final String label = tab.text.toLowerCase();
 ///           return Center(
 ///             child: Text(
-///               'This is the $label tab',
+///               'This is the tab $label',
 ///               style: const TextStyle(fontSize: 36),
 ///             ),
 ///           );
