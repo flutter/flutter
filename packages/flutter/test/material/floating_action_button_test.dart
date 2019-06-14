@@ -763,6 +763,22 @@ void main() {
       paintsExactlyCountTimes(#clipPath, 0),
     );
   });
+
+  testWidgets('Can find FloatingActionButton semantics', (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: FloatingActionButton(onPressed: () {}),
+    ));
+
+    expect(
+      tester.getSemantics(find.byType(FloatingActionButton)),
+      matchesSemantics(
+        hasTapAction: true,
+        hasEnabledState: true,
+        isButton: true,
+        isEnabled: true,
+      ),
+    );
+  }, semanticsEnabled: true);
 }
 
 Offset _rightEdgeOfFab(WidgetTester tester) {
