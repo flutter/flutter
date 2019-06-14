@@ -385,20 +385,12 @@ class OutlineInputBorder extends InputBorder {
   }
 
   Path _gapBorderPath(Canvas canvas, RRect center, double start, double extent) {
-
-    print(center.tlRadiusX * 2.0);
-    print(center.tlRadiusY * 2.0);
-    print(center.height / 2.0);
     Rect trCorner;
     Rect brCorner;
     if (center.trRadiusY + center.brRadiusY > center.height) {
-      // find ratio of radii
       final double adjustedTopRightRadius = center.trRadiusY / (center.trRadiusY + center.brRadiusY) * center.height;
       final double adjustedBottomRightRadius = center.brRadiusY / (center.trRadiusY + center.brRadiusY) * center.height;
 
-      // convert radii to appropriate doubles that add up to height
-
-      // apply these to trCorner and trCorner
       trCorner = Rect.fromLTWH(
         center.right - adjustedTopRightRadius * 2.0,
         center.top,
@@ -426,57 +418,78 @@ class OutlineInputBorder extends InputBorder {
       );
     }
 
-    final Rect tlCorner = Rect.fromLTWH(
-      center.left,
-      center.top,
-      center.tlRadiusX * 2.0,
-      center.tlRadiusY * 2.0,
-      // math.min(center.tlRadiusX * 2.0, center.height / 2.0),
-      // math.min(center.tlRadiusY * 2.0, center.height / 2.0),
-    );
-    final Rect blCorner = Rect.fromLTWH(
-      center.left,
-      center.bottom - center.brRadiusY * 2.0,
-      center.blRadiusX * 2.0,
-      center.blRadiusX * 2.0
-      // math.min(center.blRadiusX * 2.0, center.height / 2.0),
-      // math.min(center.blRadiusY * 2.0, center.height / 2.0),
-    );
+    Rect tlCorner;
+    Rect blCorner;
+
+    if (center.tlRadiusY + center.blRadiusY > center.height) {
+      final double adjustedTopLeftRadius = center.tlRadiusY / (center.tlRadiusY + center.blRadiusY) * center.height;
+      final double adjustedBottomLeftRadius = center.blRadiusY / (center.tlRadiusY + center.blRadiusY) * center.height;
+
+      tlCorner = Rect.fromLTWH(
+        center.left,
+        center.top,
+        adjustedTopLeftRadius,
+        adjustedTopLeftRadius,
+      );
+      blCorner = Rect.fromLTWH(
+        center.left,
+        center.bottom - adjustedBottomLeftRadius * 2.0,
+        adjustedBottomLeftRadius * 2.0,
+        adjustedBottomLeftRadius * 2.0,
+      );
+    } else {
+      tlCorner = Rect.fromLTWH(
+        center.left,
+        center.top,
+        center.tlRadiusX * 2.0,
+        center.tlRadiusY * 2.0,
+      );
+      blCorner = Rect.fromLTWH(
+        center.left,
+        center.bottom - center.blRadiusY * 2.0,
+        center.blRadiusX * 2.0,
+        center.blRadiusX * 2.0,
+      );
+    }
+
+    final double tlRadius = tlCorner.height / 2.0;
+    final double blRadius = blCorner.height / 2.0;
 
     const double cornerArcSweep = math.pi / 2.0;
-    final double tlCornerArcSweep = start < center.tlRadiusX
-      ? math.asin((start / center.tlRadiusX).clamp(-1.0, 1.0))
+    final double tlCornerArcSweep = start < tlRadius
+      ? math.asin((start / tlRadius).clamp(-1.0, 1.0))
       : math.pi / 2.0;
 
     final Path path = Path()
       ..addArc(tlCorner, math.pi, tlCornerArcSweep)
-      ..moveTo(center.left + center.tlRadiusX, center.top);
+      ..moveTo(center.left + tlRadius, center.top);
 
-    if (start > center.tlRadiusX)
+    if (start > tlRadius)
       path.lineTo(center.left + start, center.top);
+
+    final double trRadius = trCorner.height / 2.0;
+    final double brRadius = brCorner.height / 2.0;
 
     const double trCornerArcStart = (3 * math.pi) / 2.0;
     const double trCornerArcSweep = cornerArcSweep;
-    if (start + extent < center.width - center.trRadiusX) {
+    if (start + extent < center.width - trRadius) {
       path
         ..relativeMoveTo(extent, 0.0)
-        ..lineTo(center.right - center.trRadiusX, center.top)
+        ..lineTo(center.right - trRadius, center.top)
         ..addArc(trCorner, trCornerArcStart, trCornerArcSweep);
     } else if (start + extent < center.width) {
       final double dx = center.width - (start + extent);
-      final double sweep = math.acos(dx / center.trRadiusX);
+      final double sweep = math.acos(dx / trRadius);
       path.addArc(trCorner, trCornerArcStart + sweep, trCornerArcSweep - sweep);
     }
 
-    // fix pathing here for tr and br for both cases
-
     return path
-      ..moveTo(center.right, center.top + trCorner.height / 2.0)
-      ..lineTo(center.right, center.bottom - brCorner.height / 2.0)
+      ..moveTo(center.right, center.top + trRadius)
+      ..lineTo(center.right, center.bottom - brRadius)
       ..addArc(brCorner, 0.0, cornerArcSweep)
-      ..lineTo(center.left + center.blRadiusX, center.bottom)
+      ..lineTo(center.left + blRadius, center.bottom)
       ..addArc(blCorner, math.pi / 2.0, cornerArcSweep)
-      ..lineTo(center.left, center.top + center.trRadiusY);
+      ..lineTo(center.left, center.top + tlRadius);
   }
 
   /// Draw a rounded rectangle around [rect] using [borderRadius].
