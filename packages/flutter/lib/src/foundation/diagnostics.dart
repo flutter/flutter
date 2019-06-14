@@ -2866,7 +2866,9 @@ String describeEnum(Object enumEntry) {
 class DiagnosticPropertiesBuilder {
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
-    properties.add(property);
+    if (!kReleaseMode) {
+      properties.add(property);
+    }
   }
 
   /// List of properties accumulated so far.
