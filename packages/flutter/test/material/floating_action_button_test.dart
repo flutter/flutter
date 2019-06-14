@@ -766,9 +766,8 @@ void main() {
 
   testWidgets('Can find FloatingActionButton semantics', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
-        home: FloatingActionButton(
-      onPressed: () {},
-    )));
+      home: FloatingActionButton(onPressed: () {}),
+    ));
 
     expect(
       tester.getSemantics(find.byType(FloatingActionButton)),
