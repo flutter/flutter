@@ -21,9 +21,9 @@ import 'constants.dart';
 /// ancestor, a [TabController] can be shared by providing a
 /// [DefaultTabController] inherited widget.
 ///
-/// {@tool sample}
-///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
+///
+/// {@tool sample}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
