@@ -38,11 +38,12 @@ class FlutterVersion {
     return !<String>['dev', 'beta', 'stable'].contains(branchName);
   }
 
-  static const Set<String> officialChannels = <String>{
-    'master',
-    'dev',
-    'beta',
-    'stable',
+  /// This maps the officialChannels ordered by stability.
+  static const Map<String, int> officialChannels = <String, int>{
+    'master': 0,
+    'dev': 1,
+    'beta': 2,
+    'stable': 3,
   };
 
   /// This maps old branch names to the names of branches that replaced them.
@@ -203,7 +204,7 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
+      if (!officialChannels.containsKey(_branch) && !obsoleteBranches.containsKey(_branch))
         return '[user-branch]';
     }
     return _branch;
@@ -285,7 +286,7 @@ class FlutterVersion {
   /// writes shared cache files.
   Future<void> checkFlutterVersionFreshness() async {
     // Don't perform update checks if we're not on an official channel.
-    if (!officialChannels.contains(channel)) {
+    if (!officialChannels.containsKey(channel)) {
       return;
     }
 

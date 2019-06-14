@@ -56,8 +56,10 @@ class ChannelCommand extends FlutterCommand {
     final String currentChannel = FlutterVersion.instance.channel;
     final String currentBranch = FlutterVersion.instance.getBranchName();
     final Set<String> seenChannels = <String>{};
+    final List<String> orderedByStabilityChannels = List<String>.filled(FlutterVersion.officialChannels.length, '');
     final List<String> rawOutput = <String>[];
 
+    int counter = 0;
     showAll = showAll || currentChannel != currentBranch;
 
     printStatus('Flutter channels:');
@@ -75,11 +77,20 @@ class ChannelCommand extends FlutterCommand {
           return null;
         }
         seenChannels.add(branchName);
-        if (branchName == currentBranch)
-          return '* $branchName';
-        if (!branchName.startsWith('HEAD ') &&
-            (showAll || FlutterVersion.officialChannels.contains(branchName)))
-          return '  $branchName';
+
+        if (!branchName.startsWith('HEAD ')) {
+          if (showAll)
+            return '  $branchName';
+          if (FlutterVersion.officialChannels.containsKey(branchName)) {
+            final String prefix = branchName == currentBranch ? '* ' : '  ';
+            orderedByStabilityChannels[FlutterVersion.officialChannels[branchName]] = '$prefix$branchName';
+            counter++;
+          }
+        }
+        if(counter == orderedByStabilityChannels.length) {
+          counter = -1;
+          return orderedByStabilityChannels.join('\n');
+        }
         return null;
       },
     );
@@ -94,7 +105,7 @@ class ChannelCommand extends FlutterCommand {
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
       printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
-    } else if (!FlutterVersion.officialChannels.contains(branchName)) {
+    } else if (!FlutterVersion.officialChannels.containsKey(branchName)) {
       printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     return _checkout(branchName);

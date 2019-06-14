@@ -52,6 +52,24 @@ void main() {
       expect(testLogger.statusText, contains('Flutter channels:'));
     }
 
+    Future<void> simpleChannelTestOrderedByStability(List<String> args) async {
+      final ChannelCommand command = ChannelCommand();
+      final CommandRunner<void> runner = createTestCommandRunner(command);
+      await runner.run(args);
+      expect(testLogger.errorText, hasLength(0));
+      // The bots may return an empty list of channels (network hiccup?)
+      // and when run locally the list of branches might be different
+      // so we check for the header text rather than any specific channel name.
+      final List<String> tmpChannels = testLogger.statusText.toString().split('\n');
+      final List<String> channels = tmpChannels.sublist(1, tmpChannels.length - 1);
+
+      expect(testLogger.statusText, contains('Flutter channels:'));
+      expect(channels[0], '  master');
+      expect(channels[1], '  dev');
+      expect(channels[2], '  beta');
+      expect(channels[3], '  stable');
+    }
+
     testUsingContext('list', () async {
       await simpleChannelTest(<String>['channel']);
     });
@@ -60,13 +78,19 @@ void main() {
       await simpleChannelTest(<String>['channel', '-v']);
     });
 
+    testUsingContext('list ordered by stability', () async {
+      await simpleChannelTestOrderedByStability(<String>['channel']);
+    });
+
     testUsingContext('removes duplicates', () async {
       final Process process = createMockProcess(
           stdout: 'origin/dev\n'
                   'origin/beta\n'
+                  'origin/master\n'
                   'origin/stable\n'
                   'upstream/dev\n'
                   'upstream/beta\n'
+                  'upstream/master\n'
                   'upstream/stable\n');
       when(mockProcessManager.start(
         <String>['git', 'branch', '-r'],
@@ -93,7 +117,7 @@ void main() {
         .where((String line) => line?.isNotEmpty == true)
         .skip(1); // remove `Flutter channels:` line
 
-      expect(rows, <String>['dev', 'beta', 'stable']);
+      expect(rows, <String>['master', 'dev', 'beta', 'stable']);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

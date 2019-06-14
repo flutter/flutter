@@ -57,7 +57,7 @@ class UpgradeCommandRunner {
     if (!force && gitTagVersion == const GitTagVersion.unknown()) {
       // If the commit is a recognized branch and not master,
       // explain that we are avoiding potential damage.
-      if (flutterVersion.channel != 'master' && FlutterVersion.officialChannels.contains(flutterVersion.channel)) {
+      if (flutterVersion.channel != 'master' && FlutterVersion.officialChannels.containsKey(flutterVersion.channel)) {
         throwToolExit(
           'Unknown flutter tag. Abandoning upgrade to avoid destroying local '
           'changes. It is recommended to use git directly if not working on '
