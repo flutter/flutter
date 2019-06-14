@@ -286,7 +286,7 @@ class SingleViewPresentation extends Presentation {
         public WindowManager getWindowManager() {
             return (WindowManager) Proxy.newProxyInstance(
                     WindowManager.class.getClassLoader(),
-                    new Class[] { WindowManager.class },
+                    new Class<?>[] { WindowManager.class },
                     this
             );
         }

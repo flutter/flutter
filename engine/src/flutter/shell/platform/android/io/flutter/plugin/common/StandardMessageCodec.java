@@ -286,7 +286,7 @@ public class StandardMessageCodec implements MessageCodec<Object> {
             stream.write(MAP);
             final Map<?, ?> map = (Map) value;
             writeSize(stream, map.size());
-            for (final Entry entry: map.entrySet()) {
+            for (final Entry<?, ?> entry: map.entrySet()) {
                 writeValue(stream, entry.getKey());
                 writeValue(stream, entry.getValue());
             }
