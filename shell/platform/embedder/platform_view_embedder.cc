@@ -49,12 +49,10 @@ void PlatformViewEmbedder::HandlePlatformMessage(
     return;
   }
 
-  if (!message->response()) {
-    return;
-  }
-
   if (platform_dispatch_table_.platform_message_response_callback == nullptr) {
-    message->response()->CompleteEmpty();
+    if (message->response()) {
+      message->response()->CompleteEmpty();
+    }
     return;
   }
 
