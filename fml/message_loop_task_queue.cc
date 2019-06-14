@@ -5,6 +5,7 @@
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/fml/message_loop_task_queue.h"
+#include "flutter/fml/message_loop_impl.h"
 
 namespace fml {
 
@@ -17,11 +18,11 @@ void MessageLoopTaskQueue::Dispose() {
   delayed_tasks_ = {};
 }
 
-fml::TimePoint MessageLoopTaskQueue::RegisterTask(fml::closure task,
-                                                  fml::TimePoint target_time) {
+void MessageLoopTaskQueue::RegisterTask(fml::closure task,
+                                        fml::TimePoint target_time) {
   std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
   delayed_tasks_.push({++order_, std::move(task), target_time});
-  return delayed_tasks_.top().GetTargetTime();
+  WakeUp(delayed_tasks_.top().GetTargetTime());
 }
 
 bool MessageLoopTaskQueue::HasPendingTasks() {
@@ -29,7 +30,7 @@ bool MessageLoopTaskQueue::HasPendingTasks() {
   return !delayed_tasks_.empty();
 }
 
-fml::TimePoint MessageLoopTaskQueue::GetTasksToRunNow(
+void MessageLoopTaskQueue::GetTasksToRunNow(
     FlushType type,
     std::vector<fml::closure>& invocations) {
   std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
@@ -48,9 +49,15 @@ fml::TimePoint MessageLoopTaskQueue::GetTasksToRunNow(
   }
 
   if (delayed_tasks_.empty()) {
-    return fml::TimePoint::Max();
+    WakeUp(fml::TimePoint::Max());
   } else {
-    return delayed_tasks_.top().GetTargetTime();
+    WakeUp(delayed_tasks_.top().GetTargetTime());
+  }
+}
+
+void MessageLoopTaskQueue::WakeUp(fml::TimePoint time) {
+  if (wakeable_) {
+    wakeable_->WakeUp(time);
   }
 }
 
@@ -92,6 +99,10 @@ void MessageLoopTaskQueue::Swap(MessageLoopTaskQueue& other)
 
   std::swap(task_observers_, other.task_observers_);
   std::swap(delayed_tasks_, other.delayed_tasks_);
+}
+
+void MessageLoopTaskQueue::SetWakeable(fml::Wakeable* wakeable) {
+  wakeable_ = wakeable;
 }
 
 }  // namespace fml
