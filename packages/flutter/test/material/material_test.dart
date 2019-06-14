@@ -619,7 +619,7 @@ void main() {
         matchesGoldenFile('material.border_paint_above.png', version: null),
         skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('border is painted below child when specified', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
@@ -660,6 +660,6 @@ void main() {
         matchesGoldenFile('material.border_paint_below.png', version: null),
         skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
   });
 }

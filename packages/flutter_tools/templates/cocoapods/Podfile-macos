@@ -46,6 +46,8 @@ def pubspec_supports_macos(file)
 end
 
 target 'Runner' do
+  use_frameworks!
+
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.
   ephemeral_dir = File.join('Flutter', 'ephemeral')

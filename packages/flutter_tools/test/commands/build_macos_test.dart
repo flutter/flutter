@@ -19,24 +19,34 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
-  Cache.disableLocking();
-  final MockProcessManager mockProcessManager = MockProcessManager();
-  final MemoryFileSystem memoryFilesystem = MemoryFileSystem();
-  final MockProcess mockProcess = MockProcess();
-  final MockPlatform macosPlatform = MockPlatform();
-  final MockPlatform notMacosPlatform = MockPlatform();
+  MockProcessManager mockProcessManager;
+  MemoryFileSystem memoryFilesystem;
+  MockProcess mockProcess;
+  MockPlatform macosPlatform;
+  MockPlatform notMacosPlatform;
 
-  when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
+  setUp(() {
+    mockProcessManager = MockProcessManager();
+    memoryFilesystem = MemoryFileSystem();
+    mockProcess = MockProcess();
+    macosPlatform = MockPlatform();
+    notMacosPlatform = MockPlatform();
+    when(mockProcess.exitCode).thenAnswer((Invocation invocation) async {
     return 0;
+    });
+    when(mockProcess.stderr).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(mockProcess.stdout).thenAnswer((Invocation invocation) {
+      return const Stream<List<int>>.empty();
+    });
+    when(macosPlatform.isMacOS).thenReturn(true);
+    when(notMacosPlatform.isMacOS).thenReturn(false);
   });
-  when(mockProcess.stderr).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
-  });
-  when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-    return const Stream<List<int>>.empty();
-  });
-  when(macosPlatform.isMacOS).thenReturn(true);
-  when(notMacosPlatform.isMacOS).thenReturn(false);
 
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();

@@ -52,7 +52,7 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap()));
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate())));
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
@@ -1187,7 +1187,7 @@ void main() {
     expect(missing.isFiltered(DiagnosticLevel.info), isFalse);
     validateObjectFlagPropertyJsonSerialization(present);
     validateObjectFlagPropertyJsonSerialization(missing);
-  });
+  }, skip: isBrowser);
 
   test('describe bool property', () {
     final FlagProperty yes = FlagProperty(

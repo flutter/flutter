@@ -49,14 +49,24 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 ///
 /// The callback can be asynchronous (using `async`/`await` or
 /// using explicit [Future]s).
-/// Tests using the [AutomatedTestWidgetsFlutterBinding]
-/// have a default time out of two seconds,
-/// which is automatically increased for some expensive operations,
-/// and can also be manually increased by calling
-/// [AutomatedTestWidgetsFlutterBinding.addTime].
-/// The maximum that this timeout can reach (automatically or manually increased)
-/// is defined by the timeout property,
-/// which defaults to [TestWidgetsFlutterBinding.defaultTestTimeout].
+///
+/// There are two kinds of timeouts that can be specified. The `timeout`
+/// argument specifies the backstop timeout implemented by the `test` package.
+/// If set, it should be relatively large (minutes). It defaults to ten minutes
+/// for tests run by `flutter test`, and is unlimited for tests run by `flutter
+/// run`; specifically, it defaults to
+/// [TestWidgetsFlutterBinding.defaultTestTimeout].
+///
+/// The `initialTimeout` argument specifies the timeout implemented by the
+/// `flutter_test` package itself. If set, it may be relatively small (seconds),
+/// as it is automatically increased for some expensive operations, and can also
+/// be manually increased by calling
+/// [AutomatedTestWidgetsFlutterBinding.addTime]. The effective maximum value of
+/// this timeout (even after calling `addTime`) is the one specified by the
+/// `timeout` argument.
+///
+/// In general, timeouts are race conditions and cause flakes, so best practice
+/// is to avoid the use of timeouts in tests.
 ///
 /// If the `enableSemantics` parameter is set to `true`,
 /// [WidgetTester.ensureSemantics] will have been called before the tester is
@@ -89,11 +99,11 @@ void testWidgets(
   WidgetTesterCallback callback, {
   bool skip = false,
   test_package.Timeout timeout,
+  Duration initialTimeout,
   bool semanticsEnabled = false,
 }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
   final WidgetTester tester = WidgetTester._(binding);
-  timeout ??= binding.defaultTestTimeout;
   test(
     description,
     () {
@@ -110,10 +120,11 @@ void testWidgets(
         },
         tester._endOfTestVerifications,
         description: description ?? '',
+        timeout: initialTimeout,
       );
     },
     skip: skip,
-    timeout: timeout,
+    timeout: timeout ?? binding.defaultTestTimeout,
   );
 }
 
@@ -133,8 +144,10 @@ void testWidgets(
 /// If the callback is asynchronous, make sure you `await` the call
 /// to [benchmarkWidgets], otherwise it won't run!
 ///
-/// Benchmarks must not be run in checked mode. To avoid this, this
-/// function will print a big message if it is run in checked mode.
+/// Benchmarks must not be run in checked mode, because the performance is not
+/// representative. To avoid this, this function will print a big message if it
+/// is run in checked mode. Unit tests of this method pass `mayRunWithAsserts`,
+/// but it should not be used for actual benchmarking.
 ///
 /// Example:
 ///
@@ -152,8 +165,11 @@ void testWidgets(
 ///       });
 ///       exit(0);
 ///     }
-Future<void> benchmarkWidgets(WidgetTesterCallback callback) {
+Future<void> benchmarkWidgets(WidgetTesterCallback callback, {bool mayRunWithAsserts = false}) {
   assert(() {
+    if (mayRunWithAsserts)
+      return true;
+
     print('┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓');
     print('┇ ⚠ THIS BENCHMARK IS BEING RUN WITH ASSERTS ENABLED ⚠  ┇');
     print('┡╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┦');

@@ -19,7 +19,7 @@ void main() {
   },
     // Skip on Windows because this test is quite flaky when run on Windows,
     // until https://github.com/flutter/flutter/issues/19696 is fixed.
-    skip: isWindows,
+    skip: isWindows || isBrowser,
   );
 }
 
