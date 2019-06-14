@@ -533,6 +533,14 @@ class FlutterDriver {
   /// The `includeProperties` argument controls whether properties of the
   /// [DiagnosticsNode]s will be included in the result. It defaults to true.
   ///
+  /// [RenderObject]s are responsible for positioning, layout, and painting on
+  /// the screen, based on the configuration from a [Widget]. Callers that need
+  /// information about size or position should use this method.
+  ///
+  /// A widget may indirectly create multiple [RenderObject]s, which each
+  /// implement some aspect of the widget configuration. A 1:1 relationship
+  /// should not be assumed.
+  ///
   /// See also:
   ///
   ///  * [getWidgetDiagnostics], which gets the [DiagnosticsNode] of a [Widget].
@@ -560,6 +568,10 @@ class FlutterDriver {
   ///
   /// The `includeProperties` argument controls whether properties of the
   /// [DiagnosticsNode]s will be included in the result. It defaults to true.
+  ///
+  /// [Widget]s describe configuration for the rendering tree. Individual
+  /// widgets may create multiple [RenderObject]s to actually layout and paint
+  /// the desired configuration.
   ///
   /// See also:
   ///
