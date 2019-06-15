@@ -13,7 +13,7 @@ gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
 gcloud --quiet config set project flutter-infra
 
 # Run the test.
-if gcloud firebase test android run --type robo \
+gcloud firebase test android run --type robo \
   --app build/app/outputs/apk/release/app-armeabi-v7a-release.apk \
   --timeout 2m \
   --results-bucket=gs://flutter_firebase_testlab \
