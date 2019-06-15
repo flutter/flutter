@@ -17,7 +17,7 @@ gcloud firebase test android run --type robo \
   --app build/app/outputs/bundle/release/app.aab \
   --timeout 2m \
   --results-bucket=gs://flutter_firebase_testlab \
-  --results-dir=relesase_smoke_test/$GIT_REVISION/$CIRRUS_BUILD_ID
+  --results-dir=release_smoke_test/$GIT_REVISION/$CIRRUS_BUILD_ID
 
 # Check logcat for "E/flutter" - if it's there, something's wrong.
 gsutil cp gs://flutter_firebase_testlab/release_smoke_test/$GIT_REVISION/$CIRRUS_BUILD_ID/walleye-26-en-portrait/logcat /tmp/logcat
