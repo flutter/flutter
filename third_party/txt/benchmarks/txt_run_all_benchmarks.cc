@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include "third_party/benchmark/include/benchmark/benchmark_api.h"
-
 #include "flutter/fml/icu_util.h"
 #include "flutter/fml/logging.h"
 #include "flutter/third_party/txt/tests/txt_test_utils.h"
+#include "third_party/benchmark/include/benchmark/benchmark_api.h"
 
 // We will use a custom main to allow custom font directories for consistency.
 int main(int argc, char** argv) {
