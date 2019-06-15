@@ -97,9 +97,11 @@ void main() {
 
       final VMExtensionEvent navigationEvent = await navigationFuture;
       // validate the fields
-      expect(navigationEvent.data['routeDescription'] is String);
-      expect(navigationEvent.data['settings'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> settings = navigationEvent.data['settings'];
+      expect(navigationEvent.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.data['route'];
+      expect(route['description'] is String);
+      expect(route['settings'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> settings = route['settings'];
       expect(settings.containsKey('name'));
       expect(settings['isInitialRoute'] is bool);
 

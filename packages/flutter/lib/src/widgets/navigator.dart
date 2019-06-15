@@ -1771,28 +1771,36 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       // Among other uses, performance tools use this event to ensure that perf
       // stats reflect the time interval since the last navigation event
       // occurred, ensuring that stats only reflect the current page.
-      String description;
-      if (route is TransitionRoute<T>) {
-        final TransitionRoute<T> transitionRoute = route;
-        description = transitionRoute.debugLabel;
-      } else if (route != null) {
-        description = '$route';
+
+      Map<String, dynamic> routeJsonable;
+      if (route != null) {
+        routeJsonable = <String, dynamic>{};
+
+        String description;
+        if (route is TransitionRoute<T>) {
+          final TransitionRoute<T> transitionRoute = route;
+          description = transitionRoute.debugLabel;
+        } else {
+          description = '$route';
+        }
+        routeJsonable['description'] = description;
+
+        final RouteSettings settings = route.settings;
+        final Map<String, dynamic> settingsJsonable = <String, dynamic> {
+          'name': settings.name,
+          'isInitialRoute': settings.isInitialRoute,
+        };
+        if (settings.arguments != null) {
+          settingsJsonable['arguments'] = jsonEncode(
+            settings.arguments,
+            toEncodable: (Object object) => '$object',
+          );
+        }
+        routeJsonable['settings'] = settingsJsonable;
       }
 
-      final RouteSettings settings = route.settings;
-      final Map<String, dynamic> settingsJsonable = <String, dynamic> {
-        'name': settings.name,
-        'isInitialRoute': settings.isInitialRoute,
-      };
-      if (settings.arguments != null) {
-        settingsJsonable['arguments'] = jsonEncode(
-          settings.arguments,
-          toEncodable: (Object object) => '$object',
-        );
-      }
       developer.postEvent('Flutter.Navigation', <String, dynamic>{
-        'routeDescription': description,
-        'settings' : settingsJsonable,
+        'route': routeJsonable,
       });
     }
     _cancelActivePointers();
