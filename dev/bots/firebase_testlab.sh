@@ -2,7 +2,7 @@
 
 set -e
 
-git_revision = $(git rev-parse HEAD)
+GIT_REVISION=$(git rev-parse HEAD)
 
 pushd examples/hello_world
 
@@ -17,9 +17,9 @@ if gcloud firebase test android run --type robo \
   --app build/app/outputs/apk/release/app-armeabi-v7a-release.apk \
   --timeout 2m \
   --results-bucket=gs://flutter_firebase_testlab \
-  --results-dir=release_smoketests/hello_world/$git_revision
+  --results-dir=release_smoketests/hello_world/$GIT_REVISION
 
 # Check logcat for "E/flutter" - if it's there, something's wrong.
-! gsutil cat gs://flutter_firebase_testlab/release_smoketests/hello_world/$git_revision/walleye-26-en-portrait/logcat | grep "E/flutter" || false
+! gsutil cat gs://flutter_firebase_testlab/release_smoketests/hello_world/$GIT_REVISION/walleye-26-en-portrait/logcat | grep "E/flutter" || false
 
 popd
