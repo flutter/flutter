@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
@@ -547,6 +548,14 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, isNull);
+    });
+
+    testUsingContext('SocketException during query throws ToolExit', () async {
+      final MDnsClient client = MockMDnsClient();
+      when(client.lookup(any)).thenThrow(const SocketException('error'));
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      expect(portDiscovery.query(), throwsA(isInstanceOf<ToolExit>()));
     });
   });
 }

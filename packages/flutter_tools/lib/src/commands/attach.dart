@@ -499,6 +499,12 @@ class MDnsObservatoryDiscovery {
         }
       }
       return MDnsObservatoryDiscoveryResult(srv.first.port, authCode);
+    } on SocketException catch (error) {
+      throwToolExit(
+          'Failed to discovery Flutter observatory: '
+          '$error.'
+      );
+      return null;
     } finally {
       client.stop();
     }
