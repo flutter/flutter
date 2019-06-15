@@ -6,7 +6,7 @@ GIT_REVISION=$(git rev-parse HEAD)
 
 pushd dev/integration_tests/release_smoke_test
 
-../../bin/flutter build appbundle --target-platform android-arm,android-arm64
+../../../bin/flutter build appbundle --target-platform android-arm,android-arm64
 
 echo $GCLOUD_FIREBASE_TESTLAB_KEY > ${HOME}/gcloud-service-key.json
 gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
