@@ -448,17 +448,17 @@ void main() {
             TestSemantics(
               label: ' in the ',
               textDirection: TextDirection.ltr,
-              rect: const Rect.fromLTRB(220.0, 48.0, 452.0, 84.0),
+              rect: const Rect.fromLTRB(-4.0, -4.0, 452.0, 84.0),
             ),
             TestSemantics(
               label: 'INTERRUPTION',
               textDirection: TextDirection.rtl,
-              rect: const Rect.fromLTRB(448.0, 0.0, 488.0, 80.0),
+              rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 80.0),
             ),
             TestSemantics(
               label: 'sky',
               textDirection: TextDirection.ltr,
-              rect: const Rect.fromLTRB(484.0, 48.0, 576.0, 84.0),
+              rect: const Rect.fromLTRB(-4.0, -4.0, 576.0, 84.0),
             ),
           ],
         ),
