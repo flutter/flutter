@@ -54,7 +54,7 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The vaulues of DevelopmentArtifacts.
-  static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
+  static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[ // TODO!
     android,
     iOS,
     web,
@@ -70,7 +70,7 @@ class DevelopmentArtifact {
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
-  Cache({ Directory rootOverride, List<CachedArtifact> artifacts }) : _rootOverride = rootOverride {
+  Cache({ Directory rootOverride, List<CachedArtifact> artifacts }) : _rootOverride = rootOverride { // TODO!
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
       _artifacts.add(AndroidEngineArtifacts(this));
@@ -88,7 +88,7 @@ class Cache {
     }
   }
 
-  static const List<String> _hostsBlockedInChina = <String> [
+  static const List<String> _hostsBlockedInChina = <String> [ // TODO hmm?!
     'storage.googleapis.com',
   ];
 
@@ -318,7 +318,7 @@ class Cache {
 }
 
 /// An artifact managed by the cache.
-abstract class CachedArtifact {
+abstract class CachedArtifact { // TODO: yolo!
   CachedArtifact(this.name, this.cache, this.developmentArtifacts);
 
   final String name;
