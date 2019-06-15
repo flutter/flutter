@@ -286,27 +286,15 @@ abstract class FlutterCommand extends Command<void> {
     final List<bool> modeFlags = <bool>[argResults['debug'], argResults['profile'], argResults['release']];
     if (modeFlags.where((bool flag) => flag).length > 1)
       throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
-    final bool dynamicFlag = argParser.options.containsKey('dynamic')
-        ? argResults['dynamic']
-        : false;
-
     if (argResults['debug']) {
-      if (dynamicFlag)
-        throw ToolExit('Error: --dynamic requires --release or --profile.');
       return BuildMode.debug;
     }
-    if (argResults['profile'])
-      return dynamicFlag ? BuildMode.dynamicProfile : BuildMode.profile;
-    if (argResults['release'])
-      return dynamicFlag ? BuildMode.dynamicRelease : BuildMode.release;
-
-    if (_defaultBuildMode == BuildMode.debug && dynamicFlag)
-      throw ToolExit('Error: --dynamic requires --release or --profile.');
-    if (_defaultBuildMode == BuildMode.release && dynamicFlag)
-      return BuildMode.dynamicRelease;
-    if (_defaultBuildMode == BuildMode.profile && dynamicFlag)
-      return BuildMode.dynamicProfile;
-
+    if (argResults['profile']) {
+      return BuildMode.profile;
+    }
+    if (argResults['release']) {
+      return BuildMode.release;
+    }
     return _defaultBuildMode;
   }
 
@@ -349,9 +337,6 @@ abstract class FlutterCommand extends Command<void> {
         ? argResults['flavor']
         : null,
       trackWidgetCreation: trackWidgetCreation,
-      compilationTraceFilePath: argParser.options.containsKey('compilation-trace-file')
-          ? argResults['compilation-trace-file']
-          : null,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
           ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
