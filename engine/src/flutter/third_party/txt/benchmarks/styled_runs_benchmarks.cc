@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-#include "third_party/benchmark/include/benchmark/benchmark_api.h"
-
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/logging.h"
 #include "flutter/third_party/txt/tests/txt_test_utils.h"
+#include "third_party/benchmark/include/benchmark/benchmark_api.h"
 #include "txt/styled_runs.h"
 #include "txt/text_style.h"
 
