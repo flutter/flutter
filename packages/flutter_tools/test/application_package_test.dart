@@ -138,18 +138,21 @@ void main() {
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     }, overrides: noColorTerminalOverride);
+
     testUsingContext('Parses manifest with an Activity that has no value for its enabled field, action set to android.intent.action.MAIN and category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDefaultEnabledAndMainLauncherActivity);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity2');
     }, overrides: noColorTerminalOverride);
+
     testUsingContext('Parses manifest with a dist namespace', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithDistNamespace);
       expect(data, isNotNull);
       expect(data.packageName, 'io.flutter.examples.hello_world');
       expect(data.launchableActivityName, 'io.flutter.examples.hello_world.MainActivity');
     }, overrides: noColorTerminalOverride);
+
     testUsingContext('Error when parsing manifest with no Activity that has enabled set to true nor has no value for its enabled field', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoEnabledActivity);
       expect(data, isNull);
@@ -157,6 +160,7 @@ void main() {
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
+
     testUsingContext('Error when parsing manifest with no Activity that has action set to android.intent.action.MAIN', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoMainActivity);
       expect(data, isNull);
@@ -164,6 +168,7 @@ void main() {
       expect(
           logger.errorText, 'Error running io.flutter.examples.hello_world. Default activity not found\n');
     }, overrides: noColorTerminalOverride);
+
     testUsingContext('Error when parsing manifest with no Activity that has category set to android.intent.category.LAUNCHER', () {
       final ApkManifestData data = ApkManifestData.parseFromXmlDump(_aaptDataWithNoLauncherActivity);
       expect(data, isNull);
@@ -180,6 +185,7 @@ void main() {
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
     };
+
     testUsingContext('Error on non-existing file', () {
       final PrebuiltIOSApp iosApp =
           IOSApp.fromPrebuiltApp(fs.file('not_existing.ipa'));
@@ -190,6 +196,7 @@ void main() {
         'File "not_existing.ipa" does not exist. Use an app bundle or an ipa.\n',
       );
     }, overrides: overrides);
+
     testUsingContext('Error on non-app-bundle folder', () {
       fs.directory('regular_folder').createSync();
       final PrebuiltIOSApp iosApp =
@@ -199,6 +206,7 @@ void main() {
       expect(
           logger.errorText, 'Folder "regular_folder" is not an app bundle.\n');
     }, overrides: overrides);
+
     testUsingContext('Error on no info.plist', () {
       fs.directory('bundle.app').createSync();
       final PrebuiltIOSApp iosApp = IOSApp.fromPrebuiltApp(fs.file('bundle.app'));
@@ -209,6 +217,7 @@ void main() {
         'Invalid prebuilt iOS app. Does not contain Info.plist.\n',
       );
     }, overrides: overrides);
+
     testUsingContext('Error on bad info.plist', () {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(badPlistData);
@@ -221,6 +230,7 @@ void main() {
             'Invalid prebuilt iOS app. Info.plist does not contain bundle identifier\n'),
       );
     }, overrides: overrides);
+
     testUsingContext('Success with app bundle', () {
       fs.directory('bundle.app').createSync();
       fs.file('bundle.app/Info.plist').writeAsStringSync(plistData);
@@ -231,6 +241,7 @@ void main() {
       expect(iosApp.id, 'fooBundleId');
       expect(iosApp.bundleName, 'bundle.app');
     }, overrides: overrides);
+
     testUsingContext('Bad ipa zip-file, no payload dir', () {
       fs.file('app.ipa').createSync();
       when(os.unzip(fs.file('app.ipa'), any)).thenAnswer((Invocation _) { });
@@ -242,6 +253,7 @@ void main() {
         'Invalid prebuilt iOS ipa. Does not contain a "Payload" directory.\n',
       );
     }, overrides: overrides);
+
     testUsingContext('Bad ipa zip-file, two app bundles', () {
       fs.file('app.ipa').createSync();
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
@@ -263,6 +275,7 @@ void main() {
       expect(logger.errorText,
           'Invalid prebuilt iOS ipa. Does not contain a single app bundle.\n');
     }, overrides: overrides);
+
     testUsingContext('Success with ipa', () {
       fs.file('app.ipa').createSync();
       when(os.unzip(any, any)).thenAnswer((Invocation invocation) {
@@ -319,6 +332,7 @@ void main() {
       Platform: _kNoColorTerminalPlatform,
       OperatingSystemUtils: () => MockOperatingSystemUtils(),
     };
+
     testUsingContext('Error on non-existing file', () {
       final PrebuiltFuchsiaApp fuchsiaApp =
           FuchsiaApp.fromPrebuiltApp(fs.file('not_existing.far'));
