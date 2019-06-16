@@ -77,4 +77,32 @@ void main() {
       ),
     ));
   });
+
+  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+    await tester.pumpWidget(MaterialApp(
+      home: MediaQuery(
+        data: const MediaQueryData(
+          padding: EdgeInsets.fromLTRB(0, 20, 0, 34)
+        ),
+        child: Scaffold(
+          appBar: AppBar(title: const Text('Title')),
+          body: Scrollbar(
+            child: ListView(
+              children: const <Widget>[SizedBox(width: 40, height: 40)]
+            ),
+          ),
+        ),
+      ),
+    ));
+
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    // On Android it should not overscroll.
+    await gesture.moveBy(const Offset(0, 100));
+    // Trigger fade in animation.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(Scrollbar), isNot(paints..rect()));
+  });
+
 }

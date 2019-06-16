@@ -166,6 +166,7 @@ class FuchsiaPM {
 /// Example usage:
 /// var server = FuchsiaPackageServer(
 ///     '/path/to/repo',
+///     'server_name',
 ///     await FuchsiaDevFinder.resolve(deviceName),
 ///     await freshPort());
 /// try {
@@ -176,7 +177,7 @@ class FuchsiaPM {
 ///   server.stop();
 /// }
 class FuchsiaPackageServer {
-  FuchsiaPackageServer(this._repo, this._host, this._port);
+  FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
 
   final String _repo;
   final String _host;
@@ -186,6 +187,9 @@ class FuchsiaPackageServer {
 
   /// The url that can be used by the device to access this package server.
   String get url => 'http://$_host:$_port';
+
+  // The name used to reference the server by fuchsia-pkg:// urls.
+  final String name;
 
   /// Usees [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.

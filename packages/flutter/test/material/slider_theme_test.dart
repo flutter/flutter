@@ -68,7 +68,6 @@ void main() {
     expect(description, <String>[
       'trackHeight: 7.0',
       'activeTrackColor: Color(0xff000001)',
-      'activeTrackColor: Color(0xff000001)',
       'inactiveTrackColor: Color(0xff000002)',
       'disabledActiveTrackColor: Color(0xff000003)',
       'disabledInactiveTrackColor: Color(0xff000004)',
