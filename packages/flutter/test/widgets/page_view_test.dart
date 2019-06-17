@@ -565,6 +565,51 @@ void main() {
     expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-100.0, 0.0));
   });
 
+  testWidgets('All visible pages are able to receive touch events',
+    (WidgetTester tester) async {
+      final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
+      final List<int> tappedIndices = <int> [];
+      Iterable<int> visiblePages;
+
+      Widget build() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: 20,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () => tappedIndices.add(index),
+                child: SizedBox.expand(child: Text(index.toString())),
+              );
+            },
+          ),
+        );
+      }
+
+      visiblePages = const <int> [0, 1, 2];
+      await tester.pumpWidget(build());
+      // The first 3 items should be visible and tappable.
+      for (int index in visiblePages) {
+        expect(find.text(index.toString()), findsOneWidget);
+        await tester.tap(find.text(index.toString()));
+      }
+
+      expect(tappedIndices, visiblePages);
+
+      tappedIndices.clear();
+      controller.jumpToPage(19);
+      await tester.pump();
+      // The last 3 items should be visible and tappable.
+      visiblePages = const <int> [17, 18, 19];
+      for (int index in visiblePages) {
+        expect(find.text(index.toString()), findsOneWidget);
+        await tester.tap(find.text(index.toString()));
+      }
+
+      expect(tappedIndices, visiblePages);
+  });
+
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
     final PageController controller = PageController(
       initialPage: kStates.length - 1,
