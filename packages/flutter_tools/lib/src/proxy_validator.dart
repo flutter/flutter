@@ -6,9 +6,10 @@ import 'dart:async';
 
 import 'base/platform.dart';
 import 'doctor.dart';
+import 'usage.dart';
 
 class ProxyValidator extends DoctorValidator {
-  ProxyValidator() : super('Proxy Configuration');
+  ProxyValidator() : super('Proxy Configuration', kCommandDoctorProxyValidator);
 
   static bool get shouldShow => _getEnv('HTTP_PROXY').isNotEmpty;
 

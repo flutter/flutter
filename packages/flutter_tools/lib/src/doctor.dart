@@ -31,6 +31,7 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
+import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -128,6 +129,15 @@ class ValidatorTask {
   final Future<ValidationResult> result;
 }
 
+class DiagnoseResult {
+  const DiagnoseResult({
+    this.success,
+    this.usageParams = const <String, String>{}
+  });
+  final bool success;
+  final Map<String, String> usageParams;
+}
+
 class Doctor {
   const Doctor();
 
@@ -201,14 +211,16 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
+  Future<DiagnoseResult> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
     if (androidLicenses)
-      return AndroidLicenseValidator.runLicenseManager();
+      return DiagnoseResult(success: await AndroidLicenseValidator.runLicenseManager());
 
     if (!verbose) {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
     }
-    bool doctorResult = true;
+
+    final Map<String, String> usageParams = <String, String>{};
+    bool doctorSuccess = true;
     int issues = 0;
 
     for (ValidatorTask validatorTask in startValidatorTasks()) {
@@ -228,14 +240,17 @@ class Doctor {
 
       switch (result.type) {
         case ValidationType.missing:
-          doctorResult = false;
+          doctorSuccess = false;
           issues += 1;
+          usageParams[validator.usageParamKey] = 'missing';
           break;
         case ValidationType.partial:
         case ValidationType.notAvailable:
+          usageParams[validator.usageParamKey] = 'partial';
           issues += 1;
           break;
         case ValidationType.installed:
+          usageParams[validator.usageParamKey] = 'installed';
           break;
       }
 
@@ -272,8 +287,7 @@ class Doctor {
     } else {
       printStatus('${terminal.color('•', TerminalColor.green)} No issues found!', hangingIndent: 2);
     }
-
-    return doctorResult;
+    return DiagnoseResult(success: doctorSuccess, usageParams: usageParams);
   }
 
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
@@ -316,9 +330,13 @@ enum ValidationMessageType {
 }
 
 abstract class DoctorValidator {
-  const DoctorValidator(this.title);
+  const DoctorValidator(this.title, this.usageParamKey);
 
+  /// This is displayed in the CLI.
   final String title;
+
+  /// This is the key used to report the [ValidationResult] to Analytics.
+  final String usageParamKey;
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
 
@@ -326,11 +344,15 @@ abstract class DoctorValidator {
 }
 
 /// A validator that runs other [DoctorValidator]s and combines their output
-/// into a single [ValidationResult]. It uses the title of the first validator
-/// passed to the constructor and reports the statusInfo of the first validator
-/// that provides one. Other titles and statusInfo strings are discarded.
+/// into a single [ValidationResult]. It uses the title and the usage param key
+/// of the first validator passed to the constructor and reports the statusInfo
+/// of the first validator that provides one. Other titles and statusInfo strings
+/// are discarded.
 class GroupedValidator extends DoctorValidator {
-  GroupedValidator(this.subValidators) : super(subValidators[0].title);
+  GroupedValidator(this.subValidators) : super(
+    subValidators[0].title,
+    subValidators[0].usageParamKey,
+  );
 
   final List<DoctorValidator> subValidators;
 
@@ -479,7 +501,7 @@ class ValidationMessage {
 }
 
 class FlutterValidator extends DoctorValidator {
-  FlutterValidator() : super('Flutter');
+  FlutterValidator() : super('Flutter', kCommandDoctorFlutterValidator);
 
   @override
   Future<ValidationResult> validate() async {
@@ -522,7 +544,7 @@ bool _genSnapshotRuns(String genSnapshotPath) {
 }
 
 class NoIdeValidator extends DoctorValidator {
-  NoIdeValidator() : super('Flutter IDE Support');
+  NoIdeValidator() : super('Flutter IDE Support', kCommandDoctorNoIdeValidator);
 
   @override
   Future<ValidationResult> validate() async {
@@ -533,7 +555,7 @@ class NoIdeValidator extends DoctorValidator {
 }
 
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title, this.installPath) : super(title);
+  IntelliJValidator(String title, this.installPath) : super(title, kCommandDoctorIntelliJValidator);
 
   final String installPath;
 
@@ -724,7 +746,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  DeviceValidator() : super('Connected device');
+  DeviceValidator() : super('Connected device', kCommandDoctorDeviceValidator);
 
   @override
   String get slowWarning => 'Scanning for devices is taking a long time...';
@@ -754,7 +776,7 @@ class DeviceValidator extends DoctorValidator {
 }
 
 class ValidatorWithResult extends DoctorValidator {
-  ValidatorWithResult(String title, this.result) : super(title);
+  ValidatorWithResult(String title, this.result) : super(title, '');
 
   final ValidationResult result;
 

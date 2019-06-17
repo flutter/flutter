@@ -192,7 +192,7 @@ void main() {
 
   group('doctor with overridden validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
-      expect(await doctor.diagnose(verbose: false), isTrue);
+      expect((await doctor.diagnose(verbose: false)).success, isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -207,10 +207,50 @@ void main() {
     });
   });
 
+  group('doctor usage params', () {
+    testUsingContext('contains installed', () async {
+      final Map<String, String> usageParams = (await doctor.diagnose(verbose: false))
+          .usageParams;
+
+      expect(usageParams, const <String, String>{
+        's15': 'installed',
+        's16': 'installed',
+        's17': 'installed',
+      });
+    }, overrides: <Type, Generator>{
+      DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
+      Platform: _kNoColorOutputPlatform,
+    });
+
+    testUsingContext('contains installed and partial', () async {
+      final Map<String, String> usageParams = (await FakePassingDoctor().diagnose(verbose: false))
+          .usageParams;
+
+      expect(usageParams, const <String, String>{
+        's6': 'installed',
+        's7': 'partial',
+        's8': 'partial',
+        's9': 'installed',
+      });
+    }, overrides: noColorTerminalOverride);
+
+    testUsingContext('contains installed, missing and partial', () async {
+      final Map<String, String> usageParams = (await FakeDoctor().diagnose(verbose: false))
+          .usageParams;
+
+      expect(usageParams, const <String, String>{
+        's1': 'installed',
+        's2': 'missing',
+        's3': 'partial',
+        's4': 'partial',
+        's5': 'partial',
+      });
+    }, overrides: noColorTerminalOverride);
+  });
 
   group('doctor with fake validators', () {
     testUsingContext('validate non-verbose output format for run without issues', () async {
-      expect(await FakeQuietDoctor().diagnose(verbose: false), isTrue);
+      expect((await FakeQuietDoctor().diagnose(verbose: false)).success, isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -223,7 +263,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format when only one category fails', () async {
-      expect(await FakeSinglePassingDoctor().diagnose(verbose: false), isTrue);
+      expect((await FakeSinglePassingDoctor().diagnose(verbose: false)).success, isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[!] Partial Validator with only a Hint\n'
@@ -234,7 +274,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format for a passing run', () async {
-      expect(await FakePassingDoctor().diagnose(verbose: false), isTrue);
+      expect((await FakePassingDoctor().diagnose(verbose: false)).success, isTrue);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -250,7 +290,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate non-verbose output format', () async {
-      expect(await FakeDoctor().diagnose(verbose: false), isFalse);
+      expect((await FakeDoctor().diagnose(verbose: false)).success, isFalse);
       expect(testLogger.statusText, equals(
               'Doctor summary (to see all details, run flutter doctor -v):\n'
               '[✓] Passing Validator (with statusInfo)\n'
@@ -271,7 +311,7 @@ void main() {
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate verbose output format', () async {
-      expect(await FakeDoctor().diagnose(verbose: true), isFalse);
+      expect((await FakeDoctor().diagnose(verbose: true)).success, isFalse);
       expect(testLogger.statusText, equals(
               '[✓] Passing Validator (with statusInfo)\n'
               '    • A helpful message\n'
@@ -307,7 +347,7 @@ void main() {
         environment: anyNamed('environment'),
       )).thenReturn(ProcessResult(101, 1, '', ''));
 
-      expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+      expect((await FlutterValidatorDoctor().diagnose(verbose: false)).success, isTrue);
       final List<String> statusLines = testLogger.statusText.split('\n');
       for (String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
         expect(statusLines, contains(contains(msg)));
@@ -325,7 +365,7 @@ void main() {
   });
 
   testUsingContext('validate non-verbose output wrapping', () async {
-    expect(await FakeDoctor().diagnose(verbose: false), isFalse);
+    expect((await FakeDoctor().diagnose(verbose: false)).success, isFalse);
     expect(testLogger.statusText, equals(
         'Doctor summary (to see all\n'
         'details, run flutter doctor\n'
@@ -359,7 +399,7 @@ void main() {
   });
 
   testUsingContext('validate verbose output wrapping', () async {
-    expect(await FakeDoctor().diagnose(verbose: true), isFalse);
+    expect((await FakeDoctor().diagnose(verbose: true)).success, isFalse);
     expect(testLogger.statusText, equals(
         '[✓] Passing Validator (with\n'
         '    statusInfo)\n'
@@ -406,7 +446,7 @@ void main() {
 
   group('doctor with grouped validators', () {
     testUsingContext('validate diagnose combines validator output', () async {
-      expect(await FakeGroupedDoctor().diagnose(), isTrue);
+      expect((await FakeGroupedDoctor().diagnose()).success, isTrue);
       expect(testLogger.statusText, equals(
               '[✓] Category 1\n'
               '    • A helpful message\n'
@@ -422,7 +462,7 @@ void main() {
 
     testUsingContext('validate merging assigns statusInfo and title', () async {
       // There are two subvalidators. Only the second contains statusInfo.
-      expect(await FakeGroupedDoctorWithStatus().diagnose(), isTrue);
+      expect((await FakeGroupedDoctorWithStatus().diagnose()).success, isTrue);
       expect(testLogger.statusText, equals(
               '[✓] First validator title (A status message)\n'
               '    • A helpful message\n'
@@ -440,47 +480,47 @@ void main() {
     final MissingGroupedValidator missing = MissingGroupedValidator('Category');
 
     testUsingContext('validate installed + installed = installed', () async {
-      expect(await FakeSmallGroupDoctor(installed, installed).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(installed, installed).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[✓]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate installed + partial = partial', () async {
-      expect(await FakeSmallGroupDoctor(installed, partial).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(installed, partial).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate installed + missing = partial', () async {
-      expect(await FakeSmallGroupDoctor(installed, missing).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(installed, missing).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + installed = partial', () async {
-      expect(await FakeSmallGroupDoctor(partial, installed).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(partial, installed).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + partial = partial', () async {
-      expect(await FakeSmallGroupDoctor(partial, partial).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(partial, partial).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate partial + missing = partial', () async {
-      expect(await FakeSmallGroupDoctor(partial, missing).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(partial, missing).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + installed = partial', () async {
-      expect(await FakeSmallGroupDoctor(missing, installed).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(missing, installed).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + partial = partial', () async {
-      expect(await FakeSmallGroupDoctor(missing, partial).diagnose(), isTrue);
+      expect((await FakeSmallGroupDoctor(missing, partial).diagnose()).success, isTrue);
       expect(testLogger.statusText, startsWith('[!]'));
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('validate missing + missing = missing', () async {
-      expect(await FakeSmallGroupDoctor(missing, missing).diagnose(), isFalse);
+      expect((await FakeSmallGroupDoctor(missing, missing).diagnose()).success, isFalse);
       expect(testLogger.statusText, startsWith('[✗]'));
     }, overrides: noColorTerminalOverride);
   });
@@ -497,7 +537,7 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
 }
 
 class PassingValidator extends DoctorValidator {
-  PassingValidator(String name) : super(name);
+  PassingValidator(String name, String usageParamKey) : super(name, usageParamKey);
 
   @override
   Future<ValidationResult> validate() async {
@@ -509,7 +549,7 @@ class PassingValidator extends DoctorValidator {
 }
 
 class MissingValidator extends DoctorValidator {
-  MissingValidator() : super('Missing Validator');
+  MissingValidator(String usageParamKey) : super('Missing Validator', usageParamKey);
 
   @override
   Future<ValidationResult> validate() async {
@@ -522,7 +562,7 @@ class MissingValidator extends DoctorValidator {
 }
 
 class NotAvailableValidator extends DoctorValidator {
-  NotAvailableValidator() : super('Not Available Validator');
+  NotAvailableValidator(String usageParamKey) : super('Not Available Validator', usageParamKey);
 
   @override
   Future<ValidationResult> validate() async {
@@ -535,7 +575,7 @@ class NotAvailableValidator extends DoctorValidator {
 }
 
 class PartialValidatorWithErrors extends DoctorValidator {
-  PartialValidatorWithErrors() : super('Partial Validator with Errors');
+  PartialValidatorWithErrors(String usageParamKey) : super('Partial Validator with Errors', usageParamKey);
 
   @override
   Future<ValidationResult> validate() async {
@@ -548,7 +588,7 @@ class PartialValidatorWithErrors extends DoctorValidator {
 }
 
 class PartialValidatorWithHintsOnly extends DoctorValidator {
-  PartialValidatorWithHintsOnly() : super('Partial Validator with only a Hint');
+  PartialValidatorWithHintsOnly(String usageParamKey) : super('Partial Validator with only a Hint', usageParamKey);
 
   @override
   Future<ValidationResult> validate() async {
@@ -567,11 +607,11 @@ class FakeDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(MissingValidator());
-      _validators.add(NotAvailableValidator());
-      _validators.add(PartialValidatorWithHintsOnly());
-      _validators.add(PartialValidatorWithErrors());
+      _validators.add(PassingValidator('Passing Validator', 's1'));
+      _validators.add(MissingValidator('s2'));
+      _validators.add(NotAvailableValidator('s3'));
+      _validators.add(PartialValidatorWithHintsOnly('s4'));
+      _validators.add(PartialValidatorWithErrors('s5'));
     }
     return _validators;
   }
@@ -584,10 +624,10 @@ class FakePassingDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(PartialValidatorWithHintsOnly());
-      _validators.add(PartialValidatorWithErrors());
-      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(PassingValidator('Passing Validator', 's6'));
+      _validators.add(PartialValidatorWithHintsOnly('s7'));
+      _validators.add(PartialValidatorWithErrors('s8'));
+      _validators.add(PassingValidator('Another Passing Validator', 's9'));
     }
     return _validators;
   }
@@ -601,7 +641,7 @@ class FakeSinglePassingDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PartialValidatorWithHintsOnly());
+      _validators.add(PartialValidatorWithHintsOnly('s10'));
     }
     return _validators;
   }
@@ -614,10 +654,10 @@ class FakeQuietDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator'));
-      _validators.add(PassingValidator('Another Passing Validator'));
-      _validators.add(PassingValidator('Validators are fun'));
-      _validators.add(PassingValidator('Four score and seven validators ago'));
+      _validators.add(PassingValidator('Passing Validator', 's11'));
+      _validators.add(PassingValidator('Another Passing Validator', 's12'));
+      _validators.add(PassingValidator('Validators are fun', 's13'));
+      _validators.add(PassingValidator('Four score and seven validators ago', 's14'));
     }
     return _validators;
   }
@@ -629,9 +669,9 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
   List<DoctorValidator> get validators {
     return <DoctorValidator>[
-      PassingValidator('Passing Validator'),
-      PassingValidator('Another Passing Validator'),
-      PassingValidator('Providing validators is fun'),
+      PassingValidator('Passing Validator', 's15'),
+      PassingValidator('Another Passing Validator', 's16'),
+      PassingValidator('Providing validators is fun', 's17'),
     ];
   }
 
@@ -642,7 +682,7 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
 
 
 class PassingGroupedValidator extends DoctorValidator {
-  PassingGroupedValidator(String name) : super(name);
+  PassingGroupedValidator(String name) : super(name, 'none');
 
   @override
   Future<ValidationResult> validate() async {
@@ -654,7 +694,7 @@ class PassingGroupedValidator extends DoctorValidator {
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name) : super(name);
+  MissingGroupedValidator(String name) : super(name, 'none');
 
   @override
   Future<ValidationResult> validate() async {
@@ -665,7 +705,7 @@ class MissingGroupedValidator extends DoctorValidator {
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name) : super(name);
+  PartialGroupedValidator(String name) : super(name, 'none');
 
   @override
   Future<ValidationResult> validate() async {
@@ -676,7 +716,7 @@ class PartialGroupedValidator extends DoctorValidator {
 }
 
 class PassingGroupedValidatorWithStatus extends DoctorValidator {
-  PassingGroupedValidatorWithStatus(String name) : super(name);
+  PassingGroupedValidatorWithStatus(String name) : super(name, 'none');
 
   @override
   Future<ValidationResult> validate() async {

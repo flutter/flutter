@@ -9,10 +9,11 @@ import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../intellij/intellij.dart';
+import '../usage.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
-  AndroidStudioValidator(this._studio) : super('Android Studio');
+  AndroidStudioValidator(this._studio) : super('Android Studio', kCommandDoctorAndroidStudioValidator);
 
   final AndroidStudio _studio;
 
@@ -67,7 +68,7 @@ class AndroidStudioValidator extends DoctorValidator {
 }
 
 class NoAndroidStudioValidator extends DoctorValidator {
-  NoAndroidStudioValidator() : super('Android Studio');
+  NoAndroidStudioValidator() : super('Android Studio', kCommandDoctorNoAndroidStudioValidator);
 
   @override
   Future<ValidationResult> validate() async {

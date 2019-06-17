@@ -4,12 +4,13 @@
 
 import '../base/platform.dart';
 import '../doctor.dart';
+import '../usage.dart';
 import 'chrome.dart';
 import 'workflow.dart';
 
 /// A validator that checks whether chrome is installed and can run.
 class WebValidator extends DoctorValidator {
-  const WebValidator() : super('Chrome - develop for the web');
+  const WebValidator() : super('Chrome - develop for the web', kCommandDoctorWebValidator);
 
   @override
   Future<ValidationResult> validate() async {

@@ -7,10 +7,11 @@ import 'dart:async';
 import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
+import '../usage.dart';
 import 'vscode.dart';
 
 class VsCodeValidator extends DoctorValidator {
-  VsCodeValidator(this._vsCode) : super(_vsCode.productName);
+  VsCodeValidator(this._vsCode) : super(_vsCode.productName, kCommandDoctorVsCodeValidator);
 
   final VsCode _vsCode;
 

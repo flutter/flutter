@@ -12,6 +12,7 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
 import '../macos/xcode.dart';
+import '../usage.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
 
@@ -43,7 +44,7 @@ class IOSWorkflow implements Workflow {
 
 class IOSValidator extends DoctorValidator {
 
-  const IOSValidator() : super('iOS tools - develop for iOS devices');
+  const IOSValidator() : super('iOS tools - develop for iOS devices', kCommandDoctorIOSValidator);
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 

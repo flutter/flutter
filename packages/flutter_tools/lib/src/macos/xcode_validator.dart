@@ -5,12 +5,13 @@
 import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
+import '../usage.dart';
 import 'xcode.dart';
 
 XcodeValidator get xcodeValidator => context.get<XcodeValidator>();
 
 class XcodeValidator extends DoctorValidator {
-  const XcodeValidator() : super('Xcode - develop for iOS and macOS');
+  const XcodeValidator() : super('Xcode - develop for iOS and macOS', kCommandDoctorXcodeValidator);
 
   @override
   Future<ValidationResult> validate() async {

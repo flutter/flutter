@@ -30,6 +30,14 @@ class DoctorCommand extends FlutterCommand {
   @override
   final String description = 'Show information about the installed tooling.';
 
+  Map<String, String> _usageParams;
+
+  @override
+  Future<Map<String, String>> get usageValues async {
+    assert(_usageParams != null);
+    return _usageParams;
+  }
+
   @override
   Future<FlutterCommandResult> runCommand() async {
     if (argResults.wasParsed('check-for-remote-artifacts')) {
@@ -45,7 +53,11 @@ class DoctorCommand extends FlutterCommand {
             'git hash.');
       }
     }
-    final bool success = await doctor.diagnose(androidLicenses: argResults['android-licenses'], verbose: verbose);
-    return FlutterCommandResult(success ? ExitStatus.success : ExitStatus.warning);
+    final DiagnoseResult result = await doctor.diagnose(
+      androidLicenses: argResults['android-licenses'],
+      verbose: verbose,
+    );
+    _usageParams = result.usageParams;
+    return FlutterCommandResult(result.success ? ExitStatus.success : ExitStatus.warning);
   }
 }

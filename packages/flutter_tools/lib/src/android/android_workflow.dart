@@ -16,6 +16,7 @@ import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
 import '../globals.dart';
+import '../usage.dart';
 import 'android_sdk.dart';
 
 const int kAndroidSdkMinVersion = 28;
@@ -51,7 +52,7 @@ class AndroidWorkflow implements Workflow {
 }
 
 class AndroidValidator extends DoctorValidator {
-  AndroidValidator() : super('Android toolchain - develop for Android devices',);
+  AndroidValidator() : super('Android toolchain - develop for Android devices', kCommandDoctorAndroidValidator);
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -172,7 +173,7 @@ class AndroidValidator extends DoctorValidator {
 }
 
 class AndroidLicenseValidator extends DoctorValidator {
-  AndroidLicenseValidator() : super('Android license subvalidator',);
+  AndroidLicenseValidator() : super('Android license subvalidator', kCommandDoctorAndroidLicenseValidator);
 
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';

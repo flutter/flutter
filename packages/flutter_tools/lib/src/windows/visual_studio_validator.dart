@@ -5,12 +5,13 @@
 import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
+import '../usage.dart';
 import 'visual_studio.dart';
 
 VisualStudioValidator get visualStudioValidator => context.get<VisualStudioValidator>();
 
 class VisualStudioValidator extends DoctorValidator {
-  const VisualStudioValidator() : super('Visual Studio - develop for Windows');
+  const VisualStudioValidator() : super('Visual Studio - develop for Windows', kCommandDoctorVisualStudioValidator);
 
   @override
   Future<ValidationResult> validate() async {

@@ -190,7 +190,7 @@ Future<String> _doctorText() async {
     final BufferLogger logger = BufferLogger();
 
     await context.run<bool>(
-      body: () => doctor.diagnose(verbose: true),
+      body: () async => (await doctor.diagnose(verbose: true)).success,
       overrides: <Type, Generator>{
         Logger: () => logger,
       },
