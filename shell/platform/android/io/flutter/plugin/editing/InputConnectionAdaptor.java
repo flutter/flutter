@@ -8,6 +8,7 @@ import android.content.Context;
 import android.text.DynamicLayout;
 import android.text.Editable;
 import android.text.Layout;
+import android.text.Layout.Directions;
 import android.text.Selection;
 import android.text.TextPaint;
 import android.view.KeyEvent;
@@ -17,6 +18,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 
 import io.flutter.embedding.engine.systemchannels.TextInputChannel;
+import io.flutter.Log;
 import io.flutter.plugin.common.ErrorLogResult;
 import io.flutter.plugin.common.MethodChannel;
 
@@ -135,12 +137,25 @@ class InputConnectionAdaptor extends BaseInputConnection {
         return result;
     }
 
+    // Sanitizes the index to ensure the index is within the range of the
+    // contents of editable.
+    private static int clampIndexToEditable(int index, Editable editable) {
+        int clamped = Math.max(0, Math.min(editable.length(), index));
+        if (clamped != index) {
+            Log.d("flutter", "Text selection index was clamped ("
+                + index + "->" + clamped
+                + ") to remain in bounds. This may not be your fault, as some keyboards may select outside of bounds."
+            );
+        }
+        return clamped;
+    }
+
     @Override
     public boolean sendKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN) {
             if (event.getKeyCode() == KeyEvent.KEYCODE_DEL) {
-                int selStart = Selection.getSelectionStart(mEditable);
-                int selEnd = Selection.getSelectionEnd(mEditable);
+                int selStart = clampIndexToEditable(Selection.getSelectionStart(mEditable), mEditable);
+                int selEnd = clampIndexToEditable(Selection.getSelectionEnd(mEditable), mEditable);
                 if (selEnd > selStart) {
                     // Delete the selection.
                     Selection.setSelection(mEditable, selStart);
@@ -148,11 +163,22 @@ class InputConnectionAdaptor extends BaseInputConnection {
                     updateEditingState();
                     return true;
                 } else if (selStart > 0) {
-                    // Delete to the left of the cursor.
-                    Selection.extendLeft(mEditable, mLayout);
-                    int newSel = Selection.getSelectionEnd(mEditable);
-                    Selection.setSelection(mEditable, newSel);
-                    mEditable.delete(newSel, selStart);
+                    // Delete to the left/right of the cursor depending on direction of text.
+                    // TODO(garyq): Explore how to obtain per-character direction. The
+                    // isRTLCharAt() call below is returning blanket direction assumption
+                    // based on the first character in the line.
+                    boolean isRtl = mLayout.isRtlCharAt(mLayout.getLineForOffset(selStart));
+                    if (isRtl) {
+                        Selection.extendRight(mEditable, mLayout);
+                    } else {
+                        Selection.extendLeft(mEditable, mLayout);
+                    }
+                    int newStart = clampIndexToEditable(Selection.getSelectionStart(mEditable), mEditable);
+                    int newEnd = clampIndexToEditable(Selection.getSelectionEnd(mEditable), mEditable);
+                    Selection.setSelection(mEditable, Math.min(newStart, newEnd));
+                    // Min/Max the values since RTL selections will start at a higher
+                    // index than they end at.
+                    mEditable.delete(Math.min(newStart, newEnd), Math.max(newStart, newEnd));
                     updateEditingState();
                     return true;
                 }
