@@ -73,6 +73,8 @@ class DartIsolate : public UIDartState {
 
   Phase GetPhase() const;
 
+  std::string GetServiceId();
+
   FML_WARN_UNUSED_RESULT
   bool PrepareForRunningFromPrecompiledCode();
 

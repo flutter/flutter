@@ -49,6 +49,9 @@ class EmbedderContext {
   void SetSemanticsCustomActionCallback(
       SemanticsActionCallback semantics_custom_action);
 
+  void SetPlatformMessageCallback(
+      std::function<void(const FlutterPlatformMessage*)> callback);
+
  private:
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
@@ -63,6 +66,7 @@ class EmbedderContext {
   SemanticsNodeCallback update_semantics_node_callback_;
   SemanticsActionCallback update_semantics_custom_action_callback_;
   std::unique_ptr<EmbedderTestGLSurface> gl_surface_;  // lazy
+  std::function<void(const FlutterPlatformMessage*)> platform_message_callback_;
 
   static VoidCallback GetIsolateCreateCallbackHook();
 
@@ -89,6 +93,8 @@ class EmbedderContext {
   bool GLMakeResourceCurrent();
 
   void* GLGetProcAddress(const char* name);
+
+  void PlatformMessageCallback(const FlutterPlatformMessage* message);
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderContext);
 };
