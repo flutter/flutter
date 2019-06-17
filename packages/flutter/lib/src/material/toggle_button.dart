@@ -482,7 +482,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         trRadius.y * 2,
       );
       final Rect brCorner = Rect.fromLTWH(
-        right - (trRadius.x * 2),
+        right - (brRadius.x * 2),
         bottom - (brRadius.y * 2),
         brRadius.x * 2,
         brRadius.y * 2,
