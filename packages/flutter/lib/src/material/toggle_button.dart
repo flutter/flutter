@@ -126,15 +126,20 @@ class ToggleButtons extends StatelessWidget {
 
         // consider rtl languages
         BorderRadius edgeBorderRadius;
+        BorderRadius clipBorderRadius;
         if (index == 0) {
           edgeBorderRadius = BorderRadius.only(
             topLeft: borderRadius.topLeft,
             bottomLeft: borderRadius.bottomLeft,
           );
+          clipBorderRadius = BorderRadius.only(
+            topLeft: borderRadius.topLeft - Radius.circular(borderWidth / 2.0),
+            bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth / 2.0),
+          );
         } else if (index == children.length - 1) {
           edgeBorderRadius = BorderRadius.only(
-            topRight: borderRadius.topRight,
-            bottomRight: borderRadius.bottomRight,
+            topRight: borderRadius.topRight - Radius.circular(borderWidth / 2.0),
+            bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth / 2.0),
           );
         }
 
@@ -147,6 +152,7 @@ class ToggleButtons extends StatelessWidget {
           horizontalBorderSide: horizontalBorderSide,
           trailingBorderSide: trailingBorderSide,
           borderRadius: edgeBorderRadius ?? BorderRadius.zero,
+          clipRadius: clipBorderRadius ?? BorderRadius.zero,
           isFirstButton: index == 0,
           child: children[index],
         );
@@ -189,7 +195,8 @@ class _ToggleButton extends StatelessWidget {
     this.leadingBorderSide,
     this.horizontalBorderSide,
     this.trailingBorderSide,
-    this.borderRadius = const BorderRadius.all(Radius.circular(0.0)),
+    this.borderRadius,
+    this.clipRadius,
     this.isFirstButton,
     this.child,
   }) : super(key: key);
@@ -246,6 +253,8 @@ class _ToggleButton extends StatelessWidget {
 
   final BorderRadius borderRadius;
 
+  final BorderRadius clipRadius;
+
   final bool isFirstButton;
 
   /// The button's label, which is usually an [Icon] or a [Text] widget.
@@ -271,9 +280,7 @@ class _ToggleButton extends StatelessWidget {
         color: currentColor,
       ),
       child: ClipRRect(
-        borderRadius: borderRadius.subtract(
-          BorderRadius.circular(clipRadius),
-        ),
+        borderRadius: clipRadius,
         child: RawMaterialButton(
           textStyle: TextStyle(
             color: currentColor,
