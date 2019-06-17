@@ -447,22 +447,20 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
     final double sweepAngle = math.pi / 2.0;
 
-    final Rect tlCorner = Rect.fromLTWH(
-      left,
-      top,
-      tlRadius.x * 2.0,
-      tlRadius.y * 2.0,
-    );
-    final Rect blCorner = Rect.fromLTWH(
-      left,
-      bottom - (blRadius.y * 2.0),
-      blRadius.x * 2.0,
-      blRadius.y * 2.0,
-    );
     final Paint leadingPaint = leadingBorderSide.toPaint();
-
     if (isFirstButton) {
-
+      final Rect tlCorner = Rect.fromLTWH(
+        left,
+        top,
+        tlRadius.x * 2.0,
+        tlRadius.y * 2.0,
+      );
+      final Rect blCorner = Rect.fromLTWH(
+        left,
+        bottom - (blRadius.y * 2.0),
+        blRadius.x * 2.0,
+        blRadius.y * 2.0,
+      );
       final Path leadingPath = Path()
         ..moveTo(outer.right, bottom)
         ..lineTo(left + blRadius.x, bottom)
@@ -470,7 +468,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         ..lineTo(left, top + tlRadius.y)
         ..addArc(tlCorner, math.pi, sweepAngle)
         ..lineTo(outer.right, top);
-
       context.canvas.drawPath(leadingPath, leadingPaint);
     } else if (isLastButton) {
       final Path leftPath = Path()
@@ -490,7 +487,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         brRadius.x * 2,
         brRadius.y * 2,
       );
-
       final Paint endingPaint = trailingBorderSide.toPaint();
       final Path endingPath = Path()
         ..moveTo(left + horizontalBorderSide.width / 2.0, top)
@@ -500,7 +496,6 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         ..addArc(brCorner, 0, sweepAngle)
         ..lineTo(left + horizontalBorderSide.width / 2.0, bottom);
       context.canvas.drawPath(endingPath, endingPaint);
-
     } else {
       final Path leftPath = Path()
         ..moveTo(left, bottom + leadingBorderSide.width / 2)
