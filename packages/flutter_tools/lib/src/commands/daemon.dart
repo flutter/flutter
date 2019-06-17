@@ -659,7 +659,12 @@ class DeviceDomain extends Domain {
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
       _serializeDeviceEvents = _serializeDeviceEvents.then<void>((_) async {
-        sendEvent(eventName, await _deviceToMap(device));
+        try {
+          final Map<String, Object> response = await _deviceToMap(device);
+          sendEvent(eventName, response);
+        } catch (err) {
+          printError(err);
+        }
       });
     };
   }
