@@ -4,15 +4,9 @@
 
 #import <Foundation/Foundation.h>
 
-#if defined(FLUTTER_FRAMEWORK)
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros.h"
-#else
 #import "FlutterChannels.h"
 #import "FlutterCodecs.h"
 #import "FlutterMacros.h"
-#endif
 
 // TODO: Merge this file and FlutterPluginRegistrarMacOS.h with the iOS FlutterPlugin.h, sharing
 // all but the platform-specific methods.

@@ -7,6 +7,7 @@ assert(is_ios)
 import("//build/config/ios/ios_sdk.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/shell/gpu/gpu.gni")
+import("$flutter_root/shell/platform/darwin/common/framework_shared.gni")
 
 _flutter_framework_dir = "$root_out_dir/Flutter.framework"
 
@@ -22,14 +23,10 @@ shell_gpu_configuration("ios_gpu_configuration") {
 _flutter_framework_headers = [
   "framework/Headers/Flutter.h",
   "framework/Headers/FlutterAppDelegate.h",
-  "framework/Headers/FlutterBinaryMessenger.h",
   "framework/Headers/FlutterCallbackCache.h",
-  "framework/Headers/FlutterChannels.h",
-  "framework/Headers/FlutterCodecs.h",
   "framework/Headers/FlutterDartProject.h",
   "framework/Headers/FlutterEngine.h",
   "framework/Headers/FlutterHeadlessDartRunner.h",
-  "framework/Headers/FlutterMacros.h",
   "framework/Headers/FlutterPlatformViews.h",
   "framework/Headers/FlutterPlugin.h",
   "framework/Headers/FlutterPluginAppLifeCycleDelegate.h",
@@ -49,8 +46,6 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterAppDelegate_Internal.h",
     "framework/Source/FlutterCallbackCache.mm",
     "framework/Source/FlutterCallbackCache_Internal.h",
-    "framework/Source/FlutterChannels.mm",
-    "framework/Source/FlutterCodecs.mm",
     "framework/Source/FlutterDartProject.mm",
     "framework/Source/FlutterDartProject_Internal.h",
     "framework/Source/FlutterEngine.mm",
@@ -66,8 +61,6 @@ shared_library("create_flutter_framework_dylib") {
     "framework/Source/FlutterPlatformViews_Internal.h",
     "framework/Source/FlutterPlatformViews_Internal.mm",
     "framework/Source/FlutterPluginAppLifeCycleDelegate.mm",
-    "framework/Source/FlutterStandardCodec.mm",
-    "framework/Source/FlutterStandardCodec_Internal.h",
     "framework/Source/FlutterTextInputDelegate.h",
     "framework/Source/FlutterTextInputPlugin.h",
     "framework/Source/FlutterTextInputPlugin.mm",
@@ -120,6 +113,7 @@ shared_library("create_flutter_framework_dylib") {
     "$flutter_root/runtime:libdart",
     "$flutter_root/shell/common",
     "$flutter_root/shell/platform/darwin/common",
+    "$flutter_root/shell/platform/darwin/common:framework_shared",
     "//third_party/skia",
   ]
 
@@ -205,17 +199,18 @@ copy("copy_framework_module_map") {
 action("copy_framework_headers") {
   script = "$flutter_root/sky/tools/install_framework_headers.py"
   visibility = [ ":*" ]
-  sources = _flutter_framework_headers
+  sources = get_path_info(_flutter_framework_headers, "abspath") +
+            framework_shared_headers
   outputs = []
-  foreach(header, _flutter_framework_headers) {
-    header_basename = rebase_path(header, "framework/headers")
+  foreach(header, sources) {
+    header_basename = get_path_info(header, "file")
     outputs += [ "$_flutter_framework_headers_copy_dir/$header_basename" ]
   }
   args = [
            "--location",
            rebase_path("$_flutter_framework_headers_copy_dir"),
            "--headers",
-         ] + rebase_path(_flutter_framework_headers)
+         ] + rebase_path(sources, "", "//")
 }
 
 copy("copy_framework_icu") {

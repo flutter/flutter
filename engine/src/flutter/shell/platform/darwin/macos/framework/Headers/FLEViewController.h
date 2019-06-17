@@ -6,15 +6,9 @@
 
 #import "FLEOpenGLContextHandling.h"
 #import "FLEReshapeListener.h"
-#import "FlutterPluginRegistrarMacOS.h"
-
-#if defined(FLUTTER_FRAMEWORK)
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros.h"
-#else
 #import "FlutterBinaryMessenger.h"
 #import "FlutterMacros.h"
-#endif
+#import "FlutterPluginRegistrarMacOS.h"
 
 typedef NS_ENUM(NSInteger, FlutterMouseTrackingMode) {
   // Hover events will never be sent to Flutter.

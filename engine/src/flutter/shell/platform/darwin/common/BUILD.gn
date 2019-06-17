@@ -2,6 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("framework_shared.gni")
+
 source_set("common") {
   sources = [
     "buffer_conversions.h",
@@ -21,4 +23,30 @@ source_set("common") {
   ]
 
   public_configs = [ "$flutter_root:config" ]
+}
+
+# Shared framework headers end up in the same folder as platform-specific
+# framework headers when consumed by clients, so the include paths assume they
+# are next to each other.
+config("framework_relative_headers") {
+  include_dirs = [ "framework/Headers" ]
+}
+
+# Framework code shared between iOS and macOS.
+source_set("framework_shared") {
+  sources = [
+    "framework/Source/FlutterChannels.mm",
+    "framework/Source/FlutterCodecs.mm",
+    "framework/Source/FlutterStandardCodec.mm",
+    "framework/Source/FlutterStandardCodec_Internal.h",
+  ]
+
+  public = framework_shared_headers
+
+  defines = [ "FLUTTER_FRAMEWORK" ]
+
+  public_configs = [
+    "$flutter_root:config",
+    ":framework_relative_headers",
+  ]
 }

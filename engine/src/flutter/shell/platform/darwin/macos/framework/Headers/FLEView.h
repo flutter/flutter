@@ -6,12 +6,7 @@
 
 #import "FLEOpenGLContextHandling.h"
 #import "FLEReshapeListener.h"
-
-#if defined(FLUTTER_FRAMEWORK)
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros.h"
-#else
 #import "FlutterMacros.h"
-#endif
 
 /**
  * View capable of acting as a rendering target and input source for the Flutter

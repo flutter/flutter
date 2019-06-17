@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#ifndef SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERSTANDARDCODECINTERNAL_H_
-#define SHELL_PLATFORM_IOS_FRAMEWORK_SOURCE_FLUTTERSTANDARDCODECINTERNAL_H_
+#ifndef SHELL_PLATFORM_DARWIN_COMMON_FRAMEWORK_SOURCE_FLUTTERSTANDARDCODECINTERNAL_H_
+#define SHELL_PLATFORM_DARWIN_COMMON_FRAMEWORK_SOURCE_FLUTTERSTANDARDCODECINTERNAL_H_
 
-#include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h"
+#include "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 
 typedef NS_ENUM(NSInteger, FlutterStandardField) {
   FlutterStandardFieldNil,

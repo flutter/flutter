@@ -6,7 +6,7 @@
 
 #import <objc/message.h>
 
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputModel.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLEViewController_Internal.h"
 
