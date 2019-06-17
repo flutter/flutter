@@ -46,20 +46,24 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// The main-axis extent of each item.
   double get itemExtent;
 
+  /// {@template flutter.rendering.indexToLayoutOffset}
   /// The layout offset for the child with the given index.
   ///
   /// This function is given the [itemExtent] as an argument to avoid
   /// recomputing [itemExtent] repeatedly during layout.
+  /// {@endtemplate}
   ///
   /// By default, places the children in order, without gaps, starting from
   /// layout offset zero.
   @protected
   double indexToLayoutOffset(double itemExtent, int index) => itemExtent * index;
 
+  /// {@template flutter.rendering.getMinChildIndexForScrollOffset}
   /// The minimum child index that is visible at the given scroll offset.
   ///
   /// This function is given the [itemExtent] as an argument to avoid
   /// recomputing [itemExtent] repeatedly during layout.
+  /// {@endtemplate}
   ///
   /// By default, returns a value consistent with the children being placed in
   /// order, without gaps, starting from layout offset zero.
@@ -76,10 +80,12 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     return 0;
   }
 
+  /// {@template flutter.rendering.getMaxChildIndexForScrollOffset}
   /// The maximum child index that is visible at the given scroll offset.
   ///
   /// This function is given the [itemExtent] as an argument to avoid
   /// recomputing [itemExtent] repeatedly during layout.
+  /// {@endtemplate}
   ///
   /// By default, returns a value consistent with the children being placed in
   /// order, without gaps, starting from layout offset zero.

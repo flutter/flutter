@@ -1054,28 +1054,26 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   }
 
   @override
-  _SliverFillViewportElement createElement() => _SliverFillViewportElement(this);
-
-  @override
   void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
   }
-}
-
-class _SliverFillViewportElement extends SliverMultiBoxAdaptorElement {
-  _SliverFillViewportElement(SliverFillViewport widget) : super(widget);
 
   @override
-  RenderSliverFillViewport get renderObject => super.renderObject;
-
-  @override
-  double estimateMaxScrollOffset(SliverConstraints constraints, {int firstIndex, int lastIndex, double leadingScrollOffset, double trailingScrollOffset}) {
-    final int estimatedChildCount = widget.delegate.estimatedChildCount;
-    if (estimatedChildCount == null || estimatedChildCount < 1) {
-      return super.estimateMaxScrollOffset(constraints, firstIndex: firstIndex, lastIndex: lastIndex, leadingScrollOffset: leadingScrollOffset, trailingScrollOffset: trailingScrollOffset);
+  double estimateMaxScrollOffset(
+    SliverConstraints constraints,
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  ) {
+    final double padding = (1 - viewportFraction) * constraints.viewportMainAxisExtent;
+    if (delegate.estimatedChildCount == null) {
+      return trailingScrollOffset + padding / 2;
     }
 
-    return renderObject.indexToLayoutOffset(renderObject.itemExtent, estimatedChildCount - 1) + renderObject.itemExtent;
+    return delegate.estimatedChildCount > 0
+      ? padding + viewportFraction * constraints.viewportMainAxisExtent * (delegate.estimatedChildCount)
+      : 0;
   }
 }
 
