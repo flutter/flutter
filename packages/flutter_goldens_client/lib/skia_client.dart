@@ -13,6 +13,7 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'package:flutter_goldens_client/client.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
@@ -191,7 +192,7 @@ class SkiaGoldClient {
   }
 
   Future<String> _getCommitHash() async {
-    // TODO(Piinks): Skia Gold tests can only currently be ingested post-submit
+    // TODO(Piinks): Skia Gold tests can only currently be ingested post-submit,
     // else will return false
     if (!flutterRoot.existsSync()) {
       return null;
@@ -217,10 +218,21 @@ class SkiaGoldClient {
   }
 
   String _getKeysJSON() {
-    // TODO(Piinks): Select meaningful keys for tracking test conditions
+     String platform;
+    if (isLinux) {
+      platform = 'Linux';
+    } else if (isMacOS) {
+      platform = 'MacOS';
+    } else if (isWindows) {
+      platform = 'Windows';
+    } else if (isBrowser) {
+      platform = 'Web';
+    } else {
+      platform = 'Other';
+    }
     return convert.json.encode(
     <String, dynamic>{
-    'Operating System' : io.Platform.operatingSystem,
+    'Platform' : platform,
     });
   }
 }

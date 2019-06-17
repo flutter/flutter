@@ -94,9 +94,9 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     defaultComparator ??= goldenFileComparator;
 
     const Platform platform = LocalPlatform();
+    goldens ??= GoldensClient();
     if(platform.environment[_kServiceAccountKey] == null) {
       // Prepare the goldens repo.
-      goldens ??= GoldensClient();
       await goldens.prepare();
     }
 
@@ -110,6 +110,8 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     if(testingWithSkia) {
+      // Library prefix notation for Skia Gold.
+      golden = _addPrefix(golden);
       // Always updating for SkiaGold testing.
       update(golden, imageBytes);
     }
@@ -119,19 +121,19 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
 
-    if (testingWithSkia /* TODO(Piinks): && post-submit */) {
-      // Testing with SkiaGoldClient.
+    if (testingWithSkia /* TODO(Piinks): && isPostSubmit() */) {
+      // Testing with SkiaGoldClient. ------------------------------------------
       final bool authorized = await _skiaClient.auth(fs.directory(basedir));
       if(!authorized) {
-        // TODO(Piinks): Clean-up
+        // TODO(Piinks): CI needs implementation
         return true;
         // throw test_package.TestFailure('Could not authorize goldctl.');
       }
       await _skiaClient.imgtestInit();
       return await _skiaClient.imgtestAdd(golden.path, goldenFile);
 
-    } else if (platform.isLinux) {
-      // Testing with GoldensClient
+    } else if (isLinux) {
+      // Testing with GoldensClient --------------------------------------------
       final List<int> goldenBytes = await goldenFile.readAsBytes();
       if (goldenBytes.length != imageBytes.length) {
         return false;
@@ -143,10 +145,9 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       }
       return true;
     } else {
-      // Not executing test.
-      print('Skipping golden file test for "$golden"');
-      print('Skia Gold unavailable && !Platform.isLinux');
-      return true; // TODO(Piinks): Clean-up, place skip here
+      // Not executing test. ---------------------------------------------------
+      print('Skipping golden file test for "$golden" : Skia Gold unavailable && !isLinux');
+      return true; // TODO(Piinks): write to skip out
     }
   }
 
@@ -155,6 +156,11 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     final File goldenFile = _getGoldenFile(golden);
     await goldenFile.parent.create(recursive: true);
     await goldenFile.writeAsBytes(imageBytes, flush: true);
+  }
+
+  Uri _addPrefix(Uri golden) {
+    final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
+    return Uri.parse(prefix + '.' + golden.toString());
   }
 
   File _getGoldenFile(Uri uri) {
