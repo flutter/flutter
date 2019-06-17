@@ -14,6 +14,7 @@ import java.nio.ByteBuffer;
 
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.plugin.common.BinaryMessenger;
+import io.flutter.plugin.common.StringCodec;
 import io.flutter.view.FlutterCallbackInformation;
 
 /**
@@ -44,10 +45,24 @@ public class DartExecutor implements BinaryMessenger {
   @NonNull
   private final DartMessenger messenger;
   private boolean isApplicationRunning = false;
+  private String isolateServiceId;
+  private IsolateServiceIdListener isolateServiceIdListener;
+
+  private final BinaryMessenger.BinaryMessageHandler isolateChannelMessageHandler =
+      new BinaryMessenger.BinaryMessageHandler() {
+        @Override
+        public void onMessage(ByteBuffer message, final BinaryReply callback) {
+          isolateServiceId = StringCodec.INSTANCE.decodeMessage(message);
+          if (isolateServiceIdListener != null) {
+            isolateServiceIdListener.onIsolateServiceIdAvailable(isolateServiceId);
+          }
+        }
+      };
 
   public DartExecutor(@NonNull FlutterJNI flutterJNI) {
     this.flutterJNI = flutterJNI;
     this.messenger = new DartMessenger(flutterJNI);
+    messenger.setMessageHandler("flutter/isolate", isolateChannelMessageHandler);
   }
 
   /**
@@ -180,6 +195,32 @@ public class DartExecutor implements BinaryMessenger {
     messenger.setMessageHandler(channel, handler);
   }
   //------ END BinaryMessenger -----
+
+  /**
+   * Returns an identifier for this executor's primary isolate.  This identifier can be used
+   * in queries to the Dart service protocol.
+   */
+  public String getIsolateServiceId() {
+    return isolateServiceId;
+  }
+
+  /**
+   * Callback interface invoked when the isolate identifier becomes available.
+   */
+  interface IsolateServiceIdListener {
+    void onIsolateServiceIdAvailable(String isolateServiceId);
+  }
+
+  /**
+   * Set a listener that will be notified when an isolate identifier is available for this
+   * executor's primary isolate.
+   */
+  public void setIsolateServiceIdListener(IsolateServiceIdListener listener) {
+    isolateServiceIdListener = listener;
+    if (isolateServiceIdListener != null && isolateServiceId != null) {
+      isolateServiceIdListener.onIsolateServiceIdAvailable(isolateServiceId);
+    }
+  }
 
   /**
    * Configuration options that specify which Dart entrypoint function is executed and where

@@ -216,5 +216,50 @@ TEST_F(EmbedderTest, CanCreateOpenGLRenderingEngine) {
   ASSERT_TRUE(engine.is_valid());
 }
 
+TEST_F(EmbedderTest, IsolateServiceIdSent) {
+  auto& context = GetEmbedderContext();
+  fml::AutoResetWaitableEvent latch;
+
+  fml::Thread thread;
+  UniqueEngine engine;
+  std::string isolate_message;
+
+  EmbedderTestTaskRunner runner(
+      [&](FlutterTask task) { FlutterEngineRunTask(engine.get(), &task); });
+
+  thread.GetTaskRunner()->PostTask([&]() {
+    EmbedderConfigBuilder builder(context);
+    const auto task_runner_description = runner.GetEmbedderDescription();
+    runner.SetForwardingTaskRunner(
+        fml::MessageLoop::GetCurrent().GetTaskRunner());
+    builder.SetPlatformTaskRunner(&task_runner_description);
+    builder.SetDartEntrypoint("main");
+    builder.SetPlatformMessageCallback(
+        [&](const FlutterPlatformMessage* message) {
+          if (strcmp(message->channel, "flutter/isolate") == 0) {
+            isolate_message = {reinterpret_cast<const char*>(message->message),
+                               message->message_size};
+            latch.Signal();
+          }
+        });
+    engine = builder.LaunchEngine();
+    ASSERT_TRUE(engine.is_valid());
+  });
+
+  // Wait for the isolate ID message and check its format.
+  latch.Wait();
+  ASSERT_EQ(isolate_message.find("isolates/"), 0ul);
+
+  // Since the engine was started on its own thread, it must be killed there as
+  // well.
+  fml::AutoResetWaitableEvent kill_latch;
+  thread.GetTaskRunner()->PostTask(
+      fml::MakeCopyable([&engine, &kill_latch]() mutable {
+        engine.reset();
+        kill_latch.Signal();
+      }));
+  kill_latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter

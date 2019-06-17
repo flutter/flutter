@@ -33,6 +33,7 @@ static constexpr char kLifecycleChannel[] = "flutter/lifecycle";
 static constexpr char kNavigationChannel[] = "flutter/navigation";
 static constexpr char kLocalizationChannel[] = "flutter/localization";
 static constexpr char kSettingsChannel[] = "flutter/settings";
+static constexpr char kIsolateChannel[] = "flutter/isolate";
 
 Engine::Engine(Delegate& delegate,
                DartVM& vm,
@@ -145,6 +146,14 @@ Engine::RunStatus Engine::Run(RunConfiguration configuration) {
       isolate->AddIsolateShutdownCallback(
           settings_.root_isolate_shutdown_callback);
     }
+
+    std::string service_id = isolate->GetServiceId();
+    fml::RefPtr<PlatformMessage> service_id_message =
+        fml::MakeRefCounted<flutter::PlatformMessage>(
+            kIsolateChannel,
+            std::vector<uint8_t>(service_id.begin(), service_id.end()),
+            nullptr);
+    HandlePlatformMessage(service_id_message);
   }
 
   return isolate_running ? Engine::RunStatus::Success

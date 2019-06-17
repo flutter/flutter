@@ -91,6 +91,18 @@ void EmbedderContext::SetSemanticsCustomActionCallback(
       update_semantics_custom_action_callback;
 }
 
+void EmbedderContext::SetPlatformMessageCallback(
+    std::function<void(const FlutterPlatformMessage*)> callback) {
+  platform_message_callback_ = callback;
+}
+
+void EmbedderContext::PlatformMessageCallback(
+    const FlutterPlatformMessage* message) {
+  if (platform_message_callback_) {
+    platform_message_callback_(message);
+  }
+}
+
 FlutterUpdateSemanticsNodeCallback
 EmbedderContext::GetUpdateSemanticsNodeCallbackHook() {
   return [](const FlutterSemanticsNode* semantics_node, void* user_data) {

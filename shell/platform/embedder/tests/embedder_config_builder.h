@@ -58,6 +58,9 @@ class EmbedderConfigBuilder {
 
   void SetPlatformTaskRunner(const FlutterTaskRunnerDescription* runner);
 
+  void SetPlatformMessageCallback(
+      std::function<void(const FlutterPlatformMessage*)> callback);
+
   UniqueEngine LaunchEngine();
 
  private:

@@ -141,6 +141,13 @@ DartIsolate::Phase DartIsolate::GetPhase() const {
   return phase_;
 }
 
+std::string DartIsolate::GetServiceId() {
+  const char* service_id_buf = Dart_IsolateServiceId(isolate());
+  std::string service_id(service_id_buf);
+  free(const_cast<char*>(service_id_buf));
+  return service_id;
+}
+
 bool DartIsolate::Initialize(Dart_Isolate dart_isolate, bool is_root_isolate) {
   TRACE_EVENT0("flutter", "DartIsolate::Initialize");
   if (phase_ != Phase::Uninitialized) {

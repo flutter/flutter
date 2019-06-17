@@ -12,6 +12,11 @@ EmbedderConfigBuilder::EmbedderConfigBuilder(
     InitializationPreference preference)
     : context_(context) {
   project_args_.struct_size = sizeof(project_args_);
+  project_args_.platform_message_callback =
+      [](const FlutterPlatformMessage* message, void* context) {
+        reinterpret_cast<EmbedderContext*>(context)->PlatformMessageCallback(
+            message);
+      };
 
   custom_task_runners_.struct_size = sizeof(FlutterCustomTaskRunners);
 
@@ -124,6 +129,11 @@ void EmbedderConfigBuilder::SetPlatformTaskRunner(
   }
   custom_task_runners_.platform_task_runner = runner;
   project_args_.custom_task_runners = &custom_task_runners_;
+}
+
+void EmbedderConfigBuilder::SetPlatformMessageCallback(
+    std::function<void(const FlutterPlatformMessage*)> callback) {
+  context_.SetPlatformMessageCallback(callback);
 }
 
 UniqueEngine EmbedderConfigBuilder::LaunchEngine() {
