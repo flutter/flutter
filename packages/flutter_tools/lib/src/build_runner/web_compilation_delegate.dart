@@ -36,8 +36,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
 
   @override
   Future<bool> initialize({
-    @required Directory projectDirectory,
-    @required List<String> targets,
+    Directory projectDirectory,
     String testOutputDir,
     bool release = false,
   }) async {
@@ -81,14 +80,11 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
           ),
       ),
     };
-    final Status status =
-        logger.startProgress('Compiling ${targets.first} for the Web...', timeout: null);
     core.BuildResult result;
     try {
       result = await _runBuilder(
         buildEnvironment,
         buildOptions,
-        targets,
         release,
         buildDirs,
       );
@@ -98,7 +94,6 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       result = await _runBuilder(
         buildEnvironment,
         buildOptions,
-        targets,
         release,
         buildDirs,
       );
@@ -108,13 +103,10 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       result = await _runBuilder(
         buildEnvironment,
         buildOptions,
-        targets,
         release,
         buildDirs,
       );
       return result.status == core.BuildStatus.success;
-    } finally {
-      status.stop();
     }
   }
 
@@ -136,7 +128,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     return result.status == core.BuildStatus.success;
   }
 
-  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, List<String> targets, bool release, Set<core.BuildDirectory> buildDirs) async {
+  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, bool release, Set<core.BuildDirectory> buildDirs) async {
     _builder = await BuildImpl.create(
       buildOptions,
       buildEnvironment,
