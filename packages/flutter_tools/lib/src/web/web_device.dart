@@ -32,7 +32,7 @@ class WebDevice extends Device {
       'web',
       category: Category.web,
       platformType: PlatformType.web,
-      ephemeral: true,
+      ephemeral: false,
   );
 
   @override

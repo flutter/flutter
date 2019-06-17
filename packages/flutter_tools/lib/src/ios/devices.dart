@@ -118,7 +118,7 @@ class IOSDevice extends Device {
           id,
           category: Category.mobile,
           platformType: PlatformType.ios,
-          ephemeral: false,
+          ephemeral: true,
       ) {
     _installerPath = _checkForCommand('ideviceinstaller');
     _iproxyPath = _checkForCommand('iproxy');
