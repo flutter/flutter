@@ -625,10 +625,12 @@ class PageView extends StatefulWidget {
   ///
   /// It is called before [pageDidChange], in the middle of the scroll animation.
   final ValueChanged<int> onPageChanged;
+
   /// Called whenever the page has changed and the scroll animation has stopped.
   ///
   /// It is called after [onPageChanged], at the end of the scroll animation.
   final ValueChanged<int> pageDidChange;
+
   /// A delegate that provides the children for the [PageView].
   ///
   /// The [PageView.custom] constructor lets you specify this delegate
@@ -651,13 +653,13 @@ class _PageViewState extends State<PageView> {
 
   /// A flag to record last index reported by [PageView.pageDidChange] and to decide
   /// whether to call [PageView.pageDidChange];
-  int _lastpageDidChangeIndex = 0;
+  int _lastPageDidChangeIndex = 0;
 
   @override
   void initState() {
     super.initState();
     _lastOnPageChangedIndex = widget.controller.initialPage;
-    _lastpageDidChangeIndex = widget.controller.initialPage;
+    _lastPageDidChangeIndex = widget.controller.initialPage;
   }
 
   AxisDirection _getDirection(BuildContext context) {
@@ -692,8 +694,8 @@ class _PageViewState extends State<PageView> {
         } else if (notification.depth == 0 && widget.pageDidChange != null && notification is ScrollEndNotification) {
           final PageMetrics metrics = notification.metrics;
           final int currentPage = metrics.page.round();
-          if (currentPage != _lastpageDidChangeIndex) {
-            _lastpageDidChangeIndex = currentPage;
+          if (currentPage != _lastPageDidChangeIndex) {
+            _lastPageDidChangeIndex = currentPage;
             widget.pageDidChange(currentPage);
           }
         }
