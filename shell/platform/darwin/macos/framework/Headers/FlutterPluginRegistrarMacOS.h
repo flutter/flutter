@@ -6,15 +6,9 @@
 
 #import "FlutterPluginMacOS.h"
 
-#if defined(FLUTTER_FRAMEWORK)
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterBinaryMessenger.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros.h"
-#else
 #import "FlutterBinaryMessenger.h"
 #import "FlutterChannels.h"
 #import "FlutterMacros.h"
-#endif
 
 // TODO: Merge this file and FlutterPluginMacOS.h with the iOS FlutterPlugin.h, sharing all but
 // the platform-specific methods.

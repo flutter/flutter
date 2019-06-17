@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#if defined(FLUTTER_FRAMEWORK)
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros.h"
-#else
 #import "FlutterMacros.h"
-#endif
 
 /**
  * Protocol for views owned by FLEViewController to handle context changes, specifically relating to

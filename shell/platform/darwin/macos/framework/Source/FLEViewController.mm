@@ -5,8 +5,8 @@
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEViewController.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLEViewController_Internal.h"
 
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterChannels.h"
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterCodecs.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/common/framework/Headers/FlutterCodecs.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEReshapeListener.h"
 #import "flutter/shell/platform/darwin/macos/framework/Headers/FLEView.h"
 #import "flutter/shell/platform/darwin/macos/framework/Source/FLETextInputPlugin.h"

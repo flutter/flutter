@@ -4,11 +4,7 @@
 
 #import <Cocoa/Cocoa.h>
 
-#if defined(FLUTTER_FRAMEWORK)
-#import "flutter/shell/platform/darwin/ios/framework/Headers/FlutterMacros.h"
-#else
 #import "FlutterMacros.h"
-#endif
 
 /**
  * Protocol for listening to reshape events on this FlutterView.

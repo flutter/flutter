@@ -6,7 +6,7 @@ assert(is_mac)
 
 import("//build/config/mac/mac_sdk.gni")
 import("$flutter_root/common/config.gni")
-import("$flutter_root/shell/platform/darwin/framework_shared.gni")
+import("$flutter_root/shell/platform/darwin/common/framework_shared.gni")
 import("$flutter_root/shell/platform/glfw/config.gni")
 
 group("macos") {
@@ -60,7 +60,7 @@ shared_library("create_flutter_framework_dylib") {
   sources += _flutter_framework_headers
 
   deps = [
-    "$flutter_root/shell/platform/darwin:framework_shared",
+    "$flutter_root/shell/platform/darwin/common:framework_shared",
     "$flutter_root/shell/platform/embedder:embedder",
   ]
 
