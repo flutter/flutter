@@ -51,7 +51,7 @@ Future<void> main() async {
             'app',
             'outputs',
             'bundle',
-            'productionrelease',
+            'productionRelease',
             'app.aab',
           );
 
