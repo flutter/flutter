@@ -122,7 +122,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
     size_t items_count = 0;
 
     {
-      std::lock_guard<std::mutex> lock(queue_mutex_);
+      std::scoped_lock lock(queue_mutex_);
       std::tie(resource, trace_id) = std::move(queue_.front());
       queue_.pop();
       items_count = queue_.size();
@@ -150,7 +150,7 @@ class Pipeline : public fml::RefCountedThreadSafe<Pipeline<R>> {
 
   void ProducerCommit(ResourcePtr resource, size_t trace_id) {
     {
-      std::lock_guard<std::mutex> lock(queue_mutex_);
+      std::scoped_lock lock(queue_mutex_);
       queue_.emplace(std::move(resource), trace_id);
     }
 

@@ -31,7 +31,7 @@ void EmbedderTaskRunner::PostTaskForTime(fml::closure task,
 
   {
     // Release the lock before the jump via the dispatch table.
-    std::lock_guard<std::mutex> lock(tasks_mutex_);
+    std::scoped_lock lock(tasks_mutex_);
     baton = ++last_baton_;
     pending_tasks_[baton] = task;
   }
@@ -52,7 +52,7 @@ bool EmbedderTaskRunner::PostTask(uint64_t baton) {
   fml::closure task;
 
   {
-    std::lock_guard<std::mutex> lock(tasks_mutex_);
+    std::scoped_lock lock(tasks_mutex_);
     auto found = pending_tasks_.find(baton);
     if (found == pending_tasks_.end()) {
       FML_LOG(ERROR) << "Embedder attempted to post an unknown task.";

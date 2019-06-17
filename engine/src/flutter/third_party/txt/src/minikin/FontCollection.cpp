@@ -66,7 +66,7 @@ FontCollection::FontCollection(
 
 void FontCollection::init(
     const vector<std::shared_ptr<FontFamily>>& typefaces) {
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   mId = sNextId++;
   vector<uint32_t> lastChar;
   size_t nTypefaces = typefaces.size();
@@ -406,7 +406,7 @@ bool FontCollection::hasVariationSelector(uint32_t baseCodepoint,
     return false;
   }
 
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
 
   // Currently mRanges can not be used here since it isn't aware of the
   // variation sequence.

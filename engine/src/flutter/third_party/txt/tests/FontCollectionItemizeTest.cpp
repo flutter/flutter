@@ -63,7 +63,7 @@ void itemize(const std::shared_ptr<FontCollection>& collection,
 
   result->clear();
   ParseUnicode(buf, BUF_SIZE, str, &len, NULL);
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   collection->itemize(buf, len, style, result);
 }
 
@@ -76,7 +76,7 @@ const std::string& getFontPath(const FontCollection::Run& run) {
 // Utility function to obtain FontLanguages from string.
 const FontLanguages& registerAndGetFontLanguages(
     const std::string& lang_string) {
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   return FontLanguageListCache::getById(
       FontLanguageListCache::getId(lang_string));
 }

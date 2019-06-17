@@ -90,7 +90,7 @@ static void BM_FontCollection_itemize(benchmark::State& state) {
   FontStyle style(FontStyle::registerLanguageList(
       ITEMIZE_TEST_CASES[testIndex].languageTag));
 
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   while (state.KeepRunning()) {
     result.clear();
     collection->itemize(buffer, utf16_length, style, &result);

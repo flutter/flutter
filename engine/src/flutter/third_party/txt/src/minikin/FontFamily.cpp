@@ -56,7 +56,7 @@ android::hash_t FontStyle::hash() const {
 
 // static
 uint32_t FontStyle::registerLanguageList(const std::string& languages) {
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   return FontLanguageListCache::getId(languages);
 }
 
@@ -115,7 +115,7 @@ FontFamily::FontFamily(uint32_t langId, int variant, std::vector<Font>&& fonts)
 bool FontFamily::analyzeStyle(const std::shared_ptr<MinikinFont>& typeface,
                               int* weight,
                               bool* italic) {
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   const uint32_t os2Tag = MinikinFont::MakeTag('O', 'S', '/', '2');
   HbBlob os2Table(getFontTable(typeface.get(), os2Tag));
   if (os2Table.get() == nullptr)
@@ -175,7 +175,7 @@ bool FontFamily::isColorEmojiFamily() const {
 }
 
 void FontFamily::computeCoverage() {
-  std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   const FontStyle defaultStyle;
   const MinikinFont* typeface = getClosestMatch(defaultStyle).font;
   const uint32_t cmapTag = MinikinFont::MakeTag('c', 'm', 'a', 'p');
@@ -233,7 +233,7 @@ std::shared_ptr<FontFamily> FontFamily::createFamilyWithVariation(
   std::vector<Font> fonts;
   for (const Font& font : mFonts) {
     bool supportedVariations = false;
-    std::lock_guard<std::recursive_mutex> _l(gMinikinLock);
+    std::scoped_lock _l(gMinikinLock);
     std::unordered_set<AxisTag> supportedAxes = font.getSupportedAxesLocked();
     if (!supportedAxes.empty()) {
       for (const FontVariation& variation : variations) {

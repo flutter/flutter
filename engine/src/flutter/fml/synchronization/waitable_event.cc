@@ -55,13 +55,13 @@ bool WaitWithTimeoutImpl(std::unique_lock<std::mutex>* locker,
 // AutoResetWaitableEvent ------------------------------------------------------
 
 void AutoResetWaitableEvent::Signal() {
-  std::lock_guard<std::mutex> locker(mutex_);
+  std::scoped_lock locker(mutex_);
   signaled_ = true;
   cv_.notify_one();
 }
 
 void AutoResetWaitableEvent::Reset() {
-  std::lock_guard<std::mutex> locker(mutex_);
+  std::scoped_lock locker(mutex_);
   signaled_ = false;
 }
 
@@ -110,21 +110,21 @@ bool AutoResetWaitableEvent::WaitWithTimeout(TimeDelta timeout) {
 }
 
 bool AutoResetWaitableEvent::IsSignaledForTest() {
-  std::lock_guard<std::mutex> locker(mutex_);
+  std::scoped_lock locker(mutex_);
   return signaled_;
 }
 
 // ManualResetWaitableEvent ----------------------------------------------------
 
 void ManualResetWaitableEvent::Signal() {
-  std::lock_guard<std::mutex> locker(mutex_);
+  std::scoped_lock locker(mutex_);
   signaled_ = true;
   signal_id_++;
   cv_.notify_all();
 }
 
 void ManualResetWaitableEvent::Reset() {
-  std::lock_guard<std::mutex> locker(mutex_);
+  std::scoped_lock locker(mutex_);
   signaled_ = false;
 }
 
@@ -160,7 +160,7 @@ bool ManualResetWaitableEvent::WaitWithTimeout(TimeDelta timeout) {
 }
 
 bool ManualResetWaitableEvent::IsSignaledForTest() {
-  std::lock_guard<std::mutex> locker(mutex_);
+  std::scoped_lock locker(mutex_);
   return signaled_;
 }
 

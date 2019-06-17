@@ -70,7 +70,7 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
   std::vector<DartServiceIsolate::ObservatoryServerStateCallback>
       callbacks_to_fire;
   {
-    std::lock_guard<std::mutex> lock(callbacks_mutex_);
+    std::scoped_lock lock(callbacks_mutex_);
     for (auto& callback : callbacks_) {
       callbacks_to_fire.push_back(*callback.get());
     }
@@ -98,7 +98,7 @@ DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
   auto handle = reinterpret_cast<CallbackHandle>(callback_pointer.get());
 
   {
-    std::lock_guard<std::mutex> lock(callbacks_mutex_);
+    std::scoped_lock lock(callbacks_mutex_);
     callbacks_.insert(std::move(callback_pointer));
   }
 
@@ -111,7 +111,7 @@ DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
 
 bool DartServiceIsolate::RemoveServerStatusCallback(
     CallbackHandle callback_handle) {
-  std::lock_guard<std::mutex> lock(callbacks_mutex_);
+  std::scoped_lock lock(callbacks_mutex_);
   auto found = std::find_if(
       callbacks_.begin(), callbacks_.end(),
       [callback_handle](const auto& item) {

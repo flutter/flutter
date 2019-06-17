@@ -14,26 +14,26 @@ MessageLoopTaskQueue::MessageLoopTaskQueue() : order_(0) {}
 MessageLoopTaskQueue::~MessageLoopTaskQueue() = default;
 
 void MessageLoopTaskQueue::Dispose() {
-  std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
+  std::scoped_lock lock(delayed_tasks_mutex_);
   delayed_tasks_ = {};
 }
 
 void MessageLoopTaskQueue::RegisterTask(fml::closure task,
                                         fml::TimePoint target_time) {
-  std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
+  std::scoped_lock lock(delayed_tasks_mutex_);
   delayed_tasks_.push({++order_, std::move(task), target_time});
   WakeUp(delayed_tasks_.top().GetTargetTime());
 }
 
 bool MessageLoopTaskQueue::HasPendingTasks() {
-  std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
+  std::scoped_lock lock(delayed_tasks_mutex_);
   return !delayed_tasks_.empty();
 }
 
 void MessageLoopTaskQueue::GetTasksToRunNow(
     FlushType type,
     std::vector<fml::closure>& invocations) {
-  std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
+  std::scoped_lock lock(delayed_tasks_mutex_);
 
   const auto now = fml::TimePoint::Now();
   while (!delayed_tasks_.empty()) {
@@ -62,23 +62,23 @@ void MessageLoopTaskQueue::WakeUp(fml::TimePoint time) {
 }
 
 size_t MessageLoopTaskQueue::GetNumPendingTasks() {
-  std::lock_guard<std::mutex> lock(delayed_tasks_mutex_);
+  std::scoped_lock lock(delayed_tasks_mutex_);
   return delayed_tasks_.size();
 }
 
 void MessageLoopTaskQueue::AddTaskObserver(intptr_t key,
                                            fml::closure callback) {
-  std::lock_guard<std::mutex> observers_lock(observers_mutex_);
+  std::scoped_lock observers_lock(observers_mutex_);
   task_observers_[key] = std::move(callback);
 }
 
 void MessageLoopTaskQueue::RemoveTaskObserver(intptr_t key) {
-  std::lock_guard<std::mutex> observers_lock(observers_mutex_);
+  std::scoped_lock observers_lock(observers_mutex_);
   task_observers_.erase(key);
 }
 
 void MessageLoopTaskQueue::NotifyObservers() {
-  std::lock_guard<std::mutex> observers_lock(observers_mutex_);
+  std::scoped_lock observers_lock(observers_mutex_);
   for (const auto& observer : task_observers_) {
     observer.second();
   }
