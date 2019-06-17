@@ -138,6 +138,10 @@ class ToggleButtons extends StatelessWidget {
           );
         } else if (index == children.length - 1) {
           edgeBorderRadius = BorderRadius.only(
+            topRight: borderRadius.topRight,
+            bottomRight: borderRadius.bottomRight,
+          );
+          clipBorderRadius = BorderRadius.only(
             topRight: borderRadius.topRight - Radius.circular(borderWidth / 2.0),
             bottomRight: borderRadius.bottomRight - Radius.circular(borderWidth / 2.0),
           );
@@ -342,11 +346,11 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
 
   @override
   _SelectToggleButtonRenderObject createRenderObject(BuildContext context) => _SelectToggleButtonRenderObject(
-      leadingBorderSide: leadingBorderSide,
-      horizontalBorderSide: horizontalBorderSide,
-      trailingBorderSide: trailingBorderSide,
-      borderRadius: borderRadius,
-      isFirstButton: isFirstButton,
+    leadingBorderSide: leadingBorderSide,
+    horizontalBorderSide: horizontalBorderSide,
+    trailingBorderSide: trailingBorderSide,
+    borderRadius: borderRadius,
+    isFirstButton: isFirstButton,
   );
 
   @override
@@ -360,14 +364,46 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
   }
 }
 
-class _SelectToggleButtonRenderObject extends RenderProxyBox {
+// class _RenderBorderBox extends RenderShiftedBox {
+//   _RenderBorderBox({
+//     this.isFirstButton,
+//     this.borderWidth,
+//     RenderBox child,
+//   }) : super(child);
+
+//   bool isFirstButton;
+
+//   double borderWidth;
+
+//   @override
+//   void performLayout() {
+//     child.layout(constraints, parentUsesSize: true);
+
+//     if (isFirstButton) {
+//       size = constraints.constrain(Size(
+//         child.size.width + borderWidth * 2.0,
+//         child.size.width + borderWidth * 2.0,
+//       ));
+//     } else {
+//       size = constraints.constrain(Size(
+//         child.size.width + borderWidth,
+//         child.size.width + borderWidth * 2.0,
+//       ));
+//     }
+
+
+//   }
+// }
+
+class _SelectToggleButtonRenderObject extends RenderShiftedBox {
   _SelectToggleButtonRenderObject({
     this.leadingBorderSide,
     this.horizontalBorderSide,
     this.trailingBorderSide,
     this.borderRadius,
     this.isFirstButton,
-  });
+    RenderBox child,
+  }) : super(child);
 
   BorderSide leadingBorderSide;
 
@@ -380,11 +416,59 @@ class _SelectToggleButtonRenderObject extends RenderProxyBox {
   bool isFirstButton;
 
   @override
+  void performLayout() {
+    if (child == null) {
+      size = constraints.constrain(Size(
+        leadingBorderSide.width + trailingBorderSide.width,
+        horizontalBorderSide.width * 2.0,
+      ));
+      return;
+    }
+
+    if (trailingBorderSide != null) {
+      final BoxConstraints innerConstraints = constraints.deflate(
+        EdgeInsets.only(
+          left: leadingBorderSide.width,
+          top: horizontalBorderSide.width,
+          right: trailingBorderSide?.width ?? 0.0,
+          bottom: horizontalBorderSide.width,
+        ),
+      );
+
+      child.layout(innerConstraints, parentUsesSize: true);
+      final BoxParentData childParentData = child.parentData;
+      childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
+
+      size = constraints.constrain(Size(
+        leadingBorderSide.width + child.size.width + trailingBorderSide.width,
+        horizontalBorderSide.width * 2.0 + child.size.height,
+      ));
+    } else {
+      final BoxConstraints innerConstraints = constraints.deflate(
+        EdgeInsets.only(
+          left: leadingBorderSide.width,
+          top: horizontalBorderSide.width,
+          bottom: horizontalBorderSide.width,
+        ),
+      );
+
+      child.layout(innerConstraints, parentUsesSize: true);
+      final BoxParentData childParentData = child.parentData;
+      childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
+
+      size = constraints.constrain(Size(
+        leadingBorderSide.width + child.size.width,
+        horizontalBorderSide.width * 2.0 + child.size.height,
+      ));
+    }
+  }
+
+  @override
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
     final Offset bottomRight = size.bottomRight(offset);
-    final Rect inner = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
-    final Rect center = inner.inflate(horizontalBorderSide.width / 2.0);
+    final Rect outer = Rect.fromLTRB(offset.dx, offset.dy, bottomRight.dx, bottomRight.dy);
+    final Rect center = outer.deflate(horizontalBorderSide.width / 2.0);
 
     final double bottom = center.bottom;
     final double left = center.left;
@@ -423,9 +507,22 @@ class _SelectToggleButtonRenderObject extends RenderProxyBox {
       final Paint horizontalPaint = horizontalBorderSide.toPaint();
       final Path horizontalPaths = Path()
         ..moveTo(left + tlRadius.x, top)
-        ..lineTo(right, top)
+        ..lineTo(outer.right, top)
         ..moveTo(left + blRadius.x, bottom)
-        ..lineTo(right, bottom);
+        ..lineTo(outer.right, bottom);
+      context.canvas.drawPath(horizontalPaths, horizontalPaint);
+    } else if (!isFirstButton && trailingBorderSide == null) {
+      final Path leftPath = Path()
+        ..moveTo(left, bottom + leadingBorderSide.width / 2)
+        ..lineTo(left, top - leadingBorderSide.width / 2);
+      context.canvas.drawPath(leftPath, leadingPaint);
+
+      final Paint horizontalPaint = horizontalBorderSide.toPaint();
+      final Path horizontalPaths = Path()
+        ..moveTo(left + horizontalBorderSide.width / 2.0, top)
+        ..lineTo(outer.right - trRadius.x, top)
+        ..moveTo(left + horizontalBorderSide.width / 2.0 + tlRadius.x, bottom)
+        ..lineTo(outer.right - trRadius.x, bottom);
       context.canvas.drawPath(horizontalPaths, horizontalPaint);
     } else {
       final Path leftPath = Path()
@@ -440,10 +537,7 @@ class _SelectToggleButtonRenderObject extends RenderProxyBox {
         ..moveTo(left + horizontalBorderSide.width / 2.0 + tlRadius.x, bottom)
         ..lineTo(right - trRadius.x, bottom);
       context.canvas.drawPath(horizontalPaths, horizontalPaint);
-    }
 
-    // only the last toggle button requires a paint on the trailing side
-    if (trailingBorderSide != null) {
       final Paint trailingPaint = trailingBorderSide.toPaint();
       final Rect trCorner = Rect.fromLTWH(
         right - (trRadius.x * 2),
