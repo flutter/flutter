@@ -61,7 +61,8 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   // main axis.
   //
   // The default value is to center the earliest possible child or the last possible
-  // child in the viewport along the main axis, when they become the current item.
+  // child in the viewport along the main axis, when the viewport is scrolled to
+  // the start or end (but is not overscrolled).
   double get _padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
 
   /// {@macro flutter.rendering.indexToLayoutOffset}
