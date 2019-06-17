@@ -86,17 +86,21 @@ import io.flutter.view.AccessibilityBridge;
  * To invoke a native method that is not associated with a platform view, invoke it statically:
  *
  * {@code
- *    String uri = FlutterJNI.nativeGetObservatoryUri();
+ *    bool enabled = FlutterJNI.nativeGetIsSoftwareRenderingEnabled();
  * }
  */
 public class FlutterJNI {
   private static final String TAG = "FlutterJNI";
 
+  // This is set from native code via JNI.
+  private static String observatoryUri;
+
   @UiThread
   public static native boolean nativeGetIsSoftwareRenderingEnabled();
 
-  @UiThread
-  public static native String nativeGetObservatoryUri();
+  public static String getObservatoryUri() {
+    return observatoryUri;
+  }
 
   private Long nativePlatformViewId;
   private FlutterRenderer.RenderSurface renderSurface;
