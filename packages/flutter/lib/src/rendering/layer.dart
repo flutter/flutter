@@ -157,7 +157,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Return the engine layer for retained rendering. When there's no
   /// corresponding engine layer, null is returned.
   @protected
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]);
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]);
 
   void _addToSceneWithRetainedRendering(ui.SceneBuilder builder) {
     // There can't be a loop by adding a retained layer subtree whose
@@ -173,7 +173,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
       builder.addRetained(_engineLayer);
       return;
     }
-    _engineLayer = addToScene(builder);
+    addToScene(builder);
     _needsAddToScene = false;
   }
 
@@ -258,9 +258,8 @@ class PictureLayer extends Layer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     builder.addPicture(layerOffset, picture, isComplexHint: isComplexHint, willChangeHint: willChangeHint);
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -329,7 +328,7 @@ class TextureLayer extends Layer {
   final bool freeze;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addTexture(
       textureId,
@@ -338,7 +337,6 @@ class TextureLayer extends Layer {
       height: shiftedRect.height,
       freeze: freeze,
     );
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -369,7 +367,7 @@ class PlatformViewLayer extends Layer {
   final int viewId;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addPlatformView(
       viewId,
@@ -377,7 +375,6 @@ class PlatformViewLayer extends Layer {
       width: shiftedRect.width,
       height: shiftedRect.height,
     );
-    return null;
   }
 
   @override
@@ -447,14 +444,13 @@ class PerformanceOverlayLayer extends Layer {
   final bool checkerboardOffscreenLayers;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(optionsMask != null);
     final Rect shiftedOverlayRect = layerOffset == Offset.zero ? overlayRect : overlayRect.shift(layerOffset);
     builder.addPerformanceOverlay(optionsMask, shiftedOverlayRect);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -752,9 +748,8 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     addChildrenToScene(builder, layerOffset);
-    return null; // ContainerLayer does not have a corresponding engine layer
   }
 
   /// Uploads all of this layer's children to the engine.
@@ -899,16 +894,15 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     // Skia has a fast path for concatenating scale/translation only matrices.
     // Hence pushing a translation-only transform layer should be fast. For
     // retained rendering, we don't want to push the offset down to each leaf
     // node. Otherwise, changing an offset layer on the very high level could
     // cascade the change to too many leaves.
-    final ui.EngineLayer engineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy);
+    _engineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     builder.pop();
-    return engineLayer;
   }
 
   @override
@@ -1020,7 +1014,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1028,12 +1022,13 @@ class ClipRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
-      builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior);
+      _engineLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior);
+    } else {
+      _engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1101,7 +1096,7 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1109,12 +1104,13 @@ class ClipRRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
-      builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior);
+      _engineLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior);
+    } else {
+      _engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1182,7 +1178,7 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisableClipLayers;
@@ -1190,12 +1186,13 @@ class ClipPathLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
-      builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior);
+      _engineLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior);
+    } else {
+      _engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 }
 
@@ -1277,17 +1274,16 @@ class TransformLayer extends OffsetLayer {
   bool _inverseDirty = true;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     _lastEffectiveTransform = transform;
     final Offset totalOffset = offset + layerOffset;
     if (totalOffset != Offset.zero) {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
-    builder.pushTransform(_lastEffectiveTransform.storage);
+    _engineLayer = builder.pushTransform(_lastEffectiveTransform.storage, oldLayer: _engineLayer);
     addChildrenToScene(builder);
     builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   Offset _transformOffset(Offset regionOffset) {
@@ -1391,18 +1387,19 @@ class OpacityLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = firstChild != null;  // don't add this layer if there's no child
     assert(() {
       enabled = enabled && !debugDisableOpacityLayers;
       return true;
     }());
     if (enabled)
-      builder.pushOpacity(alpha, offset: offset + layerOffset);
+      _engineLayer = builder.pushOpacity(alpha, offset: offset + layerOffset, oldLayer: _engineLayer);
+    else
+      _engineLayer = null;
     addChildrenToScene(builder);
     if (enabled)
       builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1467,12 +1464,11 @@ class ShaderMaskLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
-    builder.pushShaderMask(shader, shiftedMaskRect, blendMode);
+    _engineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 
   @override
@@ -1506,11 +1502,10 @@ class BackdropFilterLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    builder.pushBackdropFilter(filter);
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    _engineLayer = builder.pushBackdropFilter(filter, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
-    return null; // this does not return an engine layer yet.
   }
 }
 
@@ -1636,26 +1631,27 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    ui.EngineLayer engineLayer;
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     bool enabled = true;
     assert(() {
       enabled = !debugDisablePhysicalShapeLayers;
       return true;
     }());
     if (enabled) {
-      engineLayer = builder.pushPhysicalShape(
+      _engineLayer = builder.pushPhysicalShape(
         path: layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset),
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
         clipBehavior: clipBehavior,
+        oldLayer: _engineLayer,
       );
+    } else {
+      _engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
-    return engineLayer;
   }
 
   @override
@@ -1757,15 +1753,16 @@ class LeaderLayer extends ContainerLayer {
   Iterable<S> findAll<S>(Offset regionOffset) => super.findAll<S>(regionOffset - offset);
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
-      builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage);
+      _engineLayer = builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage, oldLayer: _engineLayer);
+    else
+      _engineLayer = null;
     addChildrenToScene(builder);
     if (_lastOffset != Offset.zero)
       builder.pop();
-    return null; // this does not have an engine layer.
   }
 
   /// Applies the transform that would be applied when compositing the given
@@ -1997,30 +1994,29 @@ class FollowerLayer extends ContainerLayer {
   bool get alwaysNeedsAddToScene => true;
 
   @override
-  ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(link != null);
     assert(showWhenUnlinked != null);
     if (link.leader == null && !showWhenUnlinked) {
       _lastTransform = null;
       _lastOffset = null;
       _inverseDirty = true;
-      return null; // this does not have an engine layer.
+      _engineLayer = null;
     }
     _establishTransform();
     if (_lastTransform != null) {
-      builder.pushTransform(_lastTransform.storage);
+      _engineLayer = builder.pushTransform(_lastTransform.storage, oldLayer: _engineLayer);
       addChildrenToScene(builder);
       builder.pop();
       _lastOffset = unlinkedOffset + layerOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset.dx, unlinkedOffset.dy, .0);
-      builder.pushTransform(matrix.storage);
+      _engineLayer = builder.pushTransform(matrix.storage, oldLayer: _engineLayer);
       addChildrenToScene(builder);
       builder.pop();
     }
     _inverseDirty = true;
-    return null; // this does not have an engine layer.
   }
 
   @override

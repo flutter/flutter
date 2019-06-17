@@ -2098,7 +2098,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
       }());
       // If we always have our own layer, then we can just repaint
       // ourselves without involving any other nodes.
-      assert(_layer != null);
+      assert(_layer is OffsetLayer);
       if (owner != null) {
         owner._nodesNeedingPaint.add(this);
         owner.requestVisualUpdate();
