@@ -6,14 +6,13 @@
 import 'dart:async';
 
 import 'package:build_daemon/client.dart';
+import 'package:build_daemon/constants.dart';
 import 'package:build_daemon/data/build_status.dart';
 import 'package:build_daemon/data/build_target.dart';
 import 'package:build_daemon/data/server_log.dart';
-
 import 'package:meta/meta.dart';
 import 'package:shelf/shelf.dart';
 import 'package:vm_service_lib/vm_service_lib.dart' as vmservice;
-
 import 'package:webdev/src/webdev.dart';
 
 import 'application_package.dart';
@@ -57,7 +56,6 @@ Future<BuildDaemonClient> connectClient(
       buildScript,
       'daemon',
       '--skip-build-script-check',
-      '--no-something',
       '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
       '--define', 'flutter_tools:entrypoint=release=false', //-hard coded for now
@@ -251,14 +249,13 @@ class ResidentWebRunner extends ResidentRunner {
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
     await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
-
-    _webDevHandle = await connectToWebdev(
+    _webDevHandle = await (await connectToWebdev(
       targetPort,
-      _client.port,
+      daemonPort(fs.currentDirectory.path),
       'web',
       _client.buildResults,
       optionalHandler: _assetHandler,
-    ).first;
+    )).first;
     appStartedCompleter?.complete();
     return attach(
       connectionInfoCompleter: connectionInfoCompleter,
@@ -495,3 +492,14 @@ class ResidentWebRunner extends ResidentRunner {
     );
   }
 }
+
+int daemonPort(String workingDirectory) {
+  final File portFile = fs.file(_assetServerPortFilePath(workingDirectory));
+  if (!portFile.existsSync()) {
+    throw Exception('Unable to read daemon asset port file.');
+  }
+  return int.parse(portFile.readAsStringSync());
+}
+
+String _assetServerPortFilePath(String workingDirectory) =>
+    '${daemonWorkspace(workingDirectory)}/.asset_server_port';

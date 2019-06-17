@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
 
+import 'package:analyzer/analyzer.dart'; // ignore: deprecated_member_use
 import 'package:build_runner/build_runner.dart' as build_runner;
 import 'package:build/build.dart';
 import 'package:build_config/build_config.dart';
@@ -144,7 +145,7 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
     hideOutput: true,
     defaultGenerateFor: const InputSet(
       include: <String>[
-        'lib/**',
+        'lib/**_web_entrypoint.dart',
       ],
     ),
   ),
@@ -337,6 +338,11 @@ class FlutterWebShellBuilder implements Builder {
 
   @override
   Future<void> build(BuildStep buildStep) async {
+    final AssetId dartEntrypointId = buildStep.inputId;
+    final bool isAppEntrypoint = await _isAppEntryPoint(dartEntrypointId, buildStep);
+    if (!isAppEntrypoint) {
+      return;
+    }
     final AssetId outputId = buildStep.inputId.changeExtension('_web_entrypoint.dart');
     await buildStep.writeAsString(outputId, '''
 import 'dart:ui' as ui;
@@ -432,4 +438,21 @@ Future<String> _createPackageFile(Iterable<AssetId> inputSources, BuildStep buil
   await packagesFile
       .writeAsString('# Generated for $inputUri\n$packagesFileContent');
   return packageFileName;
+}
+
+/// Returns whether or not [dartId] is an app entrypoint (basically, whether
+/// or not it has a `main` function).
+Future<bool> _isAppEntryPoint(AssetId dartId, AssetReader reader) async {
+  assert(dartId.extension == '.dart');
+  // Skip reporting errors here, dartdevc will report them later with nicer
+  // formatting.
+  final CompilationUnit parsed = parseCompilationUnit(await reader.readAsString(dartId),
+      suppressErrors: true);
+  // Allow two or fewer arguments so that entrypoints intended for use with
+  // [spawnUri] get counted.
+  return parsed.declarations.any((CompilationUnitMember node) {
+    return node is FunctionDeclaration &&
+        node.name.name == 'main' &&
+        node.functionExpression.parameters.parameters.length <= 2;
+  });
 }
