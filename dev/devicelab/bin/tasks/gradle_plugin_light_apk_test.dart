@@ -157,7 +157,7 @@ Future<void> main() async {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('gradlew assembleDebug on plugin example');
         await pluginProject.runGradleTask('assembleDebug');
-        if (!pluginProject.hasDebugApk)
+        if (!File(pluginProject.debugApkPath).existsSync())
           throw TaskResult.failure(
               'Gradle did not produce an apk file at the expected place');
       });

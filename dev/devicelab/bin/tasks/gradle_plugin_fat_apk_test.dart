@@ -91,10 +91,6 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm,android-arm64', '-Psplit-per-abi=true']);
 
-        if (!pluginProject.hasReleaseArmApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk at: ${pluginProject.releaseArmApkPath}');
-
         final Iterable<String> armApkFiles = await getFilesInApk(pluginProject.releaseArmApkPath);
 
         checkItContains<String>(<String>[
