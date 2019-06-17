@@ -42,7 +42,7 @@ class TestCommand extends FastFlutterCommand {
         negatable: false,
         help: 'Start in a paused mode and wait for a debugger to connect.\n'
               'You must specify a single test file to run, explicitly.\n'
-              'Instructions for connecting with a debugger and printed to the '
+              'Instructions for connecting with a debugger are printed to the '
               'console once the test has started.',
       )
       ..addFlag('disable-service-auth-codes',
