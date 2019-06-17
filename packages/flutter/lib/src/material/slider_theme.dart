@@ -1193,6 +1193,10 @@ abstract class RangeSliderThumbShape {
   ///
   /// {@macro flutter.material.rangeSlider.shape.sliderTheme}
   ///
+  /// [textDirection] can be used to determine how the orientation of either
+  /// slider thumb should be changed, such as drawing different shapes for the
+  /// left and right thumb.
+  ///
   /// {@macro flutter.material.rangeSlider.shape.thumb}
   void paint(
     PaintingContext context,
@@ -1202,6 +1206,7 @@ abstract class RangeSliderThumbShape {
     bool isDiscrete,
     bool isEnabled,
     bool isOnTop,
+    TextDirection textDirection,
     SliderThemeData sliderTheme,
     Thumb thumb,
   });
@@ -2290,6 +2295,7 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     bool isEnabled = false,
     bool isOnTop,
     @required SliderThemeData sliderTheme,
+    TextDirection textDirection,
     Thumb thumb,
   }) {
     assert(context != null);
