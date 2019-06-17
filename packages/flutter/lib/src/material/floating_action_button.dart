@@ -462,11 +462,9 @@ class FloatingActionButton extends StatelessWidget {
     );
 
     if (tooltip != null) {
-      result = MergeSemantics(
-        child: Tooltip(
-          message: tooltip,
-          child: result,
-        ),
+      result = Tooltip(
+        message: tooltip,
+        child: result,
       );
     }
 
@@ -477,7 +475,7 @@ class FloatingActionButton extends StatelessWidget {
       );
     }
 
-    return result;
+    return MergeSemantics(child: result);
   }
 
   @override
