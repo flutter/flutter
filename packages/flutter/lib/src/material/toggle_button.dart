@@ -360,6 +360,7 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
     borderRadius: borderRadius,
     isFirstButton: isFirstButton,
     isLastButton: isLastButton,
+    textDirection: Directionality.of(context),
   );
 
   @override
@@ -370,7 +371,8 @@ class _SelectToggleButton extends SingleChildRenderObjectWidget {
       ..trailingBorderSide = trailingBorderSide
       ..borderRadius = borderRadius
       ..isFirstButton = isFirstButton
-      ..isLastButton = isLastButton;
+      ..isLastButton = isLastButton
+      ..textDirection = Directionality.of(context);
   }
 }
 
@@ -382,6 +384,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     this.borderRadius,
     this.isFirstButton,
     this.isLastButton,
+    this.textDirection,
     RenderBox child,
   }) : super(child);
 
@@ -397,6 +400,8 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
   bool isLastButton;
 
+  TextDirection textDirection;
+
   @override
   void performLayout() {
     if (child == null) {
@@ -407,13 +412,27 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       return;
     }
 
-    final double rightBorderOffset = isLastButton ? trailingBorderSide.width : 0.0;
+    final double trailingBorderOffset = isLastButton ? trailingBorderSide.width : 0.0;
+    double leftConstraint;
+    double rightConstraint;
 
+    switch (textDirection) {
+      case TextDirection.ltr:
+        rightConstraint = trailingBorderOffset;
+        leftConstraint = leadingBorderSide.width;
+        break;
+      case TextDirection.rtl:
+        rightConstraint = leadingBorderSide.width;
+        leftConstraint = trailingBorderOffset;
+        break;
+    }
+
+    print('rightConstraint $rightConstraint $leftConstraint $isFirstButton');
     final BoxConstraints innerConstraints = constraints.deflate(
       EdgeInsets.only(
-        left: leadingBorderSide.width,
+        left: leftConstraint,
         top: horizontalBorderSide.width,
-        right: rightBorderOffset,
+        right: rightConstraint,
         bottom: horizontalBorderSide.width,
       ),
     );
@@ -423,7 +442,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
     childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
 
     size = constraints.constrain(Size(
-      leadingBorderSide.width + child.size.width + rightBorderOffset,
+      leadingBorderSide.width + child.size.width + trailingBorderOffset,
       horizontalBorderSide.width * 2.0 + child.size.height,
     ));
   }
@@ -447,68 +466,113 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
     final double sweepAngle = math.pi / 2.0;
 
+    final Rect tlCorner = Rect.fromLTWH(
+      left,
+      top,
+      tlRadius.x * 2.0,
+      tlRadius.y * 2.0,
+    );
+    final Rect blCorner = Rect.fromLTWH(
+      left,
+      bottom - (blRadius.y * 2.0),
+      blRadius.x * 2.0,
+      blRadius.y * 2.0,
+    );
+    final Rect trCorner = Rect.fromLTWH(
+      right - (trRadius.x * 2),
+      top,
+      trRadius.x * 2,
+      trRadius.y * 2,
+    );
+    final Rect brCorner = Rect.fromLTWH(
+      right - (brRadius.x * 2),
+      bottom - (brRadius.y * 2),
+      brRadius.x * 2,
+      brRadius.y * 2,
+    );
+
     final Paint leadingPaint = leadingBorderSide.toPaint();
-    if (isFirstButton) {
-      final Rect tlCorner = Rect.fromLTWH(
-        left,
-        top,
-        tlRadius.x * 2.0,
-        tlRadius.y * 2.0,
-      );
-      final Rect blCorner = Rect.fromLTWH(
-        left,
-        bottom - (blRadius.y * 2.0),
-        blRadius.x * 2.0,
-        blRadius.y * 2.0,
-      );
-      final Path leadingPath = Path()
-        ..moveTo(outer.right, bottom)
-        ..lineTo(left + blRadius.x, bottom)
-        ..addArc(blCorner, math.pi / 2.0, sweepAngle)
-        ..lineTo(left, top + tlRadius.y)
-        ..addArc(tlCorner, math.pi, sweepAngle)
-        ..lineTo(outer.right, top);
-      context.canvas.drawPath(leadingPath, leadingPaint);
-    } else if (isLastButton) {
-      final Path leftPath = Path()
-        ..moveTo(left, bottom + leadingBorderSide.width / 2)
-        ..lineTo(left, top - leadingBorderSide.width / 2);
-      context.canvas.drawPath(leftPath, leadingPaint);
+    switch (textDirection) {
+      case TextDirection.ltr:
+        if (isFirstButton) {
+          final Path leadingPath = Path()
+            ..moveTo(outer.right, bottom)
+            ..lineTo(left + blRadius.x, bottom)
+            ..addArc(blCorner, math.pi / 2.0, sweepAngle)
+            ..lineTo(left, top + tlRadius.y)
+            ..addArc(tlCorner, math.pi, sweepAngle)
+            ..lineTo(outer.right, top);
+          context.canvas.drawPath(leadingPath, leadingPaint);
+        } else if (isLastButton) {
+          final Path leftPath = Path()
+            ..moveTo(left, bottom + leadingBorderSide.width / 2)
+            ..lineTo(left, top - leadingBorderSide.width / 2);
+          context.canvas.drawPath(leftPath, leadingPaint);
 
-      final Rect trCorner = Rect.fromLTWH(
-        right - (trRadius.x * 2),
-        top,
-        trRadius.x * 2,
-        trRadius.y * 2,
-      );
-      final Rect brCorner = Rect.fromLTWH(
-        right - (brRadius.x * 2),
-        bottom - (brRadius.y * 2),
-        brRadius.x * 2,
-        brRadius.y * 2,
-      );
-      final Paint endingPaint = trailingBorderSide.toPaint();
-      final Path endingPath = Path()
-        ..moveTo(left + horizontalBorderSide.width / 2.0, top)
-        ..lineTo(right - trRadius.x, top)
-        ..addArc(trCorner, math.pi * 3.0 / 2.0, sweepAngle)
-        ..lineTo(right, bottom - brRadius.y)
-        ..addArc(brCorner, 0, sweepAngle)
-        ..lineTo(left + horizontalBorderSide.width / 2.0, bottom);
-      context.canvas.drawPath(endingPath, endingPaint);
-    } else {
-      final Path leftPath = Path()
-        ..moveTo(left, bottom + leadingBorderSide.width / 2)
-        ..lineTo(left, top - leadingBorderSide.width / 2);
-      context.canvas.drawPath(leftPath, leadingPaint);
+          final Paint endingPaint = trailingBorderSide.toPaint();
+          final Path endingPath = Path()
+            ..moveTo(left + horizontalBorderSide.width / 2.0, top)
+            ..lineTo(right - trRadius.x, top)
+            ..addArc(trCorner, math.pi * 3.0 / 2.0, sweepAngle)
+            ..lineTo(right, bottom - brRadius.y)
+            ..addArc(brCorner, 0, sweepAngle)
+            ..lineTo(left + horizontalBorderSide.width / 2.0, bottom);
+          context.canvas.drawPath(endingPath, endingPaint);
+        } else {
+          final Path leadingPath = Path()
+            ..moveTo(left, bottom + leadingBorderSide.width / 2)
+            ..lineTo(left, top - leadingBorderSide.width / 2);
+          context.canvas.drawPath(leadingPath, leadingPaint);
 
-      final Paint horizontalPaint = horizontalBorderSide.toPaint();
-      final Path horizontalPaths = Path()
-        ..moveTo(left + horizontalBorderSide.width / 2.0, top)
-        ..lineTo(outer.right - trRadius.x, top)
-        ..moveTo(left + horizontalBorderSide.width / 2.0 + tlRadius.x, bottom)
-        ..lineTo(outer.right - trRadius.x, bottom);
-      context.canvas.drawPath(horizontalPaths, horizontalPaint);
+          final Paint horizontalPaint = horizontalBorderSide.toPaint();
+          final Path horizontalPaths = Path()
+            ..moveTo(left + horizontalBorderSide.width / 2.0, top)
+            ..lineTo(outer.right - trRadius.x, top)
+            ..moveTo(left + horizontalBorderSide.width / 2.0 + tlRadius.x, bottom)
+            ..lineTo(outer.right - trRadius.x, bottom);
+          context.canvas.drawPath(horizontalPaths, horizontalPaint);
+        }
+        break;
+      case TextDirection.rtl:
+        if (isFirstButton) {
+          final Path leadingPath = Path()
+            ..moveTo(outer.left, bottom)
+            ..lineTo(right - brRadius.x, bottom)
+            ..addArc(brCorner, math.pi * 3.0 / 2.0, sweepAngle)
+            ..lineTo(right, top + trRadius.y)
+            ..addArc(trCorner, 0, sweepAngle)
+            ..lineTo(outer.left, top);
+          context.canvas.drawPath(leadingPath, leadingPaint);
+        } else if (isLastButton) {
+          final Path leadingPath = Path()
+            ..moveTo(right, bottom + leadingBorderSide.width / 2)
+            ..lineTo(right, top - leadingBorderSide.width / 2);
+          context.canvas.drawPath(leadingPath, leadingPaint);
+
+          final Paint endingPaint = trailingBorderSide.toPaint();
+          final Path endingPath = Path()
+            ..moveTo(right - horizontalBorderSide.width / 2.0, top)
+            ..lineTo(left + tlRadius.x, top)
+            ..addArc(tlCorner, math.pi, sweepAngle)
+            ..lineTo(left, bottom - blRadius.y)
+            ..addArc(blCorner, math.pi / 2.0, sweepAngle)
+            ..lineTo(right - horizontalBorderSide.width / 2.0, bottom);
+          context.canvas.drawPath(endingPath, endingPaint);
+        } else {
+          final Path leadingPath = Path()
+            ..moveTo(right, bottom + leadingBorderSide.width / 2)
+            ..lineTo(right, top - leadingBorderSide.width / 2);
+          context.canvas.drawPath(leadingPath, leadingPaint);
+
+          final Paint horizontalPaint = horizontalBorderSide.toPaint();
+          final Path horizontalPaths = Path()
+            ..moveTo(right + horizontalBorderSide.width / 2.0, top)
+            ..lineTo(outer.left - tlRadius.x, top)
+            ..moveTo(right + horizontalBorderSide.width / 2.0 + trRadius.x, bottom)
+            ..lineTo(outer.left - tlRadius.x, bottom);
+          context.canvas.drawPath(horizontalPaths, horizontalPaint);
+        }
+        break;
     }
   }
 }
