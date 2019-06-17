@@ -178,7 +178,7 @@ class FuchsiaDevice extends Device {
   FuchsiaDevice(String id, {this.name}) : super(
       id,
       platformType: PlatformType.fuchsia,
-      category: Category.desktop,
+      category: null,
       ephemeral: false,
   );
 
