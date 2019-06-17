@@ -263,17 +263,27 @@ Future<RunResult> runCheckedAsync(
   return result;
 }
 
-bool exitsHappy(List<String> cli) {
+bool exitsHappy(
+  List<String> cli, {
+  Map<String, String> environment,
+}) {
   _traceCommand(cli);
   try {
-    return processManager.runSync(cli).exitCode == 0;
+    //return processManager.runSync(cli, environment: environment).exitCode == 0;
+    final int code = processManager.runSync(cli, environment: environment).exitCode;
+    if (code != 0) {
+      print('Yolo dawg!');
+      print('Command was: ${cli.join(' ')}');
+      print('Code was: $code');
+    }
+    return code == 0;
   } catch (error) {
     printTrace('$cli failed with $error');
     return false;
   }
 }
 
-Future<bool> exitsHappyAsync(List<String> cli) async {
+Future<bool> exitsHappyAsync(List<String> cli) async { // TODO here too
   _traceCommand(cli);
   try {
     return (await processManager.run(cli)).exitCode == 0; // TODO: we can pass an environment map here

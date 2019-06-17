@@ -18,6 +18,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
 import '../macos/cocoapod_utils.dart';
@@ -44,7 +45,13 @@ class IOSDeviceNotFoundError implements Exception {
 class IMobileDevice {
   const IMobileDevice();
 
-  bool get isInstalled => exitsHappy(<String>['idevice_id', '-h']);
+  bool get isInstalled {
+    final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
+    return exitsHappy(
+      <String>['$cachePath/idevice_id', '-h'],
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath},
+    );
+  }
 
   /// Returns true if libimobiledevice is installed and working as expected.
   ///
@@ -54,13 +61,20 @@ class IMobileDevice {
       return false;
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final ProcessResult ideviceResult = (await runAsync(<String>['ideviceinfo', '-u', fakeIphoneId])).processResult;
+    final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
+    final ProcessResult ideviceResult = (await runAsync(
+      <String>['$cachePath/ideviceinfo', '-u', fakeIphoneId],
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath}
+    )).processResult;
     if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
       return false;
     }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await runAsync(<String>['idevice_id', '-l'])).processResult;
+    final ProcessResult result = (await runAsync(
+      <String>['$cachePath/idevice_id', '-l'],
+      environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath},
+    )).processResult;
     if (result.exitCode == 0 && result.stdout.isEmpty)
       return true;
 
@@ -70,7 +84,11 @@ class IMobileDevice {
 
   Future<String> getAvailableDeviceIDs() async {
     try {
-      final ProcessResult result = await processManager.run(<String>['idevice_id', '-l']);
+      final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
+      final ProcessResult result = await processManager.run(
+        <String>['$cachePath/idevice_id', '-l'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath},
+      );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
       return result.stdout;

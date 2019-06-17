@@ -45,9 +45,9 @@ class IOSValidator extends DoctorValidator {
 
   const IOSValidator() : super('iOS tools - develop for iOS devices');
 
-  Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
+  Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']); // TODO!
 
-  Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']);
+  Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']); // TODO!
 
   String get iosDeployMinimumVersion => '1.9.4';
 

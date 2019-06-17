@@ -227,7 +227,7 @@ class Cache {
     return getRoot().childDirectory('flutter_web_sdk');
   }
 
-  String getVersionFor(String artifactName) {
+  String getVersionFor(String artifactName) { // TODO Use!
     final File versionFile = fs.file(fs.path.join(
         _rootOverride?.path ?? flutterRoot, 'bin', 'internal',
         '$artifactName.version'));
