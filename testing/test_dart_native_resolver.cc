@@ -44,7 +44,7 @@ Dart_NativeFunction TestDartNativeResolver::DartNativeEntryResolverCallback(
     bool* auto_setup_scope) {
   auto name = tonic::StdStringFromDart(dart_name);
 
-  std::lock_guard<std::mutex> lock(gIsolateResolversMutex);
+  std::scoped_lock lock(gIsolateResolversMutex);
   auto found = gIsolateResolvers.find(Dart_CurrentIsolate());
   if (found == gIsolateResolvers.end()) {
     FML_LOG(ERROR) << "Could not resolve native method for :" << name;
@@ -74,7 +74,7 @@ void TestDartNativeResolver::SetNativeResolverForIsolate() {
   FML_CHECK(!tonic::LogIfError(result))
       << "Could not set native resolver in test.";
 
-  std::lock_guard<std::mutex> lock(gIsolateResolversMutex);
+  std::scoped_lock lock(gIsolateResolversMutex);
   gIsolateResolvers[Dart_CurrentIsolate()] = shared_from_this();
 
   std::vector<Dart_Isolate> isolates_with_dead_resolvers;

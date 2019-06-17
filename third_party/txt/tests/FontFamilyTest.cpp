@@ -30,13 +30,13 @@ typedef ICUTestBase FontLanguagesTest;
 typedef ICUTestBase FontLanguageTest;
 
 static const FontLanguages& createFontLanguages(const std::string& input) {
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   uint32_t langId = FontLanguageListCache::getId(input);
   return FontLanguageListCache::getById(langId);
 }
 
 static FontLanguage createFontLanguage(const std::string& input) {
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   uint32_t langId = FontLanguageListCache::getId(input);
   return FontLanguageListCache::getById(langId)[0];
 }
@@ -575,7 +575,7 @@ TEST_F(FontFamilyTest, hasVariationSelectorTest) {
   std::shared_ptr<FontFamily> family(
       new FontFamily(std::vector<Font>{Font(minikinFont, FontStyle())}));
 
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
 
   const uint32_t kVS1 = 0xFE00;
   const uint32_t kVS2 = 0xFE01;
@@ -630,7 +630,7 @@ TEST_F(FontFamilyTest, hasVSTableTest) {
         new MinikinFontForTest(testCase.fontPath));
     std::shared_ptr<FontFamily> family(
         new FontFamily(std::vector<Font>{Font(minikinFont, FontStyle())}));
-    std::lock_guard<std::mutex> _l(gMinikinLock);
+    std::scoped_lock _l(gMinikinLock);
     EXPECT_EQ(testCase.hasVSTable, family->hasVSTable());
   }
 }
@@ -714,7 +714,7 @@ TEST_F(FontFamilyTest, coverageTableSelectionTest) {
   std::shared_ptr<FontFamily> unicodeEnc4Font =
       makeFamily(kUnicodeEncoding4Font);
 
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
 
   EXPECT_TRUE(unicodeEnc1Font->hasGlyph(0x0061, 0));
   EXPECT_TRUE(unicodeEnc3Font->hasGlyph(0x0061, 0));

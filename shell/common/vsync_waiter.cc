@@ -37,7 +37,7 @@ void VsyncWaiter::AsyncWaitForVsync(Callback callback) {
   TRACE_EVENT0("flutter", "AsyncWaitForVsync");
 
   {
-    std::lock_guard<std::mutex> lock(callback_mutex_);
+    std::scoped_lock lock(callback_mutex_);
     if (callback_) {
       // The animator may request a frame more than once within a frame
       // interval. Multiple calls to request frame must result in a single
@@ -55,7 +55,7 @@ void VsyncWaiter::FireCallback(fml::TimePoint frame_start_time,
   Callback callback;
 
   {
-    std::lock_guard<std::mutex> lock(callback_mutex_);
+    std::scoped_lock lock(callback_mutex_);
     callback = std::move(callback_);
   }
 

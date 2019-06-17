@@ -33,7 +33,7 @@ namespace minikin {
 class HbFontCacheTest : public testing::Test {
  public:
   virtual void TearDown() {
-    std::lock_guard<std::mutex> _l(gMinikinLock);
+    std::scoped_lock _l(gMinikinLock);
     purgeHbFontCacheLocked();
   }
 };
@@ -48,7 +48,7 @@ TEST_F(HbFontCacheTest, getHbFontLockedTest) {
   std::shared_ptr<MinikinFontForTest> fontC(
       new MinikinFontForTest(kTestFontDir "BoldItalic.ttf"));
 
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   // Never return NULL.
   EXPECT_NE(nullptr, getHbFontLocked(fontA.get()));
   EXPECT_NE(nullptr, getHbFontLocked(fontB.get()));
@@ -71,7 +71,7 @@ TEST_F(HbFontCacheTest, purgeCacheTest) {
   std::shared_ptr<MinikinFontForTest> minikinFont(
       new MinikinFontForTest(kTestFontDir "Regular.ttf"));
 
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   hb_font_t* font = getHbFontLocked(minikinFont.get());
   ASSERT_NE(nullptr, font);
 

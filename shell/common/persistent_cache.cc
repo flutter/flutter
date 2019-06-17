@@ -180,13 +180,13 @@ void PersistentCache::DumpSkp(const SkData& data) {
 
 void PersistentCache::AddWorkerTaskRunner(
     fml::RefPtr<fml::TaskRunner> task_runner) {
-  std::lock_guard<std::mutex> lock(worker_task_runners_mutex_);
+  std::scoped_lock lock(worker_task_runners_mutex_);
   worker_task_runners_.insert(task_runner);
 }
 
 void PersistentCache::RemoveWorkerTaskRunner(
     fml::RefPtr<fml::TaskRunner> task_runner) {
-  std::lock_guard<std::mutex> lock(worker_task_runners_mutex_);
+  std::scoped_lock lock(worker_task_runners_mutex_);
   auto found = worker_task_runners_.find(task_runner);
   if (found != worker_task_runners_.end()) {
     worker_task_runners_.erase(found);
@@ -196,7 +196,7 @@ void PersistentCache::RemoveWorkerTaskRunner(
 fml::RefPtr<fml::TaskRunner> PersistentCache::GetWorkerTaskRunner() const {
   fml::RefPtr<fml::TaskRunner> worker;
 
-  std::lock_guard<std::mutex> lock(worker_task_runners_mutex_);
+  std::scoped_lock lock(worker_task_runners_mutex_);
   if (!worker_task_runners_.empty()) {
     worker = *worker_task_runners_.begin();
   }

@@ -31,7 +31,7 @@ TEST_F(FontLanguageListCacheTest, getId) {
   EXPECT_NE(0UL, FontStyle::registerLanguageList("jp"));
   EXPECT_NE(0UL, FontStyle::registerLanguageList("en,zh-Hans"));
 
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   EXPECT_EQ(0UL, FontLanguageListCache::getId(""));
 
   EXPECT_EQ(FontLanguageListCache::getId("en"),
@@ -52,7 +52,7 @@ TEST_F(FontLanguageListCacheTest, getId) {
 }
 
 TEST_F(FontLanguageListCacheTest, getById) {
-  std::lock_guard<std::mutex> _l(gMinikinLock);
+  std::scoped_lock _l(gMinikinLock);
   uint32_t enLangId = FontLanguageListCache::getId("en");
   uint32_t jpLangId = FontLanguageListCache::getId("jp");
   FontLanguage english = FontLanguageListCache::getById(enLangId)[0];

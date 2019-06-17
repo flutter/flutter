@@ -40,7 +40,7 @@ DartVMRef::~DartVMRef() {
     // pessimization and not required for correctness.
     return;
   }
-  std::lock_guard<std::mutex> lifecycle_lock(gVMMutex);
+  std::scoped_lock lifecycle_lock(gVMMutex);
   vm_.reset();
 }
 
@@ -48,7 +48,7 @@ DartVMRef DartVMRef::Create(Settings settings,
                             fml::RefPtr<DartSnapshot> vm_snapshot,
                             fml::RefPtr<DartSnapshot> isolate_snapshot,
                             fml::RefPtr<DartSnapshot> shared_snapshot) {
-  std::lock_guard<std::mutex> lifecycle_lock(gVMMutex);
+  std::scoped_lock lifecycle_lock(gVMMutex);
 
   if (!settings.leak_vm) {
     FML_CHECK(!gVMLeak)
@@ -68,7 +68,7 @@ DartVMRef DartVMRef::Create(Settings settings,
     return DartVMRef{std::move(vm)};
   }
 
-  std::lock_guard<std::mutex> dependents_lock(gVMDependentsMutex);
+  std::scoped_lock dependents_lock(gVMDependentsMutex);
 
   gVMData.reset();
   gVMServiceProtocol.reset();
@@ -103,27 +103,27 @@ DartVMRef DartVMRef::Create(Settings settings,
 }
 
 bool DartVMRef::IsInstanceRunning() {
-  std::lock_guard<std::mutex> lock(gVMMutex);
+  std::scoped_lock lock(gVMMutex);
   return !gVM.expired();
 }
 
 std::shared_ptr<const DartVMData> DartVMRef::GetVMData() {
-  std::lock_guard<std::mutex> lock(gVMDependentsMutex);
+  std::scoped_lock lock(gVMDependentsMutex);
   return gVMData.lock();
 }
 
 std::shared_ptr<ServiceProtocol> DartVMRef::GetServiceProtocol() {
-  std::lock_guard<std::mutex> lock(gVMDependentsMutex);
+  std::scoped_lock lock(gVMDependentsMutex);
   return gVMServiceProtocol.lock();
 }
 
 std::shared_ptr<IsolateNameServer> DartVMRef::GetIsolateNameServer() {
-  std::lock_guard<std::mutex> lock(gVMDependentsMutex);
+  std::scoped_lock lock(gVMDependentsMutex);
   return gVMIsolateNameServer.lock();
 }
 
 DartVM* DartVMRef::GetRunningVM() {
-  std::lock_guard<std::mutex> lock(gVMMutex);
+  std::scoped_lock lock(gVMMutex);
   auto vm = gVM.lock().get();
   FML_CHECK(vm) << "Caller assumed VM would be running when it wasn't";
   return vm;
