@@ -3520,6 +3520,8 @@ class TextAlignVertical {
   }) : assert(y != null),
        assert(y >= -1.0 && y <= 1.0);
 
+  /// A value ranging from -1.0 to 1.0 that corresponds to the topmost to the
+  /// bottommost possible text position.
   final double y;
 
   /// A TextAlignVertical that aligns to the top of the input.
