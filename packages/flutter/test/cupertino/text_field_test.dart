@@ -436,7 +436,7 @@ void main() {
   );
 
   testWidgets(
-    'placeholder textAlign is equal to inputText',
+    'placeholder respects textAlign'
     (WidgetTester tester) async {
       await tester.pumpWidget(
         const CupertinoApp(
