@@ -140,7 +140,7 @@ void main() {
       matchesGoldenFile('card_theme.custom_shape.png'),
       skip: !isLinux,
     );
-  });
+  },  skip: isBrowser);
 }
 
 CardTheme _cardTheme() {

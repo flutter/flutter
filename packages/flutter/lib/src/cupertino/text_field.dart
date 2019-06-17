@@ -117,6 +117,9 @@ enum OverlayVisibilityMode {
 /// rounded rectangle border around the text field. If you set the [decoration]
 /// property to null, the decoration will be removed entirely.
 ///
+/// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
+/// This will ensure we discard any resources used by the object.
+///
 /// See also:
 ///
 ///  * <https://developer.apple.com/documentation/uikit/uitextfield>
@@ -124,6 +127,7 @@ enum OverlayVisibilityMode {
 ///    Design UI conventions.
 ///  * [EditableText], which is the raw text editing control at the heart of a
 ///    [TextField].
+///  * Learn how to use a [TextEditingController] in one of our [cookbook recipe]s.(https://flutter.dev/docs/cookbook/forms/text-field-changes#2-use-a-texteditingcontroller)
 class CupertinoTextField extends StatefulWidget {
   /// Creates an iOS-style text field.
   ///
@@ -479,7 +483,7 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
     properties.add(IntProperty('maxLength', maxLength, defaultValue: null));
     properties.add(FlagProperty('maxLengthEnforced', value: maxLengthEnforced, ifTrue: 'max length enforced'));
-    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
+    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: null));
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));

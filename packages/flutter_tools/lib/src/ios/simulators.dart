@@ -15,7 +15,7 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
+import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
@@ -387,8 +387,7 @@ class IOSSimulator extends Device {
     final BuildInfo debugBuildInfo = BuildInfo(BuildMode.debug, buildInfo.flavor,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-        buildSharedLibrary: buildInfo.buildSharedLibrary);
+        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
@@ -413,7 +412,7 @@ class IOSSimulator extends Device {
 
   Future<void> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
     // Run compiler to produce kernel file for the application.
-    return bundle.build(
+    return BundleBuilder().build(
       mainPath: mainPath,
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,

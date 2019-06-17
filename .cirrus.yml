@@ -76,6 +76,16 @@ task:
       container:
         cpu: 4
         memory: 12G
+    - name: web_tests-linux
+      # TODO(jonahwilliams): re-enabled once we've determined causes for flakiness
+      allow_failures: true
+      env:
+        SHARD: web_tests
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
     - name: build_tests-linux
       env:
         SHARD: build_tests
@@ -178,6 +188,8 @@ task:
   # with the actual time - this should help to verify
   print_date_script:
     - date
+  install_cocoapods_script:
+    - sudo gem install cocoapods
   git_fetch_script:
     - git clean -xfd
     - git fetch origin

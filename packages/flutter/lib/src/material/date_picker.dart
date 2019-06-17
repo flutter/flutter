@@ -438,6 +438,7 @@ class DayPicker extends StatelessWidget {
               // formatted full date.
               label: '${localizations.formatDecimal(day)}, ${localizations.formatFullDate(dayToBuild)}',
               selected: isSelectedDay,
+              sortKey: OrdinalSortKey(day.toDouble()),
               child: ExcludeSemantics(
                 child: Text(localizations.formatDecimal(day), style: itemStyle),
               ),

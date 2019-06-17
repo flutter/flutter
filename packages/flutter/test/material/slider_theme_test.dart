@@ -12,6 +12,88 @@ import 'package:flutter/painting.dart';
 import '../rendering/mock_canvas.dart';
 
 void main() {
+  test('SliderThemeData copyWith, ==, hashCode basics', () {
+    expect(const SliderThemeData(), const SliderThemeData().copyWith());
+    expect(const SliderThemeData().hashCode, const SliderThemeData().copyWith().hashCode);
+  });
+
+  testWidgets('Default SliderThemeData debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const SliderThemeData().debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[]);
+  });
+
+
+  testWidgets('SliderThemeData implements debugFillProperties', (WidgetTester tester) async {
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    const SliderThemeData(
+      trackHeight: 7.0,
+      activeTrackColor: Color(0xFF000001),
+      inactiveTrackColor: Color(0xFF000002),
+      disabledActiveTrackColor: Color(0xFF000003),
+      disabledInactiveTrackColor: Color(0xFF000004),
+      activeTickMarkColor: Color(0xFF000005),
+      inactiveTickMarkColor: Color(0xFF000006),
+      disabledActiveTickMarkColor: Color(0xFF000007),
+      disabledInactiveTickMarkColor: Color(0xFF000008),
+      thumbColor: Color(0xFF000009),
+      overlappingShapeStrokeColor: Color(0xFF000010),
+      disabledThumbColor: Color(0xFF000011),
+      overlayColor: Color(0xFF000012),
+      valueIndicatorColor: Color(0xFF000013),
+      overlayShape: RoundSliderOverlayShape(),
+      tickMarkShape: RoundSliderTickMarkShape(),
+      thumbShape: RoundSliderThumbShape(),
+      trackShape: RoundedRectSliderTrackShape(),
+      valueIndicatorShape: PaddleSliderValueIndicatorShape(),
+      rangeTickMarkShape: RoundRangeSliderTickMarkShape(),
+      rangeThumbShape: RoundRangeSliderThumbShape(),
+      rangeTrackShape: RoundedRectRangeSliderTrackShape(),
+      rangeValueIndicatorShape: PaddleRangeSliderValueIndicatorShape(),
+      showValueIndicator: ShowValueIndicator.always,
+      valueIndicatorTextStyle: TextStyle(color: Colors.black),
+    ).debugFillProperties(builder);
+
+    final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+    expect(description, <String>[
+      'trackHeight: 7.0',
+      'activeTrackColor: Color(0xff000001)',
+      'inactiveTrackColor: Color(0xff000002)',
+      'disabledActiveTrackColor: Color(0xff000003)',
+      'disabledInactiveTrackColor: Color(0xff000004)',
+      'activeTickMarkColor: Color(0xff000005)',
+      'inactiveTickMarkColor: Color(0xff000006)',
+      'disabledActiveTickMarkColor: Color(0xff000007)',
+      'disabledInactiveTickMarkColor: Color(0xff000008)',
+      'thumbColor: Color(0xff000009)',
+      'overlappingShapeStrokeColor: Color(0xff000010)',
+      'disabledThumbColor: Color(0xff000011)',
+      'overlayColor: Color(0xff000012)',
+      'valueIndicatorColor: Color(0xff000013)',
+      'overlayShape: Instance of \'RoundSliderOverlayShape\'',
+      'tickMarkShape: Instance of \'RoundSliderTickMarkShape\'',
+      'thumbShape: Instance of \'RoundSliderThumbShape\'',
+      'trackShape: Instance of \'RoundedRectSliderTrackShape\'',
+      'valueIndicatorShape: Instance of \'PaddleSliderValueIndicatorShape\'',
+      'rangeTickMarkShape: Instance of \'RoundRangeSliderTickMarkShape\'',
+      'rangeThumbShape: Instance of \'RoundRangeSliderThumbShape\'',
+      'rangeTrackShape: Instance of \'RoundedRectRangeSliderTrackShape\'',
+      'rangeValueIndicatorShape: Instance of \'PaddleRangeSliderValueIndicatorShape\'',
+      'showValueIndicator: always',
+      'valueIndicatorTextStyle: TextStyle(inherit: true, color: Color(0xff000000))'
+    ]);
+  });
+
   testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
@@ -78,6 +160,30 @@ void main() {
     expect(sliderTheme.overlayColor, equals(customColor1.withAlpha(0x1f)));
     expect(sliderTheme.valueIndicatorColor, equals(customColor1.withAlpha(0xff)));
     expect(sliderTheme.valueIndicatorTextStyle.color, equals(customColor4));
+  });
+
+  testWidgets('SliderThemeData generates correct shapes for fromPrimaryColors', (WidgetTester tester) async {
+    const Color customColor1 = Color(0xcafefeed);
+    const Color customColor2 = Color(0xdeadbeef);
+    const Color customColor3 = Color(0xdecaface);
+    const Color customColor4 = Color(0xfeedcafe);
+
+    final SliderThemeData sliderTheme = SliderThemeData.fromPrimaryColors(
+      primaryColor: customColor1,
+      primaryColorDark: customColor2,
+      primaryColorLight: customColor3,
+      valueIndicatorTextStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor4),
+    );
+
+    expect(sliderTheme.overlayShape, const RoundSliderOverlayShape());
+    expect(sliderTheme.tickMarkShape, const RoundSliderTickMarkShape());
+    expect(sliderTheme.thumbShape, const RoundSliderThumbShape());
+    expect(sliderTheme.trackShape, const RoundedRectSliderTrackShape());
+    expect(sliderTheme.valueIndicatorShape, const PaddleSliderValueIndicatorShape());
+    expect(sliderTheme.rangeTickMarkShape, const RoundRangeSliderTickMarkShape());
+    expect(sliderTheme.rangeThumbShape, const RoundRangeSliderThumbShape());
+    expect(sliderTheme.rangeTrackShape, const RoundedRectRangeSliderTrackShape());
+    expect(sliderTheme.rangeValueIndicatorShape, const PaddleRangeSliderValueIndicatorShape());
   });
 
   testWidgets('SliderThemeData lerps correctly', (WidgetTester tester) async {
@@ -422,7 +528,8 @@ void main() {
         ),
     );
     await gesture.up();
-  });
+  }, skip: isBrowser
+  );
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
@@ -615,6 +722,9 @@ void main() {
         overlayShape: SliderComponentShape.noOverlay,
         thumbShape: SliderComponentShape.noThumb,
         showValueIndicator: ShowValueIndicator.never,
+        // When the track is hidden to 0 height, a tick mark radius
+        // must be provided to get a non-zero radius.
+        tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 1),
       ),
       value: 0.5,
       divisions: 4,
@@ -707,6 +817,8 @@ void main() {
   });
 }
 
+
+
 Widget _buildApp(
   SliderThemeData sliderTheme, {
   double value = 0.0,
@@ -730,3 +842,5 @@ Widget _buildApp(
     ),
   );
 }
+
+

@@ -175,10 +175,10 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     const FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
 
-    properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: defaultData.focusColor));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
     properties.add(DoubleProperty('elevation', elevation, defaultValue: defaultData.elevation));
     properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: defaultData.focusElevation));
     properties.add(DoubleProperty('hoverElevation', hoverElevation, defaultValue: defaultData.hoverElevation));

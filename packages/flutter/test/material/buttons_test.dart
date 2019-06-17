@@ -681,7 +681,7 @@ void main() {
     expect(tester.getSize(find.byType(FlatButton)).height, equals(48.0));
     expect(tester.getSize(find.byType(Text)).width, isIn(<double>[126.0, 127.0]));
     expect(tester.getSize(find.byType(Text)).height, equals(42.0));
-  });
+  }, skip: isBrowser);
 
   // This test is very similar to the '...explicit splashColor and highlightColor' test
   // in icon_button_test.dart. If you change this one, you may want to also change that one.
@@ -924,7 +924,7 @@ void main() {
 
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('MaterialButton minWidth and height parameters', (WidgetTester tester) async {
     Widget buildFrame({ double minWidth, double height, EdgeInsets padding = EdgeInsets.zero, Widget child }) {

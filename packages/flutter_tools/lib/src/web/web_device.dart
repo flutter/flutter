@@ -5,39 +5,30 @@
 import 'package:meta/meta.dart';
 
 import '../application_package.dart';
-import '../asset.dart';
-import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/logger.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
 import '../build_info.dart';
-import '../bundle.dart';
 import '../device.dart';
-import '../globals.dart';
 import '../project.dart';
-import '../web/compile.dart';
 import '../web/workflow.dart';
 import 'chrome.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
-  WebApplicationPackage(this._flutterProject) : super(id: _flutterProject.manifest.appName);
+  WebApplicationPackage(this.flutterProject) : super(id: flutterProject.manifest.appName);
 
-  final FlutterProject _flutterProject;
+  final FlutterProject flutterProject;
 
   @override
-  String get name => _flutterProject.manifest.appName;
+  String get name => flutterProject.manifest.appName;
 
   /// The location of the web source assets.
-  Directory get webSourcePath => _flutterProject.directory.childDirectory('web');
+  Directory get webSourcePath => flutterProject.directory.childDirectory('web');
 }
 
 class WebDevice extends Device {
   WebDevice() : super('web', category: Category.web);
-
-  HttpServer _server;
-  WebApplicationPackage _package;
 
   @override
   bool get supportsHotReload => true;
@@ -49,7 +40,7 @@ class WebDevice extends Device {
   bool get supportsStartPaused => true;
 
   @override
-  bool get supportsStopApp => true;
+  bool get supportsFlutterExit => true;
 
   @override
   bool get supportsScreenshot => false;
@@ -75,7 +66,7 @@ class WebDevice extends Device {
   Future<bool> get isLocalEmulator async => false;
 
   @override
-  bool isSupported() => flutterWebEnabled;
+  bool isSupported() => flutterWebEnabled && canFindChrome();
 
   @override
   String get name => 'web';
@@ -85,6 +76,9 @@ class WebDevice extends Device {
 
   @override
   Future<String> get sdkNameAndVersion async {
+    if (!isSupported()) {
+      return 'unknown';
+    }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     String version = 'unknown';
     if (platform.isWindows) {
@@ -121,35 +115,13 @@ class WebDevice extends Device {
     bool usesTerminalUi = true,
     bool ipv6 = false,
   }) async {
-    final Status status = logger.startProgress('Compiling ${package.name} to JavaScript...', timeout: null);
-    final int result = await webCompiler.compileDart2js(target: mainPath, minify: false, enabledAssertions: true);
-    status.stop();
-    if (result != 0) {
-      printError('Failed to compile ${package.name} to JavaScript');
-      return LaunchResult.failed();
-    }
-    final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
-    final int build = await assetBundle.build();
-    if (build != 0) {
-      throwToolExit('Error: Failed to build asset bundle');
-    }
-    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
-
-    _package = package;
-    _server = await HttpServer.bind(InternetAddress.loopbackIPv4, 0);
-    _server.listen(_basicAssetServer);
-    printStatus('Serving assets from http:localhost:${_server.port}');
-    await chromeLauncher.launch('http://localhost:${_server.port}');
+    // See [ResidentWebRunner.run] in flutter_tools/lib/src/resident_web_runner.dart
+    // for the web initialization and server logic.
     return LaunchResult.succeeded(observatoryUri: null);
   }
 
-  // Note: we don't currently have a way to track which chrome processes
-  // belong to the flutter tool, so we'll err on the side of caution by
-  // keeping these open.
   @override
   Future<bool> stopApp(ApplicationPackage app) async {
-    await _server?.close();
-    _server = null;
     return true;
   }
 
@@ -158,39 +130,6 @@ class WebDevice extends Device {
 
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async => true;
-
-  Future<void> _basicAssetServer(HttpRequest request) async {
-    if (request.method != 'GET') {
-      request.response.statusCode = HttpStatus.forbidden;
-      await request.response.close();
-      return;
-    }
-    // Resolve all get requests to the build/web/ or build/flutter_assets directory.
-    final Uri uri = request.uri;
-    File file;
-    String contentType;
-    if (uri.path == '/') {
-      file = _package.webSourcePath.childFile('index.html');
-      contentType = 'text/html';
-    } else if (uri.path == '/main.dart.js') {
-      file = fs.file(fs.path.join(getWebBuildDirectory(), 'main.dart.js'));
-      contentType = 'text/javascript';
-    } else {
-      file = fs.file(fs.path.join(getAssetBuildDirectory(), uri.path.replaceFirst('/assets/', '')));
-    }
-
-    if (!file.existsSync()) {
-      request.response.statusCode = HttpStatus.notFound;
-      await request.response.close();
-      return;
-    }
-    request.response.statusCode = HttpStatus.ok;
-    if (contentType != null) {
-      request.response.headers.add(HttpHeaders.contentTypeHeader, contentType);
-    }
-    await request.response.addStream(file.openRead());
-    await request.response.close();
-  }
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {

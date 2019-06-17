@@ -77,7 +77,7 @@ void main() {
     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
     await gesture.moveBy(_kGestureOffset);
     // Move back to original position.
-    await gesture.moveBy(Offset.zero.translate(-_kGestureOffset.dx, -_kGestureOffset.dy));
+    await gesture.moveBy(Offset(-_kGestureOffset.dx, -_kGestureOffset.dy));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 500));
 
@@ -95,5 +95,45 @@ void main() {
         const Radius.circular(1.25),
       ),
     ));
+  });
+
+  testWidgets("should not paint when there isn't enough space", (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: MediaQuery(
+          data: const MediaQueryData(
+            padding: EdgeInsets.fromLTRB(0, 20, 0, 34),
+          ),
+          child: CupertinoPageScaffold(
+            navigationBar: const CupertinoNavigationBar(
+              middle: Text('Title'),
+              backgroundColor: Color(0x11111111),
+            ),
+            child: CupertinoScrollbar(
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                children: const <Widget> [SizedBox(width: 10, height: 10)],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    final TestGesture gesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await gesture.moveBy(_kGestureOffset);
+    // Move back to original position.
+    await gesture.moveBy(Offset(-_kGestureOffset.dx, -_kGestureOffset.dy));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
+
+    // The scrollbar should not appear even when overscrolled.
+    final TestGesture overscrollGesture = await tester.startGesture(tester.getCenter(find.byType(ListView)));
+    await overscrollGesture.moveBy(_kGestureOffset);
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.byType(CupertinoScrollbar), isNot(paints..rrect()));
   });
 }

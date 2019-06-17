@@ -1,7 +1,9 @@
 // Copyright 2015 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
+import 'dart:ui' show window, FrameTiming;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
@@ -9,7 +11,18 @@ import 'package:flutter/services.dart';
 
 import '../flutter_test_alternative.dart';
 
-class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding { }
+class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding {
+  final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
+
+  @override
+  void postEvent(String eventKind, Map<dynamic, dynamic> eventData) {
+    getEventsDispatched(eventKind).add(eventData);
+  }
+
+  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
+  }
+}
 
 class TestStrategy {
   int allowedPriority = 10000;
@@ -19,28 +32,9 @@ class TestStrategy {
   }
 }
 
-List<VoidCallback> runWithMicrotaskQueueSpy(VoidCallback callback) {
-  final List<VoidCallback> microtaskQueue = <VoidCallback>[];
-  runZoned<void>(
-    () {
-      callback();
-    },
-    zoneSpecification: ZoneSpecification(
-      scheduleMicrotask: (Zone self, ZoneDelegate parent, Zone zone, void f()) {
-        // Don't actually run the tasks, just record that it was scheduled.
-        microtaskQueue.add(f);
-        self.parent.scheduleMicrotask(() {
-          f();
-          microtaskQueue.remove(f);
-        });
-      },
-    ),
-  );
-  return microtaskQueue;
-}
-
 void main() {
-  SchedulerBinding scheduler;
+  TestSchedulerBinding scheduler;
+
   setUpAll(() {
     scheduler = TestSchedulerBinding();
   });
@@ -112,27 +106,46 @@ void main() {
   });
 
   test('2 calls to scheduleWarmUpFrame just schedules it once', () {
-    final List<VoidCallback> microtaskQueue = runWithMicrotaskQueueSpy(() {
-      scheduler.scheduleWarmUpFrame();
-      scheduler.scheduleWarmUpFrame();
-    });
+    final List<VoidCallback> timerQueueTasks = <VoidCallback>[];
+    bool taskExecuted = false;
+    runZoned<void>(
+      () {
+        // Run it twice without processing the queued tasks.
+        scheduler.scheduleWarmUpFrame();
+        scheduler.scheduleWarmUpFrame();
+        scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
+      },
+      zoneSpecification: ZoneSpecification(
+        createTimer: (Zone self, ZoneDelegate parent, Zone zone, Duration duration, void f()) {
+          // Don't actually run the tasks, just record that it was scheduled.
+          timerQueueTasks.add(f);
+          return null;
+        },
+      ),
+    );
 
-    // scheduleWarmUpFrame scheduled 1 microtask
-    expect(microtaskQueue.length, 1);
+    // scheduleWarmUpFrame scheduled 2 Timers, scheduleTask scheduled 0 because
+    // events are locked.
+    expect(timerQueueTasks.length, 2);
+    expect(taskExecuted, false);
   });
 
-  test('Tasks are not executed before scheduleWarmUpFrame finishes', () async {
-    bool taskExecuted = false;
-    final List<VoidCallback> microtaskQueue = runWithMicrotaskQueueSpy(() {
-        scheduler.scheduleTask(() { taskExecuted = true; }, Priority.touch);
-        Timer.run(() { taskExecuted = true; });
-        scheduler.scheduleWarmUpFrame();
-    });
+  test('Flutter.Frame event fired', () async {
+    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
+      // build start, build finish
+      10000, 15000,
+      // raster start, raster finish
+      16000, 20000,
+    ])]);
 
-    expect(microtaskQueue.isNotEmpty, true);
-    await scheduler.endOfFrame;
+    final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
+    expect(events, hasLength(1));
 
-    expect(scheduler.schedulerPhase, SchedulerPhase.idle);
-    expect(taskExecuted, false);
+    final Map<String, dynamic> event = events.first;
+    expect(event['number'], isNonNegative);
+    expect(event['startTime'], 10000);
+    expect(event['elapsed'], 10000);
+    expect(event['build'], 5000);
+    expect(event['raster'], 4000);
   });
 }

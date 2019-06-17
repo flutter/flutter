@@ -15,6 +15,9 @@ import 'text_editing.dart';
 
 export 'dart:ui' show TextAffinity;
 
+// Whether we're compiled to JavaScript in a web browser.
+const bool _kIsBrowser = identical(0, 0.0);
+
 /// The type of information for which to optimize the text input control.
 ///
 /// On Android, behavior may vary across device and keyboard provider.
@@ -825,6 +828,10 @@ class TextInput {
 
   static bool _debugEnsureInputActionWorksOnPlatform(TextInputAction inputAction) {
     assert(() {
+      if (_kIsBrowser) {
+        // TODO(flutterweb): what makes sense here?
+        return true;
+      }
       if (Platform.isIOS) {
         assert(
           _iOSSupportedInputActions.contains(inputAction),
