@@ -162,19 +162,6 @@ class FlutterPlugin implements Plugin<Project> {
         String flutterExecutableName = Os.isFamily(Os.FAMILY_WINDOWS) ? "flutter.bat" : "flutter"
         flutterExecutable = Paths.get(flutterRoot.absolutePath, "bin", flutterExecutableName).toFile();
 
-        // x86/x86_64 native library used for debugging only, for now.
-        File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-        Task debugX86JarTask = project.tasks.create("${FLUTTER_BUILD_PREFIX}X86Jar", Jar) {
-            destinationDir flutterX86Jar.parentFile
-            archiveName flutterX86Jar.name
-            from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
-                into 'lib/x86'
-            }
-            from("${flutterRoot}/bin/cache/artifacts/engine/android-x64/libflutter.so") {
-                into 'lib/x86_64'
-            }
-        }
-
         if (useLocalEngine(project)) {
             String engineOutPath = project.property('localEngineOut')
             File engineOut = project.file(engineOutPath)
@@ -192,10 +179,22 @@ class FlutterPlugin implements Plugin<Project> {
             // However, we use the same engine for each of the build types.
             project.android.buildTypes.each {
                 addApiDependencies(project, it, project.files {
-                    [debugX86JarTask, flutterJar]
+                    flutterJar
                 })
             }
         } else {
+            // x86/x86_64 native library used for debugging only, for now.
+            File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
+            Task debugX86JarTask = project.tasks.create("${FLUTTER_BUILD_PREFIX}X86Jar", Jar) {
+                destinationDir flutterX86Jar.parentFile
+                archiveName flutterX86Jar.name
+                from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
+                    into 'lib/x86'
+                }
+                from("${flutterRoot}/bin/cache/artifacts/engine/android-x64/libflutter.so") {
+                    into 'lib/x86_64'
+                }
+            }
             String basePlatformArch = getBasePlatform(project)
             // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
@@ -525,6 +524,10 @@ class FlutterPlugin implements Plugin<Project> {
                     // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
                     // is included as an implementation dependency, which causes duplicated `libflutter.so`.
                     if (getBasePlatform(project) == targetArch) {
+                        return
+                    }
+                    // Don't include `libflutter.so` for other architectures when a local engine is specified.
+                    if (useLocalEngine(project)) {
                         return
                     }
                     def engineArtifactSubdir = getEngineArtifactDirName(variant.buildType, targetArch);
