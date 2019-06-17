@@ -82,14 +82,15 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     double leadingScrollOffset,
     double trailingScrollOffset,
   }) {
-    final double padding = _padding;
-    return childManager.estimateMaxScrollOffset(
+    final double scrollOffset = childManager.estimateMaxScrollOffset(
       constraints,
       firstIndex: firstIndex,
       lastIndex: lastIndex,
-      leadingScrollOffset: leadingScrollOffset - padding,
-      trailingScrollOffset: trailingScrollOffset - padding,
-    ) + padding + padding;
+      leadingScrollOffset: leadingScrollOffset,
+      trailingScrollOffset: trailingScrollOffset,
+    );
+
+    return scrollOffset >= itemExtent ? scrollOffset + _padding : scrollOffset;
   }
 }
 

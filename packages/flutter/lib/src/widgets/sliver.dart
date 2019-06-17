@@ -1054,8 +1054,28 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   }
 
   @override
+  _SliverFillViewportElement createElement() => _SliverFillViewportElement(this);
+
+  @override
   void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class _SliverFillViewportElement extends SliverMultiBoxAdaptorElement {
+  _SliverFillViewportElement(SliverFillViewport widget) : super(widget);
+
+  @override
+  RenderSliverFillViewport get renderObject => super.renderObject;
+
+  @override
+  double estimateMaxScrollOffset(SliverConstraints constraints, {int firstIndex, int lastIndex, double leadingScrollOffset, double trailingScrollOffset}) {
+    final int estimatedChildCount = widget.delegate.estimatedChildCount;
+    if (estimatedChildCount == null || estimatedChildCount < 1) {
+      return super.estimateMaxScrollOffset(constraints, firstIndex: firstIndex, lastIndex: lastIndex, leadingScrollOffset: leadingScrollOffset, trailingScrollOffset: trailingScrollOffset);
+    }
+
+    return renderObject.indexToLayoutOffset(renderObject.itemExtent, estimatedChildCount - 1) + renderObject.itemExtent;
   }
 }
 

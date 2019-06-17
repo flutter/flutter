@@ -174,17 +174,16 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       collectGarbage(0, 0);
     }
 
-    if (firstChild == null) {
-      if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
-        // There are either no children, or we are past the end of all our children.
-        final double max = computeMaxScrollOffset(constraints, itemExtent);
-        geometry = SliverGeometry(
-          scrollExtent: max,
-          maxPaintExtent: max,
-        );
-        childManager.didFinishLayout();
-        return;
-      }
+    if (firstChild == null &&
+      !addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
+      // There are either no children, or we are past the end of all our children.
+      final double max = computeMaxScrollOffset(constraints, itemExtent);
+      geometry = SliverGeometry(
+        scrollExtent: max,
+        maxPaintExtent: max,
+      );
+      childManager.didFinishLayout();
+      return;
     }
 
     RenderBox trailingChildWithLayout;
@@ -230,8 +229,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     }
 
     final int lastIndex = indexOf(lastChild);
-    final double leadingScrollOffset = indexToLayoutOffset(itemExtent, firstIndex);
-    final double trailingScrollOffset = indexToLayoutOffset(itemExtent, lastIndex + 1);
+    final double leadingScrollOffset = firstIndex == 0 ? 0 : indexToLayoutOffset(itemExtent, firstIndex - 1) + itemExtent;
+    final double trailingScrollOffset = indexToLayoutOffset(itemExtent, lastIndex) + itemExtent;
 
     assert(firstIndex == 0 || childScrollOffset(firstChild) - scrollOffset <= precisionErrorTolerance);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
