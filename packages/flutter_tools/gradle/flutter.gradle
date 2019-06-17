@@ -252,13 +252,13 @@ class FlutterPlugin implements Plugin<Project> {
 
                     pluginProject.android.buildTypes.each {
                         def buildMode = buildModeFor(it)
-                        addFlutterJarCompileOnlyDependency(pluginProject, it, project.files {
+                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files {
                             baseJar[buildMode]
                         })
                     }
                     pluginProject.android.buildTypes.whenObjectAdded {
                         def buildMode = buildModeFor(it)
-                        addFlutterJarCompileOnlyDependency(pluginProject, it, project.files {
+                        addFlutterJarCompileOnlyDependency(pluginProject, it.name, project.files {
                             baseJar[buildMode]
                         })
                     }
@@ -337,7 +337,7 @@ class FlutterPlugin implements Plugin<Project> {
         return PLATFORM_ARM32;
     }
 
-    private void addFlutterJarCompileOnlyDependency(Project project, buildType, FileCollection files) {
+    private void addFlutterJarCompileOnlyDependency(Project project, String variantName, FileCollection files) {
         if (project.state.failure) {
             return
         }
@@ -345,9 +345,9 @@ class FlutterPlugin implements Plugin<Project> {
         project.dependencies {
             String configuration;
             if (project.getConfigurations().findByName("compileOnly")) {
-                configuration = buildType.name + "CompileOnly"
+                configuration = "${variantName}CompileOnly";
             } else {
-                configuration = buildType.name + "Provided"
+                configuration = "${variantName}Provided";
             }
 
             if (flutterJar != null) {
