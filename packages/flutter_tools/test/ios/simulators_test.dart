@@ -123,7 +123,7 @@ void main() {
     test('Has a simulator category', () async {
       final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
 
-      expect(device.category, Category.simulator);
+      expect(device.category, Category.mobile);
     });
   });
 

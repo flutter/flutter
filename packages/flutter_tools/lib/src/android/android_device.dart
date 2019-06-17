@@ -72,7 +72,12 @@ class AndroidDevice extends Device {
     this.productID,
     this.modelID,
     this.deviceCodeName,
-  }) : super(id, category: Category.mobile);
+  }) : super(
+      id,
+      category: Category.mobile,
+      platformType: PlatformType.android,
+      ephemeral: null, // We don't know unless we call the isLocalEmulator.
+  );
 
   final String productID;
   final String modelID;

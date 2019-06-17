@@ -42,7 +42,12 @@ class FlutterTesterApp extends ApplicationPackage {
 
 // TODO(scheglov): This device does not currently work with full restarts.
 class FlutterTesterDevice extends Device {
-  FlutterTesterDevice(String deviceId) : super(deviceId, category: Category.unknown);
+  FlutterTesterDevice(String deviceId) : super(
+      deviceId,
+      platformType: PlatformType.web,
+      category: Category.mobile,
+      ephemeral: true,
+  );
 
   Process _process;
   final DevicePortForwarder _portForwarder = _NoopPortForwarder();

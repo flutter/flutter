@@ -74,7 +74,6 @@ void main() {
       expect(device.supportsHotRestart, false);
       expect(device.supportsFlutterExit, false);
       expect(device.isSupportedForProject(FlutterProject.current()), true);
-      expect(device.category, Category.fuchsia);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
     });

@@ -215,7 +215,12 @@ class SimDevice {
 }
 
 class IOSSimulator extends Device {
-  IOSSimulator(String id, { this.name, this.simulatorCategory }) : super(id, category: Category.simulator);
+  IOSSimulator(String id, { this.name, this.simulatorCategory }) : super(
+      id,
+      category: Category.mobile,
+      platformType: PlatformType.ios,
+      ephemeral: true,
+  );
 
   @override
   final String name;

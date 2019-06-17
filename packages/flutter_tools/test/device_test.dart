@@ -50,7 +50,12 @@ class TestDeviceManager extends DeviceManager {
 }
 
 class _MockDevice extends Device {
-  _MockDevice(this.name, String id) : super(id, category: Category.unknown);
+  _MockDevice(this.name, String id) : super(
+      id,
+      platformType: PlatformType.web,
+      category: Category.mobile,
+      ephemeral: true,
+  );
 
   @override
   final String name;
