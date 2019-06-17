@@ -212,8 +212,6 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
 class _SliderDemoState extends State<SliderDemo> {
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
         tabName: 'SINGLE SLIDER',
@@ -225,13 +223,15 @@ class _SliderDemoState extends State<SliderDemo> {
         tabName: 'RANGE SLIDER',
         description: 'Sliders containing 2 thumbs',
         demoWidget: _RangeSliders(),
-        documentationUrl: 'https://docs.flutter.io/flutter/material/Slider-class.html',
+        documentationUrl: 'https://docs.flutter.io/flutter/material/RangeSlider-class.html',
       ),
     ];
 
     return TabbedComponentDemoScaffold(
       title: 'Sliders',
       demos: demos,
+      isScrollable: false,
+      showExampleCodeAction: false,
     );
   }
 }
@@ -362,9 +362,9 @@ class _RangeSliders extends StatefulWidget {
 }
 
 class _RangeSlidersState extends State<_RangeSliders> {
-  RangeValues _continuousValues = RangeValues(25.0, 75.0);
-  RangeValues _discreteValues = RangeValues(20.0, 120.0);
-  RangeValues _discreteCustomValues = RangeValues(25.0, 75.0);
+  RangeValues _continuousValues = const RangeValues(25.0, 75.0);
+  RangeValues _discreteValues = const RangeValues(40.0, 120.0);
+  RangeValues _discreteCustomValues = const RangeValues(25.0, 75.0);
 
   @override
   Widget build(BuildContext context) {
