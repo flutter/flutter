@@ -407,42 +407,25 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       return;
     }
 
-    if (trailingBorderSide != null) {
-      final BoxConstraints innerConstraints = constraints.deflate(
-        EdgeInsets.only(
-          left: leadingBorderSide.width,
-          top: horizontalBorderSide.width,
-          right: trailingBorderSide?.width ?? 0.0,
-          bottom: horizontalBorderSide.width,
-        ),
-      );
+    final double rightBorderOffset = isLastButton ? trailingBorderSide.width : 0.0;
 
-      child.layout(innerConstraints, parentUsesSize: true);
-      final BoxParentData childParentData = child.parentData;
-      childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
+    final BoxConstraints innerConstraints = constraints.deflate(
+      EdgeInsets.only(
+        left: leadingBorderSide.width,
+        top: horizontalBorderSide.width,
+        right: rightBorderOffset,
+        bottom: horizontalBorderSide.width,
+      ),
+    );
 
-      size = constraints.constrain(Size(
-        leadingBorderSide.width + child.size.width + trailingBorderSide.width,
-        horizontalBorderSide.width * 2.0 + child.size.height,
-      ));
-    } else {
-      final BoxConstraints innerConstraints = constraints.deflate(
-        EdgeInsets.only(
-          left: leadingBorderSide.width,
-          top: horizontalBorderSide.width,
-          bottom: horizontalBorderSide.width,
-        ),
-      );
+    child.layout(innerConstraints, parentUsesSize: true);
+    final BoxParentData childParentData = child.parentData;
+    childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
 
-      child.layout(innerConstraints, parentUsesSize: true);
-      final BoxParentData childParentData = child.parentData;
-      childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
-
-      size = constraints.constrain(Size(
-        leadingBorderSide.width + child.size.width,
-        horizontalBorderSide.width * 2.0 + child.size.height,
-      ));
-    }
+    size = constraints.constrain(Size(
+      leadingBorderSide.width + child.size.width + rightBorderOffset,
+      horizontalBorderSide.width * 2.0 + child.size.height,
+    ));
   }
 
   @override
