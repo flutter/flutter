@@ -189,11 +189,11 @@ Removed a forwarded port. It takes `deviceId`, `devicePort`, and `hostPort` as r
 
 #### device.added
 
-This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 #### device.removed
 
-This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 ### emulator domain
 
