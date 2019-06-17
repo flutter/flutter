@@ -164,11 +164,6 @@ static void DestroyJNI(JNIEnv* env, jobject jcaller, jlong shell_holder) {
   delete ANDROID_SHELL_HOLDER;
 }
 
-static jstring GetObservatoryUri(JNIEnv* env, jclass clazz) {
-  return env->NewStringUTF(
-      flutter::DartServiceIsolate::GetObservatoryUri().c_str());
-}
-
 static void SurfaceCreated(JNIEnv* env,
                            jobject jcaller,
                            jlong shell_holder,
@@ -552,11 +547,6 @@ bool RegisterApi(JNIEnv* env) {
           .signature = "(J[Ljava/lang/String;Ljava/lang/String;"
                        "Ljava/lang/String;Landroid/content/res/AssetManager;)V",
           .fnPtr = reinterpret_cast<void*>(&RunBundleAndSnapshotFromLibrary),
-      },
-      {
-          .name = "nativeGetObservatoryUri",
-          .signature = "()Ljava/lang/String;",
-          .fnPtr = reinterpret_cast<void*>(&GetObservatoryUri),
       },
       {
           .name = "nativeDispatchEmptyPlatformMessage",

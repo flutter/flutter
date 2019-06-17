@@ -9,6 +9,7 @@
 
 #include "flutter/common/settings.h"
 #include "flutter/fml/macros.h"
+#include "flutter/runtime/dart_service_isolate.h"
 
 namespace flutter {
 
@@ -24,6 +25,7 @@ class FlutterMain {
 
  private:
   const flutter::Settings settings_;
+  DartServiceIsolate::CallbackHandle observatory_uri_callback_;
 
   FlutterMain(flutter::Settings settings);
 
@@ -34,6 +36,8 @@ class FlutterMain {
                    jstring bundlePath,
                    jstring appRootPath,
                    jstring engineCachesPath);
+
+  void SetupObservatoryUriCallback(JNIEnv* env);
 
   FML_DISALLOW_COPY_AND_ASSIGN(FlutterMain);
 };

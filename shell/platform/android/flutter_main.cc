@@ -33,10 +33,20 @@ extern const intptr_t kPlatformStrongDillSize;
 #endif
 }
 
-FlutterMain::FlutterMain(flutter::Settings settings)
-    : settings_(std::move(settings)) {}
+namespace {
 
-FlutterMain::~FlutterMain() = default;
+fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
+
+}  // anonymous namespace
+
+FlutterMain::FlutterMain(flutter::Settings settings)
+    : settings_(std::move(settings)), observatory_uri_callback_() {}
+
+FlutterMain::~FlutterMain() {
+  if (observatory_uri_callback_) {
+    DartServiceIsolate::RemoveServerStatusCallback(observatory_uri_callback_);
+  }
+}
 
 static std::unique_ptr<FlutterMain> g_flutter_main;
 
@@ -114,6 +124,37 @@ void FlutterMain::Init(JNIEnv* env,
   // Not thread safe. Will be removed when FlutterMain is refactored to no
   // longer be a singleton.
   g_flutter_main.reset(new FlutterMain(std::move(settings)));
+
+  g_flutter_main->SetupObservatoryUriCallback(env);
+}
+
+void FlutterMain::SetupObservatoryUriCallback(JNIEnv* env) {
+  g_flutter_jni_class = new fml::jni::ScopedJavaGlobalRef<jclass>(
+      env, env->FindClass("io/flutter/embedding/engine/FlutterJNI"));
+  if (g_flutter_jni_class->is_null()) {
+    return;
+  }
+  jfieldID uri_field = env->GetStaticFieldID(
+      g_flutter_jni_class->obj(), "observatoryUri", "Ljava/lang/String;");
+  if (uri_field == nullptr) {
+    return;
+  }
+
+  auto set_uri = [env, uri_field](std::string uri) {
+    fml::jni::ScopedJavaLocalRef<jstring> java_uri =
+        fml::jni::StringToJavaString(env, uri);
+    env->SetStaticObjectField(g_flutter_jni_class->obj(), uri_field,
+                              java_uri.obj());
+  };
+
+  fml::MessageLoop::EnsureInitializedForCurrentThread();
+  fml::RefPtr<fml::TaskRunner> platform_runner =
+      fml::MessageLoop::GetCurrent().GetTaskRunner();
+
+  observatory_uri_callback_ = DartServiceIsolate::AddServerStatusCallback(
+      [platform_runner, set_uri](std::string uri) {
+        platform_runner->PostTask([uri, set_uri] { set_uri(uri); });
+      });
 }
 
 static void RecordStartTimestamp(JNIEnv* env,

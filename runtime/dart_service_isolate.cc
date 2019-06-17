@@ -32,7 +32,7 @@ namespace {
 
 static Dart_LibraryTagHandler g_embedder_tag_handler;
 static tonic::DartLibraryNatives* g_natives;
-static std::string observatory_uri_;
+static std::string g_observatory_uri;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
                                       int argument_count,
@@ -63,7 +63,7 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
     return;
   }
 
-  observatory_uri_ = uri;
+  g_observatory_uri = uri;
 
   // Collect callbacks to fire in a separate collection and invoke them outside
   // the lock.
@@ -79,10 +79,6 @@ void DartServiceIsolate::NotifyServerState(Dart_NativeArguments args) {
   for (auto callback_to_fire : callbacks_to_fire) {
     callback_to_fire(uri);
   }
-}
-
-std::string DartServiceIsolate::GetObservatoryUri() {
-  return observatory_uri_;
 }
 
 DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
@@ -102,8 +98,8 @@ DartServiceIsolate::CallbackHandle DartServiceIsolate::AddServerStatusCallback(
     callbacks_.insert(std::move(callback_pointer));
   }
 
-  if (!observatory_uri_.empty()) {
-    callback(observatory_uri_);
+  if (!g_observatory_uri.empty()) {
+    callback(g_observatory_uri);
   }
 
   return handle;

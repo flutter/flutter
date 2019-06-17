@@ -135,7 +135,7 @@ public class FlutterNativeView implements BinaryMessenger {
     }
 
     public static String getObservatoryUri() {
-        return FlutterJNI.nativeGetObservatoryUri();
+        return FlutterJNI.getObservatoryUri();
     }
 
     @Override
