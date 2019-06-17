@@ -568,7 +568,7 @@ void main() {
   testWidgets('All visible pages are able to receive touch events',
     (WidgetTester tester) async {
       final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
-      final List<int> tappedIndices = <int> [];
+      int tappedIndex;
       Iterable<int> visiblePages;
 
       Widget build() {
@@ -579,7 +579,7 @@ void main() {
             itemCount: 20,
             itemBuilder: (BuildContext context, int index) {
               return GestureDetector(
-                onTap: () => tappedIndices.add(index),
+                onTap: () => tappedIndex = index,
                 child: SizedBox.expand(child: Text(index.toString())),
               );
             },
@@ -590,14 +590,16 @@ void main() {
       visiblePages = const <int> [0, 1, 2];
       await tester.pumpWidget(build());
       // The first 3 items should be visible and tappable.
+
       for (int index in visiblePages) {
         expect(find.text(index.toString()), findsOneWidget);
-        await tester.tap(find.text(index.toString()));
+        // The center of 3 has an x-coordinate of 800, so we have to manually
+        // offset it a bit.
+        final Offset center = tester.getCenter(find.text(index.toString())).translate(-3, 0);
+        await tester.tapAt(center);
+        expect(tappedIndex, index);
       }
 
-      expect(tappedIndices, visiblePages);
-
-      tappedIndices.clear();
       controller.jumpToPage(19);
       await tester.pump();
       // The last 3 items should be visible and tappable.
@@ -605,9 +607,8 @@ void main() {
       for (int index in visiblePages) {
         expect(find.text(index.toString()), findsOneWidget);
         await tester.tap(find.text(index.toString()));
+        expect(tappedIndex, index);
       }
-
-      expect(tappedIndices, visiblePages);
   });
 
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
