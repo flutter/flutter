@@ -57,46 +57,51 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     markNeedsLayout();
   }
 
-  /// The padding that will be placed before and after the children if any, along the
-  /// main axis.
-  ///
-  /// The default value is to center the first child or the last child in the
-  /// viewport along the main axis, when they become the current item.
-  double get padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
+  // The padding that will be placed before and after the children if any, along the
+  // main axis.
+  //
+  // The default value is to center the earliest possible child or the last possible
+  // child in the viewport along the main axis, when they become the current item.
+  double get _padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
 
   /// {@macro flutter.rendering.indexToLayoutOffset}
   ///
   /// By default, places the children in order, without gaps, starting from a
-  /// layout offset that equals [padding].
+  /// layout offset that allows the child with the earliest possible index to be
+  /// placed in the center of the viewport when the scroll offset is 0.
   @override
   double indexToLayoutOffset(double itemExtent, int index) {
-    return padding + super.indexToLayoutOffset(itemExtent, index);
+    return _padding + super.indexToLayoutOffset(itemExtent, index);
   }
 
   /// {@macro flutter.rendering.getMinChildIndexForScrollOffset}
   ///
   /// By default, returns a value consistent with the children being placed in
-  /// order, without gaps, starting from layout offset that equals to [padding].
+  /// order, without gaps, starting from layout offset that allows the child with
+  /// the earliest possible index to be placed in the center of the viewport when
+  /// the scroll offset is 0.
   @override
   int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset - padding, 0.0), itemExtent);
+    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
   }
 
   /// {@macro flutter.rendering.getMaxChildIndexForScrollOffset}
   ///
   /// By default, returns a value consistent with the children being placed in
-  /// order, without gaps, starting from layout offset that equals to [padding].
+  /// order, without gaps, starting from layout offset that allows the child with
+  /// the earliest possible index to be placed in the center of the viewport when
+  /// the scroll offset is 0.
   @override
   int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset - padding, 0.0), itemExtent);
+    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
   }
 
   /// Called to estimate the total scrollable extents of this object.
   ///
   /// Must return the total distance from the start of the child with the
   /// earliest possible index to the end of the child with the last possible
-  /// index, plus 2 * [padding], if the [RenderSliverFillViewport] contains more
-  /// than one child.
+  /// index, plus leading and trailing paddings, if the [RenderSliverFillViewport]
+  /// contains more than one child.
   ///
   /// By default, defers to [RenderSliverBoxChildManager.estimateMaxScrollOffset].
   ///
@@ -112,6 +117,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     double leadingScrollOffset,
     double trailingScrollOffset,
   }) {
+    // Only overriding the documentation.
     return super.estimateMaxScrollOffset(
       constraints,
       firstIndex: firstIndex,
