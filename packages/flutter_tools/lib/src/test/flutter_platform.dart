@@ -837,16 +837,22 @@ class FlutterPlatform extends PlatformPlugin {
       testPath,
     ]);
     printTrace(command.join(' '));
+    // If the FLUTTER_TEST environment variable has been set, then pass it on
+    // for package:flutter_test to handle the value.
+    //
+    // If FLUTTER_TEST has not been set, assume from this context that this
+    // call was invoked by the command 'flutter test'.
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST') 
+        ? platform.environment['FLUTTER_TEST']
+        : 'true';
     final Map<String, String> environment = <String, String>{
-      'FLUTTER_TEST': platform.environment.containsKey('FLUTTER_TEST')
-        ? '${platform.environment['FLUTTER_TEST']}'
-        : 'true',
+      'FLUTTER_TEST': flutterTest,
       'FONTCONFIG_FILE': _fontConfigFile.path,
       'SERVER_PORT': serverPort.toString(),
     };
     if (buildTestAssets) {
       environment['UNIT_TEST_ASSETS'] = fs.path.join(
-        flutterProject.directory.path, 'build', 'unit_test_assets');
+        flutterProject?.directory?.path ?? '', 'build', 'unit_test_assets');
     }
     return processManager.start(command, environment: environment);
   }
