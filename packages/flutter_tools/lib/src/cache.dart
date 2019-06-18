@@ -97,10 +97,12 @@ class Cache {
 
   // Check whether there is a writable bit in the usr permissions.
   static bool _hasUserWritePermission(FileStat stat) {
+    // First grab the set of permissions for the usr group.
     final int permissions = ((stat.mode & 0xFFF) >> 6) & 0x7;
-    return permissions == 2
-      || permissions == 3
-      || permissions == 6
+    // These values represent all of the octal permission bits that have
+    // readable and writable permission, though technically if we're missing
+    // readable we probably didn't make it this far.
+    return permissions == 6
       || permissions == 7;
   }
 
