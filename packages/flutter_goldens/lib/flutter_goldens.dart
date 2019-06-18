@@ -11,7 +11,7 @@ import 'package:file/local.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
-import 'package:test_api/test_api.dart' as test_api;
+import 'package:test_api/test_api.dart';
 
 import 'package:flutter_goldens_client/client.dart';
 import 'package:flutter_goldens_client/skia_client.dart';
@@ -54,7 +54,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
   FlutterGoldenFileComparator(
     this.basedir, {
     this.fs = const LocalFileSystem(),
-      this.platform = const LocalPlatform(),
+    this.platform = const LocalPlatform(),
   });
 
   /// The directory to which golden file URIs will be resolved in [compare] and [update].
@@ -72,12 +72,6 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   /// Instance of the [SkiaGoldClient] for executing tests.
   final SkiaGoldClient _skiaClient = SkiaGoldClient();
-
-  /// Flag to test golden images via [GoldensClient] or [SkiaGoldClient].
-  ///
-  /// Currently, testing is executed via Skia Gold in environments where a
-  /// service account key is available for authentication.
-  bool get testingWithSkia => platform.environment[_kServiceAccountKey] != null ? true : false;
 
   /// Creates a new [FlutterGoldenFileComparator] that mirrors the relative
   /// path resolution of the default [goldenFileComparator].
@@ -109,7 +103,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    if(testingWithSkia) {
+    if(_testingWithSkiaGold()) {
       // Library prefix notation for Skia Gold.
       golden = _addPrefix(golden);
       // Always updating for SkiaGold testing.
@@ -121,7 +115,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
 
-    if (testingWithSkia && _isPostSubmit()) {
+    if (_testingWithSkiaGold()) {
       // Testing with SkiaGoldClient. ------------------------------------------
       final bool authorized = await _skiaClient.auth(fs.directory(basedir));
       if(!authorized) {
@@ -144,12 +138,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       return true;
     } else {
       // Not executing test. ---------------------------------------------------
-      test_api.expectLater(
-        true,
-        false,
-        reason: '"$golden" : Skia Gold unavailable && !isLinux',
-        skip: true,
-      );
+      print('Skipping "$golden" : Skia Gold unavailable && !isLinux');
       return true;
     }
   }
@@ -170,11 +159,15 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     return fs.directory(basedir).childFile(fs.file(uri).path);
   }
 
-  bool _isPostSubmit() {
+  bool _testingWithSkiaGold() {
     final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
     final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
     final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
-    if (cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master') {
+    final bool serviceAccountAvailable =  platform.environment[_kServiceAccountKey] != null ? true : false;
+    if (cirrusCI.isNotEmpty
+      && cirrusPR.isEmpty
+      && cirrusBranch == 'master'
+      && serviceAccountAvailable) {
       return true;
     }
     return false;
