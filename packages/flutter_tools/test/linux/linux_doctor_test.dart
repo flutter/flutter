@@ -24,7 +24,7 @@ void main() {
     testUsingContext('Returns full validation when clang++ and make are availibe', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
-          stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\junk',
+          stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
           exitCode: 0,
         );
       });
@@ -48,7 +48,34 @@ void main() {
       ProcessManager: () => processManager,
     });
 
-    testUsingContext('Returns partial validation when clang and make are not availible', () async {
+    testUsingContext('Returns partial validation when clang++ version is too old', () async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+        return FakeProcessResult(
+          stdout: 'clang version 2.0.1-10 (tags/RELEASE_401/final)\njunk',
+          exitCode: 0,
+        );
+      });
+      when(processManager.run(<String>[
+        'make',
+        '--version',
+      ])).thenAnswer((_) async {
+        return FakeProcessResult(
+          stdout: 'GNU Make 4.1\njunk',
+          exitCode: 0,
+        );
+      });
+
+      final ValidationResult result = await linuxDoctorValidator.validate();
+      expect(result.type, ValidationType.partial);
+      expect(result.messages, <ValidationMessage>[
+        ValidationMessage.error('clang++ 2.0.1 is below minimum version of 3.4.0'),
+        ValidationMessage('GNU Make 4.1'),
+      ]);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('Returns missing validation when clang and make are not availible', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
           stdout: '',

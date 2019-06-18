@@ -71,9 +71,6 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosValidator);
 
-      if (windowsWorkflow.appliesToHostPlatform)
-        _validators.add(visualStudioValidator);
-
       if (webWorkflow.appliesToHostPlatform)
         _validators.add(const WebValidator());
 
@@ -81,6 +78,9 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (flutterDesktopEnabled) {
         if (linuxWorkflow.appliesToHostPlatform) {
           _validators.add(LinuxDoctorValidator());
+        }
+        if (windowsWorkflow.appliesToHostPlatform) {
+          _validators.add(visualStudioValidator);
         }
       }
 

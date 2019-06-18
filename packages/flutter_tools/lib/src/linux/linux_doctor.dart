@@ -2,15 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/version.dart';
-
 import '../base/io.dart';
 import '../base/process_manager.dart';
+import '../base/version.dart';
 import '../doctor.dart';
 
-/// A validator that checks for GCC and the correct gtk version.
+/// A validator that checks for Clang and Make build dependencies
 class LinuxDoctorValidator extends DoctorValidator {
-  LinuxDoctorValidator() : super('Linux toolchain - develop for Linux desktop applications');
+  LinuxDoctorValidator() : super('Linux toolchain - develop for Linux desktop');
 
   /// The minimum version of clang supported.
   final Version minimumClangVersion = Version(3, 4, 0);
@@ -19,7 +18,7 @@ class LinuxDoctorValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     ValidationType validationType = ValidationType.installed;
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    /// Check for some version of Clang.
+    /// Check for a minimum version of Clang.
     final ProcessResult clangResult = await processManager.run(const <String>[
       'clang++',
       '--version',
@@ -34,11 +33,14 @@ class LinuxDoctorValidator extends DoctorValidator {
       if (version >= minimumClangVersion) {
         messages.add(ValidationMessage('clang++ $version'));
       } else {
+        validationType = ValidationType.partial;
         messages.add(ValidationMessage.error('clang++ $version is below minimum version of $minimumClangVersion'));
       }
     }
 
-    /// Check for the correct version of make
+    /// Check for make.
+    // TODO(jonahwilliams): tighten this check to include a version when we have
+    // a better idea about what is supported.
     final ProcessResult makeResult = await processManager.run(const <String>[
       'make',
       '--version',
