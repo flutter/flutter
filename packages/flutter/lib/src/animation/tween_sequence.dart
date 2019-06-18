@@ -16,7 +16,7 @@ import 'tween.dart';
 ///
 /// For example, to define an animation that uses an easing curve to interpolate
 /// between 5.0 and 10.0 during the first 40% of the animation, remain at 10.0
-/// for the next 20%, and then return to 10.0 for the final 40%:
+/// for the next 20%, and then return to 5.0 for the final 40%:
 ///
 /// ```dart
 /// final Animation<double> animation = TweenSequence(
