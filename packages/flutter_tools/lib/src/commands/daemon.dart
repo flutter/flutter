@@ -768,15 +768,14 @@ dynamic _toEncodable(dynamic object) {
 }
 
 Future<Map<String, dynamic>> _deviceToMap(Device device) async {
-  final bool isLocalEmulator = await device.isLocalEmulator;
   return <String, dynamic>{
     'id': device.id,
     'name': device.name,
     'platform': getNameForTargetPlatform(await device.targetPlatform),
-    'emulator': isLocalEmulator,
+    'emulator': await device.isLocalEmulator,
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),
-    'ephemeral': device.ephemeral ?? isLocalEmulator,
+    'ephemeral': device.ephemeral,
   };
 }
 
