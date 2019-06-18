@@ -114,6 +114,7 @@ class FlutterPlugin implements Plugin<Project> {
             String abiValue = PLATFORM_ARCH_MAP[targetArch]
             project.android {
                 packagingOptions {
+                    pickFirst "lib/${abiValue}/libflutter.so"
                     // Prevent the ELF library from getting corrupted.
                     doNotStrip "*/${abiValue}/libapp.so"
                 }
@@ -165,7 +166,7 @@ class FlutterPlugin implements Plugin<Project> {
             // The local engine is built for one of the build type.
             // However, we use the same engine for each of the build types.
             project.android.buildTypes.each {
-                addApiDependencies(project, it.name, project.files {
+                addApiDependencies(project, it, project.files {
                     flutterJar
                 })
             }
@@ -204,13 +205,13 @@ class FlutterPlugin implements Plugin<Project> {
             // added after applying the Flutter plugin.
             project.android.buildTypes.each {
                 def buildMode = buildModeFor(it)
-                addApiDependencies(project, it.name, project.files {
+                addApiDependencies(project, it, project.files {
                     baseJar[buildMode]
                 })
             }
             project.android.buildTypes.whenObjectAdded {
                 def buildMode = buildModeFor(it)
-                addApiDependencies(project, it.name, project.files {
+                addApiDependencies(project, it, project.files {
                     baseJar[buildMode]
                 })
             }
@@ -341,14 +342,14 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private static void addApiDependencies(Project project, String variantName, FileCollection files) {
+    private static void addApiDependencies(Project project, buildType, FileCollection files) {
         project.dependencies {
             String configuration;
             // `compile` dependencies are now `api` dependencies.
             if (project.getConfigurations().findByName("api")) {
-                configuration = "${variantName}Api";
+                configuration = buildType.name + "Api";
             } else {
-                configuration = "${variantName}Compile";
+                configuration = buildType.name + "Compile";
             }
             add(configuration, files)
         }
@@ -526,7 +527,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             // Include the snapshots and libflutter.so in `lib/`.
-            addApiDependencies(project, variant.name, project.files {
+            addApiDependencies(project, buildType, project.files {
                 packFlutterSnapshotsAndLibsTask
             })
 
