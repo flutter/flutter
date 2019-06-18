@@ -43,18 +43,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
       )
       ..addOption('route',
         help: 'Which route to load when running the app.',
-      )
-      ..addFlag('train',
-        hide: !verboseHelp,
-        negatable: false,
-        help: 'Save Dart runtime compilation trace to a file. '
-              'Compilation trace will be saved to a file specified by --compilation-trace-file '
-              'when \'flutter run --dynamic --profile --train\' exits. '
-              'This file contains a list of Dart symbols that were compiled by the runtime JIT '
-              'compiler up to that point. This file can be used in subsequent --dynamic builds '
-              'to precompile some code by the offline compiler. '
-              'This flag is only allowed when running as --dynamic --profile (recommended) or '
-              '--debug (may include unwanted debug symbols).',
       );
     usesTargetOption();
     usesPortOptions();
@@ -400,11 +388,6 @@ class RunCommand extends RunCommandBase {
       }
     }
 
-    if (argResults['train'] &&
-        getBuildMode() != BuildMode.debug && getBuildMode() != BuildMode.dynamicProfile)
-      throwToolExit('Error: --train is only allowed when running as --dynamic --profile '
-          '(recommended) or --debug (may include unwanted debug symbols).');
-
     List<String> expFlags;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment].isNotEmpty) {
@@ -447,7 +430,6 @@ class RunCommand extends RunCommandBase {
         projectRootPath: argResults['project-root'],
         packagesFilePath: globalResults['packages'],
         dillOutputPath: argResults['output-dill'],
-        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );
@@ -469,7 +451,6 @@ class RunCommand extends RunCommandBase {
         applicationBinary: applicationBinaryPath == null
             ? null
             : fs.file(applicationBinaryPath),
-        saveCompilationTrace: argResults['train'],
         stayResident: stayResident,
         ipv6: ipv6,
       );

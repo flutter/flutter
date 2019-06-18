@@ -39,7 +39,6 @@ class ResidentWebRunner extends ResidentRunner {
           target: target,
           usesTerminalUI: true,
           stayResident: true,
-          saveCompilationTrace: false,
           debuggingOptions: debuggingOptions,
           ipv6: ipv6,
         );
