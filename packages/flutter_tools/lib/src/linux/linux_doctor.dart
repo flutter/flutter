@@ -2,42 +2,53 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/version.dart';
+
 import '../base/io.dart';
 import '../base/process_manager.dart';
 import '../doctor.dart';
 
 /// A validator that checks for GCC and the correct gtk version.
 class LinuxDoctorValidator extends DoctorValidator {
-  const LinuxDoctorValidator() : super('Linux toolchain - develop for Linux desktop applications');
+  LinuxDoctorValidator() : super('Linux toolchain - develop for Linux desktop applications');
+
+  /// The minimum version of clang supported.
+  final Version minimumClangVersion = Version(3, 4, 0);
 
   @override
   Future<ValidationResult> validate() async {
     ValidationType validationType = ValidationType.installed;
     final List<ValidationMessage> messages = <ValidationMessage>[];
-    /// Check for some version of GCC.
-    final ProcessResult gccResult = await processManager.run(const <String>[
-      'g++',
+    /// Check for some version of Clang.
+    final ProcessResult clangResult = await processManager.run(const <String>[
+      'clang++',
       '--version',
     ]);
-    if (gccResult.exitCode != 0) {
+    if (clangResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error('GCC executable missing'));
+      messages.add(ValidationMessage.error('clang++ is not installed.'));
     } else {
-      messages.add(ValidationMessage(gccResult.stdout));
+      final String firstLine = clangResult.stdout.split('\n').first.trim();
+      final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(firstLine).group(0);
+      final Version version = Version.parse(versionString);
+      if (version >= minimumClangVersion) {
+        messages.add(ValidationMessage('clang++ $version'));
+      } else {
+        messages.add(ValidationMessage.error('clang++ $version is below minimum version of $minimumClangVersion'));
+      }
     }
 
-    /// Check for the correct version of gtk.
-    final ProcessResult gtkResult = await processManager.run(const <String>[
-      'pkg-config',
-      '--exists',
-      '--print-errors',
-      'gtk+-3.0',
+    /// Check for the correct version of make
+    final ProcessResult makeResult = await processManager.run(const <String>[
+      'make',
+      '--version',
     ]);
-    if (gtkResult.exitCode != 0) {
+    if (makeResult.exitCode != 0) {
       validationType = ValidationType.missing;
-      messages.add(ValidationMessage.error(gtkResult.stdout));
+      messages.add(ValidationMessage.error('make is not installed.'));
     } else {
-      messages.add(ValidationMessage('GTK installed and up to date'));
+      final String firstLine = makeResult.stdout.split('\n').first.trim();
+      messages.add(ValidationMessage(firstLine));
     }
 
     return ValidationResult(validationType, messages);
