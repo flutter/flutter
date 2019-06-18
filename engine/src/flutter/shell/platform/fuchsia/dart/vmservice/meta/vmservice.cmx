@@ -3,6 +3,9 @@
         "data": "data/vmservice"
     },
     "sandbox": {
+        "features": [
+            "deprecated-ambient-replace-as-executable"
+        ],
         "services": [
             "fuchsia.cobalt.LoggerFactory",
             "fuchsia.fonts.Provider",
