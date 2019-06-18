@@ -64,7 +64,7 @@ final DartPlatform flutterWebPlatform =
   'isolate',
 ]);
 
-/// The build application to compile a flutter application to the web.
+/// The builders required to compile a Flutter application to the web.
 final List<core.BuilderApplication> builders = <core.BuilderApplication>[
   core.apply(
     'flutter_tools:test_bootstrap',
