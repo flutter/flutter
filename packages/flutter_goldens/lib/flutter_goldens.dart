@@ -11,7 +11,7 @@ import 'package:file/local.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
-import 'package:test_api/test_api.dart';
+import 'package:test_api/test_api.dart' as test_api;
 
 import 'package:flutter_goldens_client/client.dart';
 import 'package:flutter_goldens_client/skia_client.dart';
@@ -144,8 +144,13 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       return true;
     } else {
       // Not executing test. ---------------------------------------------------
-      print('Skipping golden file test for "$golden" : Skia Gold unavailable && !isLinux');
-      return true; // TODO(Piinks): write to skip out
+      test_api.expectLater(
+        true,
+        false,
+        reason: '"$golden" : Skia Gold unavailable && !isLinux',
+        skip: true,
+      );
+      return true;
     }
   }
 

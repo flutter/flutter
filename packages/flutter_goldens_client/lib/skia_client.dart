@@ -195,8 +195,6 @@ class SkiaGoldClient {
   }
 
   Future<String> _getCommitHash() async {
-    // TODO(Piinks): Skia Gold tests can only currently be ingested post-submit,
-    // else will return false
     if (!flutterRoot.existsSync()) {
       return null;
     } else {
