@@ -1,4 +1,4 @@
-Signature: bd0fe86a14b4cc6a94822cfa9c780c82
+Signature: 8c06bb0b2f94f2d22d021e48faa26e85
 
 UNUSED LICENSES:
 
@@ -2168,6 +2168,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/upload_skiaserve.expected/try
 FILE: ../../../third_party/skia/infra/bots/resources.isolate
 FILE: ../../../third_party/skia/infra/bots/skpbench_skia_bundled.isolate
 FILE: ../../../third_party/skia/infra/bots/swarm_recipe.isolate
+FILE: ../../../third_party/skia/infra/bots/task_drivers.isolate
 FILE: ../../../third_party/skia/infra/bots/tasks.json
 FILE: ../../../third_party/skia/infra/bots/test_skia_bundled.isolate
 FILE: ../../../third_party/skia/infra/bots/tools/luci-go/linux64/isolate.sha1
@@ -2250,9 +2251,12 @@ FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphBuilder.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/ParagraphStyle.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TextShadow.h
 FILE: ../../../third_party/skia/modules/skparagraph/include/TextStyle.h
+FILE: ../../../third_party/skia/modules/skparagraph/include/TypefaceFontProvider.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/FontCollection.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/FontIterator.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/FontIterator.h
+FILE: ../../../third_party/skia/modules/skparagraph/src/FontResolver.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/src/FontResolver.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphBuilderImpl.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/ParagraphCache.h
@@ -2268,7 +2272,6 @@ FILE: ../../../third_party/skia/modules/skparagraph/src/TextStyle.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/TypefaceFontProvider.cpp
-FILE: ../../../third_party/skia/modules/skparagraph/src/TypefaceFontProvider.h
 FILE: ../../../third_party/skia/public.bzl
 FILE: ../../../third_party/skia/samplecode/SampleParagraph.cpp
 FILE: ../../../third_party/skia/site/METADATA
