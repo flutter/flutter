@@ -24,13 +24,13 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - ./dev/bots/cirrus_setup.sh
-    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
+    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git .
     - ls
-    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > $DEPOT_TOOLS/ensure.txt
-    - cd $DEPOT_TOOLS
+    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > depot_tools/ensure.txt
+    - cd depot_tools
     - ls
     - cat ensure.txt
-    - $DEPOT_TOOLS/cipd ensure -ensure-file ensure.txt -root $DEPOT_TOOLS
+    - ./cipd ensure -ensure-file ensure.txt -root .
   matrix:
     - name: docs
       env:
@@ -283,13 +283,13 @@ task:
     - bin/flutter config --no-analytics
     - bin/flutter doctor -v
     - bin/flutter update-packages
-    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
+    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git .
     - ls
-    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > $DEPOT_TOOLS/ensure.txt
-    - cd $DEPOT_TOOLS
+    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > depot_tools/ensure.txt
+    - cd depot_tools
     - ls
     - cat ensure.txt
-    - $DEPOT_TOOLS/cipd ensure -ensure-file ensure.txt -root $DEPOT_TOOLS
+    - ./cipd ensure -ensure-file ensure.txt -root .
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
