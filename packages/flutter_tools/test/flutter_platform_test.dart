@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/test/flutter_platform.dart';
@@ -33,7 +32,7 @@ void main() {
       MockPlatform mockPlatform;
       MockProcessManager mockProcessManager;
       FlutterPlatform flutterPlatform;
-      final Map<Type, Generator> contextOverrides = {
+      final Map<Type, Generator> contextOverrides = <Type, Generator>{
         Platform: () => mockPlatform,
         ProcessManager: () => mockProcessManager,
       };
@@ -63,31 +62,31 @@ void main() {
       }
 
       testUsingContext('as true when not originally set', () async {
-        when(mockPlatform.environment).thenReturn({});
+        when(mockPlatform.environment).thenReturn(<String, String>{});
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'true');
       }, overrides: contextOverrides);
 
       testUsingContext('as true when set to true', () async {
-        when(mockPlatform.environment).thenReturn({'FLUTTER_TEST': 'true'});
+        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': 'true'});
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'true');
       }, overrides: contextOverrides);
 
       testUsingContext('as false when set to false', () async {
-        when(mockPlatform.environment).thenReturn({'FLUTTER_TEST': 'false'});
+        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': 'false'});
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'false');
       }, overrides: contextOverrides);
 
       testUsingContext('unchanged when set', () async {
-        when(mockPlatform.environment).thenReturn({'FLUTTER_TEST': 'neither true nor false'});
+        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': 'neither true nor false'});
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], 'neither true nor false');
       }, overrides: contextOverrides);
 
       testUsingContext('as null when set to null', () async {
-        when(mockPlatform.environment).thenReturn({'FLUTTER_TEST': null});
+        when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_TEST': null});
         final Map<String, String> capturedEnvironment = await captureEnvironment();
         expect(capturedEnvironment['FLUTTER_TEST'], null);
       }, overrides: contextOverrides);
