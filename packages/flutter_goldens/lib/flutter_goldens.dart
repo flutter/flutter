@@ -121,13 +121,11 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       throw TestFailure('Could not be compared against non-existent file: "$golden"');
     }
 
-    if (testingWithSkia /* TODO(Piinks): && isPostSubmit() */) {
+    if (testingWithSkia && _isPostSubmit()) {
       // Testing with SkiaGoldClient. ------------------------------------------
       final bool authorized = await _skiaClient.auth(fs.directory(basedir));
       if(!authorized) {
-        // TODO(Piinks): CI needs implementation
-        return true;
-        // throw test_package.TestFailure('Could not authorize goldctl.');
+        throw TestFailure('Could not authorize goldctl.');
       }
       await _skiaClient.imgtestInit();
       return await _skiaClient.imgtestAdd(golden.path, goldenFile);
@@ -165,5 +163,15 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
 
   File _getGoldenFile(Uri uri) {
     return fs.directory(basedir).childFile(fs.file(uri).path);
+  }
+
+  bool _isPostSubmit() {
+    final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
+    final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
+    final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
+    if (cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master') {
+      return true;
+    }
+    return false;
   }
 }

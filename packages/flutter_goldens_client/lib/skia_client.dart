@@ -86,7 +86,7 @@ class SkiaGoldClient {
 
     if (_serviceAccount == null)
       return false; // Not in the proper environment for golden file testing.
-
+    
     final File authFile = _workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json'
