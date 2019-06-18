@@ -2365,6 +2365,7 @@ void main() {
           labelText: 'label text',
           border: OutlineInputBorder(
             borderRadius: BorderRadius.only(
+              // Intentionally large values that are larger than the InputDecorator
               topLeft: Radius.circular(100.0),
               bottomLeft: Radius.circular(100.0),
               topRight: Radius.circular(200.0),
