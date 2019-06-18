@@ -14,9 +14,10 @@ import 'tween.dart';
 /// animation's duration. Each tween defines the animation's value during the
 /// interval indicated by its weight.
 ///
-/// For example, to define an animation that uses an easing curve to interpolate
-/// between 5.0 and 10.0 during the first 40% of the animation, remain at 10.0
-/// for the next 20%, and then return to 5.0 for the final 40%:
+/// {@tool sample}
+/// This example defines an animation that uses an easing curve to interpolate
+/// between 5.0 and 10.0 during the first 40% of the animation, remains at 10.0
+/// for the next 20%, and then returns to 5.0 for the final 40%.
 ///
 /// ```dart
 /// final Animation<double> animation = TweenSequence(
@@ -38,6 +39,7 @@ import 'tween.dart';
 ///   ],
 /// ).animate(myAnimationController);
 /// ```
+/// {@end-tool}
 class TweenSequence<T> extends Animatable<T> {
   /// Construct a TweenSequence.
   ///
