@@ -267,7 +267,10 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar_theme.tab_indicator_size_tab.png'),
+      matchesGoldenFile(
+        'tab_bar_theme.tab_indicator_size_tab.png',
+        version: null,
+      ),
       skip: !isLinux,
     );
   }, skip: isBrowser);
@@ -279,7 +282,10 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar_theme.tab_indicator_size_label.png'),
+      matchesGoldenFile(
+        'tab_bar_theme.tab_indicator_size_label.png',
+        version: null,
+      ),
       skip: !isLinux,
     );
   }, skip: isBrowser);
@@ -296,7 +302,10 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar_theme.custom_tab_indicator.png'),
+      matchesGoldenFile(
+        'tab_bar_theme.custom_tab_indicator.png',
+        version: null,
+      ),
       skip: !isLinux,
     );
   }, skip: isBrowser);
@@ -313,7 +322,10 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile('tab_bar_theme.beveled_rect_indicator.png'),
+      matchesGoldenFile(
+        'tab_bar_theme.beveled_rect_indicator.png',
+        version: null,
+      ),
       skip: !isLinux,
     );
   }, skip: isBrowser);

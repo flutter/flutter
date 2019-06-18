@@ -5,6 +5,7 @@
 import 'package:meta/meta.dart';
 
 import 'basic_types.dart';
+import 'constants.dart';
 import 'diagnostics.dart';
 import 'print.dart';
 
@@ -331,7 +332,14 @@ class FlutterErrorDetails extends Diagnosticable {
   /// If the exception contains an [ErrorSummary] that summary is used,
   /// otherwise the summary is inferred from the string representation of the
   /// exception.
+  ///
+  /// In release mode, this always returns a [DiagnosticsNode.message] with a
+  /// formatted version of the exception.
   DiagnosticsNode get summary {
+    String formatException() => exceptionAsString().split('\n')[0].trimLeft();
+    if (kReleaseMode) {
+      return DiagnosticsNode.message(formatException());
+    }
     final Diagnosticable diagnosticable = _exceptionToDiagnosticable();
     DiagnosticsNode summary;
     if (diagnosticable != null) {
@@ -339,7 +347,7 @@ class FlutterErrorDetails extends Diagnosticable {
       debugFillProperties(builder);
       summary = builder.properties.firstWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.summary, orElse: () => null);
     }
-    return summary ?? ErrorSummary('${exceptionAsString().split("\n")[0].trimLeft()}');
+    return summary ?? ErrorSummary('${formatException()}');
   }
 
   @override
