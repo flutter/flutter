@@ -75,6 +75,61 @@ void main() {
       ProcessManager: () => processManager,
     });
 
+    testUsingContext('Returns mising validation when make is not availible', () async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+        return FakeProcessResult(
+          stdout: 'clang version 4.0.1-10 (tags/RELEASE_401/final)\njunk',
+          exitCode: 0,
+        );
+      });
+      when(processManager.run(<String>[
+        'make',
+        '--version',
+      ])).thenAnswer((_) async {
+        return FakeProcessResult(
+          stdout: '',
+          exitCode: 1,
+        );
+      });
+
+      final ValidationResult result = await linuxDoctorValidator.validate();
+      expect(result.type, ValidationType.missing);
+      expect(result.messages, <ValidationMessage>[
+        ValidationMessage('clang++ 4.0.1'),
+        ValidationMessage.error('make is not installed')
+      ]);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+    });
+
+    testUsingContext('Returns mising validation when clang++ is not availible', () async {
+      when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
+        return FakeProcessResult(
+          stdout: '',
+          exitCode: 1,
+        );
+      });
+      when(processManager.run(<String>[
+        'make',
+        '--version',
+      ])).thenAnswer((_) async {
+        return FakeProcessResult(
+          stdout: 'GNU Make 4.1\njunk',
+          exitCode: 0,
+        );
+      });
+
+      final ValidationResult result = await linuxDoctorValidator.validate();
+      expect(result.type, ValidationType.missing);
+      expect(result.messages, <ValidationMessage>[
+        ValidationMessage.error('clang++ is not installed'),
+        ValidationMessage('GNU Make 4.1'),
+      ]);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+    });
+
+
     testUsingContext('Returns missing validation when clang and make are not availible', () async {
       when(processManager.run(<String>['clang++', '--version'])).thenAnswer((_) async {
         return FakeProcessResult(
