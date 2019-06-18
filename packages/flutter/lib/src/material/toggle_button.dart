@@ -61,6 +61,7 @@ class ToggleButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ThemeData themeData = Theme.of(context);
+    final TextDirection textDirection = Directionality.of(context);
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -124,10 +125,12 @@ class ToggleButtons extends StatelessWidget {
           }
         }
 
-        // consider rtl languages
         BorderRadius edgeBorderRadius;
         BorderRadius clipBorderRadius;
-        if (index == 0) {
+        if (
+          index == 0 && textDirection == TextDirection.ltr ||
+          index == children.length - 1 && textDirection == TextDirection.rtl
+        ) {
           edgeBorderRadius = BorderRadius.only(
             topLeft: borderRadius.topLeft,
             bottomLeft: borderRadius.bottomLeft,
@@ -136,7 +139,10 @@ class ToggleButtons extends StatelessWidget {
             topLeft: borderRadius.topLeft - Radius.circular(borderWidth / 2.0),
             bottomLeft: borderRadius.bottomLeft - Radius.circular(borderWidth / 2.0),
           );
-        } else if (index == children.length - 1) {
+        } else if (
+          index == children.length - 1 && textDirection == TextDirection.ltr ||
+          index == 0 && textDirection == TextDirection.rtl
+        ) {
           edgeBorderRadius = BorderRadius.only(
             topRight: borderRadius.topRight,
             bottomRight: borderRadius.bottomRight,
@@ -420,31 +426,56 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
       case TextDirection.ltr:
         rightConstraint = trailingBorderOffset;
         leftConstraint = leadingBorderSide.width;
+
+        final BoxConstraints innerConstraints = constraints.deflate(
+          EdgeInsets.only(
+            left: leftConstraint,
+            top: horizontalBorderSide.width,
+            right: rightConstraint,
+            bottom: horizontalBorderSide.width,
+          ),
+        );
+
+        child.layout(innerConstraints, parentUsesSize: true);
+        final BoxParentData childParentData = child.parentData;
+        childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
+
+        size = constraints.constrain(Size(
+          leftConstraint + child.size.width + rightConstraint,
+          horizontalBorderSide.width * 2.0 + child.size.height,
+        ));
+
         break;
       case TextDirection.rtl:
         rightConstraint = leadingBorderSide.width;
         leftConstraint = trailingBorderOffset;
+
+        final BoxConstraints innerConstraints = constraints.deflate(
+          EdgeInsets.only(
+            left: leftConstraint,
+            top: horizontalBorderSide.width,
+            right: rightConstraint,
+            bottom: horizontalBorderSide.width,
+          ),
+        );
+
+        child.layout(innerConstraints, parentUsesSize: true);
+        final BoxParentData childParentData = child.parentData;
+
+        if (isLastButton) {
+          childParentData.offset = Offset(trailingBorderOffset, trailingBorderOffset);
+        } else {
+          childParentData.offset = Offset(0, horizontalBorderSide.width);
+        }
+
+        print('$leftConstraint $rightConstraint');
+        size = constraints.constrain(Size(
+          leftConstraint + child.size.width + rightConstraint,
+          horizontalBorderSide.width * 2.0 + child.size.height,
+        ));
+
         break;
     }
-
-    print('rightConstraint $rightConstraint $leftConstraint $isFirstButton');
-    final BoxConstraints innerConstraints = constraints.deflate(
-      EdgeInsets.only(
-        left: leftConstraint,
-        top: horizontalBorderSide.width,
-        right: rightConstraint,
-        bottom: horizontalBorderSide.width,
-      ),
-    );
-
-    child.layout(innerConstraints, parentUsesSize: true);
-    final BoxParentData childParentData = child.parentData;
-    childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
-
-    size = constraints.constrain(Size(
-      leadingBorderSide.width + child.size.width + trailingBorderOffset,
-      horizontalBorderSide.width * 2.0 + child.size.height,
-    ));
   }
 
   @override
@@ -538,9 +569,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Path leadingPath = Path()
             ..moveTo(outer.left, bottom)
             ..lineTo(right - brRadius.x, bottom)
-            ..addArc(brCorner, math.pi * 3.0 / 2.0, sweepAngle)
+            ..addArc(brCorner, math.pi / 2.0, -sweepAngle)
             ..lineTo(right, top + trRadius.y)
-            ..addArc(trCorner, 0, sweepAngle)
+            ..addArc(trCorner, 0, -sweepAngle)
             ..lineTo(outer.left, top);
           context.canvas.drawPath(leadingPath, leadingPaint);
         } else if (isLastButton) {
@@ -553,9 +584,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
           final Path endingPath = Path()
             ..moveTo(right - horizontalBorderSide.width / 2.0, top)
             ..lineTo(left + tlRadius.x, top)
-            ..addArc(tlCorner, math.pi, sweepAngle)
+            ..addArc(tlCorner, math.pi * 3.0 / 2.0, -sweepAngle)
             ..lineTo(left, bottom - blRadius.y)
-            ..addArc(blCorner, math.pi / 2.0, sweepAngle)
+            ..addArc(blCorner, math.pi, -sweepAngle)
             ..lineTo(right - horizontalBorderSide.width / 2.0, bottom);
           context.canvas.drawPath(endingPath, endingPaint);
         } else {
@@ -566,9 +597,9 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
 
           final Paint horizontalPaint = horizontalBorderSide.toPaint();
           final Path horizontalPaths = Path()
-            ..moveTo(right + horizontalBorderSide.width / 2.0, top)
+            ..moveTo(right - horizontalBorderSide.width / 2.0, top)
             ..lineTo(outer.left - tlRadius.x, top)
-            ..moveTo(right + horizontalBorderSide.width / 2.0 + trRadius.x, bottom)
+            ..moveTo(right - horizontalBorderSide.width / 2.0 + trRadius.x, bottom)
             ..lineTo(outer.left - tlRadius.x, bottom);
           context.canvas.drawPath(horizontalPaths, horizontalPaint);
         }
