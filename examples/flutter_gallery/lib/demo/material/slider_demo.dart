@@ -203,13 +203,13 @@ class _SliderDemoState extends State<SliderDemo> {
   Widget build(BuildContext context) {
     final List<ComponentDemoTabData> demos = <ComponentDemoTabData>[
       ComponentDemoTabData(
-        tabName: 'SINGLE SLIDER',
+        tabName: 'SINGLE',
         description: 'Sliders containing 1 thumb',
         demoWidget: _Sliders(),
         documentationUrl: 'https://docs.flutter.io/flutter/material/Slider-class.html',
       ),
       ComponentDemoTabData(
-        tabName: 'RANGE SLIDER',
+        tabName: 'RANGE',
         description: 'Sliders containing 2 thumbs',
         demoWidget: _RangeSliders(),
         documentationUrl: 'https://docs.flutter.io/flutter/material/RangeSlider-class.html',
