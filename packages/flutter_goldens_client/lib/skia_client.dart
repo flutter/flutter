@@ -171,12 +171,13 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    final io.ProcessResult imgtestResult = io.Process.runSync(
+    //final io.ProcessResult imgtestResult =
+    io.Process.runSync(
       _goldctl,
       imgtestArguments,
     );
 //    Will not turn the tree red.
-//    TODO(Piinks): Comment on PR if digests need to be triaged.
+//    TODO(Piinks): Comment on PR if digests need to be triaged, https://URL-to-issue
 //    if (imgtestResult.exitCode != 0) {
 //      final StringBuffer buf = StringBuffer();
 //      buf

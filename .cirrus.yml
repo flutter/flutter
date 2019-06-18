@@ -24,14 +24,11 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - ./dev/bots/cirrus_setup.sh
-    - ls
     - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp/depot_tools
     - cd tmp/depot_tools
-    - ls
     - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > ensure.txt
-    - ls
-    - cat ensure.txt
     - ./cipd ensure -ensure-file ensure.txt -root .
+    - ls
   matrix:
     - name: docs
       env:
@@ -284,8 +281,8 @@ task:
     - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp/depot_tools
     - cd tmp/depot_tools
     - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > ensure.txt
-    - cat ensure.txt
     - ./cipd ensure -ensure-file ensure.txt -root .
+    - ls
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
     bin/cache/dart-sdk/bin/dart --enable-asserts dev/bots/test.dart
