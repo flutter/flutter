@@ -15,26 +15,15 @@ class SliderDemo extends StatefulWidget {
   _SliderDemoState createState() => _SliderDemoState();
 }
 
-Path _triangle(double size, Offset thumbCenter, {bool invert = false}) {
+Path _downTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
   final double height = math.sqrt(3.0) / 2.0;
-  final double halfSide = size / 2.0;
   final double centerHeight = size * height / 3.0;
-  final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx - halfSide, thumbCenter.dy + sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
-  thumbPath.lineTo(thumbCenter.dx + halfSide, thumbCenter.dy + sign * centerHeight);
-  thumbPath.close();
-  return thumbPath;
-}
-
-Path _leftTriangle(double size, Offset thumbCenter, {bool invert = false}) {
-  final Path thumbPath = Path();
   final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx - halfSize, thumbCenter.dy);
-  thumbPath.lineTo(thumbCenter.dx + halfSize, thumbCenter.dy - size * sign);
-  thumbPath.lineTo(thumbCenter.dx + halfSize, thumbCenter.dy + size * sign);
+  thumbPath.moveTo(thumbCenter.dx - halfSize, thumbCenter.dy + sign * centerHeight);
+  thumbPath.lineTo(thumbCenter.dx, thumbCenter.dy - 2.0 * sign * centerHeight);
+  thumbPath.lineTo(thumbCenter.dx + halfSize, thumbCenter.dy + sign * centerHeight);
   thumbPath.close();
   return thumbPath;
 }
@@ -43,12 +32,16 @@ Path _rightTriangle(double size, Offset thumbCenter, {bool invert = false}) {
   final Path thumbPath = Path();
   final double halfSize = size / 2.0;
   final double sign = invert ? -1.0 : 1.0;
-  thumbPath.moveTo(thumbCenter.dx + halfSize, thumbCenter.dy);
-  thumbPath.lineTo(thumbCenter.dx - halfSize, thumbCenter.dy - size * sign);
-  thumbPath.lineTo(thumbCenter.dx - halfSize, thumbCenter.dy + size * sign);
+  thumbPath.moveTo(thumbCenter.dx + halfSize * sign, thumbCenter.dy);
+  thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy - size);
+  thumbPath.lineTo(thumbCenter.dx - halfSize * sign, thumbCenter.dy + size);
   thumbPath.close();
   return thumbPath;
 }
+
+Path _upTriangle(double size, Offset thumbCenter) => _downTriangle(size, thumbCenter, invert: true);
+
+Path _leftTriangle(double size, Offset thumbCenter) => _rightTriangle(size, thumbCenter, invert: true);
 
 class _CustomRangeThumbShape extends RangeSliderThumbShape {
   static const double _thumbSize = 4.0;
@@ -144,7 +137,7 @@ class _CustomThumbShape extends SliderComponentShape {
       end: sliderTheme.thumbColor,
     );
     final double size = _thumbSize * sizeTween.evaluate(enableAnimation);
-    final Path thumbPath = _triangle(size, thumbCenter);
+    final Path thumbPath = _downTriangle(size, thumbCenter);
     canvas.drawPath(thumbPath, Paint()..color = colorTween.evaluate(enableAnimation));
   }
 }
@@ -188,11 +181,7 @@ class _CustomValueIndicatorShape extends SliderComponentShape {
     );
     final double size = _indicatorSize * sizeTween.evaluate(enableAnimation);
     final Offset slideUpOffset = Offset(0.0, -slideUpTween.evaluate(activationAnimation));
-    final Path thumbPath = _triangle(
-      size,
-      thumbCenter + slideUpOffset,
-      invert: true,
-    );
+    final Path thumbPath = _upTriangle(size, thumbCenter + slideUpOffset);
     final Color paintColor = enableColor.evaluate(enableAnimation).withAlpha((255.0 * activationAnimation.value).round());
     canvas.drawPath(
       thumbPath,
@@ -364,7 +353,7 @@ class _RangeSliders extends StatefulWidget {
 class _RangeSlidersState extends State<_RangeSliders> {
   RangeValues _continuousValues = const RangeValues(25.0, 75.0);
   RangeValues _discreteValues = const RangeValues(40.0, 120.0);
-  RangeValues _discreteCustomValues = const RangeValues(25.0, 75.0);
+  RangeValues _discreteCustomValues = const RangeValues(40.0, 160.0);
 
   @override
   Widget build(BuildContext context) {
