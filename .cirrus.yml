@@ -25,10 +25,7 @@ task:
   setup_script:
     - ./dev/bots/cirrus_setup.sh
     - ls
-    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp
-    - ls
-    - cd tmp
-    - ls
+    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp/depot_tools
     - cd tmp/depot_tools
     - ls
     - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > ensure.txt
@@ -157,7 +154,7 @@ task:
       -o depot_tools.zip
     - Expand-Archive -LiteralPath depot_tools.zip -DestinationPath c:/depot_tools
     - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > c:/depot_tools
-    - c:/depot_tools/cipd.exe ensure -ensure-file c:/depot_tools/ensure.txt -root c:depot_tools
+    - c:/depot_tools/cipd.bat ensure -ensure-file c:/depot_tools/ensure.txt -root c:depot_tools
   test_all_script:
     - bin\cache\dart-sdk\bin\dart.exe --enable-asserts dev\bots\test.dart
   matrix:
@@ -284,11 +281,9 @@ task:
     - bin/flutter config --no-analytics
     - bin/flutter doctor -v
     - bin/flutter update-packages
-    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp
-    - ls
-    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > ./tmp/depot_tools/ensure.txt
+    - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp/depot_tools
     - cd tmp/depot_tools
-    - ls
+    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > ensure.txt
     - cat ensure.txt
     - ./cipd ensure -ensure-file ensure.txt -root .
   test_all_script: |
