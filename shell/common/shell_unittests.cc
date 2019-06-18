@@ -437,7 +437,7 @@ TEST(SettingsTest, FrameTimingSetsAndGetsProperly) {
 #if FLUTTER_RUNTIME_MODE == FLUTTER_RUNTIME_MODE_RELEASE
 TEST_F(ShellTest, ReportTimingsIsCalledSoonerInNonReleaseMode) {
 #else
-TEST_F(ShellTest, ReportTimingsIsCalledLaterInNonReleaseMode) {
+TEST_F(ShellTest, ReportTimingsIsCalledLaterInReleaseMode) {
 #endif
   fml::TimePoint start = fml::TimePoint::Now();
   auto settings = CreateSettingsForFixture();
