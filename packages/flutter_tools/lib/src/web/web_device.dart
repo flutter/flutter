@@ -28,7 +28,12 @@ class WebApplicationPackage extends ApplicationPackage {
 }
 
 class WebDevice extends Device {
-  WebDevice() : super('web');
+  WebDevice() : super(
+      'web',
+      category: Category.web,
+      platformType: PlatformType.web,
+      ephemeral: false,
+  );
 
   @override
   bool get supportsHotReload => true;
