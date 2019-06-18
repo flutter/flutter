@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.view.Surface;
+import android.view.SurfaceHolder;
 
 import java.nio.ByteBuffer;
 import java.util.HashSet;
@@ -116,18 +117,77 @@ public class FlutterJNI {
     mainLooper = Looper.getMainLooper();
   }
 
+  //------ Start Native Attach/Detach Support ----
+  /**
+   * Returns true if this instance of {@code FlutterJNI} is connected to Flutter's native
+   * engine via a Java Native Interface (JNI).
+   */
+  public boolean isAttached() {
+    return nativePlatformViewId != null;
+  }
+
+  /**
+   * Attaches this {@code FlutterJNI} instance to Flutter's native engine, which allows
+   * for communication between Android code and Flutter's platform agnostic engine.
+   * <p>
+   * This method must not be invoked if {@code FlutterJNI} is already attached to native.
+   */
+  @UiThread
+  public void attachToNative(boolean isBackgroundView) {
+    ensureRunningOnMainThread();
+    ensureNotAttachedToNative();
+    nativePlatformViewId = nativeAttach(this, isBackgroundView);
+  }
+
+  private native long nativeAttach(FlutterJNI flutterJNI, boolean isBackgroundView);
+
+  /**
+   * Detaches this {@code FlutterJNI} instance from Flutter's native engine, which precludes
+   * any further communication between Android code and Flutter's platform agnostic engine.
+   * <p>
+   * This method must not be invoked if {@code FlutterJNI} is not already attached to native.
+   * <p>
+   * Invoking this method will result in the release of all native-side resources that were
+   * setup during {@link #attachToNative(boolean)}, or accumulated thereafter.
+   * <p>
+   * It is permissable to re-attach this instance to native after detaching it from native.
+   */
+  @UiThread
+  public void detachFromNativeAndReleaseResources() {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeDestroy(nativePlatformViewId);
+    nativePlatformViewId = null;
+  }
+
+  private native void nativeDestroy(long nativePlatformViewId);
+
+  private void ensureNotAttachedToNative() {
+    if (nativePlatformViewId != null) {
+      throw new RuntimeException("Cannot execute operation because FlutterJNI is attached to native.");
+    }
+  }
+
+  private void ensureAttachedToNative() {
+    if (nativePlatformViewId == null) {
+      throw new RuntimeException("Cannot execute operation because FlutterJNI is not attached to native.");
+    }
+  }
+  //------ End Native Attach/Detach Support ----
+
+  //----- Start Render Surface Support -----
   /**
    * Sets the {@link FlutterRenderer.RenderSurface} delegate for the attached Flutter context.
-   *
+   * <p>
    * Flutter expects a user interface to exist on the platform side (Android), and that interface
    * is expected to offer some capabilities that Flutter depends upon. The {@link FlutterRenderer.RenderSurface}
    * interface represents those expectations.
-   *
+   * <p>
    * If an app includes a user interface that renders a Flutter UI then a {@link FlutterRenderer.RenderSurface}
    * should be set (this is the typical Flutter scenario). If no UI is being rendered, such as a
    * Flutter app that is running Dart code in the background, then no registration may be necessary.
-   *
-   * If no {@link FlutterRenderer.RenderSurface} is registered then related messages coming from
+   * <p>
+   * If no {@link FlutterRenderer.RenderSurface} is registered, then related messages coming from
    * Flutter will be dropped (ignored).
    */
   @UiThread
@@ -136,6 +196,163 @@ public class FlutterJNI {
     this.renderSurface = renderSurface;
   }
 
+  /**
+   * Adds a {@link OnFirstFrameRenderedListener}, which receives a callback when Flutter's
+   * engine notifies {@code FlutterJNI} that the first frame of a Flutter UI has been rendered
+   * to the {@link Surface} that was provided to Flutter.
+   */
+  @UiThread
+  public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
+    ensureRunningOnMainThread();
+    firstFrameListeners.add(listener);
+  }
+
+  /**
+   * Removes a {@link OnFirstFrameRenderedListener} that was added with
+   * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
+   */
+  @UiThread
+  public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
+    ensureRunningOnMainThread();
+    firstFrameListeners.remove(listener);
+  }
+
+  // Called by native to notify first Flutter frame rendered.
+  @SuppressWarnings("unused")
+  @UiThread
+  private void onFirstFrame() {
+    ensureRunningOnMainThread();
+    if (renderSurface != null) {
+      renderSurface.onFirstFrameRendered();
+    }
+    // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
+
+    for (OnFirstFrameRenderedListener listener : firstFrameListeners) {
+      listener.onFirstFrameRendered();
+    }
+  }
+
+  /**
+   * Call this method when a {@link Surface} has been created onto which you would like Flutter
+   * to paint.
+   * <p>
+   * See {@link android.view.SurfaceHolder.Callback#surfaceCreated(SurfaceHolder)} for an example
+   * of where this call might originate.
+   */
+  @UiThread
+  public void onSurfaceCreated(@NonNull Surface surface) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSurfaceCreated(nativePlatformViewId, surface);
+  }
+
+  private native void nativeSurfaceCreated(long nativePlatformViewId, Surface surface);
+
+  /**
+   * Call this method when the {@link Surface} changes that was previously registered with
+   * {@link #onSurfaceCreated(Surface)}.
+   * <p>
+   * See {@link android.view.SurfaceHolder.Callback#surfaceChanged(SurfaceHolder, int, int, int)}
+   * for an example of where this call might originate.
+   */
+  @UiThread
+  public void onSurfaceChanged(int width, int height) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSurfaceChanged(nativePlatformViewId, width, height);
+  }
+
+  private native void nativeSurfaceChanged(long nativePlatformViewId, int width, int height);
+
+  /**
+   * Call this method when the {@link Surface} is destroyed that was previously registered with
+   * {@link #onSurfaceCreated(Surface)}.
+   * <p>
+   * See {@link android.view.SurfaceHolder.Callback#surfaceDestroyed(SurfaceHolder)} for an example
+   * of where this call might originate.
+   */
+  @UiThread
+  public void onSurfaceDestroyed() {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSurfaceDestroyed(nativePlatformViewId);
+  }
+
+  private native void nativeSurfaceDestroyed(long nativePlatformViewId);
+
+  /**
+   * Call this method to notify Flutter of the current device viewport metrics that are
+   * applies to the Flutter UI that is being rendered.
+   * <p>
+   * This method should be invoked with initial values upon attaching to native. Then,
+   * it should be invoked any time those metrics change while {@code FlutterJNI} is
+   * attached to native.
+   */
+  @UiThread
+  public void setViewportMetrics(
+      float devicePixelRatio,
+      int physicalWidth,
+      int physicalHeight,
+      int physicalPaddingTop,
+      int physicalPaddingRight,
+      int physicalPaddingBottom,
+      int physicalPaddingLeft,
+      int physicalViewInsetTop,
+      int physicalViewInsetRight,
+      int physicalViewInsetBottom,
+      int physicalViewInsetLeft
+  ) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSetViewportMetrics(
+        nativePlatformViewId,
+        devicePixelRatio,
+        physicalWidth,
+        physicalHeight,
+        physicalPaddingTop,
+        physicalPaddingRight,
+        physicalPaddingBottom,
+        physicalPaddingLeft,
+        physicalViewInsetTop,
+        physicalViewInsetRight,
+        physicalViewInsetBottom,
+        physicalViewInsetLeft
+    );
+  }
+
+  private native void nativeSetViewportMetrics(
+      long nativePlatformViewId,
+      float devicePixelRatio,
+      int physicalWidth,
+      int physicalHeight,
+      int physicalPaddingTop,
+      int physicalPaddingRight,
+      int physicalPaddingBottom,
+      int physicalPaddingLeft,
+      int physicalViewInsetTop,
+      int physicalViewInsetRight,
+      int physicalViewInsetBottom,
+      int physicalViewInsetLeft
+  );
+  //----- End Render Surface Support -----
+
+  //------ Start Touch Interaction Support ---
+  /**
+   * Sends a packet of pointer data to Flutter's engine.
+   */
+  @UiThread
+  public void dispatchPointerDataPacket(ByteBuffer buffer, int position) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeDispatchPointerDataPacket(nativePlatformViewId, buffer, position);
+  }
+
+  private native void nativeDispatchPointerDataPacket(long nativePlatformViewId,
+                                                      ByteBuffer buffer,
+                                                      int position);
+  //------ End Touch Interaction Support ---
+
+  //------ Start Accessibility Support -----
   /**
    * Sets the {@link AccessibilityDelegate} for the attached Flutter context.
    *
@@ -186,24 +403,156 @@ public class FlutterJNI {
     // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
   }
 
-  // Called by native to notify first Flutter frame rendered.
-  @SuppressWarnings("unused")
-  @UiThread
-  private void onFirstFrame() {
-    ensureRunningOnMainThread();
-    if (renderSurface != null) {
-      renderSurface.onFirstFrameRendered();
-    }
-    // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
-
-    for (OnFirstFrameRenderedListener listener : firstFrameListeners) {
-      listener.onFirstFrameRendered();
-    }
+  /**
+   * Sends a semantics action to Flutter's engine, without any additional arguments.
+   */
+  public void dispatchSemanticsAction(int id, @NonNull AccessibilityBridge.Action action) {
+    dispatchSemanticsAction(id, action, null);
   }
 
   /**
+   * Sends a semantics action to Flutter's engine, with additional arguments.
+   */
+  public void dispatchSemanticsAction(int id, @NonNull AccessibilityBridge.Action action, @Nullable Object args) {
+    ensureAttachedToNative();
+
+    ByteBuffer encodedArgs = null;
+    int position = 0;
+    if (args != null) {
+      encodedArgs = StandardMessageCodec.INSTANCE.encodeMessage(args);
+      position = encodedArgs.position();
+    }
+    dispatchSemanticsAction(id, action.value, encodedArgs, position);
+  }
+
+  /**
+   * Sends a semantics action to Flutter's engine, given arguments that are already encoded for
+   * the engine.
+   * <p>
+   * To send a semantics action that has not already been encoded, see
+   * {@link #dispatchSemanticsAction(int, AccessibilityBridge.Action)} and
+   * {@link #dispatchSemanticsAction(int, AccessibilityBridge.Action, Object)}.
+   */
+  @UiThread
+  public void dispatchSemanticsAction(int id, int action, ByteBuffer args, int argsPosition) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeDispatchSemanticsAction(nativePlatformViewId, id, action, args, argsPosition);
+  }
+
+  private native void nativeDispatchSemanticsAction(
+      long nativePlatformViewId,
+      int id,
+      int action,
+      ByteBuffer args,
+      int argsPosition
+  );
+
+  /**
+   * Instructs Flutter to enable/disable its semantics tree, which is used by Flutter to support
+   * accessibility and related behaviors.
+   */
+  @UiThread
+  public void setSemanticsEnabled(boolean enabled) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSetSemanticsEnabled(nativePlatformViewId, enabled);
+  }
+
+  private native void nativeSetSemanticsEnabled(long nativePlatformViewId, boolean enabled);
+
+  // TODO(mattcarroll): figure out what flags are supported and add javadoc about when/why/where to use this.
+  @UiThread
+  public void setAccessibilityFeatures(int flags) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeSetAccessibilityFeatures(nativePlatformViewId, flags);
+  }
+
+  private native void nativeSetAccessibilityFeatures(long nativePlatformViewId, int flags);
+  //------ End Accessibility Support ----
+
+  //------ Start Texture Registration Support -----
+  /**
+   * Gives control of a {@link SurfaceTexture} to Flutter so that Flutter can display that
+   * texture within Flutter's UI.
+   */
+  @UiThread
+  public void registerTexture(long textureId, SurfaceTexture surfaceTexture) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeRegisterTexture(nativePlatformViewId, textureId, surfaceTexture);
+  }
+
+  private native void nativeRegisterTexture(long nativePlatformViewId, long textureId, SurfaceTexture surfaceTexture);
+
+  /**
+   * Call this method to inform Flutter that a texture previously registered with
+   * {@link #registerTexture(long, SurfaceTexture)} has a new frame available.
+   * <p>
+   * Invoking this method instructs Flutter to update its presentation of the given texture so that
+   * the new frame is displayed.
+   */
+  @UiThread
+  public void markTextureFrameAvailable(long textureId) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeMarkTextureFrameAvailable(nativePlatformViewId, textureId);
+  }
+
+  private native void nativeMarkTextureFrameAvailable(long nativePlatformViewId, long textureId);
+
+  /**
+   * Unregisters a texture that was registered with {@link #registerTexture(long, SurfaceTexture)}.
+   */
+  @UiThread
+  public void unregisterTexture(long textureId) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeUnregisterTexture(nativePlatformViewId, textureId);
+  }
+
+  private native void nativeUnregisterTexture(long nativePlatformViewId, long textureId);
+  //------ Start Texture Registration Support -----
+
+  //------ Start Dart Execution Support -------
+  /**
+   * Executes a Dart entrypoint.
+   * <p>
+   * This can only be done once per JNI attachment because a Dart isolate can only be
+   * entered once.
+   */
+  @UiThread
+  public void runBundleAndSnapshotFromLibrary(
+      @NonNull String[] prioritizedBundlePaths,
+      @Nullable String entrypointFunctionName,
+      @Nullable String pathToEntrypointFunction,
+      @NonNull AssetManager assetManager
+  ) {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    nativeRunBundleAndSnapshotFromLibrary(
+        nativePlatformViewId,
+        prioritizedBundlePaths,
+        entrypointFunctionName,
+        pathToEntrypointFunction,
+        assetManager
+    );
+  }
+
+  private native void nativeRunBundleAndSnapshotFromLibrary(
+      long nativePlatformViewId,
+      @NonNull String[] prioritizedBundlePaths,
+      @Nullable String entrypointFunctionName,
+      @Nullable String pathToEntrypointFunction,
+      @NonNull AssetManager manager
+  );
+  //------ End Dart Execution Support -------
+
+  //--------- Start Platform Message Support ------
+  /**
    * Sets the handler for all platform messages that come from the attached platform view to Java.
-   *
+   * <p>
    * Communication between a specific Flutter context (Dart) and the host platform (Java) is
    * accomplished by passing messages. Messages can be sent from Java to Dart with the corresponding
    * {@code FlutterJNI} methods:
@@ -211,14 +560,13 @@ public class FlutterJNI {
    *   <li>{@link #dispatchPlatformMessage(String, ByteBuffer, int, int)}</li>
    *   <li>{@link #dispatchEmptyPlatformMessage(String, int)}</li>
    * </ul>
-   *
+   * <p>
    * {@code FlutterJNI} is also the recipient of all platform messages sent from its attached
-   * Flutter context (AKA platform view). {@code FlutterJNI} does not know what to do with these
-   * messages, so a handler is exposed to allow these messages to be processed in whatever manner is
-   * desired:
-   *
+   * Flutter context. {@code FlutterJNI} does not know what to do with these messages, so a handler
+   * is exposed to allow these messages to be processed in whatever manner is desired:
+   * <p>
    * {@code setPlatformMessageHandler(PlatformMessageHandler)}
-   *
+   * <p>
    * If a message is received but no {@link PlatformMessageHandler} is registered, that message will
    * be dropped (ignored). Therefore, when using {@code FlutterJNI} to integrate a Flutter context
    * in an app, a {@link PlatformMessageHandler} must be registered for 2-way Java/Dart communication
@@ -249,254 +597,10 @@ public class FlutterJNI {
     // TODO(mattcarroll): log dropped messages when in debug mode (https://github.com/flutter/flutter/issues/25391)
   }
 
-  @UiThread
-  public void addEngineLifecycleListener(@NonNull EngineLifecycleListener engineLifecycleListener) {
-    ensureRunningOnMainThread();
-    engineLifecycleListeners.add(engineLifecycleListener);
-  }
-
-  @UiThread
-  public void removeEngineLifecycleListener(@NonNull EngineLifecycleListener engineLifecycleListener) {
-    ensureRunningOnMainThread();
-    engineLifecycleListeners.remove(engineLifecycleListener);
-  }
-
-  @UiThread
-  public void addOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
-    ensureRunningOnMainThread();
-    firstFrameListeners.add(listener);
-  }
-
-  @UiThread
-  public void removeOnFirstFrameRenderedListener(@NonNull OnFirstFrameRenderedListener listener) {
-    ensureRunningOnMainThread();
-    firstFrameListeners.remove(listener);
-  }
-
-  // TODO(mattcarroll): rename comments after refactor is done and their origin no longer matters (https://github.com/flutter/flutter/issues/25533)
-  //----- Start from FlutterView -----
-  @UiThread
-  public void onSurfaceCreated(@NonNull Surface surface) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeSurfaceCreated(nativePlatformViewId, surface);
-  }
-
-  private native void nativeSurfaceCreated(long nativePlatformViewId, Surface surface);
-
-  @UiThread
-  public void onSurfaceChanged(int width, int height) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeSurfaceChanged(nativePlatformViewId, width, height);
-  }
-
-  private native void nativeSurfaceChanged(long nativePlatformViewId, int width, int height);
-
-  @UiThread
-  public void onSurfaceDestroyed() {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeSurfaceDestroyed(nativePlatformViewId);
-  }
-
-  private native void nativeSurfaceDestroyed(long nativePlatformViewId);
-
-  @UiThread
-  public void setViewportMetrics(
-      float devicePixelRatio,
-      int physicalWidth,
-      int physicalHeight,
-      int physicalPaddingTop,
-      int physicalPaddingRight,
-      int physicalPaddingBottom,
-      int physicalPaddingLeft,
-      int physicalViewInsetTop,
-      int physicalViewInsetRight,
-      int physicalViewInsetBottom,
-      int physicalViewInsetLeft
-  ) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeSetViewportMetrics(
-        nativePlatformViewId,
-        devicePixelRatio,
-        physicalWidth,
-        physicalHeight,
-        physicalPaddingTop,
-        physicalPaddingRight,
-        physicalPaddingBottom,
-        physicalPaddingLeft,
-        physicalViewInsetTop,
-        physicalViewInsetRight,
-        physicalViewInsetBottom,
-        physicalViewInsetLeft
-    );
-  }
-
-  private native void nativeSetViewportMetrics(
-      long nativePlatformViewId,
-      float devicePixelRatio,
-      int physicalWidth,
-      int physicalHeight,
-      int physicalPaddingTop,
-      int physicalPaddingRight,
-      int physicalPaddingBottom,
-      int physicalPaddingLeft,
-      int physicalViewInsetTop,
-      int physicalViewInsetRight,
-      int physicalViewInsetBottom,
-      int physicalViewInsetLeft
-  );
-
-  @UiThread
-  public Bitmap getBitmap() {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    return nativeGetBitmap(nativePlatformViewId);
-  }
-
-  private native Bitmap nativeGetBitmap(long nativePlatformViewId);
-
-  @UiThread
-  public void dispatchPointerDataPacket(ByteBuffer buffer, int position) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeDispatchPointerDataPacket(nativePlatformViewId, buffer, position);
-  }
-
-  private native void nativeDispatchPointerDataPacket(long nativePlatformViewId,
-                                                      ByteBuffer buffer,
-                                                      int position);
-
-  public void dispatchSemanticsAction(int id, @NonNull AccessibilityBridge.Action action) {
-    dispatchSemanticsAction(id, action, null);
-  }
-
-  public void dispatchSemanticsAction(int id, @NonNull AccessibilityBridge.Action action, @Nullable Object args) {
-    ensureAttachedToNative();
-
-    ByteBuffer encodedArgs = null;
-    int position = 0;
-    if (args != null) {
-      encodedArgs = StandardMessageCodec.INSTANCE.encodeMessage(args);
-      position = encodedArgs.position();
-    }
-    dispatchSemanticsAction(id, action.value, encodedArgs, position);
-  }
-
-  @UiThread
-  public void dispatchSemanticsAction(int id, int action, ByteBuffer args, int argsPosition) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeDispatchSemanticsAction(nativePlatformViewId, id, action, args, argsPosition);
-  }
-
-  private native void nativeDispatchSemanticsAction(
-      long nativePlatformViewId,
-      int id,
-      int action,
-      ByteBuffer args,
-      int argsPosition
-  );
-
-  @UiThread
-  public void setSemanticsEnabled(boolean enabled) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeSetSemanticsEnabled(nativePlatformViewId, enabled);
-  }
-
-  private native void nativeSetSemanticsEnabled(long nativePlatformViewId, boolean enabled);
-
-  @UiThread
-  public void setAccessibilityFeatures(int flags) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeSetAccessibilityFeatures(nativePlatformViewId, flags);
-  }
-
-  private native void nativeSetAccessibilityFeatures(long nativePlatformViewId, int flags);
-
-  @UiThread
-  public void registerTexture(long textureId, SurfaceTexture surfaceTexture) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeRegisterTexture(nativePlatformViewId, textureId, surfaceTexture);
-  }
-
-  private native void nativeRegisterTexture(long nativePlatformViewId, long textureId, SurfaceTexture surfaceTexture);
-
-  @UiThread
-  public void markTextureFrameAvailable(long textureId) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeMarkTextureFrameAvailable(nativePlatformViewId, textureId);
-  }
-
-  private native void nativeMarkTextureFrameAvailable(long nativePlatformViewId, long textureId);
-
-  @UiThread
-  public void unregisterTexture(long textureId) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeUnregisterTexture(nativePlatformViewId, textureId);
-  }
-
-  private native void nativeUnregisterTexture(long nativePlatformViewId, long textureId);
-  //------- End from FlutterView -----
-
-  // TODO(mattcarroll): rename comments after refactor is done and their origin no longer matters (https://github.com/flutter/flutter/issues/25533)
-  //------ Start from FlutterNativeView ----
-  public boolean isAttached() {
-    return nativePlatformViewId != null;
-  }
-
-  @UiThread
-  public void attachToNative(boolean isBackgroundView) {
-    ensureRunningOnMainThread();
-    ensureNotAttachedToNative();
-    nativePlatformViewId = nativeAttach(this, isBackgroundView);
-  }
-
-  private native long nativeAttach(FlutterJNI flutterJNI, boolean isBackgroundView);
-
-  @UiThread
-  public void detachFromNativeAndReleaseResources() {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeDestroy(nativePlatformViewId);
-    nativePlatformViewId = null;
-  }
-
-  private native void nativeDestroy(long nativePlatformViewId);
-
-  @UiThread
-  public void runBundleAndSnapshotFromLibrary(
-      @NonNull String[] prioritizedBundlePaths,
-      @Nullable String entrypointFunctionName,
-      @Nullable String pathToEntrypointFunction,
-      @NonNull AssetManager assetManager
-  ) {
-    ensureRunningOnMainThread();
-    ensureAttachedToNative();
-    nativeRunBundleAndSnapshotFromLibrary(
-        nativePlatformViewId,
-        prioritizedBundlePaths,
-        entrypointFunctionName,
-        pathToEntrypointFunction,
-        assetManager
-    );
-  }
-
-  private native void nativeRunBundleAndSnapshotFromLibrary(
-      long nativePlatformViewId,
-      @NonNull String[] prioritizedBundlePaths,
-      @Nullable String entrypointFunctionName,
-      @Nullable String pathToEntrypointFunction,
-      @NonNull AssetManager manager
-  );
-
+  /**
+   * Sends an empty reply (identified by {@code responseId}) from Android to Flutter over the given
+   * {@code channel}.
+   */
   @UiThread
   public void dispatchEmptyPlatformMessage(String channel, int responseId) {
     ensureRunningOnMainThread();
@@ -514,6 +618,9 @@ public class FlutterJNI {
       int responseId
   );
 
+  /**
+   * Sends a reply {@code message} from Android to Flutter over the given {@code channel}.
+   */
   @UiThread
   public void dispatchPlatformMessage(String channel, ByteBuffer message, int position, int responseId) {
     ensureRunningOnMainThread();
@@ -539,6 +646,7 @@ public class FlutterJNI {
       int responseId
   );
 
+  // TODO(mattcarroll): differentiate between channel responses and platform responses.
   @UiThread
   public void invokePlatformMessageEmptyResponseCallback(int responseId) {
     ensureRunningOnMainThread();
@@ -555,6 +663,7 @@ public class FlutterJNI {
       int responseId
   );
 
+  // TODO(mattcarroll): differentiate between channel responses and platform responses.
   @UiThread
   public void invokePlatformMessageResponseCallback(int responseId, ByteBuffer message, int position) {
     ensureRunningOnMainThread();
@@ -577,10 +686,29 @@ public class FlutterJNI {
       ByteBuffer message,
       int position
   );
-  //------ End from FlutterNativeView ----
+  //------- End Platform Message Support ----
 
-  // TODO(mattcarroll): rename comments after refactor is done and their origin no longer matters (https://github.com/flutter/flutter/issues/25533)
-  //------ Start from Engine ---
+  //----- Start Engine Lifecycle Support ----
+  /**
+   * Adds the given {@code engineLifecycleListener} to be notified of Flutter engine lifecycle
+   * events, e.g., {@link EngineLifecycleListener#onPreEngineRestart()}.
+   */
+  @UiThread
+  public void addEngineLifecycleListener(@NonNull EngineLifecycleListener engineLifecycleListener) {
+    ensureRunningOnMainThread();
+    engineLifecycleListeners.add(engineLifecycleListener);
+  }
+
+  /**
+   * Removes the given {@code engineLifecycleListener}, which was previously added using
+   * {@link #addOnFirstFrameRenderedListener(OnFirstFrameRenderedListener)}.
+   */
+  @UiThread
+  public void removeEngineLifecycleListener(@NonNull EngineLifecycleListener engineLifecycleListener) {
+    ensureRunningOnMainThread();
+    engineLifecycleListeners.remove(engineLifecycleListener);
+  }
+
   // Called by native.
   @SuppressWarnings("unused")
   private void onPreEngineRestart() {
@@ -588,19 +716,16 @@ public class FlutterJNI {
       listener.onPreEngineRestart();
     }
   }
-  //------ End from Engine ---
+  //----- End Engine Lifecycle Support ----
 
-  private void ensureNotAttachedToNative() {
-    if (nativePlatformViewId != null) {
-      throw new RuntimeException("Cannot execute operation because FlutterJNI is attached to native.");
-    }
+  @UiThread
+  public Bitmap getBitmap() {
+    ensureRunningOnMainThread();
+    ensureAttachedToNative();
+    return nativeGetBitmap(nativePlatformViewId);
   }
 
-  private void ensureAttachedToNative() {
-    if (nativePlatformViewId == null) {
-      throw new RuntimeException("Cannot execute operation because FlutterJNI is not attached to native.");
-    }
-  }
+  private native Bitmap nativeGetBitmap(long nativePlatformViewId);
 
   private void ensureRunningOnMainThread() {
     if (Looper.myLooper() != mainLooper) {
