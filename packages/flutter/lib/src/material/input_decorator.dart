@@ -3536,7 +3536,8 @@ class InputDecorationTheme extends Diagnosticable {
 ///
 /// See also:
 ///
-///  * [TextField]
+///  * [TextField.textAlignVertical]
+///  * [InputDecorator.textAlignVertical]
 class TextAlignVertical {
   /// Construct TextAlignVertical from any given y value.
   const TextAlignVertical({
