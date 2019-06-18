@@ -24,10 +24,12 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - ./dev/bots/cirrus_setup.sh
+    - ls
     - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp
     - ls
-    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > tmp/depot_tools/ensure.txt
     - cd tmp/depot_tools
+    - ls
+    - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > ensure.txt
     - ls
     - cat ensure.txt
     - ./cipd ensure -ensure-file ensure.txt -root .
