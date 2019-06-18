@@ -149,7 +149,7 @@ subprojects {
 
   Future<void> getPackages() async {
     await inDirectory(Directory(rootPath), () async {
-      await flutter('pub', options: <String>["get"]);
+      await flutter('pub', options: <String>['get']);
     });
   }
 
