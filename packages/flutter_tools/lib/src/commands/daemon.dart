@@ -26,7 +26,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.4.2';
+const String protocolVersion = '0.5.0';
 
 /// Whether the tool started from the daemon, as opposed to the command line.
 bool get isRunningFromDaemon => _isRunningFromDaemon;
@@ -868,7 +868,7 @@ class AppInstance {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
   }
 
-  Future<void> stop() => runner.stop();
+  Future<void> stop() => runner.exit();
   Future<void> detach() => runner.detach();
 
   void closeLogger() {

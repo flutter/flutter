@@ -329,7 +329,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       }
       // State type is private, hence using dynamic.
       dynamic getInspectorState() => inspectorKey.currentState;
-      String paragraphText(RenderParagraph paragraph) => paragraph.text.text;
+      String paragraphText(RenderParagraph paragraph) {
+        final TextSpan textSpan = paragraph.text;
+        return textSpan.text;
+      }
 
       await tester.pumpWidget(
         Directionality(
@@ -927,7 +930,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
 
     test('ext.flutter.inspector.disposeGroup', () async {
       final Object a = Object();
@@ -1487,7 +1490,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
       expect(await service.testExtension('getSelectedWidget', <String, String>{'objectGroup': 'my-group'}), contains('createdByLocalProject'));
-    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked() || isBrowser); // Test requires --track-widget-creation flag.
 
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
@@ -1895,7 +1898,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(expectedChildLayerCount, equals(2));
       await expectLater(
         layer.toImage(renderObject.semanticBounds.inflate(50.0)),
-        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
+        matchesGoldenFile(
+          'inspector.repaint_boundary_margin.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -1906,7 +1912,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 0.5,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin_small.png'),
+        matchesGoldenFile(
+          'inspector.repaint_boundary_margin_small.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -1915,7 +1924,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 2.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin_large.png'),
+        matchesGoldenFile(
+          'inspector.repaint_boundary_margin_large.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -1931,7 +1943,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 300.0,
           height: 300.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary.png'),
+        matchesGoldenFile(
+          'inspector.repaint_boundary.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -1949,7 +1964,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
           margin: 50.0,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
+        matchesGoldenFile(
+          'inspector.repaint_boundary_margin.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -1970,7 +1988,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
+        matchesGoldenFile(
+          'inspector.repaint_boundary_debugPaint.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
       // Verify that taking a screenshot with debug paint on did not change
@@ -1981,7 +2002,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // hasn't changed the regular render of the widget.
       await expectLater(
         find.byType(RepaintBoundaryWithDebugPaint),
-        matchesGoldenFile('inspector.repaint_boundary.png'),
+        matchesGoldenFile(
+          'inspector.repaint_boundary.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -1995,7 +2019,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 100.0,
           height: 100.0,
         ),
-        matchesGoldenFile('inspector.container.png'),
+        matchesGoldenFile(
+          'inspector.container.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2006,7 +2033,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.container_debugPaint.png'),
+        matchesGoldenFile(
+          'inspector.container_debugPaint.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2027,7 +2057,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             height: 100.0,
             debugPaint: true,
           ),
-          matchesGoldenFile('inspector.container_debugPaint.png'),
+          matchesGoldenFile(
+            'inspector.container_debugPaint.png',
+            version: null,
+          ),
           skip: !isLinux,
         );
         expect(container.debugNeedsLayout, isFalse);
@@ -2040,7 +2073,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 50.0,
           height: 100.0,
         ),
-        matchesGoldenFile('inspector.container_small.png'),
+        matchesGoldenFile(
+          'inspector.container_small.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2051,7 +2087,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 400.0,
           maxPixelRatio: 3.0,
         ),
-        matchesGoldenFile('inspector.container_large.png'),
+        matchesGoldenFile(
+          'inspector.container_large.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2064,7 +2103,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.clipRect_debugPaint.png'),
+        matchesGoldenFile(
+          'inspector.clipRect_debugPaint.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2081,7 +2123,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This golden image is platform dependent due to the clip icon.
       await expectLater(
         clipRectScreenshot,
-        matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
+        matchesGoldenFile(
+          'inspector.clipRect_debugPaint_margin.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2121,7 +2166,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.padding_debugPaint.png'),
+        matchesGoldenFile(
+          'inspector.padding_debugPaint.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2133,7 +2181,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint.1.png'),
+        matchesGoldenFile(
+          'inspector.sizedBox_debugPaint.png',
+          version: 1,
+        ),
         skip: !isLinux,
       );
 
@@ -2146,10 +2197,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           margin: 50.0,
           debugPaint: true,
         ),
-        matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
+        matchesGoldenFile(
+          'inspector.sizedBox_debugPaint_margin.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Screenshot of composited transforms - only offsets', (WidgetTester tester) async {
       // Composited transforms are challenging to take screenshots of as the
@@ -2218,7 +2272,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile('inspector.composited_transform.only_offsets.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.only_offsets.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2228,13 +2285,19 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 5000.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.only_offsets_follower.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_small.1.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.only_offsets_small.png',
+          version: 1,
+        ),
         skip: !isLinux,
       );
 
@@ -2244,10 +2307,13 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.only_offsets_target.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Screenshot composited transforms - with rotations', (WidgetTester tester) async {
       final LayerLink link = LayerLink();
@@ -2317,7 +2383,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // screenshots of specific subtrees are reasonable.
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile('inspector.composited_transform.with_rotations.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.with_rotations.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2327,7 +2396,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_small.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.with_rotations_small.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2337,7 +2409,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_target.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.with_rotations_target.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2347,7 +2422,10 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png'),
+        matchesGoldenFile(
+          'inspector.composited_transform.with_rotations_follower.png',
+          version: null,
+        ),
         skip: !isLinux,
       );
 
@@ -2357,7 +2435,64 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(identical(key2.currentContext.findRenderObject(), box2), isTrue);
       expect(box1.localToGlobal(Offset.zero), equals(position1));
       expect(box2.localToGlobal(Offset.zero), equals(position2));
-    });
+    }, skip: isBrowser);
+
+    testWidgets('getChildrenDetailsSubtree', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Hello, World',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Hello, World'),
+            ),
+            body: const Center(
+              child: Text('Hello, World!'),
+            ),
+          ),
+        ),
+      );
+
+      // Figure out the pubRootDirectory
+      final Map<String, Object> jsonObject = await service.testExtension(
+          'getSelectedWidget',
+          <String, String>{'arg': null, 'objectGroup': 'my-group'},
+      );
+      final Map<String, Object> creationLocation =
+      jsonObject['creationLocation'];
+      expect(creationLocation, isNotNull);
+      final String file = creationLocation['file'];
+      expect(file, endsWith('widget_inspector_test.dart'));
+      final List<String> segments = Uri.parse(file).pathSegments;
+      // Strip a couple subdirectories away to generate a plausible pub rootdirectory.
+      final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
+      service.setPubRootDirectories(<String>[pubRootTest]);
+
+      final String summary = service.getRootWidgetSummaryTree('foo1');
+      final List<dynamic> childrenOfRoot = json.decode(summary)['children'];
+      final List<dynamic> childrenOfMaterialApp = childrenOfRoot.first['children'];
+      final Map<String, Object> scaffold = childrenOfMaterialApp.first;
+      expect(scaffold['description'], 'Scaffold');
+      final String objectId = scaffold['objectId'];
+      final String details = service.getDetailsSubtree(objectId, 'foo2');
+      final List<dynamic> detailedChildren = json.decode(details)['children'];
+
+      final List<Map<String, Object>> appBars = <Map<String, Object>>[];
+      void visitChildren(List<dynamic> children) {
+        for (Map<String, Object> child in children) {
+          if (child['description'] == 'AppBar') {
+            appBars.add(child);
+          }
+          if (child.containsKey('children')) {
+            visitChildren(child['children']);
+          }
+        }
+      }
+      visitChildren(detailedChildren);
+      expect(appBars.single.containsKey('children'), isFalse);
+    }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
   }
 }
 

@@ -20,7 +20,7 @@ import 'ios/plist_utils.dart' as plist;
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
 import 'template.dart';
-import 'web/web_device.dart';
+import 'web/workflow.dart';
 
 /// Represents the contents of a Flutter project at the specified [directory].
 ///
@@ -188,7 +188,7 @@ class FlutterProject {
     if (flutterDesktopEnabled && macos.existsSync()) {
       await macos.ensureReadyForPlatformSpecificTooling();
     }
-    if (flutterWebEnabled) {
+    if (flutterWebEnabled && web.existsSync()) {
       await web.ensureReadyForPlatformSpecificTooling();
     }
     await injectPlugins(this, checkProjects: checkProjects);
@@ -580,26 +580,16 @@ class WebProject {
 
   /// Whether this flutter project has a web sub-project.
   bool existsSync() {
-    return parent.directory.childDirectory('web').existsSync();
+    return parent.directory.childDirectory('web').existsSync()
+      && indexFile.existsSync();
   }
 
-  Future<void> ensureReadyForPlatformSpecificTooling() async {
-    /// Generate index.html in build/web. Eventually we could support
-    /// a custom html under the web sub directory.
-    final Directory outputDir = fs.directory(getWebBuildDirectory());
-    if (!outputDir.existsSync()) {
-      outputDir.createSync(recursive: true);
-    }
-    final Template template = Template.fromName('web/index.html.tmpl');
-    template.render(
-      outputDir,
-      <String, dynamic>{
-        'appName': parent.manifest.appName,
-      },
-      printStatusWhenWriting: false,
-      overwriteExisting: true,
-    );
-  }
+  /// The html file used to host the flutter web application.
+  File get indexFile => parent.directory
+      .childDirectory('web')
+      .childFile('index.html');
+
+  Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
 /// Deletes [directory] with all content.

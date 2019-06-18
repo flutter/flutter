@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // This whole test suite needs triage.
 import 'dart:async';
 import 'dart:math' as math;
 import 'dart:ui' as ui show window;
@@ -385,7 +386,7 @@ void main() {
     expect(textField.cursorRadius, const Radius.circular(3.0));
   });
 
-  testWidgets('cursor android golden', (WidgetTester tester) async {
+  testWidgets('Material cursor android golden', (WidgetTester tester) async {
     final Widget widget = overlay(
       child: const RepaintBoundary(
         key: ValueKey<int>(1),
@@ -407,11 +408,14 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.0.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.material.0.png',
+        version: 0,
+      ),
     );
   }, skip: !isLinux);
 
-  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+  testWidgets('Material cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final Widget widget = overlay(
@@ -436,7 +440,10 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.0.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.material.1.png',
+        version: 0,
+      ),
     );
   }, skip: !isLinux);
 
@@ -487,10 +494,13 @@ void main() {
     await expectLater(
       // The toolbar exists in the Overlay above the MaterialApp.
       find.byType(Overlay),
-      matchesGoldenFile('text_field_opacity_test.0.2.png'),
+      matchesGoldenFile(
+        'text_field_opacity_test.0.png',
+        version: 2,
+      ),
       skip: !isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -852,6 +862,55 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('PASTE'), findsNothing);
     expect(find.text('CUT'), findsNothing);
+  });
+
+  testWidgets('text field build empty tool bar when no options available ios', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(platform: TargetPlatform.iOS),
+          home: const Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
+  });
+
+  testWidgets('text field build empty tool bar when no options available android', (WidgetTester tester) async {
+    await tester.pumpWidget(
+        const MaterialApp(
+          home: Material(
+            child: TextField(
+              readOnly: true,
+            ),
+          ),
+        )
+    );
+
+    await tester.tap(find.byType(TextField));
+    await tester.pump(const Duration(milliseconds: 50));
+
+    await tester.tap(find.byType(TextField));
+    // Wait for context menu to be built.
+    await tester.pumpAndSettle();
+    final RenderBox container = tester.renderObject(find.descendant(
+      of: find.byType(FadeTransition),
+      matching: find.byType(Container),
+    ));
+    expect(container.size, Size.zero);
   });
 
   testWidgets('Sawping controllers should update selection', (WidgetTester tester) async {
@@ -2586,7 +2645,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -5221,6 +5280,70 @@ void main() {
   );
 
   testWidgets(
+    'double double tap just shows the selection menu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: '',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Double tap on the same location shows the selection menu.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+
+      // Double tap again keeps the selection menu visible.
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'double long press just shows the selection menu',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: '',
+      );
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: TextField(
+                controller: controller,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      // Long press shows the selection menu.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+
+      // Long press again keeps the selection menu visible.
+      await tester.longPressAt(textOffsetToPosition(tester, 0));
+      await tester.pump();
+      expect(find.text('PASTE'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
     'double tap hold selects word (iOS)',
     (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController(
@@ -6580,5 +6703,35 @@ void main() {
     // Tap the handle again to hide the toolbar.
     await tester.tapAt(handlePos, pointer: 7);
     expect(editableText.selectionOverlay.toolbarIsVisible, isFalse);
+  });
+
+  testWidgets('when TextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(MaterialApp(
+      theme: ThemeData(),
+      home: Scaffold(
+        body: Center(
+          child: ListView(
+            controller: scrollController,
+            children: <Widget>[
+              Container(height: 579), // Push field almost off screen.
+              TextField(controller: controller),
+              Container(height: 1000),
+            ],
+          ),
+        ),
+      ),
+    ));
+
+    // Tap the TextField to put the cursor into it and bring it into view.
+    expect(scrollController.offset, 0.0);
+    await tester.tap(find.byType(TextField));
+    await tester.pumpAndSettle();
+
+    // The ListView has scrolled to keep the TextField and cursor handle
+    // visible.
+    expect(scrollController.offset, 44.0);
   });
 }

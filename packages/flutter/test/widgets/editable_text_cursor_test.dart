@@ -90,7 +90,10 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.0.3.png'),
+      matchesGoldenFile(
+        'editable_text_test.0.png',
+        version: 3,
+      ),
     );
   }, skip: !isLinux);
 
@@ -141,7 +144,10 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.1.3.png'),
+      matchesGoldenFile(
+        'editable_text_test.1.png',
+        version: 3,
+      ),
     );
   }, skip: !isLinux);
 
@@ -445,7 +451,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(controller.selection.baseOffset, 10);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Updating the floating cursor correctly moves the cursor', (WidgetTester tester) async {
     const String text = 'hello world this is fun and cool and awesome!';
@@ -501,7 +507,7 @@ void main() {
     await tester.pumpAndSettle();
     // The cursor has been set.
     expect(controller.selection.baseOffset, 10);
-  });
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/pull/30475.
   testWidgets('Trying to select with the floating cursor does not crash', (WidgetTester tester) async {
@@ -567,7 +573,7 @@ void main() {
       offset: const Offset(-250, 20)));
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
-  });
+  }, skip: isBrowser);
 
   testWidgets('autofocus sets cursor to the end of text', (WidgetTester tester) async {
     const String text = 'hello world';
@@ -599,7 +605,7 @@ void main() {
     expect(focusNode.hasFocus, true);
     expect(controller.selection.isCollapsed, true);
     expect(controller.selection.baseOffset, text.length);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Floating cursor is painted on iOS', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
@@ -687,7 +693,7 @@ void main() {
     editableTextState.updateFloatingCursor(RawFloatingCursorPoint(state: FloatingCursorDragState.End));
     await tester.pumpAndSettle();
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, skip: isBrowser);
 
   testWidgets('cursor layout iOS', (WidgetTester tester) async {
     final GlobalKey<EditableTextState> editableTextKey = GlobalKey<EditableTextState>();
@@ -747,7 +753,10 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('editable_text_test.2.0.png'),
+      matchesGoldenFile(
+        'editable_text_test.2.png',
+        version: 0,
+      ),
     );
     debugDefaultTargetPlatformOverride = null;
   }, skip: !isLinux);

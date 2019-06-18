@@ -293,13 +293,18 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
   => _CoversSameAreaAs(expectedPath, areaToCompare: areaToCompare, sampleSize: sampleSize);
 
 /// Asserts that a [Finder], [Future<ui.Image>], or [ui.Image] matches the
-/// golden image file identified by [key].
+/// golden image file identified by [key], with an optional [version] number.
 ///
 /// For the case of a [Finder], the [Finder] must match exactly one widget and
 /// the rendered image of the first [RepaintBoundary] ancestor of the widget is
 /// treated as the image for the widget.
 ///
 /// [key] may be either a [Uri] or a [String] representation of a URI.
+///
+/// [version] is a number that can be used to differentiate historical golden
+/// files. This parameter is optional. Version numbers are used in golden file
+/// tests for package:flutter. You can learn more about these tests [here]
+/// (https://github.com/flutter/flutter/wiki/Writing-a-golden-file-test-for-package:flutter).
 ///
 /// This is an asynchronous matcher, meaning that callers should use
 /// [expectLater] when using this matcher and await the future returned by
@@ -323,11 +328,11 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///    verify that two different code paths create identical images.
 ///  * [flutter_test] for a discussion of test configurations, whereby callers
 ///    may swap out the backend for this matcher.
-AsyncMatcher matchesGoldenFile(dynamic key) {
+AsyncMatcher matchesGoldenFile(dynamic key, {int version}) {
   if (key is Uri) {
-    return _MatchesGoldenFile(key);
+    return _MatchesGoldenFile(key, version);
   } else if (key is String) {
-    return _MatchesGoldenFile.forStringPath(key);
+    return _MatchesGoldenFile.forStringPath(key, version);
   }
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
@@ -1646,28 +1651,23 @@ class _MatchesReferenceImage extends AsyncMatcher {
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData()
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
-      if (bytes == null) {
-        return 'Failed to generate an image from engine within the 10,000ms timeout.';
-      }
+      final ByteData bytes = await image.toByteData();
+      if (bytes == null)
+        return 'could not be encoded.';
 
-      final ByteData referenceBytes = await referenceImage.toByteData()
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
-      if (referenceBytes == null) {
-        return 'Failed to generate an image from engine within the 10,000ms timeout.';
-      }
+      final ByteData referenceBytes = await referenceImage.toByteData();
+      if (referenceBytes == null)
+        return 'could not have its reference image encoded.';
 
-      if (referenceImage.height != image.height || referenceImage.width != image.width) {
+      if (referenceImage.height != image.height || referenceImage.width != image.width)
         return 'does not match as width or height do not match. $image != $referenceImage';
-      }
 
       final int countDifferentPixels = _countDifferentPixels(
         Uint8List.view(bytes.buffer),
         Uint8List.view(referenceBytes.buffer),
       );
       return countDifferentPixels == 0 ? null : 'does not match on $countDifferentPixels pixels';
-    }, additionalTime: const Duration(seconds: 21));
+    }, additionalTime: const Duration(minutes: 1));
   }
 
   @override
@@ -1677,11 +1677,12 @@ class _MatchesReferenceImage extends AsyncMatcher {
 }
 
 class _MatchesGoldenFile extends AsyncMatcher {
-  const _MatchesGoldenFile(this.key);
+  const _MatchesGoldenFile(this.key, this.version);
 
-  _MatchesGoldenFile.forStringPath(String path) : key = Uri.parse(path);
+  _MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
 
   final Uri key;
+  final int version;
 
   @override
   Future<String> matchAsync(dynamic item) async {
@@ -1701,29 +1702,42 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
+    final Uri testNameUri = _getTestNameUri(key, version);
+
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png)
-        .timeout(const Duration(seconds: 10), onTimeout: () => null);
+      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
       if (bytes == null)
-        return 'Failed to generate screenshot from engine within the 10,000ms timeout.';
+        return 'could not encode screenshot.';
       if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(key, bytes.buffer.asUint8List());
+        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
         return null;
       }
       try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), key);
+        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
         return success ? null : 'does not match';
       } on TestFailure catch (ex) {
         return ex.message;
       }
-    }, additionalTime: const Duration(seconds: 11));
+    }, additionalTime: const Duration(minutes: 1));
   }
 
   @override
   Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "$key"');
+      description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
+
+  Uri _getTestNameUri(Uri key, int version) {
+    return version == null ? key : Uri.parse(
+      key
+        .toString()
+        .splitMapJoin(
+          RegExp(r'.png'),
+          onMatch: (Match m) => '${'.' + version.toString() + m.group(0)}',
+          onNonMatch: (String n) => '$n'
+        )
+    );
+  }
 }
 
 class _MatchesSemanticsData extends Matcher {

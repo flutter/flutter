@@ -46,6 +46,8 @@ def pubspec_supports_macos(file)
 end
 
 target 'Runner' do
+  use_frameworks!
+
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.
   ephemeral_dir = File.join('Flutter', 'ephemeral')
@@ -77,3 +79,6 @@ target 'Runner' do
     end
   }
 end
+
+# Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
+install! 'cocoapods', :disable_input_output_paths => true

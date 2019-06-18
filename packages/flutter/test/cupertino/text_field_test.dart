@@ -350,7 +350,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('cursor android golden', (WidgetTester tester) async {
+  testWidgets('Cupertino cursor android golden', (WidgetTester tester) async {
     final Widget widget = CupertinoApp(
       home: Center(
         child: RepaintBoundary(
@@ -373,11 +373,14 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.0.png',
+        version: 2,
+      ),
     );
   }, skip: !isLinux);
 
-  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+  testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final Widget widget = CupertinoApp(
@@ -403,7 +406,10 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.1.png',
+        version: 2,
+      ),
     );
   }, skip: !isLinux);
 
@@ -2626,6 +2632,34 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
+  testWidgets('when CupertinoTextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(CupertinoApp(
+      theme: const CupertinoThemeData(),
+      home: Center(
+        child: ListView(
+          controller: scrollController,
+          children: <Widget>[
+            Container(height: 585), // Push field almost off screen.
+            CupertinoTextField(controller: controller),
+            Container(height: 1000),
+          ],
+        ),
+      ),
+    ));
+
+    // Tap the TextField to put the cursor into it and bring it into view.
+    expect(scrollController.offset, 0.0);
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pumpAndSettle();
+
+    // The ListView has scrolled to keep the TextField and cursor handle
+    // visible.
+    expect(scrollController.offset, 26.0);
+  });
+
   testWidgets('disabled state golden', (WidgetTester tester) async {
     await tester.pumpWidget(
       CupertinoApp(
@@ -2647,7 +2681,10 @@ void main() {
 
     await expectLater(
       find.byType(CupertinoTextField),
-      matchesGoldenFile('text_field_test.disabled.0.png'),
+      matchesGoldenFile(
+        'text_field_test.disabled.png',
+        version: 0,
+      ),
       skip: !isLinux,
     );
   });

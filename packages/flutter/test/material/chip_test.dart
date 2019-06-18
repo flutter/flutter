@@ -356,7 +356,7 @@ void main() {
     );
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
     expect(tester.getSize(find.byType(Chip)), const Size(800.0, 48.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Chip elements are ordered horizontally for locale', (WidgetTester tester) async {
     final UniqueKey iconKey = UniqueKey();
@@ -477,7 +477,7 @@ void main() {
     expect(tester.getSize(find.byType(Chip).first).width, anyOf(318.0, 319.0));
     expect(tester.getSize(find.byType(Chip).first).height, equals(50.0));
     expect(tester.getSize(find.byType(Chip).last), anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Labels can be non-text widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
@@ -511,7 +511,7 @@ void main() {
       anyOf(const Size(132.0, 48.0), const Size(131.0, 48.0)),
     );
     expect(tester.getSize(find.byType(Chip).last), const Size(58.0, 48.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Avatars can be non-circle avatar widgets', (WidgetTester tester) async {
     final Key keyA = GlobalKey();
@@ -735,7 +735,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
     expect(find.byKey(avatarKey), findsNothing);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Delete button drawer works as expected on RawChip', (WidgetTester tester) async {
     final UniqueKey labelKey = UniqueKey();
@@ -851,7 +851,7 @@ void main() {
     expect(tester.getSize(find.byType(RawChip)), equals(const Size(80.0, 48.0)));
     expect(tester.getTopLeft(find.byKey(labelKey)), equals(const Offset(12.0, 17.0)));
     expect(find.byKey(deleteButtonKey), findsNothing);
-  });
+  }, skip: isBrowser);
 
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
@@ -934,7 +934,7 @@ void main() {
     expect(getSelectProgress(tester), equals(0.0));
     expect(getAvatarDrawerProgress(tester), equals(1.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Selection without avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
@@ -1010,7 +1010,7 @@ void main() {
     expect(getSelectProgress(tester), equals(0.0));
     expect(getAvatarDrawerProgress(tester), equals(0.0));
     expect(getDeleteDrawerProgress(tester), equals(0.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Activation works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
@@ -1135,7 +1135,7 @@ void main() {
     );
 
     expect(tester.getSize(find.byKey(key2)), const Size(80.0, 32.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Chip uses the right theme colors for the right components', (WidgetTester tester) async {
     final ThemeData themeData = ThemeData(
@@ -1721,7 +1721,7 @@ void main() {
     ], excludes: <Offset>[
       const Offset(4, 4),
     ]));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Chips should use InkWell instead of InkResponse.', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/28646

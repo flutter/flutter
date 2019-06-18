@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/desktop.dart';
-import 'package:flutter_tools/src/web/web_device.dart';
+import 'package:flutter_tools/src/web/workflow.dart';
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher;
 

@@ -129,7 +129,7 @@ void main() {
         equals('TextInputType.text'));
     expect(tester.testTextInput.setClientArgs['inputAction'],
         equals('TextInputAction.done'));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "unspecified" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -161,7 +161,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "go" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -185,7 +185,7 @@ void main() {
       action: TextInputAction.send,
       serializedActionName: 'TextInputAction.send',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "next" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -193,7 +193,7 @@ void main() {
       action: TextInputAction.next,
       serializedActionName: 'TextInputAction.next',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "previous" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -201,7 +201,7 @@ void main() {
       action: TextInputAction.previous,
       serializedActionName: 'TextInputAction.previous',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "continue" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -209,7 +209,7 @@ void main() {
       action: TextInputAction.continueAction,
       serializedActionName: 'TextInputAction.continueAction',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "join" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -217,7 +217,7 @@ void main() {
       action: TextInputAction.join,
       serializedActionName: 'TextInputAction.join',
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Keyboard is configured for "route" action when explicitly requested', (WidgetTester tester) async {
     await _desiredKeyboardActionIsRequested(
@@ -1170,7 +1170,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('can extend selection with a11y means - character', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1271,7 +1271,7 @@ void main() {
     expect(controller.selection.extentOffset, 2);
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('can extend selection with a11y means - word', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1373,7 +1373,7 @@ void main() {
     expect(controller.selection.extentOffset, 9);
 
     semantics.dispose();
-  });
+  }, skip: isBrowser);
 
   testWidgets('password fields have correct semantics', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
@@ -1870,8 +1870,9 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
     expect(renderEditable.text.children.length, 3);
-    expect(renderEditable.text.children[1].text, 'composing');
-    expect(renderEditable.text.children[1].style.decoration, TextDecoration.underline);
+    final TextSpan textSpan = renderEditable.text.children[1];
+    expect(textSpan.text, 'composing');
+    expect(textSpan.style.decoration, TextDecoration.underline);
 
     focusNode.unfocus();
     await tester.pump();
@@ -2045,7 +2046,7 @@ void main() {
     // at all. Again, both handles should be invisible.
     scrollable.controller.jumpTo(0);
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
-  });
+  }, skip: isBrowser);
 
   testWidgets('text selection handle visibility RTL', (WidgetTester tester) async {
     // Text with two separate words to select.
@@ -2102,7 +2103,7 @@ void main() {
     expect(state.selectionOverlay.handlesAreVisible, isTrue);
     expect(controller.selection.base.offset, 0);
     expect(controller.selection.extent.offset, 5);
-  });
+  }, skip: isBrowser);
 
   // Regression test for https://github.com/flutter/flutter/issues/31287
   testWidgets('iOS text selection handle visibility', (WidgetTester tester) async {
@@ -2272,7 +2273,7 @@ void main() {
     await verifyVisibility(HandlePositionInViewport.rightEdge, false, HandlePositionInViewport.rightEdge, false);
 
     debugDefaultTargetPlatformOverride = null;
-  });
+  }, skip: isBrowser);
 }
 
 class MockTextSelectionControls extends Mock implements TextSelectionControls {
