@@ -18,8 +18,6 @@ const String _kRepositoryRoot = '$_kFlutterRoot/bin/cache/pkg/goldens';
 const String _kVersionFile = '$_kFlutterRoot/bin/internal/goldens.version';
 const String _kGoldensVersion = '123456abcdef';
 
-// TODO(Piinks): Write tests for SkiaGold path, update GoldClient path if necessary
-
 void main() {
   MemoryFileSystem fs;
   FakePlatform platform;
@@ -132,6 +130,18 @@ void main() {
         goldenFile.writeAsBytesSync(<int>[4, 5, 6], flush: true);
         await comparator.update(Uri.parse('test.png'), Uint8List.fromList(<int>[1, 2, 3]));
         expect(goldenFile.readAsBytesSync(), <int>[1, 2, 3]);
+      });
+    });
+
+    group('SkiaGold Client', () {
+      SkiaGoldClient skiaGoldClient = SkiaGoldClient();
+      platform = FakePlatform(environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot});
+      process = MockProcessManager();
+      group('auth', () {
+        test('Returns false when authorization unavailable.', () async {
+          
+        });
+
       });
     });
   });
