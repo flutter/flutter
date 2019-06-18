@@ -27,6 +27,8 @@ task:
     - ls
     - git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git ./tmp
     - ls
+    - cd tmp
+    - ls
     - cd tmp/depot_tools
     - ls
     - echo '# Ensure File\n$ServiceURL https://chrom-infra-packages.appspot.com\n\n#Skia Gold Client goldctl\nskia/tools/goldctl/${platform} latest' > ensure.txt
@@ -75,7 +77,6 @@ task:
         DEPOT_TOOLS: "tmp/depot_tools"
         GOLDCTL: "$DEPOT_TOOLS/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-        SKIA_GOLD_INSTANCE: ENCRYPTED[b7fa82a8d5e452508d7b193b6be254da8e1a57c4aaab641b7ef4ee137bcc11ad6f100a0d5448d4e5aa4698b69599b00a]
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -167,7 +168,6 @@ task:
         PATH: "c:/depot_tools;c:/MinGit/cmd;$PATH"
         DEPOT_TOOLS_WIN_TOOLCHAIN: 0
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-        SKIA_GOLD_INSTANCE: ENCRYPTED[b7fa82a8d5e452508d7b193b6be254da8e1a57c4aaab641b7ef4ee137bcc11ad6f100a0d5448d4e5aa4698b69599b00a]
     - name: tool_tests-windows
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
@@ -240,7 +240,6 @@ task:
         DEPOT_TOOLS: "tmp/depot_tools"
         GOLDCTL: "$DEPOT_TOOLS/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-        SKIA_GOLD_INSTANCE: ENCRYPTED[b7fa82a8d5e452508d7b193b6be254da8e1a57c4aaab641b7ef4ee137bcc11ad6f100a0d5448d4e5aa4698b69599b00a]
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
     - name: tool_tests-macos

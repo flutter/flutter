@@ -24,7 +24,6 @@ import 'package:flutter_test/flutter_test.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
-const String _kSkiaGoldInstance = 'SKIA_GOLD_INSTANCE';
 
 /// A class that represents the Skia Gold client for golden file testing.
 class SkiaGoldClient {
@@ -71,11 +70,6 @@ class SkiaGoldClient {
   ///
   /// Uses the [platform] [environment] in this iteration.
   String get _serviceAccount => platform.environment[_kServiceAccountKey];
-
-  /// The name of the Skia Gold Flutter instance.
-  ///
-  /// Uses the [platform] [environment] in this iteration.
-  String get _skiaGoldInstance => platform.environment[_kSkiaGoldInstance];
 
   /// Prepares the local work space for golden file testing and initializes the
   /// goldctl authorization for executing tests.
@@ -130,7 +124,7 @@ class SkiaGoldClient {
 
       final List<String> imgtestInitArguments = <String>[
         'imgtest', 'init',
-        '--instance', _skiaGoldInstance,
+        '--instance', 'flutter',
         '--work-dir', _workDirectory
           .childDirectory('temp')
           .path,
@@ -221,21 +215,9 @@ class SkiaGoldClient {
   }
 
   String _getKeysJSON() {
-     String platform;
-    if (isLinux) {
-      platform = 'Linux';
-    } else if (isMacOS) {
-      platform = 'MacOS';
-    } else if (isWindows) {
-      platform = 'Windows';
-    } else if (isBrowser) {
-      platform = 'Web';
-    } else {
-      platform = 'Other';
-    }
     return convert.json.encode(
     <String, dynamic>{
-    'Platform' : platform,
+    'Platform' : platform.operatingSystem,
     });
   }
 }
