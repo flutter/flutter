@@ -240,8 +240,6 @@ task:
         DEPOT_TOOLS: "tmp/depot_tools"
         GOLDCTL: "$DEPOT_TOOLS/goldctl"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
-      test_script:
-        - dart --enable-asserts ./dev/bots/test.dart
     - name: tool_tests-macos
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
