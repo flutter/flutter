@@ -17,6 +17,7 @@
 #include "flutter/shell/platform/embedder/embedder.h"
 #include "flutter/shell/platform/glfw/key_event_handler.h"
 #include "flutter/shell/platform/glfw/keyboard_hook_handler.h"
+#include "flutter/shell/platform/glfw/platform_handler.h"
 #include "flutter/shell/platform/glfw/text_input_plugin.h"
 
 // For compatibility with GTK-based plugins, special message loop setup is
@@ -74,6 +75,9 @@ struct FlutterDesktopWindowControllerState {
   // Handlers for keyboard events from GLFW.
   std::vector<std::unique_ptr<flutter::KeyboardHookHandler>>
       keyboard_hook_handlers;
+
+  // Handler for the flutter/platform channel.
+  std::unique_ptr<flutter::PlatformHandler> platform_handler;
 
   // Whether or not the pointer has been added (or if tracking is enabled, has
   // been added since it was last removed).
@@ -606,6 +610,8 @@ FlutterDesktopWindowControllerRef FlutterDesktopCreateWindow(
       std::make_unique<flutter::KeyEventHandler>(internal_plugin_messenger));
   state->keyboard_hook_handlers.push_back(
       std::make_unique<flutter::TextInputPlugin>(internal_plugin_messenger));
+  state->platform_handler = std::make_unique<flutter::PlatformHandler>(
+      internal_plugin_messenger, state->window.get());
 
   // Trigger an initial size callback to send size information to Flutter.
   state->monitor_screen_coordinates_per_inch = GetScreenCoordinatesPerInch();

@@ -36,6 +36,8 @@ source_set("flutter_glfw") {
     "key_event_handler.cc",
     "key_event_handler.h",
     "keyboard_hook_handler.h",
+    "platform_handler.cc",
+    "platform_handler.h",
     "text_input_plugin.cc",
     "text_input_plugin.h",
   ]
