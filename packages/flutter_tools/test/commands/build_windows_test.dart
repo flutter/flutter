@@ -87,7 +87,6 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
@@ -105,7 +104,6 @@ void main() {
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',

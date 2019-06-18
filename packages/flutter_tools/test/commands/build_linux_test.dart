@@ -63,7 +63,6 @@ void main() {
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
@@ -79,7 +78,6 @@ void main() {
     fs.file('linux/build.sh').createSync(recursive: true);
     fs.file('pubspec.yaml').createSync();
     fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       'make',

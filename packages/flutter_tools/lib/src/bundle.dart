@@ -19,7 +19,7 @@ import 'devfs.dart';
 import 'globals.dart';
 import 'project.dart';
 
-String get defaultMainPath => fs.path.join('lib', 'main.dart');
+const String defaultMainPath = 'lib/main.dart';
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
 String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
@@ -57,7 +57,7 @@ class BundleBuilder {
   Future<void> build({
     TargetPlatform platform,
     BuildMode buildMode,
-    String mainPath,
+    String mainPath = defaultMainPath,
     String manifestPath = defaultManifestPath,
     String applicationKernelFilePath,
     String depfilePath,
@@ -73,7 +73,6 @@ class BundleBuilder {
     List<String> fileSystemRoots,
     String fileSystemScheme,
   }) async {
-    mainPath ??= defaultMainPath;
     depfilePath ??= defaultDepfilePath;
     assetDirPath ??= getAssetBuildDirectory();
     packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
