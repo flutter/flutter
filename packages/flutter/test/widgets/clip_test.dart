@@ -356,7 +356,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipRect.1.png'),
+      matchesGoldenFile(
+        'clip.ClipRect.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -396,7 +399,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipRectOverlay.1.png'),
+      matchesGoldenFile(
+        'clip.ClipRectOverlay.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -445,7 +451,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipRRect.1.png'),
+      matchesGoldenFile(
+        'clip.ClipRRect.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -488,7 +497,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipOval.1.png'),
+      matchesGoldenFile(
+        'clip.ClipOval.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -536,7 +548,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.ClipPath.1.png'),
+      matchesGoldenFile(
+        'clip.ClipPath.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -581,7 +596,10 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.antiAlias.1.png'),
+      matchesGoldenFile(
+        'clip.PhysicalModel.antiAlias.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -589,7 +607,10 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.hardEdge.1.png'),
+      matchesGoldenFile(
+        'clip.PhysicalModel.hardEdge.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -599,7 +620,10 @@ void main() {
     await tester.pumpWidget(genPhysicalModel(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.antiAliasWithSaveLayer.png'),
+      matchesGoldenFile(
+        'clip.PhysicalModel.antiAliasWithSaveLayer.png',
+        version: null,
+      ),
     );
   }, skip: isBrowser);
 
@@ -641,7 +665,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalModel.default.1.png'),
+      matchesGoldenFile(
+        'clip.PhysicalModel.default.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -690,7 +717,10 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAlias));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.antiAlias.1.png'),
+      matchesGoldenFile(
+        'clip.PhysicalShape.antiAlias.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -698,7 +728,10 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.hardEdge));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.hardEdge.1.png'),
+      matchesGoldenFile(
+        'clip.PhysicalShape.hardEdge.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 
@@ -706,7 +739,10 @@ void main() {
     await tester.pumpWidget(genPhysicalShape(Clip.antiAliasWithSaveLayer));
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.antiAliasWithSaveLayer.png'),
+      matchesGoldenFile(
+        'clip.PhysicalShape.antiAliasWithSaveLayer.png',
+        version: null,
+      ),
     );
   }, skip: isBrowser);
 
@@ -752,7 +788,10 @@ void main() {
     );
     await expectLater(
       find.byType(RepaintBoundary).first,
-      matchesGoldenFile('clip.PhysicalShape.default.1.png'),
+      matchesGoldenFile(
+        'clip.PhysicalShape.default.png',
+        version: 1,
+      ),
     );
   }, skip: isBrowser);
 

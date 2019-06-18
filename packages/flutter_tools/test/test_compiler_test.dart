@@ -59,6 +59,15 @@ void main() {
 
       expect(await testCompiler.compile('test/foo.dart'), null);
       expect(fs.file('test/foo.dart.dill').existsSync(), false);
+      verify(residentCompiler.shutdown()).called(1);
+    }));
+
+    test('Disposing test compiler shuts down backing compiler', () => testbed.run(() async {
+      testCompiler.compiler = residentCompiler;
+      expect(testCompiler.compilerController.isClosed, false);
+      await testCompiler.dispose();
+      expect(testCompiler.compilerController.isClosed, true);
+      verify(residentCompiler.shutdown()).called(1);
     }));
   });
 }

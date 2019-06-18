@@ -105,6 +105,32 @@ void main() {
     ),
   });
 
+testUsingContext('retry from HttpException', () async {
+    String error;
+    FakeAsync().run((FakeAsync time) {
+      fetchUrl(Uri.parse('http://example.invalid/')).then((List<int> value) {
+        error = 'test completed unexpectedly';
+      }, onError: (dynamic exception) {
+        error = 'test failed unexpectedly: $exception';
+      });
+      expect(testLogger.statusText, '');
+      time.elapse(const Duration(milliseconds: 10000));
+      expect(testLogger.statusText,
+        'Download failed -- attempting retry 1 in 1 second...\n'
+        'Download failed -- attempting retry 2 in 2 seconds...\n'
+        'Download failed -- attempting retry 3 in 4 seconds...\n'
+        'Download failed -- attempting retry 4 in 8 seconds...\n',
+      );
+    });
+    expect(testLogger.errorText, isEmpty);
+    expect(error, isNull);
+    expect(testLogger.traceText, contains('Download error: HttpException'));
+  }, overrides: <Type, Generator>{
+    HttpClientFactory: () => () => MockHttpClientThrowing(
+      const io.HttpException('test exception handling'),
+    ),
+  });
+
   testUsingContext('max attempts', () async {
     String error;
     List<int> actualResult;

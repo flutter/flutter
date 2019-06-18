@@ -17,11 +17,7 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleDebug',
             options: <String>['-Ptarget-platform=android-arm']);
 
-        if (!pluginProject.hasDebugApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -47,11 +43,7 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm']);
 
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -74,11 +66,7 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm64']);
 
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -124,7 +112,7 @@ Future<void> main() async {
 
       await runProjectTest((FlutterProject project) async {
         section('gradlew assembleFreeDebug (product flavor)');
-        await project.addProductFlavor('free');
+        await project.addProductFlavors(<String>['free']);
         await project.runGradleTask('assembleFreeDebug');
       });
 
@@ -169,7 +157,7 @@ Future<void> main() async {
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
         section('gradlew assembleDebug on plugin example');
         await pluginProject.runGradleTask('assembleDebug');
-        if (!pluginProject.hasDebugApk)
+        if (!File(pluginProject.debugApkPath).existsSync())
           throw TaskResult.failure(
               'Gradle did not produce an apk file at the expected place');
       });

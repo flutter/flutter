@@ -17,11 +17,7 @@ Future<void> main() async {
         section('APK content for task assembleDebug without explicit target platform');
         await pluginProject.runGradleTask('assembleDebug');
 
-        if (!pluginProject.hasDebugApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a debug apk file at: ${pluginProject.debugApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.debugApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -48,11 +44,7 @@ Future<void> main() async {
         section('APK content for task assembleRelease without explicit target platform');
         await pluginProject.runGradleTask('assembleRelease');
 
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk file at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -75,11 +67,7 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm,android-arm64']);
 
-        if (!pluginProject.hasReleaseApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk at: ${pluginProject.releaseApkPath}');
-
-        final Iterable<String> apkFiles = await pluginProject.getFilesInApk(pluginProject.releaseApkPath);
+        final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -103,11 +91,7 @@ Future<void> main() async {
         await pluginProject.runGradleTask('assembleRelease',
             options: <String>['-Ptarget-platform=android-arm,android-arm64', '-Psplit-per-abi=true']);
 
-        if (!pluginProject.hasReleaseArmApk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk at: ${pluginProject.releaseArmApkPath}');
-
-        final Iterable<String> armApkFiles = await pluginProject.getFilesInApk(pluginProject.releaseArmApkPath);
+        final Iterable<String> armApkFiles = await getFilesInApk(pluginProject.releaseArmApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',
@@ -122,11 +106,7 @@ Future<void> main() async {
           'assets/flutter_assets/vm_snapshot_data',
         ], armApkFiles);
 
-        if (!pluginProject.hasReleaseArm64Apk)
-          throw TaskResult.failure(
-              'Gradle did not produce a release apk at: ${pluginProject.releaseArm64ApkPath}');
-
-        final Iterable<String> arm64ApkFiles = await pluginProject.getFilesInApk(pluginProject.releaseArm64ApkPath);
+        final Iterable<String> arm64ApkFiles = await getFilesInApk(pluginProject.releaseArm64ApkPath);
 
         checkItContains<String>(<String>[
           'AndroidManifest.xml',

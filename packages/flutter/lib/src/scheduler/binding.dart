@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:developer';
-import 'dart:ui' show AppLifecycleState;
+import 'dart:developer' show Flow, Timeline;
+import 'dart:ui' show AppLifecycleState, FramePhase, FrameTiming;
 
 import 'package:collection/collection.dart' show PriorityQueue, HeapPriorityQueue;
 import 'package:flutter/foundation.dart';
@@ -198,6 +198,17 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     window.onDrawFrame = _handleDrawFrame;
     SystemChannels.lifecycle.setMessageHandler(_handleLifecycleMessage);
     readInitialLifecycleStateFromNativeWindow();
+
+    if (!kReleaseMode) {
+      int frameNumber = 0;
+
+      window.onReportTimings = (List<FrameTiming> timings) {
+        for (FrameTiming frameTiming in timings) {
+          frameNumber += 1;
+          _profileFramePostEvent(frameNumber, frameTiming);
+        }
+      };
+    }
   }
 
   /// The current [SchedulerBinding], if one has been created.
@@ -842,8 +853,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   }
   Duration _currentFrameTimeStamp;
 
-  int _profileFrameNumber = 0;
-  final Stopwatch _profileFrameStopwatch = Stopwatch();
+  int _debugFrameNumber = 0;
   String _debugBanner;
   bool _ignoreNextEngineDrawFrame = false;
 
@@ -894,13 +904,9 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     if (rawTimeStamp != null)
       _lastRawTimeStamp = rawTimeStamp;
 
-    if (!kReleaseMode) {
-      _profileFrameNumber += 1;
-      _profileFrameStopwatch.reset();
-      _profileFrameStopwatch.start();
-    }
-
     assert(() {
+      _debugFrameNumber += 1;
+
       if (debugPrintBeginFrameBanner || debugPrintEndFrameBanner) {
         final StringBuffer frameTimeStampDescription = StringBuffer();
         if (rawTimeStamp != null) {
@@ -908,7 +914,7 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
         } else {
           frameTimeStampDescription.write('(warm-up frame)');
         }
-        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_profileFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
+        _debugBanner = '▄▄▄▄▄▄▄▄ Frame ${_debugFrameNumber.toString().padRight(7)}   ${frameTimeStampDescription.toString().padLeft(18)} ▄▄▄▄▄▄▄▄';
         if (debugPrintBeginFrameBanner)
           debugPrint(_debugBanner);
       }
@@ -961,10 +967,6 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     } finally {
       _schedulerPhase = SchedulerPhase.idle;
       Timeline.finishSync(); // end the Frame
-      if (!kReleaseMode) {
-        _profileFrameStopwatch.stop();
-        _profileFramePostEvent();
-      }
       assert(() {
         if (debugPrintEndFrameBanner)
           debugPrint('▀' * _debugBanner.length);
@@ -975,11 +977,13 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
     }
   }
 
-  void _profileFramePostEvent() {
+  void _profileFramePostEvent(int frameNumber, FrameTiming frameTiming) {
     postEvent('Flutter.Frame', <String, dynamic>{
-      'number': _profileFrameNumber,
-      'startTime': _currentFrameTimeStamp.inMicroseconds,
-      'elapsed': _profileFrameStopwatch.elapsedMicroseconds,
+      'number': frameNumber,
+      'startTime': frameTiming.timestampInMicroseconds(FramePhase.buildStart),
+      'elapsed': frameTiming.totalSpan.inMicroseconds,
+      'build': frameTiming.buildDuration.inMicroseconds,
+      'raster': frameTiming.rasterDuration.inMicroseconds,
     });
   }
 
