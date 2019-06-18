@@ -181,16 +181,18 @@ class SkiaGoldClient {
       _goldctl,
       imgtestArguments,
     );
-    if (imgtestResult.exitCode != 0) {
-      final StringBuffer buf = StringBuffer();
-      buf
-        ..writeln('Flutter + Skia Gold imgtest add failed.')
-        ..writeln('If this is the first execution of this test, it may need to be triaged.')
-        ..writeln('In this case, re-run the test after triage is completed.\n')
-        ..writeln('stdout: ${imgtestResult.stdout}')
-        ..writeln('stderr: ${imgtestResult.stderr}');
-      throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
-    }
+//    Will not turn the tree red.
+//    TODO(Piinks): Comment on PR if digests need to be triaged.
+//    if (imgtestResult.exitCode != 0) {
+//      final StringBuffer buf = StringBuffer();
+//      buf
+//        ..writeln('Flutter + Skia Gold imgtest add failed.')
+//        ..writeln('If this is the first execution of this test, it may need to be triaged.')
+//        ..writeln('In this case, re-run the test after triage is completed.\n')
+//        ..writeln('stdout: ${imgtestResult.stdout}')
+//        ..writeln('stderr: ${imgtestResult.stderr}');
+//      throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
+//    }
     return true;
   }
 
