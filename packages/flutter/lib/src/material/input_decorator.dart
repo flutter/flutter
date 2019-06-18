@@ -755,8 +755,14 @@ class _RenderDecoration extends RenderBox {
   TextAlignVertical _textAlignVertical;
   set textAlignVertical(TextAlignVertical value) {
     assert(value != null);
-    if (_textAlignVertical == value)
+    if (_textAlignVertical == value) {
       return;
+    }
+    // No need to relayout if the effective value is still the same.
+    if (textAlignVertical.y == value.y) {
+      _textAlignVertical = value;
+      return;
+    }
     _textAlignVertical = value;
     markNeedsLayout();
   }
@@ -1031,7 +1037,12 @@ class _RenderDecoration extends RenderBox {
     // If the prefix/suffix overflows however, allow it to extend outside of the
     // input and align the remaining part of the text and prefix/suffix.
     final double overflow = math.max(0, contentHeight - maxContainerHeight);
+    // Map textAlignVertical from -1:1 to 0:1 so that it can be used to scale
+    // the baseline from its minimum to maximum values.
     final double textAlignVerticalFactor = (textAlignVertical.y + 1.0) / 2.0;
+    // Adjust to try to fit top overflow inside the input on an inverse scale of
+    // textAlignVertical, so that top aligned text adjusts the most and bottom
+    // aligned text doesn't adjust at all.
     final double baselineAdjustment = fixAboveInput - overflow * (1 - textAlignVerticalFactor);
 
     // The baselines that will be used to draw the actual input text content.
