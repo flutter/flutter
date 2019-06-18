@@ -236,8 +236,20 @@ class Cache {
     return fs.path.join(getArtifactDirectory(dirName).path, fileName);
   }
 
-  CachedArtifact getArtifactInstanceOf(Object typeImplementation) {
-    return _artifacts.firstWhere((dynamic current) => current.runtimeType == typeImplementation);
+  Map<String, String> iosUsbExecutionEnv() {
+    final String concatenatedPath = <String>[
+      'libimobiledevice',
+      'usbmuxd',
+      'libplist',
+      'openssl',
+      'ideviceinstaller',
+      'libtasn1',
+      'ios-deploy',
+    ].map((String path) => cache.getArtifactDirectory(path).path)
+        .toList()
+        .join(':');
+
+    return <String, String>{'DYLD_LIBRARY_PATH': concatenatedPath};
   }
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
@@ -246,7 +258,7 @@ class Cache {
     return getRoot().childDirectory('flutter_web_sdk');
   }
 
-  String getVersionFor(String artifactName) { // TODO Use!
+  String getVersionFor(String artifactName) {
     final File versionFile = fs.file(fs.path.join(
         _rootOverride?.path ?? flutterRoot, 'bin', 'internal',
         '$artifactName.version'));
@@ -925,22 +937,6 @@ abstract class IosUsbArtifacts extends CachedArtifact {
 
   String getBinaryFileName(String packageName, String binaryName) {
     return fs.path.join(cache.getArtifactDirectory(packageName).path, binaryName);
-  }
-
-  static Map<String, String> executionEnv() {
-    final String concatenatedPath = <String>[
-      'libimobiledevice',
-      'usbmuxd',
-      'libplist',
-      'openssl',
-      'ideviceinstaller',
-      'libtasn1',
-      'ios-deploy',
-    ].map((String path) => cache.getArtifactDirectory(path).path)
-        .toList()
-        .join(':');
-
-    return <String, String>{'DYLD_LIBRARY_PATH': concatenatedPath};
   }
 
   @override

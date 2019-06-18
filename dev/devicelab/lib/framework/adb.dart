@@ -11,7 +11,6 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'utils.dart';
-import '../../../../packages/flutter_tools/lib/src/cache.dart';
 
 /// The root of the API for controlling devices.
 DeviceDiscovery get devices => DeviceDiscovery();
@@ -395,7 +394,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
 
   @override
   Future<List<String>> discoverDevices() async {
-    final String binPath = LibIMobileDeviceArtifacts.binaryPath('idevice_id');
+    final String binPath = cache.getArtifactFile('libimobiledevice', 'idevice_id');
     final List<String> iosDeviceIDs = LineSplitter.split(await eval(binPath, <String>['-l'])) // TODO add env
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)

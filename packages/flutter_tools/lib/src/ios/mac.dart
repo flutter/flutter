@@ -46,10 +46,12 @@ class IMobileDevice {
   const IMobileDevice();
 
   bool get isInstalled {
-    final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
     return exitsHappy(
-      <String>['$cachePath/idevice_id', '-h'],
-      environment: IosUsbArtifacts.executionEnv(),
+      <String>[
+        cache.getArtifactFile('libimobiledevice', 'idevice_id'),
+        '-h',
+      ],
+      environment: cache.iosUsbExecutionEnv(),
     );
   }
 
@@ -61,10 +63,13 @@ class IMobileDevice {
       return false;
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
-    final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
-    final Map<String, String> executionEnv = IosUsbArtifacts.executionEnv();
+    final Map<String, String> executionEnv = cache.iosUsbExecutionEnv();
     final ProcessResult ideviceResult = (await runAsync(
-      <String>['$cachePath/ideviceinfo', '-u', fakeIphoneId],
+      <String>[
+        cache.getArtifactFile('libimobiledevice', 'ideviceinfo'),
+        '-u',
+        fakeIphoneId
+      ],
       environment: executionEnv,
     )).processResult;
     if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
@@ -73,7 +78,10 @@ class IMobileDevice {
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(
-      <String>['$cachePath/idevice_id', '-l'],
+      <String>[
+        cache.getArtifactFile('libimobiledevice', 'idevice_id'),
+        '-l',
+      ],
       environment: executionEnv,
     )).processResult;
     if (result.exitCode == 0 && result.stdout.isEmpty)
@@ -81,17 +89,16 @@ class IMobileDevice {
 
     // Check that we can look up the names of any attached devices.
     return await exitsHappyAsync(
-      <String>['$cachePath/idevicename'],
+      <String>[cache.getArtifactFile('libimobiledevice', 'idevicename')],
       environment: executionEnv,
     );
   }
 
   Future<String> getAvailableDeviceIDs() async {
     try {
-      final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
       final ProcessResult result = await processManager.run(
-        <String>['$cachePath/idevice_id', '-l'],
-        environment: IosUsbArtifacts.executionEnv(),
+        <String>[cache.getArtifactFile('libimobiledevice', 'idevice_id'), '-l'],
+        environment: cache.iosUsbExecutionEnv(),
       );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');
@@ -103,7 +110,7 @@ class IMobileDevice {
 
   Future<String> getInfoForDevice(String deviceID, String key) async {
     try {
-      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]);
+      final ProcessResult result = await processManager.run(<String>['ideviceinfo', '-u', deviceID, '-k', key]); // TODO
       if (result.exitCode == 255 && result.stdout != null && result.stdout.contains('No device found'))
         throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n${result.stdout}');
       if (result.exitCode != 0)
