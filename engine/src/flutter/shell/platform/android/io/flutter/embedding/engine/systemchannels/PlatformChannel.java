@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodCall;
@@ -25,6 +26,8 @@ import io.flutter.plugin.common.MethodChannel;
  * effects, system chrome configurations, and clipboard interaction.
  */
 public class PlatformChannel {
+  private static final String TAG = "PlatformChannel";
+
   @NonNull
   public final MethodChannel channel;
   @Nullable
@@ -41,6 +44,7 @@ public class PlatformChannel {
 
       String method = call.method;
       Object arguments = call.arguments;
+      Log.v(TAG, "Received '" + method + "' message.");
       try {
         switch (method) {
           case "SystemSound.play":

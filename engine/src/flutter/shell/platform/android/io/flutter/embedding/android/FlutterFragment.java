@@ -17,11 +17,13 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Arrays;
+
+import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.dart.DartExecutor;
@@ -358,6 +360,7 @@ public class FlutterFragment extends Fragment {
       // which means there shouldn't be any possibility for the Fragment Lifecycle to get out of
       // sync with the Activity. We use the Fragment's Lifecycle because it is possible that the
       // attached Activity is not a LifecycleOwner.
+      Log.d(TAG, "Attaching FlutterEngine to the Activity that owns this Fragment.");
       flutterEngine.getActivityControlSurface().attachToActivity(getActivity(), getLifecycle());
     }
   }
@@ -385,6 +388,8 @@ public class FlutterFragment extends Fragment {
    * {@link FlutterEngine} is instantiated.
    */
   private void setupFlutterEngine() {
+    Log.d(TAG, "Setting up FlutterEngine.");
+
     // First, defer to subclasses for a custom FlutterEngine.
     flutterEngine = createFlutterEngine(getContextCompat());
     if (flutterEngine != null) {
@@ -407,8 +412,8 @@ public class FlutterFragment extends Fragment {
 
     // Neither our subclass, nor our owning Activity wanted to provide a custom FlutterEngine.
     // Create a FlutterEngine to back our FlutterView.
-    Log.d(TAG, "No subclass or our attached Activity provided a custom FlutterEngine. Creating a "
-        + "new FlutterEngine for this FlutterFragment.");
+    Log.d(TAG, "No preferred FlutterEngine was provided. Creating a new FlutterEngine for"
+        + " this FlutterFragment.");
     flutterEngine = new FlutterEngine(getContext());
     isFlutterEngineFromActivity = false;
   }
@@ -434,6 +439,7 @@ public class FlutterFragment extends Fragment {
   @Nullable
   @Override
   public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    Log.v(TAG, "Creating FlutterView.");
     flutterView = new FlutterView(getContext(), getRenderMode(), getTransparencyMode());
     flutterView.addOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
     return flutterView;
@@ -454,6 +460,9 @@ public class FlutterFragment extends Fragment {
       // So this is expected behavior in many cases.
       return;
     }
+
+    Log.d(TAG, "Executing Dart entrypoint: " + getDartEntrypointFunctionName()
+        + ", and sending initial route: " + getInitialRoute());
 
     // The engine needs to receive the Flutter app's initial route before executing any
     // Dart code to ensure that the initial route arrives in time to be applied.
@@ -528,7 +537,7 @@ public class FlutterFragment extends Fragment {
   @Override
   public void onStart() {
     super.onStart();
-    Log.d(TAG, "onStart()");
+    Log.v(TAG, "onStart()");
 
     // We post() the code that attaches the FlutterEngine to our FlutterView because there is
     // some kind of blocking logic on the native side when the surface is connected. That lag
@@ -538,6 +547,7 @@ public class FlutterFragment extends Fragment {
     new Handler().post(new Runnable() {
       @Override
       public void run() {
+        Log.v(TAG, "Attaching FlutterEngine to FlutterView.");
         flutterView.attachToFlutterEngine(flutterEngine);
 
         // TODO(mattcarroll): the following call should exist here, but the plugin system needs to be revamped.
@@ -552,13 +562,13 @@ public class FlutterFragment extends Fragment {
   @Override
   public void onResume() {
     super.onResume();
-    Log.d(TAG, "onResume()");
+    Log.v(TAG, "onResume()");
     flutterEngine.getLifecycleChannel().appIsResumed();
   }
 
   // TODO(mattcarroll): determine why this can't be in onResume(). Comment reason, or move if possible.
   public void onPostResume() {
-    Log.d(TAG, "onPostResume()");
+    Log.v(TAG, "onPostResume()");
     if (flutterEngine != null) {
       // TODO(mattcarroll): find a better way to handle the update of UI overlays than calling through
       //                    to platformPlugin. We're implicitly entangling the Window, Activity, Fragment,
@@ -572,14 +582,14 @@ public class FlutterFragment extends Fragment {
   @Override
   public void onPause() {
     super.onPause();
-    Log.d(TAG, "onPause()");
+    Log.v(TAG, "onPause()");
     flutterEngine.getLifecycleChannel().appIsInactive();
   }
 
   @Override
   public void onStop() {
     super.onStop();
-    Log.d(TAG, "onStop()");
+    Log.v(TAG, "onStop()");
     flutterEngine.getLifecycleChannel().appIsPaused();
     flutterView.detachFromFlutterEngine();
   }
@@ -587,17 +597,18 @@ public class FlutterFragment extends Fragment {
   @Override
   public void onDestroyView() {
     super.onDestroyView();
-    Log.d(TAG, "onDestroyView()");
+    Log.v(TAG, "onDestroyView()");
     flutterView.removeOnFirstFrameRenderedListener(onFirstFrameRenderedListener);
   }
 
   @Override
   public void onDetach() {
     super.onDetach();
-    Log.d(TAG, "onDetach()");
+    Log.v(TAG, "onDetach()");
 
     if (shouldAttachEngineToActivity()) {
       // Notify plugins that they are no longer attached to an Activity.
+      Log.d(TAG, "Detaching FlutterEngine from the Activity that owns this Fragment.");
       if (getActivity().isChangingConfigurations()) {
         flutterEngine.getActivityControlSurface().detachFromActivityForConfigChanges();
       } else {
@@ -641,8 +652,8 @@ public class FlutterFragment extends Fragment {
    * See {@link android.app.Activity#onBackPressed()}
    */
   public void onBackPressed() {
-    Log.d(TAG, "onBackPressed()");
     if (flutterEngine != null) {
+      Log.v(TAG, "Forwarding onBackPressed() to FlutterEngine.");
       flutterEngine.getNavigationChannel().popRoute();
     } else {
       Log.w(TAG, "Invoked onBackPressed() before FlutterFragment was attached to an Activity.");
@@ -660,6 +671,10 @@ public class FlutterFragment extends Fragment {
    */
   public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
     if (flutterEngine != null) {
+      Log.v(TAG, "Forwarding onRequestPermissionsResult() to FlutterEngine:\n"
+        + "requestCode: " + requestCode + "\n"
+        + "permissions: " + Arrays.toString(permissions) + "\n"
+        + "grantResults: " + Arrays.toString(grantResults));
       flutterEngine.getActivityControlSurface().onRequestPermissionsResult(requestCode, permissions, grantResults);
     } else {
       Log.w(TAG, "onRequestPermissionResult() invoked before FlutterFragment was attached to an Activity.");
@@ -676,6 +691,7 @@ public class FlutterFragment extends Fragment {
    */
   public void onNewIntent(@NonNull Intent intent) {
     if (flutterEngine != null) {
+      Log.v(TAG, "Forwarding onNewIntent() to FlutterEngine.");
       flutterEngine.getActivityControlSurface().onNewIntent(intent);
     } else {
       Log.w(TAG, "onNewIntent() invoked before FlutterFragment was attached to an Activity.");
@@ -692,6 +708,10 @@ public class FlutterFragment extends Fragment {
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     if (flutterEngine != null) {
+      Log.v(TAG, "Forwarding onActivityResult() to FlutterEngine:\n"
+          + "requestCode: " + requestCode + "\n"
+          + "resultCode: " + resultCode + "\n"
+          + "data: " + data);
       flutterEngine.getActivityControlSurface().onActivityResult(requestCode, resultCode, data);
     } else {
       Log.w(TAG, "onActivityResult() invoked before FlutterFragment was attached to an Activity.");
@@ -706,6 +726,7 @@ public class FlutterFragment extends Fragment {
    */
   public void onUserLeaveHint() {
     if (flutterEngine != null) {
+      Log.v(TAG, "Forwarding onUserLeaveHint() to FlutterEngine.");
       flutterEngine.getActivityControlSurface().onUserLeaveHint();
     } else {
       Log.w(TAG, "onUserLeaveHint() invoked before FlutterFragment was attached to an Activity.");
@@ -724,6 +745,7 @@ public class FlutterFragment extends Fragment {
       // Use a trim level delivered while the application is running so the
       // framework has a chance to react to the notification.
       if (level == TRIM_MEMORY_RUNNING_LOW) {
+        Log.v(TAG, "Forwarding onTrimMemory() to FlutterEngine. Level: " + level);
         flutterEngine.getSystemChannel().sendMemoryPressureWarning();
       }
     } else {
@@ -739,6 +761,7 @@ public class FlutterFragment extends Fragment {
   @Override
   public void onLowMemory() {
     super.onLowMemory();
+    Log.v(TAG, "Forwarding onLowMemory() to FlutterEngine.");
     flutterEngine.getSystemChannel().sendMemoryPressureWarning();
   }
 

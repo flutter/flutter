@@ -18,7 +18,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +25,7 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.embedding.engine.FlutterShellArgs;
 import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
@@ -179,7 +179,6 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    Log.d(TAG, "onCreate()");
     super.onCreate(savedInstanceState);
     configureWindowForTransparency();
     setContentView(createFragmentContainer());
@@ -220,6 +219,8 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
       // Don't display an opaque cover view if the Activity is intended to be transparent.
       return;
     }
+
+    Log.v(TAG, "Showing cover view until first frame is rendered.");
 
     // Create the coverView.
     if (coverView == null) {
@@ -321,6 +322,13 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
   @NonNull
   protected FlutterFragment createFlutterFragment() {
     BackgroundMode backgroundMode = getBackgroundMode();
+
+    Log.d(TAG, "Creating FlutterFragment:\n"
+        + "Background transparency mode: " + backgroundMode + "\n"
+        + "Dart entrypoint: " + getDartEntrypoint() + "\n"
+        + "Initial route: " + getInitialRoute() + "\n"
+        + "App bundle path: " + getAppBundlePath() + "\n"
+        + "Will attach FlutterEngine to Activity: " + shouldAttachEngineToActivity());
 
     return new FlutterFragment.Builder()
         .dartEntrypoint(getDartEntrypoint())
@@ -515,6 +523,7 @@ public class FlutterActivity extends FragmentActivity implements OnFirstFrameRen
 
   @Override
   public void onFirstFrameRendered() {
+    Log.v(TAG, "First frame has been rendered. Hiding cover view.");
     hideCoverView();
   }
 

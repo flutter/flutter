@@ -7,6 +7,7 @@ package io.flutter.embedding.engine.systemchannels;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.JSONMethodCodec;
 import io.flutter.plugin.common.MethodChannel;
@@ -15,6 +16,7 @@ import io.flutter.plugin.common.MethodChannel;
  * TODO(mattcarroll): fill in javadoc for NavigationChannel.
  */
 public class NavigationChannel {
+  private static final String TAG = "NavigationChannel";
 
   @NonNull
   public final MethodChannel channel;
@@ -24,14 +26,17 @@ public class NavigationChannel {
   }
 
   public void setInitialRoute(String initialRoute) {
+    Log.v(TAG, "Sending message to set initial route to '" + initialRoute + "'");
     channel.invokeMethod("setInitialRoute", initialRoute);
   }
 
   public void pushRoute(String route) {
+    Log.v(TAG, "Sending message to push route '" + route + "'");
     channel.invokeMethod("pushRoute", route);
   }
 
   public void popRoute() {
+    Log.v(TAG, "Sending message to pop route.");
     channel.invokeMethod("popRoute", null);
   }
 
