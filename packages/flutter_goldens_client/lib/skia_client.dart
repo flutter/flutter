@@ -86,7 +86,10 @@ class SkiaGoldClient {
 
     if (_serviceAccount == null)
       return false; // Not in the proper environment for golden file testing.
-    
+
+    final String authorization = '${_workDirectory.path}serviceAccount.json';
+    await io.File(authorization).writeAsString(_serviceAccount);
+
     final File authFile = _workDirectory.childFile(fs.path.join(
       'temp',
       'auth_opt.json'
@@ -94,7 +97,7 @@ class SkiaGoldClient {
     if(!authFile.existsSync()){
       final List<String> authArguments = <String>[
         'auth',
-        '--service-account', _serviceAccount,
+        '--service-account', authorization,
         '--work-dir', _workDirectory.childDirectory('temp').path,
       ];
 
