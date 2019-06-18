@@ -25,6 +25,8 @@ task:
   setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     - name: docs
+      # TODO(flutter/flutter#34435): remove allow_failures
+      allow_failures: true
       env:
         SHARD: docs
         # For uploading master docs to Firebase master branch staging site
