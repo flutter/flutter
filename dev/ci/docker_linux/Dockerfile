@@ -103,6 +103,10 @@ RUN dpkg-query -L nodejs
 # Install Firebase
 # This is why we need nodejs installed.
 RUN /usr/bin/npm --verbose install -g firebase-tools
+# TODO(dnfield): Remove this once Firebase has a fix upstream for
+# https://github.com/flutter/flutter/issues/34435
+COPY patch_firebase.sh /root/patch_firebase.sh
+RUN /root/patch_firebase.sh
 
 # Install dashing
 # This is why we need golang installed.
