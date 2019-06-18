@@ -53,8 +53,8 @@ class DevelopmentArtifact {
   /// Artifacts required by all developments.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
-  /// The vaulues of DevelopmentArtifacts.
-  static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[ // TODO!
+  /// The values of DevelopmentArtifacts.
+  static final List<DevelopmentArtifact> values = <DevelopmentArtifact>[
     android,
     iOS,
     web,
@@ -83,6 +83,12 @@ class Cache {
       _artifacts.add(LinuxEngineArtifacts(this));
       _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
+      _artifacts.add(LibIMobileDeviceArtifacts(this));
+      _artifacts.add(UsbMuxdArtifacts(this));
+      _artifacts.add(LibPListArtifacts(this));
+      _artifacts.add(IDeviceInstallerArtifacts(this));
+      _artifacts.add(IosDeployArtifacts(this));
+      _artifacts.add(OpenSSLArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -318,7 +324,7 @@ class Cache {
 }
 
 /// An artifact managed by the cache.
-abstract class CachedArtifact { // TODO: yolo!
+abstract class CachedArtifact {
   CachedArtifact(this.name, this.cache, this.developmentArtifacts);
 
   final String name;
@@ -894,6 +900,56 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
     }
     return _doUpdate();
   }
+}
+
+/// A cached artifact containing fonts used for Material Design.
+abstract class _IosUsbArtifacts extends CachedArtifact {
+  _IosUsbArtifacts(String name, Cache cache) : super(
+    name,
+    cache,
+    const <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
+  );
+
+  /// Return the full path to a binary in the cache
+  String binaryPath(String binaryName) {
+    return fs.path.join(cache.getArtifactDirectory(name).path, binaryName);
+  }
+
+  @override
+  Future<void> updateInner() {
+    final Uri archiveUri = Uri.parse(fs.path.join(_storageBaseUrl, 'flutter_infra', 'ios-usb-dependencies', name, version, '$name.zip'));
+    return _downloadZipArchive('Downloading $name...', archiveUri, location);
+  }
+}
+
+/// The cached artifact for libimobiledevice binaries for running apps on
+/// iOS devices
+class LibIMobileDeviceArtifacts extends _IosUsbArtifacts {
+  LibIMobileDeviceArtifacts(Cache cache) : super('libimobiledevice', cache);
+}
+
+class UsbMuxdArtifacts extends _IosUsbArtifacts {
+  UsbMuxdArtifacts(Cache cache) : super('usbmuxd', cache);
+}
+
+class LibPListArtifacts extends _IosUsbArtifacts {
+  LibPListArtifacts(Cache cache) : super('libplist', cache);
+}
+
+class OpenSSLArtifacts extends _IosUsbArtifacts {
+  OpenSSLArtifacts(Cache cache) : super('openssl', cache);
+}
+
+class IDeviceInstallerArtifacts extends _IosUsbArtifacts {
+  IDeviceInstallerArtifacts(Cache cache) : super('ideviceinstaller', cache);
+}
+
+class LibTasn1Artifacts extends _IosUsbArtifacts {
+  LibTasn1Artifacts(Cache cache) : super('libtasn1', cache);
+}
+
+class IosDeployArtifacts extends _IosUsbArtifacts {
+  IosDeployArtifacts(Cache cache) : super('ios-deploy', cache);
 }
 
 // Many characters are problematic in filenames, especially on Windows.
