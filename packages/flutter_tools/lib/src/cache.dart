@@ -129,7 +129,8 @@ class Cache {
           'Warning: Flutter is missing permissions to write files '
           'in its installation directory - "$value". '
           'Please install Flutter from an official channel in a directory '
-          'where you have write permissions. For more information see '
+          'where you have write permissions and that does not require '
+          'administrative or root access. For more information see '
           'https://flutter.dev/docs/get-started/install');
       }
     }
