@@ -44,9 +44,9 @@ class FlutterTesterApp extends ApplicationPackage {
 class FlutterTesterDevice extends Device {
   FlutterTesterDevice(String deviceId) : super(
       deviceId,
-      platformType: PlatformType.web,
-      category: Category.mobile,
-      ephemeral: true,
+      platformType: null,
+      category: null,
+      ephemeral: false,
   );
 
   Process _process;
