@@ -135,18 +135,6 @@ class FlutterPlugin implements Plugin<Project> {
                     matchingFallbacks = ['debug', 'release']
                 }
             }
-            dynamicProfile {
-                initWith debug
-                if (it.hasProperty('matchingFallbacks')) {
-                    matchingFallbacks = ['debug', 'release']
-                }
-            }
-            dynamicRelease {
-                initWith debug
-                if (it.hasProperty('matchingFallbacks')) {
-                    matchingFallbacks = ['debug', 'release']
-                }
-            }
         }
 
         String flutterRootPath = resolveProperty(project, "flutter.sdk", System.env.FLUTTER_ROOT)
@@ -211,8 +199,6 @@ class FlutterPlugin implements Plugin<Project> {
             }
             baseJar["profile"] = baseEnginePath.resolve("${basePlatformArch}-profile").resolve("flutter.jar").toFile()
             baseJar["release"] = baseEnginePath.resolve("${basePlatformArch}-release").resolve("flutter.jar").toFile()
-            baseJar["dynamicProfile"] = baseEnginePath.resolve("${basePlatformArch}-dynamic-profile").resolve("flutter.jar").toFile()
-            baseJar["dynamicRelease"] = baseEnginePath.resolve("${basePlatformArch}-dynamic-release").resolve("flutter.jar").toFile()
 
             // Add flutter.jar dependencies to all <buildType>Api configurations, including custom ones
             // added after applying the Flutter plugin.
@@ -373,15 +359,11 @@ class FlutterPlugin implements Plugin<Project> {
      *
      * Note: The BuildType DSL type is not public, and is therefore omitted from the signature.
      *
-     * @return "debug", "profile", "dynamicProfile", "dynamicRelease", or "release" (fall-back).
+     * @return "debug", "profile", or "release" (fall-back).
      */
     private static String buildModeFor(buildType) {
         if (buildType.name == "profile") {
             return "profile"
-        } else if (buildType.name == "dynamicProfile") {
-            return "dynamicProfile"
-        } else if (buildType.name == "dynamicRelease") {
-            return "dynamicRelease"
         } else if (buildType.debuggable) {
             return "debug"
         }
@@ -391,10 +373,6 @@ class FlutterPlugin implements Plugin<Project> {
     private static String getEngineArtifactDirName(buildType, targetArch) {
         if (buildType.name == "profile") {
             return "${targetArch}-profile"
-        } else if (buildType.name == "dynamicProfile") {
-            return "${targetArch}-dynamic-profile"
-        } else if (buildType.name == "dynamicRelease") {
-            return "${targetArch}-dynamic-release"
         } else if (buildType.debuggable) {
             return "${targetArch}"
         }
@@ -742,14 +720,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             if (buildMode == "debug") {
                 args "--debug"
             }
-            if (buildMode == "profile" || buildMode == "dynamicProfile") {
+            if (buildMode == "profile") {
                 args "--profile"
             }
-            if (buildMode == "release" || buildMode == "dynamicRelease") {
+            if (buildMode == "release") {
                 args "--release"
-            }
-            if (buildMode == "dynamicProfile" || buildMode == "dynamicRelease") {
-                args "--dynamic"
             }
         }
     }
