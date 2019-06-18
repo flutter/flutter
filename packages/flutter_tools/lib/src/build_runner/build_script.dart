@@ -4,12 +4,8 @@
 
 // ignore_for_file: implementation_imports
 import 'dart:async';
-
-// ignore: dart_convert_import
-import 'dart:convert';
-
-// ignore: dart_io_import
-import 'dart:io';
+import 'dart:convert'; // ignore: dart_convert_import
+import 'dart:io'; // ignore: dart_io_import
 import 'dart:isolate';
 
 import 'package:analyzer/analyzer.dart'; // ignore: deprecated_member_use
@@ -29,8 +25,7 @@ import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:crypto/crypto.dart';
 
-// ignore: package_path_import
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as path; // ignore: package_path_import
 import 'package:scratch_space/scratch_space.dart';
 import 'package:test_core/backend.dart';
 
