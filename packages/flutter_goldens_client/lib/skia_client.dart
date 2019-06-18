@@ -177,7 +177,7 @@ class SkiaGoldClient {
       imgtestArguments,
     );
 //    Will not turn the tree red.
-//    TODO(Piinks): Comment on PR if digests need to be triaged, https://URL-to-issue
+      // TODO(Piinks): Comment on PR if triage is needed
 //    if (imgtestResult.exitCode != 0) {
 //      final StringBuffer buf = StringBuffer();
 //      buf
