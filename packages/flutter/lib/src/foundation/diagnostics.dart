@@ -2551,6 +2551,8 @@ class DiagnosticsProperty<T> extends DiagnosticsNode {
     json['defaultLevel'] = describeEnum(_defaultLevel);
     if (value is Diagnosticable || value is DiagnosticsNode)
       json['isDiagnosticableValue'] = true;
+    if (value is num || value is String || value is bool || value == null)
+      json['value'] = value;
     return json;
   }
 
