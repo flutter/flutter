@@ -218,7 +218,7 @@ void main() {
               ],
             ),
             TestSemantics(
-              label: ' regrettable event',
+              label: ' this is a regrettable event',
               textDirection: TextDirection.ltr,
             ),
           ],
@@ -414,7 +414,7 @@ void main() {
             TestSemantics(
               label: 'INTERRUPTION',
               textDirection: TextDirection.rtl,
-              rect: const Rect.fromLTRB(448.0, 0.0, 488.0, 80.0),
+              rect: const Rect.fromLTRB(0.0, 0.0, 40.0, 80.0),
             ),
             TestSemantics(
               label: 'sky',
