@@ -5,13 +5,12 @@
 import '../base/context.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
-import '../usage.dart';
 import 'xcode.dart';
 
 XcodeValidator get xcodeValidator => context.get<XcodeValidator>();
 
 class XcodeValidator extends DoctorValidator {
-  const XcodeValidator() : super('Xcode - develop for iOS and macOS', kCommandDoctorXcodeValidator);
+  const XcodeValidator() : super('Xcode - develop for iOS and macOS');
 
   @override
   Future<ValidationResult> validate() async {
@@ -54,6 +53,6 @@ class XcodeValidator extends DoctorValidator {
       }
     }
 
-    return ValidationResult(xcodeStatus, messages, statusInfo: xcodeVersionInfo);
+    return ValidationResult('xcode', xcodeStatus, messages, statusInfo: xcodeVersionInfo);
   }
 }

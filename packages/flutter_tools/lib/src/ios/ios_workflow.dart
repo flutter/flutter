@@ -12,7 +12,6 @@ import '../base/user_messages.dart';
 import '../base/version.dart';
 import '../doctor.dart';
 import '../macos/xcode.dart';
-import '../usage.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
 
@@ -44,7 +43,7 @@ class IOSWorkflow implements Workflow {
 
 class IOSValidator extends DoctorValidator {
 
-  const IOSValidator() : super('iOS tools - develop for iOS devices', kCommandDoctorIOSValidator);
+  const IOSValidator() : super('iOS tools - develop for iOS devices');
 
   Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']);
 
@@ -121,6 +120,6 @@ class IOSValidator extends DoctorValidator {
       messages.add(ValidationMessage.hint(userMessages.iOSBrewMissing));
     }
 
-    return ValidationResult(packageManagerStatus, messages);
+    return ValidationResult('ios', packageManagerStatus, messages);
   }
 }

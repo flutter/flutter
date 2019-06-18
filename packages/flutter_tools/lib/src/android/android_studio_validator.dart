@@ -9,11 +9,10 @@ import '../base/version.dart';
 import '../doctor.dart';
 import '../globals.dart';
 import '../intellij/intellij.dart';
-import '../usage.dart';
 import 'android_studio.dart';
 
 class AndroidStudioValidator extends DoctorValidator {
-  AndroidStudioValidator(this._studio) : super('Android Studio', kCommandDoctorAndroidStudioValidator);
+  AndroidStudioValidator(this._studio) : super('Android Studio');
 
   final AndroidStudio _studio;
 
@@ -59,7 +58,7 @@ class AndroidStudioValidator extends DoctorValidator {
       }
     }
 
-    return ValidationResult(type, messages, statusInfo: studioVersionText);
+    return ValidationResult('androidStudio', type, messages, statusInfo: studioVersionText);
   }
 
   bool _hasIssues(List<ValidationMessage> messages) {
@@ -68,7 +67,7 @@ class AndroidStudioValidator extends DoctorValidator {
 }
 
 class NoAndroidStudioValidator extends DoctorValidator {
-  NoAndroidStudioValidator() : super('Android Studio', kCommandDoctorNoAndroidStudioValidator);
+  NoAndroidStudioValidator() : super('Android Studio');
 
   @override
   Future<ValidationResult> validate() async {
@@ -80,7 +79,7 @@ class NoAndroidStudioValidator extends DoctorValidator {
     }
     messages.add(ValidationMessage(userMessages.androidStudioInstallation));
 
-    return ValidationResult(ValidationType.notAvailable, messages,
+    return ValidationResult('noAndroidStudio', ValidationType.notAvailable, messages,
         statusInfo: 'not installed');
   }
 }

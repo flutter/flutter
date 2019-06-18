@@ -209,13 +209,11 @@ void main() {
 
   group('doctor usage params', () {
     testUsingContext('contains installed', () async {
-      final Map<String, String> usageParams = (await doctor.diagnose(verbose: false))
-          .usageParams;
+      final Map<String, String> results = getValidationResultMap(
+          (await doctor.diagnose(verbose: false)).validations);
 
-      expect(usageParams, const <String, String>{
-        's15': 'installed',
-        's16': 'installed',
-        's17': 'installed',
+      expect(results, const <String, String>{
+        'passingValidator': 'installed',
       });
     }, overrides: <Type, Generator>{
       DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),
@@ -223,27 +221,26 @@ void main() {
     });
 
     testUsingContext('contains installed and partial', () async {
-      final Map<String, String> usageParams = (await FakePassingDoctor().diagnose(verbose: false))
-          .usageParams;
+      final Map<String, String> results = getValidationResultMap(
+          (await FakePassingDoctor().diagnose(verbose: false)).validations);
 
-      expect(usageParams, const <String, String>{
-        's6': 'installed',
-        's7': 'partial',
-        's8': 'partial',
-        's9': 'installed',
+      expect(results, const <String, String>{
+        'passingValidator': 'installed',
+        'partialValidatorWithHintsOnly': 'partial',
+        'partialValidatorWithErrors': 'partial',
       });
     }, overrides: noColorTerminalOverride);
 
     testUsingContext('contains installed, missing and partial', () async {
-      final Map<String, String> usageParams = (await FakeDoctor().diagnose(verbose: false))
-          .usageParams;
+      final Map<String, String> results = getValidationResultMap(
+          (await FakeDoctor().diagnose(verbose: false)).validations);
 
-      expect(usageParams, const <String, String>{
-        's1': 'installed',
-        's2': 'missing',
-        's3': 'partial',
-        's4': 'partial',
-        's5': 'partial',
+      expect(results, const <String, String>{
+        'passingValidator': 'installed',
+        'missingValidator': 'missing',
+        'notAvailableValidator': 'notAvailable',
+        'partialValidatorWithHintsOnly': 'partial',
+        'partialValidatorWithErrors': 'partial',
       });
     }, overrides: noColorTerminalOverride);
   });
@@ -526,6 +523,13 @@ void main() {
   });
 }
 
+Map<String, String> getValidationResultMap(List<ValidationResult> validations) {
+  return Map<String, String>.fromIterable(validations,
+    key: (dynamic v) => v.name,
+    value: (dynamic v) => v.typeStr,
+  );
+}
+
 class IntelliJValidatorTestTarget extends IntelliJValidator {
   IntelliJValidatorTestTarget(String title, String installPath) : super(title, installPath);
 
@@ -537,19 +541,20 @@ class IntelliJValidatorTestTarget extends IntelliJValidator {
 }
 
 class PassingValidator extends DoctorValidator {
-  PassingValidator(String name, String usageParamKey) : super(name, usageParamKey);
+  PassingValidator(String title) : super(title);
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage('A helpful message'));
     messages.add(ValidationMessage('A second, somewhat longer helpful message'));
-    return ValidationResult(ValidationType.installed, messages, statusInfo: 'with statusInfo');
+    return ValidationResult('passingValidator', ValidationType.installed, messages,
+        statusInfo: 'with statusInfo');
   }
 }
 
 class MissingValidator extends DoctorValidator {
-  MissingValidator(String usageParamKey) : super('Missing Validator', usageParamKey);
+  MissingValidator() : super('Missing Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -557,12 +562,12 @@ class MissingValidator extends DoctorValidator {
     messages.add(ValidationMessage.error('A useful error message'));
     messages.add(ValidationMessage('A message that is not an error'));
     messages.add(ValidationMessage.hint('A hint message'));
-    return ValidationResult(ValidationType.missing, messages);
+    return ValidationResult('missingValidator', ValidationType.missing, messages);
   }
 }
 
 class NotAvailableValidator extends DoctorValidator {
-  NotAvailableValidator(String usageParamKey) : super('Not Available Validator', usageParamKey);
+  NotAvailableValidator() : super('Not Available Validator');
 
   @override
   Future<ValidationResult> validate() async {
@@ -570,12 +575,12 @@ class NotAvailableValidator extends DoctorValidator {
     messages.add(ValidationMessage.error('A useful error message'));
     messages.add(ValidationMessage('A message that is not an error'));
     messages.add(ValidationMessage.hint('A hint message'));
-    return ValidationResult(ValidationType.notAvailable, messages);
+    return ValidationResult('notAvailableValidator', ValidationType.notAvailable, messages);
   }
 }
 
 class PartialValidatorWithErrors extends DoctorValidator {
-  PartialValidatorWithErrors(String usageParamKey) : super('Partial Validator with Errors', usageParamKey);
+  PartialValidatorWithErrors() : super('Partial Validator with Errors');
 
   @override
   Future<ValidationResult> validate() async {
@@ -583,19 +588,19 @@ class PartialValidatorWithErrors extends DoctorValidator {
     messages.add(ValidationMessage.error('An error message indicating partial installation'));
     messages.add(ValidationMessage.hint('Maybe a hint will help the user'));
     messages.add(ValidationMessage('An extra message with some verbose details'));
-    return ValidationResult(ValidationType.partial, messages);
+    return ValidationResult('partialValidatorWithErrors', ValidationType.partial, messages);
   }
 }
 
 class PartialValidatorWithHintsOnly extends DoctorValidator {
-  PartialValidatorWithHintsOnly(String usageParamKey) : super('Partial Validator with only a Hint', usageParamKey);
+  PartialValidatorWithHintsOnly() : super('Partial Validator with only a Hint');
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage.hint('There is a hint here'));
     messages.add(ValidationMessage('But there is no error'));
-    return ValidationResult(ValidationType.partial, messages);
+    return ValidationResult('partialValidatorWithHintsOnly', ValidationType.partial, messages);
   }
 }
 
@@ -607,11 +612,11 @@ class FakeDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator', 's1'));
-      _validators.add(MissingValidator('s2'));
-      _validators.add(NotAvailableValidator('s3'));
-      _validators.add(PartialValidatorWithHintsOnly('s4'));
-      _validators.add(PartialValidatorWithErrors('s5'));
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(MissingValidator());
+      _validators.add(NotAvailableValidator());
+      _validators.add(PartialValidatorWithHintsOnly());
+      _validators.add(PartialValidatorWithErrors());
     }
     return _validators;
   }
@@ -624,10 +629,10 @@ class FakePassingDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator', 's6'));
-      _validators.add(PartialValidatorWithHintsOnly('s7'));
-      _validators.add(PartialValidatorWithErrors('s8'));
-      _validators.add(PassingValidator('Another Passing Validator', 's9'));
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PartialValidatorWithHintsOnly());
+      _validators.add(PartialValidatorWithErrors());
+      _validators.add(PassingValidator('Another Passing Validator'));
     }
     return _validators;
   }
@@ -641,7 +646,7 @@ class FakeSinglePassingDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PartialValidatorWithHintsOnly('s10'));
+      _validators.add(PartialValidatorWithHintsOnly());
     }
     return _validators;
   }
@@ -654,10 +659,10 @@ class FakeQuietDoctor extends Doctor {
   List<DoctorValidator> get validators {
     if (_validators == null) {
       _validators = <DoctorValidator>[];
-      _validators.add(PassingValidator('Passing Validator', 's11'));
-      _validators.add(PassingValidator('Another Passing Validator', 's12'));
-      _validators.add(PassingValidator('Validators are fun', 's13'));
-      _validators.add(PassingValidator('Four score and seven validators ago', 's14'));
+      _validators.add(PassingValidator('Passing Validator'));
+      _validators.add(PassingValidator('Another Passing Validator'));
+      _validators.add(PassingValidator('Validators are fun'));
+      _validators.add(PassingValidator('Four score and seven validators ago'));
     }
     return _validators;
   }
@@ -669,9 +674,9 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   @override
   List<DoctorValidator> get validators {
     return <DoctorValidator>[
-      PassingValidator('Passing Validator', 's15'),
-      PassingValidator('Another Passing Validator', 's16'),
-      PassingValidator('Providing validators is fun', 's17'),
+      PassingValidator('Passing Validator'),
+      PassingValidator('Another Passing Validator'),
+      PassingValidator('Providing validators is fun'),
     ];
   }
 
@@ -679,50 +684,48 @@ class FakeDoctorValidatorsProvider implements DoctorValidatorsProvider {
   List<Workflow> get workflows => <Workflow>[];
 }
 
-
-
 class PassingGroupedValidator extends DoctorValidator {
-  PassingGroupedValidator(String name) : super(name, 'none');
+  PassingGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage('A helpful message'));
-    return ValidationResult(ValidationType.installed, messages);
+    return ValidationResult('none', ValidationType.installed, messages);
   }
-
 }
 
 class MissingGroupedValidator extends DoctorValidator {
-  MissingGroupedValidator(String name) : super(name, 'none');
+  MissingGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage.error('A useful error message'));
-    return ValidationResult(ValidationType.missing, messages);
+    return ValidationResult('none', ValidationType.missing, messages);
   }
 }
 
 class PartialGroupedValidator extends DoctorValidator {
-  PartialGroupedValidator(String name) : super(name, 'none');
+  PartialGroupedValidator(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage.error('An error message for partial installation'));
-    return ValidationResult(ValidationType.partial, messages);
+    return ValidationResult('none', ValidationType.partial, messages);
   }
 }
 
 class PassingGroupedValidatorWithStatus extends DoctorValidator {
-  PassingGroupedValidatorWithStatus(String name) : super(name, 'none');
+  PassingGroupedValidatorWithStatus(String name) : super(name);
 
   @override
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     messages.add(ValidationMessage('A different message'));
-    return ValidationResult(ValidationType.installed, messages, statusInfo: 'A status message');
+    return ValidationResult('none', ValidationType.installed, messages,
+        statusInfo: 'A status message');
   }
 }
 

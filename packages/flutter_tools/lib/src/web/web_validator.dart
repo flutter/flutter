@@ -4,13 +4,12 @@
 
 import '../base/platform.dart';
 import '../doctor.dart';
-import '../usage.dart';
 import 'chrome.dart';
 import 'workflow.dart';
 
 /// A validator that checks whether chrome is installed and can run.
 class WebValidator extends DoctorValidator {
-  const WebValidator() : super('Chrome - develop for the web', kCommandDoctorWebValidator);
+  const WebValidator() : super('Chrome - develop for the web');
 
   @override
   Future<ValidationResult> validate() async {
@@ -32,12 +31,14 @@ class WebValidator extends DoctorValidator {
     }
     if (!canRunChrome) {
       return ValidationResult(
+        'web',
         ValidationType.missing,
         messages,
         statusInfo: 'Cannot find chrome executable at $chrome',
       );
     }
     return ValidationResult(
+      'web',
       ValidationType.installed,
       messages,
     );

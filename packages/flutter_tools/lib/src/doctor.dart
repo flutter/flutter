@@ -31,7 +31,6 @@ import 'macos/macos_workflow.dart';
 import 'macos/xcode_validator.dart';
 import 'proxy_validator.dart';
 import 'tester/flutter_tester.dart';
-import 'usage.dart';
 import 'version.dart';
 import 'vscode/vscode_validator.dart';
 import 'web/web_validator.dart';
@@ -129,13 +128,18 @@ class ValidatorTask {
   final Future<ValidationResult> result;
 }
 
+/// The diagnose of [Doctor].
 class DiagnoseResult {
   const DiagnoseResult({
     this.success,
-    this.usageParams = const <String, String>{}
+    this.validations = const <ValidationResult>[]
   });
+  /// Whether all the validations passed. This means that no validation
+  /// resulted in [ValidationType.missing].
   final bool success;
-  final Map<String, String> usageParams;
+
+  /// The result of the validations performed.
+  final List<ValidationResult> validations;
 }
 
 class Doctor {
@@ -219,7 +223,7 @@ class Doctor {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
     }
 
-    final Map<String, String> usageParams = <String, String>{};
+    final List<ValidationResult> validationResults = <ValidationResult>[];
     bool doctorSuccess = true;
     int issues = 0;
 
@@ -238,19 +242,18 @@ class Doctor {
       }
       status.stop();
 
+      validationResults.add(result);
+
       switch (result.type) {
         case ValidationType.missing:
           doctorSuccess = false;
           issues += 1;
-          usageParams[validator.usageParamKey] = 'missing';
           break;
         case ValidationType.partial:
         case ValidationType.notAvailable:
-          usageParams[validator.usageParamKey] = 'partial';
           issues += 1;
           break;
         case ValidationType.installed:
-          usageParams[validator.usageParamKey] = 'installed';
           break;
       }
 
@@ -287,7 +290,7 @@ class Doctor {
     } else {
       printStatus('${terminal.color('•', TerminalColor.green)} No issues found!', hangingIndent: 2);
     }
-    return DiagnoseResult(success: doctorSuccess, usageParams: usageParams);
+    return DiagnoseResult(success: doctorSuccess, validations: validationResults);
   }
 
   bool get canListAnything => workflows.any((Workflow workflow) => workflow.canListDevices);
@@ -330,13 +333,10 @@ enum ValidationMessageType {
 }
 
 abstract class DoctorValidator {
-  const DoctorValidator(this.title, this.usageParamKey);
+  const DoctorValidator(this.title);
 
   /// This is displayed in the CLI.
   final String title;
-
-  /// This is the key used to report the [ValidationResult] to Analytics.
-  final String usageParamKey;
 
   String get slowWarning => 'This is taking an unexpectedly long time...';
 
@@ -349,10 +349,7 @@ abstract class DoctorValidator {
 /// of the first validator that provides one. Other titles and statusInfo strings
 /// are discarded.
 class GroupedValidator extends DoctorValidator {
-  GroupedValidator(this.subValidators) : super(
-    subValidators[0].title,
-    subValidators[0].usageParamKey,
-  );
+  GroupedValidator(this.subValidators) : super(subValidators[0].title);
 
   final List<DoctorValidator> subValidators;
 
@@ -404,16 +401,24 @@ class GroupedValidator extends DoctorValidator {
       }
       mergedMessages.addAll(result.messages);
     }
-
-    return ValidationResult(mergedType, mergedMessages,
-        statusInfo: statusInfo);
+    return ValidationResult(
+        results.first.name,
+        mergedType,
+        mergedMessages,
+        statusInfo: statusInfo,
+      );
   }
 }
 
 class ValidationResult {
+  /// [name] is the canonical name used to indentify the validation.
+  ///
   /// [ValidationResult.type] should only equal [ValidationResult.installed]
   /// if no [messages] are hints or errors.
-  ValidationResult(this.type, this.messages, { this.statusInfo });
+  ValidationResult(this.name, this.type, this.messages, { this.statusInfo });
+
+  /// A canonical name for this validation result.
+  final String name;
 
   final ValidationType type;
   // A short message about the status.
@@ -444,6 +449,22 @@ class ValidationResult {
       case ValidationType.notAvailable:
       case ValidationType.partial:
        return terminal.color(leadingBox, TerminalColor.yellow);
+    }
+    return null;
+  }
+
+  /// The string representation of the type.
+  String get typeStr {
+    assert(type != null);
+    switch (type) {
+      case ValidationType.missing:
+        return 'missing';
+      case ValidationType.installed:
+        return 'installed';
+      case ValidationType.notAvailable:
+        return 'notAvailable';
+      case ValidationType.partial:
+        return 'partial';
     }
     return null;
   }
@@ -501,7 +522,7 @@ class ValidationMessage {
 }
 
 class FlutterValidator extends DoctorValidator {
-  FlutterValidator() : super('Flutter', kCommandDoctorFlutterValidator);
+  FlutterValidator() : super('Flutter');
 
   @override
   Future<ValidationResult> validate() async {
@@ -528,7 +549,7 @@ class FlutterValidator extends DoctorValidator {
       valid = ValidationType.partial;
     }
 
-    return ValidationResult(valid, messages,
+    return ValidationResult('flutter', valid, messages,
       statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
@@ -544,18 +565,20 @@ bool _genSnapshotRuns(String genSnapshotPath) {
 }
 
 class NoIdeValidator extends DoctorValidator {
-  NoIdeValidator() : super('Flutter IDE Support', kCommandDoctorNoIdeValidator);
+  NoIdeValidator() : super('Flutter IDE Support');
 
   @override
   Future<ValidationResult> validate() async {
-    return ValidationResult(ValidationType.missing, <ValidationMessage>[
+    return ValidationResult('noIde', ValidationType.missing, <ValidationMessage>[
       ValidationMessage(userMessages.noIdeInstallationInfo),
-    ], statusInfo: userMessages.noIdeStatusInfo);
+      ],
+      statusInfo: userMessages.noIdeStatusInfo
+    );
   }
 }
 
 abstract class IntelliJValidator extends DoctorValidator {
-  IntelliJValidator(String title, this.installPath) : super(title, kCommandDoctorIntelliJValidator);
+  IntelliJValidator(String title, this.installPath) : super(title);
 
   final String installPath;
 
@@ -595,6 +618,7 @@ abstract class IntelliJValidator extends DoctorValidator {
     _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return ValidationResult(
+      'intelliJ',
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
       messages,
       statusInfo: userMessages.intellijStatusInfo(version));
@@ -715,7 +739,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     } on FileSystemException catch (e) {
       validators.add(ValidatorWithResult(
           userMessages.intellijMacUnknownResult,
-          ValidationResult(ValidationType.missing, <ValidationMessage>[
+          ValidationResult('intelliJValidatorOnMac', ValidationType.missing, <ValidationMessage>[
               ValidationMessage.error(e.message),
           ]),
       ));
@@ -746,7 +770,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 }
 
 class DeviceValidator extends DoctorValidator {
-  DeviceValidator() : super('Connected device', kCommandDoctorDeviceValidator);
+  DeviceValidator() : super('Connected device');
 
   @override
   String get slowWarning => 'Scanning for devices is taking a long time...';
@@ -768,15 +792,16 @@ class DeviceValidator extends DoctorValidator {
     }
 
     if (devices.isEmpty) {
-      return ValidationResult(ValidationType.notAvailable, messages);
+      return ValidationResult('device', ValidationType.notAvailable, messages);
     } else {
-      return ValidationResult(ValidationType.installed, messages, statusInfo: userMessages.devicesAvailable(devices.length));
+      return ValidationResult('device', ValidationType.installed, messages,
+          statusInfo: userMessages.devicesAvailable(devices.length));
     }
   }
 }
 
 class ValidatorWithResult extends DoctorValidator {
-  ValidatorWithResult(String title, this.result) : super(title, '');
+  ValidatorWithResult(String title, this.result) : super(title);
 
   final ValidationResult result;
 

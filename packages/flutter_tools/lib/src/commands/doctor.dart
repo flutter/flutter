@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../doctor.dart';
 import '../runner/flutter_command.dart';
+import '../usage.dart';
 
 class DoctorCommand extends FlutterCommand {
   DoctorCommand({this.verbose = false}) {
@@ -30,12 +31,49 @@ class DoctorCommand extends FlutterCommand {
   @override
   final String description = 'Show information about the installed tooling.';
 
-  Map<String, String> _usageParams;
+  List<ValidationResult> _validations;
 
   @override
   Future<Map<String, String>> get usageValues async {
-    assert(_usageParams != null);
-    return _usageParams;
+    assert(_validations != null);
+    return Map<String, String>.fromIterable(_validations,
+      key: (dynamic v) {
+        switch (v.name) {
+          case 'device':
+            return kCommandDoctorDeviceValidator;
+          case 'intelliJ':
+            return kCommandDoctorIntelliJValidator;
+          case 'noIde':
+            return kCommandDoctorNoIdeValidator;
+          case 'flutter':
+            return kCommandDoctorFlutterValidator;
+          case 'androidLicense':
+            return kCommandDoctorAndroidLicenseValidator;
+          case 'android':
+            return kCommandDoctorAndroidValidator;
+          case 'xcode':
+            return kCommandDoctorXcodeValidator;
+          case 'cocoaPods':
+            return kCommandDoctorCocoaPodsValidator;
+          case 'ios':
+            return kCommandDoctorIOSValidator;
+          case 'visualStudio':
+            return kCommandDoctorVisualStudioValidator;
+          case 'web':
+            return kCommandDoctorWebValidator;
+          case 'androidStudio':
+            return kCommandDoctorAndroidStudioValidator;
+          case 'noAndroidStudio':
+            return kCommandDoctorNoAndroidStudioValidator;
+          case 'proxy':
+            return kCommandDoctorProxyValidator;
+          case 'vsCode':
+            return kCommandDoctorVsCodeValidator;
+        }
+        return '';
+      },
+      value: (dynamic v) => v.typeStr,
+    );
   }
 
   @override
@@ -57,7 +95,7 @@ class DoctorCommand extends FlutterCommand {
       androidLicenses: argResults['android-licenses'],
       verbose: verbose,
     );
-    _usageParams = result.usageParams;
+    _validations = result.validations;
     return FlutterCommandResult(result.success ? ExitStatus.success : ExitStatus.warning);
   }
 }

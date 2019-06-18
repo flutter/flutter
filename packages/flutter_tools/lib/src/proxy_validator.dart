@@ -6,10 +6,9 @@ import 'dart:async';
 
 import 'base/platform.dart';
 import 'doctor.dart';
-import 'usage.dart';
 
 class ProxyValidator extends DoctorValidator {
-  ProxyValidator() : super('Proxy Configuration', kCommandDoctorProxyValidator);
+  ProxyValidator() : super('Proxy Configuration');
 
   static bool get shouldShow => _getEnv('HTTP_PROXY').isNotEmpty;
 
@@ -49,6 +48,7 @@ class ProxyValidator extends DoctorValidator {
         messages.any((ValidationMessage msg) => msg.isHint || msg.isHint);
 
     return ValidationResult(
+      'proxy',
       hasIssues ? ValidationType.partial : ValidationType.installed,
       messages,
     );

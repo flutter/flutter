@@ -8,13 +8,12 @@ import '../base/context.dart';
 import '../base/os.dart';
 import '../base/user_messages.dart';
 import '../doctor.dart';
-import '../usage.dart';
 import 'cocoapods.dart';
 
 CocoaPodsValidator get cocoapodsValidator => context.get<CocoaPodsValidator>();
 
 class CocoaPodsValidator extends DoctorValidator {
-  const CocoaPodsValidator() : super('CocoaPods subvalidator', kCommandDoctorCocoaPodsValidator);
+  const CocoaPodsValidator() : super('CocoaPods subvalidator');
 
   bool get hasHomebrew => os.which('brew') != null;
 
@@ -54,6 +53,6 @@ class CocoaPodsValidator extends DoctorValidator {
       messages.add(ValidationMessage.hint(userMessages.cocoaPodsBrewMissing));
     }
 
-    return ValidationResult(status, messages);
+    return ValidationResult('cocoaPods', status, messages);
   }
 }
