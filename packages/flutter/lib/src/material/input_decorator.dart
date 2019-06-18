@@ -3537,6 +3537,8 @@ class InputDecorationTheme extends Diagnosticable {
 /// See also:
 ///
 ///  * [TextField.textAlignVertical], which is passed on to the [InputDecorator].
+///  * [CupertinoTextField.textAlignVertical], which behaves in the same way as
+///    the parameter in TextField.
 ///  * [InputDecorator.textAlignVertical], which defines the alignment of
 ///    prefix, input, and suffix, within the [InputDecorator].
 class TextAlignVertical {

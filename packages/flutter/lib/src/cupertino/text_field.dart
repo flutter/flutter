@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart' show TextAlignVertical;
 
 import 'colors.dart';
 import 'icons.dart';
@@ -174,6 +175,7 @@ class CupertinoTextField extends StatefulWidget {
     this.style,
     this.strutStyle,
     this.textAlign = TextAlign.start,
+    this.textAlignVertical = TextAlignVertical.top, // TODO(justinmc): Match previous behavior of if prefix then center
     this.readOnly = false,
     this.showCursor,
     this.autofocus = false,
@@ -322,6 +324,9 @@ class CupertinoTextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
+
+  /// {@macro flutter.material.inputDecorator.textAlignVertical}
+  final TextAlignVertical textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.readOnly}
   final bool readOnly;
@@ -487,6 +492,8 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
     properties.add(DiagnosticsProperty<ScrollController>('scrollController', scrollController, defaultValue: null));
     properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
+    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
+    properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
   }
 }
 
@@ -722,7 +729,10 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         widget.clearButtonMode == OverlayVisibilityMode.never &&
         widget.prefix == null &&
         widget.suffix == null) {
-      return editableText;
+      return Align(
+        alignment: Alignment(-1.0, widget.textAlignVertical.y),
+        child: editableText,
+      );
     }
 
     // Otherwise, listen to the current state of the text entry.
@@ -789,7 +799,13 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           );
         }
 
-        return Row(children: rowChildren);
+        return Align(
+          alignment: Alignment(-1.0, widget.textAlignVertical.y),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: rowChildren,
+          ),
+        );
       },
     );
   }
