@@ -474,6 +474,7 @@ void main() {
           selected: true,
           button: true,
           textField: true,
+          readOnly: true,
           focused: true,
           inMutuallyExclusiveGroup: true,
           header: true,
