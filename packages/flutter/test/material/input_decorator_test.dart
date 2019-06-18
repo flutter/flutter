@@ -2355,6 +2355,77 @@ void main() {
     expect(getBorder(tester), disabledBorder);
   });
 
+  testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
+    // This is a regression test for https://github.com/flutter/flutter/issues/34327
+    await tester.pumpWidget(
+      buildInputDecorator(
+        decoration: const InputDecoration(
+          filled: true,
+          fillColor: Color(0xFF00FF00),
+          labelText: 'label text',
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(100.0),
+              bottomLeft: Radius.circular(100.0),
+              topRight: Radius.circular(200.0),
+              bottomRight: Radius.circular(200.0),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    const double largerBorderRadius = 28.0;
+    const double smallerBorderRadius = largerBorderRadius / 2.0;
+
+    expect(findBorderPainter(), paints
+      ..save()
+      ..path(
+        style: PaintingStyle.fill,
+        color: const Color(0xFF00FF00),
+        includes: <Offset>[
+          // The border should draw on along the four edges of the
+          // InputDecorator.
+          const Offset(800.0 / 2.0, 0.0), // top center
+          const Offset(800.0 / 2.0, 56), // bottom center
+          const Offset(0.0, 56 / 2.0), // left center
+          const Offset(800.0, 56 / 2.0), // right center
+
+          // The border path should contain points where each
+          // rounded corner ends.
+          // Bottom-right arc
+          const Offset(800.0, 56 - largerBorderRadius),
+          const Offset(800.0 - largerBorderRadius, 56.0),
+          // Top-right arc
+          const Offset(800.0, 0.0 + largerBorderRadius),
+          const Offset(800.0 - largerBorderRadius, 0.0),
+          // Bottom-left arc
+          const Offset(0.0, 56 - smallerBorderRadius),
+          const Offset(0.0 + smallerBorderRadius, 56.0),
+          // Top-left arc
+          const Offset(0.0, 0.0 + smallerBorderRadius),
+          const Offset(0.0 + smallerBorderRadius, 0.0),
+        ],
+        excludes: <Offset>[
+          // The border should not contain the corner points, since the border
+          // is rounded.
+          const Offset(0.0, 0.0), // outside the rounded corner, top left
+          const Offset(800.0, 0.0), // top right
+          const Offset(0.0, 56.0), // bottom left
+          const Offset(800.0, 56.0), // bottom right
+
+          // Corners with larger border ratio should not contain points outside
+          // of the larger radius.
+          const Offset(800.0, 56 - smallerBorderRadius),
+          const Offset(800.0 - smallerBorderRadius, 56.0),
+          const Offset(800.0, 0.0 + smallerBorderRadius),
+          const Offset(800.0 - smallerBorderRadius, 0.0),
+        ],
+      )
+      ..restore()
+    );
+  });
+
   testWidgets('OutlineInputBorder radius carries over when lerping', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/23982
     const Key key = Key('textField');
