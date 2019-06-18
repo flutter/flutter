@@ -182,23 +182,11 @@ class FlutterPlugin implements Plugin<Project> {
                 })
             }
         } else {
-            // x86/x86_64 native library used for debugging only, for now.
-            File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-            Task debugX86JarTask = project.tasks.create("${FLUTTER_BUILD_PREFIX}X86Jar", Jar) {
-                destinationDir flutterX86Jar.parentFile
-                archiveName flutterX86Jar.name
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
-                    into 'lib/x86'
-                }
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x64/libflutter.so") {
-                    into 'lib/x86_64'
-                }
-            }
             String basePlatformArch = getBasePlatform(project)
             // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
             File debugJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
-            baseJar["debug"] = [debugX86JarTask, debugJar]
+            baseJar["debug"] = debugJar
             if (!debugJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
@@ -338,7 +326,7 @@ class FlutterPlugin implements Plugin<Project> {
                     provided project.files(flutterJar)
                 }
             } else {
-                assert baseJar["debug"].last().isFile()
+                assert baseJar["debug"].isFile()
                 assert baseJar["profile"].isFile()
                 assert baseJar["release"].isFile()
 
@@ -515,10 +503,16 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.add(compileTask)
             }
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            def libFlutterPlatforms = targetPlatforms.collect()
+            // x86/x86_64 native library used for debugging only, for now.
+            if (flutterBuildMode == 'debug') {
+                libFlutterPlatforms.add('android-x86')
+                libFlutterPlatforms.add('android-x64')
+            }
             Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
-                targetPlatforms.each { targetArch ->
+                libFlutterPlatforms.each { targetArch ->
                     // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
                     // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
                     // is included as an implementation dependency, which causes duplicated `libflutter.so`.
