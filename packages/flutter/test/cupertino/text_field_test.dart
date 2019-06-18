@@ -373,7 +373,10 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.cupertino.0.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.0.png',
+        version: 2,
+      ),
     );
   }, skip: !isLinux);
 
@@ -403,7 +406,10 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.cupertino.1.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.1.png',
+        version: 2,
+      ),
     );
   }, skip: !isLinux);
 
@@ -2675,7 +2681,10 @@ void main() {
 
     await expectLater(
       find.byType(CupertinoTextField),
-      matchesGoldenFile('text_field_test.disabled.0.png'),
+      matchesGoldenFile(
+        'text_field_test.disabled.png',
+        version: 0,
+      ),
       skip: !isLinux,
     );
   });
