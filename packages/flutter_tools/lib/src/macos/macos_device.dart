@@ -75,12 +75,24 @@ class MacOSDevice extends Device {
     // Stop any running applications with the same executable.
     if (!prebuiltApplication) {
       Cache.releaseLockEarly();
-      await buildMacOS(FlutterProject.current(), debuggingOptions?.buildInfo);
+      await buildMacOS(
+        flutterProject: FlutterProject.current(),
+        buildInfo: debuggingOptions?.buildInfo,
+        targetOverride: mainPath,
+      );
     }
+
+    // Ensure that the executable is locatable.
+    final String executable = package.executable(debuggingOptions?.buildInfo?.mode);
+    if (executable == null) {
+      printError('Unable to find executable to run');
+      return LaunchResult.failed();
+    }
+
     // Make sure to call stop app after we've built.
     await stopApp(package);
     final Process process = await processManager.start(<String>[
-      package.executable(debuggingOptions?.buildInfo?.mode)
+      executable
     ]);
     if (debuggingOptions?.buildInfo?.isRelease == true) {
       return LaunchResult.succeeded();

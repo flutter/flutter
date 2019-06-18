@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // web has different stack traces
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -56,19 +58,20 @@ Future<void> main() async {
       exception: getAssertionErrorWithMessage(),
       stack: sampleStack,
       library: 'error handling test',
-      context: 'testing the error handling logic',
-      informationCollector: (StringBuffer information) {
-        information.writeln('line 1 of extra information');
-        information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
+      context: ErrorDescription('testing the error handling logic'),
+      informationCollector: () sync* {
+       yield ErrorDescription('line 1 of extra information');
+       yield ErrorHint('line 2 of extra information\n');
       },
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
       'Message goes here\\.\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
+      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
+      'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
       '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially '
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
@@ -102,14 +105,15 @@ Future<void> main() async {
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞═════════════════════════════════════════════════════════\n'
       'The following assertion was thrown:\n'
-      'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word '
-      'word word word word word word word word word word word word word word word word word word word word '
       'word word word word word word word word word word word word word word word word word word word word\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      'word word word word word word word word word word word word word word word word word word word word\n'
+      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
+      'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
       '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially '
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
@@ -138,18 +142,19 @@ Future<void> main() async {
       exception: getAssertionErrorWithoutMessage(),
       stack: sampleStack,
       library: 'error handling test',
-      context: 'testing the error handling logic',
-      informationCollector: (StringBuffer information) {
-        information.writeln('line 1 of extra information');
-        information.writeln('line 2 of extra information\n'); // the double trailing newlines here are intentional
-      },
+      context: ErrorDescription('testing the error handling logic'),
+      informationCollector: () sync* {
+        yield ErrorDescription('line 1 of extra information');
+        yield ErrorDescription('line 2 of extra information\n'); // the trailing newlines here are intentional
+      }
     ));
     expect(console.join('\n'), matches(
       '^══╡ EXCEPTION CAUGHT BY ERROR HANDLING TEST ╞═══════════════════════════════════════════════════════\n'
       'The following assertion was thrown testing the error handling logic:\n'
-      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\': Failed assertion: line [0-9]+ pos [0-9]+: \'false\': is not true\\.\n'
+      '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':[\n ]'
+      'Failed[\n ]assertion:[\n ]line[\n ][0-9]+[\n ]pos[\n ][0-9]+:[\n ]\'false\':[\n ]is[\n ]not[\n ]true\\.\n'
       '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially '
+      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
       'more information in this error message to help you determine and fix the underlying cause\\.\n'
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'

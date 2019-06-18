@@ -316,6 +316,8 @@ void main() {
     expect(tapCount, 1);
     expect(singleTapUpCount, 1);
     expect(singleLongTapStartCount, 0);
+
+    await gesture.removePointer();
   });
 
   testWidgets('a touch drag is not recognized for text selection', (WidgetTester tester) async {
@@ -335,6 +337,8 @@ void main() {
     expect(dragStartCount, 0);
     expect(dragUpdateCount, 0);
     expect(dragEndCount, 0);
+
+    await gesture.removePointer();
   });
 
   testWidgets('a mouse drag is recognized for text selection', (WidgetTester tester) async {
@@ -354,6 +358,8 @@ void main() {
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
+
+    await gesture.removePointer();
   });
 
   testWidgets('a slow mouse drag is still recognized for text selection', (WidgetTester tester) async {
@@ -371,5 +377,7 @@ void main() {
     expect(dragStartCount, 1);
     expect(dragUpdateCount, 1);
     expect(dragEndCount, 1);
+
+    await gesture.removePointer();
   });
 }

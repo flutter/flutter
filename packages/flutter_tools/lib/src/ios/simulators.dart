@@ -15,14 +15,16 @@ import '../base/process.dart';
 import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
-import '../bundle.dart' as bundle;
+import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart';
+import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
 import 'ios_workflow.dart';
 import 'mac.dart';
+import 'plist_utils.dart';
 
 const String _xcrunPath = '/usr/bin/xcrun';
 
@@ -287,7 +289,7 @@ class IOSSimulator extends Device {
     if (isSupported())
       return 'Supported';
 
-    return _supportMessage != null ? _supportMessage : 'Unknown';
+    return _supportMessage ?? 'Unknown';
   }
 
   @override
@@ -343,7 +345,15 @@ class IOSSimulator extends Device {
 
     // Launch the updated application in the simulator.
     try {
-      await SimControl.instance.launch(id, package.id, args);
+      // Use the built application's Info.plist to get the bundle identifier,
+      // which should always yield the correct value and does not require
+      // parsing the xcodeproj or configuration files.
+      // See https://github.com/flutter/flutter/issues/31037 for more information.
+      final IOSApp iosApp = package;
+      final String plistPath = fs.path.join(iosApp.simulatorBundlePath, 'Info.plist');
+      final String bundleIdentifier = iosWorkflow.getPlistValueFromFile(plistPath, kCFBundleIdentifierKey);
+
+      await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
       printError('$error');
       return LaunchResult.failed();
@@ -377,8 +387,7 @@ class IOSSimulator extends Device {
     final BuildInfo debugBuildInfo = BuildInfo(BuildMode.debug, buildInfo.flavor,
         trackWidgetCreation: buildInfo.trackWidgetCreation,
         extraFrontEndOptions: buildInfo.extraFrontEndOptions,
-        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions,
-        buildSharedLibrary: buildInfo.buildSharedLibrary);
+        extraGenSnapshotOptions: buildInfo.extraGenSnapshotOptions);
 
     final XcodeBuildResult buildResult = await buildXcodeProject(
       app: app,
@@ -403,7 +412,7 @@ class IOSSimulator extends Device {
 
   Future<void> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
     // Run compiler to produce kernel file for the application.
-    return bundle.build(
+    return BundleBuilder().build(
       mainPath: mainPath,
       precompiledSnapshot: false,
       trackWidgetCreation: buildInfo.trackWidgetCreation,

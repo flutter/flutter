@@ -72,7 +72,7 @@ BuildApp() {
       EchoError "========================================================================"
       EchoError "ERROR: Unknown FLUTTER_BUILD_MODE: ${build_mode}."
       EchoError "Valid values are 'Debug', 'Profile', or 'Release' (case insensitive)."
-      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment varaible."
+      EchoError "This is controlled by the FLUTTER_BUILD_MODE environment variable."
       EchoError "If that is not set, the CONFIGURATION environment variable is used."
       EchoError ""
       EchoError "You can fix this by either adding an appropriately named build"
@@ -249,7 +249,7 @@ BuildApp() {
   fi
 
   StreamOutput " ├─Assembling Flutter resources..."
-  RunCommand "${FLUTTER_ROOT}/bin/flutter" --suppress-analytics             \
+  RunCommand "${FLUTTER_ROOT}/bin/flutter"                                  \
     ${verbose_flag}                                                         \
     build bundle                                                            \
     --target-platform=ios                                                   \

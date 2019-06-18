@@ -47,7 +47,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// [ScrollableWidgetBuilder] does not use provided [ScrollController], the
 /// sheet will remain at the initialChildSize.
 ///
-/// By default, the widget will expand its non-occupied area to fill availble
+/// By default, the widget will expand its non-occupied area to fill available
 /// space in the parent. If this is not desired, e.g. because the parent wants
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
@@ -157,7 +157,7 @@ class DraggableScrollableSheet extends StatefulWidget {
 /// [DraggableScrollableSheet] widgets notify their ancestors when the size of
 /// the sheet changes. When the extent of the sheet changes via a drag,
 /// this notification bubbles up through the tree, which means a given
-/// [NotificationListener] will recieve notifications for all descendant
+/// [NotificationListener] will receive notifications for all descendant
 /// [DraggableScrollableSheet] widgets. To focus on notifications from the
 /// nearest [DraggableScorllableSheet] descendant, check that the [depth]
 /// property of the notification is zero.
@@ -262,13 +262,16 @@ class _DraggableSheetExtent {
   }
   double get currentExtent => _currentExtent.value;
 
+  double get additionalMinExtent => isAtMin ? 0.0 : 1.0;
+  double get additionalMaxExtent => isAtMax ? 0.0 : 1.0;
+
   /// The scroll position gets inputs in terms of pixels, but the extent is
   /// expected to be expressed as a number between 0..1.
   void addPixelDelta(double delta, BuildContext context) {
     if (availablePixels == 0) {
       return;
     }
-    currentExtent += delta / availablePixels;
+    currentExtent += delta / availablePixels * maxExtent;
     DraggableScrollableNotification(
       minExtent: minExtent,
       maxExtent: maxExtent,
@@ -425,6 +428,17 @@ class _DraggableScrollableSheetScrollPosition
   VoidCallback _dragCancelCallback;
   final _DraggableSheetExtent extent;
   bool get listShouldScroll => pixels > 0.0;
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    // We need to provide some extra extent if we haven't yet reached the max or
+    // min extents. Otherwise, a list with fewer children than the extent of
+    // the available space will get stuck.
+    return super.applyContentDimensions(
+      minScrollExtent - extent.additionalMinExtent,
+      maxScrollExtent + extent.additionalMaxExtent,
+    );
+  }
 
   @override
   void applyUserOffset(double delta) {

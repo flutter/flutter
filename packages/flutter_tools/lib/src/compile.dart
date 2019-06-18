@@ -38,7 +38,7 @@ class KernelCompilerFactory {
 
 typedef CompilerMessageConsumer = void Function(String message, { bool emphasis, TerminalColor color });
 
-/// The target model describes the set of core libraries that are availible within
+/// The target model describes the set of core libraries that are available within
 /// the SDK.
 class TargetModel {
   /// Parse a [TargetModel] from a raw string.
@@ -281,8 +281,12 @@ class KernelCompiler {
       command.add('--aot');
       command.add('--tfa');
     }
+    // If we're not targeting product (release) mode and we're still aot, then
+    // target profile mode.
     if (targetProductVm) {
       command.add('-Ddart.vm.product=true');
+    } else if (aot) {
+      command.add('-Ddart.vm.profile=true');
     }
     if (incrementalCompilerByteStorePath != null) {
       command.add('--incremental');
@@ -730,10 +734,11 @@ class ResidentCompiler {
   }
 
   Future<dynamic> shutdown() async {
-    // Server was never sucessfully created.
+    // Server was never successfully created.
     if (_server == null) {
       return 0;
     }
+    printTrace('killing pid ${_server.pid}');
     _server.kill();
     return _server.exitCode;
   }

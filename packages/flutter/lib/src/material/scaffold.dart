@@ -904,6 +904,7 @@ class Scaffold extends StatefulWidget {
     this.primary = true,
     this.drawerDragStartBehavior = DragStartBehavior.start,
     this.extendBody = false,
+    this.drawerScrimColor,
   }) : assert(primary != null),
        assert(extendBody != null),
        assert(drawerDragStartBehavior != null),
@@ -993,6 +994,11 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   final Widget endDrawer;
+
+  /// The color to use for the scrim that obscures primary content while a drawer is open.
+  ///
+  /// By default, the color is [Colors.black54]
+  final Color drawerScrimColor;
 
   /// The color of the [Material] widget that underlies the entire Scaffold.
   ///
@@ -1187,7 +1193,7 @@ class Scaffold extends StatefulWidget {
       'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
       'context that is "under" the Scaffold. For an example of this, please see the '
       'documentation for Scaffold.of():\n'
-      '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
+      '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
       'A more efficient solution is to split your build function into several widgets. This '
       'introduces a new context from which you can obtain the Scaffold. In this solution, '
       'you would have an outer widget that creates the Scaffold populated by instances of '
@@ -1230,7 +1236,7 @@ class Scaffold extends StatefulWidget {
         'There are several ways to avoid this problem. The simplest is to use a Builder to get a '
         'context that is "under" the Scaffold. For an example of this, please see the '
         'documentation for Scaffold.of():\n'
-        '  https://docs.flutter.io/flutter/material/Scaffold/of.html\n'
+        '  https://api.flutter.dev/flutter/material/Scaffold/of.html\n'
         'A more efficient solution is to split your build function into several widgets. This '
         'introduces a new context from which you can obtain the Scaffold. In this solution, '
         'you would have an outer widget that creates the Scaffold populated by instances of '
@@ -1541,6 +1547,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     bool isPersistent, {
     AnimationController animationController,
     Color backgroundColor,
+    double elevation,
+    ShapeBorder shape,
   }) {
     assert(() {
       if (widget.bottomSheet != null && isPersistent && _currentBottomSheet != null) {
@@ -1619,6 +1627,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
       builder: builder,
       isPersistent: isPersistent,
       backgroundColor: backgroundColor,
+      elevation: elevation,
+      shape: shape,
     );
 
     if (!isPersistent)
@@ -1673,6 +1683,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   PersistentBottomSheetController<T> showBottomSheet<T>(
     WidgetBuilder builder, {
     Color backgroundColor,
+    double elevation,
+    ShapeBorder shape,
   }) {
     assert(() {
       if (widget.bottomSheet != null) {
@@ -1694,6 +1706,8 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         false,
         animationController: controller,
         backgroundColor: backgroundColor,
+        elevation: elevation,
+        shape: shape,
       );
     });
     return _currentBottomSheet;
@@ -1898,6 +1912,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           child: widget.endDrawer,
           drawerCallback: _endDrawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
+          scrimColor: widget.drawerScrimColor,
         ),
         _ScaffoldSlot.endDrawer,
         // remove the side padding from the side we're not touching
@@ -1920,6 +1935,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
           child: widget.drawer,
           drawerCallback: _drawerOpenedCallback,
           dragStartBehavior: widget.drawerDragStartBehavior,
+          scrimColor: widget.drawerScrimColor,
         ),
         _ScaffoldSlot.drawer,
         // remove the side padding from the side we're not touching
@@ -2216,6 +2232,8 @@ class _StandardBottomSheet extends StatefulWidget {
     this.builder,
     this.isPersistent = false,
     this.backgroundColor,
+    this.elevation,
+    this.shape,
   }) : super(key: key);
 
   final AnimationController animationController; // we control it, but it must be disposed by whoever created it.
@@ -2225,6 +2243,8 @@ class _StandardBottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
   final bool isPersistent;
   final Color backgroundColor;
+  final double elevation;
+  final ShapeBorder shape;
 
   @override
   _StandardBottomSheetState createState() => _StandardBottomSheetState();
@@ -2311,6 +2331,8 @@ class _StandardBottomSheetState extends State<_StandardBottomSheet> {
             onClosing: widget.onClosing,
             builder: widget.builder,
             backgroundColor: widget.backgroundColor,
+            elevation: widget.elevation,
+            shape: widget.shape,
           ),
         ),
       );

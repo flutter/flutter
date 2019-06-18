@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // needs substantial triage.
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -17,6 +17,7 @@ Widget buildInputDecorator({
   TextDirection textDirection = TextDirection.ltr,
   bool isEmpty = false,
   bool isFocused = false,
+  bool isHovering = false,
   TextStyle baseStyle,
   Widget child = const Text(
     'text',
@@ -39,6 +40,7 @@ Widget buildInputDecorator({
                   decoration: decoration,
                   isEmpty: isEmpty,
                   isFocused: isFocused,
+                  isHovering: isHovering,
                   baseStyle: baseStyle,
                   child: child,
                 ),
@@ -89,6 +91,12 @@ BorderRadius getBorderRadius(WidgetTester tester) {
 double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
 
 Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
+
+Color getContainerColor(WidgetTester tester) {
+  final CustomPaint customPaint = tester.widget(findBorderPainter());
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  return inputBorderPainter.blendedColor;
+}
 
 double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
@@ -1430,7 +1438,7 @@ void main() {
     expect(tester.getTopLeft(find.text('text')).dy, 12.0);
     expect(getBorderBottom(tester), 40.0);
     expect(getBorderWeight(tester), 1.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorator.collapsed', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1469,7 +1477,7 @@ void main() {
     expect(tester.getSize(find.text('hint')).height, 16.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 0.0);
     expect(getBorderWeight(tester), 0.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorator with baseStyle', (WidgetTester tester) async {
     // Setting the baseStyle of the InputDecoration and the style of the input
@@ -1510,7 +1518,7 @@ void main() {
     expect(tester.getTopLeft(find.text('hint')).dy, 23.5);
     expect(tester.getTopLeft(find.text('label')).dy, 17.75);
     expect(tester.getTopLeft(find.text('text')).dy, 23.5);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {
     // Same as not specifying any style overrides
@@ -1552,7 +1560,7 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1604,7 +1612,7 @@ void main() {
 
     // The label should not be seen.
     expect(getOpacity(tester, 'label'), 0.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1629,7 +1637,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorationTheme outline border, dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1825,6 +1833,7 @@ void main() {
         counterStyle: themeStyle,
         filled: true,
         fillColor: Colors.red,
+        focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
       )
@@ -1873,6 +1882,7 @@ void main() {
         counterStyle: themeStyle,
         filled: true,
         fillColor: Colors.red,
+        focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
       ),
@@ -2020,19 +2030,150 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-        skip: !Platform.isLinux,
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.ltr.png',
+          version: null,
+        ),
+        skip: !isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-        skip: !Platform.isLinux,
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.rtl.png',
+          version: null,
+        ),
+        skip: !isLinux,
       );
     },
-    skip: !Platform.isLinux,
+    skip: !isLinux,
   );
+
+  testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {
+    const Color fillColor = Color(0x0A000000);
+    const Color hoverColor = Color(0xFF00FF00);
+    const Color disabledColor = Color(0x05000000);
+    const Color enabledBorderColor = Color(0x61000000);
+
+    Future<void> pumpDecorator({bool hovering, bool enabled = true, bool filled = true}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isHovering: hovering,
+          decoration: InputDecoration(
+            enabled: enabled,
+            filled: filled,
+            hoverColor: hoverColor,
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+          ),
+        ),
+      );
+    }
+
+    // Test filled text field.
+    await pumpDecorator(hovering: false);
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(fillColor));
+
+    await pumpDecorator(hovering: true);
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(hoverColor));
+
+    await pumpDecorator(hovering: false);
+    expect(getContainerColor(tester), equals(hoverColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(fillColor));
+
+    await pumpDecorator(hovering: false, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    await pumpDecorator(hovering: true, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    // Test outline text field.
+    const Color blendedHoverColor = Color(0x74004400);
+    await pumpDecorator(hovering: false, filled: false);
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(hovering: true, filled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(blendedHoverColor));
+
+    await pumpDecorator(hovering: false, filled: false);
+    expect(getBorderColor(tester), equals(blendedHoverColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(hovering: false, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(disabledColor));
+
+    await pumpDecorator(hovering: true, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(disabledColor));
+  });
+
+  testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
+    const Color focusColor = Color(0xFF0000FF);
+    const Color disabledColor = Color(0x05000000);
+    const Color enabledBorderColor = Color(0x61000000);
+
+    Future<void> pumpDecorator({bool focused, bool enabled = true, bool filled = true}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: focused,
+          decoration: InputDecoration(
+            enabled: enabled,
+            filled: filled,
+            focusColor: focusColor,
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: focusColor)),
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+          ),
+        ),
+      );
+    }
+
+    // Test outline text field default border.
+    await pumpDecorator(focused: false, filled: false);
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(focused: true, filled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(focusColor));
+
+    await pumpDecorator(focused: false, filled: false);
+    expect(getBorderColor(tester), equals(focusColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(focused: false, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(disabledColor));
+
+    await pumpDecorator(focused: true, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(disabledColor));
+  });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305
@@ -2065,7 +2206,8 @@ void main() {
       suffixStyle: TextStyle(height: 8.0),
       counterStyle: TextStyle(height: 9.0),
       filled: true,
-      fillColor: Color(10),
+      fillColor: Color(0x10),
+      focusColor: Color(0x20),
       errorBorder: UnderlineInputBorder(),
       focusedBorder: OutlineInputBorder(),
       focusedErrorBorder: UnderlineInputBorder(),
@@ -2077,7 +2219,8 @@ void main() {
     // Spot check
     expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
     expect(debugString, contains('isDense: true'));
-    expect(debugString, contains('fillColor: Color(0x0000000a)'));
+    expect(debugString, contains('fillColor: Color(0x00000010)'));
+    expect(debugString, contains('focusColor: Color(0x00000020)'));
     expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
     expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
   });
@@ -2320,8 +2463,8 @@ void main() {
       gapPadding: 32.0,
     );
     expect(outlineInputBorder.hashCode, const OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
       gapPadding: 32.0,
     ).hashCode);
     expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
@@ -2346,6 +2489,7 @@ void main() {
       counterStyle: TextStyle(),
       filled: true,
       fillColor: Colors.red,
+      focusColor: Colors.blue,
       errorBorder: UnderlineInputBorder(),
       focusedBorder: UnderlineInputBorder(),
       focusedErrorBorder: UnderlineInputBorder(),
@@ -2369,6 +2513,7 @@ void main() {
       'counterStyle: TextStyle(<all styles inherited>)',
       'filled: true',
       'fillColor: MaterialColor(primary value: Color(0xfff44336))',
+      'focusColor: MaterialColor(primary value: Color(0xff2196f3))',
       'errorBorder: UnderlineInputBorder()',
       'focusedBorder: UnderlineInputBorder()',
       'focusedErrorBorder: UnderlineInputBorder()',

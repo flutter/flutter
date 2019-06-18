@@ -33,7 +33,6 @@ import 'binding.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'gesture_detector.dart';
-import 'icon_data.dart';
 
 /// Signature for the builder callback used by
 /// [WidgetInspector.selectButtonBuilder].
@@ -60,6 +59,9 @@ class _ProxyLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => _layer.find(regionOffset);
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 /// A [Canvas] that multicasts all method calls to a main canvas and a
@@ -674,63 +676,6 @@ class _InspectorReferenceData {
   int count = 1;
 }
 
-/// Configuration controlling how [DiagnosticsNode] objects are serialized to
-/// JSON mainly focused on if and how children are included in the JSON.
-class _SerializeConfig {
-  _SerializeConfig({
-    this.groupName,
-    this.summaryTree = false,
-    this.subtreeDepth  = 1,
-    this.pathToInclude,
-    this.includeProperties = false,
-    this.expandPropertyValues = true,
-  });
-
-  _SerializeConfig.merge(
-    _SerializeConfig base, {
-    int subtreeDepth,
-    Iterable<Diagnosticable> pathToInclude,
-  }) : groupName = base.groupName,
-       summaryTree = base.summaryTree,
-       subtreeDepth = subtreeDepth ?? base.subtreeDepth,
-       pathToInclude = pathToInclude ?? base.pathToInclude,
-       includeProperties = base.includeProperties,
-       expandPropertyValues = base.expandPropertyValues;
-
-  /// Optional object group name used to manage manage lifetimes of object
-  /// references in the returned JSON.
-  ///
-  /// A call to `ext.flutter.inspector.disposeGroup` is required before objects
-  /// in the tree are garbage collected unless [groupName] is null in
-  /// which case no object references are included in the JSON payload.
-  final String groupName;
-
-  /// Whether to only include children that would exist in the summary tree.
-  final bool summaryTree;
-
-  /// How many levels of children to include in the JSON payload.
-  final int subtreeDepth;
-
-  /// Path of nodes through the children of this node to include even if
-  /// subtreeDepth is exceeded.
-  final Iterable<Diagnosticable> pathToInclude;
-
-  /// Include information about properties in the JSON instead of requiring
-  /// a separate request to determine properties.
-  final bool includeProperties;
-
-  /// Expand children of properties that have values that are themselves
-  /// Diagnosticable objects.
-  final bool expandPropertyValues;
-
-  /// Whether to include object references to the [DiagnosticsNode] and
-  /// [DiagnosticsNode.value] objects in the JSON payload.
-  ///
-  /// If [interactive] is true, a call to `ext.flutter.inspector.disposeGroup`
-  /// is required before objects in the tree will ever be garbage collected.
-  bool get interactive => groupName != null;
-}
-
 // Production implementation of [WidgetInspectorService].
 class _WidgetInspectorService = Object with WidgetInspectorService;
 
@@ -961,6 +906,22 @@ mixin WidgetInspectorService {
     return Future<void>.value();
   }
 
+  static const String _consoleObjectGroup = 'console-group';
+
+  void _reportError(FlutterErrorDetails details) {
+    postEvent('Flutter.Error', _nodeToJson(
+      details.toDiagnosticsNode(),
+      _SerializationDelegate(
+        groupName: _consoleObjectGroup,
+        subtreeDepth: 5,
+        includeProperties: true,
+        expandPropertyValues: true,
+        maxDescendentsTruncatableNode: 5,
+        service: this,
+      ),
+    ));
+  }
+
   /// Called to register service extensions.
   ///
   /// See also:
@@ -974,6 +935,18 @@ mixin WidgetInspectorService {
     assert(() { _debugServiceExtensionsRegistered = true; return true; }());
 
     SchedulerBinding.instance.addPersistentFrameCallback(_onFrameStart);
+
+    final FlutterExceptionHandler structuredExceptionHandler = _reportError;
+    final FlutterExceptionHandler defaultExceptionHandler = FlutterError.onError;
+
+    _registerBoolServiceExtension(
+      name: 'structuredErrors',
+      getter: () async => FlutterError.onError == structuredExceptionHandler,
+      setter: (bool value) {
+        FlutterError.onError = value ? structuredExceptionHandler : defaultExceptionHandler;
+        return Future<void>.value();
+      },
+    );
 
     _registerBoolServiceExtension(
       name: 'show',
@@ -1236,7 +1209,7 @@ mixin WidgetInspectorService {
 
     final _InspectorReferenceData data = _idToReferenceData[id];
     if (data == null) {
-      throw FlutterError('Id does not exist.');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist.')]);
     }
     return data.object;
   }
@@ -1271,9 +1244,9 @@ mixin WidgetInspectorService {
 
     final _InspectorReferenceData referenceData = _idToReferenceData[id];
     if (referenceData == null)
-      throw FlutterError('Id does not exist');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id does not exist')]);
     if (_groups[groupName]?.remove(referenceData) != true)
-      throw FlutterError('Id is not in group');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Id is not in group')]);
     _decrementReferenceCount(referenceData);
   }
 
@@ -1316,11 +1289,13 @@ mixin WidgetInspectorService {
           return false;
         }
         selection.currentElement = object;
+        developer.inspect(selection.currentElement);
       } else {
         if (object == selection.current) {
           return false;
         }
         selection.current = object;
+        developer.inspect(selection.current);
       }
       if (selectionChangedCallback != null) {
         if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
@@ -1357,20 +1332,20 @@ mixin WidgetInspectorService {
     else if (value is Element)
       path = _getElementParentChain(value, groupName);
     else
-      throw FlutterError('Cannot get parent chain for node of type ${value.runtimeType}');
+      throw FlutterError.fromParts(<DiagnosticsNode>[ErrorSummary('Cannot get parent chain for node of type ${value.runtimeType}')]);
 
     return path.map<Object>((_DiagnosticsPathNode node) => _pathNodeToJson(
       node,
-      _SerializeConfig(groupName: groupName),
+      _SerializationDelegate(groupName: groupName, service: this),
     )).toList();
   }
 
-  Map<String, Object> _pathNodeToJson(_DiagnosticsPathNode pathNode, _SerializeConfig config) {
+  Map<String, Object> _pathNodeToJson(_DiagnosticsPathNode pathNode, _SerializationDelegate delegate) {
     if (pathNode == null)
       return null;
     return <String, Object>{
-      'node': _nodeToJson(pathNode.node, config),
-      'children': _nodesToJson(pathNode.children, config),
+      'node': _nodeToJson(pathNode.node, delegate),
+      'children': _nodesToJson(pathNode.children, delegate, parent: pathNode.node),
       'childIndex': pathNode.childIndex,
     };
   }
@@ -1408,82 +1383,9 @@ mixin WidgetInspectorService {
 
   Map<String, Object> _nodeToJson(
     DiagnosticsNode node,
-    _SerializeConfig config,
+    _SerializationDelegate delegate,
   ) {
-    if (node == null)
-      return null;
-    final Map<String, Object> json = node.toJsonMap();
-
-    final Object value = node.value;
-    if (config.interactive) {
-      json['objectId'] = toId(node, config.groupName);
-      json['valueId'] = toId(value, config.groupName);
-    }
-
-    if (value  is Element) {
-      if (value is StatefulElement) {
-        json['stateful'] = true;
-      }
-      json['widgetRuntimeType'] = value.widget?.runtimeType.toString();
-    }
-
-    if (config.summaryTree) {
-      json['summaryTree'] = true;
-    }
-
-    final _Location creationLocation = _getCreationLocation(value);
-    bool createdByLocalProject = false;
-    if (creationLocation != null) {
-      json['locationId'] = _toLocationId(creationLocation);
-      json['creationLocation'] = creationLocation.toJsonMap();
-      if (_isLocalCreationLocation(creationLocation)) {
-        createdByLocalProject = true;
-        json['createdByLocalProject'] = true;
-      }
-    }
-
-    if (config.subtreeDepth > 0 ||
-        (config.pathToInclude != null && config.pathToInclude.isNotEmpty)) {
-      json['children'] = _nodesToJson(_getChildrenHelper(node, config), config);
-    }
-
-    if (config.includeProperties) {
-      json['properties'] = _nodesToJson(
-        node.getProperties().where(
-          (DiagnosticsNode node) => !node.isFiltered(createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel.info),
-        ),
-        _SerializeConfig(groupName: config.groupName, subtreeDepth: 1, expandPropertyValues: true),
-      );
-    }
-
-    if (node is DiagnosticsProperty) {
-      // Add additional information about properties needed for graphical
-      // display of properties.
-      if (value is Color) {
-        json['valueProperties'] = <String, Object>{
-          'red': value.red,
-          'green': value.green,
-          'blue': value.blue,
-          'alpha': value.alpha,
-        };
-      } else if (value is IconData) {
-        json['valueProperties'] = <String, Object>{
-          'codePoint': value.codePoint,
-        };
-      }
-      if (config.expandPropertyValues && value is Diagnosticable) {
-        json['properties'] = _nodesToJson(
-          value.toDiagnosticsNode().getProperties().where(
-                (DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info),
-          ),
-          _SerializeConfig(groupName: config.groupName,
-              subtreeDepth: 0,
-              expandPropertyValues: false,
-          ),
-        );
-      }
-    }
-    return json;
+    return node?.toJsonMap(delegate);
   }
 
   bool _isValueCreatedByLocalProject(Object value) {
@@ -1523,35 +1425,23 @@ mixin WidgetInspectorService {
     return jsonString;
   }
 
+  List<DiagnosticsNode> _truncateNodes(Iterable<DiagnosticsNode> nodes, int maxDescendentsTruncatableNode) {
+    if (nodes.every((DiagnosticsNode node) => node.value is Element) && isWidgetCreationTracked()) {
+      final List<DiagnosticsNode> localNodes = nodes.where((DiagnosticsNode node) =>
+          _isValueCreatedByLocalProject(node.value)).toList();
+      if (localNodes.isNotEmpty) {
+        return localNodes;
+      }
+    }
+    return nodes.take(maxDescendentsTruncatableNode).toList();
+  }
+
   List<Map<String, Object>> _nodesToJson(
     Iterable<DiagnosticsNode> nodes,
-    _SerializeConfig config,
-  ) {
-    if (nodes == null)
-      return <Map<String, Object>>[];
-    return nodes.map<Map<String, Object>>(
-      (DiagnosticsNode node) {
-        if (config.pathToInclude != null && config.pathToInclude.isNotEmpty) {
-          if (config.pathToInclude.first == node.value) {
-            return _nodeToJson(
-              node,
-              _SerializeConfig.merge(config, pathToInclude: config.pathToInclude.skip(1)),
-            );
-          } else {
-            return _nodeToJson(node, _SerializeConfig.merge(config));
-          }
-        }
-        // The tricky special case here is that when in the detailsTree,
-        // we keep subtreeDepth from going down to zero until we reach nodes
-        // that also exist in the summary tree. This ensures that every time
-        // you expand a node in the details tree, you expand the entire subtree
-        // up until you reach the next nodes shared with the summary tree.
-        return _nodeToJson(
-          node,
-          config.summaryTree || config.subtreeDepth > 1 || _shouldShowInSummaryTree(node) ?
-              _SerializeConfig.merge(config, subtreeDepth: config.subtreeDepth - 1) : config,
-        );
-      }).toList();
+    _SerializationDelegate delegate, {
+    @required DiagnosticsNode parent,
+  }) {
+    return DiagnosticsNode.toJsonList(nodes, parent, delegate);
   }
 
   /// Returns a JSON representation of the properties of the [DiagnosticsNode]
@@ -1563,7 +1453,7 @@ mixin WidgetInspectorService {
 
   List<Object> _getProperties(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), _SerializeConfig(groupName: groupName));
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : node.getProperties(), _SerializationDelegate(groupName: groupName, service: this), parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1574,8 +1464,8 @@ mixin WidgetInspectorService {
 
   List<Object> _getChildren(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    final _SerializeConfig config = _SerializeConfig(groupName: groupName);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
+    final _SerializationDelegate delegate = _SerializationDelegate(groupName: groupName, service: this);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1596,8 +1486,8 @@ mixin WidgetInspectorService {
 
   List<Object> _getChildrenSummaryTree(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
-    final _SerializeConfig config = _SerializeConfig(groupName: groupName, summaryTree: true);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
+    final _SerializationDelegate delegate = _SerializationDelegate(groupName: groupName, summaryTree: true, service: this);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   /// Returns a JSON representation of the children of the [DiagnosticsNode]
@@ -1613,21 +1503,20 @@ mixin WidgetInspectorService {
   List<Object> _getChildrenDetailsSubtree(String diagnosticsNodeId, String groupName) {
     final DiagnosticsNode node = toObject(diagnosticsNodeId);
     // With this value of minDepth we only expand one extra level of important nodes.
-    final _SerializeConfig config = _SerializeConfig(groupName: groupName, subtreeDepth: 1,  includeProperties: true);
-    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenHelper(node, config), config);
-  }
-
-  List<DiagnosticsNode> _getChildrenHelper(DiagnosticsNode node, _SerializeConfig config) {
-    return _getChildrenFiltered(node, config).toList();
+    final _SerializationDelegate delegate = _SerializationDelegate(groupName: groupName, subtreeDepth: 1, includeProperties: true, service: this);
+    return _nodesToJson(node == null ? const <DiagnosticsNode>[] : _getChildrenFiltered(node, delegate), delegate, parent: node);
   }
 
   bool _shouldShowInSummaryTree(DiagnosticsNode node) {
+    if (node.level == DiagnosticLevel.error) {
+      return true;
+    }
     final Object value = node.value;
     if (value is! Diagnosticable) {
       return true;
     }
     if (value is! Element || !isWidgetCreationTracked()) {
-      // Creation locations are not availabe so include all nodes in the
+      // Creation locations are not available so include all nodes in the
       // summary tree.
       return true;
     }
@@ -1636,14 +1525,21 @@ mixin WidgetInspectorService {
 
   List<DiagnosticsNode> _getChildrenFiltered(
     DiagnosticsNode node,
-    _SerializeConfig config,
+    _SerializationDelegate delegate,
+  ) {
+    return _filterChildren(node.getChildren(), delegate);
+  }
+
+  List<DiagnosticsNode> _filterChildren(
+    List<DiagnosticsNode> nodes,
+    _SerializationDelegate delegate,
   ) {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-    for (DiagnosticsNode child in node.getChildren()) {
-      if (!config.summaryTree || _shouldShowInSummaryTree(child)) {
+    for (DiagnosticsNode child in nodes) {
+      if (!delegate.summaryTree || _shouldShowInSummaryTree(child)) {
         children.add(child);
       } else {
-        children.addAll(_getChildrenFiltered(child, config));
+        children.addAll(_getChildrenFiltered(child, delegate));
       }
     }
     return children;
@@ -1656,7 +1552,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object> _getRootWidget(String groupName) {
-    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
+    return _nodeToJson(WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(), _SerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the [DiagnosticsNode] for the root
@@ -1668,7 +1564,7 @@ mixin WidgetInspectorService {
   Map<String, Object> _getRootWidgetSummaryTree(String groupName) {
     return _nodeToJson(
       WidgetsBinding.instance?.renderViewElement?.toDiagnosticsNode(),
-      _SerializeConfig(groupName: groupName, subtreeDepth: 1000000, summaryTree: true),
+      _SerializationDelegate(groupName: groupName, subtreeDepth: 1000000, summaryTree: true, service: this),
     );
   }
 
@@ -1680,7 +1576,7 @@ mixin WidgetInspectorService {
   }
 
   Map<String, Object> _getRootRenderObject(String groupName) {
-    return _nodeToJson(RendererBinding.instance?.renderView?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
+    return _nodeToJson(RendererBinding.instance?.renderView?.toDiagnosticsNode(), _SerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a JSON representation of the subtree rooted at the
@@ -1702,11 +1598,12 @@ mixin WidgetInspectorService {
     }
     return _nodeToJson(
       root,
-      _SerializeConfig(
+      _SerializationDelegate(
         groupName: groupName,
         summaryTree: false,
         subtreeDepth: 2,  // TODO(jacobr): make subtreeDepth configurable.
         includeProperties: true,
+        service: this,
       ),
     );
   }
@@ -1725,7 +1622,7 @@ mixin WidgetInspectorService {
   Map<String, Object> _getSelectedRenderObject(String previousSelectionId, String groupName) {
     final DiagnosticsNode previousSelection = toObject(previousSelectionId);
     final RenderObject current = selection?.current;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
@@ -1812,7 +1709,7 @@ mixin WidgetInspectorService {
   Map<String, Object> _getSelectedWidget(String previousSelectionId, String groupName) {
     final DiagnosticsNode previousSelection = toObject(previousSelectionId);
     final Element current = selection?.currentElement;
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns a [DiagnosticsNode] representing the currently selected [Element]
@@ -1843,7 +1740,7 @@ mixin WidgetInspectorService {
       }
       current = firstLocal;
     }
-    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializeConfig(groupName: groupName));
+    return _nodeToJson(current == previousSelection?.value ? previousSelection : current?.toDiagnosticsNode(), _SerializationDelegate(groupName: groupName, service: this));
   }
 
   /// Returns whether [Widget] creation locations are available.
@@ -2180,7 +2077,6 @@ class _WidgetInspectorState extends State<WidgetInspector>
         // changed.
       });
     };
-    assert(WidgetInspectorService.instance.selectionChangedCallback == null);
     WidgetInspectorService.instance.selectionChangedCallback = _selectionChangedCallback;
   }
 
@@ -2557,10 +2453,12 @@ class _InspectorOverlayLayer extends Layer {
       return true;
     }());
     if (inDebugMode == false) {
-      throw FlutterError(
-        'The inspector should never be used in production mode due to the '
-        'negative performance impact.'
-      );
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary(
+          'The inspector should never be used in production mode due to the '
+          'negative performance impact.'
+        )
+      ]);
     }
   }
 
@@ -2668,7 +2566,8 @@ class _InspectorOverlayLayer extends Layer {
   ) {
     canvas.save();
     final double maxWidth = size.width - 2 * (_kScreenEdgeMargin + _kTooltipPadding);
-    if (_textPainter == null || _textPainter.text.text != message || _textPainterMaxWidth != maxWidth) {
+    final TextSpan textSpan = _textPainter?.text;
+    if (_textPainter == null || textSpan.text != message || _textPainterMaxWidth != maxWidth) {
       _textPainterMaxWidth = maxWidth;
       _textPainter = TextPainter()
         ..maxLines = _kMaxTooltipLines
@@ -2718,6 +2617,9 @@ class _InspectorOverlayLayer extends Layer {
 
   @override
   S find<S>(Offset regionOffset) => null;
+
+  @override
+  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
 }
 
 const double _kScreenEdgeMargin = 10.0;
@@ -2830,4 +2732,105 @@ int _toLocationId(_Location location) {
   _locations.add(location);
   _locationToId[location] = id;
   return id;
+}
+
+class _SerializationDelegate implements DiagnosticsSerializationDelegate {
+  _SerializationDelegate({
+    this.groupName,
+    this.summaryTree = false,
+    this.maxDescendentsTruncatableNode = -1,
+    this.expandPropertyValues = true,
+    this.subtreeDepth = 1,
+    this.includeProperties = false,
+    @required this.service,
+  });
+
+  final WidgetInspectorService service;
+  final String groupName;
+  final bool summaryTree;
+  final int maxDescendentsTruncatableNode;
+
+  @override
+  final bool includeProperties;
+
+  @override
+  final int subtreeDepth;
+
+  @override
+  final bool expandPropertyValues;
+
+  final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];
+
+  bool get interactive => groupName != null;
+
+  @override
+  Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
+    final Map<String, Object> result = <String, Object>{};
+    final Object value = node.value;
+    if (interactive) {
+      result['objectId'] = service.toId(node, groupName);
+      result['valueId'] = service.toId(value, groupName);
+    }
+    if (summaryTree) {
+      result['summaryTree'] = true;
+    }
+    final _Location creationLocation = _getCreationLocation(value);
+    if (creationLocation != null) {
+      result['locationId'] = _toLocationId(creationLocation);
+      result['creationLocation'] = creationLocation.toJsonMap();
+      if (service._isLocalCreationLocation(creationLocation)) {
+        _nodesCreatedByLocalProject.add(node);
+        result['createdByLocalProject'] = true;
+      }
+    }
+    return result;
+  }
+
+  @override
+  DiagnosticsSerializationDelegate delegateForNode(DiagnosticsNode node) {
+    // The tricky special case here is that when in the detailsTree,
+    // we keep subtreeDepth from going down to zero until we reach nodes
+    // that also exist in the summary tree. This ensures that every time
+    // you expand a node in the details tree, you expand the entire subtree
+    // up until you reach the next nodes shared with the summary tree.
+    return summaryTree || subtreeDepth > 1 || service._shouldShowInSummaryTree(node)
+        ? copyWith(subtreeDepth: subtreeDepth - 1)
+        : this;
+  }
+
+  @override
+  List<DiagnosticsNode> filterChildren(List<DiagnosticsNode> children, DiagnosticsNode owner) {
+    return service._filterChildren(children, this);
+  }
+
+  @override
+  List<DiagnosticsNode> filterProperties(List<DiagnosticsNode> properties, DiagnosticsNode owner) {
+    final bool createdByLocalProject = _nodesCreatedByLocalProject.contains(owner);
+    return properties.where((DiagnosticsNode node) {
+      return !node.isFiltered(createdByLocalProject ? DiagnosticLevel.fine : DiagnosticLevel.info);
+    }).toList();
+  }
+
+  @override
+  List<DiagnosticsNode> truncateNodesList(List<DiagnosticsNode> nodes, DiagnosticsNode owner) {
+    if (maxDescendentsTruncatableNode >= 0 &&
+        owner?.allowTruncate == true &&
+        nodes.length > maxDescendentsTruncatableNode) {
+      nodes = service._truncateNodes(nodes, maxDescendentsTruncatableNode);
+    }
+    return nodes;
+  }
+
+  @override
+  DiagnosticsSerializationDelegate copyWith({int subtreeDepth, bool includeProperties}) {
+    return _SerializationDelegate(
+      groupName: groupName,
+      summaryTree: summaryTree,
+      maxDescendentsTruncatableNode: maxDescendentsTruncatableNode,
+      expandPropertyValues: expandPropertyValues,
+      subtreeDepth: subtreeDepth ?? this.subtreeDepth,
+      includeProperties: includeProperties ?? this.includeProperties,
+      service: service,
+    );
+  }
 }

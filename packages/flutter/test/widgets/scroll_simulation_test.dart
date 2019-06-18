@@ -9,8 +9,8 @@ void main() {
   test('ClampingScrollSimulation has a stable initial conditions', () {
     void checkInitialConditions(double position, double velocity) {
       final ClampingScrollSimulation simulation = ClampingScrollSimulation(position: position, velocity: velocity);
-      expect(simulation.x(0.0), closeTo(position, 0.00001));
-      expect(simulation.dx(0.0), closeTo(velocity, 0.00001));
+      expect(simulation.x(0.0), moreOrLessEquals(position));
+      expect(simulation.dx(0.0), moreOrLessEquals(velocity));
     }
 
     checkInitialConditions(51.0, 2866.91537);
