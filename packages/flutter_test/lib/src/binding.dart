@@ -150,15 +150,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// [LiveTestWidgetsFlutterBinding] otherwise (e.g. if it was run
   /// using `flutter run`). This is determined by looking at the
   /// environment variables for a variable called `FLUTTER_TEST`.
-  /// 
+  ///
   /// If `FLUTTER_TEST` is set with a value of 'true', then this test was
   /// invoked by `flutter test`. If `FLUTTER_TEST` is not set, or if it is set
   /// to 'false', then this test was invoked by `flutter run`.
-  /// 
+  ///
   /// Browser environments do not currently support the
   /// [LiveTestWidgetsFlutterBinding], so this function will always set up an
   /// [AutomatedTestWidgetsFlutterBinding] when run in a web browser.
-  /// 
+  ///
   /// The parameter [enviroment] is exposed to test different environment
   /// variable values, and should not be used.
   static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {

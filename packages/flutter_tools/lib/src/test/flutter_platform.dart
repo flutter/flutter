@@ -842,7 +842,7 @@ class FlutterPlatform extends PlatformPlugin {
     //
     // If FLUTTER_TEST has not been set, assume from this context that this
     // call was invoked by the command 'flutter test'.
-    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST') 
+    final String flutterTest = platform.environment.containsKey('FLUTTER_TEST')
         ? platform.environment['FLUTTER_TEST']
         : 'true';
     final Map<String, String> environment = <String, String>{
