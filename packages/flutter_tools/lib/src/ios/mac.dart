@@ -49,7 +49,7 @@ class IMobileDevice {
     final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
     return exitsHappy(
       <String>['$cachePath/idevice_id', '-h'],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath},
+      environment: IosUsbArtifacts.executionEnv(),
     );
   }
 
@@ -62,9 +62,10 @@ class IMobileDevice {
     // If usage info is printed in a hyphenated id, we need to update.
     const String fakeIphoneId = '00008020-001C2D903C42002E';
     final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
+    final Map<String, String> executionEnv = IosUsbArtifacts.executionEnv();
     final ProcessResult ideviceResult = (await runAsync(
       <String>['$cachePath/ideviceinfo', '-u', fakeIphoneId],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath}
+      environment: executionEnv,
     )).processResult;
     if (ideviceResult.stdout.contains('Usage: ideviceinfo')) {
       return false;
@@ -73,13 +74,16 @@ class IMobileDevice {
     // If no device is attached, we're unable to detect any problems. Assume all is well.
     final ProcessResult result = (await runAsync(
       <String>['$cachePath/idevice_id', '-l'],
-      environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath},
+      environment: executionEnv,
     )).processResult;
     if (result.exitCode == 0 && result.stdout.isEmpty)
       return true;
 
     // Check that we can look up the names of any attached devices.
-    return await exitsHappyAsync(<String>['idevicename']);
+    return await exitsHappyAsync(
+      <String>['$cachePath/idevicename'],
+      environment: executionEnv,
+    );
   }
 
   Future<String> getAvailableDeviceIDs() async {
@@ -87,7 +91,7 @@ class IMobileDevice {
       final String cachePath = cache.getArtifactDirectory('libimobiledevice').path;
       final ProcessResult result = await processManager.run(
         <String>['$cachePath/idevice_id', '-l'],
-        environment: <String, String>{'DYLD_LIBRARY_PATH': cachePath},
+        environment: IosUsbArtifacts.executionEnv(),
       );
       if (result.exitCode != 0)
         throw ToolExit('idevice_id returned an error:\n${result.stderr}');

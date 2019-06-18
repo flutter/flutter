@@ -270,11 +270,14 @@ bool exitsHappy(
   _traceCommand(cli);
   try {
     //return processManager.runSync(cli, environment: environment).exitCode == 0;
-    final int code = processManager.runSync(cli, environment: environment).exitCode;
+    final ProcessResult result = processManager.runSync(cli, environment: environment);
+    final int code = result.exitCode;
     if (code != 0) {
       print('Yolo dawg!');
       print('Command was: ${cli.join(' ')}');
       print('Code was: $code');
+      print(result.stdout);
+      print('env was: ${environment['DYLD_LIBRARY_PATH']}');
     }
     return code == 0;
   } catch (error) {
@@ -283,10 +286,23 @@ bool exitsHappy(
   }
 }
 
-Future<bool> exitsHappyAsync(List<String> cli) async { // TODO here too
+Future<bool> exitsHappyAsync(
+  List<String> cli, {
+  Map<String, String> environment,
+}) async {
   _traceCommand(cli);
   try {
-    return (await processManager.run(cli)).exitCode == 0; // TODO: we can pass an environment map here
+    //return (await processManager.run(cli, environment: environment)).exitCode == 0;
+    var result = (await processManager.run(cli, environment: environment));
+    final int code = result.exitCode;
+    if (code != 0) {
+      print('Yolo dawg!');
+      print('Command was: ${cli.join(' ')}');
+      print('Code was: $code');
+      print(result.stdout.toString);
+    }
+    return code == 0;
+
   } catch (error) {
     printTrace('$cli failed with $error');
     return false;

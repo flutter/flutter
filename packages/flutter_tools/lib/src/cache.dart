@@ -70,7 +70,7 @@ class DevelopmentArtifact {
 class Cache {
   /// [rootOverride] is configurable for testing.
   /// [artifacts] is configurable for testing.
-  Cache({ Directory rootOverride, List<CachedArtifact> artifacts }) : _rootOverride = rootOverride { // TODO!
+  Cache({ Directory rootOverride, List<CachedArtifact> artifacts }) : _rootOverride = rootOverride {
     if (artifacts == null) {
       _artifacts.add(MaterialFonts(this));
       _artifacts.add(AndroidEngineArtifacts(this));
@@ -225,6 +225,19 @@ class Cache {
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
   Directory getArtifactDirectory(String name) {
     return getCacheArtifacts().childDirectory(name);
+  }
+
+  /// Get a file in a cached artifact directory; for example:
+  ///
+  /// `getArtifactFileName('libimobiledevice', 'idevice_id');`
+  ///
+  /// will return: `'bin/cache/artifacts/libimobiledevice/idevice_id'`
+  String getArtifactFile(String dirName, String fileName) {
+    return fs.path.join(getArtifactDirectory(dirName).path, fileName);
+  }
+
+  CachedArtifact getArtifactInstanceOf(Object typeImplementation) {
+    return _artifacts.firstWhere((dynamic current) => current.runtimeType == typeImplementation);
   }
 
   /// The web sdk has to be co-located with the dart-sdk so that they can share source
@@ -562,7 +575,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     final String url = '$_storageBaseUrl/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
-    for (String pkgName in getPackageDirs()) { // TODO yolo!
+    for (String pkgName in getPackageDirs()) {
       await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
@@ -902,17 +915,32 @@ class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
   }
 }
 
-/// A cached artifact containing fonts used for Material Design.
-abstract class _IosUsbArtifacts extends CachedArtifact {
-  _IosUsbArtifacts(String name, Cache cache) : super(
+/// Abstract class for cached iOS/USB binary dependencies.
+abstract class IosUsbArtifacts extends CachedArtifact {
+  IosUsbArtifacts(String name, Cache cache) : super(
     name,
     cache,
     const <DevelopmentArtifact>{ DevelopmentArtifact.iOS },
   );
 
-  /// Return the full path to a binary in the cache
-  String binaryPath(String binaryName) {
-    return fs.path.join(cache.getArtifactDirectory(name).path, binaryName);
+  String getBinaryFileName(String packageName, String binaryName) {
+    return fs.path.join(cache.getArtifactDirectory(packageName).path, binaryName);
+  }
+
+  static Map<String, String> executionEnv() {
+    final String concatenatedPath = <String>[
+      'libimobiledevice',
+      'usbmuxd',
+      'libplist',
+      'openssl',
+      'ideviceinstaller',
+      'libtasn1',
+      'ios-deploy',
+    ].map((String path) => cache.getArtifactDirectory(path).path)
+        .toList()
+        .join(':');
+
+    return <String, String>{'DYLD_LIBRARY_PATH': concatenatedPath};
   }
 
   @override
@@ -924,31 +952,31 @@ abstract class _IosUsbArtifacts extends CachedArtifact {
 
 /// The cached artifact for libimobiledevice binaries for running apps on
 /// iOS devices
-class LibIMobileDeviceArtifacts extends _IosUsbArtifacts {
+class LibIMobileDeviceArtifacts extends IosUsbArtifacts {
   LibIMobileDeviceArtifacts(Cache cache) : super('libimobiledevice', cache);
 }
 
-class UsbMuxdArtifacts extends _IosUsbArtifacts {
+class UsbMuxdArtifacts extends IosUsbArtifacts {
   UsbMuxdArtifacts(Cache cache) : super('usbmuxd', cache);
 }
 
-class LibPListArtifacts extends _IosUsbArtifacts {
+class LibPListArtifacts extends IosUsbArtifacts {
   LibPListArtifacts(Cache cache) : super('libplist', cache);
 }
 
-class OpenSSLArtifacts extends _IosUsbArtifacts {
+class OpenSSLArtifacts extends IosUsbArtifacts {
   OpenSSLArtifacts(Cache cache) : super('openssl', cache);
 }
 
-class IDeviceInstallerArtifacts extends _IosUsbArtifacts {
+class IDeviceInstallerArtifacts extends IosUsbArtifacts {
   IDeviceInstallerArtifacts(Cache cache) : super('ideviceinstaller', cache);
 }
 
-class LibTasn1Artifacts extends _IosUsbArtifacts {
+class LibTasn1Artifacts extends IosUsbArtifacts {
   LibTasn1Artifacts(Cache cache) : super('libtasn1', cache);
 }
 
-class IosDeployArtifacts extends _IosUsbArtifacts {
+class IosDeployArtifacts extends IosUsbArtifacts {
   IosDeployArtifacts(Cache cache) : super('ios-deploy', cache);
 }
 

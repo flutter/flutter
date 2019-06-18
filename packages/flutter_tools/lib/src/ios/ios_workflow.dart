@@ -10,7 +10,9 @@ import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/user_messages.dart';
 import '../base/version.dart';
+import '../cache.dart';
 import '../doctor.dart';
+import '../globals.dart';
 import '../macos/xcode.dart';
 import 'mac.dart';
 import 'plist_utils.dart' as plist;
@@ -45,16 +47,34 @@ class IOSValidator extends DoctorValidator {
 
   const IOSValidator() : super('iOS tools - develop for iOS devices');
 
-  Future<bool> get hasIDeviceInstaller => exitsHappyAsync(<String>['ideviceinstaller', '-h']); // TODO!
+  Future<bool> get hasIDeviceInstaller {
+    final String binPath = cache.getArtifactFile('ideviceinstaller', 'ideviceinstaller');
+    return exitsHappyAsync(
+      <String>[binPath, '-h'],
+      environment: IosUsbArtifacts.executionEnv(),
+      );
+  }
 
-  Future<bool> get hasIosDeploy => exitsHappyAsync(<String>['ios-deploy', '--version']); // TODO!
+  Future<bool> get hasIosDeploy {
+    final String binPath = cache.getArtifactFile('ios-deploy', 'ios-deploy');
+    return exitsHappyAsync(
+      <String>[binPath, '--version'],
+      environment: IosUsbArtifacts.executionEnv(),
+      );
+  }
 
   String get iosDeployMinimumVersion => '1.9.4';
 
   // ios-deploy <= v1.9.3 declares itself as v2.0.0
   List<String> get iosDeployBadVersions => <String>['2.0.0'];
 
-  Future<String> get iosDeployVersionText async => (await runAsync(<String>['ios-deploy', '--version'])).processResult.stdout.replaceAll('\n', '');
+  Future<String> get iosDeployVersionText async {
+    final String binPath = cache.getArtifactFile('ios-deploy', 'ios-deploy');
+    return (await runAsync(
+      <String>[binPath, '--version'],
+      environment: IosUsbArtifacts.executionEnv(),
+    )).processResult.stdout.replaceAll('\n', '');
+  }
 
   bool get hasHomebrew => os.which('brew') != null;
 
