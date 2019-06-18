@@ -395,6 +395,9 @@ class ApplicationPackageStore {
   AndroidApk android;
   IOSApp iOS;
   FuchsiaApp fuchsia;
+  LinuxApp linux;
+  MacOSApp macOS;
+  WindowsApp windows;
 
   Future<ApplicationPackage> getPackageForPlatform(TargetPlatform platform) async {
     switch (platform) {
@@ -411,8 +414,14 @@ class ApplicationPackageStore {
         fuchsia ??= FuchsiaApp.fromFuchsiaProject(FlutterProject.current().fuchsia);
         return fuchsia;
       case TargetPlatform.darwin_x64:
+        macOS ??= MacOSApp.fromMacOSProject(FlutterProject.current().macos);
+        return macOS;
       case TargetPlatform.linux_x64:
+        linux ??= LinuxApp.fromLinuxProject(FlutterProject.current().linux);
+        return linux;
       case TargetPlatform.windows_x64:
+        windows ??= WindowsApp.fromWindowsProject(FlutterProject.current().windows);
+        return windows;
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         return null;
