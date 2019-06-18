@@ -13,6 +13,7 @@ import android.os.LocaleList;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.annotation.VisibleForTesting;
 import android.text.format.DateFormat;
 import android.util.AttributeSet;
 import android.view.KeyEvent;
@@ -25,9 +26,11 @@ import android.view.inputmethod.InputConnection;
 import android.widget.FrameLayout;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
@@ -74,6 +77,8 @@ public class FlutterView extends FrameLayout {
   // Connections to a Flutter execution context.
   @Nullable
   private FlutterEngine flutterEngine;
+  @NonNull
+  private final Set<FlutterEngineAttachmentListener> flutterEngineAttachmentListeners = new HashSet<>();
 
   // Components that process various types of Android View input and events,
   // possibly storing intermediate state, and communicating those events to Flutter.
@@ -561,6 +566,11 @@ public class FlutterView extends FrameLayout {
     sendUserSettingsToFlutter();
     sendLocalesToFlutter(getResources().getConfiguration());
     sendViewportMetricsToFlutter();
+
+    // Notify engine attachment listeners of the attachment.
+    for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
+      listener.onFlutterEngineAttachedToFlutterView(flutterEngine);
+    }
   }
 
   /**
@@ -578,6 +588,11 @@ public class FlutterView extends FrameLayout {
     if (!isAttachedToFlutterEngine()) {
       Log.d(TAG, "Not attached to an engine. Doing nothing.");
       return;
+    }
+
+    // Notify engine attachment listeners of the detachment.
+    for (FlutterEngineAttachmentListener listener : flutterEngineAttachmentListeners) {
+      listener.onFlutterEngineDetachedFromFlutterView();
     }
 
     // Disconnect and clean up the AccessibilityBridge.
@@ -604,8 +619,40 @@ public class FlutterView extends FrameLayout {
 //    }
   }
 
-  private boolean isAttachedToFlutterEngine() {
+  /**
+   * Returns true if this {@code FlutterView} is currently attached to a {@link FlutterEngine}.
+   */
+  @VisibleForTesting
+  public boolean isAttachedToFlutterEngine() {
     return flutterEngine != null && flutterEngine.getRenderer().isAttachedTo(renderSurface);
+  }
+
+  /**
+   * Returns the {@link FlutterEngine} to which this {@code FlutterView} is currently attached,
+   * or null if this {@code FlutterView} is not currently attached to a {@link FlutterEngine}.
+   */
+  @VisibleForTesting
+  @Nullable
+  public FlutterEngine getAttachedFlutterEngine() {
+    return flutterEngine;
+  }
+
+  /**
+   * Adds a {@link FlutterEngineAttachmentListener}, which is notifed whenever this {@code FlutterView}
+   * attached to/detaches from a {@link FlutterEngine}.
+   */
+  @VisibleForTesting
+  public void addFlutterEngineAttachmentListener(@NonNull FlutterEngineAttachmentListener listener) {
+    flutterEngineAttachmentListeners.add(listener);
+  }
+
+  /**
+   * Removes a {@link FlutterEngineAttachmentListener} that was previously added with
+   * {@link #addFlutterEngineAttachmentListener(FlutterEngineAttachmentListener)}.
+   */
+  @VisibleForTesting
+  public void removeFlutterEngineAttachmentListener(@NonNull FlutterEngineAttachmentListener listener) {
+    flutterEngineAttachmentListeners.remove(listener);
   }
 
   /**
@@ -711,5 +758,23 @@ public class FlutterView extends FrameLayout {
      * switch {@code Fragment}s at runtime that contain a Flutter UI.
      */
     transparent
+  }
+
+  /**
+   * Listener that is notified when a {@link FlutterEngine} is attached to/detached from
+   * a given {@code FlutterView}.
+   */
+  @VisibleForTesting
+  public interface FlutterEngineAttachmentListener {
+    /**
+     * The given {@code engine} has been attached to the associated {@code FlutterView}.
+     */
+    void onFlutterEngineAttachedToFlutterView(@NonNull FlutterEngine engine);
+
+    /**
+     * A previously attached {@link FlutterEngine} has been detached from the associated
+     * {@code FlutterView}.
+     */
+    void onFlutterEngineDetachedFromFlutterView();
   }
 }
