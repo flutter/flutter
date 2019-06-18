@@ -1617,7 +1617,7 @@ void main() {
 
         // In the middle of the expanded InputDecorator.
         expect(tester.getTopLeft(find.text(text)).dy, closeTo(331.0, .0001));
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 247.0);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(247.0, .0001));
       });
 
       testWidgets('InputDecorator tall prefix with border align top', (WidgetTester tester) async {
@@ -1681,7 +1681,7 @@ void main() {
 
         // Below the center example.
         expect(tester.getTopLeft(find.text(text)).dy, closeTo(554.0, .0001));
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 470.0);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(470.0, .0001));
       });
 
       testWidgets('InputDecorator tall prefix with border align double', (WidgetTester tester) async {
@@ -1712,7 +1712,7 @@ void main() {
 
         // Between the top and center examples.
         expect(tester.getTopLeft(find.text(text)).dy, closeTo(353.3, .0001));
-        expect(tester.getTopLeft(find.byKey(pKey)).dy, 269.3);
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(269.3, .0001));
       });
     });
 
