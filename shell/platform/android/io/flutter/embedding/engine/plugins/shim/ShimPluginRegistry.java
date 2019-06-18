@@ -10,6 +10,7 @@ import android.support.annotation.NonNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterEngine;
 import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.plugin.platform.PlatformViewsController;
@@ -32,12 +33,15 @@ import io.flutter.view.FlutterView;
  * }
  */
 public class ShimPluginRegistry implements PluginRegistry {
+  private static final String TAG = "ShimPluginRegistry";
+
   private final FlutterEngine flutterEngine;
   private final PlatformViewsController platformViewsController;
   private final Map<String, Object> pluginMap = new HashMap<>();
   private final FlutterEngine.EngineLifecycleListener engineLifecycleListener = new FlutterEngine.EngineLifecycleListener() {
     @Override
     public void onPreEngineRestart() {
+      Log.v(TAG, "onPreEngineRestart()");
       ShimPluginRegistry.this.onPreEngineRestart();
     }
   };
@@ -53,6 +57,7 @@ public class ShimPluginRegistry implements PluginRegistry {
 
   @Override
   public Registrar registrarFor(String pluginKey) {
+    Log.v(TAG, "Creating plugin Registrar for '" + pluginKey + "'");
     if (pluginMap.containsKey(pluginKey)) {
       throw new IllegalStateException("Plugin key " + pluginKey + " is already in use");
     }
@@ -75,10 +80,12 @@ public class ShimPluginRegistry implements PluginRegistry {
 
   //----- From FlutterPluginRegistry that aren't in the PluginRegistry interface ----//
   public void attach(FlutterView flutterView, Activity activity) {
+    Log.v(TAG, "Attaching to a FlutterView and an Activity.");
     platformViewsController.attach(activity, flutterEngine.getRenderer(), flutterEngine.getDartExecutor());
   }
 
   public void detach() {
+    Log.v(TAG, "Detaching from a FlutterView and an Activity.");
     platformViewsController.detach();
     platformViewsController.onFlutterViewDestroyed();
   }

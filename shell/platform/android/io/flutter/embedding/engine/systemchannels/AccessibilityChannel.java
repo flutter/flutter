@@ -4,8 +4,8 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.HashMap;
-import java.util.Map;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.FlutterJNI;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.BasicMessageChannel;
@@ -19,6 +19,8 @@ import io.flutter.view.AccessibilityBridge;
  * events that might be sent from Flutter to the Android platform.
  */
 public class AccessibilityChannel {
+  private static final String TAG = "AccessibilityChannel";
+
   @NonNull
   public final BasicMessageChannel<Object> channel;
   @NonNull
@@ -41,6 +43,7 @@ public class AccessibilityChannel {
       @SuppressWarnings("unchecked")
       final HashMap<String, Object> data = (HashMap<String, Object>) annotatedEvent.get("data");
 
+      Log.v(TAG, "Received " + type + " message.");
       switch (type) {
         case "announce":
           String announceMessage = (String) data.get("message");

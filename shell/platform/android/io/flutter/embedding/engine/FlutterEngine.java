@@ -12,6 +12,7 @@ import android.support.annotation.NonNull;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.embedding.engine.plugins.PluginRegistry;
 import io.flutter.embedding.engine.plugins.activity.ActivityControlSurface;
@@ -91,6 +92,7 @@ public class FlutterEngine implements LifecycleOwner {
   private final EngineLifecycleListener engineLifecycleListener = new EngineLifecycleListener() {
     @SuppressWarnings("unused")
     public void onPreEngineRestart() {
+      Log.v(TAG, "onPreEngineRestart()");
       for (EngineLifecycleListener lifecycleListener : engineLifecycleListeners) {
         lifecycleListener.onPreEngineRestart();
       }
@@ -143,6 +145,7 @@ public class FlutterEngine implements LifecycleOwner {
   }
 
   private void attachToJni() {
+    Log.v(TAG, "Attaching to JNI.");
     // TODO(mattcarroll): update native call to not take in "isBackgroundView"
     flutterJNI.attachToNative(false);
 
@@ -163,6 +166,7 @@ public class FlutterEngine implements LifecycleOwner {
    * This {@code FlutterEngine} instance should be discarded after invoking this method.
    */
   public void destroy() {
+    Log.d(TAG, "Destroying.");
     // The order that these things are destroyed is important.
     pluginRegistry.destroy();
     dartExecutor.onDetachedFromJNI();

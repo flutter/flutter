@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.dart.DartExecutor;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -23,6 +24,8 @@ import io.flutter.plugin.common.StandardMethodCodec;
  * Register a {@link PlatformViewsHandler} to implement the Android side of this channel.
  */
 public class PlatformViewsChannel {
+  private static final String TAG = "PlatformViewsChannel";
+
   private final MethodChannel channel;
   private PlatformViewsHandler handler;
 
@@ -42,6 +45,7 @@ public class PlatformViewsChannel {
         return;
       }
 
+      Log.v(TAG, "Received '" + call.method + "' message.");
       switch (call.method) {
         case "create":
           create(call, result);

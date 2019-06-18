@@ -9,13 +9,13 @@ import android.graphics.SurfaceTexture;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Surface;
 import android.view.TextureView;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import io.flutter.Log;
 import io.flutter.embedding.engine.renderer.FlutterRenderer;
 import io.flutter.embedding.engine.renderer.OnFirstFrameRenderedListener;
 
@@ -50,19 +50,19 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
   private final SurfaceTextureListener surfaceTextureListener = new SurfaceTextureListener() {
     @Override
     public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int width, int height) {
-      Log.d(TAG, "SurfaceTextureListener.onSurfaceTextureAvailable()");
+      Log.v(TAG, "SurfaceTextureListener.onSurfaceTextureAvailable()");
       isSurfaceAvailableForRendering = true;
 
       // If we're already attached to a FlutterRenderer then we're now attached to both a renderer
       // and the Android window, so we can begin rendering now.
       if (isAttachedToFlutterRenderer) {
-        Log.d(TAG, "Already attached to renderer. Notifying of surface creation.");
         connectSurfaceToRenderer();
       }
     }
 
     @Override
     public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+      Log.v(TAG, "SurfaceTextureListener.onSurfaceTextureSizeChanged()");
       if (isAttachedToFlutterRenderer) {
         changeSurfaceSize(width, height);
       }
@@ -75,7 +75,7 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
 
     @Override
     public boolean onSurfaceTextureDestroyed(SurfaceTexture surface) {
-      Log.d(TAG, "SurfaceTextureListener.onSurfaceTextureDestroyed()");
+      Log.v(TAG, "SurfaceTextureListener.onSurfaceTextureDestroyed()");
       isSurfaceAvailableForRendering = false;
 
       // If we're attached to a FlutterRenderer then we need to notify it that our SurfaceTexture
@@ -125,7 +125,9 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
    * Flutter's UI to this {@code FlutterTextureView}.
    */
   public void attachToRenderer(@NonNull FlutterRenderer flutterRenderer) {
+    Log.v(TAG, "Attaching to FlutterRenderer.");
     if (this.flutterRenderer != null) {
+      Log.v(TAG, "Already connected to a FlutterRenderer. Detaching from old one and attaching to new one.");
       this.flutterRenderer.detachFromRenderSurface();
     }
 
@@ -135,6 +137,7 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
     // If we're already attached to an Android window then we're now attached to both a renderer
     // and the Android window. We can begin rendering now.
     if (isSurfaceAvailableForRendering) {
+      Log.v(TAG, "Surface is available for rendering. Connecting FlutterRenderer to Android surface.");
       connectSurfaceToRenderer();
     }
   }
@@ -149,7 +152,9 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
     if (flutterRenderer != null) {
       // If we're attached to an Android window then we were rendering a Flutter UI. Now that
       // this FlutterTextureView is detached from the FlutterRenderer, we need to stop rendering.
+      // TODO(mattcarroll): introduce a isRendererConnectedToSurface() to wrap "getWindowToken() != null"
       if (getWindowToken() != null) {
+        Log.v(TAG, "Disconnecting FlutterRenderer from Android surface.");
         disconnectSurfaceFromRenderer();
       }
 
@@ -175,6 +180,7 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
       throw new IllegalStateException("changeSurfaceSize() should only be called when flutterRenderer is non-null.");
     }
 
+    Log.v(TAG, "Notifying FlutterRenderer that Android surface size has changed to " + width + " x " + height);
     flutterRenderer.surfaceChanged(width, height);
   }
 
@@ -208,7 +214,7 @@ public class FlutterTextureView extends TextureView implements FlutterRenderer.R
   @Override
   public void onFirstFrameRendered() {
     // TODO(mattcarroll): decide where this method should live and what it needs to do.
-    Log.d(TAG, "onFirstFrameRendered()");
+    Log.v(TAG, "onFirstFrameRendered()");
 
     for (OnFirstFrameRenderedListener listener : onFirstFrameRenderedListeners) {
       listener.onFirstFrameRendered();
