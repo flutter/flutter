@@ -1689,11 +1689,11 @@ class InputDecorator extends StatefulWidget {
   /// How the text should be aligned vertically.
   ///
   /// Determines the alignment of the baseline within the available space of
-  /// the input.  For example, TextAlignVertical.top will place the baseline
-  /// such that the text, and any attached decoration like prefix and suffix,
-  /// is as close to the top of the input as possible without overflowing.
-  /// Likewise, prefix and suffix height are included in the calculation at
-  /// other alignments as well. If the height is greater than the height
+  /// the input (typically a TextField). For example, TextAlignVertical.top will
+  /// place the baseline such that the text, and any attached decoration like
+  /// prefix and suffix, is as close to the top of the input as possible without
+  /// overflowing. The heights of the prefix and suffix are similarly included
+  /// for other alignment values. If the height is greater than the height
   /// available, then the prefix and suffix will be allowed to overflow first
   /// before the text scrolls.
   /// {@endtemplate}
@@ -3536,8 +3536,9 @@ class InputDecorationTheme extends Diagnosticable {
 ///
 /// See also:
 ///
-///  * [TextField.textAlignVertical]
-///  * [InputDecorator.textAlignVertical]
+///  * [TextField.textAlignVertical], which is passed on to the [InputDecorator].
+///  * [InputDecorator.textAlignVertical], which defines the alignment of
+///    prefix, input, and suffix, within the [InputDecorator].
 class TextAlignVertical {
   /// Construct TextAlignVertical from any given y value.
   const TextAlignVertical({
