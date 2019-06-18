@@ -1055,7 +1055,9 @@ class _RenderDecoration extends RenderBox {
       - topHeight
       - contentPadding.bottom;
     final double alignableHeight = fixAboveInput + inputHeight + fixBelowInput;
-    // outlinePadding accounts for the border and floating label.
+    // When outline aligned, the baseline is vertically centered by default, and
+    // outlinePadding is used to account for the presence of the border and
+    // floating label.
     final double outlinePadding = _isOutlineAligned ? 10.0 : 0;
     final double textAlignVerticalOffset = (maxContentHeight - alignableHeight - outlinePadding) * textAlignVerticalFactor;
     final double inputBaseline = topInputBaseline + textAlignVerticalOffset;
@@ -1686,7 +1688,14 @@ class InputDecorator extends StatefulWidget {
   /// {@template flutter.widgets.inputDecorator.textAlignVertical}
   /// How the text should be aligned vertically.
   ///
-  /// Cannot be null.
+  /// Determines the alignment of the baseline within the available space of
+  /// the input.  For example, TextAlignVertical.top will place the baseline
+  /// such that the text, and any attached decoration like prefix and suffix,
+  /// is as close to the top of the input as possible without overflowing.
+  /// Likewise, prefix and suffix height are included in the calculation at
+  /// other alignments as well. If the height is greater than the height
+  /// available, then the prefix and suffix will be allowed to overflow first
+  /// before the text scrolls.
   /// {@endtemplate}
   final TextAlignVertical textAlignVertical;
 
@@ -3519,11 +3528,15 @@ class InputDecorationTheme extends Diagnosticable {
 
 /// The vertical alignment of text within an input.
 ///
-/// This consists simply of a double [y] that can range from -1.0 to 1.0. -1.0
-/// aligns to the top of the input so that the top of the first line of text
-/// fits within the input and its padding. 0.0 aligns to the center of the
-/// input. 1.0 aligns so that the bottom of the last line of text aligns with
-/// the bottom interior edge of the input.
+/// A single [y] value that can range from -1.0 to 1.0. -1.0 aligns to the top
+/// of the input so that the top of the first line of text fits within the input
+/// and its padding. 0.0 aligns to the center of the input. 1.0 aligns so that
+/// the bottom of the last line of text aligns with the bottom interior edge of
+/// the input.
+///
+/// See also:
+///
+///  * [TextField]
 class TextAlignVertical {
   /// Construct TextAlignVertical from any given y value.
   const TextAlignVertical({
@@ -3531,19 +3544,21 @@ class TextAlignVertical {
   }) : assert(y != null),
        assert(y >= -1.0 && y <= 1.0);
 
-  /// A value ranging from -1.0 to 1.0 that corresponds to the topmost to the
-  /// bottommost possible text position.
+  /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
+  /// locations of the top and bottom of the input text box.
   final double y;
 
-  /// A TextAlignVertical that aligns to the top of the input.
+  /// Aligns a TextField's input Text with the topmost location within the
+  /// TextField.
   static const TextAlignVertical top = TextAlignVertical(y: -1.0);
-  /// A TextAlignVertical that aligns to the center of the input.
+  /// Aligns a TextField's input Text to the center of the TextField.
   static const TextAlignVertical center = TextAlignVertical(y: 0.0);
-  /// A TextAlignVertical that aligns to the bottom of the input.
+  /// Aligns a TextField's input Text with the bottommost location within the
+  /// TextField.
   static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);
 
   @override
   String toString() {
-    return 'TextAlignVertical(y: $y)';
+    return '$runtimeType(y: $y)';
   }
 }
