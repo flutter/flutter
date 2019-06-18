@@ -76,7 +76,7 @@ class AndroidDevice extends Device {
       id,
       category: Category.mobile,
       platformType: PlatformType.android,
-      ephemeral: null, // We don't know unless we call the isLocalEmulator.
+      ephemeral: true,
   );
 
   final String productID;
