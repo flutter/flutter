@@ -269,6 +269,8 @@ class DataTable extends StatelessWidget {
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
+       assert(dataRowHeight != null),
+       assert(headingRowHeight != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        _onlyTextColumn = _initOnlyTextColumn(columns),
