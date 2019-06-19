@@ -992,20 +992,20 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 #pragma mark - FlutterBinaryMessenger
 
 - (void)sendOnChannel:(NSString*)channel message:(NSData*)message {
-  [_engine.get() sendOnChannel:channel message:message];
+  [self.surrogateBinaryMessenger sendOnChannel:channel message:message];
 }
 
 - (void)sendOnChannel:(NSString*)channel
               message:(NSData*)message
           binaryReply:(FlutterBinaryReply)callback {
   NSAssert(channel, @"The channel must not be null");
-  [_engine.get() sendOnChannel:channel message:message binaryReply:callback];
+  [self.surrogateBinaryMessenger sendOnChannel:channel message:message binaryReply:callback];
 }
 
 - (void)setMessageHandlerOnChannel:(NSString*)channel
               binaryMessageHandler:(FlutterBinaryMessageHandler)handler {
   NSAssert(channel, @"The channel must not be null");
-  [_engine.get() setMessageHandlerOnChannel:channel binaryMessageHandler:handler];
+  [self.surrogateBinaryMessenger setMessageHandlerOnChannel:channel binaryMessageHandler:handler];
 }
 
 #pragma mark - FlutterTextureRegistry
@@ -1046,6 +1046,11 @@ constexpr CGFloat kStandardStatusBarHeight = 20.0;
 
 - (NSObject*)valuePublishedByPlugin:(NSString*)pluginKey {
   return [_engine.get() valuePublishedByPlugin:pluginKey];
+}
+
+#pragma mark - FlutterSurrogateBinaryMessenger
+- (NSObject<FlutterBinaryMessenger>*)surrogateBinaryMessenger {
+  return _engine.get();
 }
 
 @end
