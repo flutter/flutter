@@ -8,11 +8,13 @@ import 'basic_types.dart';
 import 'text_style.dart';
 
 /// Defines the strut, which sets the minimum height a line can be
-/// relative to the baseline. Strut applies to all lines in the paragraph.
-/// Strut is a feature that allows minimum line heights to be set. The effect
-/// is as if a zero width space was included at the beginning of each line
-/// in the paragraph. This imaginary space is 'shaped' according the
-/// properties defined in this class. Flutter's strut is based on
+/// relative to the baseline.
+///
+/// Strut applies to all lines in the paragraph. Strut is a feature that
+/// allows minimum line heights to be set. The effect is as if a zero
+/// width space was included at the beginning of each line in the
+/// paragraph. This imaginary space is 'shaped' according the properties
+/// defined in this class. Flutter's strut is based on
 /// [typesetting strut](https://en.wikipedia.org/wiki/Strut_(typesetting))
 /// and CSS's [line-height](https://www.w3.org/TR/CSS2/visudet.html#line-height).
 ///
@@ -20,8 +22,7 @@ import 'text_style.dart';
 /// strut are calculated, and any laid out text that has a shorter ascent or
 /// descent than the strut's ascent or descent will take the ascent and
 /// descent of the strut. Text with ascents or descents larger than the
-/// strut's ascent or descent will lay
-/// out as normal and extend past the strut.
+/// strut's ascent or descent will layout as normal and extend past the strut.
 ///
 /// Strut is defined independently from any text content or [TextStyle]s.
 ///
@@ -41,11 +42,15 @@ import 'text_style.dart';
 /// [fontFamily] or [fontFamilyFallback] is provided, then the platform's
 /// default family will be used.
 ///
-/// When [height] is omitted or null, then the font's ascent and descent
+/// When [height] is omitted or null, then the font defined ascent and descent
 /// will be used. The font's combined ascent and descent may be taller or
-/// shorter than the [fontSize]. When height is provided, the `ascent + decent`
-/// is normalized before multipling by the [height] in order to ensure
-/// the total line height is exactly the `height * fontSize`.
+/// shorter than the [fontSize]. When [height] is provided, the line's EM-square
+/// ascent and descent (which sums to [fontSize]) will be scaled by [height] to
+/// achieve a final line height of `fontSize * height + fontSize * leading`
+/// logical pixels. The proportion of ascent:descent with [height] specified
+/// is the same as the font metrics defined ascent:descent ratio.
+///
+/// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
 ///
 /// Each line's spacing above the baseline will be at least as tall as the
 /// half leading plus ascent. Each line's spacing below the baseline will
@@ -84,8 +89,8 @@ import 'text_style.dart';
 ///
 ///  * [height]: the multiple of [fontSize] the line's height should be.
 ///    The line's height will take the font's ascent and descent values if
-///    [height] is omitted or null. If provided, the ascent plus descent is
-///    scaled to match the [fontSize] before being multiplied by the [height].
+///    [height] is omitted or null. If provided, the EM-square ascent and
+///    descent (which sum to [fontSize]) is scaled by [height].
 ///    The [height] will impact the spacing above and below the baseline
 ///    differently depending on the ratios between the font's ascent and
 ///    descent. This property is separate from the leading multiplier, which
@@ -419,11 +424,24 @@ class StrutStyle extends Diagnosticable {
   /// Ascent is the spacing above the baseline and descent is the spacing below
   /// the baseline.
   ///
+  /// When [height] is omitted or null, then the font defined ascent and descent
+  /// will be used. The font's combined ascent and descent may be taller or
+  /// shorter than the [fontSize]. When [height] is provided, the line's EM-square
+  /// ascent and descent (which sums to [fontSize]) will be scaled by [height] to
+  /// achieve a final line height of `fontSize * height + fontSize * leading`
+  /// logical pixels. The following diagram illustrates the differences between
+  /// the font metrics defined height and the EM-square height:
+  ///
+  /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
+  ///
   /// The [height] will impact the spacing above and below the baseline differently
   /// depending on the ratios between the font's ascent and descent. This property is
   /// separate from the leading multiplier, which is controlled through [leading].
   ///
-  /// The default height is 1.0.
+  /// The ratio of ascent:descent with [height] specified is the same as the
+  /// font metrics defined ascent:descent ratio when [height] is null or omitted.
+  ///
+  /// The default height is null.
   final double height;
 
   /// The typeface thickness to use when calculating the strut (e.g., bold).

@@ -107,19 +107,25 @@ const String _kColorBackgroundWarning = 'Cannot provide both a backgroundColor a
 /// ### Line height
 ///
 /// By default, text will layout with line height as defined by the font.
-/// Font-defined line height may be taller or shorter than the font size. the
-/// [height] property allows manual adjustment of the height of the line as
+/// Font-metrics defined line height may be taller or shorter than the font size.
+/// The [height] property allows manual adjustment of the height of the line as
 /// a multiple of [fontSize]. For most fonts, setting [height] to 1.0 is not
-/// the same as omitting or setting height to null.
+/// the same as omitting or setting height to null. The following diagram
+/// illustrates the difference between the font-metrics defined line height and
+/// the line height produced with `height: 1.0` (also known as the EM-square):
+///
+/// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
 ///
 /// {@tool sample}
 /// The [height] property can be used to change the line height. Here, the line
 /// height is set to 5 times the font size, so that the text is very spaced out.
+/// Since the `fontSize` is set to 10, the final height of the line is
+/// 50 pixels.
 ///
 /// ```dart
 /// Text(
 ///   'Don\'t act surprised, you guys, cuz I wrote \'em!',
-///   style: TextStyle(height: 5.0),
+///   style: TextStyle(fontSize: 10, height: 5.0),
 /// )
 /// ```
 /// {@end-tool}
@@ -447,8 +453,18 @@ class TextStyle extends Diagnosticable {
   ///
   /// When [height] is null or omitted, the line height will be determined
   /// by the font's metrics directly, which may differ from the fontSize.
-  /// Otherwise, the line height of the span of text will be scaled to be
-  /// the `fontSize * height`.
+  /// When [height] is non-null, the line height of the span of text will be a
+  /// multiple of [fontSize] and be exactly `fontSize * height` logical pixels
+  /// tall.
+  ///
+  /// For most fonts, setting [height] to 1.0 is not the same as omitting or
+  /// setting height to null because the [fontSize] sets the height of the EM-square,
+  /// which is different than the font provided metrics for line height. The
+  /// following diagram illustrates the difference between the font-metrics
+  /// defined line height and the line height produced with `height: 1.0`
+  /// (which forms the upper and lower edges of the EM-square):
+  ///
+  /// ![Text height diagram](https://flutter.github.io/assets-for-api-docs/assets/painting/text_height_diagram.png)
   final double height;
 
   /// The locale used to select region-specific glyphs.
