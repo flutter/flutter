@@ -469,7 +469,7 @@ void main() {
           'toolkit': 'glfw',
           'keyCode': 0x04,
           'scanCode': 0x01,
-          'codePoint': 0x10,
+          'charactersIgnoringModifiers': 'a',
           'modifiers': modifier,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -503,7 +503,7 @@ void main() {
           'toolkit': 'glfw',
           'keyCode': 0x04,
           'scanCode': 0x64,
-          'codePoint': 0x1,
+          'charactersIgnoringModifiers': 'a',
           'modifiers': modifier | GLFWKeyHelper.modifierControl,
         });
         final RawKeyEventDataLinux data = event.data;
@@ -538,7 +538,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 65,
         'scanCode': 0x00000026,
-        'codePoint': 97,
+        'charactersIgnoringModifiers': 'a',
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = keyAEvent.data;
@@ -553,7 +553,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 256,
         'scanCode': 0x00000009,
-        'codePoint': 0,
+          'charactersIgnoringModifiers': '',
         'modifiers': 0x0,
       });
       final RawKeyEventDataLinux data = escapeKeyEvent.data;
@@ -568,7 +568,7 @@ void main() {
         'toolkit': 'glfw',
         'keyCode': 340,
         'scanCode': 0x00000032,
-        'codePoint': 0,
+        'charactersIgnoringModifiers': '',
       });
       final RawKeyEventDataLinux data = shiftLeftKeyEvent.data;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
