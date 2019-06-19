@@ -171,7 +171,7 @@ void main() {
 
     testUsingContext('Doesnt error if we have usr write permissions in flutterRoot', () {
       when(mockFileSystem.statSync(any)).thenReturn(mockFileStat);
-      when(mockFileStat.mode).thenReturn(777);
+      when(mockFileStat.mode).thenReturn(493); // 0755 in decimal.
 
       Cache.flutterRoot = '';
     }, overrides: <Type, Generator>{
