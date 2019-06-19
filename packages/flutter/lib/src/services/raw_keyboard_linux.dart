@@ -53,7 +53,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// The hardware key code corresponding to this key event.
   ///
   /// This is the physical key that was pressed, not the Unicode character.
-  /// See [charactersIgnoringModifiers] for the unmodified Unicode character. This value may be different 
+  /// See [charactersIgnoringModifiers] for the unmodified Unicode character. This value may be different
   /// depending on the window toolkit used (See [toolkit]).
   final int keyCode;
 
