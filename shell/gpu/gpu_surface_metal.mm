@@ -8,6 +8,7 @@
 
 #include "third_party/skia/include/core/SkSurface.h"
 #include "third_party/skia/include/gpu/GrBackendSurface.h"
+#include "third_party/skia/include/ports/SkCFObject.h"
 
 namespace flutter {
 
@@ -80,7 +81,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& size)
   }
 
   GrMtlTextureInfo metal_texture_info;
-  metal_texture_info.fTexture = metal_texture.get();
+  metal_texture_info.fTexture.reset(SkCFSafeRetain(metal_texture.get()));
 
   GrBackendRenderTarget metal_render_target(bounds.width * scale,   // width
                                             bounds.height * scale,  // height
