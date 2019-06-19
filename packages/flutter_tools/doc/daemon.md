@@ -199,7 +199,7 @@ This is sent when a device is disconnected (and polling has been enabled via `en
 
 #### emulator.getEmulators
 
-Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id` and `name`.
+Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id`, `name`, `category` and `platformType`. `category` and `platformType` values match the values described in `device.getDevices`.
 
 #### emulator.launch
 
@@ -258,7 +258,8 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
-- 0.5.1: Added `platformType`, `ephemeral`, and `category` field to device.
+- 0.5.2: Added `platformType` and `category` fields to emulator.
+- 0.5.1: Added `platformType`, `ephemeral`, and `category` fields to device.
 - 0.5.0: Added `daemon.getSupportedPlatforms` command
 - 0.4.2: Added `app.detach` command
 - 0.4.1: Added `flutter attach --machine`

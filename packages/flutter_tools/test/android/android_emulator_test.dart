@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/android/android_emulator.dart';
+import 'package:flutter_tools/src/device.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -38,6 +39,8 @@ void main() {
       expect(emulator.name, name);
       expect(emulator.manufacturer, manufacturer);
       expect(emulator.label, label);
+      expect(emulator.category, Category.mobile);
+      expect(emulator.platformType, PlatformType.android);
     });
     testUsingContext('parses ini files', () {
       const String iniFile = '''
