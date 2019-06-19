@@ -46,7 +46,7 @@ void main() {
       final GradleProject gradleProject = MockGradleProject();
       const AndroidBuildInfo buildInfo = AndroidBuildInfo(BuildInfo.debug);
       when(gradleProject.apkFilesFor(buildInfo)).thenReturn(<String>['not_real']);
-      when(gradleProhect.apkDirectory).thenReturn(fs.currentDirectory);
+      when(gradleProject.apkDirectory).thenReturn(fs.currentDirectory);
 
       expect(findApkFiles(gradleProject, buildInfo), <File>[]);
     }, overrides: <Type, Generator>{
