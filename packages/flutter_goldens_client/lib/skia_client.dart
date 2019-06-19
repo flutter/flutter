@@ -78,7 +78,7 @@ class SkiaGoldClient {
     _workDirectory = workDirectory;
 
     if (_serviceAccount == null)
-      return false; // Not in the proper environment for golden file testing.
+      return false;
 
     final String authorization = '${_workDirectory.path}serviceAccount.json';
     await io.File(authorization).writeAsString(_serviceAccount);
@@ -183,7 +183,6 @@ class SkiaGoldClient {
   }
 
   Future<String> _getCommitHash() async {
-    return '7472fad194214e3a6746370953911fb031e8f0d9';
     if (!flutterRoot.existsSync()) {
       return null;
     } else {
