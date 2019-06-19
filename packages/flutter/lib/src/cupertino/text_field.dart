@@ -744,13 +744,17 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
         // if needed.
         if (widget.placeholder != null && text.text.isEmpty) {
           stackChildren.add(
-            Padding(
-              padding: widget.padding,
-              child: Text(
-                widget.placeholder,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: placeholderStyle
+            SizedBox(
+              width: double.infinity,
+              child: Padding(
+                padding: widget.padding,
+                child: Text(
+                  widget.placeholder,
+                  maxLines: widget.maxLines,
+                  overflow: TextOverflow.ellipsis,
+                  style: placeholderStyle,
+                  textAlign: widget.textAlign,
+                ),
               ),
             ),
           );
