@@ -262,14 +262,14 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
-    this.tablePadding = 24.0,
+    this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
-       assert(tablePadding != null),
+       assert(horizontalMargin != null),
        assert(columnSpacing != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
@@ -315,14 +315,14 @@ class DataTable extends StatelessWidget {
   /// row is selectable.
   final ValueSetter<bool> onSelectAll;
 
-  /// The horizontal padding between the edges of the table and the content
+  /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
   ///
   /// When a checkbox is displayed, it is also the padding between the checkbox
   /// the content in the first data column.
   ///
   /// This value defaults to 24.0 to adhere to the Material Design specifications.
-  final double tablePadding;
+  final double horizontalMargin;
 
   /// The horizontal padding between the contents of each data column.
   ///
@@ -384,7 +384,7 @@ class DataTable extends StatelessWidget {
     Widget contents = Semantics(
       container: true,
       child: Padding(
-        padding: EdgeInsetsDirectional.only(start: tablePadding, end: tablePadding / 2.0),
+        padding: EdgeInsetsDirectional.only(start: horizontalMargin, end: horizontalMargin / 2.0),
         child: Center(
           child: Checkbox(
             activeColor: color,
@@ -549,7 +549,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (showCheckboxColumn) {
-      tableColumns[0] = FixedColumnWidth(tablePadding + Checkbox.width + tablePadding / 2.0);
+      tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
         checked: allChecked,
@@ -573,16 +573,16 @@ class DataTable extends StatelessWidget {
 
       double paddingStart;
       if (dataColumnIndex == 0 && showCheckboxColumn) {
-        paddingStart = tablePadding / 2.0;
+        paddingStart = horizontalMargin / 2.0;
       } else if (dataColumnIndex == 0 && !showCheckboxColumn) {
-        paddingStart = tablePadding;
+        paddingStart = horizontalMargin;
       } else {
         paddingStart = columnSpacing / 2.0;
       }
 
       double paddingEnd;
       if (dataColumnIndex == columns.length - 1) {
-        paddingEnd = tablePadding;
+        paddingEnd = horizontalMargin;
       } else {
         paddingEnd = columnSpacing / 2.0;
       }

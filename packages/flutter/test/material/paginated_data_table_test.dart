@@ -298,9 +298,9 @@ void main() {
   });
 
   testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
-    const double _defaultTablePadding = 24.0;
+    const double _defaultHorizontalMargin = 24.0;
     const double _defaultColumnSpacing = 56.0;
-    const double _customTablePadding = 10.0;
+    const double _customHorizontalMargin = 10.0;
     const double _customColumnSpacing = 15.0;
     final TestDataSource source = TestDataSource(
       onSelectChanged: (bool value) {},
@@ -333,11 +333,11 @@ void main() {
     padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
-      _defaultTablePadding,
+      _defaultHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _defaultTablePadding / 2,
+      _defaultHorizontalMargin / 2,
     );
 
     // default first column padding
@@ -345,7 +345,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultTablePadding / 2,
+      _defaultHorizontalMargin / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
@@ -373,7 +373,7 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultTablePadding,
+      _defaultHorizontalMargin,
     );
 
     // CUSTOM VALUES
@@ -394,7 +394,7 @@ void main() {
             DataColumn(label: Text('Calories'), numeric: true),
             DataColumn(label: Text('Generation')),
           ],
-          tablePadding: _customTablePadding,
+          horizontalMargin: _customHorizontalMargin,
           columnSpacing: _customColumnSpacing,
         ),
       ),
@@ -405,11 +405,11 @@ void main() {
     padding = find.ancestor(of: checkbox, matching: find.byType(Padding)).first;
     expect(
       tester.getRect(checkbox).left - tester.getRect(padding).left,
-      _customTablePadding,
+      _customHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(checkbox).right,
-      _customTablePadding / 2,
+      _customHorizontalMargin / 2,
     );
 
     // custom first column padding
@@ -417,7 +417,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customTablePadding / 2,
+      _customHorizontalMargin / 2,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
@@ -445,14 +445,14 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customTablePadding,
+      _customHorizontalMargin,
     );
   });
 
   testWidgets('PaginatedDataTable custom horizontal padding - no checkbox', (WidgetTester tester) async {
-    const double _defaultTablePadding = 24.0;
+    const double _defaultHorizontalMargin = 24.0;
     const double _defaultColumnSpacing = 56.0;
-    const double _customTablePadding = 10.0;
+    const double _customHorizontalMargin = 10.0;
     const double _customColumnSpacing = 15.0;
     final TestDataSource source = TestDataSource();
     Finder cellContent;
@@ -481,7 +481,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)'); // DataTable wraps its DataCells in an Align widget
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _defaultTablePadding,
+      _defaultHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
@@ -509,7 +509,7 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _defaultTablePadding,
+      _defaultHorizontalMargin,
     );
 
     // CUSTOM VALUES
@@ -529,7 +529,7 @@ void main() {
             DataColumn(label: Text('Calories'), numeric: true),
             DataColumn(label: Text('Generation')),
           ],
-          tablePadding: _customTablePadding,
+          horizontalMargin: _customHorizontalMargin,
           columnSpacing: _customColumnSpacing,
         ),
       ),
@@ -540,7 +540,7 @@ void main() {
     cellContent = find.widgetWithText(Align, 'Frozen yogurt (0)');
     expect(
       tester.getRect(cellContent).left - tester.getRect(padding).left,
-      _customTablePadding,
+      _customHorizontalMargin,
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
@@ -568,7 +568,7 @@ void main() {
     );
     expect(
       tester.getRect(padding).right - tester.getRect(cellContent).right,
-      _customTablePadding,
+      _customHorizontalMargin,
     );
   });
 }
