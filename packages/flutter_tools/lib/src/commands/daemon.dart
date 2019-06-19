@@ -28,6 +28,10 @@ import '../vmservice.dart';
 
 const String protocolVersion = '0.5.2';
 
+/// Whether the tool started from the daemon, as opposed to the command line.
+bool get isRunningFromDaemon => _isRunningFromDaemon;
+bool _isRunningFromDaemon = false;
+
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
 /// JSON-RPC based responses and events to stdout.
@@ -49,6 +53,7 @@ class DaemonCommand extends FlutterCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     printStatus('Starting device daemon...');
+    _isRunningFromDaemon = true;
 
     final NotifyingLogger notifyingLogger = NotifyingLogger();
 

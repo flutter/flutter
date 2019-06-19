@@ -12,8 +12,8 @@ import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../project.dart';
-import '../web/workflow.dart';
 import 'chrome.dart';
+import 'workflow.dart';
 
 class WebApplicationPackage extends ApplicationPackage {
   WebApplicationPackage(this.flutterProject) : super(id: flutterProject.manifest.appName);
