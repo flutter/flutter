@@ -550,6 +550,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
         // We're not quite sure why this can happen, perhaps the user
         // accidentally edited the .packages file. Re-running pub should
         // fix the issue, and we definitely shouldn't crash here.
+        printTrace('Failed to parse .packages file to check flutter dependency.');
         return;
       }
 
