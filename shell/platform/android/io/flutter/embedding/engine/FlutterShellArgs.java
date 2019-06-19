@@ -43,6 +43,8 @@ public class FlutterShellArgs {
   public static final String ARG_DUMP_SHADER_SKP_ON_SHADER_COMPILATION = "--dump-skp-on-shader-compilation";
   public static final String ARG_KEY_VERBOSE_LOGGING = "verbose-logging";
   public static final String ARG_VERBOSE_LOGGING = "--verbose-logging";
+  public static final String ARG_KEY_OBSERVATORY_PORT = "observatory-port";
+  public static final String ARG_OBSERVATORY_PORT = "--observatory-port=";
 
   @NonNull
   public static FlutterShellArgs fromIntent(@NonNull Intent intent) {
@@ -57,6 +59,10 @@ public class FlutterShellArgs {
     }
     if (intent.getBooleanExtra(ARG_KEY_START_PAUSED, false)) {
       args.add(ARG_START_PAUSED);
+    }
+    final int observatoryPort = intent.getIntExtra(ARG_KEY_OBSERVATORY_PORT, 0);
+    if (observatoryPort > 0) {
+      args.add(ARG_OBSERVATORY_PORT + Integer.toString(observatoryPort));
     }
     if (intent.getBooleanExtra(ARG_KEY_DISABLE_SERVICE_AUTH_CODES, false)) {
       args.add(ARG_DISABLE_SERVICE_AUTH_CODES);
