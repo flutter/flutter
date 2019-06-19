@@ -1,4 +1,4 @@
-Signature: fa4fed3e5f5bc8d20f9173d367eb36b5
+Signature: 0433bad1da63ac83eb645d42ca3ee92f
 
 UNUSED LICENSES:
 
@@ -5448,6 +5448,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/effects/FillEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GaussianBlurEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GradientEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/LevelsEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/LinearWipeEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/MotionTileEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TintEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/TransformEffect.cpp
