@@ -23,12 +23,13 @@ bool get flutterDesktopEnabled {
   if (debugDisableDesktop) {
     return false;
   }
+  final bool platformEnabled = platform
+      .environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
   if (isRunningFromDaemon) {
-    _flutterDesktopEnabled = platform.environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
+    return platformEnabled && !FlutterVersion.instance.isStable;
   }
-  return _flutterDesktopEnabled && !FlutterVersion.instance.isStable;
+  return !FlutterVersion.instance.isStable;
 }
-bool _flutterDesktopEnabled = true;
 
 /// Kills a process on linux or macOS.
 Future<bool> killProcess(String executable) async {

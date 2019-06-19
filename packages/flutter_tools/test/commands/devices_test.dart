@@ -20,6 +20,8 @@ void main() {
   group('devices', () {
     setUpAll(() {
       Cache.disableLocking();
+      // TODO(jonahwilliams): adjust the individual tests so they do not
+      // depend on the host environment.
       debugDisableWebAndDesktop = true;
     });
 

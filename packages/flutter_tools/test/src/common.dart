@@ -22,7 +22,7 @@ export 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // Defin
 
 /// Disable both web and desktop to make testing easier. For example, prevent
 /// them from showing up in the devices list if the host happens to be setup
-/// properly
+/// properly.
 set debugDisableWebAndDesktop(bool value) {
   if (value) {
     debugDisableDesktop = true;

@@ -38,11 +38,7 @@ void main() {
       const ProcessManager processManager = LocalProcessManager();
       process = await processManager.start(
           <String>[flutterBin, '--show-test-device', 'daemon'],
-          workingDirectory: tempDir.path,
-          environment: <String, String>{
-            'FLUTTER_WEB': 'false',
-            'ENABLE_FLUTTER_DESKTOP': 'false',
-      });
+          workingDirectory: tempDir.path);
 
       final StreamController<String> stdout =
           StreamController<String>.broadcast();
