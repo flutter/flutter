@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui;
@@ -1702,7 +1703,9 @@ class _MatchesGoldenFile extends AsyncMatcher {
       imageFuture = _captureImage(elements.single);
     }
 
-    final Uri testNameUri = _getTestNameUri(key, version);
+    final Uri testNameUri = _testingWithSkiaGold()
+      ? key
+      :_addVersion(key, version);
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
     return binding.runAsync<String>(() async {
@@ -1724,10 +1727,14 @@ class _MatchesGoldenFile extends AsyncMatcher {
   }
 
   @override
-  Description describe(Description description) =>
-      description.add('one widget whose rasterized image matches golden image "${_getTestNameUri(key, version)}"');
+  Description describe(Description description) {
+    final Uri testNameUri = _testingWithSkiaGold()
+      ? key
+      :_addVersion(key, version);
+    description.add('one widget whose rasterized image matches golden image "$testNameUri"');
+  }
 
-  Uri _getTestNameUri(Uri key, int version) {
+  Uri _addVersion(Uri key, int version) {
     return version == null ? key : Uri.parse(
       key
         .toString()
@@ -1737,6 +1744,13 @@ class _MatchesGoldenFile extends AsyncMatcher {
           onNonMatch: (String n) => '$n'
         )
     );
+  }
+
+  bool _testingWithSkiaGold() {
+    final String cirrusCI = Platform.environment['CIRRUS_CI'] ?? '';
+    final String cirrusPR = Platform.environment['CIRRUS_PR'] ?? '';
+    final String cirrusBranch = Platform.environment['CIRRUS_BRANCH'] ?? '';
+    return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
   }
 }
 

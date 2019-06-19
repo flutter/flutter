@@ -2685,7 +2685,6 @@ void main() {
         'text_field_test.disabled.png',
         version: 0,
       ),
-      skip: !isLinux,
     );
   });
 }

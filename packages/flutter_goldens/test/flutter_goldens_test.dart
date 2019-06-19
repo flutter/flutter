@@ -134,14 +134,23 @@ void main() {
     });
 
     group('SkiaGold Client', () {
-      SkiaGoldClient skiaGoldClient = SkiaGoldClient();
+
+      final SkiaGoldClient skiaGoldClient = SkiaGoldClient();
       platform = FakePlatform(environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot});
       process = MockProcessManager();
-      group('auth', () {
-        test('Returns false when authorization unavailable.', () async {
-          
-        });
 
+      group('auth', () {
+        test('Returns false when authorization is unavailable.', () async {
+          final Directory testDirectory = fs.directory(comparator.basedir);
+          final bool result = await skiaGoldClient.auth(testDirectory);
+          expect(false, result);
+        });
+      });
+      group('imgtestInit', () {
+        // necessary files are created - keys, failures
+      });
+      group('imgtestAdd', () {
+        // throws error for null arguments
       });
     });
   });

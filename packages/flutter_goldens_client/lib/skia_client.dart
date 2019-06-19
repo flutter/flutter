@@ -13,7 +13,6 @@ import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import 'package:flutter_goldens_client/client.dart';
-import 'package:flutter_test/flutter_test.dart';
 
 // If you are here trying to figure out how to use golden files in the Flutter
 // repo itself, consider reading this wiki page:
@@ -84,75 +83,67 @@ class SkiaGoldClient {
     final String authorization = '${_workDirectory.path}serviceAccount.json';
     await io.File(authorization).writeAsString(_serviceAccount);
 
-    final File authFile = _workDirectory.childFile(fs.path.join(
-      'temp',
-      'auth_opt.json'
-    ));
-    if(!authFile.existsSync()){
-      final List<String> authArguments = <String>[
-        'auth',
-        '--service-account', authorization,
-        '--work-dir', _workDirectory.childDirectory('temp').path,
-      ];
+    final List<String> authArguments = <String>[
+      'auth',
+      '--service-account', authorization,
+      '--work-dir', _workDirectory.childDirectory('temp').path,
+    ];
 
-      final io.ProcessResult authResults = io.Process.runSync(
-        _goldctl,
-        authArguments,
-      );
-      if(authResults.exitCode != 0) {
-        final StringBuffer buf = StringBuffer();
-        buf
-          ..writeln('Flutter + Skia Gold auth failed.')
-          ..writeln('stdout: ${authResults.stdout}')
-          ..writeln('stderr: ${authResults.stderr}');
-        throw NonZeroExitCode(authResults.exitCode, buf.toString());
-      }
+    final io.ProcessResult authResults = io.Process.runSync(
+      _goldctl,
+      authArguments,
+    );
+
+    if(authResults.exitCode != 0) {
+      final StringBuffer buf = StringBuffer();
+      buf
+        ..writeln('Flutter + Skia Gold auth failed.')
+        ..writeln('stdout: ${authResults.stdout}')
+        ..writeln('stderr: ${authResults.stderr}');
+      throw NonZeroExitCode(authResults.exitCode, buf.toString());
     }
     return true;
   }
 
   Future<void> imgtestInit() async {
-    final File keysFile = _workDirectory.childFile('keys.json');
+    final String commitHash = await _getCommitHash();
+    final String keys = '${_workDirectory.path}keys.json';
+    final String failures = '${_workDirectory.path}failures.json';
 
-    if(!keysFile.existsSync() || await _isNewCommit()) {
-      final String commitHash = await _getCommitHash();
-      final String keys = '${_workDirectory.path}keys.json';
-      final String failures = '${_workDirectory.path}failures.json';
+    await io.File(keys).writeAsString(_getKeysJSON());
+    await io.File(failures).create();
 
-      await io.File(keys).writeAsString(_getKeysJSON());
-      await io.File(failures).create();
+    final List<String> imgtestInitArguments = <String>[
+      'imgtest', 'init',
+      '--instance', 'flutter',
+      '--work-dir', _workDirectory
+        .childDirectory('temp')
+        .path,
+      '--commit', commitHash,
+      '--keys-file', keys,
+      '--failure-file', failures,
+      '--passfail',
+    ];
 
-      final List<String> imgtestInitArguments = <String>[
-        'imgtest', 'init',
-        '--instance', 'flutter',
-        '--work-dir', _workDirectory
-          .childDirectory('temp')
-          .path,
-        '--commit', commitHash,
-        '--keys-file', keys,
-        '--failure-file', failures,
-        '--passfail',
-      ];
-      if (imgtestInitArguments.contains(null)) {
-        final StringBuffer buf = StringBuffer();
-        buf.writeln('Null argument for Skia Gold imgtest init:');
-        imgtestInitArguments.forEach(buf.writeln);
-        throw NonZeroExitCode(1, buf.toString());
-      }
+    if (imgtestInitArguments.contains(null)) {
+      final StringBuffer buf = StringBuffer();
+      buf.writeln('Null argument for Skia Gold imgtest init:');
+      imgtestInitArguments.forEach(buf.writeln);
+      throw NonZeroExitCode(1, buf.toString());
+    }
 
-      final io.ProcessResult imgtestInitResult = io.Process.runSync(
-        _goldctl,
-        imgtestInitArguments,
-      );
+    final io.ProcessResult imgtestInitResult = io.Process.runSync(
+      _goldctl,
+      imgtestInitArguments,
+    );
 
-      if (imgtestInitResult.exitCode != 0) {
-        final StringBuffer buf = StringBuffer();
-        buf
-          ..writeln('Flutter + Skia Gold imgtest init failed.')
-          ..writeln('stdout: ${imgtestInitResult.stdout}')
-          ..writeln('stderr: ${imgtestInitResult.stderr}');
-        throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
-      }
+    if (imgtestInitResult.exitCode != 0) {
+      final StringBuffer buf = StringBuffer();
+      buf
+        ..writeln('Flutter + Skia Gold imgtest init failed.')
+        ..writeln('stdout: ${imgtestInitResult.stdout}')
+        ..writeln('stderr: ${imgtestInitResult.stderr}');
+      throw NonZeroExitCode(imgtestInitResult.exitCode, buf.toString());
     }
   }
 
@@ -160,7 +151,7 @@ class SkiaGoldClient {
     final List<String> imgtestArguments = <String>[
       'imgtest', 'add',
       '--work-dir', _workDirectory.childDirectory('temp').path,
-      '--test-name', testName,
+      '--test-name', testName.split('.png')[0],
       '--png-file', goldenFile.path,
     ];
 
@@ -172,26 +163,27 @@ class SkiaGoldClient {
     }
 
     //final io.ProcessResult imgtestResult =
-    io.Process.runSync(
+    await io.Process.run( //Sync(
       _goldctl,
       imgtestArguments,
     );
-//    Will not turn the tree red.
-      // TODO(Piinks): Comment on PR if triage is needed
-//    if (imgtestResult.exitCode != 0) {
-//      final StringBuffer buf = StringBuffer();
-//      buf
-//        ..writeln('Flutter + Skia Gold imgtest add failed.')
-//        ..writeln('If this is the first execution of this test, it may need to be triaged.')
-//        ..writeln('In this case, re-run the test after triage is completed.\n')
-//        ..writeln('stdout: ${imgtestResult.stdout}')
-//        ..writeln('stderr: ${imgtestResult.stderr}');
-//      throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
-//    }
+    // Will not turn the tree red.
+    // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
+    // if (imgtestResult.exitCode != 0) {
+    //   final StringBuffer buf = StringBuffer();
+    //  buf
+    //    ..writeln('Flutter + Skia Gold imgtest add failed.')
+    //    ..writeln('If this is the first execution of this test, it may need to be triaged.')
+    //    ..writeln('In this case, re-run the test after triage is completed.\n')
+    //    ..writeln('stdout: ${imgtestResult.stdout}')
+    //    ..writeln('stderr: ${imgtestResult.stderr}');
+    //  throw NonZeroExitCode(imgtestResult.exitCode, buf.toString());
+    // }
     return true;
   }
 
   Future<String> _getCommitHash() async {
+    return '7472fad194214e3a6746370953911fb031e8f0d9';
     if (!flutterRoot.existsSync()) {
       return null;
     } else {
@@ -201,18 +193,6 @@ class SkiaGoldClient {
       );
       return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
     }
-  }
-
-  Future<bool> _isNewCommit() async {
-    final File resultFile = _workDirectory.childFile(fs.path.join(
-    'temp',
-    'result-state.json'
-    ));
-    final String contents = await resultFile.readAsString();
-    final Map<String, dynamic> resultJSON = convert.json.decode(contents);
-    final String lastTestedCommit = resultJSON['SharedConfig']['gitHash'];
-    final String currentCommit = await _getCommitHash();
-    return lastTestedCommit == currentCommit ? false : true;
   }
 
   String _getKeysJSON() {

@@ -11,7 +11,6 @@ import 'package:file/local.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 import 'package:platform/platform.dart';
-import 'package:test_api/test_api.dart';
 
 import 'package:flutter_goldens_client/client.dart';
 import 'package:flutter_goldens_client/skia_client.dart';
@@ -107,7 +106,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       // Library prefix notation for Skia Gold.
       golden = _addPrefix(golden);
       // Always updating for SkiaGold testing.
-      update(golden, imageBytes);
+      await update(golden, imageBytes);
     }
 
     final File goldenFile = _getGoldenFile(golden);
@@ -116,16 +115,17 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     }
 
     if (_testingWithSkiaGold()) {
-      // Testing with SkiaGoldClient. ------------------------------------------
+      // Testing with SkiaGoldClient.
       final bool authorized = await _skiaClient.auth(fs.directory(basedir));
       if(!authorized) {
         throw TestFailure('Could not authorize goldctl.');
       }
+
       await _skiaClient.imgtestInit();
       return await _skiaClient.imgtestAdd(golden.path, goldenFile);
 
     } else if (isLinux) {
-      // Testing with GoldensClient --------------------------------------------
+      // Testing with GoldensClient.
       final List<int> goldenBytes = await goldenFile.readAsBytes();
       if (goldenBytes.length != imageBytes.length) {
         return false;
@@ -137,7 +137,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       }
       return true;
     } else {
-      // Not executing test. ---------------------------------------------------
+      // Testing skipped.
       print('Skipping "$golden" : Skia Gold unavailable && !isLinux');
       return true;
     }
@@ -163,13 +163,6 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
     final String cirrusCI = platform.environment['CIRRUS_CI'] ?? '';
     final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
     final String cirrusBranch = platform.environment['CIRRUS_BRANCH'] ?? '';
-    final bool serviceAccountAvailable =  platform.environment[_kServiceAccountKey] != null ? true : false;
-    if (cirrusCI.isNotEmpty
-      && cirrusPR.isEmpty
-      && cirrusBranch == 'master'
-      && serviceAccountAvailable) {
-      return true;
-    }
-    return false;
+    return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
   }
 }
