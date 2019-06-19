@@ -738,6 +738,7 @@ class ResidentCompiler {
     if (_server == null) {
       return 0;
     }
+    printTrace('killing pid ${_server.pid}');
     _server.kill();
     return _server.exitCode;
   }

@@ -76,9 +76,6 @@ Future<int> runTests(
     final bool result = await webCompilationProxy.initialize(
       projectDirectory: flutterProject.directory,
       testOutputDir: tempBuildDir,
-      targets: testFiles.map((String testFile) {
-        return fs.path.relative(testFile, from: flutterProject.directory.path);
-      }).toList(),
     );
     if (!result) {
       throwToolExit('Failed to compile tests');

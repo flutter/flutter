@@ -44,6 +44,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(mockMacOSApp), true);
       expect(await device.isAppInstalled(mockMacOSApp), true);
       expect(await device.stopApp(mockMacOSApp), false);
+      expect(device.category, Category.desktop);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

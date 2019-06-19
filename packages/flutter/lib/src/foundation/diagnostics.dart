@@ -7,6 +7,7 @@ import 'dart:math' as math;
 import 'package:meta/meta.dart';
 
 import 'assertions.dart';
+import 'constants.dart';
 import 'debug.dart';
 
 // Examples can assume:
@@ -89,6 +90,9 @@ enum DiagnosticLevel {
 ///  * [DiagnosticsNode.toStringDeep], which dumps text art trees for these
 ///    styles.
 enum DiagnosticsTreeStyle {
+  /// A style that does not display the tree, for release mode.
+  none,
+
   /// Sparse style for displaying trees.
   ///
   /// See also:
@@ -1107,6 +1111,9 @@ class TextTreeRenderer {
     String prefixOtherLines,
     TextTreeConfiguration parentConfiguration,
   }) {
+    if (kReleaseMode) {
+      return '';
+    }
     final bool isSingleLine = _isSingleLine(node.style) && parentConfiguration?.lineBreakProperties != true;
     prefixOtherLines ??= prefixLineOne;
     if (node.linePrefix != null) {
@@ -1378,11 +1385,14 @@ class TextTreeRenderer {
 
 /// Defines diagnostics data for a [value].
 ///
-/// [DiagnosticsNode] provides a high quality multi-line string dump via
-/// [toStringDeep]. The core members are the [name], [toDescription],
-/// [getProperties], [value], and [getChildren]. All other members exist
-/// typically to provide hints for how [toStringDeep] and debugging tools should
-/// format output.
+/// For debug and profile modes, [DiagnosticsNode] provides a high quality
+/// multi-line string dump via [toStringDeep]. The core members are the [name],
+/// [toDescription], [getProperties], [value], and [getChildren]. All other
+/// members exist typically to provide hints for how [toStringDeep] and
+/// debugging tools should format output.
+///
+/// In release mode, far less information is retained and some information may
+/// not print at all.
 abstract class DiagnosticsNode {
   /// Initializes the object.
   ///
@@ -1459,7 +1469,7 @@ abstract class DiagnosticsNode {
   ///
   /// If `minLevel` is [DiagnosticLevel.hidden] no diagnostics will be filtered.
   /// If `minLevel` is [DiagnosticLevel.off] all diagnostics will be filtered.
-  bool isFiltered(DiagnosticLevel minLevel) => level.index < minLevel.index;
+  bool isFiltered(DiagnosticLevel minLevel) => kReleaseMode ? true : level.index < minLevel.index;
 
   /// Priority level of the diagnostic used to control which diagnostics should
   /// be shown and filtered.
@@ -1470,7 +1480,7 @@ abstract class DiagnosticsNode {
   /// the value returned here but other factors also influence it. For example,
   /// whether an exception is thrown computing a property value
   /// [DiagnosticLevel.error] is returned.
-  DiagnosticLevel get level => DiagnosticLevel.info;
+  DiagnosticLevel get level => kReleaseMode ? DiagnosticLevel.hidden : DiagnosticLevel.info;
 
   /// Whether the name of the property should be shown when showing the default
   /// view of the tree.
@@ -1528,6 +1538,9 @@ abstract class DiagnosticsNode {
   ///    plugin.
   @mustCallSuper
   Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    if (kReleaseMode) {
+      return <String, Object>{};
+    }
     final Map<String, Object> data = <String, Object>{
       'description': toDescription(),
       'type': runtimeType.toString(),
@@ -1626,6 +1639,9 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.info,
   }) {
+    if (kReleaseMode) {
+      return super.toString();
+    }
     assert(style != null);
     assert(minLevel != null);
     if (_isSingleLine(style))
@@ -1646,6 +1662,8 @@ abstract class DiagnosticsNode {
   TextTreeConfiguration get textTreeConfiguration {
     assert(style != null);
     switch (style) {
+      case DiagnosticsTreeStyle.none:
+        return null;
       case DiagnosticsTreeStyle.dense:
         return denseTextConfiguration;
       case DiagnosticsTreeStyle.sparse:
@@ -1697,6 +1715,9 @@ abstract class DiagnosticsNode {
     TextTreeConfiguration parentConfiguration,
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
+    if (kReleaseMode) {
+      return '';
+    }
     return TextTreeRenderer(
       minLevel: minLevel,
       wrapWidth: 65,
@@ -2769,6 +2790,8 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
   DiagnosticPropertiesBuilder _cachedBuilder;
 
   DiagnosticPropertiesBuilder get _builder {
+    if (kReleaseMode)
+      return null;
     if (_cachedBuilder == null) {
       _cachedBuilder = DiagnosticPropertiesBuilder();
       value?.debugFillProperties(_cachedBuilder);
@@ -2778,14 +2801,14 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   DiagnosticsTreeStyle get style {
-    return super.style ?? _builder.defaultDiagnosticsTreeStyle;
+    return kReleaseMode ? DiagnosticsTreeStyle.none : super.style ?? _builder.defaultDiagnosticsTreeStyle;
   }
 
   @override
-  String get emptyBodyDescription => _builder.emptyBodyDescription;
+  String get emptyBodyDescription => kReleaseMode ? '' : _builder.emptyBodyDescription;
 
   @override
-  List<DiagnosticsNode> getProperties() => _builder.properties;
+  List<DiagnosticsNode> getProperties() => kReleaseMode ? const <DiagnosticsNode>[] : _builder.properties;
 
   @override
   List<DiagnosticsNode> getChildren() {
@@ -2794,6 +2817,9 @@ class DiagnosticableNode<T extends Diagnosticable> extends DiagnosticsNode {
 
   @override
   String toDescription({ TextTreeConfiguration parentConfiguration }) {
+    if (kReleaseMode) {
+      return '';
+    }
     return value.toStringShort();
   }
 }
@@ -2866,7 +2892,9 @@ String describeEnum(Object enumEntry) {
 class DiagnosticPropertiesBuilder {
   /// Add a property to the list of properties.
   void add(DiagnosticsNode property) {
-    properties.add(property);
+    if (!kReleaseMode) {
+      properties.add(property);
+    }
   }
 
   /// List of properties accumulated so far.
@@ -3228,6 +3256,9 @@ abstract class DiagnosticableTree extends Diagnosticable {
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
+    if (kReleaseMode) {
+      return toString();
+    }
     final StringBuffer result = StringBuffer();
     result.write(toString());
     result.write(joiner);
@@ -3312,6 +3343,9 @@ mixin DiagnosticableTreeMixin implements DiagnosticableTree {
     String joiner = ', ',
     DiagnosticLevel minLevel = DiagnosticLevel.debug,
   }) {
+    if (kReleaseMode) {
+      return toString();
+    }
     final StringBuffer result = StringBuffer();
     result.write(toStringShort());
     result.write(joiner);

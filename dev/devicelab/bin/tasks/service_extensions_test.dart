@@ -94,9 +94,16 @@ void main() {
       final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
       device.tap(100, 200);
+
       final VMExtensionEvent navigationEvent = await navigationFuture;
-      // Validate that there are not any fields.
-      expect(navigationEvent.data.isEmpty);
+      // validate the fields
+      expect(navigationEvent.data['route'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> route = navigationEvent.data['route'];
+      expect(route['description'] is String);
+      expect(route['settings'] is Map<dynamic, dynamic>);
+      final Map<dynamic, dynamic> settings = route['settings'];
+      expect(settings.containsKey('name'));
+      expect(settings['isInitialRoute'] is bool);
 
       run.stdin.write('q');
       final int result = await run.exitCode;

@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:meta/meta.dart';
+
 import 'android/android_device.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
@@ -27,6 +29,38 @@ import 'web/workflow.dart';
 import 'windows/windows_device.dart';
 
 DeviceManager get deviceManager => context.get<DeviceManager>();
+
+/// A description of the kind of workflow the device supports.
+class Category {
+  const Category._(this.value);
+
+  static const Category web = Category._('web');
+  static const Category desktop = Category._('desktop');
+  static const Category mobile = Category._('mobile');
+
+  final String value;
+
+  @override
+  String toString() => value;
+}
+
+/// The platform sub-folder that a device type supports.
+class PlatformType {
+  const PlatformType._(this.value);
+
+  static const PlatformType web = PlatformType._('web');
+  static const PlatformType android = PlatformType._('android');
+  static const PlatformType ios = PlatformType._('ios');
+  static const PlatformType linux = PlatformType._('linux');
+  static const PlatformType macos = PlatformType._('macos');
+  static const PlatformType windows = PlatformType._('windows');
+  static const PlatformType fuchsia = PlatformType._('fuchsia');
+
+  final String value;
+
+  @override
+  String toString() => value;
+}
 
 /// A class to get all available devices.
 class DeviceManager {
@@ -208,9 +242,18 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 
 abstract class Device {
 
-  Device(this.id);
+  Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
+
+  /// The [Category] for this device type.
+  final Category category;
+
+  /// The [PlatformType] for this device.
+  final PlatformType platformType;
+
+  /// Whether this is an ephemeral device.
+  final bool ephemeral;
 
   String get name;
 
