@@ -983,7 +983,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   /// {@template flutter.clipper.clipBehavior}
-  /// Controls how to clip (default to [Clip.antiAlias]).
+  /// Controls how to clip (defaults to [Clip.hardEdge]).
   ///
   /// [Clip.none] is not allowed here.
   /// {@endtemplate}
