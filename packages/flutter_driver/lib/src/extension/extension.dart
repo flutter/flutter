@@ -17,6 +17,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
 import '../common/find.dart';
 import '../common/frame_sync.dart';
@@ -114,6 +115,7 @@ class FlutterDriverExtension {
       'waitUntilNoTransientCallbacks': _waitUntilNoTransientCallbacks,
       'get_semantics_id': _getSemanticsId,
       'get_offset': _getOffset,
+      'get_diagnostics_tree': _getDiagnosticsTree,
     });
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
@@ -133,6 +135,7 @@ class FlutterDriverExtension {
       'waitUntilNoTransientCallbacks': (Map<String, String> params) => WaitUntilNoTransientCallbacks.deserialize(params),
       'get_semantics_id': (Map<String, String> params) => GetSemanticsId.deserialize(params),
       'get_offset': (Map<String, String> params) => GetOffset.deserialize(params),
+      'get_diagnostics_tree': (Map<String, String> params) => GetDiagnosticsTree.deserialize(params),
     });
 
     _finders.addAll(<String, FinderConstructor>{
@@ -406,6 +409,25 @@ class FlutterDriverExtension {
     }
     final Offset globalPoint = box.localToGlobal(localPoint);
     return GetOffsetResult(dx: globalPoint.dx, dy: globalPoint.dy);
+  }
+
+  Future<DiagnosticsTreeResult> _getDiagnosticsTree(Command command) async {
+    final GetDiagnosticsTree diagnosticsCommand = command;
+    final Finder finder = await _waitForElement(_createFinder(diagnosticsCommand.finder));
+    final Element element = finder.evaluate().single;
+    DiagnosticsNode diagnosticsNode;
+    switch (diagnosticsCommand.diagnosticsType) {
+      case DiagnosticsType.renderObject:
+        diagnosticsNode = element.renderObject.toDiagnosticsNode();
+        break;
+      case DiagnosticsType.widget:
+        diagnosticsNode = element.toDiagnosticsNode();
+        break;
+    }
+    return DiagnosticsTreeResult(diagnosticsNode.toJsonMap(DiagnosticsSerializationDelegate(
+      subtreeDepth: diagnosticsCommand.subtreeDepth,
+      includeProperties: diagnosticsCommand.includeProperties,
+    )));
   }
 
   Future<ScrollResult> _scroll(Command command) async {
