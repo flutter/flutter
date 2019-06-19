@@ -3,8 +3,18 @@
 // found in the LICENSE file.
 
 #include "flutter/shell/platform/darwin/common/framework/Headers/FlutterChannels.h"
+#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSurrogateBinaryMessenger.h"
 
 #pragma mark - Basic message channel
+
+static NSObject<FlutterBinaryMessenger>* getSurrogate(NSObject<FlutterBinaryMessenger>* messenger) {
+  if ([messenger conformsToProtocol:@protocol(FlutterSurrogateBinaryMessenger)]) {
+    NSObject<FlutterSurrogateBinaryMessenger>* surrogate =
+        (NSObject<FlutterSurrogateBinaryMessenger>*)messenger;
+    return [surrogate surrogateBinaryMessenger];
+  }
+  return messenger;
+}
 
 @implementation FlutterBasicMessageChannel {
   NSObject<FlutterBinaryMessenger>* _messenger;
@@ -32,7 +42,7 @@
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   _name = [name retain];
-  _messenger = [messenger retain];
+  _messenger = [getSurrogate(messenger) retain];
   _codec = [codec retain];
   return self;
 }
@@ -172,7 +182,7 @@ NSObject const* FlutterMethodNotImplemented = [NSObject new];
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   _name = [name retain];
-  _messenger = [messenger retain];
+  _messenger = [getSurrogate(messenger) retain];
   _codec = [codec retain];
   return self;
 }
@@ -251,7 +261,7 @@ NSObject const* FlutterEndOfEventStream = [NSObject new];
   self = [super init];
   NSAssert(self, @"Super init cannot be nil");
   _name = [name retain];
-  _messenger = [messenger retain];
+  _messenger = [getSurrogate(messenger) retain];
   _codec = [codec retain];
   return self;
 }

@@ -53,6 +53,7 @@ executable("flutter_channels_unittests") {
   testonly = true
 
   sources = [
+    "common/framework/Source/flutter_channels_unittest.mm",
     "common/framework/Source/flutter_codecs_unittest.mm",
     "common/framework/Source/flutter_standard_codec_unittest.mm",
   ]
