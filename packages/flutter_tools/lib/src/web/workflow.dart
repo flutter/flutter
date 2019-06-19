@@ -4,10 +4,10 @@
 
 import 'package:meta/meta.dart';
 
+import '../base/common.dart';
 import '../base/context.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
-import '../commands/daemon.dart' show isRunningFromDaemon;
 import '../doctor.dart';
 import '../version.dart';
 import 'chrome.dart';
