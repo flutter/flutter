@@ -3280,15 +3280,17 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
             'the framework is still in the process of building widgets, which '
             'means the render tree for this frame has not yet been determined. '
             'The size getter should only be called from paint callbacks or '
-            'interaction event handlers (e.g. gesture callbacks).\n'
+            'interaction event handlers (e.g. gesture callbacks).'
           ),
+          ErrorSpacer(),
           ErrorHint(
             'If you need some sizing information during build to decide which '
             'widgets to build, consider using a LayoutBuilder widget, which can '
             'tell you the layout constraints at a given location in the tree. See '
             '<https://api.flutter.dev/flutter/widgets/LayoutBuilder-class.html> '
-            'for more details.\n'
+            'for more details.'
           ),
+          ErrorSpacer(),
           describeElement('The size getter was called for the following element')
         ]);
       }

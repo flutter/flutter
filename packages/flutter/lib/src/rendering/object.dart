@@ -2741,13 +2741,13 @@ mixin RenderObjectWithChildMixin<ChildType extends RenderObject> on RenderObject
             'example, a RenderSliver cannot be the child of a RenderBox because '
             'a RenderSliver does not understand the RenderBox layout protocol.',
           ),
-          ErrorDescription(''),
+          ErrorSpacer(),
           DiagnosticsProperty<dynamic>(
             'The $runtimeType that expected a $ChildType child was created by',
             debugCreator,
             style: DiagnosticsTreeStyle.errorProperty,
           ),
-          ErrorDescription(''),
+          ErrorSpacer(),
           DiagnosticsProperty<dynamic>(
             'The ${child.runtimeType} that did not match the expected child type '
             'was created by',
@@ -2880,13 +2880,13 @@ mixin ContainerRenderObjectMixin<ChildType extends RenderObject, ParentDataType 
             'example, a RenderSliver cannot be the child of a RenderBox because '
             'a RenderSliver does not understand the RenderBox layout protocol.'
           ),
-          ErrorDescription(''),
+          ErrorSpacer(),
           DiagnosticsProperty<dynamic>(
             'The $runtimeType that expected a $ChildType child was created by',
             debugCreator,
             style: DiagnosticsTreeStyle.errorProperty,
           ),
-          ErrorDescription(''),
+          ErrorSpacer(),
           DiagnosticsProperty<dynamic>(
             'The ${child.runtimeType} that did not match the expected child type '
             'was created by',
