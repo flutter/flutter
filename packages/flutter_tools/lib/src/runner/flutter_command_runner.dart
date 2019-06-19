@@ -547,7 +547,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       try {
         flutterUri = packageMap.map['flutter'];
       } on FormatException {
-        // We're not quie sure why this can happen, perhaps the user
+        // We're not quite sure why this can happen, perhaps the user
         // accidentally edited the .packages file. Re-running pub should
         // fix the issue, and we definitely shouldn't crash here.
         return;
