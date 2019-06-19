@@ -4,20 +4,19 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/android/android_studio_validator.dart';
-import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/ios/ios_workflow.dart';
-import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
-import 'package:flutter_tools/src/macos/xcode_validator.dart';
-import 'package:flutter_tools/src/proxy_validator.dart';
-import 'package:flutter_tools/src/vscode/vscode_validator.dart';
-import 'package:flutter_tools/src/web/web_validator.dart';
-import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
-
+import '../android/android_studio_validator.dart';
+import '../android/android_workflow.dart';
 import '../base/common.dart';
 import '../doctor.dart';
+import '../ios/ios_workflow.dart';
+import '../macos/cocoapods_validator.dart';
+import '../macos/xcode_validator.dart';
+import '../proxy_validator.dart';
 import '../runner/flutter_command.dart';
 import '../usage.dart';
+import '../vscode/vscode_validator.dart';
+import '../web/web_validator.dart';
+import '../windows/visual_studio_validator.dart';
 
 class DoctorCommand extends FlutterCommand {
   DoctorCommand({this.verbose = false}) {
