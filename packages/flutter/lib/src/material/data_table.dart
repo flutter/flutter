@@ -318,13 +318,13 @@ class DataTable extends StatelessWidget {
   /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
   ///
-  /// When a checkbox is displayed, it is also the padding between the checkbox
+  /// When a checkbox is displayed, it is also the margin between the checkbox
   /// the content in the first data column.
   ///
   /// This value defaults to 24.0 to adhere to the Material Design specifications.
   final double horizontalMargin;
 
-  /// The horizontal padding between the contents of each data column.
+  /// The horizontal margin between the contents of each data column.
   ///
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;

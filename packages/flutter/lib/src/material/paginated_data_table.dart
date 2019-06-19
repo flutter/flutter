@@ -144,7 +144,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// This value defaults to 24.0 to adhere to the Material Design specifications.
   final double horizontalMargin;
 
-  /// The horizontal padding between the contents of each data column.
+  /// The horizontal margin between the contents of each data column.
   ///
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;
