@@ -22,8 +22,7 @@ task:
   artifacts_cache:
     folder: bin/cache/artifacts
     fingerprint_script: echo $OS; cat bin/internal/engine.version
-  setup_script:
-    - ./dev/bots/cirrus_setup.sh
+  setup_script: ./dev/bots/cirrus_setup.sh
   matrix:
     # TODO(flutter/flutter#34435): re-enable the docs shard
     # - name: docs

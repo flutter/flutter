@@ -66,10 +66,18 @@ void main() {
 
     setUp(() {
       fs = MemoryFileSystem();
+      platform = FakePlatform(
+        operatingSystem: 'linux',
+        environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot},
+      );
       final Directory flutterRoot = fs.directory('/path/to/flutter')..createSync(recursive: true);
       final Directory goldensRoot = flutterRoot.childDirectory('bin/cache/goldens')..createSync(recursive: true);
       final Directory testDirectory = goldensRoot.childDirectory('test/foo/bar')..createSync(recursive: true);
-      comparator = FlutterGoldenFileComparator(testDirectory.uri, fs: fs);
+      comparator = FlutterGoldenFileComparator(
+        testDirectory.uri,
+        fs: fs,
+        platform: platform,
+      );
     });
 
     group('fromDefaultComparator', () {
@@ -132,25 +140,19 @@ void main() {
         expect(goldenFile.readAsBytesSync(), <int>[1, 2, 3]);
       });
     });
-
-    group('SkiaGold Client', () {
-
-      final SkiaGoldClient skiaGoldClient = SkiaGoldClient();
-      platform = FakePlatform(environment: <String, String>{'FLUTTER_ROOT': _kFlutterRoot});
-      process = MockProcessManager();
-
-      group('auth', () {
-        test('Returns false when authorization is unavailable.', () async {
-          final Directory testDirectory = fs.directory(comparator.basedir);
-          final bool result = await skiaGoldClient.auth(testDirectory);
-          expect(false, result);
-        });
+    group('Skia Gold', () {
+      final MemoryFileSystem fs = MemoryFileSystem();
+      final FakePlatform platform = FakePlatform(environment: <String, String>{
+        'FLUTTER_ROOT': _kFlutterRoot
       });
-      group('imgtestInit', () {
-        // necessary files are created - keys, failures
-      });
-      group('imgtestAdd', () {
-        // throws error for null arguments
+      final SkiaGoldClient skiaClient = SkiaGoldClient(
+        fs: fs,
+        platform: platform,
+      );
+
+      test('auth returns false when service account is unavailable', () async {
+        final bool result = await skiaClient.auth(fs.directory(comparator.basedir));
+        expect(result, isFalse);
       });
     });
   });

@@ -1731,7 +1731,7 @@ class _MatchesGoldenFile extends AsyncMatcher {
     final Uri testNameUri = _testingWithSkiaGold()
       ? key
       :_addVersion(key, version);
-    description.add('one widget whose rasterized image matches golden image "$testNameUri"');
+    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 
   Uri _addVersion(Uri key, int version) {

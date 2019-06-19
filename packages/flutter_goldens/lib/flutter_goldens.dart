@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -124,7 +123,7 @@ class FlutterGoldenFileComparator implements GoldenFileComparator {
       await _skiaClient.imgtestInit();
       return await _skiaClient.imgtestAdd(golden.path, goldenFile);
 
-    } else if (isLinux) {
+    } else if (platform.isLinux) {
       // Testing with GoldensClient.
       final List<int> goldenBytes = await goldenFile.readAsBytes();
       if (goldenBytes.length != imageBytes.length) {

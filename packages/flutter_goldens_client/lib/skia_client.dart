@@ -8,9 +8,7 @@ import 'dart:io' as io;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
-import 'package:path/path.dart' as path;
 import 'package:platform/platform.dart';
-import 'package:process/process.dart';
 
 import 'package:flutter_goldens_client/client.dart';
 
@@ -30,7 +28,6 @@ class SkiaGoldClient {
   SkiaGoldClient({
     this.fs = const LocalFileSystem(),
     this.platform = const LocalPlatform(),
-    this.process = const LocalProcessManager(),
   });
 
   /// The file system to use for storing local files for running imgtests.
@@ -45,13 +42,9 @@ class SkiaGoldClient {
   /// replaced by mock platform instance.
   final Platform platform;
 
-  /// A controller for launching sub-processes.
+  /// The local [Directory] where The Skia Client will be operating tests.
   ///
-  /// This is useful in tests, where the real process manager (the default) can
-  /// be replaced by a mock process manager that doesn't really create
-  /// sub-processes.
-  final ProcessManager process;
-
+  /// This is provided by the [FlutterGoldenFileComparator], cannot be null.
   Directory _workDirectory;
 
   /// The local [Directory] where the Flutter repository is hosted.
@@ -80,7 +73,7 @@ class SkiaGoldClient {
     if (_serviceAccount == null)
       return false;
 
-    final String authorization = '${_workDirectory.path}serviceAccount.json';
+    final String authorization ='${_workDirectory.path}serviceAccount.json';
     await io.File(authorization).writeAsString(_serviceAccount);
 
     final List<String> authArguments = <String>[
@@ -167,6 +160,7 @@ class SkiaGoldClient {
       _goldctl,
       imgtestArguments,
     );
+
     // Will not turn the tree red.
     // TODO(Piinks): Comment on PR if triage is needed, https://github.com/flutter/flutter/issues/34673
     // if (imgtestResult.exitCode != 0) {
@@ -186,8 +180,9 @@ class SkiaGoldClient {
     if (!flutterRoot.existsSync()) {
       return null;
     } else {
-      final io.ProcessResult revParse = await process.run(
-        <String>['git', 'rev-parse', 'HEAD'],
+      final io.ProcessResult revParse = io.Process.runSync(
+        'git',
+        <String>['rev-parse', 'HEAD'],
         workingDirectory: flutterRoot.path,
       );
       return revParse.exitCode == 0 ? revParse.stdout.trim() : null;

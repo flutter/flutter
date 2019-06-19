@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
@@ -336,7 +337,7 @@ void main() {
         expect(comparator.golden, Uri.parse('foo.png'));
       });
 
-      testWidgets('Comparator succeeds incorporating version number', (WidgetTester tester) async {
+      testWidgets('Comparator succeeds incorporating version number when appropriate', (WidgetTester tester) async {
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
         await expectLater(finder, matchesGoldenFile(
@@ -345,7 +346,11 @@ void main() {
         ));
         expect(comparator.invocation, _ComparatorInvocation.compare);
         expect(comparator.imageBytes, hasLength(greaterThan(0)));
-        expect(comparator.golden, Uri.parse('foo.1.png'));
+        if (_testingWithSkiaGold()){
+          expect(comparator.golden, Uri.parse('foo.png'));
+        } else {
+          expect(comparator.golden, Uri.parse('foo.1.png'));
+        }
       });
 
       testWidgets('Comparator succeeds with null version number', (WidgetTester tester) async {
@@ -414,7 +419,7 @@ void main() {
         }
       });
 
-      testWidgets('Comparator failure incorporates version number', (WidgetTester tester) async {
+      testWidgets('Comparator failure incorporates version number when appropriate', (WidgetTester tester) async {
         comparator.behavior = _ComparatorBehavior.returnFalse;
         await tester.pumpWidget(boilerplate(const Text('hello')));
         final Finder finder = find.byType(Text);
@@ -427,7 +432,11 @@ void main() {
         } on TestFailure catch (error) {
           expect(comparator.invocation, _ComparatorInvocation.compare);
           expect(error.message, contains('does not match'));
-          expect(error.message, contains('foo.1.png'));
+          if (_testingWithSkiaGold()) {
+            expect(error.message, contains('foo.png'));
+          } else {
+            expect(error.message, contains('foo.1.png'));
+          }
         }
       });
 
@@ -713,4 +722,11 @@ class _FakeSemanticsNode extends SemanticsNode {
   SemanticsData data;
   @override
   SemanticsData getSemanticsData() => data;
+}
+
+bool _testingWithSkiaGold() {
+  final String cirrusCI = Platform.environment['CIRRUS_CI'] ?? '';
+  final String cirrusPR = Platform.environment['CIRRUS_PR'] ?? '';
+  final String cirrusBranch = Platform.environment['CIRRUS_BRANCH'] ?? '';
+  return cirrusCI.isNotEmpty && cirrusPR.isEmpty && cirrusBranch == 'master';
 }
