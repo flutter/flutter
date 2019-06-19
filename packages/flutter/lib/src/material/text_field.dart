@@ -149,6 +149,7 @@ class TextField extends StatefulWidget {
     this.style,
     this.strutStyle,
     this.textAlign = TextAlign.start,
+    this.textAlignVertical,
     this.textDirection,
     this.readOnly = false,
     this.showCursor,
@@ -277,6 +278,9 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
+
+  /// {@macro flutter.material.inputDecorator.textAlignVertical}
+  final TextAlignVertical textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.textDirection}
   final TextDirection textDirection;
@@ -506,6 +510,7 @@ class TextField extends StatefulWidget {
     properties.add(EnumProperty<TextInputAction>('textInputAction', textInputAction, defaultValue: null));
     properties.add(EnumProperty<TextCapitalization>('textCapitalization', textCapitalization, defaultValue: TextCapitalization.none));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: TextAlign.start));
+    properties.add(DiagnosticsProperty<TextAlignVertical>('textAlignVertical', textAlignVertical, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
@@ -1009,6 +1014,7 @@ class _TextFieldState extends State<TextField> with AutomaticKeepAliveClientMixi
             decoration: _getEffectiveDecoration(),
             baseStyle: widget.style,
             textAlign: widget.textAlign,
+            textAlignVertical: widget.textAlignVertical,
             isHovering: _isHovering,
             isFocused: focusNode.hasFocus,
             isEmpty: controller.value.text.isEmpty,
