@@ -122,7 +122,7 @@ android {
     );
 
     buildScript.openWrite(mode: FileMode.append).write('''
-subprojects { 
+subprojects {
   afterEvaluate {
     android {
         buildTypes {
