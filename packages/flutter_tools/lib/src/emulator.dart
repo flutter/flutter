@@ -10,6 +10,7 @@ import 'android/android_sdk.dart';
 import 'base/context.dart';
 import 'base/io.dart' show ProcessResult;
 import 'base/process_manager.dart';
+import 'device.dart';
 import 'globals.dart';
 import 'ios/ios_emulators.dart';
 
@@ -218,6 +219,8 @@ abstract class Emulator {
   String get name;
   String get manufacturer;
   String get label;
+  Category get category;
+  PlatformType get platformType;
 
   @override
   int get hashCode => id.hashCode;
