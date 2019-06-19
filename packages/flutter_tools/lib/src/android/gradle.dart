@@ -509,7 +509,7 @@ Future<void> _buildGradleProjectV2(
   flutterUsage.sendTiming('build', 'gradle-v2', Duration(milliseconds: sw.elapsedMilliseconds));
 
   if (!isBuildingBundle) {
-    final Iterable<File> apkFiles = _findApkFiles(project, androidBuildInfo);
+    final Iterable<File> apkFiles = findApkFiles(project, androidBuildInfo);
     if (apkFiles.isEmpty)
       throwToolExit('Gradle build failed to produce an Android package.');
     // Copy the first APK to app.apk, so `flutter run`, `flutter install`, etc. can find it.
@@ -546,7 +546,8 @@ Future<void> _buildGradleProjectV2(
   }
 }
 
-Iterable<File> _findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
+@visibleForTesting
+Iterable<File> findApkFiles(GradleProject project, AndroidBuildInfo androidBuildInfo) {
   final Iterable<String> apkFileNames = project.apkFilesFor(androidBuildInfo);
   if (apkFileNames.isEmpty)
     return const <File>[];
