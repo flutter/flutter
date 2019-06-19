@@ -29,6 +29,10 @@ declare_args() {
   # Set this flag when linking with custom allocators that don't satisfy
   # default ::operator new(size_t) alignment guarantees.
   operator_new_alignment = "default"
+
+  # By default, API calls to deprecated methods are errors. While prototyping,
+  # this flag may be set to allow such calls.
+  allow_deprecated_api_calls = false
 }
 
 # default_include_dirs ---------------------------------------------------------
@@ -664,6 +668,10 @@ if (is_win) {
     # availability is newer than the deployment target. This is not
     # required when compiling Chrome for iOS.
     default_warning_flags += [ "-Wunguarded-availability" ]
+  }
+
+  if (allow_deprecated_api_calls) {
+    default_warning_flags += [ "-Wno-deprecated-declarations" ]
   }
 }
 
