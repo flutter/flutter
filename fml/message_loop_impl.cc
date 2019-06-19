@@ -39,9 +39,11 @@ fml::RefPtr<MessageLoopImpl> MessageLoopImpl::Create() {
 #endif
 }
 
-MessageLoopImpl::MessageLoopImpl() : terminated_(false) {
-  task_queue_ = std::make_unique<MessageLoopTaskQueue>();
-  task_queue_->SetWakeable(this);
+MessageLoopImpl::MessageLoopImpl()
+    : task_queue_(MessageLoopTaskQueues::GetInstance()),
+      queue_id_(task_queue_->CreateTaskQueue()),
+      terminated_(false) {
+  task_queue_->SetWakeable(queue_id_, this);
 }
 
 MessageLoopImpl::~MessageLoopImpl() = default;
@@ -54,7 +56,7 @@ void MessageLoopImpl::PostTask(fml::closure task, fml::TimePoint target_time) {
     // |task| synchronously within this function.
     return;
   }
-  task_queue_->RegisterTask(task, target_time);
+  task_queue_->RegisterTask(queue_id_, task, target_time);
 }
 
 void MessageLoopImpl::AddTaskObserver(intptr_t key, fml::closure callback) {
@@ -62,14 +64,14 @@ void MessageLoopImpl::AddTaskObserver(intptr_t key, fml::closure callback) {
   FML_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
       << "Message loop task observer must be added on the same thread as the "
          "loop.";
-  task_queue_->AddTaskObserver(key, callback);
+  task_queue_->AddTaskObserver(queue_id_, key, callback);
 }
 
 void MessageLoopImpl::RemoveTaskObserver(intptr_t key) {
   FML_DCHECK(MessageLoop::GetCurrent().GetLoopImpl().get() == this)
       << "Message loop task observer must be removed from the same thread as "
          "the loop.";
-  task_queue_->RemoveTaskObserver(key);
+  task_queue_->RemoveTaskObserver(queue_id_, key);
 }
 
 void MessageLoopImpl::DoRun() {
@@ -95,7 +97,7 @@ void MessageLoopImpl::DoRun() {
   // should be destructed on the message loop's thread. We have just returned
   // from the implementations |Run| method which we know is on the correct
   // thread. Drop all pending tasks on the floor.
-  task_queue_->Dispose();
+  task_queue_->Dispose(queue_id_);
 }
 
 void MessageLoopImpl::DoTerminate() {
@@ -116,7 +118,7 @@ void MessageLoopImpl::SwapTaskQueues(const fml::RefPtr<MessageLoopImpl>& other)
                                   std::defer_lock);
 
   std::lock(t1, t2);
-  task_queue_->Swap(*other->task_queue_);
+  task_queue_->Swap(queue_id_, other->queue_id_);
 }
 
 void MessageLoopImpl::FlushTasks(FlushType type) {
@@ -130,11 +132,11 @@ void MessageLoopImpl::FlushTasks(FlushType type) {
   // gather invocations -> Swap -> execute invocations
   // will lead us to run invocations on the wrong thread.
   std::scoped_lock task_flush_lock(tasks_flushing_mutex_);
-  task_queue_->GetTasksToRunNow(type, invocations);
+  task_queue_->GetTasksToRunNow(queue_id_, type, invocations);
 
   for (const auto& invocation : invocations) {
     invocation();
-    task_queue_->NotifyObservers();
+    task_queue_->NotifyObservers(queue_id_);
   }
 }
 

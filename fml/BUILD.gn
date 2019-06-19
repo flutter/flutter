@@ -46,8 +46,8 @@ source_set("fml") {
     "message_loop.h",
     "message_loop_impl.cc",
     "message_loop_impl.h",
-    "message_loop_task_queue.cc",
-    "message_loop_task_queue.h",
+    "message_loop_task_queues.cc",
+    "message_loop_task_queues.h",
     "native_library.h",
     "paths.cc",
     "paths.h",
@@ -201,7 +201,7 @@ executable("fml_unittests") {
     "file_unittest.cc",
     "memory/ref_counted_unittest.cc",
     "memory/weak_ptr_unittest.cc",
-    "message_loop_task_queue_unittests.cc",
+    "message_loop_task_queues_unittests.cc",
     "message_loop_unittests.cc",
     "message_unittests.cc",
     "paths_unittests.cc",
@@ -223,5 +223,19 @@ executable("fml_unittests") {
     "$flutter_root/fml",
     "$flutter_root/testing",
     "//third_party/dart/runtime:libdart_jit",
+  ]
+}
+
+executable("fml_benchmarks") {
+  testonly = true
+
+  sources = [
+    "message_loop_task_queues_benchmark.cc",
+  ]
+
+  deps = [
+    "$flutter_root/benchmarking",
+    "$flutter_root/fml",
+    "$flutter_root/runtime:libdart",
   ]
 }
