@@ -11,9 +11,8 @@
 #include "flutter/shell/common/shell.h"
 #include "flutter/shell/platform/darwin/ios/framework/Headers/FlutterViewController.h"
 #include "flutter/shell/platform/darwin/ios/framework/Source/FlutterPlatformViews_Internal.h"
-#import "flutter/shell/platform/darwin/ios/framework/Source/FlutterSurrogateBinaryMessenger.h"
 
-@interface FlutterViewController () <FlutterSurrogateBinaryMessenger>
+@interface FlutterViewController ()
 
 - (fml::WeakPtr<FlutterViewController>)getWeakPtr;
 - (flutter::FlutterPlatformViewsController*)platformViewsController;
