@@ -551,17 +551,17 @@ Iterable<File> _findApkFiles(GradleProject project, AndroidBuildInfo androidBuil
   if (apkFileNames.isEmpty)
     return const <File>[];
 
-  return apkFileNames.map<File>((String apkFileName) {
+  return apkFileNames.expand<File>((String apkFileName) {
     File apkFile = project.apkDirectory.childFile(apkFileName);
     if (apkFile.existsSync())
-      return apkFile;
+      return <File>[apkFile];
     final BuildInfo buildInfo = androidBuildInfo.buildInfo;
     final String modeName = camelCase(buildInfo.modeName);
     apkFile = project.apkDirectory
         .childDirectory(modeName)
         .childFile(apkFileName);
     if (apkFile.existsSync())
-      return apkFile;
+      return <File>[apkFile];
     if (buildInfo.flavor != null) {
       // Android Studio Gradle plugin v3 adds flavor to path.
       apkFile = project.apkDirectory
@@ -569,9 +569,9 @@ Iterable<File> _findApkFiles(GradleProject project, AndroidBuildInfo androidBuil
           .childDirectory(modeName)
           .childFile(apkFileName);
       if (apkFile.existsSync())
-        return apkFile;
+        return <File>[apkFile];
     }
-    return null;
+    return const <File>[];
   });
 }
 
