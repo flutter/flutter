@@ -49,20 +49,10 @@ class AssembleCommand extends FlutterCommand {
 
 abstract class AssembleBase extends FlutterCommand {
   AssembleBase() {
-    argParser.addOption(
-      'target-platform',
-      allowed: const <String>[
-        'android-arm',
-        'android-arm64',
-        'android-x64',
-        'android-x86',
-        'ios',
-        'darwin-x64',
-        'linux-x64',
-        'windows-x64',
-        'fuchsia',
-        'web',
-      ],
+    argParser.addMultiOption(
+      'define',
+      abbr: 'd',
+      help: 'Allows passing configuration to a target with --define=key=value.'
     );
     argParser.addOption(
       'build-mode',

@@ -249,10 +249,10 @@ class Target {
 
   /// Locate the stamp file for a particular target name and environment.
   static File _findStampFile(String name, Environment environment) {
-    final String platform = getNameForTargetPlatform(environment.targetPlatform);
+    final String prefix = environment.defines[name].computeIdentifier();
     final String mode = getNameForBuildMode(environment.buildMode);
     final String flavor = environment.flavor;
-    final String fileName = '$name.$mode.$platform.$flavor';
+    String fileName = '$name.$mode.$flavor';
     return environment.buildDir.childFile(fileName);
   }
 
@@ -263,6 +263,41 @@ class Target {
       source.accept(collector);
     }
     return collector.sources;
+  }
+}
+
+
+/// Command line configuration passed to a specific target.
+///
+/// These defines allow arbitrary configuration to be safely used in a build
+/// target.
+///
+/// Example:
+///   flutter assemble foo -d=foo=value -d=foo=value2
+class TargetDefines {
+  TargetDefines(this.defines, this.target);
+
+  /// The rule these defines are for.
+  final String target;
+
+  /// The key value pairs for this specific target.
+  final Map<String, String> defines;
+
+  /// A unique identifier generated from this set of defines.
+  ///
+  /// If there are no defines, returns `null` which signals that it is safe
+  /// to skip inserting the identifier in the output pathh.
+  String computeIdentifier() {
+    if (defines.isEmpty) {
+      return null;
+    }
+    // Sort the keys so that the result is stable.
+    final List<String> keysAndValues = defines.keys
+        .followedBy(defines.values)
+        .toList()
+        ..sort();
+    // Return the base64 encoding so it is safe to write to the file system.
+    return base64.encode(keysAndValues.join('').codeUnits);
   }
 }
 
@@ -303,9 +338,6 @@ class Target {
 ///        ..createSync()
 ///        ..writeAsStringSync('non_debug');
 ///    }
-// TODO(jonahwilliams): allow passing serializable defines to each rule that
-// could include somewhat arbitary config and be used to invalidate. Example:
-// android_arch, ios_arch.
 class Environment {
   /// Create a new [Environment] object.
   ///
@@ -313,24 +345,27 @@ class Environment {
   /// defaults based on it.
   factory Environment({
     @required Directory projectDir,
-    @required TargetPlatform targetPlatform,
     @required BuildMode buildMode,
     Directory buildDir,
     Directory cacheDir,
     Directory flutterRootDir,
     String flavor,
+    Map<String, Map<String, String>> defineValues = const <String, Map<String, String>>{},
   }) {
     assert(projectDir != null);
-    assert(targetPlatform != null);
     assert(buildMode != null);
+    final Map<String, TargetDefines> defines = <String, TargetDefines>{};
+    for (String key in defineValues.keys) {
+      defines[key] = TargetDefines(defineValues[key], key);
+    }
     return Environment._(
       projectDir: projectDir,
       flutterRootDir: flutterRootDir ?? fs.directory(Cache.flutterRoot),
       buildDir: buildDir ?? projectDir.childDirectory('build'),
       cacheDir: cacheDir ??
           Cache.instance.getCacheArtifacts().childDirectory('engine'),
-      targetPlatform: targetPlatform,
       buildMode: buildMode,
+      defines: defines,
       flavor: flavor ?? 'none',
     );
   }
@@ -339,10 +374,10 @@ class Environment {
     @required this.projectDir,
     @required this.buildDir,
     @required this.cacheDir,
-    @required this.targetPlatform,
     @required this.buildMode,
     @required this.flavor,
     @required this.flutterRootDir,
+    @required this.defines,
   });
 
   /// The [Source] value which is substituted with the path to [projectDir].
@@ -392,11 +427,8 @@ class Environment {
   /// The currently selected build mode.
   final BuildMode buildMode;
 
-  /// The current target platform.
-  ///
-  /// Certain targets do not require a [TargetPlatform], while others will fail
-  /// if paired with an incorrect [TargetPlatform].
-  final TargetPlatform targetPlatform;
+  /// Per-target additional condiguration.
+  final Map<String, TargetDefines> defines;
 
   /// The current flavor, or 'none' if none.
   final String flavor;
