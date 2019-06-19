@@ -120,6 +120,6 @@ class IOSValidator extends DoctorValidator {
       messages.add(ValidationMessage.hint(userMessages.iOSBrewMissing));
     }
 
-    return ValidationResult('ios', packageManagerStatus, messages);
+    return ValidationResult(packageManagerStatus, messages);
   }
 }

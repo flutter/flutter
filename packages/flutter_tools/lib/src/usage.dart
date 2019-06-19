@@ -54,18 +54,16 @@ const String kCommandDoctorDeviceValidator = 'cd27';
 const String kCommandDoctorIntelliJValidator = 'cd28';
 const String kCommandDoctorNoIdeValidator = 'cd29';
 const String kCommandDoctorFlutterValidator = 'cd30';
-const String kCommandDoctorAndroidLicenseValidator = 'cd31';
-const String kCommandDoctorAndroidValidator = 'cd32';
-const String kCommandDoctorXcodeValidator = 'cd33';
-const String kCommandDoctorCocoaPodsValidator = 'cd34';
-const String kCommandDoctorIOSValidator = 'cd35';
-const String kCommandDoctorVisualStudioValidator = 'cd36';
-const String kCommandDoctorWebValidator = 'cd37';
-const String kCommandDoctorAndroidStudioValidator = 'cd38';
-const String kCommandDoctorNoAndroidStudioValidator = 'cd39';
-const String kCommandDoctorProxyValidator = 'cd40';
-const String kCommandDoctorVsCodeValidator = 'cd41';
-// Next ID: cd42
+const String kCommandDoctorAndroidHostPlatformValidator = 'cd31';
+const String kCommandDoctorIosHostPlatformValidator = 'cd32';
+const String kCommandDoctorIOSValidator = 'cd33';
+const String kCommandDoctorVisualStudioValidator = 'cd34';
+const String kCommandDoctorWebValidator = 'cd35';
+const String kCommandDoctorAndroidStudioValidator = 'cd36';
+const String kCommandDoctorNoAndroidStudioValidator = 'cd37';
+const String kCommandDoctorProxyValidator = 'cd38';
+const String kCommandDoctorVsCodeValidator = 'cd39';
+// Next ID: cd40
 
 Usage get flutterUsage => Usage.instance;
 

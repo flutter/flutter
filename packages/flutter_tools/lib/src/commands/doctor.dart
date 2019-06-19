@@ -4,6 +4,16 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/android/android_studio_validator.dart';
+import 'package:flutter_tools/src/android/android_workflow.dart';
+import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/macos/cocoapods_validator.dart';
+import 'package:flutter_tools/src/macos/xcode_validator.dart';
+import 'package:flutter_tools/src/proxy_validator.dart';
+import 'package:flutter_tools/src/vscode/vscode_validator.dart';
+import 'package:flutter_tools/src/web/web_validator.dart';
+import 'package:flutter_tools/src/windows/visual_studio_validator.dart';
+
 import '../base/common.dart';
 import '../doctor.dart';
 import '../runner/flutter_command.dart';
@@ -31,48 +41,64 @@ class DoctorCommand extends FlutterCommand {
   @override
   final String description = 'Show information about the installed tooling.';
 
-  List<ValidationResult> _validations;
+  Map<Type, ValidationResult> _validations;
 
   @override
   Future<Map<String, String>> get usageValues async {
     assert(_validations != null);
-    return Map<String, String>.fromIterable(_validations,
-      key: (dynamic v) {
-        switch (v.name) {
-          case 'device':
-            return kCommandDoctorDeviceValidator;
-          case 'intelliJ':
-            return kCommandDoctorIntelliJValidator;
-          case 'noIde':
-            return kCommandDoctorNoIdeValidator;
-          case 'flutter':
-            return kCommandDoctorFlutterValidator;
-          case 'androidLicense':
-            return kCommandDoctorAndroidLicenseValidator;
-          case 'android':
-            return kCommandDoctorAndroidValidator;
-          case 'xcode':
-            return kCommandDoctorXcodeValidator;
-          case 'cocoaPods':
-            return kCommandDoctorCocoaPodsValidator;
-          case 'ios':
-            return kCommandDoctorIOSValidator;
-          case 'visualStudio':
-            return kCommandDoctorVisualStudioValidator;
-          case 'web':
-            return kCommandDoctorWebValidator;
-          case 'androidStudio':
-            return kCommandDoctorAndroidStudioValidator;
-          case 'noAndroidStudio':
-            return kCommandDoctorNoAndroidStudioValidator;
-          case 'proxy':
-            return kCommandDoctorProxyValidator;
-          case 'vsCode':
-            return kCommandDoctorVsCodeValidator;
+    return _validations
+      .map<String, String>((Type validationType, ValidationResult result) {
+        String dimension = '';
+        switch (validationType) {
+          case DeviceValidator:
+            dimension = kCommandDoctorDeviceValidator;
+            break;
+          case IntelliJValidator:
+            dimension = kCommandDoctorIntelliJValidator;
+            break;
+          case NoIdeValidator:
+            dimension = kCommandDoctorNoIdeValidator;
+            break;
+          case FlutterValidator:
+            dimension = kCommandDoctorFlutterValidator;
+            break;
+          case AndroidValidator:
+          case AndroidHostPlatformValidator:
+          case AndroidLicenseValidator:
+            dimension = kCommandDoctorAndroidHostPlatformValidator;
+            break;
+          case XcodeValidator:
+          case IosHostPlatformValidator:
+          case CocoaPodsValidator:
+            dimension = kCommandDoctorIosHostPlatformValidator;
+            break;
+          case IOSValidator:
+            dimension = kCommandDoctorIOSValidator;
+            break;
+          case VisualStudioValidator:
+            dimension = kCommandDoctorVisualStudioValidator;
+            break;
+          case WebValidator:
+            dimension = kCommandDoctorWebValidator;
+            break;
+          case AndroidStudioValidator:
+            dimension = kCommandDoctorAndroidStudioValidator;
+            break;
+          case NoAndroidStudioValidator:
+            dimension = kCommandDoctorNoAndroidStudioValidator;
+            break;
+          case ProxyValidator:
+            dimension = kCommandDoctorProxyValidator;
+            break;
+          case VsCodeValidator:
+            dimension = kCommandDoctorVsCodeValidator;
+            break;
+          default:
+            print(validationType);
+            break;
         }
-        return '';
-      },
-      value: (dynamic v) => v.typeStr,
+        return MapEntry<String, String>(dimension, result.typeStr);
+      }
     );
   }
 

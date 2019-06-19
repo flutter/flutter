@@ -31,7 +31,6 @@ class VsCodeValidator extends DoctorValidator {
         : ValidationType.partial;
 
     return ValidationResult(
-      'vsCode',
       validationType,
       _vsCode.validationMessages,
       statusInfo: vsCodeVersionText,

@@ -46,6 +46,6 @@ class VisualStudioValidator extends DoctorValidator {
       messages.add(ValidationMessage.error(userMessages.visualStudioMissing));
     }
 
-    return ValidationResult('visualStudio', status, messages, statusInfo: versionInfo);
+    return ValidationResult(status, messages, statusInfo: versionInfo);
   }
 }

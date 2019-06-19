@@ -31,14 +31,12 @@ class WebValidator extends DoctorValidator {
     }
     if (!canRunChrome) {
       return ValidationResult(
-        'web',
         ValidationType.missing,
         messages,
         statusInfo: 'Cannot find chrome executable at $chrome',
       );
     }
     return ValidationResult(
-      'web',
       ValidationType.installed,
       messages,
     );

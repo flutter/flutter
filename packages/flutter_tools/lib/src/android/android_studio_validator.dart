@@ -58,7 +58,7 @@ class AndroidStudioValidator extends DoctorValidator {
       }
     }
 
-    return ValidationResult('androidStudio', type, messages, statusInfo: studioVersionText);
+    return ValidationResult(type, messages, statusInfo: studioVersionText);
   }
 
   bool _hasIssues(List<ValidationMessage> messages) {
@@ -79,7 +79,7 @@ class NoAndroidStudioValidator extends DoctorValidator {
     }
     messages.add(ValidationMessage(userMessages.androidStudioInstallation));
 
-    return ValidationResult('noAndroidStudio', ValidationType.notAvailable, messages,
+    return ValidationResult(ValidationType.notAvailable, messages,
         statusInfo: 'not installed');
   }
 }

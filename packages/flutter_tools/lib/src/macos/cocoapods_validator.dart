@@ -53,6 +53,6 @@ class CocoaPodsValidator extends DoctorValidator {
       messages.add(ValidationMessage.hint(userMessages.cocoaPodsBrewMissing));
     }
 
-    return ValidationResult('cocoaPods', status, messages);
+    return ValidationResult(status, messages);
   }
 }

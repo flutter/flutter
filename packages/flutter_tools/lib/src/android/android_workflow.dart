@@ -51,7 +51,7 @@ class AndroidWorkflow implements Workflow {
 }
 
 class AndroidValidator extends DoctorValidator {
-  AndroidValidator() : super('Android toolchain - develop for Android devices');
+  AndroidValidator() : super('Android toolchain - develop for Android devices',);
 
   @override
   String get slowWarning => '${_task ?? 'This'} is taking a long time...';
@@ -102,12 +102,12 @@ class AndroidValidator extends DoctorValidator {
       } else {
         messages.add(ValidationMessage.error(userMessages.androidMissingSdkInstructions(kAndroidHome)));
       }
-      return ValidationResult('android', ValidationType.missing, messages);
+      return ValidationResult(ValidationType.missing, messages);
     }
 
     if (androidSdk.licensesAvailable && !androidSdk.platformToolsAvailable) {
       messages.add(ValidationMessage.hint(userMessages.androidSdkLicenseOnly(kAndroidHome)));
-      return ValidationResult('android', ValidationType.partial, messages);
+      return ValidationResult(ValidationType.partial, messages);
     }
 
     messages.add(ValidationMessage(userMessages.androidSdkLocation(androidSdk.directory)));
@@ -122,7 +122,7 @@ class AndroidValidator extends DoctorValidator {
         messages.add(ValidationMessage.error(
           userMessages.androidSdkBuildToolsOutdated(androidSdk.sdkManagerPath, kAndroidSdkMinVersion, kAndroidSdkBuildToolsMinVersion.toString())),
         );
-        return ValidationResult('android', ValidationType.missing, messages);
+        return ValidationResult(ValidationType.missing, messages);
       }
       sdkVersionText = userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
 
@@ -150,33 +150,29 @@ class AndroidValidator extends DoctorValidator {
         return ValidationMessage.error(message);
       }));
       messages.add(ValidationMessage(userMessages.androidSdkInstallHelp));
-      return ValidationResult('android', ValidationType.partial, messages,
-          statusInfo: sdkVersionText);
+      return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
     // Now check for the JDK.
     final String javaBinary = AndroidSdk.findJavaBinary();
     if (javaBinary == null) {
       messages.add(ValidationMessage.error(userMessages.androidMissingJdk));
-      return ValidationResult('android', ValidationType.partial, messages,
-          statusInfo: sdkVersionText);
+      return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
     messages.add(ValidationMessage(userMessages.androidJdkLocation(javaBinary)));
 
     // Check JDK version.
     if (! await _checkJavaVersion(javaBinary, messages)) {
-      return ValidationResult('android', ValidationType.partial, messages,
-          statusInfo: sdkVersionText);
+      return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
 
     // Success.
-    return ValidationResult('android', ValidationType.installed, messages,
-        statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
   }
 }
 
 class AndroidLicenseValidator extends DoctorValidator {
-  AndroidLicenseValidator() : super('Android license subvalidator');
+  AndroidLicenseValidator() : super('Android license subvalidator',);
 
   @override
   String get slowWarning => 'Checking Android licenses is taking an unexpectedly long time...';
@@ -189,7 +185,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     if (androidSdk == null || androidSdk.latestVersion == null ||
         androidSdk.validateSdkWellFormed().isNotEmpty ||
         ! await _checkJavaVersionNoOutput()) {
-      return ValidationResult('androidLicense', ValidationType.missing, messages);
+      return ValidationResult(ValidationType.missing, messages);
     }
 
     final String sdkVersionText = userMessages.androidStatusInfo(androidSdk.latestVersion.buildToolsVersionName);
@@ -201,19 +197,15 @@ class AndroidLicenseValidator extends DoctorValidator {
         break;
       case LicensesAccepted.some:
         messages.add(ValidationMessage.hint(userMessages.androidLicensesSome));
-        return ValidationResult('androidLicense', ValidationType.partial, messages,
-            statusInfo: sdkVersionText);
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.none:
         messages.add(ValidationMessage.error(userMessages.androidLicensesNone));
-        return ValidationResult('androidLicense', ValidationType.partial, messages,
-            statusInfo: sdkVersionText);
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
       case LicensesAccepted.unknown:
         messages.add(ValidationMessage.error(userMessages.androidLicensesUnknown));
-        return ValidationResult('androidLicense', ValidationType.partial, messages,
-            statusInfo: sdkVersionText);
+        return ValidationResult(ValidationType.partial, messages, statusInfo: sdkVersionText);
     }
-    return ValidationResult('androidLicense', ValidationType.installed, messages,
-        statusInfo: sdkVersionText);
+    return ValidationResult(ValidationType.installed, messages, statusInfo: sdkVersionText);
   }
 
   Future<bool> _checkJavaVersionNoOutput() async {

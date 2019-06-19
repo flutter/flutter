@@ -61,10 +61,22 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       _validators.add(FlutterValidator());
 
       if (androidWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[androidValidator, androidLicenseValidator]));
+        _validators.add(AndroidHostPlatformValidator(
+          <DoctorValidator>[
+            androidValidator,
+            androidLicenseValidator,
+          ]
+        )
+      );
 
       if (iosWorkflow.appliesToHostPlatform || macOSWorkflow.appliesToHostPlatform)
-        _validators.add(GroupedValidator(<DoctorValidator>[xcodeValidator, cocoapodsValidator]));
+        _validators.add(IosHostPlatformValidator(
+          <DoctorValidator>[
+            xcodeValidator,
+            cocoapodsValidator
+          ]
+        )
+      );
 
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosValidator);
@@ -132,14 +144,14 @@ class ValidatorTask {
 class DiagnoseResult {
   const DiagnoseResult({
     this.success,
-    this.validations = const <ValidationResult>[]
+    this.validations = const <Type, ValidationResult>{},
   });
   /// Whether all the validations passed. This means that no validation
   /// resulted in [ValidationType.missing].
   final bool success;
 
   /// The result of the validations performed.
-  final List<ValidationResult> validations;
+  final Map<Type, ValidationResult> validations;
 }
 
 class Doctor {
@@ -223,7 +235,7 @@ class Doctor {
       printStatus('Doctor summary (to see all details, run flutter doctor -v):');
     }
 
-    final List<ValidationResult> validationResults = <ValidationResult>[];
+    final Map<Type, ValidationResult> validationResults = <Type, ValidationResult>{};
     bool doctorSuccess = true;
     int issues = 0;
 
@@ -242,7 +254,7 @@ class Doctor {
       }
       status.stop();
 
-      validationResults.add(result);
+      validationResults[validator.runtimeType] = result;
 
       switch (result.type) {
         case ValidationType.missing:
@@ -402,7 +414,6 @@ class GroupedValidator extends DoctorValidator {
       mergedMessages.addAll(result.messages);
     }
     return ValidationResult(
-        results.first.name,
         mergedType,
         mergedMessages,
         statusInfo: statusInfo,
@@ -410,15 +421,22 @@ class GroupedValidator extends DoctorValidator {
   }
 }
 
+/// This wrapper class is needed to distinguish the type of the validator
+/// exported by [Doctor.diagnose].
+class AndroidHostPlatformValidator extends GroupedValidator {
+  AndroidHostPlatformValidator(List<DoctorValidator> subValidators) : super(subValidators);
+}
+
+/// This wrapper class is needed to distinguish the type of the validator
+/// exported by [Doctor.diagnose].
+class IosHostPlatformValidator extends GroupedValidator {
+  IosHostPlatformValidator(List<DoctorValidator> subValidators) : super(subValidators);
+}
+
 class ValidationResult {
-  /// [name] is the canonical name used to indentify the validation.
-  ///
   /// [ValidationResult.type] should only equal [ValidationResult.installed]
   /// if no [messages] are hints or errors.
-  ValidationResult(this.name, this.type, this.messages, { this.statusInfo });
-
-  /// A canonical name for this validation result.
-  final String name;
+  ValidationResult(this.type, this.messages, { this.statusInfo });
 
   final ValidationType type;
   // A short message about the status.
@@ -549,7 +567,7 @@ class FlutterValidator extends DoctorValidator {
       valid = ValidationType.partial;
     }
 
-    return ValidationResult('flutter', valid, messages,
+    return ValidationResult(valid, messages,
       statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
     );
   }
@@ -569,7 +587,7 @@ class NoIdeValidator extends DoctorValidator {
 
   @override
   Future<ValidationResult> validate() async {
-    return ValidationResult('noIde', ValidationType.missing, <ValidationMessage>[
+    return ValidationResult(ValidationType.missing, <ValidationMessage>[
       ValidationMessage(userMessages.noIdeInstallationInfo),
       ],
       statusInfo: userMessages.noIdeStatusInfo
@@ -618,7 +636,6 @@ abstract class IntelliJValidator extends DoctorValidator {
     _validateIntelliJVersion(messages, kMinIdeaVersion);
 
     return ValidationResult(
-      'intelliJ',
       _hasIssues(messages) ? ValidationType.partial : ValidationType.installed,
       messages,
       statusInfo: userMessages.intellijStatusInfo(version));
@@ -739,7 +756,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     } on FileSystemException catch (e) {
       validators.add(ValidatorWithResult(
           userMessages.intellijMacUnknownResult,
-          ValidationResult('intelliJValidatorOnMac', ValidationType.missing, <ValidationMessage>[
+          ValidationResult(ValidationType.missing, <ValidationMessage>[
               ValidationMessage.error(e.message),
           ]),
       ));
@@ -792,9 +809,9 @@ class DeviceValidator extends DoctorValidator {
     }
 
     if (devices.isEmpty) {
-      return ValidationResult('device', ValidationType.notAvailable, messages);
+      return ValidationResult(ValidationType.notAvailable, messages);
     } else {
-      return ValidationResult('device', ValidationType.installed, messages,
+      return ValidationResult(ValidationType.installed, messages,
           statusInfo: userMessages.devicesAvailable(devices.length));
     }
   }
