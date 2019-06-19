@@ -2402,110 +2402,57 @@ void main() {
       ..path(
         style: PaintingStyle.fill,
         color: const Color(0xFF00FF00),
-        includes: <Offset>[
+        includes: const <Offset>[
           // The border should draw along the four edges of the
           // InputDecorator.
+
           // Top center
-          const Offset(
-            inputDecoratorWidth / 2.0,
-            0.0,
-          ),
+          Offset(inputDecoratorWidth / 2.0, 0.0),
           // Bottom center
-          const Offset(
-            inputDecoratorWidth / 2.0,
-            inputDecoratorHeight,
-          ),
+          Offset(inputDecoratorWidth / 2.0, inputDecoratorHeight),
           // Left center
-          const Offset(
-            0.0,
-            inputDecoratorHeight / 2.0,
-          ),
+          Offset(0.0, inputDecoratorHeight / 2.0),
           // Right center
-          const Offset(
-            inputDecoratorWidth,
-            inputDecoratorHeight / 2.0,
-          ),
+          Offset(inputDecoratorWidth, inputDecoratorHeight / 2.0),
 
           // The border path should contain points where each rounded corner
           // ends.
+
           // Bottom-right arc
-          const Offset(
-            inputDecoratorWidth,
-            inputDecoratorHeight - largerBorderRadiusScaled,
-          ),
-          const Offset(
-            inputDecoratorWidth - largerBorderRadiusScaled,
-            inputDecoratorHeight,
-          ),
-
+          Offset(inputDecoratorWidth, inputDecoratorHeight - largerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - largerBorderRadiusScaled, inputDecoratorHeight),
           // Top-right arc
-          const Offset(
-            inputDecoratorWidth,
-            0.0 + largerBorderRadiusScaled,
-          ),
-          const Offset(
-            inputDecoratorWidth - largerBorderRadiusScaled,
-            0.0,
-          ),
-
+          Offset(inputDecoratorWidth,0.0 + largerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - largerBorderRadiusScaled, 0.0),
           // Bottom-left arc
-          const Offset(
-            0.0,
-            inputDecoratorHeight - smallerBorderRadiusScaled,
-          ),
-          const Offset(
-            0.0 + smallerBorderRadiusScaled,
-            inputDecoratorHeight,
-          ),
-
+          Offset(0.0, inputDecoratorHeight - smallerBorderRadiusScaled),
+          Offset(0.0 + smallerBorderRadiusScaled, inputDecoratorHeight),
           // Top-left arc
-          const Offset(
-            0.0,
-            0.0 + smallerBorderRadiusScaled,
-          ),
-          const Offset(
-            0.0 + smallerBorderRadiusScaled,
-            0.0,
-          ),
+          Offset(0.0,0.0 + smallerBorderRadiusScaled),
+          Offset(0.0 + smallerBorderRadiusScaled, 0.0),
         ],
-        excludes: <Offset>[
+        excludes: const <Offset>[
           // The border should not contain the corner points, since the border
           // is rounded.
-          const Offset(
-            0.0,
-            0.0
-          ), // outside the rounded corner, top left
-          const Offset(
-            inputDecoratorWidth,
-            0.0
-          ), // top right
-          const Offset(
-            0.0,
-            inputDecoratorWidth
-          ), // bottom left
-          const Offset(
-            inputDecoratorWidth,
-            inputDecoratorWidth
-          ), // bottom right
+
+          // Top-left
+          Offset(0.0, 0.0),
+          // Top-right
+          Offset(inputDecoratorWidth, 0.0),
+          // Bottom-left
+          Offset(0.0, inputDecoratorHeight),
+          // Bottom-right
+          Offset(inputDecoratorWidth, inputDecoratorHeight),
 
           // Corners with larger border ratio should not contain points outside
           // of the larger radius.
-          const Offset(
-            inputDecoratorWidth,
-            56 - smallerBorderRadiusScaled,
-          ),
-          const Offset(
-            inputDecoratorWidth - smallerBorderRadiusScaled,
-            inputDecoratorWidth,
-          ),
-          const Offset(
-            inputDecoratorWidth,
-            0.0 + smallerBorderRadiusScaled,
-          ),
-          const Offset(
-            inputDecoratorWidth - smallerBorderRadiusScaled,
-            0.0,
-          ),
+
+          // Bottom-right arc
+          Offset(inputDecoratorWidth, inputDecoratorHeight - smallerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - smallerBorderRadiusScaled, inputDecoratorWidth),
+          // Top-left arc
+          Offset(inputDecoratorWidth, 0.0 + smallerBorderRadiusScaled),
+          Offset(inputDecoratorWidth - smallerBorderRadiusScaled, 0.0),
         ],
       )
       ..restore()
