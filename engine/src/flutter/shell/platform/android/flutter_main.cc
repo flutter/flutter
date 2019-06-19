@@ -42,11 +42,7 @@ fml::jni::ScopedJavaGlobalRef<jclass>* g_flutter_jni_class = nullptr;
 FlutterMain::FlutterMain(flutter::Settings settings)
     : settings_(std::move(settings)), observatory_uri_callback_() {}
 
-FlutterMain::~FlutterMain() {
-  if (observatory_uri_callback_) {
-    DartServiceIsolate::RemoveServerStatusCallback(observatory_uri_callback_);
-  }
-}
+FlutterMain::~FlutterMain() = default;
 
 static std::unique_ptr<FlutterMain> g_flutter_main;
 
