@@ -565,6 +565,7 @@ class SemanticsProperties extends DiagnosticableTree {
     this.button,
     this.header,
     this.textField,
+    this.readOnly,
     this.focused,
     this.inMutuallyExclusiveGroup,
     this.hidden,
@@ -650,6 +651,13 @@ class SemanticsProperties extends DiagnosticableTree {
   /// TalkBack/VoiceOver provide special affordances to enter text into a
   /// text field.
   final bool textField;
+
+  /// If non-null, indicates that this subtree is read only.
+  ///
+  /// Only applicable when [textField] is true
+  ///
+  /// TalkBack/VoiceOver will treat it as non-editable text field.
+  final bool readOnly;
 
   /// If non-null, whether the node currently holds input focus.
   ///
@@ -3504,6 +3512,14 @@ class SemanticsConfiguration {
   bool get isTextField => _hasFlag(SemanticsFlag.isTextField);
   set isTextField(bool value) {
     _setFlag(SemanticsFlag.isTextField, value);
+  }
+
+  /// Whether the owning [RenderObject] is read only.
+  ///
+  /// Only applicable when [isTextField] is true.
+  bool get isReadOnly => _hasFlag(SemanticsFlag.isReadOnly);
+  set isReadOnly(bool value) {
+    _setFlag(SemanticsFlag.isReadOnly, value);
   }
 
   /// Whether the [value] should be obscured.
