@@ -4,6 +4,7 @@
 
 import 'package:meta/meta.dart';
 
+import '../commands/daemon.dart' show isRunningFromDaemon;
 import '../base/context.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
@@ -15,12 +16,18 @@ import 'chrome.dart';
 bool debugDisableWeb = false;
 
 /// Only launch or display web devices if `FLUTTER_WEB`
-/// environment variable is set to true.
+/// environment variable is set to true from the daemon.
 bool get flutterWebEnabled {
-  _flutterWebEnabled = platform.environment['FLUTTER_WEB']?.toLowerCase() == 'true';
-  return _flutterWebEnabled && !FlutterVersion.instance.isStable;
+  if (debugDisableWeb) {
+    return false;
+  }
+  final bool platformEnabled = platform
+      .environment['FLUTTER_WEB']?.toLowerCase() == 'true';
+  if (isRunningFromDaemon) {
+    return platformEnabled && !FlutterVersion.instance.isStable;
+  }
+  return !FlutterVersion.instance.isStable;
 }
-bool _flutterWebEnabled;
 
 /// The  web workflow instance.
 WebWorkflow get webWorkflow => context.get<WebWorkflow>();
