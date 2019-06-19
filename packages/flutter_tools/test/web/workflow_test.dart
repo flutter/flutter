@@ -46,15 +46,6 @@ void main() {
       });
     });
 
-    test('does not apply if FLUTTER_WEB is not true', ()=> testbed.run(() {
-      expect(workflow.appliesToHostPlatform, false);
-      expect(workflow.canLaunchDevices, false);
-      expect(workflow.canListDevices, false);
-      expect(workflow.canListEmulators, false);
-    }, overrides: <Type, Generator>{
-      Platform: () => noEnvironment,
-    }));
-
     test('Applies on Linux', () => testbed.run(() {
       expect(workflow.appliesToHostPlatform, true);
       expect(workflow.canLaunchDevices, true);
@@ -92,7 +83,7 @@ void main() {
       Platform: () => notSupported,
     }));
 
-    test('does not apply on stable brnach', () => testbed.run(() {
+    test('does not apply on stable branch', () => testbed.run(() {
       expect(workflow.appliesToHostPlatform, false);
       expect(workflow.canLaunchDevices, false);
       expect(workflow.canListDevices, false);
@@ -119,7 +110,6 @@ class MockPlatform extends Mock implements Platform {
       this.macos = false,
       this.linux = false,
       this.environment = const <String, String>{
-        'FLUTTER_WEB': 'true',
         kChromeEnvironment: 'chrome',
       }});
 
