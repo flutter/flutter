@@ -162,13 +162,15 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
   /// The parameter [enviroment] is exposed to test different environment
   /// variable values, and should not be used.
   static WidgetsBinding ensureInitialized([@visibleForTesting Map<String, String> environment]) {
-    environment ??= Platform.environment;
+    if (!isBrowser) {
+      // Accessing Platform may throw from a browser, so we guard this.
+      environment ??= Platform.environment;
+    }
     if (WidgetsBinding.instance == null) {
       if (isBrowser) {
         // Browser environments do not support the LiveTestWidgetsFlutterBinding.
         AutomatedTestWidgetsFlutterBinding();
-      }
-      else if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
+      } else if (environment.containsKey('FLUTTER_TEST') && environment['FLUTTER_TEST'] != 'false') {
         AutomatedTestWidgetsFlutterBinding();
       } else {
         LiveTestWidgetsFlutterBinding();
