@@ -114,7 +114,6 @@ class FlutterPlugin implements Plugin<Project> {
             String abiValue = PLATFORM_ARCH_MAP[targetArch]
             project.android {
                 packagingOptions {
-                    pickFirst "lib/${abiValue}/libflutter.so"
                     // Prevent the ELF library from getting corrupted.
                     doNotStrip "*/${abiValue}/libapp.so"
                 }
@@ -166,28 +165,16 @@ class FlutterPlugin implements Plugin<Project> {
             // The local engine is built for one of the build type.
             // However, we use the same engine for each of the build types.
             project.android.buildTypes.each {
-                addApiDependencies(project, it, project.files {
+                addApiDependencies(project, it.name, project.files {
                     flutterJar
                 })
             }
         } else {
-            // x86/x86_64 native library used for debugging only, for now.
-            File flutterX86Jar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/flutter-x86.jar")
-            Task debugX86JarTask = project.tasks.create("${FLUTTER_BUILD_PREFIX}X86Jar", Jar) {
-                destinationDir flutterX86Jar.parentFile
-                archiveName flutterX86Jar.name
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x86/libflutter.so") {
-                    into 'lib/x86'
-                }
-                from("${flutterRoot}/bin/cache/artifacts/engine/android-x64/libflutter.so") {
-                    into 'lib/x86_64'
-                }
-            }
             String basePlatformArch = getBasePlatform(project)
             // This is meant to include the compiled classes only, however it will include `libflutter.so` as well.
             Path baseEnginePath = Paths.get(flutterRoot.absolutePath, "bin", "cache", "artifacts", "engine")
             File debugJar = baseEnginePath.resolve("${basePlatformArch}").resolve("flutter.jar").toFile()
-            baseJar["debug"] = [debugX86JarTask, debugJar]
+            baseJar["debug"] = debugJar
             if (!debugJar.isFile()) {
                 project.exec {
                     executable flutterExecutable.absolutePath
@@ -205,13 +192,13 @@ class FlutterPlugin implements Plugin<Project> {
             // added after applying the Flutter plugin.
             project.android.buildTypes.each {
                 def buildMode = buildModeFor(it)
-                addApiDependencies(project, it, project.files {
+                addApiDependencies(project, it.name, project.files {
                     baseJar[buildMode]
                 })
             }
             project.android.buildTypes.whenObjectAdded {
                 def buildMode = buildModeFor(it)
-                addApiDependencies(project, it, project.files {
+                addApiDependencies(project, it.name, project.files {
                     baseJar[buildMode]
                 })
             }
@@ -325,7 +312,7 @@ class FlutterPlugin implements Plugin<Project> {
                     provided project.files(flutterJar)
                 }
             } else {
-                assert baseJar["debug"].last().isFile()
+                assert baseJar["debug"].isFile()
                 assert baseJar["profile"].isFile()
                 assert baseJar["release"].isFile()
 
@@ -342,14 +329,14 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private static void addApiDependencies(Project project, buildType, FileCollection files) {
+    private static void addApiDependencies(Project project, String variantName, FileCollection files) {
         project.dependencies {
             String configuration;
             // `compile` dependencies are now `api` dependencies.
             if (project.getConfigurations().findByName("api")) {
-                configuration = buildType.name + "Api";
+                configuration = "${variantName}Api";
             } else {
-                configuration = buildType.name + "Compile";
+                configuration = "${variantName}Compile";
             }
             add(configuration, files)
         }
@@ -494,10 +481,16 @@ class FlutterPlugin implements Plugin<Project> {
                 flutterTasks.add(compileTask)
             }
             def libJar = project.file("${project.buildDir}/${AndroidProject.FD_INTERMEDIATES}/flutter/${variant.name}/libs.jar")
+            def libFlutterPlatforms = targetPlatforms.collect()
+            // x86/x86_64 native library used for debugging only, for now.
+            if (flutterBuildMode == 'debug') {
+                libFlutterPlatforms.add('android-x86')
+                libFlutterPlatforms.add('android-x64')
+            }
             Task packFlutterSnapshotsAndLibsTask = project.tasks.create(name: "packLibs${FLUTTER_BUILD_PREFIX}${variant.name.capitalize()}", type: Jar) {
                 destinationDir libJar.parentFile
                 archiveName libJar.name
-                targetPlatforms.each { targetArch ->
+                libFlutterPlatforms.each { targetArch ->
                     // This check prevents including `libflutter.so` twice, since it's included in the base platform jar.
                     // Unfortunately, the `pickFirst` setting in `packagingOptions` does not work when the project `:flutter`
                     // is included as an implementation dependency, which causes duplicated `libflutter.so`.
@@ -527,7 +520,7 @@ class FlutterPlugin implements Plugin<Project> {
                 }
             }
             // Include the snapshots and libflutter.so in `lib/`.
-            addApiDependencies(project, buildType, project.files {
+            addApiDependencies(project, variant.name, project.files {
                 packFlutterSnapshotsAndLibsTask
             })
 

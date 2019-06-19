@@ -34,6 +34,27 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
   }
 }
 
+Future<Iterable<String>> getFilesInApk(String apk) async {
+  if (!File(apk).existsSync())
+    throw TaskResult.failure(
+        'Gradle did not produce an output artifact file at: $apk');
+
+  final Process unzip = await startProcess(
+    'unzip',
+    <String>['-v', apk],
+    isBot: false, // we just want to test the output, not have any debugging info
+  );
+  return unzip.stdout
+      .transform(utf8.decoder)
+      .transform(const LineSplitter())
+      .map((String line) => line.split(' ').last)
+      .toList();
+}
+
+Future<Iterable<String>> getFilesInAppBundle(String bundle) {
+  return getFilesInApk(bundle);
+}
+
 void checkItContains<T>(Iterable<T> values, Iterable<T> collection) {
   for (T value in values) {
     if (!collection.contains(value)) {
@@ -95,20 +116,25 @@ android {
     ''');
   }
 
-  Future<void> addProductFlavor(String name) async {
+  Future<void> addProductFlavors(Iterable<String> flavors) async {
     final File buildScript = File(
       path.join(androidPath, 'app', 'build.gradle'),
     );
 
-    buildScript.openWrite(mode: FileMode.append).write('''
+    final String flavorConfig = flavors.map((String name) {
+      return '''
+$name {
+    applicationIdSuffix ".$name"
+    versionNameSuffix "-$name"
+}
+      ''';
+    }).join('\n');
 
+    buildScript.openWrite(mode: FileMode.append).write('''
 android {
     flavorDimensions "mode"
     productFlavors {
-        $name {
-            applicationIdSuffix ".$name"
-            versionNameSuffix "-$name"
-        }
+        $flavorConfig
     }
 }
     ''');
@@ -160,31 +186,8 @@ class FlutterPluginProject {
   String get releaseArm64ApkPath => path.join(examplePath, 'build', 'app', 'outputs', 'apk', 'release', 'app-arm64-v8a-release.apk');
   String get releaseBundlePath => path.join(examplePath, 'build', 'app', 'outputs', 'bundle', 'release', 'app.aab');
 
-  bool get hasDebugApk => File(debugApkPath).existsSync();
-  bool get hasReleaseApk => File(releaseApkPath).existsSync();
-  bool get hasReleaseArmApk => File(releaseArmApkPath).existsSync();
-  bool get hasReleaseArm64Apk => File(releaseArm64ApkPath).existsSync();
-  bool get hasReleaseBundle => File(releaseBundlePath).existsSync();
-
   Future<void> runGradleTask(String task, {List<String> options}) async {
     return _runGradleTask(workingDirectory: exampleAndroidPath, task: task, options: options);
-  }
-
-  Future<Iterable<String>> getFilesInApk(String apk) async {
-    final Process unzip = await startProcess(
-      'unzip',
-      <String>['-v', apk],
-      isBot: false, // we just want to test the output, not have any debugging info
-    );
-    return unzip.stdout
-        .transform(utf8.decoder)
-        .transform(const LineSplitter())
-        .map((String line) => line.split(' ').last)
-        .toList();
-  }
-
-  Future<Iterable<String>> getFilesInAppBundle(String bundle) {
-    return getFilesInApk(bundle);
   }
 }
 
