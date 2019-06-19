@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/analysis.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
@@ -19,7 +20,7 @@ void main() {
   Directory tempDir;
 
   setUp(() {
-    FlutterCommandRunner.initFlutterRoot();
+    Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
   });
 
