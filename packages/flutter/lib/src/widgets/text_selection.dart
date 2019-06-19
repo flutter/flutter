@@ -108,12 +108,16 @@ abstract class TextSelectionControls {
   /// [globalEditableRegion] is the TextField size of the global coordinate system
   /// in logical pixels.
   ///
+  /// [textLineHeight] is the `preferredLineHeight` of the [RenderEditable] we
+  /// are building a toolbar for.
+  ///
   /// The [position] is a general calculation midpoint parameter of the toolbar.
   /// If you want more detailed position information, can use [endpoints]
   /// to calculate it.
   Widget buildToolbar(
     BuildContext context,
     Rect globalEditableRegion,
+    double textLineHeight,
     Offset position,
     List<TextSelectionPoint> endpoints,
     TextSelectionDelegate delegate,
@@ -509,17 +513,27 @@ class TextSelectionOverlay {
       return Container();
 
     // Find the horizontal midpoint, just above the selected text.
-    final List<TextSelectionPoint> endpoints = renderObject.getEndpointsForSelection(_selection);
-    final Offset midpoint = Offset(
-      (endpoints.length == 1) ?
-        endpoints[0].point.dx :
-        (endpoints[0].point.dx + endpoints[1].point.dx) / 2.0,
-      endpoints[0].point.dy - renderObject.preferredLineHeight,
-    );
+    final List<TextSelectionPoint> endpoints =
+        renderObject.getEndpointsForSelection(_selection);
 
     final Rect editingRegion = Rect.fromPoints(
       renderObject.localToGlobal(Offset.zero),
       renderObject.localToGlobal(renderObject.size.bottomRight(Offset.zero)),
+    );
+
+    final bool isMultiline = endpoints.last.point.dy - endpoints.first.point.dy >
+          renderObject.preferredLineHeight / 2;
+
+    // If the selected text spans more than 1 line, horizontally center the toolbar.
+    // Derived from both iOS and Android.
+    final double midX = isMultiline
+      ? editingRegion.width / 2
+      : (endpoints.first.point.dx + endpoints.last.point.dx) / 2;
+
+    final Offset midpoint = Offset(
+      midX,
+      // The y-coordinate won't be made use of most likely.
+      endpoints[0].point.dy - renderObject.preferredLineHeight,
     );
 
     return FadeTransition(
@@ -531,6 +545,7 @@ class TextSelectionOverlay {
         child: selectionControls.buildToolbar(
           context,
           editingRegion,
+          renderObject.preferredLineHeight,
           midpoint,
           endpoints,
           selectionDelegate,
