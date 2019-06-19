@@ -84,7 +84,8 @@ void main() {
       const String appName = 'app_name';
       fs
           .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-          .createSync(recursive: true);
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
       fs.file('.packages').createSync();
       final File pubspecFile = fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
@@ -105,7 +106,8 @@ void main() {
       const String appName = 'app_name';
       fs
           .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-          .createSync(recursive: true);
+          ..createSync(recursive: true)
+          ..writeAsStringSync('{}');
       fs.file('.packages').createSync();
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       final File pubspecFile = fs.file('pubspec.yaml')..createSync();
@@ -127,7 +129,8 @@ void main() {
     const String appName = 'app_name';
     fs
         .file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
-        .createSync(recursive: true);
+        ..createSync(recursive: true)
+        ..writeAsStringSync('{}');
     fs.file('.packages').createSync();
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     final File pubspecFile = fs.file('pubspec.yaml')..createSync();

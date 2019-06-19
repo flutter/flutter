@@ -119,6 +119,13 @@ class FlutterManifest {
     return _flutterDescriptor['uses-material-design'] ?? false;
   }
 
+  /// True if this Flutter module should use AndroidX dependencies.
+  ///
+  /// If false the deprecated Android Support library will be used.
+  bool get usesAndroidX {
+    return _flutterDescriptor['module']['androidX'] ?? false;
+  }
+
   /// True if this manifest declares a Flutter module project.
   ///
   /// A Flutter project is considered a module when it has a `module:`
@@ -356,6 +363,9 @@ void _validateFlutter(YamlMap yaml, List<String> errors) {
           errors.add('Expected "${kvp.key}" to be an object, but got ${kvp.value} (${kvp.value.runtimeType}).');
         }
 
+        if (kvp.value['androidX'] != null && kvp.value['androidX'] is! bool) {
+          errors.add('The "androidX" value must be a bool if set.');
+        }
         if (kvp.value['androidPackage'] != null && kvp.value['androidPackage'] is! String) {
           errors.add('The "androidPackage" value must be a string if set.');
         }

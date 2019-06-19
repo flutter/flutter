@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/rendering.dart';
@@ -11,6 +10,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior, PointerDeviceKind;
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 class MockClipboard {
   Object _clipboardData = <String, dynamic>{
@@ -27,6 +28,101 @@ class MockClipboard {
     }
   }
 }
+
+class PathBoundsMatcher extends Matcher {
+  const PathBoundsMatcher({
+    this.rectMatcher,
+    this.topMatcher,
+    this.leftMatcher,
+    this.rightMatcher,
+    this.bottomMatcher,
+  }) : super();
+
+  final Matcher rectMatcher;
+  final Matcher topMatcher;
+  final Matcher leftMatcher;
+  final Matcher rightMatcher;
+  final Matcher bottomMatcher;
+
+  @override
+  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
+    final Rect bounds = item.getBounds();
+
+    final List<Matcher> matchers = <Matcher> [rectMatcher, topMatcher, leftMatcher, rightMatcher, bottomMatcher];
+    final List<dynamic> values = <dynamic> [bounds, bounds.top, bounds.left, bounds.right, bounds.bottom];
+    final Map<Matcher, dynamic> failedMatcher = <Matcher, dynamic> {};
+
+    for(int idx = 0; idx < matchers.length; idx++) {
+      if (!(matchers[idx]?.matches(values[idx], matchState) != false)) {
+        failedMatcher[matchers[idx]] = values[idx];
+      }
+    }
+
+    matchState['failedMatcher'] = failedMatcher;
+    return failedMatcher.isEmpty;
+  }
+
+  @override
+  Description describe(Description description) => description.add('The actual Rect does not match');
+
+  @override
+  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+    final Map<Matcher, dynamic> map = matchState['failedMatcher'];
+    final Iterable<String> descriptions = map.entries
+      .map<String>(
+        (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
+      );
+
+    // description is guaranteed to be non-null.
+    return description
+        ..add('mismatch Rect: ${item.getBounds()}')
+        .addAll(': ', ', ', '. ', descriptions);
+  }
+}
+
+class PathPointsMatcher extends Matcher {
+  const PathPointsMatcher({
+      this.includes = const <Offset>[],
+      this.excludes = const <Offset>[],
+  }) : super();
+
+  final Iterable<Offset> includes;
+  final Iterable<Offset> excludes;
+
+  @override
+  bool matches(covariant Path item, Map<dynamic, dynamic> matchState) {
+    final Offset notIncluded = includes.firstWhere((Offset offset) => !item.contains(offset), orElse: () => null);
+    final Offset notExcluded = excludes.firstWhere(item.contains, orElse: () => null);
+
+    matchState['notIncluded'] = notIncluded;
+    matchState['notExcluded'] = notExcluded;
+    return (notIncluded ?? notExcluded) == null;
+  }
+
+  @override
+  Description describe(Description description) => description.add('must include these points $includes and must not include $excludes');
+
+  @override
+  Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
+    final Offset notIncluded = matchState['notIncluded'];
+    final Offset notExcluded = matchState['notExcluded'];
+    final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
+
+    if ((notExcluded ?? notIncluded) != null) {
+      desc.add('Within the bounds of the path ${item.getBounds()}: ');
+    }
+
+    if (notIncluded != null) {
+      desc.add('$notIncluded is not included. ');
+    }
+    if (notExcluded != null) {
+      desc.add('$notExcluded is not excluded. ');
+    }
+    return desc;
+  }
+}
+
 
 void main() {
   final MockClipboard mockClipboard = MockClipboard();
@@ -59,7 +155,7 @@ void main() {
     }).toList();
   }
 
-  Offset textOffsetToPosition(WidgetTester tester, int offset) {
+  Offset textOffsetToBottomLeftPosition(WidgetTester tester, int offset) {
     final RenderEditable renderEditable = findRenderEditable(tester);
     final List<TextSelectionPoint> endpoints = globalize(
       renderEditable.getEndpointsForSelection(
@@ -68,8 +164,15 @@ void main() {
       renderEditable,
     );
     expect(endpoints.length, 1);
-    return endpoints[0].point + const Offset(0.0, -2.0);
+    return endpoints[0].point;
   }
+
+  Offset textOffsetToPosition(WidgetTester tester, int offset) => textOffsetToBottomLeftPosition(tester, offset) + const Offset(0, -2);
+
+  setUp(() {
+    EditableText.debugDeterministicCursor = false;
+  });
+
 
   testWidgets(
     'takes available space horizontally and takes intrinsic space vertically no-strut',
@@ -351,7 +454,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
   });
 
-  testWidgets('cursor android golden', (WidgetTester tester) async {
+  testWidgets('Cupertino cursor android golden', (WidgetTester tester) async {
     final Widget widget = CupertinoApp(
       home: Center(
         child: RepaintBoundary(
@@ -374,11 +477,14 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.0.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.0.png',
+        version: 2,
+      ),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
-  testWidgets('cursor iOS golden', (WidgetTester tester) async {
+  testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
     debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
     final Widget widget = CupertinoApp(
@@ -404,9 +510,12 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.1.2.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino.1.png',
+        version: 2,
+      ),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: !isLinux);
 
   testWidgets(
     'can control text content via controller',
@@ -432,6 +541,31 @@ void main() {
       await tester.pump();
 
       expect(find.text('controller text'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'placeholder respects textAlign',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        const CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              placeholder: 'placeholder',
+              textAlign: TextAlign.right,
+            ),
+          ),
+        ),
+      );
+
+      final Text placeholder = tester.widget(find.text('placeholder'));
+      expect(placeholder.textAlign, TextAlign.right);
+
+      await tester.enterText(find.byType(CupertinoTextField), 'input');
+      await tester.pump();
+
+      final EditableText inputText = tester.widget(find.text('input'));
+      expect(placeholder.textAlign, inputText.textAlign);
     },
   );
 
@@ -1116,8 +1250,8 @@ void main() {
     Text text = tester.widget<Text>(find.text('Paste'));
     expect(text.style.color, CupertinoColors.white);
     expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.11);
-    expect(text.style.fontWeight, FontWeight.w300);
+    expect(text.style.letterSpacing, -0.15);
+    expect(text.style.fontWeight, FontWeight.w400);
 
     // Change the theme.
     await tester.pumpWidget(
@@ -1148,8 +1282,45 @@ void main() {
     // The toolbar buttons' text are still the same style.
     expect(text.style.color, CupertinoColors.white);
     expect(text.style.fontSize, 14);
-    expect(text.style.letterSpacing, -0.11);
-    expect(text.style.fontWeight, FontWeight.w300);
+    expect(text.style.letterSpacing, -0.15);
+    expect(text.style.fontWeight, FontWeight.w400);
+  });
+
+  testWidgets('Read only text field', (WidgetTester tester) async {
+    final TextEditingController controller = TextEditingController(text: 'readonly');
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Column(
+          children: <Widget>[
+            CupertinoTextField(
+              controller: controller,
+              readOnly: true,
+            ),
+          ],
+        ),
+      ),
+    );
+    // Read only text field cannot open keyboard.
+    await tester.showKeyboard(find.byType(CupertinoTextField));
+    expect(tester.testTextInput.hasAnyClients, false);
+
+    await tester.longPressAt(
+        tester.getTopRight(find.text('readonly'))
+    );
+
+    await tester.pump();
+
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
+    expect(find.text('Select All'), findsOneWidget);
+
+    await tester.tap(find.text('Select All'));
+    await tester.pump();
+
+    expect(find.text('Copy'), findsOneWidget);
+    expect(find.text('Paste'), findsNothing);
+    expect(find.text('Cut'), findsNothing);
   });
 
   testWidgets('copy paste', (WidgetTester tester) async {
@@ -1266,6 +1437,49 @@ void main() {
 
       // No toolbar.
       expect(find.byType(CupertinoButton), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'double tap selects word and first tap of double tap moves cursor',
+    (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController(
+        text: 'Atwater Peel Sherbrooke Bonaventure',
+      );
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: Center(
+            child: CupertinoTextField(
+              controller: controller,
+            ),
+          ),
+        ),
+      );
+
+      // Long press to put the cursor after the "w".
+      const int index = 3;
+      final TestGesture gesture =
+        await tester.startGesture(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 500));
+      await gesture.up();
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection.collapsed(offset: index),
+      );
+
+      // Double tap on the same location to select the word around the cursor.
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tapAt(textOffsetToPosition(tester, index));
+      await tester.pump();
+      expect(
+        controller.selection,
+        const TextSelection(baseOffset: 0, extentOffset: 7),
+      );
+
+      // Selected text shows 3 toolbar buttons.
+      expect(find.byType(CupertinoButton), findsNWidgets(3));
     },
   );
 
@@ -1973,7 +2187,7 @@ void main() {
     expect(controller.selection.isCollapsed, isTrue);
     expect(controller.selection.baseOffset, 4);
     await tester.tapAt(ePos, pointer: 7);
-    await tester.pump(const Duration(milliseconds: 50));
+    await tester.pumpAndSettle();
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 7);
 
@@ -1993,7 +2207,6 @@ void main() {
     await tester.pump();
     await gesture.moveTo(newHandlePos);
     await tester.pump();
-
     expect(controller.selection.baseOffset, 4);
     expect(controller.selection.extentOffset, 5);
 
@@ -2546,5 +2759,390 @@ void main() {
     expect(right.opacity.value, equals(1.0));
 
     debugDefaultTargetPlatformOverride = null;
+  });
+
+  testWidgets('when CupertinoTextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
+    final ScrollController scrollController = ScrollController();
+    final TextEditingController controller = TextEditingController();
+
+    await tester.pumpWidget(CupertinoApp(
+      theme: const CupertinoThemeData(),
+      home: Center(
+        child: ListView(
+          controller: scrollController,
+          children: <Widget>[
+            Container(height: 585), // Push field almost off screen.
+            CupertinoTextField(controller: controller),
+            Container(height: 1000),
+          ],
+        ),
+      ),
+    ));
+
+    // Tap the TextField to put the cursor into it and bring it into view.
+    expect(scrollController.offset, 0.0);
+    await tester.tap(find.byType(CupertinoTextField));
+    await tester.pumpAndSettle();
+
+    // The ListView has scrolled to keep the TextField and cursor handle
+    // visible.
+    expect(scrollController.offset, 26.0);
+  });
+
+  testWidgets('disabled state golden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: DecoratedBox(
+          decoration: const BoxDecoration(color: Color(0xFFFFFFFF)),
+          child: Center(
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: CupertinoTextField(
+                controller: TextEditingController(text: 'lorem'),
+                enabled: false,
+              ),
+            )
+          )
+        )
+      )
+    );
+
+    await expectLater(
+      find.byType(CupertinoTextField),
+      matchesGoldenFile(
+        'text_field_test.disabled.png',
+        version: 0,
+      ),
+      skip: !isLinux,
+    );
+  });
+
+  group('Text selection toolbar', () {
+    testWidgets('Collapsed selection works', (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValue = 1;
+      TextEditingController controller;
+      EditableTextState state;
+      Offset bottomLeftSelectionPosition;
+
+      controller = TextEditingController(text: 'a');
+      // Top left collapsed selection. The toolbar should flip vertically, and
+      // the arrow should not point exactly to the caret because the caret is
+      // too close to the left.
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
+
+      state.renderEditable.selectPositionAt(from: textOffsetToPosition(tester, 0), cause: SelectionChangedCause.tap);
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, 0);
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            excludes: <Offset> [
+              // Arrow should not point to the selection handle.
+              bottomLeftSelectionPosition.translate(0, 8 + 0.1),
+            ],
+            includes: <Offset> [
+              // Expected center of the arrow.
+              Offset(26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            leftMatcher: moreOrLessEquals(8),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+          ),
+        ),
+      );
+
+      // Top Right collapsed selection. The toolbar should flip vertically, and
+      // the arrow should not point exactly to the caret because the caret is
+      // too close to the right.
+      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.topRight,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.renderEditable.selectPositionAt(
+        from: tester.getTopRight(find.byType(CupertinoApp)),
+        cause: SelectionChangedCause.tap
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      // -1 because we want to reach the end of the line, not the start of a new line.
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset - 1);
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            excludes: <Offset> [
+              // Arrow should not point to the selection handle.
+              bottomLeftSelectionPosition.translate(0, 8 + 0.1),
+            ],
+            includes: <Offset> [
+              // Expected center of the arrow.
+              Offset(400 - 26.0, bottomLeftSelectionPosition.dy + 8 + 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8, epsilon: 0.01),
+            rightMatcher: moreOrLessEquals(400.0 - 8),
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy + 8 + 43, epsilon: 0.01),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+
+      // Normal centered collapsed selection. The toolbar arrow should point down, and
+      // it should point exactly to the caret.
+      controller = TextEditingController(text: List<String>.filled(200, 'a').join());
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      state.renderEditable.selectPositionAt(
+        from: tester.getCenter(find.byType(EditableText)),
+        cause: SelectionChangedCause.tap
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      bottomLeftSelectionPosition = textOffsetToBottomLeftPosition(tester, state.renderEditable.selection.baseOffset);
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              bottomLeftSelectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(bottomLeftSelectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+    });
+
+    testWidgets('selecting multiple words works', (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValue = 1;
+      TextEditingController controller;
+      EditableTextState state;
+
+      // Normal multiword collapsed selection. The toolbar arrow should point down, and
+      // it should point exactly to the caret.
+      controller = TextEditingController(text: List<String>.filled(20, 'a').join('  '));
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
+
+      // Select the first 2 words.
+      state.renderEditable.selectPositionAt(
+        from: textOffsetToPosition(tester, 0),
+        to: textOffsetToPosition(tester, 4),
+        cause: SelectionChangedCause.tap
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      final Offset selectionPosition = (textOffsetToBottomLeftPosition(tester, 0) + textOffsetToBottomLeftPosition(tester, 4)) / 2;
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              selectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+    });
+
+    testWidgets('selecting multiline works', (WidgetTester tester) async {
+      EditableText.debugDeterministicCursor = true;
+      tester.binding.window.physicalSizeTestValue = const Size(400, 400);
+      tester.binding.window.devicePixelRatioTestValue = 1;
+      TextEditingController controller;
+      EditableTextState state;
+
+      // Normal multiline collapsed selection. The toolbar arrow should point down, and
+      // it should point exactly to the horizontal center of the text field.
+      controller = TextEditingController(text: List<String>.filled(20, 'a  a  ').join('\n'));
+      await tester.pumpWidget(
+        CupertinoApp(
+          debugShowCheckedModeBanner: false,
+          home: CupertinoPageScaffold(
+            child: Align(
+              alignment: Alignment.center,
+              child: SizedBox(
+                width: 200,
+                height: 200,
+                child: CupertinoTextField(
+                  controller: controller,
+                  maxLines: null,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      state = tester.state<EditableTextState>(find.byType(EditableText));
+      final double lineHeight = state.renderEditable.preferredLineHeight;
+
+      // Select the first 2 words.
+      state.renderEditable.selectPositionAt(
+        from: textOffsetToPosition(tester, 0),
+        to: textOffsetToPosition(tester, 10),
+        cause: SelectionChangedCause.tap
+      );
+      expect(state.showToolbar(), true);
+      await tester.pumpAndSettle();
+
+      final Offset selectionPosition = Offset(
+        // Toolbar should be centered.
+        200,
+        textOffsetToBottomLeftPosition(tester, 0).dy,
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathPointsMatcher(
+            includes: <Offset> [
+              // Expected center of the arrow.
+              selectionPosition.translate(0, -lineHeight - 8 - 0.1),
+            ],
+          ),
+        ),
+      );
+
+      expect(
+        find.byType(CupertinoTextSelectionToolbar),
+        paints..clipPath(
+          pathMatcher: PathBoundsMatcher(
+            bottomMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight, epsilon: 0.01),
+            topMatcher: moreOrLessEquals(selectionPosition.dy - 8 - lineHeight - 43, epsilon: 0.01),
+            rightMatcher: lessThanOrEqualTo(400 - 8),
+            leftMatcher: greaterThanOrEqualTo(8),
+          ),
+        ),
+      );
+    });
   });
 }

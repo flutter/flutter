@@ -306,6 +306,7 @@ class _AndroidViewState extends State<AndroidView> {
   Widget build(BuildContext context) {
     return Focus(
       focusNode: _focusNode,
+      onFocusChange: _onFocusChange,
       child: _AndroidPlatformView(
         controller: _controller,
         hitTestBehavior: widget.hitTestBehavior,
@@ -383,6 +384,40 @@ class _AndroidViewState extends State<AndroidView> {
     if (widget.onPlatformViewCreated != null) {
       _controller.addOnPlatformViewCreatedListener(widget.onPlatformViewCreated);
     }
+  }
+
+  void _onFocusChange(bool isFocused) {
+    if (!_controller.isCreated) {
+      return;
+    }
+    if (!isFocused) {
+      _controller.clearFocus().catchError((dynamic e) {
+       if (e is MissingPluginException) {
+         // We land the framework part of Android platform views keyboard
+         // support before the engine part. There will be a commit range where
+         // clearFocus isn't implemented in the engine. When that happens we
+         // just swallow the error here. Once the engine part is rolled to the
+         // framework I'll remove this.
+         // TODO(amirh): remove this once the engine's clearFocus is rolled.
+         return;
+       }
+      });
+      return;
+    }
+    SystemChannels.textInput.invokeMethod<void>(
+      'TextInput.setPlatformViewClient',
+      _id,
+    ).catchError((dynamic e) {
+      if (e is MissingPluginException) {
+        // We land the framework part of Android platform views keyboard
+        // support before the engine part. There will be a commit range where
+        // setPlatformViewClient isn't implemented in the engine. When that
+        // happens we just swallow the error here. Once the engine part is
+        // rolled to the framework I'll remove this.
+        // TODO(amirh): remove this once the engine's clearFocus is rolled.
+        return;
+      }
+    });
   }
 }
 

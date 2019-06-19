@@ -264,6 +264,8 @@ class DataTable extends StatelessWidget {
     this.onSelectAll,
     this.dataRowHeight = 48.0,
     this.headingRowHeight = 56.0,
+    this.horizontalMargin = 24.0,
+    this.columnSpacing = 56.0,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -271,6 +273,8 @@ class DataTable extends StatelessWidget {
        assert(sortAscending != null),
        assert(dataRowHeight != null),
        assert(headingRowHeight != null),
+       assert(horizontalMargin != null),
+       assert(columnSpacing != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        _onlyTextColumn = _initOnlyTextColumn(columns),
@@ -325,6 +329,20 @@ class DataTable extends StatelessWidget {
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double headingRowHeight;
 
+  /// The horizontal margin between the edges of the table and the content
+  /// in the first and last cells of each row.
+  ///
+  /// When a checkbox is displayed, it is also the margin between the checkbox
+  /// the content in the first data column.
+  ///
+  /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  final double horizontalMargin;
+
+  /// The horizontal margin between the contents of each data column.
+  ///
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  final double columnSpacing;
+
   /// The data to show in each row (excluding the row that contains
   /// the column headings).
   ///
@@ -367,6 +385,8 @@ class DataTable extends StatelessWidget {
 
   static const double _tablePadding = 24.0;
   static const double _columnSpacing = 56.0;
+  static const double _headingRowHeight = 56.0;
+  static const double _dataRowHeight = 48.0;
   static const double _sortArrowPadding = 2.0;
   static const double _headingFontSize = 12.0;
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
@@ -382,7 +402,7 @@ class DataTable extends StatelessWidget {
     Widget contents = Semantics(
       container: true,
       child: Padding(
-        padding: const EdgeInsetsDirectional.only(start: _tablePadding, end: _tablePadding / 2.0),
+        padding: EdgeInsetsDirectional.only(start: horizontalMargin, end: horizontalMargin / 2.0),
         child: Center(
           child: Checkbox(
             activeColor: color,
@@ -547,7 +567,7 @@ class DataTable extends StatelessWidget {
 
     int displayColumnIndex = 0;
     if (showCheckboxColumn) {
-      tableColumns[0] = const FixedColumnWidth(_tablePadding + Checkbox.width + _tablePadding / 2.0);
+      tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
         checked: allChecked,
@@ -571,16 +591,23 @@ class DataTable extends StatelessWidget {
 
       double paddingStart;
       if (dataColumnIndex == 0 && showCheckboxColumn) {
-        paddingStart = _tablePadding / 2.0;
+        paddingStart = horizontalMargin / 2.0;
       } else if (dataColumnIndex == 0 && !showCheckboxColumn) {
-        paddingStart = _tablePadding;
+        paddingStart = horizontalMargin;
       } else {
-        paddingStart = _columnSpacing / 2.0;
+        paddingStart = columnSpacing / 2.0;
+      }
+
+      double paddingEnd;
+      if (dataColumnIndex == columns.length - 1) {
+        paddingEnd = horizontalMargin;
+      } else {
+        paddingEnd = columnSpacing / 2.0;
       }
 
       final EdgeInsetsDirectional padding = EdgeInsetsDirectional.only(
         start: paddingStart,
-        end: dataColumnIndex == columns.length - 1 ? _tablePadding : _columnSpacing / 2.0,
+        end: paddingEnd,
       );
       if (dataColumnIndex == _onlyTextColumn) {
         tableColumns[displayColumnIndex] = const IntrinsicColumnWidth(flex: 1.0);

@@ -238,6 +238,13 @@ class RenderEditable extends RenderBox {
   /// The default value of this property is false.
   bool ignorePointer;
 
+  /// Whether text is composed.
+  ///
+  /// Text is composed when user selects it for editing. The [TextSpan] will have
+  /// children with composing effect and leave text property to be null.
+  @visibleForTesting
+  bool get isComposingText => text.text == null;
+
   /// The pixel ratio of the current device.
   ///
   /// Should be obtained by querying MediaQuery for the devicePixelRatio.
@@ -1500,7 +1507,7 @@ class RenderEditable extends RenderBox {
   // should rework this properly to once again match the platform. The constant
   // _kCaretHeightOffset scales poorly for small font sizes.
   //
-  /// On iOS, the cursor is taller than the the cursor on Android. The height
+  /// On iOS, the cursor is taller than the cursor on Android. The height
   /// of the cursor for iOS is approximate and obtained through an eyeball
   /// comparison.
   Rect get _getCaretPrototype {
@@ -1773,12 +1780,12 @@ class RenderEditable extends RenderBox {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor));
+    properties.add(ColorProperty('cursorColor', cursorColor));
     properties.add(DiagnosticsProperty<ValueNotifier<bool>>('showCursor', showCursor));
     properties.add(IntProperty('maxLines', maxLines));
     properties.add(IntProperty('minLines', minLines));
     properties.add(DiagnosticsProperty<bool>('expands', expands, defaultValue: false));
-    properties.add(DiagnosticsProperty<Color>('selectionColor', selectionColor));
+    properties.add(ColorProperty('selectionColor', selectionColor));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor));
     properties.add(DiagnosticsProperty<Locale>('locale', locale, defaultValue: null));
     properties.add(DiagnosticsProperty<TextSelection>('selection', selection));

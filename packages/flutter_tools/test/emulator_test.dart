@@ -9,6 +9,7 @@ import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/emulator.dart';
 import 'package:flutter_tools/src/ios/ios_emulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
@@ -170,6 +171,12 @@ class _MockEmulator extends Emulator {
 
   @override
   final String label;
+
+  @override
+  Category get category => Category.mobile;
+
+  @override
+  PlatformType get platformType => PlatformType.android;
 
   @override
   Future<void> launch() {

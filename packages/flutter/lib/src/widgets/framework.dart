@@ -1545,6 +1545,8 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 /// for that inherited widget using [BuildContext.inheritFromWidgetOfExactType]
 /// and then returns the [ThemeData].
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=1t-8rBCGBYw}
+///
 /// See also:
 ///
 ///  * [StatefulWidget] and [State], for widgets that can build differently
@@ -2581,7 +2583,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   //
   // See also:
   //
-  //  * https://www.dartlang.org/articles/dart-vm/numeric-computation, which
+  //  * https://dart.dev/articles/dart-vm/numeric-computation, which
   //    explains how numbers are represented in Dart.
   @override
   int get hashCode => _cachedHash;
@@ -3250,7 +3252,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
           'If you need some sizing information during build to decide which '
           'widgets to build, consider using a LayoutBuilder widget, which can '
           'tell you the layout constraints at a given location in the tree. See '
-          '<https://docs.flutter.io/flutter/widgets/LayoutBuilder-class.html> '
+          '<https://api.flutter.dev/flutter/widgets/LayoutBuilder-class.html> '
           'for more details.\n'
           '\n'
           'The size getter was called for the following element:\n'
@@ -3519,6 +3521,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   }
 
   @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return _ElementDiagnosticableTreeNode(
+      name: name,
+      value: this,
+      style: style,
+    );
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle= DiagnosticsTreeStyle.dense;
@@ -3666,6 +3677,30 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// Called by rebuild() after the appropriate checks have been made.
   @protected
   void performRebuild();
+}
+
+class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
+  _ElementDiagnosticableTreeNode({
+    String name,
+    @required Element value,
+    @required DiagnosticsTreeStyle style,
+    this.stateful = false,
+  }) : super(
+    name: name,
+    value: value,
+    style: style,
+  );
+
+  final bool stateful;
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    final Element element = value;
+    json['widgetRuntimeType'] = element.widget?.runtimeType?.toString();
+    json['stateful'] = stateful;
+    return json;
+  }
 }
 
 /// Signature for the constructor that is called when an error occurs while
@@ -4071,6 +4106,16 @@ class StatefulElement extends ComponentElement {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _state.didChangeDependencies();
+  }
+
+  @override
+  DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
+    return _ElementDiagnosticableTreeNode(
+      name: name,
+      value: this,
+      style: style,
+      stateful: true,
+    );
   }
 
   @override

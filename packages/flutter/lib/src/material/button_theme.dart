@@ -10,6 +10,7 @@ import 'colors.dart';
 import 'constants.dart';
 import 'flat_button.dart';
 import 'material_button.dart';
+import 'material_state.dart';
 import 'outline_button.dart';
 import 'raised_button.dart';
 import 'theme.dart';
@@ -479,7 +480,13 @@ class ButtonThemeData extends Diagnosticable {
   /// Returns the button's [MaterialButton.disabledColor] if it is non-null.
   /// Otherwise the color scheme's [ColorScheme.onSurface] color is returned
   /// with its opacity set to 0.30 if [getBrightness] is dark, 0.38 otherwise.
+  ///
+  /// If [MaterialButton.textColor] is a [MaterialStateColor], it will be used
+  /// as the `disabledTextColor`. It will be resolved in the
+  /// [MaterialState.disabled] state.
   Color getDisabledTextColor(MaterialButton button) {
+    if (button.textColor is MaterialStateColor)
+      return button.textColor;
     if (button.disabledTextColor != null)
       return button.disabledTextColor;
     return _getDisabledColor(button);
@@ -918,12 +925,12 @@ class ButtonThemeData extends Diagnosticable {
       defaultValue: defaultTheme.alignedDropdown,
       ifTrue: 'dropdown width matches button',
     ));
-    properties.add(DiagnosticsProperty<Color>('buttonColor', _buttonColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('disabledColor', _disabledColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('focusColor', _focusColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', _hoverColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('highlightColor', _highlightColor, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('splashColor', _splashColor, defaultValue: null));
+    properties.add(ColorProperty('buttonColor', _buttonColor, defaultValue: null));
+    properties.add(ColorProperty('disabledColor', _disabledColor, defaultValue: null));
+    properties.add(ColorProperty('focusColor', _focusColor, defaultValue: null));
+    properties.add(ColorProperty('hoverColor', _hoverColor, defaultValue: null));
+    properties.add(ColorProperty('highlightColor', _highlightColor, defaultValue: null));
+    properties.add(ColorProperty('splashColor', _splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultTheme.colorScheme));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', _materialTapTargetSize, defaultValue: null));
   }

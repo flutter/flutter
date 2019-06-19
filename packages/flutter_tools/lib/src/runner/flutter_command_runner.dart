@@ -343,6 +343,12 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initializer uses it).
     final String flutterRoot = topLevelResults['flutter-root'] ?? defaultFlutterRoot;
+    bool checkPermissions = true;
+    assert(() {
+      checkPermissions = false;
+      return true;
+    }());
+    Cache.checkPermissions = checkPermissions;
     Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
     // Set up the tooling configuration.
@@ -477,10 +483,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
   }
 
-  static void initFlutterRoot() {
-    Cache.flutterRoot ??= defaultFlutterRoot;
-  }
-
   /// Get the root directories of the repo - the directories containing Dart packages.
   List<String> getRepoRoots() {
     final String root = fs.path.absolute(Cache.flutterRoot);
@@ -543,7 +545,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Check that the flutter running is that same as the one referenced in the pubspec.
     if (fs.isFileSync(kPackagesFileName)) {
       final PackageMap packageMap = PackageMap(kPackagesFileName);
-      final Uri flutterUri = packageMap.map['flutter'];
+      Uri flutterUri;
+      try {
+        flutterUri = packageMap.map['flutter'];
+      } on FormatException {
+        // We're not quite sure why this can happen, perhaps the user
+        // accidentally edited the .packages file. Re-running pub should
+        // fix the issue, and we definitely shouldn't crash here.
+        printTrace('Failed to parse .packages file to check flutter dependency.');
+        return;
+      }
 
       if (flutterUri != null && (flutterUri.scheme == 'file' || flutterUri.scheme == '')) {
         // .../flutter/packages/flutter/lib

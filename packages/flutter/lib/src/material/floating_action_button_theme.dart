@@ -175,15 +175,15 @@ class FloatingActionButtonThemeData extends Diagnosticable {
     super.debugFillProperties(properties);
     const FloatingActionButtonThemeData defaultData = FloatingActionButtonThemeData();
 
-    properties.add(DiagnosticsProperty<Color>('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
-    properties.add(DiagnosticsProperty<Color>('focusColor', focusColor, defaultValue: defaultData.focusColor));
-    properties.add(DiagnosticsProperty<Color>('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: defaultData.elevation));
-    properties.add(DiagnosticsProperty<double>('focusElevation', focusElevation, defaultValue: defaultData.focusElevation));
-    properties.add(DiagnosticsProperty<double>('hoverElevation', hoverElevation, defaultValue: defaultData.hoverElevation));
-    properties.add(DiagnosticsProperty<double>('disabledElevation', disabledElevation, defaultValue: defaultData.disabledElevation));
-    properties.add(DiagnosticsProperty<double>('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
+    properties.add(ColorProperty('foregroundColor', foregroundColor, defaultValue: defaultData.foregroundColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
+    properties.add(DoubleProperty('elevation', elevation, defaultValue: defaultData.elevation));
+    properties.add(DoubleProperty('focusElevation', focusElevation, defaultValue: defaultData.focusElevation));
+    properties.add(DoubleProperty('hoverElevation', hoverElevation, defaultValue: defaultData.hoverElevation));
+    properties.add(DoubleProperty('disabledElevation', disabledElevation, defaultValue: defaultData.disabledElevation));
+    properties.add(DoubleProperty('highlightElevation', highlightElevation, defaultValue: defaultData.highlightElevation));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: defaultData.shape));
   }
 }

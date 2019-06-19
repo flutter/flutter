@@ -8,6 +8,7 @@ import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, PathMetric,
                             Picture, PictureRecorder, Scene, SceneBuilder;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
@@ -297,9 +298,9 @@ class PictureLayer extends Layer {
 ///
 /// See also:
 ///
-///  * <https://docs.flutter.io/javadoc/io/flutter/view/TextureRegistry.html>
+///  * <https://api.flutter.dev/javadoc/io/flutter/view/TextureRegistry.html>
 ///    for how to create and manage backend textures on Android.
-///  * <https://docs.flutter.io/objcdoc/Protocols/FlutterTextureRegistry.html>
+///  * <https://api.flutter.dev/objcdoc/Protocols/FlutterTextureRegistry.html>
 ///    for how to create and manage backend textures on iOS.
 class TextureLayer extends Layer {
   /// Creates a texture layer bounded by [rect] and with backend texture
@@ -329,7 +330,7 @@ class TextureLayer extends Layer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final Rect shiftedRect = rect.shift(layerOffset);
+    final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addTexture(
       textureId,
       offset: shiftedRect.topLeft,
@@ -369,7 +370,7 @@ class PlatformViewLayer extends Layer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    final Rect shiftedRect = rect.shift(layerOffset);
+    final Rect shiftedRect = layerOffset == Offset.zero ? rect : rect.shift(layerOffset);
     builder.addPlatformView(
       viewId,
       offset: shiftedRect.topLeft,
@@ -448,7 +449,8 @@ class PerformanceOverlayLayer extends Layer {
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(optionsMask != null);
-    builder.addPerformanceOverlay(optionsMask, overlayRect.shift(layerOffset));
+    final Rect shiftedOverlayRect = layerOffset == Offset.zero ? overlayRect : overlayRect.shift(layerOffset);
+    builder.addPerformanceOverlay(optionsMask, shiftedOverlayRect);
     builder.setRasterizerTracingThreshold(rasterizerThreshold);
     builder.setCheckerboardRasterCacheImages(checkerboardRasterCacheImages);
     builder.setCheckerboardOffscreenLayers(checkerboardOffscreenLayers);
@@ -981,7 +983,7 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   /// {@template flutter.clipper.clipBehavior}
-  /// Controls how to clip (default to [Clip.antiAlias]).
+  /// Controls how to clip (defaults to [Clip.hardEdge]).
   ///
   /// [Clip.none] is not allowed here.
   /// {@endtemplate}
@@ -1017,8 +1019,10 @@ class ClipRectLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    if (enabled)
-      builder.pushClipRect(clipRect.shift(layerOffset), clipBehavior: clipBehavior);
+    if (enabled) {
+      final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
+      builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior);
+    }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -1096,8 +1100,10 @@ class ClipRRectLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    if (enabled)
-      builder.pushClipRRect(clipRRect.shift(layerOffset), clipBehavior: clipBehavior);
+    if (enabled) {
+      final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
+      builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior);
+    }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -1175,8 +1181,10 @@ class ClipPathLayer extends ContainerLayer {
       enabled = !debugDisableClipLayers;
       return true;
     }());
-    if (enabled)
-      builder.pushClipPath(clipPath.shift(layerOffset), clipBehavior: clipBehavior);
+    if (enabled) {
+      final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
+      builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior);
+    }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
@@ -1237,7 +1245,9 @@ class TransformLayer extends OffsetLayer {
 
   Offset _transformOffset(Offset regionOffset) {
     if (_inverseDirty) {
-      _invertedTransform = Matrix4.tryInvert(transform);
+      _invertedTransform = Matrix4.tryInvert(
+        PointerEvent.removePerspectiveTransform(transform)
+      );
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
@@ -1411,7 +1421,8 @@ class ShaderMaskLayer extends ContainerLayer {
 
   @override
   ui.EngineLayer addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
-    builder.pushShaderMask(shader, maskRect.shift(layerOffset), blendMode);
+    final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
+    builder.pushShaderMask(shader, shiftedMaskRect, blendMode);
     addChildrenToScene(builder, layerOffset);
     builder.pop();
     return null; // this does not return an engine layer yet.
@@ -1587,7 +1598,7 @@ class PhysicalModelLayer extends ContainerLayer {
     }());
     if (enabled) {
       engineLayer = builder.pushPhysicalShape(
-        path: clipPath.shift(layerOffset),
+        path: layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset),
         elevation: elevation,
         color: color,
         shadowColor: shadowColor,
@@ -1604,7 +1615,7 @@ class PhysicalModelLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
+    properties.add(ColorProperty('color', color));
   }
 }
 

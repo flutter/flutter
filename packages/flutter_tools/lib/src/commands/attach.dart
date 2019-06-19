@@ -315,8 +315,9 @@ class AttachCommand extends FlutterCommand {
         result = await runner.attach();
         assert(result != null);
       }
-      if (result != 0)
+      if (result != 0) {
         throwToolExit(null, exitCode: result);
+      }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
       for (ForwardedPort port in ports) {

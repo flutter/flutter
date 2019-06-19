@@ -74,6 +74,10 @@ TaskFunction createHelloWorldCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
 }
 
+TaskFunction createWebCompileTest() {
+  return const WebCompileTest().run;
+}
+
 TaskFunction createComplexLayoutCompileTest() {
   return CompileTest('${flutterDirectory.path}/dev/benchmarks/complex_layout').run;
 }
@@ -198,6 +202,71 @@ class PerfTest {
   }
 }
 
+/// Measures how long it takes to compile a Flutter app to JavaScript and how
+/// big the compiled code is.
+class WebCompileTest {
+  const WebCompileTest();
+
+  Future<TaskResult> run() async {
+    final Map<String, Object> metrics = <String, Object>{};
+    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/hello_world', () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ]);
+      final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
+      await _measureSize('hello_world', output, metrics);
+      return null;
+    });
+    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/flutter_gallery', () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ]);
+      final String output = '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js';
+      await _measureSize('flutter_gallery', output, metrics);
+      return null;
+    });
+    const String sampleAppName = 'sample_flutter_app';
+    final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
+
+    rmTree(sampleDir);
+
+    await inDirectory<void>(Directory.systemTemp, () async {
+      await flutter('create', options: <String>['--template=app', '--web', sampleAppName]);
+      await inDirectory(sampleDir, () async {
+        await flutter('packages', options: <String>['get']);
+        await evalFlutter('build', options: <String>[
+          'web',
+          '-v',
+          '--release',
+          '--no-pub',
+        ]);
+        await _measureSize('basic_material_app', path.join(sampleDir.path, 'build/web/main.dart.js'), metrics);
+      });
+    });
+    return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+  }
+
+  static Future<void> _measureSize(String metric, String output, Map<String, Object> metrics) async {
+    final ProcessResult result = await Process.run('du', <String>['-k', output]);
+    await Process.run('gzip',<String>['-k', '9', output]);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', output + '.gz']);
+    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout);
+    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout);
+  }
+
+  static int _parseDu(String source) {
+    return int.parse(source.split(RegExp(r'\s+')).first.trim());
+  }
+}
+
 /// Measures how long it takes to compile a Flutter app and how big the compiled
 /// code is.
 class CompileTest {
@@ -282,6 +351,7 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
+        options.add('--target-platform=android-arm');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -318,6 +388,7 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
+        options.add('--target-platform=android-arm');
         break;
     }
     watch.start();
@@ -376,23 +447,14 @@ class CompileTest {
     }
 
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
-    final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
-    final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
-    final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
-    final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+    final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so'];
     final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
 
     return <String, dynamic>{
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
       'libflutter_compressed_bytes': libflutter.compressedSize,
-      'snapshot_uncompressed_bytes': isolateSnapshotData.uncompressedSize +
-          isolateSnapshotInstr.uncompressedSize +
-          vmSnapshotData.uncompressedSize +
-          vmSnapshotInstr.uncompressedSize,
-      'snapshot_compressed_bytes': isolateSnapshotData.compressedSize +
-          isolateSnapshotInstr.compressedSize +
-          vmSnapshotData.compressedSize +
-          vmSnapshotInstr.compressedSize,
+      'libapp_uncompressed_bytes': libapp.uncompressedSize,
+      'libapp_compressed_bytes': libapp.compressedSize,
       'license_uncompressed_bytes': license.uncompressedSize,
       'license_compressed_bytes': license.compressedSize,
     };

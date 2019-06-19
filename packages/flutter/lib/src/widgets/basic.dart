@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'debug.dart';
 import 'framework.dart';
 import 'localizations.dart';
+import 'widget_span.dart';
 
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
@@ -906,8 +907,8 @@ class PhysicalModel extends SingleChildRenderObjectWidget {
     properties.add(EnumProperty<BoxShape>('shape', shape));
     properties.add(DiagnosticsProperty<BorderRadius>('borderRadius', borderRadius));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    properties.add(ColorProperty('color', color));
+    properties.add(ColorProperty('shadowColor', shadowColor));
   }
 }
 
@@ -993,8 +994,8 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<CustomClipper<Path>>('clipper', clipper));
     properties.add(DoubleProperty('elevation', elevation));
-    properties.add(DiagnosticsProperty<Color>('color', color));
-    properties.add(DiagnosticsProperty<Color>('shadowColor', shadowColor));
+    properties.add(ColorProperty('color', color));
+    properties.add(ColorProperty('shadowColor', shadowColor));
   }
 }
 
@@ -1939,8 +1940,9 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// either the width or height is null, this widget will size itself to match
 /// the child's size in that dimension.
 ///
-/// If not given a child, this widget will size itself to the given width and
-/// height, treating nulls as zero.
+/// If not given a child, [SizedBox] will try to size itself as close to the
+/// specified height and width as possible given the parent's constraints. If
+/// [height] or [width] is null or unspecified, it will be treated as zero.
 ///
 /// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
@@ -4913,7 +4915,9 @@ class Flow extends MultiChildRenderObjectWidget {
 ///  * [TextSpan], which is used to describe the text in a paragraph.
 ///  * [Text], which automatically applies the ambient styles described by a
 ///    [DefaultTextStyle] to a single string.
-class RichText extends LeafRenderObjectWidget {
+///  * [Text.rich], a const text widget that provides similar functionality
+///    as [RichText]. [Text.rich] will inherit [TextStyle] from [DefaultTextStyle].
+class RichText extends MultiChildRenderObjectWidget {
   /// Creates a paragraph of rich text.
   ///
   /// The [text], [textAlign], [softWrap], [overflow], and [textScaleFactor]
@@ -4924,7 +4928,7 @@ class RichText extends LeafRenderObjectWidget {
   ///
   /// The [textDirection], if null, defaults to the ambient [Directionality],
   /// which in that case must not be null.
-  const RichText({
+  RichText({
     Key key,
     @required this.text,
     this.textAlign = TextAlign.start,
@@ -4943,10 +4947,23 @@ class RichText extends LeafRenderObjectWidget {
        assert(textScaleFactor != null),
        assert(maxLines == null || maxLines > 0),
        assert(textWidthBasis != null),
-       super(key: key);
+       super(key: key, children: _extractChildren(text));
+
+  // Traverses the InlineSpan tree and depth-first collects the list of
+  // child widgets that are created in WidgetSpans.
+  static List<Widget> _extractChildren(InlineSpan span) {
+    final List<Widget> result = <Widget>[];
+    span.visitChildren((InlineSpan span) {
+      if (span is WidgetSpan) {
+        result.add(span.child);
+      }
+      return true;
+    });
+    return result;
+  }
 
   /// The text to display in this widget.
-  final TextSpan text;
+  final InlineSpan text;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
@@ -5241,7 +5258,7 @@ class RawImage extends LeafRenderObjectWidget {
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
     properties.add(DoubleProperty('scale', scale, defaultValue: 1.0));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));

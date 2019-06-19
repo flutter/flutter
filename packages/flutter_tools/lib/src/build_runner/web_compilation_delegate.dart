@@ -3,18 +3,14 @@
 // found in the LICENSE file.
 
 // ignore_for_file: implementation_imports
+import 'dart:async';
+
 import 'package:build/build.dart';
-import 'package:build_config/build_config.dart';
-import 'package:build_modules/build_modules.dart';
-import 'package:build_modules/builders.dart';
-import 'package:build_modules/src/module_builder.dart';
-import 'package:build_modules/src/platform.dart';
 import 'package:build_runner_core/build_runner_core.dart' as core;
+import 'package:build_runner_core/src/asset_graph/graph.dart';
+import 'package:build_runner_core/src/asset_graph/node.dart';
 import 'package:build_runner_core/src/generate/build_impl.dart';
 import 'package:build_runner_core/src/generate/options.dart';
-import 'package:build_web_compilers/build_web_compilers.dart';
-import 'package:build_web_compilers/builders.dart';
-import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -23,106 +19,12 @@ import 'package:watcher/watcher.dart';
 import '../artifacts.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
+import '../base/platform.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../web/compile.dart';
-
-const String ddcBootstrapExtension = '.dart.bootstrap.js';
-const String jsEntrypointExtension = '.dart.js';
-const String jsEntrypointSourceMapExtension = '.dart.js.map';
-const String jsEntrypointArchiveExtension = '.dart.js.tar.gz';
-const String digestsEntrypointExtension = '.digests';
-const String jsModuleErrorsExtension = '.ddc.js.errors';
-const String jsModuleExtension = '.ddc.js';
-const String jsSourceMapExtension = '.ddc.js.map';
-
-final DartPlatform flutterWebPlatform =
-    DartPlatform.register('flutter_web', <String>[
-  'async',
-  'collection',
-  'convert',
-  'core',
-  'developer',
-  'html',
-  'html_common',
-  'indexed_db',
-  'js',
-  'js_util',
-  'math',
-  'svg',
-  'typed_data',
-  'web_audio',
-  'web_gl',
-  'web_sql',
-  '_internal',
-  // Flutter web specific libraries.
-  'ui',
-  '_engine',
-  'io',
-  'isolate',
-]);
-
-/// The build application to compile a flutter application to the web.
-final List<core.BuilderApplication> builders = <core.BuilderApplication>[
-  core.apply(
-      'flutter_tools|module_library',
-      <Builder Function(BuilderOptions)>[moduleLibraryBuilder],
-      core.toAllPackages(),
-      isOptional: true,
-      hideOutput: true,
-      appliesBuilders: <String>['flutter_tools|module_cleanup']),
-  core.apply(
-      'flutter_tools|ddc_modules',
-      <Builder Function(BuilderOptions)>[
-        (BuilderOptions options) => MetaModuleBuilder(flutterWebPlatform),
-        (BuilderOptions options) => MetaModuleCleanBuilder(flutterWebPlatform),
-        (BuilderOptions options) => ModuleBuilder(flutterWebPlatform),
-      ],
-      core.toNoneByDefault(),
-      isOptional: true,
-      hideOutput: true,
-      appliesBuilders: <String>['flutter_tools|module_cleanup']),
-  core.apply(
-      'flutter_tools|ddc',
-      <Builder Function(BuilderOptions)>[
-        (BuilderOptions builderOptions) => KernelBuilder(
-              platformSdk: artifacts.getArtifactPath(Artifact.flutterWebSdk),
-              summaryOnly: true,
-              sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
-              outputExtension: ddcKernelExtension,
-              platform: flutterWebPlatform,
-              librariesPath: 'libraries.json',
-            ),
-        (BuilderOptions builderOptions) => DevCompilerBuilder(
-              useIncrementalCompiler: false,
-              platform: flutterWebPlatform,
-              platformSdk: artifacts.getArtifactPath(Artifact.flutterWebSdk),
-              sdkKernelPath: path.join('kernel', 'flutter_ddc_sdk.dill'),
-            ),
-      ],
-      core.toAllPackages(),
-      isOptional: true,
-      hideOutput: true,
-      appliesBuilders: <String>['flutter_tools|ddc_modules']),
-  core.apply(
-    'flutter_tools|entrypoint',
-    <BuilderFactory>[
-      (BuilderOptions options) => FlutterWebEntrypointBuilder(
-          options.config['target'] ?? 'lib/main.dart'),
-    ],
-    core.toRoot(),
-    hideOutput: true,
-    defaultGenerateFor: const InputSet(
-      include: <String>[
-        'lib/**',
-        'web/**',
-      ],
-    ),
-  ),
-  core.applyPostProcess('flutter_tools|module_cleanup', moduleCleanup,
-      defaultGenerateFor: const InputSet())
-];
+import 'build_script.dart';
 
 /// A build_runner specific implementation of the [WebCompilationProxy].
 class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
@@ -133,15 +35,19 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   PackageUriMapper _packageUriMapper;
 
   @override
-  Future<void> initialize({
-    @required Directory projectDirectory,
-    @required String target,
+  Future<bool> initialize({
+    Directory projectDirectory,
+    String testOutputDir,
+    bool release = false,
   }) async {
+    // Create the .dart_tool directory if it doesn't exist.
+    projectDirectory.childDirectory('.dart_tool').createSync();
+
     // Override the generated output directory so this does not conflict with
     // other build_runner output.
     core.overrideGeneratedOutputDirectory('flutter_web');
     _packageUriMapper = PackageUriMapper(
-        path.absolute(target), PackageMap.globalPackagesPath, null, null);
+        path.absolute('lib/main.dart'), PackageMap.globalPackagesPath, null, null);
     _packageGraph = core.PackageGraph.forPath(projectDirectory.path);
     final core.BuildEnvironment buildEnvironment = core.OverrideableEnvironment(
         core.IOEnvironment(_packageGraph), onLog: (LogRecord record) {
@@ -162,24 +68,45 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       skipBuildScriptCheck: true,
       trackPerformance: false,
       deleteFilesByDefault: true,
+      enableLowResourcesMode: platform.environment['FLUTTER_LOW_RESOURCE_MODE']?.toLowerCase() == 'true',
     );
-    final Status status =
-        logger.startProgress('Compiling $target for the Web...', timeout: null);
+    final Set<core.BuildDirectory> buildDirs = <core.BuildDirectory>{
+      if (testOutputDir != null)
+        core.BuildDirectory(
+          'test',
+          outputLocation: core.OutputLocation(
+            testOutputDir,
+            useSymlinks: !platform.isWindows,
+          ),
+      ),
+    };
+    core.BuildResult result;
     try {
-      _builder = await BuildImpl.create(
-        buildOptions,
+      result = await _runBuilder(
         buildEnvironment,
-        builders,
-        <String, Map<String, dynamic>>{
-          'flutter_tools|entrypoint': <String, dynamic>{
-            'target': target,
-          }
-        },
-        isReleaseBuild: false,
+        buildOptions,
+        release,
+        buildDirs,
       );
-      await _builder.run(const <AssetId, ChangeType>{});
-    } finally {
-      status.stop();
+      return result.status == core.BuildStatus.success;
+    } on core.BuildConfigChangedException {
+      await _cleanAssets(projectDirectory);
+      result = await _runBuilder(
+        buildEnvironment,
+        buildOptions,
+        release,
+        buildDirs,
+      );
+      return result.status == core.BuildStatus.success;
+    } on core.BuildScriptChangedException {
+      await _cleanAssets(projectDirectory);
+      result = await _runBuilder(
+        buildEnvironment,
+        buildOptions,
+        release,
+        buildDirs,
+      );
+      return result.status == core.BuildStatus.success;
     }
   }
 
@@ -189,9 +116,8 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         logger.startProgress('Recompiling sources...', timeout: null);
     final Map<AssetId, ChangeType> updates = <AssetId, ChangeType>{};
     for (Uri input in inputs) {
-      updates[AssetId.resolve(
-              _packageUriMapper.map(input.toFilePath()).toString())] =
-          ChangeType.MODIFY;
+      final AssetId assetId = AssetId.resolve(_packageUriMapper.map(input.toFilePath()).toString());
+      updates[assetId] = ChangeType.MODIFY;
     }
     core.BuildResult result;
     try {
@@ -201,31 +127,73 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     }
     return result.status == core.BuildStatus.success;
   }
-}
 
-/// A ddc-only entrypoint builder that respects the Flutter target flag.
-class FlutterWebEntrypointBuilder implements Builder {
-  const FlutterWebEntrypointBuilder(this.target);
+  Future<core.BuildResult> _runBuilder(core.BuildEnvironment buildEnvironment, BuildOptions buildOptions, bool release, Set<core.BuildDirectory> buildDirs) async {
+    _builder = await BuildImpl.create(
+      buildOptions,
+      buildEnvironment,
+      builders,
+      <String, Map<String, dynamic>>{
+        'flutter_tools:ddc': <String, dynamic>{
+          'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        },
+        'flutter_tools:entrypoint': <String, dynamic>{
+          'release': release,
+          'flutterWebSdk': artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        },
+        'flutter_tools:test_entrypoint': <String, dynamic>{
+          'release': release,
+        },
+      },
+      isReleaseBuild: false,
+    );
+    return _builder.run(
+      const <AssetId, ChangeType>{},
+      buildDirs: buildDirs,
+    );
+  }
 
-  final String target;
+  Future<void> _cleanAssets(Directory projectDirectory) async {
+    final File assetGraphFile = fs.file(core.assetGraphPath);
+    AssetGraph assetGraph;
+    try {
+      assetGraph = AssetGraph.deserialize(await assetGraphFile.readAsBytes());
+    } catch (_) {
+      printTrace('Failed to clean up asset graph.');
+    }
+    final core.PackageGraph packageGraph = core.PackageGraph.forThisPackage();
+    await _cleanUpSourceOutputs(assetGraph, packageGraph);
+    final Directory cacheDirectory = fs.directory(fs.path.join(
+      projectDirectory.path,
+      '.dart_tool',
+      'build',
+      'flutter_web',
+    ));
+    if (assetGraphFile.existsSync()) {
+      assetGraphFile.deleteSync();
+    }
+    if (cacheDirectory.existsSync()) {
+      cacheDirectory.deleteSync(recursive: true);
+    }
+  }
 
-  @override
-  Map<String, List<String>> get buildExtensions => const <String, List<String>>{
-        '.dart': <String>[
-          ddcBootstrapExtension,
-          jsEntrypointExtension,
-          jsEntrypointSourceMapExtension,
-          jsEntrypointArchiveExtension,
-          digestsEntrypointExtension,
-        ],
-      };
-
-  @override
-  Future<void> build(BuildStep buildStep) async {
-    if (!buildStep.inputId.path.contains(target)) {
+  Future<void> _cleanUpSourceOutputs(AssetGraph assetGraph, core.PackageGraph packageGraph) async {
+    final core.FileBasedAssetWriter writer = core.FileBasedAssetWriter(packageGraph);
+    if (assetGraph?.outputs == null) {
       return;
     }
-    log.info('building for target ${buildStep.inputId.path}');
-    await bootstrapDdc(buildStep, platform: flutterWebPlatform);
+    for (AssetId id in assetGraph.outputs) {
+      if (id.package != packageGraph.root.name) {
+        continue;
+      }
+      final GeneratedAssetNode node = assetGraph.get(id);
+      if (node.wasOutput) {
+        // Note that this does a file.exists check in the root package and
+        // only tries to delete the file if it exists. This way we only
+        // actually delete to_source outputs, without reading in the build
+        // actions.
+        await writer.delete(id);
+      }
+    }
   }
 }
