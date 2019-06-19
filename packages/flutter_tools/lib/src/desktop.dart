@@ -23,9 +23,9 @@ bool get flutterDesktopEnabled {
   if (debugDisableDesktop) {
     return false;
   }
-  final bool platformEnabled = platform
-      .environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
   if (isRunningFromDaemon) {
+    final bool platformEnabled = platform
+        .environment['ENABLE_FLUTTER_DESKTOP']?.toLowerCase() == 'true';
     return platformEnabled && !FlutterVersion.instance.isStable;
   }
   return !FlutterVersion.instance.isStable;

@@ -24,9 +24,6 @@ void main() {
     final MockProcessManager mockProcessManager = MockProcessManager();
 
     when(notLinux.isLinux).thenReturn(false);
-    when(notLinux.environment).thenReturn(const <String, String>{
-      'ENABLE_FLUTTER_DESKTOP': 'false',
-    });
     when(mockProcessManager.run(<String>[
       'ps', 'aux',
     ])).thenAnswer((Invocation invocation) async {

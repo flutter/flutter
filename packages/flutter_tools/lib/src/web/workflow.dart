@@ -4,10 +4,10 @@
 
 import 'package:meta/meta.dart';
 
-import '../commands/daemon.dart' show isRunningFromDaemon;
 import '../base/context.dart';
 import '../base/platform.dart';
 import '../base/process_manager.dart';
+import '../commands/daemon.dart' show isRunningFromDaemon;
 import '../doctor.dart';
 import '../version.dart';
 import 'chrome.dart';
@@ -21,9 +21,9 @@ bool get flutterWebEnabled {
   if (debugDisableWeb) {
     return false;
   }
-  final bool platformEnabled = platform
-      .environment['FLUTTER_WEB']?.toLowerCase() == 'true';
   if (isRunningFromDaemon) {
+    final bool platformEnabled = platform
+        .environment['FLUTTER_WEB']?.toLowerCase() == 'true';
     return platformEnabled && !FlutterVersion.instance.isStable;
   }
   return !FlutterVersion.instance.isStable;

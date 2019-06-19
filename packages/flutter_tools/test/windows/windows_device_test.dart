@@ -24,9 +24,7 @@ void main() {
     final MockProcessManager mockProcessManager = MockProcessManager();
 
     when(notWindows.isWindows).thenReturn(false);
-    when(notWindows.environment).thenReturn(const <String, String>{
-      'ENABLE_FLUTTER_DESKTOP': 'false',
-    });
+    when(notWindows.environment).thenReturn(const <String, String>{});
     when(mockProcessManager.runSync(<String>[
       'powershell', '-script="Get-CimInstance Win32_Process"'
     ])).thenAnswer((Invocation invocation) {
