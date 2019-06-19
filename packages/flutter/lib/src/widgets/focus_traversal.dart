@@ -311,6 +311,11 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   bool _popPolicyDataIfNeeded(TraversalDirection direction, FocusScopeNode nearestScope, FocusNode focusedChild) {
     final _DirectionalPolicyData policyData = _policyData[nearestScope];
     if (policyData != null && policyData.history.isNotEmpty && policyData.history.first.direction != direction) {
+      if (policyData.history.last.node.parent == null) {
+        //Reset the policy data if history node is unavailable
+        invalidateScopeData(nearestScope);
+        return false;
+      }
       switch (direction) {
         case TraversalDirection.down:
         case TraversalDirection.up:
