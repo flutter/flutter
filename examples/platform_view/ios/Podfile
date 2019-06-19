@@ -35,7 +35,7 @@ target 'Runner' do
   # Flutter Pods
   generated_xcode_build_settings = parse_KV_file('./Flutter/Generated.xcconfig')
   if generated_xcode_build_settings.empty?
-    puts "Generated.xcconfig must exist. If you're running pod install manually, make sure flutter packages get is executed first."
+    puts "Generated.xcconfig must exist. If you're running pod install manually, make sure flutter pub get is executed first."
   end
   generated_xcode_build_settings.map { |p|
     if p[:name] == 'FLUTTER_FRAMEWORK_DIR'
@@ -55,6 +55,9 @@ target 'Runner' do
 
   pod 'MaterialControls'
 end
+
+# Prevent Cocoapods from embedding a second Flutter framework and causing an error with the new Xcode build system.
+install! 'cocoapods', :disable_input_output_paths => true
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
@@ -618,10 +616,13 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_above.png'),
-        skip: !Platform.isLinux,
+        matchesGoldenFile(
+          'material.border_paint_above.png',
+          version: null,
+        ),
+        skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('border is painted below child when specified', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
@@ -659,9 +660,12 @@ void main() {
 
       await expectLater(
         find.byKey(painterKey),
-        matchesGoldenFile('material.border_paint_below.png'),
-        skip: !Platform.isLinux,
+        matchesGoldenFile(
+          'material.border_paint_below.png',
+          version: null,
+        ),
+        skip: !isLinux,
       );
-    });
+    }, skip: isBrowser);
   });
 }

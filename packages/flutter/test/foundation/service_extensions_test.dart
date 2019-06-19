@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome')
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -145,7 +147,7 @@ void main() {
   tearDownAll(() async {
     // See widget_inspector_test.dart for tests of the ext.flutter.inspector
     // service extensions included in this count.
-    int widgetInspectorExtensionCount = 15;
+    int widgetInspectorExtensionCount = 16;
     if (WidgetInspectorService.instance.isWidgetCreationTracked()) {
       // Some inspector extensions are only exposed if widget creation locations
       // are tracked.
@@ -417,7 +419,7 @@ void main() {
     bool completed;
 
     completed = false;
-    BinaryMessages.setMockMessageHandler('flutter/assets', (ByteData message) async {
+    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', (ByteData message) async {
       expect(utf8.decode(message.buffer.asUint8List()), 'test');
       completed = true;
       return ByteData(5); // 0x0000000000
@@ -436,7 +438,7 @@ void main() {
     data = await rootBundle.loadStructuredData<bool>('test', (String value) async { expect(value, '\x00\x00\x00\x00\x00'); return false; });
     expect(data, isFalse);
     expect(completed, isTrue);
-    BinaryMessages.setMockMessageHandler('flutter/assets', null);
+    defaultBinaryMessenger.setMockMessageHandler('flutter/assets', null);
   });
 
   test('Service extensions - exit', () async {

@@ -22,12 +22,12 @@ void main() {
             data: const MediaQueryData(),
             child: CustomScrollView(
               controller: controller,
-              slivers: const <Widget>[
-                SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
-                SliverAppBar(primary: false, pinned: true, title: Text('B')),
+              slivers: <Widget>[
+                const SliverAppBar(floating: true, pinned: true, expandedHeight: 200.0, title: Text('A')),
+                const SliverAppBar(primary: false, pinned: true, title: Text('B')),
                 SliverList(
                   delegate: SliverChildListDelegate(
-                    <Widget>[
+                    const <Widget>[
                       Text('C'),
                       Text('D'),
                       SizedBox(height: 500.0),
@@ -66,7 +66,7 @@ void main() {
     // initial position of E was 200 + 56 + cSize.height + cSize.height + 500
     // we've scrolled that up by 600.0, meaning it's at that minus 600 now:
     expect(tester.getTopLeft(find.text('E')), Offset(0.0, 200.0 + 56.0 + cSize.height * 2.0 + 500.0 - 600.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('Does not crash when there is less than minExtent remainingPaintExtent', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/21887.

@@ -537,6 +537,17 @@ void main() {
       final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
       expect(port, 1234);
     });
+
+    testUsingContext('Query returns null', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[],
+         <String, List<SrvResourceRecord>>{},
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query(applicationId: 'bar'))?.port;
+      expect(port, isNull);
+    });
   });
 }
 

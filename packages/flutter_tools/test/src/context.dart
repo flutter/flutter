@@ -121,7 +121,7 @@ void testUsingContext(
         },
       );
     });
-  }, timeout: timeout != null ? timeout : const Timeout(Duration(seconds: 60)),
+  }, timeout: timeout ?? const Timeout(Duration(seconds: 60)),
       testOn: testOn, skip: skip);
 }
 
@@ -222,15 +222,42 @@ class MockSimControl extends Mock implements SimControl {
   }
 }
 
-class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {
+class MockOperatingSystemUtils implements OperatingSystemUtils {
+  @override
+  ProcessResult makeExecutable(File file) => null;
+
+  @override
+  File which(String execName) => null;
+
   @override
   List<File> whichAll(String execName) => <File>[];
+
+  @override
+  File makePipe(String path) => null;
+
+  @override
+  void zip(Directory data, File zipFile) { }
+
+  @override
+  void unzip(File file, Directory targetDirectory) { }
+
+  @override
+  bool verifyZip(File file) => true;
+
+  @override
+  void unpack(File gzippedTarFile, Directory targetDirectory) { }
+
+  @override
+  bool verifyGzip(File gzippedFile) => true;
 
   @override
   String get name => 'fake OS name and version';
 
   @override
   String get pathVarSeparator => ';';
+
+  @override
+  Future<int> findFreePort({bool ipv6 = false}) async => 12345;
 }
 
 class MockIOSSimulatorUtils extends Mock implements IOSSimulatorUtils {}
@@ -305,8 +332,12 @@ class MockXcodeProjectInterpreter implements XcodeProjectInterpreter {
 }
 
 class MockFlutterVersion extends Mock implements FlutterVersion {
+  MockFlutterVersion({bool isStable = false}) : _isStable = isStable;
+
+  final bool _isStable;
+
   @override
-  bool get isStable => false;
+  bool get isStable => _isStable;
 }
 
 class MockClock extends Mock implements SystemClock {}

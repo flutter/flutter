@@ -41,7 +41,20 @@ task:
         SHARD: deploy_gallery
         GOOGLE_DEVELOPER_SERVICE_ACCOUNT_ACTOR_FASTLANE: ENCRYPTED[d9ac1462c3c556fc2f8165c9d5566a16497d8ebc38a50357f7f3abf136b7f83e1d1d76dde36fee356cb0f9ebf7a89346]
         ANDROID_GALLERY_UPLOAD_KEY: ENCRYPTED[0f2aca35f05b26add5d9edea2a7449341269a2b7e22d5c667f876996e2e8bc44ff1369431ebf73b7c5581fd95d0e5902]
-      test_script: ./dev/bots/deploy_gallery.sh
+      test_script:
+        # Unsetting CIRRUS_CHANGE_MESSAGE and CIRRUS_COMMIT_MESSAGE as they
+        # might include non-ASCII characters which makes Gradle crash.
+        # See: https://github.com/flutter/flutter/issues/24935
+        # This is a temporary workaround until we figure how to properly configure
+        # a UTF8 locale on Cirrus (or until the Gradle bug is fixed).
+        # TODO(amirh): Set the locale to UTF8.
+        - echo "$CIRRUS_CHANGE_MESSAGE" > /tmp/cirrus_change_message.txt
+        - echo "$CIRRUS_COMMIT_MESSAGE" > /tmp/cirrus_commit_message.txt
+        - export CIRRUS_CHANGE_MESSAGE=""
+        - export CIRRUS_COMMIT_MESSAGE=""
+        - ./dev/bots/deploy_gallery.sh
+        - export CIRRUS_CHANGE_MESSAGE=`cat /tmp/cirrus_change_message.txt`
+        - export CIRRUS_COMMIT_MESSAGE=`cat /tmp/cirrus_commit_message.txt`
     - name: analyze
       test_script:
         - dart --enable-asserts ./dev/bots/analyze.dart
@@ -58,6 +71,16 @@ task:
       env:
         GCLOUD_SERVICE_ACCOUNT_KEY: ENCRYPTED[f12abe60f5045d619ef4c79b83dd1e0722a0b0b13dbea95fbe334e2db7fffbcd841a5a92da8824848b539a19afe0c9fb]
         SHARD: tool_tests
+      test_script:
+        - dart --enable-asserts ./dev/bots/test.dart
+      container:
+        cpu: 4
+        memory: 12G
+    - name: web_tests-linux
+      # TODO(jonahwilliams): re-enabled once we've determined causes for flakiness
+      allow_failures: true
+      env:
+        SHARD: web_tests
       test_script:
         - dart --enable-asserts ./dev/bots/test.dart
       container:
@@ -86,13 +109,17 @@ task:
       container:
         cpu: 4
         memory: 12G
-
+    - name: release_smoke_tests
+      env:
+        CLOUDSDK_CORE_DISABLE_PROMPTS: 1
+        GCLOUD_FIREBASE_TESTLAB_KEY: ENCRYPTED[1c140257edc48f5578fa5a0e5038b84c8e53270c405efa5a8e35ea303a4e0d135853989f448f72136206de854d17fbec]
+      test_script: ./dev/bots/firebase_testlab.sh
 
 task:
   use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true' && $CIRRUS_PR == ''
   windows_container:
-    image: cirrusci/android-sdk:28-windowsservercore-ltsc2016
-    os_version: 2016
+    image: cirrusci/android-sdk:28-windowsservercore-2019
+    os_version: 2019
     cpu: 4
   env:
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\flutter sdk"
@@ -112,6 +139,7 @@ task:
     fingerprint_script: echo %OS% & type bin\internal\engine.version
   setup_script:
     - bin\flutter.bat config --no-analytics
+    - bin\flutter.bat doctor -v
     - bin\flutter.bat update-packages
     - git fetch origin master
   test_all_script:
@@ -164,6 +192,8 @@ task:
   # with the actual time - this should help to verify
   print_date_script:
     - date
+  install_cocoapods_script:
+    - sudo gem install cocoapods
   git_fetch_script:
     - git clean -xfd
     - git fetch origin
@@ -228,6 +258,7 @@ task:
     fingerprint_script: echo $OS; cat bin/internal/engine.version
   setup_script:
     - bin/flutter config --no-analytics
+    - bin/flutter doctor -v
     - bin/flutter update-packages
   test_all_script: |
     ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976

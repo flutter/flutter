@@ -15,7 +15,7 @@ the [Flutter Setup](https://flutter.dev/setup/) guide.
 ### Building and installing the stocks demo app
 
 * `cd $FLUTTER_ROOT/examples/stocks`
-* `flutter packages get`
+* `flutter pub get`
 * `flutter run --release`
 
 The `flutter run --release` command both builds and installs the Flutter app.
@@ -24,7 +24,7 @@ The `flutter run --release` command both builds and installs the Flutter app.
 
 This app has been internationalized (just enough to show how it's
 done). It's an example of how one can do so with the
-[Dart intl package](https://pub.dartlang.org/packages/intl).
+[Dart intl package](https://pub.dev/packages/intl).
 
 The [Flutter Internationalization Tutorial](https://flutter.dev/tutorials/internationalization/)
 covers Flutter app internationalization in general.

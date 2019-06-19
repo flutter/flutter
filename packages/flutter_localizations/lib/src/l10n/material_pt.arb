@@ -1,7 +1,7 @@
 {
-  "anteMeridiemAbbreviation": "Manhã",
+  "anteMeridiemAbbreviation": "AM",
   "selectedRowCountTitleOne": "1 item selecionado",
-  "postMeridiemAbbreviation": "Tarde/noite",
+  "postMeridiemAbbreviation": "PM",
   "scriptCategory": "English-like",
   "timeOfDayFormat": "HH:mm",
   "@anteMeridiemAbbreviation": {"notUsed":"portuguese time format does not use a.m. indicator"},

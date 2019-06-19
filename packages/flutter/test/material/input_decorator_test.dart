@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+@TestOn('!chrome') // needs substantial triage.
 import 'dart:async';
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,9 +15,12 @@ Widget buildInputDecorator({
   InputDecoration decoration = const InputDecoration(),
   InputDecorationTheme inputDecorationTheme,
   TextDirection textDirection = TextDirection.ltr,
+  bool expands = false,
   bool isEmpty = false,
   bool isFocused = false,
+  bool isHovering = false,
   TextStyle baseStyle,
+  TextAlignVertical textAlignVertical,
   Widget child = const Text(
     'text',
     style: TextStyle(fontFamily: 'Ahem', fontSize: 16.0),
@@ -36,10 +39,13 @@ Widget buildInputDecorator({
               child: Directionality(
                 textDirection: textDirection,
                 child: InputDecorator(
+                  expands: expands,
                   decoration: decoration,
                   isEmpty: isEmpty,
                   isFocused: isFocused,
+                  isHovering: isHovering,
                   baseStyle: baseStyle,
+                  textAlignVertical: textAlignVertical,
                   child: child,
                 ),
               ),
@@ -89,6 +95,12 @@ BorderRadius getBorderRadius(WidgetTester tester) {
 double getBorderWeight(WidgetTester tester) => getBorderSide(tester)?.width;
 
 Color getBorderColor(WidgetTester tester) => getBorderSide(tester)?.color;
+
+Color getContainerColor(WidgetTester tester) {
+  final CustomPaint customPaint = tester.widget(findBorderPainter());
+  final dynamic/*_InputBorderPainter*/ inputBorderPainter = customPaint.foregroundPainter;
+  return inputBorderPainter.blendedColor;
+}
 
 double getOpacity(WidgetTester tester, String textValue) {
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
@@ -269,69 +281,216 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
   });
 
-  testWidgets('InputDecorator alignLabelWithHint for multiline TextField no-strut', (WidgetTester tester) async {
-    Widget buildFrame(bool alignLabelWithHint) {
-      return MaterialApp(
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: TextField(
-              maxLines: 8,
-              decoration: InputDecoration(
-                labelText: 'label',
-                alignLabelWithHint: alignLabelWithHint,
-                hintText: 'hint',
-              ),
-              strutStyle: StrutStyle.disabled,
-            ),
-          ),
-        ),
-      );
-    }
-
-    // alignLabelWithHint: false centers the label in the TextField
-    await tester.pumpWidget(buildFrame(false));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, 76.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
-
-    // alignLabelWithHint: true aligns the label with the hint.
-    await tester.pumpWidget(buildFrame(true));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
-  });
-
-  testWidgets('InputDecorator alignLabelWithHint for multiline TextField', (WidgetTester tester) async {
-    Widget buildFrame(bool alignLabelWithHint) {
-      return MaterialApp(
-        home: Material(
-          child: Directionality(
-            textDirection: TextDirection.ltr,
-            child: TextField(
-              maxLines: 8,
-              decoration: InputDecoration(
-                labelText: 'label',
-                alignLabelWithHint: alignLabelWithHint,
-                hintText: 'hint',
+  group('alignLabelWithHint', () {
+    group('expands false', () {
+      testWidgets('multiline TextField no-strut', (WidgetTester tester) async {
+        const String text = 'text';
+        final FocusNode focusNode = FocusNode();
+        final TextEditingController controller = TextEditingController();
+        Widget buildFrame(bool alignLabelWithHint) {
+          return MaterialApp(
+            home: Material(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  maxLines: 8,
+                  decoration: InputDecoration(
+                    labelText: 'label',
+                    alignLabelWithHint: alignLabelWithHint,
+                    hintText: 'hint',
+                  ),
+                  strutStyle: StrutStyle.disabled,
+                ),
               ),
             ),
-          ),
-        ),
-      );
-    }
+          );
+        }
 
-    // alignLabelWithHint: false centers the label in the TextField
-    await tester.pumpWidget(buildFrame(false));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, 76.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
+        // alignLabelWithHint: false centers the label in the TextField.
+        await tester.pumpWidget(buildFrame(false));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, 76.0);
+        expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
 
-    // alignLabelWithHint: true aligns the label with the hint.
-    await tester.pumpWidget(buildFrame(true));
-    await tester.pumpAndSettle();
-    expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
-    expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+        // Entering text still happens at the top.
+        await tester.enterText(find.byType(TextField), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 28.0);
+        controller.clear();
+        focusNode.unfocus();
+
+        // alignLabelWithHint: true aligns the label with the hint.
+        await tester.pumpWidget(buildFrame(true));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+        expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+
+        // Entering text still happens at the top.
+        await tester.enterText(find.byType(TextField), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 28.0);
+        controller.clear();
+        focusNode.unfocus();
+      });
+
+      testWidgets('multiline TextField', (WidgetTester tester) async {
+        const String text = 'text';
+        final FocusNode focusNode = FocusNode();
+        final TextEditingController controller = TextEditingController();
+        Widget buildFrame(bool alignLabelWithHint) {
+          return MaterialApp(
+            home: Material(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  maxLines: 8,
+                  decoration: InputDecoration(
+                    labelText: 'label',
+                    alignLabelWithHint: alignLabelWithHint,
+                    hintText: 'hint',
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        // alignLabelWithHint: false centers the label in the TextField.
+        await tester.pumpWidget(buildFrame(false));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, 76.0);
+        expect(tester.getBottomLeft(find.text('label')).dy, 92.0);
+
+        // Entering text still happens at the top.
+        await tester.enterText(find.byType(InputDecorator), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 28.0);
+        controller.clear();
+        focusNode.unfocus();
+
+        // alignLabelWithHint: true aligns the label with the hint.
+        await tester.pumpWidget(buildFrame(true));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+        expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+
+        // Entering text still happens at the top.
+        await tester.enterText(find.byType(InputDecorator), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 28.0);
+        controller.clear();
+        focusNode.unfocus();
+      });
+    });
+
+    group('expands true', () {
+      testWidgets('multiline TextField', (WidgetTester tester) async {
+        const String text = 'text';
+        final FocusNode focusNode = FocusNode();
+        final TextEditingController controller = TextEditingController();
+        Widget buildFrame(bool alignLabelWithHint) {
+          return MaterialApp(
+            home: Material(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  maxLines: null,
+                  expands: true,
+                  decoration: InputDecoration(
+                    labelText: 'label',
+                    alignLabelWithHint: alignLabelWithHint,
+                    hintText: 'hint',
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        // alignLabelWithHint: false centers the label in the TextField.
+        await tester.pumpWidget(buildFrame(false));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('label')).dy, 308.0);
+
+        // Entering text still happens at the top.
+        await tester.enterText(find.byType(InputDecorator), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 28.0);
+        controller.clear();
+        focusNode.unfocus();
+
+        // alignLabelWithHint: true aligns the label with the hint at the top.
+        await tester.pumpWidget(buildFrame(true));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, 28.0);
+        expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+        expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+
+        // Entering text still happens at the top.
+        await tester.enterText(find.byType(InputDecorator), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 28.0);
+        controller.clear();
+        focusNode.unfocus();
+      });
+
+      testWidgets('multiline TextField with outline border', (WidgetTester tester) async {
+        const String text = 'text';
+        final FocusNode focusNode = FocusNode();
+        final TextEditingController controller = TextEditingController();
+        Widget buildFrame(bool alignLabelWithHint) {
+          return MaterialApp(
+            home: Material(
+              child: Directionality(
+                textDirection: TextDirection.ltr,
+                child: TextField(
+                  controller: controller,
+                  focusNode: focusNode,
+                  maxLines: null,
+                  expands: true,
+                  decoration: InputDecoration(
+                    labelText: 'label',
+                    alignLabelWithHint: alignLabelWithHint,
+                    hintText: 'hint',
+                    border: OutlineInputBorder(
+                      borderSide: const BorderSide(width: 1, color: Colors.black, style: BorderStyle.solid),
+                      borderRadius: BorderRadius.circular(0),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+
+        // alignLabelWithHint: false centers the label in the TextField.
+        await tester.pumpWidget(buildFrame(false));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, 292.0);
+        expect(tester.getBottomLeft(find.text('label')).dy, 308.0);
+
+        // Entering text happens in the center as well.
+        await tester.enterText(find.byType(InputDecorator), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        controller.clear();
+        focusNode.unfocus();
+
+        // alignLabelWithHint: true aligns keeps the label in the center because
+        // that's where the hint is.
+        await tester.pumpWidget(buildFrame(true));
+        await tester.pumpAndSettle();
+        expect(tester.getTopLeft(find.text('label')).dy, 291.0);
+        expect(tester.getTopLeft(find.text('label')).dy, tester.getTopLeft(find.text('hint')).dy);
+        expect(tester.getBottomLeft(find.text('label')).dy, tester.getBottomLeft(find.text('hint')).dy);
+
+        // Entering text still happens in the center.
+        await tester.enterText(find.byType(InputDecorator), text);
+        expect(tester.getTopLeft(find.text(text)).dy, 291.0);
+        controller.clear();
+        focusNode.unfocus();
+      });
+    });
   });
 
   // Overall height for this InputDecorator is 40.0dps
@@ -1170,6 +1329,471 @@ void main() {
     expect(tester.getTopLeft(find.byKey(prefixKey)).dy, 0.0);
   });
 
+  group('textAlignVertical position', () {
+    group('simple case', () {
+      testWidgets('align top (default)', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true, // so we have a tall input where align can vary
+            decoration: const InputDecoration(
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.top, // default when no border
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Same as the default case above.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(12.0, .0001));
+      });
+
+      testWidgets('align center', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: const InputDecoration(
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.center,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Below the top aligned case.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(290.0, .0001));
+      });
+
+      testWidgets('align bottom', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: const InputDecoration(
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.bottom,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Below the center aligned case.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(568.0, .0001));
+      });
+
+      testWidgets('align as a double', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: const InputDecoration(
+              filled: true,
+            ),
+            textAlignVertical: const TextAlignVertical(y: 0.75),
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // In between the center and bottom aligned cases.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(498.5, .0001));
+      });
+    });
+
+    group('outline border', () {
+      testWidgets('align top', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true, // so we have a tall input where align can vary
+            decoration: const InputDecoration(
+              filled: true,
+              border: OutlineInputBorder(),
+            ),
+            textAlignVertical: TextAlignVertical.top,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Similar to the case without a border, but with a little extra room at
+        // the top to make room for the border.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(24.0, .0001));
+      });
+
+      testWidgets('align center (default)', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: const InputDecoration(
+              filled: true,
+              border: OutlineInputBorder(),
+            ),
+            textAlignVertical: TextAlignVertical.center, // default when border
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Below the top aligned case.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(289.0, .0001));
+      });
+
+      testWidgets('align bottom', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: const InputDecoration(
+              filled: true,
+              border: OutlineInputBorder(),
+            ),
+            textAlignVertical: TextAlignVertical.bottom,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Below the center aligned case.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(554.0, .0001));
+      });
+    });
+
+    group('prefix', () {
+      testWidgets('InputDecorator tall prefix align top', (WidgetTester tester) async {
+        const Key pKey = Key('p');
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            decoration: InputDecoration(
+              prefix: Container(
+                key: pKey,
+                height: 100,
+                width: 10,
+              ),
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.top, // default when no border
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Same as the default case above.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(96, .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
+      });
+
+      testWidgets('InputDecorator tall prefix align center', (WidgetTester tester) async {
+        const Key pKey = Key('p');
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            decoration: InputDecoration(
+              prefix: Container(
+                key: pKey,
+                height: 100,
+                width: 10,
+              ),
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.center,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Same as the default case above.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(96.0, .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
+      });
+
+      testWidgets('InputDecorator tall prefix align bottom', (WidgetTester tester) async {
+        const Key pKey = Key('p');
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            decoration: InputDecoration(
+              prefix: Container(
+                key: pKey,
+                height: 100,
+                width: 10,
+              ),
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.bottom,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Top of the input + 100 prefix height - overlap
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(96.0, .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 12.0);
+      });
+    });
+
+    group('outline border and prefix', () {
+      testWidgets('InputDecorator tall prefix align center', (WidgetTester tester) async {
+        const Key pKey = Key('p');
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              prefix: Container(
+                key: pKey,
+                height: 100,
+                width: 10,
+              ),
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.center, // default when border
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // In the middle of the expanded InputDecorator.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(331.0, .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(247.0, .0001));
+      });
+
+      testWidgets('InputDecorator tall prefix with border align top', (WidgetTester tester) async {
+        const Key pKey = Key('p');
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              prefix: Container(
+                key: pKey,
+                height: 100,
+                width: 10,
+              ),
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.top,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Above the center example.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(108.0, .0001));
+        // The prefix is positioned at the top of the input, so this value is
+        // the same as the top aligned test without a prefix.
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, 24.0);
+      });
+
+      testWidgets('InputDecorator tall prefix with border align bottom', (WidgetTester tester) async {
+        const Key pKey = Key('p');
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              prefix: Container(
+                key: pKey,
+                height: 100,
+                width: 10,
+              ),
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.bottom,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Below the center example.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(554.0, .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(470.0, .0001));
+      });
+
+      testWidgets('InputDecorator tall prefix with border align double', (WidgetTester tester) async {
+        const Key pKey = Key('p');
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true,
+            decoration: InputDecoration(
+              border: const OutlineInputBorder(),
+              prefix: Container(
+                key: pKey,
+                height: 100,
+                width: 10,
+              ),
+              filled: true,
+            ),
+            textAlignVertical: const TextAlignVertical(y: 0.1),
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // Between the top and center examples.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(353.3, .0001));
+        expect(tester.getTopLeft(find.byKey(pKey)).dy, closeTo(269.3, .0001));
+      });
+    });
+
+    group('label', () {
+      testWidgets('align top (default)', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true, // so we have a tall input where align can vary
+            decoration: const InputDecoration(
+              labelText: 'label',
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.top, // default
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // The label causes the text to start slightly lower than it would
+        // otherwise.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(28.0, .0001));
+      });
+
+      testWidgets('align center', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true, // so we have a tall input where align can vary
+            decoration: const InputDecoration(
+              labelText: 'label',
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.center,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // The label reduces the amount of space available for text, so the
+        // center is slightly lower.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(298.0, .0001));
+      });
+
+      testWidgets('align bottom', (WidgetTester tester) async {
+        const String text = 'text';
+        await tester.pumpWidget(
+          buildInputDecorator(
+            // isEmpty: false (default)
+            // isFocused: false (default)
+            expands: true, // so we have a tall input where align can vary
+            decoration: const InputDecoration(
+              labelText: 'label',
+              filled: true,
+            ),
+            textAlignVertical: TextAlignVertical.bottom,
+            // Set the fontSize so that everything works out to whole numbers.
+            child: const Text(
+              text,
+              style: TextStyle(fontFamily: 'Ahem', fontSize: 20.0),
+            ),
+          ),
+        );
+
+        // The label reduces the amount of space available for text, but the
+        // bottom line is still in the same place.
+        expect(tester.getTopLeft(find.text(text)).dy, closeTo(568.0, .0001));
+      });
+    });
+  });
+
   testWidgets('counter text has correct right margin - LTR, not dense', (WidgetTester tester) async {
     await tester.pumpWidget(
       buildInputDecorator(
@@ -1430,7 +2054,7 @@ void main() {
     expect(tester.getTopLeft(find.text('text')).dy, 12.0);
     expect(getBorderBottom(tester), 40.0);
     expect(getBorderWeight(tester), 1.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorator.collapsed', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1469,7 +2093,7 @@ void main() {
     expect(tester.getSize(find.text('hint')).height, 16.0);
     expect(tester.getTopLeft(find.text('hint')).dy, 0.0);
     expect(getBorderWeight(tester), 0.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorator with baseStyle', (WidgetTester tester) async {
     // Setting the baseStyle of the InputDecoration and the style of the input
@@ -1510,7 +2134,7 @@ void main() {
     expect(tester.getTopLeft(find.text('hint')).dy, 23.5);
     expect(tester.getTopLeft(find.text('label')).dy, 17.75);
     expect(tester.getTopLeft(find.text('text')).dy, 23.5);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorator with empty style overrides', (WidgetTester tester) async {
     // Same as not specifying any style overrides
@@ -1552,7 +2176,7 @@ void main() {
     expect(getBorderWeight(tester), 1.0);
     expect(tester.getTopLeft(find.text('helper')), const Offset(12.0, 64.0));
     expect(tester.getTopRight(find.text('counter')), const Offset(788.0, 64.0));
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecoration outline shape with no border and no floating placeholder', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1604,7 +2228,7 @@ void main() {
 
     // The label should not be seen.
     expect(getOpacity(tester, 'label'), 0.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorationTheme outline border', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1629,7 +2253,7 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 36.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
-  });
+  }, skip: isBrowser);
 
   testWidgets('InputDecorationTheme outline border, dense layout', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -1825,6 +2449,7 @@ void main() {
         counterStyle: themeStyle,
         filled: true,
         fillColor: Colors.red,
+        focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
       )
@@ -1873,6 +2498,7 @@ void main() {
         counterStyle: themeStyle,
         filled: true,
         fillColor: Colors.red,
+        focusColor: Colors.blue,
         border: InputBorder.none,
         alignLabelWithHint: true,
       ),
@@ -2020,19 +2646,150 @@ void main() {
       await tester.pumpWidget(buildFrame(TextDirection.ltr));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.ltr.png'),
-        skip: !Platform.isLinux,
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.ltr.png',
+          version: null,
+        ),
+        skip: !isLinux,
       );
 
       await tester.pumpWidget(buildFrame(TextDirection.rtl));
       await expectLater(
         find.byType(InputDecorator),
-        matchesGoldenFile('input_decorator.outline_icon_label.rtl.png'),
-        skip: !Platform.isLinux,
+        matchesGoldenFile(
+          'input_decorator.outline_icon_label.rtl.png',
+          version: null,
+        ),
+        skip: !isLinux,
       );
     },
-    skip: !Platform.isLinux,
+    skip: !isLinux,
   );
+
+  testWidgets('InputDecorator draws and animates hoverColor', (WidgetTester tester) async {
+    const Color fillColor = Color(0x0A000000);
+    const Color hoverColor = Color(0xFF00FF00);
+    const Color disabledColor = Color(0x05000000);
+    const Color enabledBorderColor = Color(0x61000000);
+
+    Future<void> pumpDecorator({bool hovering, bool enabled = true, bool filled = true}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isHovering: hovering,
+          decoration: InputDecoration(
+            enabled: enabled,
+            filled: filled,
+            hoverColor: hoverColor,
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+          ),
+        ),
+      );
+    }
+
+    // Test filled text field.
+    await pumpDecorator(hovering: false);
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(fillColor));
+
+    await pumpDecorator(hovering: true);
+    expect(getContainerColor(tester), equals(fillColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(hoverColor));
+
+    await pumpDecorator(hovering: false);
+    expect(getContainerColor(tester), equals(hoverColor));
+    await tester.pump(const Duration(milliseconds: 15));
+    expect(getContainerColor(tester), equals(fillColor));
+
+    await pumpDecorator(hovering: false, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    await pumpDecorator(hovering: true, enabled: false);
+    expect(getContainerColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getContainerColor(tester), equals(disabledColor));
+
+    // Test outline text field.
+    const Color blendedHoverColor = Color(0x74004400);
+    await pumpDecorator(hovering: false, filled: false);
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(hovering: true, filled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(blendedHoverColor));
+
+    await pumpDecorator(hovering: false, filled: false);
+    expect(getBorderColor(tester), equals(blendedHoverColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(hovering: false, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(disabledColor));
+
+    await pumpDecorator(hovering: true, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(disabledColor));
+  });
+
+  testWidgets('InputDecorator draws and animates focusColor', (WidgetTester tester) async {
+    const Color focusColor = Color(0xFF0000FF);
+    const Color disabledColor = Color(0x05000000);
+    const Color enabledBorderColor = Color(0x61000000);
+
+    Future<void> pumpDecorator({bool focused, bool enabled = true, bool filled = true}) async {
+      return await tester.pumpWidget(
+        buildInputDecorator(
+          isFocused: focused,
+          decoration: InputDecoration(
+            enabled: enabled,
+            filled: filled,
+            focusColor: focusColor,
+            focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: focusColor)),
+            disabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: disabledColor)),
+            border: const OutlineInputBorder(borderSide: BorderSide(color: enabledBorderColor)),
+          ),
+        ),
+      );
+    }
+
+    // Test outline text field default border.
+    await pumpDecorator(focused: false, filled: false);
+    await tester.pumpAndSettle();
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(focused: true, filled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(focusColor));
+
+    await pumpDecorator(focused: false, filled: false);
+    expect(getBorderColor(tester), equals(focusColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+
+    await pumpDecorator(focused: false, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(enabledBorderColor));
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(getBorderColor(tester), equals(disabledColor));
+
+    await pumpDecorator(focused: true, filled: false, enabled: false);
+    expect(getBorderColor(tester), equals(disabledColor));
+    await tester.pump(const Duration(seconds: 10));
+    expect(getBorderColor(tester), equals(disabledColor));
+  });
 
   testWidgets('InputDecorationTheme.toString()', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/19305
@@ -2065,7 +2822,8 @@ void main() {
       suffixStyle: TextStyle(height: 8.0),
       counterStyle: TextStyle(height: 9.0),
       filled: true,
-      fillColor: Color(10),
+      fillColor: Color(0x10),
+      focusColor: Color(0x20),
       errorBorder: UnderlineInputBorder(),
       focusedBorder: OutlineInputBorder(),
       focusedErrorBorder: UnderlineInputBorder(),
@@ -2077,7 +2835,8 @@ void main() {
     // Spot check
     expect(debugString, contains('labelStyle: TextStyle(inherit: true, height: 1.0x)'));
     expect(debugString, contains('isDense: true'));
-    expect(debugString, contains('fillColor: Color(0x0000000a)'));
+    expect(debugString, contains('fillColor: Color(0x00000010)'));
+    expect(debugString, contains('focusColor: Color(0x00000020)'));
     expect(debugString, contains('errorBorder: UnderlineInputBorder()'));
     expect(debugString, contains('focusedBorder: OutlineInputBorder()'));
   });
@@ -2320,8 +3079,8 @@ void main() {
       gapPadding: 32.0,
     );
     expect(outlineInputBorder.hashCode, const OutlineInputBorder(
-      borderSide: BorderSide(color: Colors.blue),
       borderRadius: BorderRadius.all(Radius.circular(9.0)),
+      borderSide: BorderSide(color: Colors.blue),
       gapPadding: 32.0,
     ).hashCode);
     expect(outlineInputBorder.hashCode, isNot(const OutlineInputBorder().hashCode));
@@ -2346,6 +3105,7 @@ void main() {
       counterStyle: TextStyle(),
       filled: true,
       fillColor: Colors.red,
+      focusColor: Colors.blue,
       errorBorder: UnderlineInputBorder(),
       focusedBorder: UnderlineInputBorder(),
       focusedErrorBorder: UnderlineInputBorder(),
@@ -2369,6 +3129,7 @@ void main() {
       'counterStyle: TextStyle(<all styles inherited>)',
       'filled: true',
       'fillColor: MaterialColor(primary value: Color(0xfff44336))',
+      'focusColor: MaterialColor(primary value: Color(0xff2196f3))',
       'errorBorder: UnderlineInputBorder()',
       'focusedBorder: UnderlineInputBorder()',
       'focusedErrorBorder: UnderlineInputBorder()',

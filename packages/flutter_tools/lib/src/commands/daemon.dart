@@ -26,7 +26,7 @@ import '../run_hot.dart';
 import '../runner/flutter_command.dart';
 import '../vmservice.dart';
 
-const String protocolVersion = '0.4.2';
+const String protocolVersion = '0.5.2';
 
 /// A server process command. This command will start up a long-lived server.
 /// It reads JSON-RPC based commands from stdin, executes them, and returns
@@ -248,6 +248,7 @@ class DaemonDomain extends Domain {
   DaemonDomain(Daemon daemon) : super(daemon, 'daemon') {
     registerHandler('version', version);
     registerHandler('shutdown', shutdown);
+    registerHandler('getSupportedPlatforms', getSupportedPlatforms);
 
     sendEvent(
       'daemon.connected',
@@ -299,6 +300,59 @@ class DaemonDomain extends Domain {
   @override
   void dispose() {
     _subscription?.cancel();
+  }
+
+  /// Enumerates the platforms supported by the provided project.
+  ///
+  /// This does not filter based on the current workflow restrictions, such
+  /// as whether command line tools are installed or whether the host platform
+  /// is correct.
+  Future<Map<String, Object>> getSupportedPlatforms(Map<String, dynamic> args) async {
+    final String projectRoot = _getStringArg(args, 'projectRoot', required: true);
+    final List<String> result = <String>[];
+    try {
+      // TODO(jonahwilliams): replace this with a project metadata check once
+      // that has been implemented.
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.directory(projectRoot));
+      if (flutterProject.linux.existsSync()) {
+        result.add('linux');
+      }
+      if (flutterProject.macos.existsSync()) {
+        result.add('macos');
+      }
+      if (flutterProject.windows.existsSync()) {
+        result.add('windows');
+      }
+      if (flutterProject.ios.existsSync()) {
+        result.add('ios');
+      }
+      if (flutterProject.android.existsSync()) {
+        result.add('android');
+      }
+      if (flutterProject.web.existsSync()) {
+        result.add('web');
+      }
+      if (flutterProject.fuchsia.existsSync()) {
+        result.add('fuchsia');
+      }
+      return <String, Object>{
+        'platforms': result,
+      };
+    } catch (err, stackTrace) {
+      sendEvent('log', <String, dynamic>{
+        'log': 'Failed to parse project metadata',
+        'stackTrace': stackTrace.toString(),
+        'error': true,
+      });
+      // On any sort of failure, fall back to Android and iOS for backwards
+      // comparability.
+      return <String, Object>{
+        'platforms': <String>[
+          'android',
+          'ios',
+        ],
+      };
+    }
   }
 }
 
@@ -605,7 +659,12 @@ class DeviceDomain extends Domain {
   _DeviceEventHandler _onDeviceEvent(String eventName) {
     return (Device device) {
       _serializeDeviceEvents = _serializeDeviceEvents.then<void>((_) async {
-        sendEvent(eventName, await _deviceToMap(device));
+        try {
+          final Map<String, Object> response = await _deviceToMap(device);
+          sendEvent(eventName, response);
+        } catch (err) {
+          printError(err);
+        }
       });
     };
   }
@@ -714,6 +773,9 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
     'name': device.name,
     'platform': getNameForTargetPlatform(await device.targetPlatform),
     'emulator': await device.isLocalEmulator,
+    'category': device.category?.toString(),
+    'platformType': device.platformType?.toString(),
+    'ephemeral': device.ephemeral,
   };
 }
 
@@ -721,6 +783,8 @@ Map<String, dynamic> _emulatorToMap(Emulator emulator) {
   return <String, dynamic>{
     'id': emulator.id,
     'name': emulator.name,
+    'category': emulator.category?.toString(),
+    'platformType': emulator.platformType?.toString(),
   };
 }
 
@@ -809,7 +873,7 @@ class AppInstance {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
   }
 
-  Future<void> stop() => runner.stop();
+  Future<void> stop() => runner.exit();
   Future<void> detach() => runner.detach();
 
   void closeLogger() {

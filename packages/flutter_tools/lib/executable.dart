@@ -10,6 +10,8 @@ import 'src/base/context.dart';
 // avoid introducing the dependency into google3. Not all build* packages
 // are synced internally.
 import 'src/build_runner/build_runner.dart';
+import 'src/build_runner/web_compilation_delegate.dart';
+
 import 'src/codegen.dart';
 import 'src/commands/analyze.dart';
 import 'src/commands/attach.dart';
@@ -35,14 +37,14 @@ import 'src/commands/precache.dart';
 import 'src/commands/run.dart';
 import 'src/commands/screenshot.dart';
 import 'src/commands/shell_completion.dart';
-import 'src/commands/stop.dart';
 import 'src/commands/test.dart';
-import 'src/commands/trace.dart';
 import 'src/commands/train.dart';
+import 'src/commands/unpack.dart';
 import 'src/commands/update_packages.dart';
 import 'src/commands/upgrade.dart';
 import 'src/commands/version.dart';
 import 'src/runner/flutter_command.dart';
+import 'src/web/compile.dart';
 
 /// Main entry point for commands.
 ///
@@ -82,10 +84,9 @@ Future<void> main(List<String> args) async {
     RunCommand(verboseHelp: verboseHelp),
     ScreenshotCommand(),
     ShellCompletionCommand(),
-    StopCommand(),
     TestCommand(verboseHelp: verboseHelp),
-    TraceCommand(),
     TrainingCommand(),
+    UnpackCommand(),
     UpdatePackagesCommand(hidden: !verboseHelp),
     UpgradeCommand(),
     VersionCommand(),
@@ -96,5 +97,6 @@ Future<void> main(List<String> args) async {
        // The build runner instance is not supported in google3 because
        // the build runner packages are not synced internally.
        CodeGenerator: () => const BuildRunner(),
+       WebCompilationProxy: () => BuildRunnerWebCompilationProxy(),
      });
 }

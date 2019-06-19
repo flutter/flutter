@@ -171,7 +171,7 @@ void main() {
     expect(
       box,
       paints
-        ..rect(rect: Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.blue.value))
+        ..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.blue.value))
         ..circle(color: Color(Colors.green.value)),
     );
 
@@ -199,7 +199,7 @@ void main() {
     expect(
       box,
       paints
-        ..rect(rect: Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.red.value))
+        ..rect(rect: const Rect.fromLTRB(300.0, 200.0, 500.0, 400.0), color: Color(Colors.red.value))
         ..circle(color: Color(Colors.green.value)),
     );
 
@@ -223,7 +223,7 @@ void main() {
     expect(box, isNot(paints..circle()));
 
     await gesture.up();
-  });
+  }, skip: isBrowser);
 
   testWidgets('Cancel an InkRipple that was disposed when its animation ended', (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/14391

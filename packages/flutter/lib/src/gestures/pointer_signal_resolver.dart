@@ -47,18 +47,17 @@ class PointerSignalResolver {
       assert(_currentEvent == null);
       return;
     }
-    assert(_currentEvent == event);
+    assert((_currentEvent.original ?? _currentEvent) == event);
     try {
-    _firstRegisteredCallback(event);
+    _firstRegisteredCallback(_currentEvent);
     } catch (exception, stack) {
       FlutterError.reportError(FlutterErrorDetails(
         exception: exception,
         stack: stack,
         library: 'gesture library',
-        context: 'while resolving a PointerSignalEvent',
-        informationCollector: (StringBuffer information) {
-          information.writeln('Event:');
-          information.write('  $event');
+        context: ErrorDescription('while resolving a PointerSignalEvent'),
+        informationCollector: () sync* {
+          yield DiagnosticsProperty<PointerSignalEvent>('Event', event, style: DiagnosticsTreeStyle.errorProperty);
         },
       ));
     }

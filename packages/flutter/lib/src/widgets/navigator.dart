@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
@@ -15,6 +16,7 @@ import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
 import 'overlay.dart';
+import 'routes.dart';
 import 'ticker_provider.dart';
 
 // Examples can assume:
@@ -393,6 +395,16 @@ class NavigatorObserver {
 /// routes and they're managed by a [Navigator] widget. The navigator
 /// manages a stack of [Route] objects and provides methods for managing
 /// the stack, like [Navigator.push] and [Navigator.pop].
+///
+/// When your user interface fits this paradigm of a stack, where the user
+/// should be able to _navigate_ back to an earlier element in the stack,
+/// the use of routes and the Navigator is appropriate. On certain platforms,
+/// such as Android, the system UI will provide a back button (outside the
+/// bounds of your application) that will allow the user to navigate back
+/// to earlier routes in your application's stack. On platforms that don't
+/// have this build-in navigation mechanism, the use of an [AppBar] (typically
+/// used in the [Scaffold.appBar] property) can automatically add a back
+/// button for user navigation.
 ///
 /// ### Displaying a full-screen route
 ///
@@ -1750,18 +1762,46 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation(route);
     return route.popped;
   }
 
-  void _afterNavigation() {
+  void _afterNavigation<T>(Route<T> route) {
     if (!kReleaseMode) {
-      // This event is used by performance tools that show stats for the
-      // time interval since the last navigation event occurred ensuring that
-      // stats only reflect the current page.
-      // These tools do not need to know exactly what the new route is so no
-      // attempt is made to describe the current route as part of the event.
-      developer.postEvent('Flutter.Navigation', <String, dynamic>{});
+      // Among other uses, performance tools use this event to ensure that perf
+      // stats reflect the time interval since the last navigation event
+      // occurred, ensuring that stats only reflect the current page.
+
+      Map<String, dynamic> routeJsonable;
+      if (route != null) {
+        routeJsonable = <String, dynamic>{};
+
+        String description;
+        if (route is TransitionRoute<T>) {
+          final TransitionRoute<T> transitionRoute = route;
+          description = transitionRoute.debugLabel;
+        } else {
+          description = '$route';
+        }
+        routeJsonable['description'] = description;
+
+        final RouteSettings settings = route.settings;
+        final Map<String, dynamic> settingsJsonable = <String, dynamic> {
+          'name': settings.name,
+          'isInitialRoute': settings.isInitialRoute,
+        };
+        if (settings.arguments != null) {
+          settingsJsonable['arguments'] = jsonEncode(
+            settings.arguments,
+            toEncodable: (Object object) => '$object',
+          );
+        }
+        routeJsonable['settings'] = settingsJsonable;
+      }
+
+      developer.postEvent('Flutter.Navigation', <String, dynamic>{
+        'route': routeJsonable,
+      });
     }
     _cancelActivePointers();
   }
@@ -1815,7 +1855,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     for (NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation(newRoute);
     return newRoute.popped;
   }
 
@@ -1869,7 +1909,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         observer.didRemove(removedRoute, oldRoute);
     }
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation(newRoute);
     return newRoute.popped;
   }
 
@@ -2022,7 +2062,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       assert(!debugPredictedWouldPop);
     }
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation<dynamic>(route);
     return true;
   }
 
@@ -2064,7 +2104,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       observer.didRemove(route, previousRoute);
     route.dispose();
     assert(() { _debugLocked = false; return true; }());
-    _afterNavigation();
+    _afterNavigation<dynamic>(nextRoute);
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
@@ -2124,7 +2164,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       final Route<dynamic> previousRoute = !route.willHandlePopInternally && _history.length > 1
           ? _history[_history.length - 2]
           : null;
-      // Don't operate the _history list since the gesture may be cancelled.
+      // Don't operate the _history list since the gesture may be canceled.
       // In case of a back swipe, the gesture controller will call .pop() itself.
 
       for (NavigatorObserver observer in widget.observers)

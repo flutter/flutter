@@ -72,7 +72,7 @@ void main() {
         '   ╚═══════════\n'
       ),
     );
-  });
+  }, skip: isBrowser);
 
   // Test that clipping will be used even when the text fits within the visible
   // region if the start position of the text is offset (e.g. during scrolling
@@ -93,7 +93,7 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(
       (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
-      paints..clipRect(rect: Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
+      paints..clipRect(rect: const Rect.fromLTRB(0.0, 0.0, 1000.0, 10.0)),
     );
   });
 
@@ -134,7 +134,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: Rect.fromLTWH(40, 0, 1, 10),
+      rect: const Rect.fromLTWH(40, 0, 1, 10),
     ));
 
     // Now change to a rounded caret.
@@ -146,7 +146,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(40, 0, 4, 10),
+        const Rect.fromLTWH(40, 0, 4, 10),
         const Radius.circular(3),
       ),
     ));
@@ -158,7 +158,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(80, 0, 4, 20),
+        const Rect.fromLTWH(80, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));
@@ -168,7 +168,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+  }, skip: isBrowser);
 
   test('Cursor with ideographic script', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -207,7 +207,7 @@ void main() {
 
     expect(editable, paints..rect(
       color: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      rect: Rect.fromLTWH(40, 0, 1, 10),
+      rect: const Rect.fromLTWH(40, 0, 1, 10),
     ));
 
     // Now change to a rounded caret.
@@ -219,7 +219,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(40, 0, 4, 10),
+        const Rect.fromLTWH(40, 0, 4, 10),
         const Radius.circular(3),
       ),
     ));
@@ -231,7 +231,7 @@ void main() {
     expect(editable, paints..rrect(
       color: const Color.fromARGB(0xFF, 0x00, 0x00, 0xFF),
       rrect: RRect.fromRectAndRadius(
-        Rect.fromLTWH(80, 0, 4, 20),
+        const Rect.fromLTWH(80, 0, 4, 20),
         const Radius.circular(3),
       ),
     ));
@@ -241,7 +241,7 @@ void main() {
     pumpFrame();
 
     expect(editable, paintsExactlyCountTimes(#drawRRect, 0));
-  });
+  }, skip: isBrowser);
 
   test('text is painted above selection', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -327,7 +327,7 @@ void main() {
         ..paragraph(),
     );
     expect(editable, paintsExactlyCountTimes(#drawRect, 1));
-  });
+  }, skip: isBrowser);
 
   test('selects correct place with offsets', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -407,7 +407,7 @@ void main() {
     expect(currentSelection.isCollapsed, false);
     expect(currentSelection.baseOffset, 5);
     expect(currentSelection.extentOffset, 9);
-  });
+  }, skip: isBrowser);
 
   test('selects correct place when offsets are flipped', () {
     final TextSelectionDelegate delegate = FakeEditableTextState();
@@ -439,7 +439,7 @@ void main() {
     expect(currentSelection.isCollapsed, isFalse);
     expect(currentSelection.baseOffset, 1);
     expect(currentSelection.extentOffset, 3);
-  });
+  }, skip: isBrowser);
 
   test('selection does not flicker as user is dragging', () {
     int selectionChangedCount = 0;
@@ -494,7 +494,7 @@ void main() {
     expect(updatedSelection.baseOffset, 3);
     expect(updatedSelection.extentOffset, 5);
     expect(selectionChangedCount, 1);
-  });
+  }, skip: isBrowser);
 
   test('editable hasFocus correctly initialized', () {
     // Regression test for https://github.com/flutter/flutter/issues/21640

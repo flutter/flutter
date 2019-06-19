@@ -43,6 +43,7 @@ void main() {
       expect(await device.isLatestBuildInstalled(linuxApp), true);
       expect(await device.isAppInstalled(linuxApp), true);
       expect(await device.stopApp(linuxApp), true);
+      expect(device.category, Category.desktop);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

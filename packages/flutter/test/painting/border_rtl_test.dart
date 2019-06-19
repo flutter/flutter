@@ -120,7 +120,7 @@ void main() {
     const Border border = Border(top: BorderSide(width: 10.0), right: BorderSide(width: 20.0));
     const BorderDirectional borderDirectional = BorderDirectional(top: BorderSide(width: 10.0), end: BorderSide(width: 20.0));
     expect(
-      border.getOuterPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      border.getOuterPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       isPathThat(
         includes: <Offset>[
           const Offset(50.0, 60.0),
@@ -146,7 +146,7 @@ void main() {
       ),
     );
     expect(
-      border.getInnerPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      border.getInnerPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       // inner path is a rect from 50.0,70.0 to 90.0,190.0
       isPathThat(
         includes: <Offset>[
@@ -184,7 +184,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getOuterPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      borderDirectional.getOuterPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       isPathThat(
         includes: <Offset>[
           const Offset(50.0, 60.0),
@@ -210,7 +210,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getInnerPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
+      borderDirectional.getInnerPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.rtl),
       // inner path is a rect from 70.0,70.0 to 110.0,190.0
       isPathThat(
         includes: <Offset>[
@@ -251,7 +251,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getOuterPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
+      borderDirectional.getOuterPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
       isPathThat(
         includes: <Offset>[
           const Offset(50.0, 60.0),
@@ -277,7 +277,7 @@ void main() {
       ),
     );
     expect(
-      borderDirectional.getInnerPath(Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
+      borderDirectional.getInnerPath(const Rect.fromLTRB(50.0, 60.0, 110.0, 190.0), textDirection: TextDirection.ltr),
       // inner path is a rect from 50.0,70.0 to 90.0,190.0
       isPathThat(
         includes: <Offset>[
@@ -314,14 +314,14 @@ void main() {
         ],
       ),
     );
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional constructor', () {
     expect(() => BorderDirectional(top: nonconst(null)), throwsAssertionError);
     expect(() => BorderDirectional(start: nonconst(null)), throwsAssertionError);
     expect(() => BorderDirectional(end: nonconst(null)), throwsAssertionError);
     expect(() => BorderDirectional(bottom: nonconst(null)), throwsAssertionError);
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional.merge', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
@@ -360,7 +360,7 @@ void main() {
       ),
       throwsAssertionError,
     );
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional.dimensions', () {
     expect(
@@ -372,7 +372,7 @@ void main() {
       ).dimensions,
       const EdgeInsetsDirectional.fromSTEB(2.0, 3.0, 7.0, 5.0),
     );
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional.isUniform', () {
     expect(
@@ -442,7 +442,7 @@ void main() {
       const BorderDirectional().isUniform,
       true,
     );
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional.add - all directional', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
@@ -478,7 +478,7 @@ void main() {
     expect(bZ + bZ, bZ);
     expect(b0 + bZ, bZ);
     expect(bZ + b0, bZ);
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional.add', () {
     const BorderSide side1 = BorderSide(color: Color(0x11111111));
@@ -530,7 +530,7 @@ void main() {
     expect((borderDirectionalWithStart + borderWithoutSides).toString(), '${const BorderDirectional(start: side1, top: doubleSide2, bottom: doubleSide2)}');
     expect((borderDirectionalWithEnd + borderWithoutSides).toString(), '${const BorderDirectional(end: side1, top: doubleSide2, bottom: doubleSide2)}');
     expect((borderDirectionalWithoutSides + borderWithoutSides).toString(), '${const Border(top: doubleSide2, bottom: doubleSide2)}');
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional.scale', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
@@ -544,7 +544,7 @@ void main() {
     expect(bY0.scale(3.0), bY0);
     const BorderDirectional bY2 = BorderDirectional(top: yellow2);
     expect(bY2.scale(0.0), bY0);
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional.lerp', () {
     const BorderDirectional directionalWithTop10 = BorderDirectional(top: BorderSide(width: 10.0));
@@ -590,7 +590,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
+          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.rtl);
       },
       paints
         ..path(
@@ -602,7 +602,7 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
+          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0), textDirection: TextDirection.ltr);
       },
       paints
         ..path(
@@ -614,11 +614,11 @@ void main() {
     expect(
       (Canvas canvas) {
         const BorderDirectional(end: BorderSide(width: 10.0, color: Color(0xFF00FF00)))
-          .paint(canvas, Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
+          .paint(canvas, const Rect.fromLTRB(10.0, 20.0, 30.0, 40.0));
       },
       paintsAssertion, // no TextDirection
     );
-  });
+  }, skip: isBrowser);
 
   test('BorderDirectional hashCode', () {
     final BorderSide side = BorderSide(width: nonconst(2.0));
@@ -668,5 +668,5 @@ void main() {
     expect(decoration2.padding, const EdgeInsetsDirectional.fromSTEB(2.0, 0.0, 0.0, 0.0));
     expect(decoration2.scale(2.0), decoration4);
     expect(BoxDecoration.lerp(decoration2, decoration6, 0.5), decoration4);
-  });
+  }, skip: isBrowser);
 }

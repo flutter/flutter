@@ -178,7 +178,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     return  '${wrapText(description)}\n\n$usageWithoutDescription';
   }
 
-  static String get _defaultFlutterRoot {
+  static String get defaultFlutterRoot {
     if (platform.environment.containsKey(kFlutterRootEnvironmentVariableName))
       return platform.environment[kFlutterRootEnvironmentVariableName];
     try {
@@ -342,7 +342,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] ?? _defaultFlutterRoot;
+    final String flutterRoot = topLevelResults['flutter-root'] ?? defaultFlutterRoot;
+    bool checkPermissions = true;
+    assert(() {
+      checkPermissions = false;
+      return true;
+    }());
+    Cache.checkPermissions = checkPermissions;
     Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
     // Set up the tooling configuration.
@@ -475,10 +481,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     }
 
     return EngineBuildPaths(targetEngine: engineBuildPath, hostEngine: engineHostBuildPath);
-  }
-
-  static void initFlutterRoot() {
-    Cache.flutterRoot ??= _defaultFlutterRoot;
   }
 
   /// Get the root directories of the repo - the directories containing Dart packages.

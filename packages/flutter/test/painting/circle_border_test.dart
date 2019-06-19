@@ -22,9 +22,9 @@ void main() {
     expect(c10.getInnerPath(Rect.fromCircle(center: Offset.zero, radius: 1.0).inflate(10.0)), isUnitCircle);
     expect(c10.getOuterPath(Rect.fromCircle(center: Offset.zero, radius: 1.0)), isUnitCircle);
     expect(
-      (Canvas canvas) => c10.paint(canvas, Rect.fromLTWH(10.0, 20.0, 30.0, 40.0)),
+      (Canvas canvas) => c10.paint(canvas, const Rect.fromLTWH(10.0, 20.0, 30.0, 40.0)),
       paints
         ..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0),
     );
-  });
+  }, skip: isBrowser);
 }

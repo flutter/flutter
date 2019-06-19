@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
+import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -181,6 +182,7 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
         'This is a multi-line message,',
         '  with a non-Flutter log message following it.',
       ]);
+      expect(device.category, Category.mobile);
     }, overrides: <Type, Generator>{
       IMobileDevice: () => mockIMobileDevice,
     });

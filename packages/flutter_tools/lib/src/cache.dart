@@ -81,7 +81,8 @@ class Cache {
       _artifacts.add(WindowsEngineArtifacts(this));
       _artifacts.add(MacOSEngineArtifacts(this));
       _artifacts.add(LinuxEngineArtifacts(this));
-      _artifacts.add(FuchsiaCacheArtifacts(this));
+      _artifacts.add(LinuxFuchsiaSDKArtifacts(this));
+      _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
     } else {
       _artifacts.addAll(artifacts);
     }
@@ -94,8 +95,49 @@ class Cache {
   final Directory _rootOverride;
   final List<CachedArtifact> _artifacts = <CachedArtifact>[];
 
+  // Check whether there is a writable bit in the usr permissions.
+  static bool _hasUserWritePermission(FileStat stat) {
+    // First grab the set of permissions for the usr group.
+    final int permissions = ((stat.mode & 0xFFF) >> 6) & 0x7;
+    // These values represent all of the octal permission bits that have
+    // readable and writable permission, though technically if we're missing
+    // readable we probably didn't make it this far.
+    return permissions == 6
+      || permissions == 7;
+  }
+
+  // Unfortunately the memory file system by default specifies a mode of `0`
+  // and is used by the majority of our tests. Default to false and only set
+  // to true when we know it is safe.
+  static bool checkPermissions = false;
+
   // Initialized by FlutterCommandRunner on startup.
-  static String flutterRoot;
+  static String get flutterRoot => _flutterRoot;
+  static String _flutterRoot;
+  static set flutterRoot(String value) {
+    if (value == null) {
+      _flutterRoot = null;
+      return;
+    }
+    if (checkPermissions) {
+      // Verify that we have writable permission in the flutter root. If not,
+      // we're liable to crash in unintuitive ways. This can happen if the user
+      // is using a homebrew or other unofficial channel, or otherwise installs
+      // Flutter into directory without permissions.
+      final FileStat binStat = fs.statSync(fs.path.join(value, 'bin'));
+      final FileStat rootStat = fs.statSync(value);
+      if (!_hasUserWritePermission(binStat) || !_hasUserWritePermission(rootStat)) {
+        throwToolExit(
+          'Warning: Flutter is missing permissions to write files '
+          'in its installation directory - "$value". '
+          'Please install Flutter from an official channel in a directory '
+          'where you have write permissions and that does not require '
+          'administrative or root access. For more information see '
+          'https://flutter.dev/docs/get-started/install');
+      }
+    }
+    _flutterRoot = value;
+  }
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
@@ -190,13 +232,6 @@ class Cache {
   }
   String _engineRevision;
 
-  /// The current version of the Fuchsia SDK the flutter tool will download.
-  String get fuchsiaRevision {
-    _fuchsiaRevision ??= getVersionFor('fuchsia');
-    return _fuchsiaRevision;
-  }
-  String _fuchsiaRevision;
-
   static Cache get instance => context.get<Cache>();
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
@@ -234,7 +269,9 @@ class Cache {
   }
 
   String getVersionFor(String artifactName) {
-    final File versionFile = fs.file(fs.path.join(_rootOverride?.path ?? flutterRoot, 'bin', 'internal', '$artifactName.version'));
+    final File versionFile = fs.file(fs.path.join(
+        _rootOverride?.path ?? flutterRoot, 'bin', 'internal',
+        '$artifactName.version'));
     return versionFile.existsSync() ? versionFile.readAsStringSync().trim() : null;
   }
 
@@ -851,30 +888,52 @@ class GradleWrapper extends CachedArtifact {
   }
 }
 
-/// The Fuchsia core SDK.
-class FuchsiaCacheArtifacts extends CachedArtifact {
-  FuchsiaCacheArtifacts(Cache cache) : super('fuchsia', cache, const <DevelopmentArtifact> {
+/// Common functionality for pulling Fuchsia SDKs.
+abstract class _FuchsiaSDKArtifacts extends CachedArtifact {
+  _FuchsiaSDKArtifacts(Cache cache, String platform)
+      :_path = 'fuchsia/sdk/core/$platform-amd64',
+       super('fuchsia-$platform', cache, const <DevelopmentArtifact> {
     DevelopmentArtifact.fuchsia,
   });
 
-  static const String _cipdBaseUrl = 'https://chrome-infra-packages.appspot.com/dl';
-  static const String _macOSSdk = 'fuchsia/sdk/core/mac-amd64';
-  static const String _linuxSdk = 'fuchsia/sdk/core/linux-amd64';
+  static const String _cipdBaseUrl =
+      'https://chrome-infra-packages.appspot.com/dl';
 
- @override
-  Future<void> updateInner() async {
-    // Step 1: Determine variant of Fuchsia SDK to download.
-    String packageName;
-    if (platform.isLinux) {
-      packageName = _linuxSdk;
-    } else if (platform.isMacOS) {
-      packageName = _macOSSdk;
-    } else {
-      // Unsupported.
-      return;
+  final String _path;
+
+  @override
+  Directory get location => cache.getArtifactDirectory('fuchsia');
+
+  Future<void> _doUpdate() {
+    final String url = '$_cipdBaseUrl/$_path/+/$version';
+    return _downloadZipArchive('Downloading package fuchsia SDK...',
+                               Uri.parse(url), location);
+  }
+}
+
+/// The Fuchsia core SDK for Linux.
+class LinuxFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
+  LinuxFuchsiaSDKArtifacts(Cache cache) : super(cache, 'linux');
+
+  @override
+  Future<void> updateInner() {
+    if (!platform.isLinux) {
+      return Future<void>.value();
     }
-    final String url = '$_cipdBaseUrl/$packageName/+/$version';
-    await _downloadZipArchive('Downloading package fuchsia SDK...', Uri.parse(url), location);
+    return _doUpdate();
+  }
+}
+
+/// The Fuchsia core SDK for MacOS.
+class MacOSFuchsiaSDKArtifacts extends _FuchsiaSDKArtifacts {
+  MacOSFuchsiaSDKArtifacts(Cache cache) : super(cache, 'mac');
+
+  @override
+  Future<void> updateInner() async {
+    if (!platform.isMacOS) {
+      return Future<void>.value();
+    }
+    return _doUpdate();
   }
 }
 

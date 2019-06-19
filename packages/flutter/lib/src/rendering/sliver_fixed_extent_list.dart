@@ -65,7 +65,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
   /// order, without gaps, starting from layout offset zero.
   @protected
   int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return itemExtent > 0.0 ? math.max(0, scrollOffset ~/ itemExtent) : 0;
+    if (itemExtent > 0.0) {
+      final double actual = scrollOffset / itemExtent;
+      final int round = actual.round();
+      if ((actual - round).abs() < precisionErrorTolerance) {
+        return round;
+      }
+      return actual.floor();
+    }
+    return 0;
   }
 
   /// The maximum child index that is visible at the given scroll offset.
@@ -203,9 +211,9 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout = firstChild;
     }
 
-    while (targetLastIndex == null || indexOf(trailingChildWithLayout) < targetLastIndex) {
+    for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       RenderBox child = childAfter(trailingChildWithLayout);
-      if (child == null) {
+      if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.
@@ -217,6 +225,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       trailingChildWithLayout = child;
       assert(child != null);
       final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index);
     }
 
@@ -224,7 +233,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     final double leadingScrollOffset = indexToLayoutOffset(itemExtent, firstIndex);
     final double trailingScrollOffset = indexToLayoutOffset(itemExtent, lastIndex + 1);
 
-    assert(firstIndex == 0 || childScrollOffset(firstChild) <= scrollOffset);
+    assert(firstIndex == 0 || childScrollOffset(firstChild) - scrollOffset <= precisionErrorTolerance);
     assert(debugAssertChildListIsNonEmptyAndContiguous());
     assert(indexOf(firstChild) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);

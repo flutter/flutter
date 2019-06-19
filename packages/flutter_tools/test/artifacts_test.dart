@@ -35,14 +35,6 @@ void main() {
           artifacts.getArtifactPath(Artifact.flutterTester),
           fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'linux-x64', 'flutter_tester'),
       );
-      expect(
-          artifacts.getArtifactPath(Artifact.genSnapshot, platform: TargetPlatform.android_arm64, mode: BuildMode.dynamicRelease),
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'android-arm64-dynamic-release', 'linux-x64', 'gen_snapshot'),
-      );
-      expect(
-          artifacts.getArtifactPath(Artifact.vmSnapshotData, platform: TargetPlatform.darwin_x64, mode: BuildMode.dynamicRelease),
-          fs.path.join(tempDir.path, 'bin', 'cache', 'artifacts', 'engine', 'darwin-x64', 'product_vm_isolate_snapshot.bin'),
-      );
     }, overrides: <Type, Generator>{
       Cache: () => Cache(rootOverride: tempDir),
       Platform: () => FakePlatform(operatingSystem: 'linux'),
@@ -52,10 +44,6 @@ void main() {
       expect(
           artifacts.getEngineType(TargetPlatform.android_arm, BuildMode.debug),
           'android-arm',
-      );
-      expect(
-          artifacts.getEngineType(TargetPlatform.android_arm64, BuildMode.dynamicProfile),
-          'android-arm64-dynamic-profile',
       );
       expect(
           artifacts.getEngineType(TargetPlatform.ios, BuildMode.release),

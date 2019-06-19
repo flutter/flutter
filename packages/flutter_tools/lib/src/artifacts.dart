@@ -28,6 +28,7 @@ enum Artifact {
   engineDartSdkPath,
   engineDartBinary,
   dart2jsSnapshot,
+  dartdevcSnapshot,
   kernelWorkerSnapshot,
   flutterWebSdk,
 }
@@ -48,19 +49,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.flutterMacOSFramework:
       return 'FlutterMacOS.framework';
     case Artifact.vmSnapshotData:
-      // Flutter 'debug' and 'dynamic profile' modes for all target platforms use Dart
-      // RELEASE VM snapshot that comes from host debug build and has the metadata
-      // related to development tools. Flutter 'dynamic release' mode uses Dart PRODUCT
-      // VM snapshot from host dynamic release build that strips out the metadata
-      // related to development tools.
-      if (mode == BuildMode.dynamicRelease) {
-        return 'product_vm_isolate_snapshot.bin';
-      }
       return 'vm_isolate_snapshot.bin';
     case Artifact.isolateSnapshotData:
-      if (mode == BuildMode.dynamicRelease) {
-        return 'product_isolate_snapshot.bin';
-      }
       return 'isolate_snapshot.bin';
     case Artifact.platformKernelDill:
       return 'platform_strong.dill';
@@ -80,6 +70,8 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'dart';
     case Artifact.dart2jsSnapshot:
       return 'dart2js.dart.snapshot';
+    case Artifact.dartdevcSnapshot:
+      return 'dartdevc.dart.snapshot';
     case Artifact.kernelWorkerSnapshot:
       return 'kernel_worker.dart.snapshot';
   }
@@ -133,7 +125,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         return _getHostArtifactPath(artifact, platform, mode);
     }
     assert(false, 'Invalid platform $platform.');
@@ -212,6 +204,8 @@ class CachedArtifacts extends Artifacts {
         return _getFlutterWebSdkPath();
       case Artifact.dart2jsSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.dartdevcSnapshot:
+        return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.flutterMacOSFramework:
@@ -233,7 +227,7 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.windows_x64:
       case TargetPlatform.fuchsia:
       case TargetPlatform.tester:
-      case TargetPlatform.web:
+      case TargetPlatform.web_javascript:
         assert(mode == null, 'Platform $platform does not support different build modes.');
         return fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:
@@ -304,6 +298,8 @@ class LocalEngineArtifacts extends Artifacts {
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
+      case Artifact.dartdevcSnapshot:
+        return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
         return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', _artifactToFileName(artifact));
     }

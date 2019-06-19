@@ -10,7 +10,7 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void sendFakeKeyEvent(Map<String, dynamic> data) {
-  BinaryMessages.handlePlatformMessage(
+  defaultBinaryMessenger.handlePlatformMessage(
     SystemChannels.keyEvent.name,
     SystemChannels.keyEvent.codec.encodeMessage(data),
     (ByteData data) {},
@@ -273,21 +273,21 @@ void main() {
     });
     testWidgets('Can move node between scopes and lose scope focus', (WidgetTester tester) async {
       final BuildContext context = await setupWidget(tester);
-      final FocusScopeNode scope1 = FocusScopeNode()..attach(context);
+      final FocusScopeNode scope1 = FocusScopeNode(debugLabel: 'scope1')..attach(context);
       final FocusAttachment scope1Attachment = scope1.attach(context);
-      final FocusScopeNode scope2 = FocusScopeNode();
+      final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'scope2');
       final FocusAttachment scope2Attachment = scope2.attach(context);
-      final FocusNode parent1 = FocusNode();
+      final FocusNode parent1 = FocusNode(debugLabel: 'parent1');
       final FocusAttachment parent1Attachment = parent1.attach(context);
-      final FocusNode parent2 = FocusNode();
+      final FocusNode parent2 = FocusNode(debugLabel: 'parent2');
       final FocusAttachment parent2Attachment = parent2.attach(context);
-      final FocusNode child1 = FocusNode();
+      final FocusNode child1 = FocusNode(debugLabel: 'child1');
       final FocusAttachment child1Attachment = child1.attach(context);
-      final FocusNode child2 = FocusNode();
+      final FocusNode child2 = FocusNode(debugLabel: 'child2');
       final FocusAttachment child2Attachment = child2.attach(context);
-      final FocusNode child3 = FocusNode();
+      final FocusNode child3 = FocusNode(debugLabel: 'child3');
       final FocusAttachment child3Attachment = child3.attach(context);
-      final FocusNode child4 = FocusNode();
+      final FocusNode child4 = FocusNode(debugLabel: 'child4');
       final FocusAttachment child4Attachment = child4.attach(context);
       scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
       scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
@@ -365,6 +365,55 @@ void main() {
       expect(scope1.focusedChild, equals(child1));
       expect(scope2.focusedChild, equals(child4));
     });
+    testWidgets('Unfocus works properly', (WidgetTester tester) async {
+      final BuildContext context = await setupWidget(tester);
+      final FocusScopeNode scope1 = FocusScopeNode()..attach(context);
+      final FocusAttachment scope1Attachment = scope1.attach(context);
+      final FocusScopeNode scope2 = FocusScopeNode();
+      final FocusAttachment scope2Attachment = scope2.attach(context);
+      final FocusNode parent1 = FocusNode();
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode();
+      final FocusAttachment parent2Attachment = parent2.attach(context);
+      final FocusNode child1 = FocusNode();
+      final FocusAttachment child1Attachment = child1.attach(context);
+      final FocusNode child2 = FocusNode();
+      final FocusAttachment child2Attachment = child2.attach(context);
+      final FocusNode child3 = FocusNode();
+      final FocusAttachment child3Attachment = child3.attach(context);
+      final FocusNode child4 = FocusNode();
+      final FocusAttachment child4Attachment = child4.attach(context);
+      scope1Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      scope2Attachment.reparent(parent: tester.binding.focusManager.rootScope);
+      parent1Attachment.reparent(parent: scope1);
+      parent2Attachment.reparent(parent: scope2);
+      child1Attachment.reparent(parent: parent1);
+      child2Attachment.reparent(parent: parent1);
+      child3Attachment.reparent(parent: parent2);
+      child4Attachment.reparent(parent: parent2);
+
+      child1.requestFocus();
+      await tester.pump();
+      expect(scope1.focusedChild, equals(child1));
+      expect(parent2.children.contains(child1), isFalse);
+
+      child1.unfocus();
+      await tester.pump();
+      expect(scope1.focusedChild, isNull);
+      expect(child1.hasPrimaryFocus, isFalse);
+      expect(scope1.hasFocus, isFalse);
+
+      child1.requestFocus();
+      await tester.pump();
+      expect(scope1.focusedChild, equals(child1));
+      expect(parent2.children.contains(child1), isFalse);
+
+      scope1.unfocus();
+      await tester.pump();
+      expect(scope1.focusedChild, isNull);
+      expect(child1.hasPrimaryFocus, isFalse);
+      expect(scope1.hasFocus, isFalse);
+    });
     testWidgets('Key handling bubbles up and terminates when handled.', (WidgetTester tester) async {
       final Set<FocusNode> receivedAnEvent = <FocusNode>{};
       final Set<FocusNode> shouldHandle = <FocusNode>{};
@@ -392,10 +441,10 @@ void main() {
       final FocusAttachment scope1Attachment = scope1.attach(context, onKey: handleEvent);
       final FocusScopeNode scope2 = FocusScopeNode(debugLabel: 'Scope 2');
       final FocusAttachment scope2Attachment = scope2.attach(context, onKey: handleEvent);
-      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1');
-      final FocusAttachment parent1Attachment = parent1.attach(context, onKey: handleEvent);
-      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2');
-      final FocusAttachment parent2Attachment = parent2.attach(context, onKey: handleEvent);
+      final FocusNode parent1 = FocusNode(debugLabel: 'Parent 1', onKey: handleEvent);
+      final FocusAttachment parent1Attachment = parent1.attach(context);
+      final FocusNode parent2 = FocusNode(debugLabel: 'Parent 2', onKey: handleEvent);
+      final FocusAttachment parent2Attachment = parent2.attach(context);
       final FocusNode child1 = FocusNode(debugLabel: 'Child 1');
       final FocusAttachment child1Attachment = child1.attach(context, onKey: handleEvent);
       final FocusNode child2 = FocusNode(debugLabel: 'Child 2');

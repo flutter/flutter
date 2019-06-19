@@ -14,18 +14,23 @@ const int kNetworkProblemExitCode = 50;
 typedef HttpClientFactory = HttpClient Function();
 
 /// Download a file from the given URL and return the bytes.
-Future<List<int>> fetchUrl(Uri url) async {
+Future<List<int>> fetchUrl(Uri url, {int maxAttempts}) async {
   int attempts = 0;
-  int duration = 1;
+  int durationSeconds = 1;
   while (true) {
     attempts += 1;
     final List<int> result = await _attempt(url);
     if (result != null)
       return result;
-    printStatus('Download failed -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
-    await Future<void>.delayed(Duration(seconds: duration));
-    if (duration < 64)
-      duration *= 2;
+    if (maxAttempts != null && attempts >= maxAttempts) {
+      printStatus('Download failed -- retry $attempts');
+      return null;
+    }
+    printStatus('Download failed -- attempting retry $attempts in '
+        '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...');
+    await Future<void>.delayed(Duration(seconds: durationSeconds));
+    if (durationSeconds < 64)
+      durationSeconds *= 2;
   }
 }
 
@@ -57,6 +62,9 @@ Future<List<int>> _attempt(Uri url, { bool onlyHeaders = false }) async {
       exitCode: kNetworkProblemExitCode,
     );
   } on SocketException catch (error) {
+    printTrace('Download error: $error');
+    return null;
+  } on HttpException catch (error) {
     printTrace('Download error: $error');
     return null;
   }
