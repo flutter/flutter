@@ -377,7 +377,6 @@ void main() {
     ).size.height, 56.0);
   });
 
-
   testWidgets('PaginatedDataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
     const double _defaultHorizontalMargin = 24.0;
     const double _defaultColumnSpacing = 56.0;
