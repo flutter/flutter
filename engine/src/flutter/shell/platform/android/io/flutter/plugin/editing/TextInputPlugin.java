@@ -262,6 +262,10 @@ public class TextInputPlugin {
     }
 
     private void setPlatformViewTextInputClient(int platformViewId) {
+        // We need to make sure that the Flutter view is focused so that no imm operations get short circuited.
+        // Not asking for focus here specifically manifested in a but on API 28 devices where the platform view's
+        // request to show a keyboard was ignored.
+        mView.requestFocus();
         inputTarget = new InputTarget(InputTarget.Type.PLATFORM_VIEW, platformViewId);
         mImm.restartInput(mView);
         mRestartInputPending = false;
