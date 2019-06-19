@@ -20,7 +20,12 @@ import 'macos_workflow.dart';
 
 /// A device that represents a desktop MacOS target.
 class MacOSDevice extends Device {
-  MacOSDevice() : super('macOS');
+  MacOSDevice() : super(
+      'macOS',
+      category: Category.desktop,
+      platformType: PlatformType.macos,
+      ephemeral: false,
+  );
 
   @override
   void clearLogs() { }
