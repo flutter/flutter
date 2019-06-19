@@ -128,7 +128,7 @@ class ValidatorTask {
   final Future<ValidationResult> result;
 }
 
-/// The diagnose of [Doctor].
+/// The diagnosis of [Doctor].
 class DiagnoseResult {
   const DiagnoseResult({
     this.success,
