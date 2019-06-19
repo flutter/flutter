@@ -288,6 +288,7 @@ class SemanticsFlag {
   static const int _kHasToggledStateIndex = 1 << 16;
   static const int _kIsToggledIndex = 1 << 17;
   static const int _kHasImplicitScrollingIndex = 1 << 18;
+  static const int _kIsReadOnlyIndex = 1 << 20;
 
   const SemanticsFlag._(this.index);
 
@@ -340,6 +341,11 @@ class SemanticsFlag {
   /// Text fields are announced as such and allow text input via accessibility
   /// affordances.
   static const SemanticsFlag isTextField = SemanticsFlag._(_kIsTextFieldIndex);
+
+  /// Whether the semantic node is read only.
+  ///
+  /// Only applicable when [isTextField] is true.
+  static const SemanticsFlag isReadOnly = SemanticsFlag._(_kIsReadOnlyIndex);
 
   /// Whether the semantic node currently holds the user's focus.
   ///
@@ -506,6 +512,7 @@ class SemanticsFlag {
     _kHasToggledStateIndex: hasToggledState,
     _kIsToggledIndex: isToggled,
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
+    _kIsReadOnlyIndex: isReadOnly,
   };
 
   @override
@@ -549,6 +556,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.isToggled';
       case _kHasImplicitScrollingIndex:
         return 'SemanticsFlag.hasImplicitScrolling';
+      case _kIsReadOnlyIndex:
+        return 'SemanticsFlag.isReadOnly';
     }
     return null;
   }
