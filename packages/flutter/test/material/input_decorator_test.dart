@@ -2357,6 +2357,18 @@ void main() {
 
   testWidgets('OutlineInputBorder borders scale down to fit when large values are passed in', (WidgetTester tester) async {
     // This is a regression test for https://github.com/flutter/flutter/issues/34327
+    const double largerBorderRadius = 200.0;
+    const double smallerBorderRadius = 100.0;
+
+    // Overall height for this InputDecorator is 56dps:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+    const double inputDecoratorHeight = 56.0;
+    const double inputDecoratorWidth = 800.0;
+
     await tester.pumpWidget(
       buildInputDecorator(
         decoration: const InputDecoration(
@@ -2366,18 +2378,24 @@ void main() {
           border: OutlineInputBorder(
             borderRadius: BorderRadius.only(
               // Intentionally large values that are larger than the InputDecorator
-              topLeft: Radius.circular(100.0),
-              bottomLeft: Radius.circular(100.0),
-              topRight: Radius.circular(200.0),
-              bottomRight: Radius.circular(200.0),
+              topLeft: Radius.circular(smallerBorderRadius),
+              bottomLeft: Radius.circular(smallerBorderRadius),
+              topRight: Radius.circular(largerBorderRadius),
+              bottomRight: Radius.circular(largerBorderRadius),
             ),
           ),
         ),
       ),
     );
 
-    const double largerBorderRadius = 28.0;
-    const double smallerBorderRadius = largerBorderRadius / 2.0;
+    // Skia determines the scale based on the ratios of radii to the total
+    // height or width allowed. In this case, it is the right side of the
+    // border, which have two corners with largerBorderRadius that add up
+    // to be 400.0.
+    const double denominator = largerBorderRadius * 2.0;
+
+    const double largerBorderRadiusScaled = largerBorderRadius / denominator * inputDecoratorHeight;
+    const double smallerBorderRadiusScaled = smallerBorderRadius / denominator * inputDecoratorHeight;
 
     expect(findBorderPainter(), paints
       ..save()
@@ -2385,42 +2403,109 @@ void main() {
         style: PaintingStyle.fill,
         color: const Color(0xFF00FF00),
         includes: <Offset>[
-          // The border should draw on along the four edges of the
+          // The border should draw along the four edges of the
           // InputDecorator.
-          const Offset(800.0 / 2.0, 0.0), // top center
-          const Offset(800.0 / 2.0, 56), // bottom center
-          const Offset(0.0, 56 / 2.0), // left center
-          const Offset(800.0, 56 / 2.0), // right center
+          // Top center
+          const Offset(
+            inputDecoratorWidth / 2.0,
+            0.0,
+          ),
+          // Bottom center
+          const Offset(
+            inputDecoratorWidth / 2.0,
+            inputDecoratorHeight,
+          ),
+          // Left center
+          const Offset(
+            0.0,
+            inputDecoratorHeight / 2.0,
+          ),
+          // Right center
+          const Offset(
+            inputDecoratorWidth,
+            inputDecoratorHeight / 2.0,
+          ),
 
-          // The border path should contain points where each
-          // rounded corner ends.
+          // The border path should contain points where each rounded corner
+          // ends.
           // Bottom-right arc
-          const Offset(800.0, 56 - largerBorderRadius),
-          const Offset(800.0 - largerBorderRadius, 56.0),
+          const Offset(
+            inputDecoratorWidth,
+            inputDecoratorHeight - largerBorderRadiusScaled,
+          ),
+          const Offset(
+            inputDecoratorWidth - largerBorderRadiusScaled,
+            inputDecoratorHeight,
+          ),
+
           // Top-right arc
-          const Offset(800.0, 0.0 + largerBorderRadius),
-          const Offset(800.0 - largerBorderRadius, 0.0),
+          const Offset(
+            inputDecoratorWidth,
+            0.0 + largerBorderRadiusScaled,
+          ),
+          const Offset(
+            inputDecoratorWidth - largerBorderRadiusScaled,
+            0.0,
+          ),
+
           // Bottom-left arc
-          const Offset(0.0, 56 - smallerBorderRadius),
-          const Offset(0.0 + smallerBorderRadius, 56.0),
+          const Offset(
+            0.0,
+            inputDecoratorHeight - smallerBorderRadiusScaled,
+          ),
+          const Offset(
+            0.0 + smallerBorderRadiusScaled,
+            inputDecoratorHeight,
+          ),
+
           // Top-left arc
-          const Offset(0.0, 0.0 + smallerBorderRadius),
-          const Offset(0.0 + smallerBorderRadius, 0.0),
+          const Offset(
+            0.0,
+            0.0 + smallerBorderRadiusScaled,
+          ),
+          const Offset(
+            0.0 + smallerBorderRadiusScaled,
+            0.0,
+          ),
         ],
         excludes: <Offset>[
           // The border should not contain the corner points, since the border
           // is rounded.
-          const Offset(0.0, 0.0), // outside the rounded corner, top left
-          const Offset(800.0, 0.0), // top right
-          const Offset(0.0, 56.0), // bottom left
-          const Offset(800.0, 56.0), // bottom right
+          const Offset(
+            0.0,
+            0.0
+          ), // outside the rounded corner, top left
+          const Offset(
+            inputDecoratorWidth,
+            0.0
+          ), // top right
+          const Offset(
+            0.0,
+            inputDecoratorWidth
+          ), // bottom left
+          const Offset(
+            inputDecoratorWidth,
+            inputDecoratorWidth
+          ), // bottom right
 
           // Corners with larger border ratio should not contain points outside
           // of the larger radius.
-          const Offset(800.0, 56 - smallerBorderRadius),
-          const Offset(800.0 - smallerBorderRadius, 56.0),
-          const Offset(800.0, 0.0 + smallerBorderRadius),
-          const Offset(800.0 - smallerBorderRadius, 0.0),
+          const Offset(
+            inputDecoratorWidth,
+            56 - smallerBorderRadiusScaled,
+          ),
+          const Offset(
+            inputDecoratorWidth - smallerBorderRadiusScaled,
+            inputDecoratorWidth,
+          ),
+          const Offset(
+            inputDecoratorWidth,
+            0.0 + smallerBorderRadiusScaled,
+          ),
+          const Offset(
+            inputDecoratorWidth - smallerBorderRadiusScaled,
+            0.0,
+          ),
         ],
       )
       ..restore()
