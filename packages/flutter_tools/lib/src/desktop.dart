@@ -6,10 +6,10 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/common.dart';
 import 'base/io.dart';
 import 'base/platform.dart';
 import 'base/process_manager.dart';
-import 'commands/daemon.dart' show isRunningFromDaemon;
 import 'convert.dart';
 import 'device.dart';
 import 'version.dart';
