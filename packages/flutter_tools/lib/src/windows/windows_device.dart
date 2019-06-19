@@ -21,7 +21,12 @@ import 'windows_workflow.dart';
 
 /// A device that represents a desktop Windows target.
 class WindowsDevice extends Device {
-  WindowsDevice() : super('Windows');
+  WindowsDevice() : super(
+      'Windows',
+      category: Category.desktop,
+      platformType: PlatformType.windows,
+      ephemeral: false,
+  );
 
   @override
   void clearLogs() { }

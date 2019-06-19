@@ -8,6 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/physics.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+import 'package:flutter/foundation.dart' show precisionErrorTolerance;
 
 import 'basic.dart';
 import 'debug.dart';
@@ -368,7 +369,12 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPageFromPixels(double pixels, double viewportDimension) {
-    return math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double round = actual.roundToDouble();
+    if ((actual - round).abs() < precisionErrorTolerance) {
+      return round;
+    }
+    return actual;
   }
 
   double getPixelsFromPage(double page) {
@@ -376,7 +382,13 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   @override
-  double get page => pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  double get page {
+    assert(
+      pixels == null || (minScrollExtent != null && maxScrollExtent != null),
+      'Page value is only available after content dimensions are established.',
+    );
+    return pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+  }
 
   @override
   void saveScrollOffset() {
