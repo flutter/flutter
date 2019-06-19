@@ -17,7 +17,6 @@ import '../src/testbed.dart';
 void main() {
   group('WebWorkflow', () {
     Testbed testbed;
-    MockPlatform noEnvironment;
     MockPlatform notSupported;
     MockPlatform windows;
     MockPlatform linux;
@@ -30,7 +29,6 @@ void main() {
     setUpAll(() {
       unstable = MockFlutterVersion(false);
       stable = MockFlutterVersion(true);
-      noEnvironment = MockPlatform(environment: const <String, String>{});
       notSupported = MockPlatform(linux: false, windows: false, macos: false);
       windows = MockPlatform(windows: true);
       linux = MockPlatform(linux: true);
