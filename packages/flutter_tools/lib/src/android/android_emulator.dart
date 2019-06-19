@@ -11,6 +11,7 @@ import '../android/android_workflow.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process_manager.dart';
+import '../device.dart';
 import '../emulator.dart';
 import 'android_sdk.dart';
 
@@ -39,6 +40,12 @@ class AndroidEmulator extends Emulator {
 
   @override
   String get label => _prop('avd.ini.displayname');
+
+  @override
+  Category get category => Category.mobile;
+
+  @override
+  PlatformType get platformType => PlatformType.android;
 
   String _prop(String name) => _properties != null ? _properties[name] : null;
 
