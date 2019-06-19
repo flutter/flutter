@@ -383,10 +383,6 @@ class DataTable extends StatelessWidget {
     }
   }
 
-  static const double _tablePadding = 24.0;
-  static const double _columnSpacing = 56.0;
-  static const double _headingRowHeight = 56.0;
-  static const double _dataRowHeight = 48.0;
   static const double _sortArrowPadding = 2.0;
   static const double _headingFontSize = 12.0;
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
