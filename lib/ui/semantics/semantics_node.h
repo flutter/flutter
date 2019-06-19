@@ -69,6 +69,7 @@ enum class SemanticsFlags : int32_t {
   kHasToggledState = 1 << 16,
   kIsToggled = 1 << 17,
   kHasImplicitScrolling = 1 << 18,
+  kIsReadOnly = 1 << 20,
 };
 
 const int kScrollableSemanticsFlags =

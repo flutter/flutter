@@ -298,6 +298,7 @@ class SemanticsFlag {
   static const int _kIsToggledIndex = 1 << 17;
   static const int _kHasImplicitScrollingIndex = 1 << 18;
   static const int _kIsMultilineIndex = 1 << 19;
+  static const int _kIsReadOnlyIndex = 1 << 20;
 
   const SemanticsFlag._(this.index);
 
@@ -353,6 +354,12 @@ class SemanticsFlag {
   /// affordances.
   static const SemanticsFlag isTextField =
       const SemanticsFlag._(_kIsTextFieldIndex);
+
+  /// Whether the semantic node is read only.
+  ///
+  /// Only applicable when [isTextField] is true.
+  static const SemanticsFlag isReadOnly =
+      const SemanticsFlag._(_kIsReadOnlyIndex);
 
   /// Whether the semantic node currently holds the user's focus.
   ///
@@ -539,6 +546,7 @@ class SemanticsFlag {
     _kIsToggledIndex: isToggled,
     _kHasImplicitScrollingIndex: hasImplicitScrolling,
     _kIsMultilineIndex: isMultiline,
+    _kIsReadOnlyIndex: isReadOnly,
   };
 
   @override
@@ -584,6 +592,8 @@ class SemanticsFlag {
         return 'SemanticsFlag.hasImplicitScrolling';
       case _kIsMultilineIndex:
         return 'SemanticsFlag.isMultiline';
+      case _kIsReadOnlyIndex:
+        return 'SemanticsFlag.isReadOnly';
     }
     return null;
   }

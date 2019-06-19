@@ -153,6 +153,10 @@ typedef enum {
   // |PageView| widget does not have implicit scrolling, so that users don't
   // navigate to the next page when reaching the end of the current one.
   kFlutterSemanticsFlagHasImplicitScrolling = 1 << 18,
+  // Whether the semantic node is read only.
+  //
+  // Only applicable when kFlutterSemanticsFlagIsTextField flag is on.
+  kFlutterSemanticsFlagIsReadOnly = 1 << 20,
 } FlutterSemanticsFlag;
 
 typedef enum {

@@ -576,6 +576,11 @@ class SemanticsObject {
   /// Whether this object represents an editable text field.
   bool get isTextField => hasFlag(ui.SemanticsFlag.isTextField);
 
+  /// Whether this object is read only.
+  ///
+  /// Only applicable when [isTextField] is true.
+  bool get isReadOnly => hasFlag(ui.SemanticsFlag.isReadOnly);
+
   /// Whether this object represents an image with no tappable functionality.
   bool get isVisualOnly =>
       hasFlag(ui.SemanticsFlag.isImage) &&

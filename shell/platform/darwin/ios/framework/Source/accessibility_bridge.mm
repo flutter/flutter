@@ -713,7 +713,8 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
   if (!object) {
     // New node case: simply create a new SemanticsObject.
     flutter::SemanticsNode node = updates[uid];
-    if (node.HasFlag(flutter::SemanticsFlags::kIsTextField)) {
+    if (node.HasFlag(flutter::SemanticsFlags::kIsTextField) &&
+        !node.HasFlag(flutter::SemanticsFlags::kIsReadOnly)) {
       // Text fields are backed by objects that implement UITextInput.
       object = [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr() uid:uid] autorelease];
     } else {
@@ -729,13 +730,16 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
       flutter::SemanticsNode node = nodeEntry->second;
       BOOL isTextField = node.HasFlag(flutter::SemanticsFlags::kIsTextField);
       BOOL wasTextField = object.node.HasFlag(flutter::SemanticsFlags::kIsTextField);
-      if (wasTextField != isTextField) {
+      BOOL isReadOnly = node.HasFlag(flutter::SemanticsFlags::kIsReadOnly);
+      BOOL wasReadOnly = object.node.HasFlag(flutter::SemanticsFlags::kIsReadOnly);
+      if (wasTextField != isTextField || isReadOnly != wasReadOnly) {
         // The node changed its type from text field to something else, or vice versa. In this
         // case, we cannot reuse the existing SemanticsObject implementation. Instead, we replace
         // it with a new instance.
         NSUInteger positionInChildlist = [object.parent.children indexOfObject:object];
+        SemanticsObject* parent = object.parent;
         [objects_ removeObjectForKey:@(node.id)];
-        if (isTextField) {
+        if (isTextField && !isReadOnly) {
           // Text fields are backed by objects that implement UITextInput.
           object = [[[TextInputSemanticsObject alloc] initWithBridge:GetWeakPtr()
                                                                  uid:uid] autorelease];
@@ -743,6 +747,7 @@ SemanticsObject* AccessibilityBridge::GetOrCreateObject(int32_t uid,
           object = [[[FlutterSemanticsObject alloc] initWithBridge:GetWeakPtr()
                                                                uid:uid] autorelease];
         }
+        object.parent = parent;
         [object.parent.children replaceObjectAtIndex:positionInChildlist withObject:object];
         objects_.get()[@(node.id)] = object;
       }

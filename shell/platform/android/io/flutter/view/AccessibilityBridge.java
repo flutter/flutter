@@ -529,9 +529,11 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
 
         if (semanticsNode.hasFlag(Flag.IS_TEXT_FIELD)) {
             result.setPassword(semanticsNode.hasFlag(Flag.IS_OBSCURED));
-            result.setClassName("android.widget.EditText");
+            if (!semanticsNode.hasFlag(Flag.IS_READ_ONLY)) {
+                result.setClassName("android.widget.EditText");
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                result.setEditable(true);
+                result.setEditable(!semanticsNode.hasFlag(Flag.IS_READ_ONLY));
                 if (semanticsNode.textSelectionBase != -1 && semanticsNode.textSelectionExtent != -1) {
                     result.setTextSelection(semanticsNode.textSelectionBase, semanticsNode.textSelectionExtent);
                 }
@@ -1611,7 +1613,8 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         IS_LIVE_REGION(1 << 15),
         HAS_TOGGLED_STATE(1 << 16),
         IS_TOGGLED(1 << 17),
-        HAS_IMPLICIT_SCROLLING(1 << 18);
+        HAS_IMPLICIT_SCROLLING(1 << 18),
+        IS_READ_ONLY(1 << 20);
 
         final int value;
 
