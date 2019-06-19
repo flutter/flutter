@@ -95,8 +95,49 @@ class Cache {
   final Directory _rootOverride;
   final List<CachedArtifact> _artifacts = <CachedArtifact>[];
 
+  // Check whether there is a writable bit in the usr permissions.
+  static bool _hasUserWritePermission(FileStat stat) {
+    // First grab the set of permissions for the usr group.
+    final int permissions = ((stat.mode & 0xFFF) >> 6) & 0x7;
+    // These values represent all of the octal permission bits that have
+    // readable and writable permission, though technically if we're missing
+    // readable we probably didn't make it this far.
+    return permissions == 6
+      || permissions == 7;
+  }
+
+  // Unfortunately the memory file system by default specifies a mode of `0`
+  // and is used by the majority of our tests. Default to false and only set
+  // to true when we know it is safe.
+  static bool checkPermissions = false;
+
   // Initialized by FlutterCommandRunner on startup.
-  static String flutterRoot;
+  static String get flutterRoot => _flutterRoot;
+  static String _flutterRoot;
+  static set flutterRoot(String value) {
+    if (value == null) {
+      _flutterRoot = null;
+      return;
+    }
+    if (checkPermissions) {
+      // Verify that we have writable permission in the flutter root. If not,
+      // we're liable to crash in unintuitive ways. This can happen if the user
+      // is using a homebrew or other unofficial channel, or otherwise installs
+      // Flutter into directory without permissions.
+      final FileStat binStat = fs.statSync(fs.path.join(value, 'bin'));
+      final FileStat rootStat = fs.statSync(value);
+      if (!_hasUserWritePermission(binStat) || !_hasUserWritePermission(rootStat)) {
+        throwToolExit(
+          'Warning: Flutter is missing permissions to write files '
+          'in its installation directory - "$value". '
+          'Please install Flutter from an official channel in a directory '
+          'where you have write permissions and that does not require '
+          'administrative or root access. For more information see '
+          'https://flutter.dev/docs/get-started/install');
+      }
+    }
+    _flutterRoot = value;
+  }
 
   // Whether to cache artifacts for all platforms. Defaults to only caching
   // artifacts for the current platform.
