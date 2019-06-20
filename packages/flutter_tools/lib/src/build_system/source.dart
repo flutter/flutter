@@ -86,24 +86,29 @@ class SourceVisitor {
     // to resolve it to, error out.
     switch (rawParts.first) {
       case Environment.kProjectDirectory:
-        segments.addAll(fs.path.split(environment.projectDir.absolute.path));
+        segments.addAll(
+            fs.path.split(environment.projectDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kBuildDirectory:
-        segments.addAll(fs.path.split(environment.buildDir.absolute.path));
+        segments.addAll(fs.path.split(
+            environment.buildDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kCacheDirectory:
-        segments.addAll(fs.path.split(environment.cacheDir.absolute.path));
+        segments.addAll(
+            fs.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
         break;
       case Environment.kFlutterRootDirectory:
-        segments.addAll(fs.path.split(environment.cacheDir.absolute.path));
+        segments.addAll(
+            fs.path.split(environment.cacheDir.resolveSymbolicLinksSync()));
         break;
       default:
         throw InvalidPatternException(pattern);
     }
     for (String rawPart in rawParts.skip(1)) {
       final String value = rawPart
-          .replaceAll(Environment.kMode, getNameForBuildMode(environment.buildMode))
-          .replaceAll(Environment.kPlatform, getNameForTargetPlatform(environment.targetPlatform))
+          .replaceAll(
+              Environment.kMode, getNameForBuildMode(environment.buildMode))
+          .replaceAll(Environment.kPlatform, getNameForBuildPlatform(environment.buildPlatform))
           .replaceAll(Environment.kFlavor, environment.flavor);
       segments.add(value);
     }
@@ -123,7 +128,7 @@ class SourceVisitor {
         throw InvalidPatternException(pattern);
       }
       if (!fs.directory(filePath).existsSync()) {
-        print('$filePath does not exist!');
+        throw Exception('$filePath does not exist!');
       }
       for (FileSystemEntity entity in fs.directory(filePath).listSync()) {
         final String filename = fs.path.basename(entity.path);
@@ -148,20 +153,21 @@ class SourceVisitor {
   /// Visit a [Source] which contains a [SourceBehavior].
   void visitBehavior(SourceBehavior sourceBehavior) {
     if (inputs) {
-      sources.addAll(sourceBehavior.inputs(environment).map((FileSystemEntity entity) {
+      sources.addAll(
+          sourceBehavior.inputs(environment).map((FileSystemEntity entity) {
         return SourceFile(entity);
       }));
     } else {
-      sources.addAll(sourceBehavior.outputs(environment).map((FileSystemEntity entity) {
+      sources.addAll(
+          sourceBehavior.outputs(environment).map((FileSystemEntity entity) {
         return SourceFile(entity);
       }));
     }
   }
 
   /// Visit a [Source] which has a separate version file.
-  void visitVersion(String pattern, String version) {
-
-  }
+  // TODO(jonahwilliams): implement correctly with tool depenendencies.
+  void visitVersion(String pattern, String version) {}
 }
 
 /// A description of an input or output of a [Target].
@@ -177,7 +183,8 @@ abstract class Source {
   const factory Source.behavior(SourceBehavior behavior) = _SourceBehavior;
 
   /// This source is versioned via a separate vile.
-  const factory Source.version(String pattern, {@required String version}) = _VersionSource;
+  const factory Source.version(String pattern, {@required String version}) =
+      _VersionSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);

@@ -37,7 +37,6 @@ void main() {
         setup: () {
           environment = Environment(
             projectDir: fs.currentDirectory,
-            targetPlatform: TargetPlatform.android_arm,
             buildMode: BuildMode.debug,
           );
           fs.file('foo.dart').createSync(recursive: true);
@@ -53,7 +52,9 @@ void main() {
             dependencies: <Target>[],
             modes: <BuildMode>[BuildMode.debug],
             invocation: (Map<String, ChangeType> updates, Environment environment) {
-              environment.buildDir.childFile('out')
+              environment
+                .buildDir
+                .childFile('out')
                 ..createSync(recursive: true)
                 ..writeAsStringSync('hey');
               fooInvocations++;
@@ -69,7 +70,8 @@ void main() {
             ],
             dependencies: <Target>[fooTarget],
             invocation: (Map<String, ChangeType> updates, Environment environment) {
-              environment.buildDir.childFile('bar')
+              environment.buildDir
+                .childFile('bar')
                 ..createSync(recursive: true)
                 ..writeAsStringSync('there');
               barInvocations++;
@@ -94,7 +96,6 @@ void main() {
       final Environment environment = Environment(
         projectDir: fs.currentDirectory,
         buildMode: BuildMode.release,
-        targetPlatform: TargetPlatform.android_arm,
       );
 
       expect(buildSystem.build('foo', environment, const BuildSystemConfig()), throwsA(isInstanceOf<InvalidBuildException>()));
@@ -181,7 +182,6 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
           buildMode: BuildMode.release,
-          targetPlatform: TargetPlatform.android_arm,
         );
       });
     });
@@ -239,7 +239,6 @@ void main() {
           setup: () {
             environment = Environment(
               projectDir: fs.currentDirectory,
-              targetPlatform: TargetPlatform.android_arm,
               buildMode: BuildMode.debug,
             );
             fs.file('foo.dart').createSync(recursive: true);
@@ -265,7 +264,9 @@ void main() {
                 ],
                 dependencies: <Target>[sharedTarget],
                 invocation: (Map<String, ChangeType> updates, Environment environment) {
-                  environment.buildDir.childFile('out')
+                  environment
+                    .buildDir
+                    .childFile('out')
                     ..createSync(recursive: true)
                     ..writeAsStringSync('hey');
                 }
@@ -280,7 +281,9 @@ void main() {
                 ],
                 dependencies: <Target>[fooTarget, sharedTarget],
                 invocation: (Map<String, ChangeType> updates, Environment environment) {
-                  environment.buildDir.childFile('bar')
+                  environment
+                    .buildDir
+                    .childFile('bar')
                     ..createSync(recursive: true)
                     ..writeAsStringSync('there');
                 }
@@ -359,7 +362,6 @@ void main() {
           projectDir: fs.currentDirectory,
           cacheDir: fs.directory('cache'),
           buildDir: fs.directory('build'),
-          targetPlatform: TargetPlatform.android_arm,
           buildMode: BuildMode.debug,
           flavor: 'flavor_town',
           flutterRootDir: fs.currentDirectory,

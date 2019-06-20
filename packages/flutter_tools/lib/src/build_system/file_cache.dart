@@ -114,7 +114,7 @@ class FileCache {
     return dirty;
   }
 
-  File get _versionFile => environment.buildDir.childFile(_kFileCacheVersion);
+  File get _versionFile => environment.rootBuildDir.childFile(_kFileCacheVersion);
 
-  File get _cacheFile => environment.buildDir.childFile(_kFileCache);
+  File get _cacheFile => environment.rootBuildDir.childFile(_kFileCache);
 }

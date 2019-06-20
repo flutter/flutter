@@ -1,11 +1,31 @@
 // Copyright 2019 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import '../../build_info.dart';
+
+import '../../base/file_system.dart';
 import '../build_system.dart';
 
-// TODO(jonahwilliams): remove import when target uses specific file paths.
-import 'windows.dart';
+// Copies all of the input files to the correct copy dir.
+Future<void> copyLinuxAssets(Map<String, ChangeType> updates,
+  Environment environment) async {
+  final String basePath = fs.path.join(
+    environment.cacheDir.absolute.path,
+    'linux-x64',
+  );
+  for (String input in updates.keys) {
+    final String outputPath = fs.path.join(
+      environment.projectDir.path,
+      'windows',
+      'linux-x64',
+      fs.path.relative(input, from: basePath),
+    );
+    final File destinationFile = fs.file(outputPath);
+    if (!destinationFile.parent.existsSync()) {
+      destinationFile.parent.createSync(recursive: true);
+    }
+    fs.file(input).copySync(destinationFile.path);
+  }
+}
 
 /// Copies the Linux desktop embedding files to the copy directory.
 const Target unpackLinux = Target(
@@ -29,8 +49,8 @@ const Target unpackLinux = Target(
     Source.pattern('{PROJECT_DIR}/linux/flutter/cpp_client_wrapper/*'),
   ],
   dependencies: <Target>[],
-  platforms: <TargetPlatform>[
-    TargetPlatform.linux_x64,
+  platforms: <BuildPlatform>[
+    BuildPlatform.linux,
   ],
-  invocation: copyDesktopAssets,
+  invocation: copyLinuxAssets,
 );

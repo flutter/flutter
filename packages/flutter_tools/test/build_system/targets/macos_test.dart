@@ -30,7 +30,7 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
-          targetPlatform: TargetPlatform.darwin_x64,
+          buildPlatform: BuildPlatform.macos,
           buildMode: BuildMode.debug,
         );
         buildSystem = const BuildSystem(<Target>[

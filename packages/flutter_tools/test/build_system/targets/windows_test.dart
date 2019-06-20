@@ -29,8 +29,8 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
-          targetPlatform: TargetPlatform.windows_x64,
           buildMode: BuildMode.debug,
+          buildPlatform: BuildPlatform.windows,
         );
         buildSystem = const BuildSystem(<Target>[
           unpackWindows,

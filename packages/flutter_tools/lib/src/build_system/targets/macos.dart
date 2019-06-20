@@ -5,7 +5,6 @@
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
-import '../../build_info.dart';
 import '../build_system.dart';
 
 /// Copy the macOS framework to the correct copy dir by invoking 'cp -R'.
@@ -15,7 +14,8 @@ import '../build_system.dart';
 ///
 /// Removes any previous version of the framework that already exists in the
 /// target directory.
-Future<void> copyFramework(Map<String, ChangeType> updates, Environment environment) async {
+Future<void> copyFramework(Map<String, ChangeType> updates,
+    Environment environment) async {
   // Ensure that the path is a framework, to minimize the potential for
   // catastrophic deletion bugs with bad arguments.
   if (fs.path.extension(updates.keys.single) != '.framework') {
@@ -51,8 +51,8 @@ const Target unpackMacos = Target(
     Source.pattern('{PROJECT_DIR}/macos/Flutter/FlutterMacOS.framework/'),
   ],
   dependencies: <Target>[],
-  platforms: <TargetPlatform>[
-    TargetPlatform.darwin_x64,
+  platforms: <BuildPlatform>[
+    BuildPlatform.macos,
   ],
   invocation: copyFramework,
 );

@@ -71,8 +71,8 @@ class InvalidBuildException implements Exception {
 
   @override
   String toString() {
-    return 'Target $target cannot build with ${environment.buildMode} and '
-      '${environment.targetPlatform}.';
+    return 'Target $target cannot build with ${environment.buildMode} '
+        'and ${environment.buildPlatform}';
   }
 }
 

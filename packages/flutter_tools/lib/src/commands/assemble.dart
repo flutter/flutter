@@ -12,6 +12,7 @@ import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/windows.dart';
 import '../convert.dart';
+import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -52,7 +53,7 @@ abstract class AssembleBase extends FlutterCommand {
     argParser.addMultiOption(
       'define',
       abbr: 'd',
-      help: 'Allows passing configuration to a target with --define=key=value.'
+      help: 'Allows passing configuration to a target with --define=target=key=value.'
     );
     argParser.addOption(
       'build-mode',
@@ -107,9 +108,25 @@ abstract class AssembleBase extends FlutterCommand {
       buildDir: fs.directory(getBuildDirectory()),
       projectDir: flutterProject.directory,
       buildMode: buildMode,
-      targetPlatform: targetPlatform,
+      defines: _parseDefines(argResults['define']),
     );
     return result;
+  }
+
+  static Map<String, Map<String, String>> _parseDefines(List<String> values) {
+    final Map<String, Map<String, String>> results = <String, Map<String, String>>{};
+    for (String chunk in values) {
+      final List<String> parts = chunk.split('=');
+      if (parts.length != 3) {
+        throwToolExit('Improperly formatted define flag: $chunk');
+      }
+      final String target = parts[0];
+      final String key = parts[1];
+      final String value = parts[2];
+      results[target] ??= <String, String>{};
+      results[target][key] = value;
+    }
+    return results;
   }
 }
 
@@ -130,7 +147,8 @@ class AssembleRun extends AssembleBase {
       await buildSystem.build(targetName, environment, BuildSystemConfig(
         resourcePoolSize: argResults['resource-pool-size'],
       ));
-    } on Exception catch (err) {
+    } on Exception catch (err, stackTrace) {
+      printTrace(stackTrace.toString());
       throwToolExit(err.toString());
     }
     return null;
@@ -154,7 +172,8 @@ class AssembleDescribe extends AssembleBase {
       print(
         json.encode(buildSystem.describe(targetName, environment))
       );
-    } on Exception catch (err) {
+    } on Exception catch (err, stackTrace) {
+      printTrace(stackTrace.toString());
       throwToolExit(err.toString());
     }
     return null;
@@ -182,7 +201,8 @@ class AssembleListInputs extends AssembleBase {
           inputs.forEach(print);
         }
       }
-    } on Exception catch (err) {
+    } on Exception catch (err, stackTrace) {
+      printTrace(stackTrace.toString());
       throwToolExit(err.toString());
     }
     return null;

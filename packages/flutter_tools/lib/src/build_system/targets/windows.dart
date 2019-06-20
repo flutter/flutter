@@ -3,19 +3,19 @@
 // found in the LICENSE file.
 
 import '../../base/file_system.dart';
-import '../../build_info.dart';
 import '../build_system.dart';
 
 /// Copies all of the input files to the correct copy dir.
-Future<void> copyDesktopAssets(Map<String, ChangeType> updates, Environment environment) async {
+Future<void> copyWindowsAssets(Map<String, ChangeType> updates,
+  Environment environment) async {
   final String basePath = fs.path.join(
     environment.cacheDir.absolute.path,
-    getNameForTargetPlatform(environment.targetPlatform),
+    'windows-x64',
   );
   for (String input in updates.keys) {
     final String outputPath = fs.path.join(
       environment.projectDir.path,
-      environment.targetPlatform == TargetPlatform.windows_x64 ? 'windows' : 'linux',
+      'windows',
       'flutter',
       fs.path.relative(input, from: basePath),
     );
@@ -55,8 +55,8 @@ const Target unpackWindows = Target(
     Source.pattern('{PROJECT_DIR}/windows/flutter/cpp_client_wrapper/*'),
   ],
   dependencies: <Target>[],
-  platforms: <TargetPlatform>[
-    TargetPlatform.windows_x64,
+  platforms: <BuildPlatform>[
+    BuildPlatform.windows,
   ],
-  invocation: copyDesktopAssets,
+  invocation: copyWindowsAssets,
 );

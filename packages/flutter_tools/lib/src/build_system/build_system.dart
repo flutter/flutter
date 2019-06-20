@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:async/async.dart';
+import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
@@ -19,6 +20,38 @@ import 'file_cache.dart';
 import 'source.dart';
 
 export 'source.dart';
+
+/// Something that can be built for.
+enum BuildPlatform {
+  ios,
+  android,
+  fuchsia,
+  web,
+  macos,
+  linux,
+  windows,
+}
+
+/// Retrive the name for the particular [platform].
+String getNameForBuildPlatform(BuildPlatform platform) {
+  switch (platform) {
+    case BuildPlatform.ios:
+      return 'ios';
+    case BuildPlatform.android:
+      return 'android';
+    case BuildPlatform.fuchsia:
+      return 'fuchsia';
+    case BuildPlatform.web:
+      return 'web';
+    case BuildPlatform.macos:
+      return 'macos';
+    case BuildPlatform.linux:
+      return 'linux';
+    case BuildPlatform.windows:
+      return 'windows';
+  }
+  return '';
+}
 
 /// The function signature of a build target which can be invoked to perform
 /// the underlying task.
@@ -77,7 +110,7 @@ class Target {
     @required this.outputs,
     @required this.invocation,
     this.dependencies = const <Target>[],
-    this.platforms = const <TargetPlatform>[],
+    this.platforms = const <BuildPlatform>[],
     this.modes = const <BuildMode>[],
   });
 
@@ -98,10 +131,10 @@ class Target {
   final List<Source> outputs;
   final BuildInvocation invocation;
 
-  /// The target platform this target supports.
+  /// The build platform this target supports.
   ///
   /// If left empty, this supports all platforms.
-  final List<TargetPlatform> platforms;
+  final List<BuildPlatform> platforms;
 
   /// The build modes this target supports.
   ///
@@ -115,7 +148,7 @@ class Target {
     FileCache fileCache,
   ) async {
     final Map<String, ChangeType> updates = <String, ChangeType>{};
-    final File stamp = _findStampFile(name, environment);
+    final File stamp = _findStampFile(environment);
     final Set<String> previousInputs = <String>{};
 
     // If the stamp file doesn't exist, we haven't run this step before and
@@ -185,7 +218,7 @@ class Target {
     List<SourceFile> outputs,
     Environment environment,
   ) {
-    final File stamp = _findStampFile(name, environment);
+    final File stamp = _findStampFile(environment);
     final List<String> inputStamps = <String>[];
     for (SourceFile input in inputs) {
       inputStamps.add(input.path);
@@ -219,7 +252,7 @@ class Target {
   List<SourceFile> resolveOutputs(
     Environment environment,
   ) {
-    final List<SourceFile> outputEntities = _resolveConfiguration(outputs, environment);
+    final List<SourceFile> outputEntities = _resolveConfiguration(outputs, environment, false);
     verifyOutputDirectories(outputEntities, environment, this);
     return outputEntities;
   }
@@ -243,22 +276,21 @@ class Target {
       'inputs': resolveInputs(environment)
           .map((SourceFile file) => file.path)
           .toList(),
-      'stamp': _findStampFile(name, environment).absolute.path,
+      'stamp': _findStampFile(environment).absolute.path,
     };
   }
 
   /// Locate the stamp file for a particular target name and environment.
-  static File _findStampFile(String name, Environment environment) {
-    final String prefix = environment.defines[name].computeIdentifier();
+  File _findStampFile(Environment environment) {
     final String mode = getNameForBuildMode(environment.buildMode);
     final String flavor = environment.flavor;
-    String fileName = '$name.$mode.$flavor';
+    final String fileName = '$name.$mode.$flavor';
     return environment.buildDir.childFile(fileName);
   }
 
   static List<SourceFile> _resolveConfiguration(
-      List<Source> config, Environment environment) {
-    final SourceVisitor collector = SourceVisitor(environment);
+      List<Source> config, Environment environment, [bool inputs = true]) {
+    final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (Source source in config) {
       source.accept(collector);
     }
@@ -282,23 +314,6 @@ class TargetDefines {
 
   /// The key value pairs for this specific target.
   final Map<String, String> defines;
-
-  /// A unique identifier generated from this set of defines.
-  ///
-  /// If there are no defines, returns `null` which signals that it is safe
-  /// to skip inserting the identifier in the output pathh.
-  String computeIdentifier() {
-    if (defines.isEmpty) {
-      return null;
-    }
-    // Sort the keys so that the result is stable.
-    final List<String> keysAndValues = defines.keys
-        .followedBy(defines.values)
-        .toList()
-        ..sort();
-    // Return the base64 encoding so it is safe to write to the file system.
-    return base64.encode(keysAndValues.join('').codeUnits);
-  }
 }
 
 /// The [Environment] defines several constants for use during the build.
@@ -349,19 +364,38 @@ class Environment {
     Directory buildDir,
     Directory cacheDir,
     Directory flutterRootDir,
+    BuildPlatform buildPlatform,
     String flavor,
-    Map<String, Map<String, String>> defineValues = const <String, Map<String, String>>{},
+    Map<String, Map<String, String>> defines = const <String, Map<String, String>>{},
   }) {
     assert(projectDir != null);
     assert(buildMode != null);
-    final Map<String, TargetDefines> defines = <String, TargetDefines>{};
-    for (String key in defineValues.keys) {
-      defines[key] = TargetDefines(defineValues[key], key);
+    String buildPrefix;
+    if (defines.isNotEmpty) {
+      // Sort the keys by target and then by rule so that the result is stable.
+      final List<String> targets = defines.keys.toList()..sort();
+      final StringBuffer buffer = StringBuffer();
+      for (String target in targets) {
+        final List<String> keys = defines[target].keys.toList()..sort();
+        for (String key in keys) {
+          buffer.write(key);
+          buffer.write(defines[target][key]);
+        }
+      }
+      final String output = buffer.toString();
+      final Digest digest = md5.convert(utf8.encode(output));
+      buildPrefix = base64.encode(digest.bytes);
     }
+    final Directory rootBuildDir = buildDir ?? projectDir.childDirectory('build');
+    final Directory buildDirectory = buildPrefix != null
+        ? rootBuildDir.childDirectory(buildPrefix)
+        : rootBuildDir;
     return Environment._(
       projectDir: projectDir,
       flutterRootDir: flutterRootDir ?? fs.directory(Cache.flutterRoot),
-      buildDir: buildDir ?? projectDir.childDirectory('build'),
+      buildDir: buildDirectory,
+      rootBuildDir: rootBuildDir,
+      buildPlatform: buildPlatform,
       cacheDir: cacheDir ??
           Cache.instance.getCacheArtifacts().childDirectory('engine'),
       buildMode: buildMode,
@@ -373,10 +407,12 @@ class Environment {
   Environment._({
     @required this.projectDir,
     @required this.buildDir,
+    @required this.rootBuildDir,
     @required this.cacheDir,
     @required this.buildMode,
     @required this.flavor,
     @required this.flutterRootDir,
+    @required this.buildPlatform,
     @required this.defines,
   });
 
@@ -392,7 +428,7 @@ class Environment {
   /// The [Source] value which is substituted with a path to the flutter root.
   static const String kFlutterRootDirectory = '{FLUTTER_ROOT}';
 
-  /// The [Source] value which is substituted with [targetPlatform].
+  /// The [Source] value which is substituted with [buildPlatform].
   static const String kPlatform = '{platform}';
 
   /// The [Source] value which is substituted with [buildMode].
@@ -427,11 +463,17 @@ class Environment {
   /// The currently selected build mode.
   final BuildMode buildMode;
 
+  /// The platform we're currently building for, or null if universal.
+  final BuildPlatform buildPlatform;
+
   /// Per-target additional condiguration.
-  final Map<String, TargetDefines> defines;
+  final Map<String, Map<String, String>> defines;
 
   /// The current flavor, or 'none' if none.
   final String flavor;
+
+  /// The root build directory shared by all builds.
+  final Directory rootBuildDir;
 }
 
 /// The build system is responsible for invoking and ordering [Target]s.
@@ -458,7 +500,7 @@ class BuildSystem {
     final bool isBuildValid = target.fold(true, (bool isValid, Target target) {
       return isValid
         && (target.modes.isEmpty || target.modes.contains(environment.buildMode))
-        && (target.platforms.isEmpty || target.platforms.contains(environment.targetPlatform));
+        && (target.platforms.isEmpty || target.platforms.contains(environment.buildPlatform));
     });
     if (!isBuildValid) {
       throw InvalidBuildException(environment, target);
@@ -570,7 +612,7 @@ void verifyOutputDirectories(List<SourceFile> outputs, Environment environment, 
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
   for (SourceFile sourceFile in outputs) {
     final String path = sourceFile.path;
-    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
+    if (!path.startsWith(buildDirectory) || !path.startsWith(projectDirectory)) {
       throw MisplacedOutputException(path, target);
     }
   }

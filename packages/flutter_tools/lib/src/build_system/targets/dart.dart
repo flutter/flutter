@@ -20,9 +20,7 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
   await compiler.compile(
     aot: environment.buildMode != BuildMode.debug,
     trackWidgetCreation: false,
-    targetModel: environment.targetPlatform == TargetPlatform.fuchsia
-        ? TargetModel.flutterRunner
-        : TargetModel.flutterRunner,
+    targetModel: TargetModel.flutter,
     targetProductVm: environment.buildMode == BuildMode.release,
     outputFilePath: environment
       .buildDir

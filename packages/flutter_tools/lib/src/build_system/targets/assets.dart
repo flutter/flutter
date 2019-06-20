@@ -51,7 +51,9 @@ class AssetBehavior extends SourceBehavior {
 /// Based on the contents of [updates], we copy the file in the case of
 /// [ChangeType.Added] and [ChangeType.Modified].
 Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment environment) async {
-  final Directory output = environment.buildDir.childDirectory('flutter_assets');
+  final Directory output = environment
+    .buildDir
+    .childDirectory('flutter_assets');
   if (!output.existsSync()) {
     output.createSync(recursive: true);
   }
@@ -60,27 +62,11 @@ Future<void> copyAssetsInvocation(Map<String, ChangeType> updates, Environment e
     manifestPath: environment.projectDir.childFile('pubspec.yaml').path,
     packagesPath: environment.projectDir.childFile('.packages').path,
   );
+  // TODO(jonahwilliams): replace with pool.
   for (MapEntry<String, DevFSContent> entry in assetBundle.entries.entries) {
-    final File file = fs.file(fs.path.join(output.path, entry.key));
-    final DevFSContent content = entry.value;
-    if (content is DevFSFileContent) {
-      final String path = content.file.absolute.path;
-      final ChangeType changeType = updates[path];
-      switch (changeType) {
-        case ChangeType.Modified:
-        case ChangeType.Added:
-          file.parent.createSync(recursive: true);
-          file.writeAsBytesSync(await entry.value.contentsAsBytes());
-          break;
-        case ChangeType.Removed:
-          // This clause won't currently be hit because the manifest logic
-          // is unaware of them once they are removed from the pubspec.
-          file.deleteSync();
-      }
-    } else {
-      file.parent.createSync(recursive: true);
-      file.writeAsBytesSync(await entry.value.contentsAsBytes());
-    }
+    final File file = fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', entry.key));
+    file.createSync(recursive: true);
+    await file.writeAsBytes(await entry.value.contentsAsBytes());
   }
 }
 

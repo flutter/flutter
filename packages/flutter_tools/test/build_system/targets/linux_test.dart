@@ -27,7 +27,7 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
-          targetPlatform: TargetPlatform.linux_x64,
+          buildPlatform: BuildPlatform.linux,
           buildMode: BuildMode.debug,
         );
         buildSystem = const BuildSystem(<Target>[
