@@ -728,12 +728,15 @@ class AnimationController extends Animation<double>
   void dispose() {
     assert(() {
       if (_ticker == null) {
-        throw FlutterError(
-          'AnimationController.dispose() called more than once.\n'
-          'A given $runtimeType cannot be disposed more than once.\n'
-          'The following $runtimeType object was disposed multiple times:\n'
-          '  $this'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('AnimationController.dispose() called more than once.'),
+          ErrorDescription('A given $runtimeType cannot be disposed more than once.\n'),
+          DiagnosticsProperty<AnimationController>(
+            'The following $runtimeType object was disposed multiple times',
+            this,
+            style: DiagnosticsTreeStyle.errorProperty,
+          ),
+        ]);
       }
       return true;
     }());
