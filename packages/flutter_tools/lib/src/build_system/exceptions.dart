@@ -61,21 +61,6 @@ class MissingOutputException implements Exception {
   }
 }
 
-/// An exception thrown when asked to build with rules that do not support the
-/// current environment.
-class InvalidBuildException implements Exception {
-  const InvalidBuildException(this.environment, this.target);
-
-  final Target target;
-  final Environment environment;
-
-  @override
-  String toString() {
-    return 'Target $target cannot build with ${environment.buildMode} '
-        'and ${environment.buildPlatform}';
-  }
-}
-
 /// An exception thrown when in output is placed outside of
 /// [Environment.buildDir].
 class MisplacedOutputException implements Exception {

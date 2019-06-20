@@ -6,7 +6,6 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process_manager.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/macos.dart';
 import 'package:mockito/mockito.dart';
@@ -30,8 +29,6 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
-          buildPlatform: BuildPlatform.macos,
-          buildMode: BuildMode.debug,
         );
         buildSystem = const BuildSystem(<Target>[
           unpackMacos,

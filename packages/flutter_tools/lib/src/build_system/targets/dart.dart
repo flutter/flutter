@@ -17,17 +17,17 @@ Future<void> compileKernel(Map<String, ChangeType> updates, Environment environm
   final KernelCompiler compiler = await kernelCompilerFactory.create(
     FlutterProject.fromDirectory(environment.projectDir),
   );
+  final BuildMode buildMode = getBuildModeForName(environment.defines['shared']['buildMode']);
   await compiler.compile(
-    aot: environment.buildMode != BuildMode.debug,
+    aot: buildMode != BuildMode.debug,
     trackWidgetCreation: false,
     targetModel: TargetModel.flutter,
-    targetProductVm: environment.buildMode == BuildMode.release,
+    targetProductVm: buildMode == BuildMode.release,
     outputFilePath: environment
       .buildDir
-      .childDirectory(getNameForBuildMode(environment.buildMode))
       .childFile('main.app.dill')
       .path,
-    depFilePath: null, // Use timestamp based analysis instead.
+    depFilePath: null,
   );
 }
 
@@ -56,7 +56,7 @@ const Target kernelSnapshot = Target(
     Source.function(listDartSources), // <- every dart file under {PROJECT_DIR}/lib and .packages
   ],
   outputs: <Source>[
-    Source.pattern('{BUILD_DIR}/{mode}/main.app.dill'),
+    Source.pattern('{BUILD_DIR}/main.app.dill'),
   ],
   dependencies: <Target>[],
   invocation: compileKernel,

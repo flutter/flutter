@@ -15,8 +15,8 @@ Future<void> copyLinuxAssets(Map<String, ChangeType> updates,
   for (String input in updates.keys) {
     final String outputPath = fs.path.join(
       environment.projectDir.path,
-      'windows',
-      'linux-x64',
+      'linux',
+      'flutter',
       fs.path.relative(input, from: basePath),
     );
     final File destinationFile = fs.file(outputPath);
@@ -31,13 +31,13 @@ Future<void> copyLinuxAssets(Map<String, ChangeType> updates,
 const Target unpackLinux = Target(
   name: 'unpack_linux',
   inputs: <Source>[
-    Source.pattern('{CACHE_DIR}/{platform}/libflutter_linux.so'),
-    Source.pattern('{CACHE_DIR}/{platform}/flutter_export.h'),
-    Source.pattern('{CACHE_DIR}/{platform}/flutter_messenger.h'),
-    Source.pattern('{CACHE_DIR}/{platform}/flutter_plugin_registrar.h'),
-    Source.pattern('{CACHE_DIR}/{platform}/flutter_glfw.h'),
-    Source.pattern('{CACHE_DIR}/{platform}/icudtl.dat'),
-    Source.pattern('{CACHE_DIR}/{platform}/cpp_client_wrapper/*'),
+    Source.pattern('{CACHE_DIR}/linux-x64/libflutter_linux.so'),
+    Source.pattern('{CACHE_DIR}/linux-x64/flutter_export.h'),
+    Source.pattern('{CACHE_DIR}/linux-x64/flutter_messenger.h'),
+    Source.pattern('{CACHE_DIR}/linux-x64/flutter_plugin_registrar.h'),
+    Source.pattern('{CACHE_DIR}/linux-x64/flutter_glfw.h'),
+    Source.pattern('{CACHE_DIR}/linux-x64/icudtl.dat'),
+    Source.pattern('{CACHE_DIR}/linux-x64/cpp_client_wrapper/*'),
   ],
   outputs: <Source>[
     Source.pattern('{PROJECT_DIR}/linux/flutter/libflutter_linux.so'),
@@ -49,8 +49,5 @@ const Target unpackLinux = Target(
     Source.pattern('{PROJECT_DIR}/linux/flutter/cpp_client_wrapper/*'),
   ],
   dependencies: <Target>[],
-  platforms: <BuildPlatform>[
-    BuildPlatform.linux,
-  ],
   invocation: copyLinuxAssets,
 );

@@ -11,7 +11,6 @@ import 'package:pool/pool.dart';
 
 import '../base/file_system.dart';
 import '../base/platform.dart';
-import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -20,38 +19,6 @@ import 'file_cache.dart';
 import 'source.dart';
 
 export 'source.dart';
-
-/// Something that can be built for.
-enum BuildPlatform {
-  ios,
-  android,
-  fuchsia,
-  web,
-  macos,
-  linux,
-  windows,
-}
-
-/// Retrive the name for the particular [platform].
-String getNameForBuildPlatform(BuildPlatform platform) {
-  switch (platform) {
-    case BuildPlatform.ios:
-      return 'ios';
-    case BuildPlatform.android:
-      return 'android';
-    case BuildPlatform.fuchsia:
-      return 'fuchsia';
-    case BuildPlatform.web:
-      return 'web';
-    case BuildPlatform.macos:
-      return 'macos';
-    case BuildPlatform.linux:
-      return 'linux';
-    case BuildPlatform.windows:
-      return 'windows';
-  }
-  return '';
-}
 
 /// The function signature of a build target which can be invoked to perform
 /// the underlying task.
@@ -110,8 +77,6 @@ class Target {
     @required this.outputs,
     @required this.invocation,
     this.dependencies = const <Target>[],
-    this.platforms = const <BuildPlatform>[],
-    this.modes = const <BuildMode>[],
   });
 
   /// The user-readable name of the target.
@@ -129,17 +94,9 @@ class Target {
   /// The output [Source]s which we attempt to verify are correctly produced.
   // TODO(jonahwilliams): track outputs to allow more surgical flutter clean.
   final List<Source> outputs;
+
+  /// The invocation which performs this build step.
   final BuildInvocation invocation;
-
-  /// The build platform this target supports.
-  ///
-  /// If left empty, this supports all platforms.
-  final List<BuildPlatform> platforms;
-
-  /// The build modes this target supports.
-  ///
-  /// If left empty, this supports all modes.
-  final List<BuildMode> modes;
 
   /// Check if we can skip the target invocation and collect hashes for all inputs.
   Future<Map<String, ChangeType>> computeChanges(
@@ -282,9 +239,7 @@ class Target {
 
   /// Locate the stamp file for a particular target name and environment.
   File _findStampFile(Environment environment) {
-    final String mode = getNameForBuildMode(environment.buildMode);
-    final String flavor = environment.flavor;
-    final String fileName = '$name.$mode.$flavor';
+    final String fileName = '$name.stamp';
     return environment.buildDir.childFile(fileName);
   }
 
@@ -360,16 +315,12 @@ class Environment {
   /// defaults based on it.
   factory Environment({
     @required Directory projectDir,
-    @required BuildMode buildMode,
     Directory buildDir,
     Directory cacheDir,
     Directory flutterRootDir,
-    BuildPlatform buildPlatform,
-    String flavor,
     Map<String, Map<String, String>> defines = const <String, Map<String, String>>{},
   }) {
     assert(projectDir != null);
-    assert(buildMode != null);
     String buildPrefix;
     if (defines.isNotEmpty) {
       // Sort the keys by target and then by rule so that the result is stable.
@@ -395,12 +346,9 @@ class Environment {
       flutterRootDir: flutterRootDir ?? fs.directory(Cache.flutterRoot),
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
-      buildPlatform: buildPlatform,
       cacheDir: cacheDir ??
           Cache.instance.getCacheArtifacts().childDirectory('engine'),
-      buildMode: buildMode,
       defines: defines,
-      flavor: flavor ?? 'none',
     );
   }
 
@@ -409,10 +357,7 @@ class Environment {
     @required this.buildDir,
     @required this.rootBuildDir,
     @required this.cacheDir,
-    @required this.buildMode,
-    @required this.flavor,
     @required this.flutterRootDir,
-    @required this.buildPlatform,
     @required this.defines,
   });
 
@@ -427,15 +372,6 @@ class Environment {
 
   /// The [Source] value which is substituted with a path to the flutter root.
   static const String kFlutterRootDirectory = '{FLUTTER_ROOT}';
-
-  /// The [Source] value which is substituted with [buildPlatform].
-  static const String kPlatform = '{platform}';
-
-  /// The [Source] value which is substituted with [buildMode].
-  static const String kMode = '{mode}';
-
-  /// The [Source] value which is substituted with [flavor].
-  static const String kFlavor = '{flavor}';
 
   /// The `PROJECT_DIR` environment variable.
   ///
@@ -460,17 +396,8 @@ class Environment {
   /// Defaults to the root of the flutter checkout for which this command is run.
   final Directory flutterRootDir;
 
-  /// The currently selected build mode.
-  final BuildMode buildMode;
-
-  /// The platform we're currently building for, or null if universal.
-  final BuildPlatform buildPlatform;
-
   /// Per-target additional condiguration.
   final Map<String, Map<String, String>> defines;
-
-  /// The current flavor, or 'none' if none.
-  final String flavor;
 
   /// The root build directory shared by all builds.
   final Directory rootBuildDir;
@@ -497,14 +424,6 @@ class BuildSystem {
 
     // Perform sanity checks on build.
     checkCycles(target);
-    final bool isBuildValid = target.fold(true, (bool isValid, Target target) {
-      return isValid
-        && (target.modes.isEmpty || target.modes.contains(environment.buildMode))
-        && (target.platforms.isEmpty || target.platforms.contains(environment.buildPlatform));
-    });
-    if (!isBuildValid) {
-      throw InvalidBuildException(environment, target);
-    }
 
     // TODO(jonahwilliams): create a separate configuration for the settings and
     // constants which effect build running.
@@ -612,7 +531,7 @@ void verifyOutputDirectories(List<SourceFile> outputs, Environment environment, 
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
   for (SourceFile sourceFile in outputs) {
     final String path = sourceFile.path;
-    if (!path.startsWith(buildDirectory) || !path.startsWith(projectDirectory)) {
+    if (!path.startsWith(buildDirectory) && !path.startsWith(projectDirectory)) {
       throw MisplacedOutputException(path, target);
     }
   }

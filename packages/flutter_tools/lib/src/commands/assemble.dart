@@ -107,7 +107,6 @@ abstract class AssembleBase extends FlutterCommand {
     final Environment result = Environment(
       buildDir: fs.directory(getBuildDirectory()),
       projectDir: flutterProject.directory,
-      buildMode: buildMode,
       defines: _parseDefines(argResults['define']),
     );
     return result;

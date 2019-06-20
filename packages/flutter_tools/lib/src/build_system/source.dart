@@ -5,7 +5,6 @@
 import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
-import '../build_info.dart';
 import 'build_system.dart';
 import 'exceptions.dart';
 
@@ -104,14 +103,7 @@ class SourceVisitor {
       default:
         throw InvalidPatternException(pattern);
     }
-    for (String rawPart in rawParts.skip(1)) {
-      final String value = rawPart
-          .replaceAll(
-              Environment.kMode, getNameForBuildMode(environment.buildMode))
-          .replaceAll(Environment.kPlatform, getNameForBuildPlatform(environment.buildPlatform))
-          .replaceAll(Environment.kFlavor, environment.flavor);
-      segments.add(value);
-    }
+    rawParts.skip(1).forEach(segments.add);
     final String filePath = fs.path.joinAll(segments);
     if (isDirectory) {
       sources.add(SourceFile(fs.directory(fs.path.normalize(filePath))));

@@ -5,7 +5,6 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/build_system/file_cache.dart';
@@ -37,7 +36,6 @@ void main() {
         setup: () {
           environment = Environment(
             projectDir: fs.currentDirectory,
-            buildMode: BuildMode.debug,
           );
           fs.file('foo.dart').createSync(recursive: true);
           fs.file('pubspec.yaml').createSync();
@@ -50,7 +48,6 @@ void main() {
               Source.pattern('{BUILD_DIR}/out'),
             ],
             dependencies: <Target>[],
-            modes: <BuildMode>[BuildMode.debug],
             invocation: (Map<String, ChangeType> updates, Environment environment) {
               environment
                 .buildDir
@@ -92,15 +89,6 @@ void main() {
       expect(buildSystem.build('not_real', environment, const BuildSystemConfig()), throwsA(isInstanceOf<Exception>()));
     }));
 
-    test('Throws exception if asked to build with unsupported environment', () => testbed.run(() {
-      final Environment environment = Environment(
-        projectDir: fs.currentDirectory,
-        buildMode: BuildMode.release,
-      );
-
-      expect(buildSystem.build('foo', environment, const BuildSystemConfig()), throwsA(isInstanceOf<InvalidBuildException>()));
-    }));
-
     test('Throws exception if asked to build with missing inputs', () => testbed.run(() {
       // Delete required input file.
       fs.file('foo.dart').deleteSync();
@@ -111,7 +99,7 @@ void main() {
     test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
       await buildSystem.build('foo', environment, const BuildSystemConfig());
 
-      final File stampFile = fs.file('build/foo.debug.android-arm.none');
+      final File stampFile = fs.file('build/foo.stamp');
       expect(stampFile.existsSync(), true);
 
       final Map<String, Object> stampContents = json.decode(stampFile.readAsStringSync());
@@ -149,7 +137,7 @@ void main() {
         ],
         'dependencies': <Object>[],
         'name':  'foo',
-        'stamp': fs.path.absolute(fs.path.join('build', 'foo.debug.android-arm.none')),
+        'stamp': fs.path.absolute(fs.path.join('build', 'foo.stamp')),
       });
     }));
 
@@ -181,7 +169,6 @@ void main() {
         fs.directory('build').createSync();
         environment = Environment(
           projectDir: fs.currentDirectory,
-          buildMode: BuildMode.release,
         );
       });
     });
@@ -239,7 +226,6 @@ void main() {
           setup: () {
             environment = Environment(
               projectDir: fs.currentDirectory,
-              buildMode: BuildMode.debug,
             );
             fs.file('foo.dart').createSync(recursive: true);
             fs.file('pubspec.yaml').createSync();
@@ -362,8 +348,6 @@ void main() {
           projectDir: fs.currentDirectory,
           cacheDir: fs.directory('cache'),
           buildDir: fs.directory('build'),
-          buildMode: BuildMode.debug,
-          flavor: 'flavor_town',
           flutterRootDir: fs.currentDirectory,
         );
         visitor = SourceVisitor(environment);
@@ -394,23 +378,6 @@ void main() {
       fizzSource.accept(visitor);
 
       expect(visitor.sources.single.path, fs.path.absolute(path));
-    }));
-
-    test('can substitute {PROJECT_DIR}/{mode}/{flavor}/{platform}/fizz', () => testbed.run(() {
-      final String path = fs.path.join('debug', 'flavor_town', 'android-arm', 'fizz');
-      fs.file(path).createSync(recursive: true);
-      const Source fizzSource = Source.pattern('{PROJECT_DIR}/{mode}/{flavor}/{platform}/fizz');
-      fizzSource.accept(visitor);
-
-      expect(visitor.sources.single.path, fs.path.absolute(path));
-    }));
-
-    test('can substitute {PROJECT_DIR}/{mode}.{flavor}.{platform}.fizz', () => testbed.run(() {
-      fs.file('debug.flavor_town.android-arm.fizz').createSync();
-      const Source fizzSource = Source.pattern('{PROJECT_DIR}/{mode}.{flavor}.{platform}.fizz');
-      fizzSource.accept(visitor);
-
-      expect(visitor.sources.single.path, fs.path.absolute('debug.flavor_town.android-arm.fizz'));
     }));
 
     test('can substitute {PROJECT_DIR}/*.fizz', () => testbed.run(() {

@@ -4,7 +4,6 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/targets/linux.dart';
 import 'package:mockito/mockito.dart';
@@ -27,8 +26,6 @@ void main() {
         environment = Environment(
           projectDir: fs.currentDirectory,
           cacheDir: cacheDir,
-          buildPlatform: BuildPlatform.linux,
-          buildMode: BuildMode.debug,
         );
         buildSystem = const BuildSystem(<Target>[
           unpackLinux,
