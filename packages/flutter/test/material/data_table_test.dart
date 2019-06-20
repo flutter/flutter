@@ -267,6 +267,123 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('DataTable custom row height', (WidgetTester tester) async {
+    Widget buildCustomTable({
+      int sortColumnIndex,
+      bool sortAscending = true,
+      double dataRowHeight = 48.0,
+      double headingRowHeight = 56.0,
+    }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        sortAscending: sortAscending,
+        onSelectAll: (bool value) {},
+        dataRowHeight: dataRowHeight,
+        headingRowHeight: headingRowHeight,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: const Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {},
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: Key(dessert.name),
+            onSelectChanged: (bool selected) {},
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {},
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    // DEFAULT VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(
+        child: DataTable(
+          onSelectAll: (bool value) {},
+          columns: <DataColumn>[
+            const DataColumn(
+              label: Text('Name'),
+              tooltip: 'Name',
+            ),
+            DataColumn(
+              label: const Text('Calories'),
+              tooltip: 'Calories',
+              numeric: true,
+              onSort: (int columnIndex, bool ascending) {},
+            ),
+          ],
+          rows: kDesserts.map<DataRow>((Dessert dessert) {
+            return DataRow(
+              key: Key(dessert.name),
+              onSelectChanged: (bool selected) {},
+              cells: <DataCell>[
+                DataCell(
+                  Text(dessert.name),
+                ),
+                DataCell(
+                  Text('${dessert.calories}'),
+                  showEditIcon: true,
+                  onTap: () {},
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Name')
+    ).size.height, 56.0); // This is the header row height
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt')
+    ).size.height, 48.0); // This is the data row height
+
+    // CUSTOM VALUES
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(headingRowHeight: 48.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Name')
+    ).size.height, 48.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(headingRowHeight: 64.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Name')
+    ).size.height, 64.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 30.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt')
+    ).size.height, 30.0);
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildCustomTable(dataRowHeight: 56.0)),
+    ));
+    expect(tester.renderObject<RenderBox>(
+      find.widgetWithText(Container, 'Frozen yogurt')
+    ).size.height, 56.0);
+  });
+
   testWidgets('DataTable custom horizontal padding - checkbox', (WidgetTester tester) async {
     const double _defaultHorizontalMargin = 24.0;
     const double _defaultColumnSpacing = 56.0;
