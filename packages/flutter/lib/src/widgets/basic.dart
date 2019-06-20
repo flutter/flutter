@@ -1944,6 +1944,8 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 /// specified height and width as possible given the parent's constraints. If
 /// [height] or [width] is null or unspecified, it will be treated as zero.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
+///
 /// The [new SizedBox.expand] constructor can be used to make a [SizedBox] that
 /// sizes itself to fit the parent. It is equivalent to setting [width] and
 /// [height] to [double.infinity].
@@ -2603,6 +2605,8 @@ class _OffstageElement extends SingleChildRenderObjectElement {
 /// The widget first tries the largest width permitted by the layout
 /// constraints. The height of the widget is determined by applying the
 /// given aspect ratio to the width, expressed as a ratio of width to height.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=XcnP3_mO_Ms}
 ///
 /// For example, a 16:9 width:height aspect ratio would have a value of
 /// 16.0/9.0. If the maximum width is infinite, the initial width is determined
