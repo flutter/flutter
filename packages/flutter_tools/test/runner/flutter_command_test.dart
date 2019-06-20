@@ -316,7 +316,7 @@ void main() {
       expect(filtered.single, ephemeral);
     });
 
-    test('doesnt remove all non-ephemeral', () {
+    test('does not remove all non-ephemeral', () {
       final List<Device> filtered = filterDevices(<Device>[
         nonEphemeralOne,
         nonEphemeralTwo,
