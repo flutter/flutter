@@ -21,6 +21,7 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'desktop.dart';
 import 'device.dart';
+import 'extension/doctor.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
@@ -39,6 +40,8 @@ import 'web/web_validator.dart';
 import 'web/workflow.dart';
 import 'windows/visual_studio_validator.dart';
 import 'windows/windows_workflow.dart';
+
+export 'extension/doctor.dart';
 
 Doctor get doctor => context.get<Doctor>();
 
@@ -309,19 +312,6 @@ abstract class Workflow {
 
   /// Are we functional enough to list emulators?
   bool get canListEmulators;
-}
-
-enum ValidationType {
-  missing,
-  partial,
-  notAvailable,
-  installed,
-}
-
-enum ValidationMessageType {
-  error,
-  hint,
-  information,
 }
 
 abstract class DoctorValidator {
