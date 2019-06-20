@@ -777,6 +777,7 @@ Future<Map<String, dynamic>> _deviceToMap(Device device) async {
     'category': device.category?.toString(),
     'platformType': device.platformType?.toString(),
     'ephemeral': device.ephemeral,
+    'emulatorId': await device.emulatorId,
   };
 }
 
