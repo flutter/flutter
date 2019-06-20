@@ -538,9 +538,11 @@ abstract class FlutterCommand extends Command<void> {
     // device we can proceed as normal.
     if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices && !deviceManager.hasSpecifiedDeviceId) {
       final FlutterProject flutterProject = FlutterProject.current();
-      devices
-        ..removeWhere((Device device) => !device.ephemeral)
-        ..removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
+      devices.removeWhere((Device device) => !device.isSupportedForProject(flutterProject));
+
+      if (devices.any((Device device) => device.ephemeral)) {
+        devices.removeWhere((Device device) => !device.ephemeral);
+      }
     }
 
     if (devices.isEmpty) {
