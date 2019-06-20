@@ -12,6 +12,7 @@ static constexpr char kChannelName[] = "flutter/platform";
 
 static constexpr char kGetClipboardDataMethod[] = "Clipboard.getData";
 static constexpr char kSetClipboardDataMethod[] = "Clipboard.setData";
+static constexpr char kSystemNavigatorPopMethod[] = "SystemNavigator.pop";
 
 static constexpr char kTextPlainFormat[] = "text/plain";
 static constexpr char kTextKey[] = "text";
@@ -72,6 +73,9 @@ void PlatformHandler::HandleMethodCall(
       return;
     }
     glfwSetClipboardString(window_, itr->value.GetString());
+    result->Success();
+  } else if (method.compare(kSystemNavigatorPopMethod) == 0) {
+    exit(EXIT_SUCCESS);
     result->Success();
   } else {
     result->NotImplemented();
