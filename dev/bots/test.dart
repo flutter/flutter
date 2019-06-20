@@ -307,35 +307,97 @@ Future<void> _runAdd2AppTest() async {
 Future<void> _runTests() async {
   final bq.BigqueryApi bigqueryApi = await _getBigqueryApi();
   await _runSmokeTests();
+  final String subShard = Platform.environment['SUBSHARD'];
 
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), tableData: bigqueryApi?.tabledata);
-  // Only packages/flutter/test/widgets/widget_inspector_test.dart really
-  // needs to be run with --track-widget-creation but it is nice to run
-  // all of the tests in package:flutter with the flag to ensure that
-  // the Dart kernel transformer triggered by the flag does not break anything.
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
-  await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), tableData: bigqueryApi?.tabledata);
-  // Regression test to ensure that code outside of package:flutter can run
-  // with --track-widget-creation.
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
-  await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
-  // Smoke test for code generation.
-  await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'), tableData: bigqueryApi?.tabledata, environment: <String, String>{
-    'FLUTTER_EXPERIMENTAL_BUILD': 'true',
-  });
+  Future<void> runWidgets() async {
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      tableData: bigqueryApi?.tabledata,
+      tests: <String>[
+        'test/widgets/',
+      ],
+    );
+    // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+    // needs to be run with --track-widget-creation but it is nice to run
+    // all of the tests in package:flutter with the flag to ensure that
+    // the Dart kernel transformer triggered by the flag does not break anything.
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--track-widget-creation'],
+      tableData: bigqueryApi?.tabledata,
+      tests: <String>[
+        'test/widgets/',
+      ],
+    );
+  }
+
+  Future<void> runFrameworkOthers() async {
+    final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter', 'test'))
+      .listSync(followLinks: false, recursive: false)
+      .whereType<Directory>()
+      .map((Directory dir) => 'test/${path.basename(dir.path)}/')
+      .toList();
+
+    print('Running tests for: ${tests.join(';')}');
+
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      tableData: bigqueryApi?.tabledata,
+      tests: tests,
+    );
+    // Only packages/flutter/test/widgets/widget_inspector_test.dart really
+    // needs to be run with --track-widget-creation but it is nice to run
+    // all of the tests in package:flutter with the flag to ensure that
+    // the Dart kernel transformer triggered by the flag does not break anything.
+    await _runFlutterTest(
+      path.join(flutterRoot, 'packages', 'flutter'),
+      options: <String>['--track-widget-creation'],
+      tableData: bigqueryApi?.tabledata,
+      tests: tests,
+    );
+  }
+
+  Future<void> runExtras() async {
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), tableData: bigqueryApi?.tabledata);
+    // Regression test to ensure that code outside of package:flutter can run
+    // with --track-widget-creation.
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'flutter_gallery'), options: <String>['--track-widget-creation'], tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
+    // Smoke test for code generation.
+    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'), tableData: bigqueryApi?.tabledata, environment: <String, String>{
+      'FLUTTER_EXPERIMENTAL_BUILD': 'true',
+    });
+  }
+  switch (subShard) {
+    case 'widgets':
+      await runWidgets();
+      break;
+    case 'framework_other':
+      await runFrameworkOthers();
+      break;
+    case 'extras':
+      runExtras();
+      break;
+    default:
+      print('Unknown sub-shard $subShard, running all tests!');
+      await runWidgets();
+      await runFrameworkOthers();
+      await runExtras();
+
+  }
 
   print('${bold}DONE: All tests successful.$reset');
 }
@@ -649,6 +711,7 @@ Future<void> _runFlutterTest(String workingDirectory, {
   Duration timeout = _kLongTimeout,
   bq.TabledataResourceApi tableData,
   Map<String, String> environment,
+  List<String> tests = const <String>[],
 }) async {
   final List<String> args = <String>['test']..addAll(options);
   if (flutterTestArgs != null && flutterTestArgs.isNotEmpty)
@@ -673,6 +736,9 @@ Future<void> _runFlutterTest(String workingDirectory, {
     }
     args.add(script);
   }
+
+  args.addAll(tests);
+
   if (!shouldProcessOutput) {
     return runCommand(flutter, args,
       workingDirectory: workingDirectory,
