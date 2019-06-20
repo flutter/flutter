@@ -262,6 +262,8 @@ class DataTable extends StatelessWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.dataRowHeight = 48.0,
+    this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
     @required this.rows,
@@ -269,6 +271,8 @@ class DataTable extends StatelessWidget {
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
+       assert(dataRowHeight != null),
+       assert(headingRowHeight != null),
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
        assert(rows != null),
@@ -315,6 +319,16 @@ class DataTable extends StatelessWidget {
   /// row is selectable.
   final ValueSetter<bool> onSelectAll;
 
+  /// The height of each row (excluding the row that contains column headings).
+  ///
+  /// This value defaults to 48.0 to adhere to the Material Design specifications.
+  final double dataRowHeight;
+
+  /// The height of the heading row.
+  ///
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  final double headingRowHeight;
+
   /// The horizontal margin between the edges of the table and the content
   /// in the first and last cells of each row.
   ///
@@ -330,7 +344,9 @@ class DataTable extends StatelessWidget {
   final double columnSpacing;
 
   /// The data to show in each row (excluding the row that contains
-  /// the column headings). Must be non-null, but may be empty.
+  /// the column headings).
+  ///
+  /// Must be non-null, but may be empty.
   final List<DataRow> rows;
 
   // Set by the constructor to the index of the only Column that is
@@ -367,8 +383,6 @@ class DataTable extends StatelessWidget {
     }
   }
 
-  static const double _headingRowHeight = 56.0;
-  static const double _dataRowHeight = 48.0;
   static const double _sortArrowPadding = 2.0;
   static const double _headingFontSize = 12.0;
   static const Duration _sortArrowAnimationDuration = Duration(milliseconds: 150);
@@ -430,14 +444,14 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: _headingRowHeight,
+      height: headingRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: AnimatedDefaultTextStyle(
         style: TextStyle(
           // TODO(ianh): font family should match Theme; see https://github.com/flutter/flutter/issues/3116
           fontWeight: FontWeight.w500,
           fontSize: _headingFontSize,
-          height: math.min(1.0, _headingRowHeight / _headingFontSize),
+          height: math.min(1.0, headingRowHeight / _headingFontSize),
           color: (Theme.of(context).brightness == Brightness.light)
             ? ((onSort != null && sorted) ? Colors.black87 : Colors.black54)
             : ((onSort != null && sorted) ? Colors.white : Colors.white70),
@@ -483,7 +497,7 @@ class DataTable extends StatelessWidget {
     }
     label = Container(
       padding: padding,
-      height: _dataRowHeight,
+      height: dataRowHeight,
       alignment: numeric ? Alignment.centerRight : AlignmentDirectional.centerStart,
       child: DefaultTextStyle(
         style: TextStyle(
