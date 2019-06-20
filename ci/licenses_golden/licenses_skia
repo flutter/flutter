@@ -1,4 +1,4 @@
-Signature: 4f33e78fc378a0892121cdab2ba08a64
+Signature: 8acb146f1e0dd052fedd3b7b82d3f102
 
 UNUSED LICENSES:
 
@@ -2271,6 +2271,8 @@ FILE: ../../../third_party/skia/modules/skparagraph/src/TextStyle.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.cpp
 FILE: ../../../third_party/skia/modules/skparagraph/src/TextWrapper.h
 FILE: ../../../third_party/skia/modules/skparagraph/src/TypefaceFontProvider.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.cpp
+FILE: ../../../third_party/skia/modules/skparagraph/utils/TestFontCollection.h
 FILE: ../../../third_party/skia/public.bzl
 FILE: ../../../third_party/skia/samplecode/SampleParagraph.cpp
 FILE: ../../../third_party/skia/site/METADATA
