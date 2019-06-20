@@ -37,8 +37,7 @@ struct SwitchDesc {
 #define DEF_SWITCHES_END };
 // clang-format on
 
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && \
-    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 
 // List of common and safe VM flags to allow to be passed directly to the VM.
 // clang-format off
@@ -118,8 +117,7 @@ const fml::StringView FlagForSwitch(Switch swtch) {
   return fml::StringView();
 }
 
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && \
-    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
 
 static bool IsWhitelistedDartVMFlag(const std::string& flag) {
   for (uint32_t i = 0; i < fml::size(gDartFlagsWhitelist); ++i) {
@@ -294,8 +292,7 @@ Settings SettingsFromCommandLine(const fml::CommandLine& command_line) {
   settings.use_test_fonts =
       command_line.HasOption(FlagForSwitch(Switch::UseTestFonts));
 
-#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE && \
-    FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_DYNAMIC_RELEASE
+#if FLUTTER_RUNTIME_MODE != FLUTTER_RUNTIME_MODE_RELEASE
   command_line.GetOptionValue(FlagForSwitch(Switch::LogTag), &settings.log_tag);
   std::string all_dart_flags;
   if (command_line.GetOptionValue(FlagForSwitch(Switch::DartFlags),
