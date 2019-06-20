@@ -26,14 +26,9 @@ config("txt_config") {
 }
 
 source_set("txt") {
-  if (current_toolchain == host_toolchain && !is_mac) {
-    defines = [ "DIRECTORY_FONT_MANAGER_AVAILABLE" ]
-  }
-  if (is_android) {
-    defines = [ "ANDROID_FONT_MANAGER_AVAILABLE" ]
-  }
+  defines = []
   if (flutter_use_fontconfig) {
-    defines = [ "FONTCONFIG_FONT_MANAGER_AVAILABLE" ]
+    defines += [ "FLUTTER_USE_FONTCONFIG" ]
   }
 
   sources = [
