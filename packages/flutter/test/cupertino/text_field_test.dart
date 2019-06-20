@@ -409,7 +409,7 @@ void main() {
     );
 
     final Finder textFinder = find.byType(CupertinoTextField);
-    await tester.tap(textFinder);
+    await tester.tapAt(tester.getTopLeft(textFinder));
     await tester.pump();
 
     final EditableTextState editableTextState = tester.firstState(find.byType(EditableText));
@@ -2676,7 +2676,7 @@ void main() {
     );
 
     final Finder textFinder = find.byType(CupertinoTextField);
-    await tester.tap(textFinder);
+    await tester.tapAt(tester.getTopLeft(textFinder));
     await tester.pump();
 
     final EditableTextState editableTextState =
