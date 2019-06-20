@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
 import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment;
 
 import 'package:flutter/foundation.dart';
@@ -766,12 +767,23 @@ class RenderParagraph extends RenderBox
       final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(baseOffset: start, extentOffset: end);
       final List<ui.TextBox> rects = getBoxesForSelection(selection);
-      Rect rect;
-      for (ui.TextBox textBox in rects) {
-        rect ??= textBox.toRect();
+      if (rects.isEmpty) {
+        return null;
+      }
+      Rect rect = rects.first.toRect();
+      currentDirection = rects.first.direction;
+      for (ui.TextBox textBox in rects.skip(1)) {
         rect = rect.expandToInclude(textBox.toRect());
         currentDirection = textBox.direction;
       }
+      // Any of the text boxes may have had infinite dimensions.
+      // We shouldn't pass infinite dimensions up to the bridges.
+      rect = Rect.fromLTWH(
+        math.max(0.0, rect.left),
+        math.max(0.0, rect.top),
+        math.min(rect.width, constraints.maxWidth),
+        math.min(rect.height, constraints.maxHeight),
+      );
       // round the current rectangle to make this API testable and add some
       // padding so that the accessibility rects do not overlap with the text.
       // TODO(jonahwilliams): implement this for all text accessibility rects.
@@ -798,12 +810,18 @@ class RenderParagraph extends RenderBox
       if (current != start) {
         final SemanticsNode node = SemanticsNode();
         final SemanticsConfiguration configuration = buildSemanticsConfig(current, start);
+        if (configuration == null) {
+          continue;
+        }
         node.updateWith(config: configuration);
         node.rect = currentRect;
         newChildren.add(node);
       }
       final dynamic inlineElement = _inlineSemanticsElements[j];
       final SemanticsConfiguration configuration = buildSemanticsConfig(start, end);
+      if (configuration == null) {
+        continue;
+      }
       if (inlineElement != null) {
         // Add semantics for this recognizer.
         final SemanticsNode node = SemanticsNode();
@@ -842,9 +860,11 @@ class RenderParagraph extends RenderBox
     if (current < rawLabel.length) {
       final SemanticsNode node = SemanticsNode();
       final SemanticsConfiguration configuration = buildSemanticsConfig(current, rawLabel.length);
-      node.updateWith(config: configuration);
-      node.rect = currentRect;
-      newChildren.add(node);
+      if (configuration != null) {
+        node.updateWith(config: configuration);
+        node.rect = currentRect;
+        newChildren.add(node);
+      }
     }
     node.updateWith(config: config, childrenInInversePaintOrder: newChildren);
   }

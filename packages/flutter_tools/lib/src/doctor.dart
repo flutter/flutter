@@ -19,12 +19,14 @@ import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'base/version.dart';
 import 'cache.dart';
+import 'desktop.dart';
 import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
 import 'globals.dart';
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_utils.dart';
+import 'linux/linux_doctor.dart';
 import 'linux/linux_workflow.dart';
 import 'macos/cocoapods_validator.dart';
 import 'macos/macos_workflow.dart';
@@ -69,11 +71,18 @@ class _DefaultDoctorValidatorsProvider implements DoctorValidatorsProvider {
       if (iosWorkflow.appliesToHostPlatform)
         _validators.add(iosValidator);
 
-      if (windowsWorkflow.appliesToHostPlatform)
-        _validators.add(visualStudioValidator);
-
       if (webWorkflow.appliesToHostPlatform)
         _validators.add(const WebValidator());
+
+      // Add desktop doctors to workflow if the flag is enabled.
+      if (flutterDesktopEnabled) {
+        if (linuxWorkflow.appliesToHostPlatform) {
+          _validators.add(LinuxDoctorValidator());
+        }
+        if (windowsWorkflow.appliesToHostPlatform) {
+          _validators.add(visualStudioValidator);
+        }
+      }
 
       final List<DoctorValidator> ideValidators = <DoctorValidator>[];
       ideValidators.addAll(AndroidStudioValidator.allValidators);

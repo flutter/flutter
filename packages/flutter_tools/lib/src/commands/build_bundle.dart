@@ -20,7 +20,6 @@ class BuildBundleCommand extends BuildSubCommand {
     usesFilesystemOptions(hide: !verboseHelp);
     usesBuildNumberOption();
     addBuildModeFlags(verboseHelp: verboseHelp);
-    addDynamicModeFlags(verboseHelp: verboseHelp);
     argParser
       ..addFlag('precompiled', negatable: false)
       // This option is still referenced by the iOS build scripts. We should
