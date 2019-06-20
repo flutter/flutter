@@ -135,10 +135,12 @@ class AndroidDevice extends Device {
     return _isLocalEmulator;
   }
 
-  /// If the device is an emulator, returns the ID shown in the output of
-  /// `flutter emulators` that matches this device. Fetching this name may require
-  /// connecting to the device and if an error occurs null will be returned.
-  /// If this devices is not an emulator, null will be returned.
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
   @override
   Future<String> get emulatorId async {
     // Emulators always have IDs in the format emulator-(port) where port is the
@@ -162,8 +164,7 @@ class AndroidDevice extends Device {
       } finally {
         console.destroy();
       }
-    }
-    catch (e) {
+    } catch (e) {
       printTrace('Failed to fetch avd name for emulator $name: $e');
       // If we fail to connect to the device, we should not fail so just return
       // an empty name. This data is best-effort.

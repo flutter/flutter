@@ -262,10 +262,12 @@ abstract class Device {
   /// Whether it is an emulated device running on localhost.
   Future<bool> get isLocalEmulator;
 
-  /// If the device is an emulator, returns the ID shown in the output of
-  /// `flutter emulators` that matches this device. Fetching this name may require
-  /// connecting to the device and if an error occurs null will be returned.
-  /// If this devices is not an emulator, null will be returned.
+  /// The unique identifier for the emulator that corresponds to this device, or
+  /// null if it is not an emulator.
+  ///
+  /// The ID returned matches that in the output of `flutter emulators`. Fetching
+  /// this name may require connecting to the device and if an error occurs null
+  /// will be returned.
   Future<String> get emulatorId;
 
   /// Whether the device is a simulator on a platform which supports hardware rendering.
