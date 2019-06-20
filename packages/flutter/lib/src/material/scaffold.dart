@@ -1892,7 +1892,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     if (removeBottomInset)
       data = data.removeViewInsets(removeBottom: true);
 
-    if(maintainBottomViewPadding && data.viewInsets != EdgeInsets.zero){
+    if (maintainBottomViewPadding && data.viewInsets.bottom != 0.0) {
       data = data.copyWith(
         padding: data.padding.copyWith(bottom: data.viewPadding.bottom)
       );

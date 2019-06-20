@@ -77,7 +77,9 @@ class SafeArea extends StatelessWidget {
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// SafeArea, the padding can be maintained below the obstruction rather than
-  /// being consumed.
+  /// being consumed. This can be helpful in cases where your layout contains
+  /// flexible widgets, which could visibly move when opening a software
+  /// keyboard due to the change in the padding value.
   final bool maintainBottomViewPadding;
 
   /// The widget below this widget in the tree.
@@ -94,7 +96,7 @@ class SafeArea extends StatelessWidget {
     final MediaQueryData data = MediaQuery.of(context);
     EdgeInsets padding = data.padding;
     // Bottom padding has been consumed - i.e. by the keyboard
-    if(data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
+    if (data.padding.bottom == 0.0 && data.viewInsets.bottom != 0.0 && maintainBottomViewPadding)
       padding = padding.copyWith(bottom: data.viewPadding.bottom);
 
     return Padding(
