@@ -29,13 +29,13 @@ import static android.view.View.OnFocusChangeListener;
  *
  * The view hierarchy for the presentation is as following:
  *
- *          rootView
- *         /         \
- *        /           \
- *       /             \
- *   container       state.fakeWindowViewGroup
- *      |
- *   EmbeddedView
+ *                rootView
+ *                  |
+ *       state.fakeWindowViewGroup
+ *             /            \
+ *   state.container   [other popup views]
+ *         |
+ *    EmbeddedView
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
 class SingleViewPresentation extends Presentation {
@@ -55,6 +55,9 @@ class SingleViewPresentation extends Presentation {
 
         // Contains views that were added directly to the window manager (e.g android.widget.PopupWindow).
         private FakeWindowViewGroup fakeWindowViewGroup;
+
+        // Contains the embedded platform view (platformView.getView()) when it is attached to the presentation.
+        private FrameLayout container;
     }
 
     private final PlatformViewFactory viewFactory;
@@ -72,12 +75,12 @@ class SingleViewPresentation extends Presentation {
     // so when we create the platform view we can tell it its view id.
     private Object createParams;
 
-    // The root view for the presentation, it has 2 childs: container which contains the embedded view, and
-    // fakeWindowViewGroup which contains views that were added directly to the presentation's window manager.
+    // The root view for the presentation, it has a single child called fakeWindowViewGroup which contains
+    // views that were added directly to the presentation's window manager. fakeWindowViewGroup's first
+    // child is the state.container which contains the embedded view. So all other views are drawn on-top but
+    // the embedded view itself is not obscured directly by the fakeWindowViewGroup.
+    //
     private AccessibilityDelegatingFrameLayout rootView;
-
-    // Contains the embedded platform view (platformView.getView()) when it is attached to the presentation.
-    private FrameLayout container;
 
     private PresentationState state;
 
@@ -142,12 +145,17 @@ class SingleViewPresentation extends Presentation {
         if (state.fakeWindowViewGroup == null) {
             state.fakeWindowViewGroup = new FakeWindowViewGroup(getContext());
         }
+        if (state.container == null) {
+            state.container = new FrameLayout(getContext());
+            final WindowManager.LayoutParams params = new WindowManager.LayoutParams();
+            params.gravity = Gravity.FILL;
+            state.fakeWindowViewGroup.addView(state.container, params);
+        }
         if (state.windowManagerHandler == null) {
             WindowManager windowManagerDelegate = (WindowManager) getContext().getSystemService(WINDOW_SERVICE);
             state.windowManagerHandler = new WindowManagerHandler(windowManagerDelegate, state.fakeWindowViewGroup);
         }
 
-        container = new FrameLayout(getContext());
         PresentationContext context = new PresentationContext(getContext(), state.windowManagerHandler);
 
         if (state.platformView == null) {
@@ -155,9 +163,8 @@ class SingleViewPresentation extends Presentation {
         }
 
         View embeddedView = state.platformView.getView();
-        container.addView(embeddedView);
+        state.container.addView(embeddedView);
         rootView = new AccessibilityDelegatingFrameLayout(getContext(), accessibilityEventsDelegate, embeddedView);
-        rootView.addView(container);
         rootView.addView(state.fakeWindowViewGroup);
 
         embeddedView.setOnFocusChangeListener(focusChangeListener);
@@ -171,7 +178,7 @@ class SingleViewPresentation extends Presentation {
     }
 
     public PresentationState detachState() {
-        container.removeAllViews();
+        state.container.removeAllViews();
         rootView.removeAllViews();
         return state;
     }
