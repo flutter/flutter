@@ -19,8 +19,8 @@ import 'raw_keyboard.dart';
 class RawKeyEventDataLinux extends RawKeyEventData {
   /// Creates a key event data structure specific for macOS.
   ///
-  /// The [toolkit], [scanCode], [charactersIgnoringModifiers], [keyCode], and [modifiers], arguments
-  /// must not be null.
+  /// The [toolkit], [scanCode], [charactersIgnoringModifiers], [keyCode], and
+  /// [modifiers], arguments must not be null.
   const RawKeyEventDataLinux({
     @required this.keyHelper,
     this.charactersIgnoringModifiers = '',
@@ -42,6 +42,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// The name of the printable key, encoded as UTF-8. This is
   /// typically the character that key would produce without any modifier keys.
   /// For dead keys, it is typically the diacritic it would add to a character.
+  /// Defaults to an empty string, asserted to be not null.
   final String charactersIgnoringModifiers;
 
   /// The hardware scan code id corresponding to this key event.
@@ -53,12 +54,12 @@ class RawKeyEventDataLinux extends RawKeyEventData {
   /// The hardware key code corresponding to this key event.
   ///
   /// This is the physical key that was pressed, not the Unicode character.
-  /// See [charactersIgnoringModifiers] for the unmodified Unicode character. This value may be different
-  /// depending on the window toolkit used (See [toolkit]).
+  /// See [charactersIgnoringModifiers] for the unmodified Unicode character.
+  /// This value may be different depending on the window toolkit used. See [KeyHelper].
   final int keyCode;
 
   /// A mask of the current modifiers using the values in Modifier Flags.
-  /// This value may be different depending on the window toolkit used (See [toolkit]).
+  /// This value may be different depending on the window toolkit used See [KeyHelper].
   final int modifiers;
 
   @override
