@@ -335,7 +335,11 @@ Future<void> _runTests() async {
     final List<String> tests = Directory(path.join(flutterRoot, 'packages', 'flutter'))
       .listSync(followLinks: false)
       .whereType<Directory>()
-      .map((Directory dir) => 'test/${path.basename(dir.path)}/');
+      .map((Directory dir) => 'test/${path.basename(dir.path)}/')
+      .toList();
+
+    print('Running tests for: ${tests.join(';')}');
+
     await _runFlutterTest(
       path.join(flutterRoot, 'packages', 'flutter'),
       tableData: bigqueryApi?.tabledata,
