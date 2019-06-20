@@ -98,7 +98,7 @@ Future<void> main(List<String> arguments) async {
   if (code != 0)
     exit(code);
 
-  createFooter('$kDocsRoot/lib/footer.html');
+  createFooter('$kDocsRoot/lib/');
   copyAssets();
   createSearchMetadata('$kDocsRoot/lib/opensearch.xml', '$kDocsRoot/doc/opensearch.xml');
   cleanOutSnippets();
@@ -268,11 +268,12 @@ void createFooter(String footerPath) {
   final String timestamp = DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now());
   final String gitBranch = getBranchName();
   final String gitBranchOut = gitBranch.isEmpty ? '' : '• </span class="no-break">$gitBranch</span>';
-
-  File(footerPath).writeAsStringSync(<String>[
+  File('${footerPath}footer.html').writeAsStringSync('<script src="footer.js"></script>');
+  final String content = <String>[
     '• </span class="no-break">$timestamp<span>',
     '• </span class="no-break">${gitRevision()}</span>',
-    gitBranchOut].join(' '));
+    gitBranchOut].join(' ');
+  File('$kPublishRoot/api/footer.js').writeAsStringSync('''document.write('$content');''');
 }
 
 /// Generates an OpenSearch XML description that can be used to add a custom
